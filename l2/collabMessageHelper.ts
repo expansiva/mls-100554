@@ -25,7 +25,6 @@ export async function registerToken() {
     try {
         const deviceId = crypto.randomUUID();
         saveNotificationDeviceId(deviceId);
-        console.info({ deviceId })
 
         const userResponse = await mls.api.msgGetUserUpdate({ userId: "" });
         await mls.api.msgUpdateUserDetails({

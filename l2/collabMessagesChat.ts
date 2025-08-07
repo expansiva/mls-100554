@@ -33,7 +33,10 @@ const message_pt = {
     msgNotSend: 'Mensagem não enviada*',
     noThreads: 'Nenhuma sala disponível no momento.',
     placeholderSearch: 'Digite para filtrar',
+    threadArchived: 'A thread foi arquivada por [user] em [date]',
+    archived: 'Arquivado',
 }
+
 const message_en = {
     loading: 'Loading...',
     btnAddParticipant: 'Add Participant',
@@ -41,8 +44,12 @@ const message_en = {
     msgNotSend: 'Message not sent*',
     noThreads: 'No threads available at the moment.',
     placeholderSearch: 'Type to filter',
+    threadArchived: 'Thread is archived by [user] in [date]',
+    archived: 'Archived',
+
 
 }
+
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
     'en': message_en,
@@ -53,14 +60,16 @@ const messages: { [key: string]: MessageType } = {
 
 @customElement('collab-messages-chat-100554')
 export class CollabMessagesChat100554 extends StateLitElement {
+
     private msg: MessageType = messages['en'];
+
     @query('collab-messages-prompt-100554') collabMessagesPrompt: CollabMessagesPrompt100554 | undefined;
     @query('#unread') private unreadEl!: HTMLDivElement | undefined;
     @query('.chat-container') private messageContainer!: HTMLDivElement | undefined;
 
     @state() userPreferenceChat?: IChatPreferences;
     @state() isLoadingThread: boolean = false;
-    @state() filteredThreads: IFilteredThreads[] = []
+    @state() filteredThreads: IFilteredThreadsByStatus = { active: [], archived: [], deleted: [] };
 
     @property() group: 'CONNECT' | 'APPS' | 'DOCS' | 'CRM' = 'CONNECT';
     @property() userId: string | undefined;
@@ -72,19 +81,20 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @property() actualMessagesParsed: IMessageGrouped = {};
     @property() isLoadingMessages: boolean = false;
     @property() searchTerm: string = '';
-
-    @property({ attribute: false }) userThreads: IThread = {
-        CONNECT: [{ "thread": { "history": [{ "action": "created", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "update_group", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_language ${language}", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120841.1000", "timestamp": "20250417135645" }, { "action": "add_user", "userId": "20250417120844.1000", "timestamp": "20250417172252" }, { "action": "add_user", "userId": "20250417004803.1000", "timestamp": "20250417174719" }], "languages": ["pt"], "status": "active", "visibility": "private", "group": "CONNECT", "threadId": "20250417135645.1000", "users": [{ "userId": "20250417120841.1000", "auth": "admin" }, { "userId": "20250417120844.1000", "auth": "write" }, { "userId": "20250417004803.1000", "auth": "write" }], "name": "" }, "users": [{ "threads": ["20250417135645.1000", "20250417180232.1000", "20250417133813.1000"], "name": "Guilherme Pereira", "userId": "20250417120841.1000", "status": "active" }, { "threads": ["20250417133813.1000", "20250417180232.1000"], "name": "Santiago", "userId": "20250417120844.1000", "status": "active" }, { "threads": ["20250417135645.1000"], "name": "Wagner", "userId": "20250417004803.1000", "status": "active" }] }]
-    };
-
+    @property({ attribute: false }) userThreads: IThread = {};
 
     private isSystemChangeScroll: boolean = false;
     private savedScrollTop = 0;
-    private hasMoreMessages = true;
+    private hasMoreMessagesLocalDB = true;
+    private hasMoreMessagesBefore: boolean = false;
     private messagesLimit = 10;
     private messagesOffset = 0;
     private isLoadingMoreMessages = false;
     private wasMessagesAtBottom: boolean = true;
+
+    private imageUrls = [
+        "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ];
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
@@ -183,6 +193,15 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private renderChatMessages() {
+        if (!this.actualThread) return html``;
+        if (this.actualThread.thread.status === 'archived') {
+            const formatedTimestamp = formatTimestamp(this.actualThread.thread.archivedAt || '');
+            const archivedAt = this.parseLocalDate(formatedTimestamp.dateFull);
+            const archivedBy = this.actualThread.users.find((user) => user.userId === this.actualThread?.thread.archivedBy)
+            return html`
+                <div>${this.msg.threadArchived.replace('[user]', archivedBy?.name || '').replace('[date]', archivedAt.datafull)}</div>
+            `
+        }
         this.userPreferenceChat = loadChatPreferences();
         const sortedEntries = Object.entries(this.actualMessagesParsed)
             .map(([date, value]) => [date.trim(), value])
@@ -355,22 +374,28 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private renderListThreads() {
-        const unreadCount = 0;
-        const imageUrls = [
-            "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        ];
-        if (this.userThreads[this.group].length === 0 && !this.isLoadingThread) {
+
+        if (!this.userThreads[this.group] || (this.userThreads[this.group].length === 0 && !this.isLoadingThread)) {
             return html`<div style="padding:1rem;">${this.msg.noThreads}</div>`;
         }
 
-        const ordenedThreads: IFilteredThreads[] = this.getOrdenedThreads();
+        const ordenedThreads = this.getOrdenedThreadsByStatus();
         this.filteredThreads = this.getFilteredThreads(ordenedThreads);
 
         return html`
-        <ul class="thread-list">
-            ${this.filteredThreads.map((item) => {
-            const randomImage = imageUrls[Math.floor(Math.random() * imageUrls.length)];
+            ${this.renderThreadsByStatus()}
+            ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
+        `;
+    }
 
+    private renderThreadsByStatus() {
+
+        const unreadCount = 0;
+
+        return html`
+        <ul class="thread-list">
+            ${this.filteredThreads.active.map((item) => {
+            const randomImage = this.imageUrls[Math.floor(Math.random() * this.imageUrls.length)];
             const now = new Date();
             const isToday =
                 item._lastMessageDate.dateObject.getFullYear() === now.getFullYear() &&
@@ -382,25 +407,60 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 : item._lastMessageDate.date;
 
             return html`
-                    <li @click=${() => this.onThreadClick(item)} class="thread-item">
-                        <div class="thread-item-avatar">
-                            <img src="${randomImage}"></img>
+                <li @click=${() => this.onThreadClick(item)} class="thread-item">
+                    <div class="thread-item-avatar">
+                        <img src="${randomImage}"></img>
+                    </div>
+                    <div class="thread-content">
+                        <div class="thread-item-header">
+                            <span class="thread-name">${item.thread.name || item.thread.threadId}</span>
+                            <span class="last-update">${displayDate}</span>
                         </div>
-                        <div class="thread-content">
-                            <div class="thread-item-header">
-                                <span class="thread-name">${item.thread.name || item.thread.threadId}</span>
-                                <span class="last-update">${displayDate}</span>
-                            </div>
-                            <div class="thread-summary">
-                                <span class="last-message">${item.thread.lastMessage || ''}</span>
-                                ${unreadCount > 0 ? html`<span class="unread-count">${unreadCount}</span>` : ''}
-                            </div>
+                        <div class="thread-summary">
+                            <span class="last-message">${item.thread.lastMessage || ''}</span>
+                            ${unreadCount > 0 ? html`<span class="unread-count">${unreadCount}</span>` : ''}
                         </div>
-                    </li>`;
+                    </div>
+                </li>
+                `;
         })}
+            ${this.renderArchivedThreads()}
         </ul>
-        ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
-    `;
+        `
+    }
+
+    private renderArchivedThreads() {
+        if (this.filteredThreads.archived.length === 0) return html``;
+        return html`        
+            ${this.filteredThreads.archived.map((item) => {
+            const randomImage = this.imageUrls[Math.floor(Math.random() * this.imageUrls.length)];
+
+            function isWithinLastWeek(date: Date): boolean {
+                const now = new Date();
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(now.getDate() - 7);
+                return date >= oneWeekAgo;
+            }
+
+            if (!item._lastMessageDateArchived) return html``
+
+            return html`
+                ${!isWithinLastWeek(item._lastMessageDateArchived.dateObject)
+                    ? html``
+                    : html`
+                        <li @click=${() => this.onThreadClick(item)} class="thread-item">
+                            <div class="thread-item-avatar">
+                                <img src="${randomImage}"></img>
+                            </div>
+                            <div class="thread-content">
+                                <div class="thread-item-header">
+                                    <span class="thread-name">(${this.msg.archived}) ${item.thread.name || item.thread.threadId}</span>
+                                </div>
+                            </div>
+                        </li>`
+                }`
+        })}
+        `
     }
 
     private renderThreadSearch() {
@@ -426,8 +486,24 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private onSearchInput(e: Event) {
         const target = e.target as HTMLInputElement;
         this.searchTerm = target.value.toLowerCase();
-        const ordenedThreads: IFilteredThreads[] = this.getOrdenedThreads();
+        const ordenedThreads = this.getOrdenedThreadsByStatus();
         this.filteredThreads = this.getFilteredThreads(ordenedThreads);
+    }
+
+    private async updateMessagesAfterScrollMore(newMessages: mls.msg.MessagePerformanceCache[], container: HTMLElement, previousHeight: number) {
+        this.actualMessages = [...newMessages, ...this.actualMessages];
+        this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+        await this.updateComplete;
+        const newHeight = container.scrollHeight;
+        container.scrollTop = newHeight - previousHeight;
+    }
+
+    private async getBeforeMessagesInServer(thread: mls.msg.ThreadPerformanceCache) {
+        const firstItem = [...this.actualMessages].sort((a, b) => a.orderAt.localeCompare(b.orderAt))[0];
+        const response = await this.getMessagesBefore(thread, firstItem.orderAt);
+        const newMessages = response?.data;
+        this.hasMoreMessagesBefore = response?.hasMore || false;
+        return newMessages;
     }
 
     private async onChatScroll(e: Event) {
@@ -435,81 +511,138 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.isSystemChangeScroll = false;
             return;
         }
+
         const container = e.target as HTMLElement;
         this.savedScrollTop = container.scrollTop;
-
         const threshold = 5;
         this.wasMessagesAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - threshold;
+        const previousHeight = container.scrollHeight;
 
         if (
             container.scrollTop === 0 &&
             !this.isLoadingMoreMessages &&
             this.actualThread &&
-            this.hasMoreMessages
+            !this.hasMoreMessagesLocalDB &&
+            this.hasMoreMessagesBefore
         ) {
             this.isLoadingMoreMessages = true;
-            const previousHeight = container.scrollHeight;
+            const newMessages = await this.getBeforeMessagesInServer(this.actualThread.thread);
+            if (newMessages) this.updateMessagesAfterScrollMore(newMessages.map(item => ({ ...item, footers: [], })), container, previousHeight);
+            this.isLoadingMoreMessages = false;
+            return;
+        }
+
+        if (
+            container.scrollTop === 0 &&
+            !this.isLoadingMoreMessages &&
+            this.actualThread &&
+            this.hasMoreMessagesLocalDB
+        ) {
+            this.isLoadingMoreMessages = true;
             const newOffset = this.messagesOffset + this.messagesLimit;
             const newMessages = await getMessagesByThreadId(
                 this.actualThread.thread.threadId,
                 this.messagesLimit,
                 newOffset
             );
+
             if (newMessages.length > 0) {
                 this.messagesOffset = newOffset;
-                this.actualMessages = [...newMessages, ...this.actualMessages];
-                this.actualMessagesParsed = this.parseMessages(this.actualMessages);
-                await this.updateComplete;
-                const newHeight = container.scrollHeight;
-                container.scrollTop = newHeight - previousHeight;
+                this.updateMessagesAfterScrollMore(newMessages, container, previousHeight);
             } else {
-                this.hasMoreMessages = false;
+                const newMessages = await this.getBeforeMessagesInServer(this.actualThread.thread);
+                if (newMessages) this.updateMessagesAfterScrollMore(newMessages.map(item => ({ ...item, footers: [], })), container, previousHeight);
+                this.hasMoreMessagesLocalDB = false;
             }
+
             this.isLoadingMoreMessages = false;
         }
     }
 
-    private getOrdenedThreads() {
-        const ordenedThreads: IFilteredThreads[] = this.userThreads[this.group]
+    private getOrdenedThreadsByStatus(): IFilteredThreadsByStatus {
+        const threads = this.userThreads[this.group]
             .map((item) => {
-
                 const lastTimestamp = item.thread.lastMessageTime
                     ? item.thread.lastMessageTime
                     : item.thread.history[0].timestamp;
 
                 const formatedTimestamp = formatTimestamp(lastTimestamp).dateFull;
                 const lastMessageDate = this.parseLocalDate(formatedTimestamp);
+                let lastMessageDateArchived;
+                if (item.thread.status === 'archived' && item.thread.archivedAt) {
+                    const formatedTimestampArchived = formatTimestamp(item.thread.archivedAt).dateFull;
+                    lastMessageDateArchived = this.parseLocalDate(formatedTimestampArchived);
+                }
 
                 return {
                     ...item,
                     _lastMessageDate: lastMessageDate,
-
+                    _lastMessageDateArchived: lastMessageDateArchived
                 };
             })
-            .sort((a, b) => b._lastMessageDate.dateObject.getTime() - a._lastMessageDate.dateObject.getTime())
+            .sort((a, b) =>
+                b._lastMessageDate.dateObject.getTime() -
+                a._lastMessageDate.dateObject.getTime()
+            );
 
-        return [...ordenedThreads]
+        const result = {
+            archived: [] as IFilteredThreads[],
+            deleted: [] as IFilteredThreads[],
+            active: [] as IFilteredThreads[],
+        };
+
+        for (const threadInfo of threads) {
+            if (threadInfo.thread.status === 'archived') {
+                result.archived.push(threadInfo);
+            } else if (threadInfo.thread.status === 'deleted') {
+                result.deleted.push(threadInfo);
+            } else {
+                result.active.push(threadInfo);
+            }
+        }
+
+        return result;
     }
 
-    private getFilteredThreads(ordened: IFilteredThreads[]): IFilteredThreads[] {
+    private getFilteredThreads(ordened: IFilteredThreadsByStatus): IFilteredThreadsByStatus {
 
         if (!this.searchTerm) return ordened;
-        return ordened.filter(item => {
-            const threadMatch = item.thread.name?.toLowerCase().includes(this.searchTerm);
-            return threadMatch;
+        Object.keys(ordened).forEach((key: string) => {
+            const key2 = key as 'deleted' | 'archived' | 'active';
+            ordened[key2] = ordened[key2].filter(item => {
+                const threadMatch = item.thread.name?.toLowerCase().includes(this.searchTerm);
+                return threadMatch;
+            })
         });
+
+        return ordened;
+
     }
 
-    private async getMessages(thread: mls.msg.Thread, lastOrderAt: string = ''): Promise<mls.msg.Message[]> {
+    private async getMessagesAfter(thread: mls.msg.Thread, lastOrderAt: string = ''): Promise<mls.msg.ResponseGetMessagesAfter | undefined> {
         if (!this.userId) {
-            return [];
+            return undefined;
         }
-        const response = await mls.api.msgGetNextMessages({
+        const response = await mls.api.msgGetMessagesAfter({
             lastOrderAt,
             threadId: thread.threadId,
             userId: this.userId
         });
-        return response.data
+        return response;
+
+    }
+
+    private async getMessagesBefore(thread: mls.msg.Thread, orderAt: string = ''): Promise<mls.msg.ResponseGetMessagesAfter | undefined> {
+        if (!this.userId) {
+            return undefined;
+        }
+        const response = await mls.api.msgGetMessagesBefore({
+            orderAt,
+            threadId: thread.threadId,
+            userId: this.userId
+        });
+        return response;
+
     }
 
     private parseMessages(rawData: mls.msg.MessagePerformanceCache[]): IMessageGrouped {
@@ -526,17 +659,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
             groupedByDay[day].sort((a, b) => a.orderAt.localeCompare(b.orderAt));
         }
         return this.groupMessages(groupedByDay);
-    }
-
-    private groupMessages2(groupedByDay: IMessageGrouped): IMessageGrouped {
-        const result: IMessageGrouped = {};
-        Object.keys(groupedByDay).forEach((key) => {
-            result[key] = groupedByDay[key].map((msg, index, arr) => {
-                const isSame = index > 0 && msg.senderId === arr[index - 1].senderId;
-                return { ...msg, isSame };
-            });
-        });
-        return result;
     }
 
     private groupMessages(groupedByDay: IMessageGrouped): IMessageGrouped {
@@ -604,7 +726,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private async onThreadClick(threadInfo: IThreadInfo) {
         this.activeScenerie = 'loading';
         this.messagesOffset = 0;
-        this.hasMoreMessages = true;
+        this.hasMoreMessagesLocalDB = true;
+        this.hasMoreMessagesBefore = false;
         this.actualThread = threadInfo;
         const messagesInDb = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, 0);
         this.actualMessages = messagesInDb;
@@ -617,6 +740,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
             await updateThread(threadByServer.thread.threadId, threadByServer.thread);
             threadInfo = await this.updateMessagesOnDb(threadInfo, threadByServer.messages);
             await updateUsers(threadByServer.users);
+
+            // console.info(threadByServer.hasMore)
+            // if (threadByServer.hasMore) await this.loadAllMessages(threadInfo);
+
             if (threadInfo.messages && threadInfo.messages.length >= 100) await this.loadAllMessages(threadInfo);
             this.checkForRegisterNotification();
 
@@ -628,7 +755,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
     private alreadyCheckForRegisterToken: boolean = false;
     private async checkForRegisterNotification() {
-        console.info({ alreadyCheckForRegisterToken: this.alreadyCheckForRegisterToken })
         if (this.alreadyCheckForRegisterToken) return;
         this.alreadyCheckForRegisterToken = true;
         const notificationPreference = loadNotificationPreferences();
@@ -637,12 +763,13 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private async loadAllMessages(threadInfo: IThreadInfo): Promise<void> {
-        const messages = await this.getMessages(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
-        if (!messages || messages.length === 0 || !this.actualThread || !this.userId) {
+        const response = await this.getMessagesAfter(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
+        if (!response || !response.data || response.data.length === 0 || !this.actualThread || !this.userId) {
             return;
         }
-        threadInfo = await this.updateMessagesOnDb(threadInfo, messages);
-        if (messages.length < 100) return;
+        threadInfo = await this.updateMessagesOnDb(threadInfo, response.data);
+        // if (!response.hasMore) return;
+        if (response.data.length < 100) return;
         return this.loadAllMessages(threadInfo);
     }
 
@@ -670,6 +797,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 lastMessage.createAt,
                 0
             );
+
             threadInfo.thread = thread;
             notifyThreadChange(thread);
         }
@@ -996,7 +1124,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
         const threadUpdated = this.userThreads[this.group].find((th) => th.thread.threadId === thread.threadId);
         if (threadUpdated) threadUpdated.thread = { ...threadUpdated.thread, ...thread };
         else if (thread.group === this.group) {
-            this.userThreads[this.group] = [...this.userThreads[this.group], { thread, users: [] }];
+            this.userThreads[this.group] = [...this.userThreads[this.group], { thread, hasMore: false, users: [] }];
+        }
+        if (threadUpdated?.thread.createdAt === this.actualThread?.thread.createdAt) {
+            this.actualThread = threadUpdated;
         }
         this.requestUpdate();
     };
@@ -1015,6 +1146,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 interface IThreadInfo {
     thread: mls.msg.ThreadPerformanceCache,
     users: mls.msg.User[],
+    hasMore?: boolean | undefined,
     messages?: mls.msg.Message[] | undefined
 }
 
@@ -1035,6 +1167,13 @@ interface IMessageFooter {
     backgroundColor?: string; // background color of the footer, ex: "#000000"
     timestamp?: string;
 }
+
+interface IFilteredThreadsByStatus {
+    archived: IFilteredThreads[];
+    deleted: IFilteredThreads[];
+    active: IFilteredThreads[];
+}
+
 interface IFilteredThreads {
     _lastMessageDate: {
         dateObject: Date;
@@ -1042,6 +1181,13 @@ interface IFilteredThreads {
         date: string;
         time: string;
     };
+    _lastMessageDateArchived?: {
+        dateObject: Date;
+        datafull: string;
+        date: string;
+        time: string;
+    };
+    hasMore?: boolean | undefined,
     thread: mls.msg.ThreadPerformanceCache;
     users: mls.msg.User[];
 }

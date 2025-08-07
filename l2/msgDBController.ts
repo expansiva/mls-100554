@@ -152,6 +152,41 @@ export async function updateMessage(message: mls.msg.Message): Promise<void> {
     });
 }
 
+export async function deleteAllMessagesFromThread(threadId: string): Promise<void> {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("messages", "readwrite");
+        const store = tx.objectStore("messages");
+        const index = store.index("byThreadId_orderAt");
+
+        const range = IDBKeyRange.bound([threadId, ''], [threadId, '\uffff']);
+        const request = index.openCursor(range);
+        const messagesInThread: mls.msg.MessagePerformanceCache[] = [];
+
+        request.onsuccess = async (event) => {
+            const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+            if (cursor) {
+                messagesInThread.push(cursor.value);
+                cursor.continue();
+            } else {
+
+                try {
+                    if (messagesInThread.length > 0) await deleteMessagesAndTasks(messagesInThread);
+                    resolve();
+                } catch (err) {
+                    reject(err);
+                }
+            }
+        };
+
+        request.onerror = () => reject("Erro ao deletar mensagens da thread");
+        tx.onerror = () => reject("Erro na transação de deleção");
+        tx.onabort = () => reject("Transação de deleção abortada");
+    });
+}
+
+
 export async function getMessage(messageId: string): Promise<mls.msg.MessagePerformanceCache | undefined> {
     const db = await openDB();
 
@@ -223,7 +258,6 @@ async function deleteMessagesAndTasks(messages: mls.msg.MessagePerformanceCache[
 
     const db = await openDB();
     const tx = db.transaction(["messages", "tasks"], "readwrite"); // transação para ambas stores
-
     const messageStore = tx.objectStore("messages");
 
     for (const msg of messages) {
@@ -246,7 +280,6 @@ async function deleteMessagesAndTasks(messages: mls.msg.MessagePerformanceCache[
         }
     }
 }
-
 
 export async function addOrUpdateTask(task: mls.msg.TaskData): Promise<void> {
     const db = await openDB();

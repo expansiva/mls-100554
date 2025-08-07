@@ -2,7 +2,7 @@
 
 import { html, css, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { updateThread, getUser, listUsers } from './_100554_msgDBController';
+import { updateThread, getUser, deleteAllMessagesFromThread } from './_100554_msgDBController';
 import { collab_triangle_exclamation } from './_100554_collabIcons';
 import { notifyThreadChange } from './_100554_aiAgentHelper';
 import { StateLitElement } from './_100554_stateLitElement';
@@ -30,8 +30,8 @@ const message_pt = {
     bots: 'Bots',
     group: 'Grupo',
     details: 'Detalhes',
-    languages: 'Idiomas',
-    languagesHint: 'Detectado e atualizado com base nos idiomas dos usuários participantes.',
+    languages: 'Tradução automática nos idiomas',
+    languagesHint: 'A cada mensagem será verificado o idioma da mensagem e feito a tradução para os idiomas acima, deixe em branco para não gastar créditos.',
     validateFormError: 'Preencha todos os campos obrigatórios.',
     userError: 'ID de usuário inválido.',
     btnSave: 'Salvar alterações',
@@ -63,9 +63,9 @@ const message_en = {
     group: 'Group',
     users: 'Users',
     bots: 'Bots',
-    languages: 'Languages',
+    languages: 'Automatic translation in multiple languages',
     details: 'Details',
-    languagesHint: 'Detected and updated based on the languages of participating users.',
+    languagesHint: 'For each message, the language will be detected and translated into the languages above. Leave blank to avoid spending credits.',
     validateFormError: 'Please fill in all required fields.',
     userError: 'Invalid user ID.',
     btnSave: 'Save changes',
@@ -94,7 +94,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
     @property() userId: string | undefined = '20250417120841.1000';
 
-    @property() threadDetails?: IThreadDetails = { "thread": { "history": [{ "action": "created", "userId": "20250417004803.1000", "timestamp": "20250622191652" }, { "action": "update_name", "userId": "20250417004803.1000", "timestamp": "20250622191652" }, { "action": "update_visibility", "userId": "20250417004803.1000", "timestamp": "20250622191652" }, { "action": "update_group", "userId": "20250417004803.1000", "timestamp": "20250622191652" }, { "action": "update_languages", "userId": "20250417004803.1000", "timestamp": "20250622191652" }, { "action": "add_user", "userId": "20250417004803.1000", "timestamp": "20250622191652" }, { "action": "add_user", "userId": "20250417120841.1000", "timestamp": "20250623120953" }, { "action": "add_user", "userId": "20250521175345.1000", "timestamp": "20250623120959" }, { "action": "add_user", "userId": "20250417120844.1000", "timestamp": "20250623121006" }, { "action": "updateBot", "userId": "Wagner", "timestamp": "20250721114724" }], "languages": ["pt"], "status": "active", "visibility": "company", "group": "CONNECT", "threadId": "20250622191652.1000", "users": [{ "userId": "20250417004803.1000", "auth": "admin" }, { "userId": "20250417120841.1000", "auth": "write" }, { "userId": "20250521175345.1000", "auth": "write" }, { "userId": "20250417120844.1000", "auth": "write" }], "name": "Wagner", "lastMessage": "aonde compro a tv 32 ?", "lastMessageTime": "20250721144157.1001", "unreadCount": 0, "lastSync": "20250721191357" }, "users": [{ "avatar_url": "https://lh6.googleusercontent.com/-Gup9IkqANhQ/AAAAAAAAAAI/AAAAAAAAIFc/38cLYfRcRbg/s96-c/photo.jpg", "threads": ["20250417135645.1000", "20250417180232.1000", "20250425212707.1000", "20250521143841.1000", "20250521144214.1000", "20250521144240.1000", "20250507201344.1000", "20250622191652.1000", "20250622191728.1000", "20250622191744.1000", "20250622191802.1000", "20250630112715.1000"], "name": "Wagner", "userId": "20250417004803.1000", "status": "active" }, { "avatar_url": "https://lh3.googleusercontent.com/a-/AOh14GjhEPN7UazL97l6qFIRIYUoLY-PNNPC93Zw4EVT=s96-c", "threads": ["20250417135645.1000", "20250417180232.1000", "20250417133813.1000", "20250422203048.1000", "20250425212707.1000", "20250507201344.1000", "20250423205309.1000", "20250521144240.1000", "20250521223250.1000", "20250521225039.1000", "20250521225730.1000", "20250521225840.1000", "20250523200654.1000", "20250622191802.1000", "20250622191728.1000", "20250622191744.1000", "20250622191652.1000", "20250630112715.1000"], "name": "Guilherme Pereira", "userId": "20250417120841.1000", "status": "active" }, { "avatar_url": "https://lh3.googleusercontent.com/a-/AOh14Gh-DIRLsowx8ItOQ7slQNzEN7geu3YrsG09SFD1=s96-c", "threads": ["20250422203048.1000", "20250521144240.1000", "20250521225840.1000", "20250622191802.1000", "20250622191728.1000", "20250622191744.1000", "20250622191652.1000", "20250630112715.1000"], "name": "Lucas", "userId": "20250521175345.1000", "status": "active" }, { "avatar_url": "https://lh5.googleusercontent.com/-RcrSZBlS8sM/AAAAAAAAAAI/AAAAAAAAAAc/DQDUXj8XpEo/s96-c/photo.jpg", "threads": ["20250417133813.1000", "20250417180232.1000", "20250423205309.1000", "20250425212707.1000", "20250521144240.1000", "20250521225840.1000", "20250622191802.1000", "20250622191728.1000", "20250622191744.1000", "20250622191652.1000", "20250630112715.1000"], "name": "Santiago", "userId": "20250417120844.1000", "status": "active" }] };
+    @property() threadDetails?: IThreadDetails = { "thread": {} } as IThreadDetails;
 
     @property() labelOk: string = '';
     @property() labelError: string = '';
@@ -107,6 +107,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
+        this.editedThreadDetails = JSON.parse(JSON.stringify(this.threadDetails));
     }
 
     async updated(changedProperties: Map<string, any>) {
@@ -121,13 +122,14 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                     else {
                         const data = await this.getThreadInfo(this.threadDetails.thread.threadId, this.userId);
                         this.threadDetails = data;
+                        this.editedThreadDetails = JSON.parse(JSON.stringify(this.threadDetails));
                     }
                 }
             }
-
-            this.editedThreadDetails = JSON.parse(JSON.stringify(this.threadDetails));
         }
+
     }
+
 
     render() {
 
@@ -147,7 +149,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                 <label>${this.msg.status}
                 <select name="status" required
                     .value=${this.editedThreadDetails?.thread.status}
-                    @change=${(e: Event) => { if (this.editedThreadDetails) this.editedThreadDetails.thread.status = (e.target as HTMLInputElement).value as mls.msg.ThreadStatus }}>
+                    @change=${(e: Event) => { if (this.editedThreadDetails) this.editedThreadDetails.thread.status = (e.target as HTMLSelectElement).value as mls.msg.ThreadStatus }}>
                     <option value="active">${this.msg.statusActive}</option>
                     <option value="archived">${this.msg.statusArchived}</option>
                     <option value="deleted">${this.msg.statusDeleted}</option>
@@ -195,7 +197,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
     `;
     }
-
 
     private renderUsers() {
         const users = this.editedThreadDetails?.users || [];
@@ -346,7 +347,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         return changed;
     }
 
-
     private async saveChanges() {
 
         this.labelError = '';
@@ -355,7 +355,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
         const changes = this.getChangedFields();
         if (!changes) return;
-
         const needUpdateThread = Object.keys(changes).length > 3;
 
         if (!needUpdateThread) {
@@ -364,7 +363,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         }
 
         let newThread: mls.msg.Thread | undefined;
-
         this.isLoading = true;
         try {
 
@@ -378,8 +376,22 @@ export class CollabMessagesThreadDetails extends StateLitElement {
             }
 
             if (newThread) {
+                const oldStatus = this.threadDetails?.thread.status;
                 this.threadDetails = JSON.parse(JSON.stringify(this.editedThreadDetails));
-                const threadCache = await updateThread(newThread.threadId, newThread);
+                let threadCache: mls.msg.ThreadPerformanceCache;
+
+                if (['deleted', 'archived'].includes(newThread.status) && newThread.status !== oldStatus) {
+                    await deleteAllMessagesFromThread(newThread.threadId);
+                    threadCache = await updateThread(
+                        newThread.threadId,
+                        newThread,
+                        '',
+                        '',
+                        0
+                    );
+                } else {
+                    threadCache = await updateThread(newThread.threadId, newThread);
+                }
                 notifyThreadChange(threadCache);
             }
 
