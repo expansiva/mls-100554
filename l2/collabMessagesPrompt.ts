@@ -296,7 +296,8 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
     }
 
     private extractAgentName(text: string): string | undefined {
-        const match = text.match(/@@(\w+)/);
+        //const match = text.match(/@@(\w+)/);
+        const match = text.match(/^@@(\w+)/);
         if (!match) return undefined;
         let value = match[1];
         if (!value.startsWith('agent')) {
@@ -315,6 +316,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             isSpecialMention = true;
             agentName = this.extractAgentName(finalText.trim())
         }
+
         if (this.onSend && typeof this.onSend === 'function') {
             this.onSend(finalText.trim(), { isSpecialMention, agentName });
         }
