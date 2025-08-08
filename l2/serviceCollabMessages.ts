@@ -4,9 +4,8 @@ import { addCoachMark, ICoachMarks } from './_100554_coachMarks';
 import { html, css, LitElement } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { saveUserIdLocalStorage } from "./_100554_aiAgentHelper";
 import { listThreads, addThread, listUsers, updateUsers } from './_100554_msgDBController';
-import { saveLastTab, loadLastTab } from "./_100554_collabMessageHelper";
+import { saveLastTab, loadLastTab, saveUserId } from "./_100554_collabMessageHelper";
 
 import './_100554_collabMessagesAdd';
 import './_100554_collabMessagesChat';
@@ -138,7 +137,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         super.updated(changedProperties);
         if (changedProperties.has('activeTab') && ['CRM', 'TASK', 'DOCS', 'CONNECT', 'APPS'].includes(this.activeTab)) {
             this.userPerfil = await this.getUser();
-            saveUserIdLocalStorage(this.userPerfil.userId);
+            saveUserId(this.userPerfil.userId);
             await this.getThreadFromLocalDB();
             this.updateThreads();
         }
@@ -179,7 +178,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         this.groupSelected = 'CRM';
         this.execCoachMarks('CRM');
         return html`<collab-messages-chat-100554 
-            
             .isLoadingThread= ${this.isLoadingThread}
             group="CRM"
             .userThreads=${{

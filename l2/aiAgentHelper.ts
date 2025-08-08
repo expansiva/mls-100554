@@ -1,6 +1,7 @@
 /// <mls shortName="aiAgentHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { updateMessage, addMessages } from "./_100554_msgDBController";
+import { getUserId } from "./_100554_collabMessageHelper";
 
 
 /**
@@ -222,7 +223,7 @@ export async function appendLongTermMemory(context: mls.msg.ExecutionContext, lo
     longTermMemory,
     messageId,
     taskId: context.task.PK,
-    userId: getUserIdLocalStorage() || context.message.senderId,
+    userId: getUserId() || context.message.senderId,
 
   });
 
@@ -235,7 +236,7 @@ export const updateStepStatus = async (context: mls.msg.ExecutionContext, stepId
   if(!context.task) throw new Error("error on AI updateStepStatus , invalid task");
   const args: mls.msg.RequestUpdateStepStatus = {
     "action": "updateStepStatus",
-    "userId": getUserIdLocalStorage() || context.task.owner || '',
+    "userId": getUserId() || context.task.owner || '',
     "messageId": context.task.messageid_created || '',
     "taskId": context.task.PK,
     stepId,
@@ -257,7 +258,7 @@ export const updateStepStatus = async (context: mls.msg.ExecutionContext, stepId
 
 export const updateTaskTitle = async (task: mls.msg.TaskData, newTitle: string): Promise<mls.msg.TaskData> => {
   const args: mls.msg.RequestUpdateTaskTitle = {
-    userId: getUserIdLocalStorage() || task.owner,
+    userId: getUserId() || task.owner,
     newTitle,
     taskId: task.PK,
     messageId: task.messageid_created || '',
@@ -295,17 +296,6 @@ export async function appendPromptToInteraction(
   return (ret as mls.msg.ResponseUpdateStepStatus).task;
 
 }
-
-const USER_ID_KEY = 'collabMessages_userId';
-
-export function saveUserIdLocalStorage(userId: string): void {
-  localStorage.setItem(USER_ID_KEY, userId);
-}
-
-export function getUserIdLocalStorage(): string | null {
-  return localStorage.getItem(USER_ID_KEY);
-}
-
 
 export function notifyMessageSendChange(context: mls.msg.ExecutionContext): void {
   const scopeWindow = window?.top ? window.top : window;

@@ -3,10 +3,12 @@
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { getConfigProject, createConfigFile } from './_100554_libProjectConfig';
 import { initManagerCoachMark } from "./_100554_collabManagerCoachMarks";
 import { getTokensCss } from './_100554_designSystemBase';
 import { getProjectDetails, setProjectDetails, getLastOpenedFiles, findStorFileInProjectsOrDeps } from './_100554_libCommom';
+import { loadNotificationPreferences } from './_100554_collabMessageHelper';
+import { listenToThreadEvents } from './_100554_collabMessagesSyncNotifications';
+
 
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
@@ -87,6 +89,7 @@ export class CollabInit extends CollabLitElement {
         await this.setLastOpenedFiles();
         this.setDefaultFiles();
         this.showMessagesIfNeeded();
+        this.initNotificationIfEnabled();
         const services = await this.getServices();
         this.checkURLParams();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
@@ -496,11 +499,10 @@ export class CollabInit extends CollabLitElement {
         };
     }
 
-    private async initProjectLocalIfNeeded() {
-        const project = mls.actualProject;
-        if (project !== 0) return;
-        const configProjectAnonymous = await getConfigProject(0);
-        if (!configProjectAnonymous) await createConfigFile(0);
+    private initNotificationIfEnabled() {
+        const preferences = loadNotificationPreferences();
+        if (preferences !== 'granted' || Notification.permission !== 'granted') return;
+        listenToThreadEvents();
     }
 
 
