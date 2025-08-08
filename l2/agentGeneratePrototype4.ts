@@ -2,13 +2,12 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getPromptByHtml } from './_100554_aiPrompts';
-import { getPayload3, PayLoad3, Organism } from './_100554_agentGeneratePrototype3';
-import { getTask } from './_100554_msgDBController';
+import { getPayload3, PayLoad3 } from './_100554_agentGeneratePrototype3';
 import { getImages } from './_100554_libUnsplash';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { createNewFile } from "./_100554_pluginNewFileBase";
 import { formatHtml } from './_100554_collabDOMSync';
-import { updateTokensTheme, addNewTokensTheme } from './_100554_designSystemBase';
+import { addNewTokensTheme } from './_100554_designSystemBase';
 
 import {
   getNextPendingStepByAgentName,
@@ -22,6 +21,7 @@ import {
   getInteractionStepId,
   getStepById
 } from "./_100554_aiAgentHelper";
+
 import {
   startNewInteractionInAiTask,
   startNewAiTask,
@@ -668,7 +668,7 @@ function generateDefsOrganism(
       projectId: info.project,
       folder: info.folder,
       shortName: info.shortName,
-      type: "widget",
+      type: "organism",
       devFidelity: "scaffold",
       group: payload.finalModuleDetails.moduleName,
       tags: ["lit", "organism"]
