@@ -65,7 +65,6 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     }
 
     private onNavigation(info: any) {
-        console.info('foi')
         this.requestUpdate();
     }
 
@@ -83,6 +82,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     //-------COMPONENT----------
 
     @state() activeId = '';
+    private tryRender = 0;
 
     createRenderRoot() {
         return this;
@@ -94,6 +94,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         const ar = this.getComponents();
         this.fireEventMode('edit');
         if (ar && ar.length > 0) return this.createNavigation(ar);
+        this.tryRenderAgain();
         return html`<h3 style="padding:1rem">${this.msg.noItens}<h3>`;
     }
 
@@ -148,6 +149,14 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     public forceUpdate(): void {
         this.requestUpdate();
+    }
+
+    private tryRenderAgain() {
+        
+        if (this.tryRender === 3) return;
+        this.tryRender++;
+        setTimeout(() => this.forceUpdate(), 800);
+        
     }
 
     private getComponents(): IInfoElChildren[] {

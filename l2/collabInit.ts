@@ -5,10 +5,9 @@ import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { initManagerCoachMark } from "./_100554_collabManagerCoachMarks";
 import { getTokensCss } from './_100554_designSystemBase';
-import { getProjectDetails, setProjectDetails, getLastOpenedFiles, findStorFileInProjectsOrDeps } from './_100554_libCommom';
+import { getProjectDetails, setProjectDetails, getLastOpenedFiles, findStorFileInProjectsOrDeps, getInstanceByFile, saveOpenedFile } from './_100554_libCommom';
 import { loadNotificationPreferences } from './_100554_collabMessageHelper';
 import { listenToThreadEvents } from './_100554_collabMessagesSyncNotifications';
-
 
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
@@ -87,7 +86,7 @@ export class CollabInit extends CollabLitElement {
         await this.loadProjectBase();
         await this.loadLastProject();
         await this.setLastOpenedFiles();
-        this.setDefaultFiles();
+        await this.setDefaultFiles();
         this.showMessagesIfNeeded();
         this.initNotificationIfEnabled();
         const services = await this.getServices();
@@ -335,12 +334,35 @@ export class CollabInit extends CollabLitElement {
 
     private FILEL6 = 'projects';
     private FILEL5 = 'modules';
-    private setDefaultFiles() {
+    private async setDefaultFiles() {
         if (!this.actualProject) return;
         const defaultL6 = findStorFileInProjectsOrDeps(this.actualProject, 2, this.FILEL6, '', '.ts');
         const defaultL5 = findStorFileInProjectsOrDeps(this.actualProject, 2, this.FILEL5, '', '.ts');
         if (defaultL6) mls.actual[6].setFullName(`_${defaultL6.project}_${defaultL6.shortName}`);
         if (defaultL5) mls.actual[5].setFullName(`_${defaultL5.project}_${defaultL5.shortName}`);
+        await this.loadDefaultPageL7();
+    }
+
+    private async loadDefaultPageL7() {
+
+        if (!this.actualProject || mls.actual[7].path) return;
+
+        const instance = await getInstanceByFile({ project: this.actualProject, shortName: 'project', folder: '', extension: '.ts' } as mls.stor.IFileInfo) as any;
+
+        if (!instance || !instance.modules || instance.modules.length === 0) return;
+
+        const mm = await getInstanceByFile({ project: this.actualProject, shortName: 'module', folder: instance.modules[0].name, extension: '.ts' } as mls.stor.IFileInfo) as any;
+
+        if (!mm || !mm.moduleConfig || !mm.moduleConfig.initialPage) return;
+
+        const defaultL7 = findStorFileInProjectsOrDeps(this.actualProject, 2, mm.moduleConfig.initialPage, instance.modules[0].name, '.ts');
+        if (defaultL7) {
+            let name = `_${defaultL7.project}_${defaultL7.shortName}`
+            if (defaultL7.folder) name = `_${defaultL7.project}_${defaultL7.folder}/${defaultL7.shortName}`;
+
+            mls.actual[7].setFullName(name);
+            saveOpenedFile(this.actualProject, 7, name);
+        }
     }
 
     private restoreSideFile(
@@ -504,7 +526,6 @@ export class CollabInit extends CollabLitElement {
         if (preferences !== 'granted' || Notification.permission !== 'granted') return;
         listenToThreadEvents();
     }
-
 
 }
 

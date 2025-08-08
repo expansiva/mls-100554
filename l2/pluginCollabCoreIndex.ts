@@ -51,7 +51,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
             },
             {
                 category: 'Services',
-                scope: ['l5ServicesLeft', 'l3ServicesLeft', 'l2ServicesLeft', 'l2ServicesRight', 'l1ServicesLeft'],
+                scope: ['l5ServicesLeft', 'l3ServicesLeft', 'l4ServicesLeft','l2ServicesLeft', 'l2ServicesRight', 'l1ServicesLeft'],
                 priority: 1,
                 auth: ['*'],
                 widget: '_100554_serviceProject'

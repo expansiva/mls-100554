@@ -400,7 +400,7 @@ export class ServicePreviewView extends StateLitElement {
     private async setMyFile() {
 
         if (!this.page || this.page === '') throw new Error(this.msg.pageNotDefined);
-        
+
         const info = mls.l2.getPath(this.page);
 
 
@@ -414,7 +414,7 @@ export class ServicePreviewView extends StateLitElement {
 
         const file = mls.stor.files[key];
 
-        const mkey = mls.editor.getKeyModel( info.project as number, info.shortName as string,  file.folder);
+        const mkey = mls.editor.getKeyModel(info.project as number, info.shortName as string, file.folder);
 
         if (!mls.stor.files[key]) throw new Error(this.msg.notFoundStorfile + ': ' + key);
         if (!mls.editor.models[mkey]) {

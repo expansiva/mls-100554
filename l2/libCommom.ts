@@ -533,6 +533,23 @@ export function getBaseTemplate(file: IInfoFile, enhancement: string = '_blank')
     
 }
 
+export async function getInstanceByFile(file: mls.stor.IFileInfo): Promise< Object | undefined>{
+
+    try {
+        let { project, shortName, folder, extension } = file;
+        if (file.extension === '.ts') extension = '';
+        
+        let key = `/_${project}_${shortName}${extension}`;
+        if (folder) key = `/_${project}_${folder}/${shortName}${extension}`;
+        key = key.replace('.ts', '.js');
+        const m = await import(key);
+        return m;
+    } catch (e) {
+        return undefined;
+    }
+    
+}
+
 export type OpenedFile = string | OpenedFileL2;
 export type UserOpenedFiles = Record<number, OpenedFile>;
 export type OpenedFileL2 = { left?: string; right?: string };
