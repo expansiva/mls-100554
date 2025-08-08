@@ -3,7 +3,7 @@
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { selectLevel, forceServiceInstance, getBaseTemplate } from './_100554_libCommom';
+import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from './_100554_libCommom';
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles } from './_100554_collabLibStor';
 import { createAllModels, readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 import { ServiceBase } from './_100554_serviceBase';
@@ -493,7 +493,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     private getAllName(file: mls.stor.IFileInfo, isHistory = false): string {
         let name = '';
-        const folder = file.folder ?  file.folder : '';
+        const folder = file.folder ? file.folder : '';
         if (this.modeView === 0 && this.project === 0) {
             name = '_' + file.project + '_' + folder + '/' + file.shortName
         } else if (this.modeView === 0 && this.project > 0) {
@@ -503,7 +503,7 @@ export class PluginExploreList extends PluginBaseModule {
         }
 
         if (isHistory && folder) name = folder + '/' + file.shortName;
-        if (isHistory && this.project === 0) name = file.project + '_' +folder + '/' + file.shortName;
+        if (isHistory && this.project === 0) name = file.project + '_' + folder + '/' + file.shortName;
 
         return name;
     }
@@ -566,7 +566,7 @@ export class PluginExploreList extends PluginBaseModule {
         const mfile = this.getMyFileInElement(e.target as HTMLElement);
         if (!mfile) return;
         this.setHistory(mfile);
-        if (mls.actualLevel != 1) selectLevel(2);
+        //if (mls.actualLevel != 1) selectLevel(2);
         this.fireEvents('open', mfile, {});
 
     }
@@ -737,20 +737,24 @@ export class PluginExploreList extends PluginBaseModule {
 
             if (['open'].includes(action)) {
 
-                const lv = mls.actualLevel == 1 ? 1 : this.levelFiles;
-
-                mls.actual[lv as any].setFullName(`_${file.project}_${file.shortName}`);
+                //const lv = mls.actualLevel == 1 ? 1 : this.levelFiles;
+                const lv = mls.actualLevel;
+                let name = `_${file.project}_${file.shortName}`;
+                if (file.folder) name = `_${file.project}_${file.folder}/${file.shortName}`;
+                mls.actual[lv as any].setFullName(name);
                 mls.actual[lv as any][this.position as ('right' | 'left')] = file
 
             }
 
-            if (mls.actualLevel == 1) {
-                mls.events.fire([1], ['FileAction'], JSON.stringify(params), timeout);
-            } else {
-                mls.events.fire([(+(this.levelFiles as any) as any)], ['FileAction'], JSON.stringify(params), timeout);
+            mls.events.fire([mls.actualLevel], ['FileAction'], JSON.stringify(params), timeout);
+
+            if (action === 'open') {
+                this.saveLocalStorageLastOpen(file, this.position as any);
             }
 
-            if (['open'].includes(action)) return;
+            if (['open'].includes(action) && mls.actualLevel === 2) {
+                return;
+            }
             this.showLoading(false);
             this.changeList(100);
 
@@ -990,11 +994,22 @@ export class PluginExploreList extends PluginBaseModule {
             const arraySf: mls.stor.IFileInfo[] = await this.getFilesProject();
             const arraySfHistory: mls.stor.IFileInfo[] = await this.getFileHistory();
             this.files = [...arraySf];
-            this.history = [...arraySfHistory];
+            this.history = this.filterArrayHistory([...arraySfHistory], this.files);
         } catch (e) {
             console.info(e);
         }
 
+    }
+
+    private filterArrayHistory(arrayAlvo: mls.stor.IFileInfo[], arrayBase: mls.stor.IFileInfo[]): mls.stor.IFileInfo[] {
+        return arrayAlvo.filter(itemAlvo =>
+            arrayBase.some(itemBase =>
+                itemBase.folder === itemAlvo.folder &&
+                itemBase.shortName === itemAlvo.shortName &&
+                itemBase.extension === itemAlvo.extension &&
+                itemBase.project === itemAlvo.project
+            )
+        );
     }
 
     private async getFilesProject(): Promise<mls.stor.IFileInfo[]> {
@@ -1021,12 +1036,9 @@ export class PluginExploreList extends PluginBaseModule {
             if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
                 continue;
             }
-            else if (mls.actualLevel === 3 && !sf.shortName.startsWith('page')) {
-                continue;
-            }
             else if ([2, 4, 5, 6, 7].includes(mls.actualLevel) && sf.shortName.startsWith('be')) {
                 continue;
-            } 
+            }
 
             const keyHtml = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.html');
             const keyStyle = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.less');
@@ -1038,16 +1050,33 @@ export class PluginExploreList extends PluginBaseModule {
             const testFile = mls.stor.files[keyTestFile];
             const defsFile = mls.stor.files[keyDefsFile];
 
- 
+
+            if (mls.actualLevel === 3 && !defsFile) {
+                continue;
+            } else if (mls.actualLevel === 3 && defsFile) {
+                const m: any | undefined = await getInstanceByFile(defsFile);
+                if (!m || !m.defs ||
+                    !m.defs.meta || !m.defs.meta.type ||
+                    m.defs.meta.type !== 'organism') continue;
+            }
+
+            if (mls.actualLevel === 4 && !defsFile) {
+                continue;
+            } else if (mls.actualLevel === 4 && defsFile) {
+                const m: any | undefined = await getInstanceByFile(defsFile);
+                if (!m || !m.defs ||
+                    !m.defs.meta || !m.defs.meta.type ||
+                    m.defs.meta.type !== 'page') continue;
+            }
 
 
             const htmlLocal = htmlFile && htmlFile.inLocalStorage && await this.isDifBaseTemplate(htmlFile);
             const styleLocal = styleFile && styleFile.inLocalStorage && await this.isDifBaseTemplate(styleFile);
             const testLocal = testFile && testFile.inLocalStorage && await this.isDifBaseTemplate(testFile);
-            const defsLocal = defsFile && defsFile.inLocalStorage && await this.isDifBaseTemplate(defsFile); 
+            const defsLocal = defsFile && defsFile.inLocalStorage && await this.isDifBaseTemplate(defsFile);
 
             const htmlError = htmlFile && htmlFile.hasError;
-            const styleError = styleFile && styleFile.hasError 
+            const styleError = styleFile && styleFile.hasError
             const testError = testFile && testFile.hasError;
             const defsError = defsFile && defsFile.hasError;
 
@@ -1266,7 +1295,19 @@ export class PluginExploreList extends PluginBaseModule {
         this.resizeObserver.observe(this);
     }
 
+    private saveLocalStorageLastOpen(storFile: mls.stor.IFileInfo, position: 'left' | 'right') {
+        let data: string & OpenedFileL2 = '';
+        if (mls.actualLevel === 2) {
+            data = {} as OpenedFileL2 & string;
+            if (storFile.folder) data[position] = `_${storFile.project}_${storFile.folder}/${storFile.shortName}`;
+            else data[position] = `_${storFile.project}_${storFile.shortName}`;
+        } else {
+            if (storFile.folder) data = `_${storFile.project}_${storFile.folder}/${storFile.shortName}`;
+            else data = `_${storFile.project}_${storFile.shortName}`;
+        }
 
+        saveOpenedFile(storFile.project, mls.actualLevel, data);
+    }
 
 }
 

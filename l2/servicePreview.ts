@@ -2,22 +2,24 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_serviceBase';
+import { StateLitElement } from './_100554_stateLitElement';
 import { getTokens } from './_100554_designSystemBase';
 import { getConfigProject } from './_100554_libProjectConfig';
 import { createPath } from './_100554_libCommom';
 import { collabImport } from './_100554_collabImport';
+
+
 import { globalState, setState, initState, getState } from './_100554_collabState';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test, collab_xmark } from './_100554_collabIcons';
-import { loadChatPreferences, getUserId } from './_100554_collabMessageHelper';
-import {  getTemporaryContext } from './_100554_aiAgentHelper';
-import { PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
-
-import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_serviceBase';
-import { StateLitElement } from './_100554_stateLitElement';
-import { IAgent } from './_100554_aiAgentBase';
 import { CollabState } from './_100554_collabState';
 import { TsTestAst } from './_100554_tsTestAST';
+import { loadChatPreferences, getUserId } from './_100554_collabMessageHelper';
+import { getTemporaryContext } from './_100554_aiAgentHelper';
+import { createAllModels } from './_100554_collabLibModel';
+import { PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
+import { IAgent } from './_100554_aiAgentBase';
 
 import './_100554_collabConsole';
 import './_100554_collabResultTest';
@@ -336,7 +338,7 @@ export class ServicePreview100554 extends ServiceBase {
     private setEvents() {
 
         mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['ModelHTMLCreated'] as any, (ev: mls.events.IEvent) => { this.onModelHTMLCreated(ev); });
-        mls.events.addEventListener([2, 5], ['FileAction'], this.onMLSFileAction.bind(this));
+        mls.events.addEventListener([2, 3, 4, 7], ['FileAction'], this.onMLSFileAction.bind(this));
         mls.events.addListener(2, 'styleChanged' as any, this.onStyleChanged.bind(this));
         //mls.events.addListener(2, 'tsTestChanged' as any, this.onTsTestChanged.bind(this));
         mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['LevelChanged'] as any, this.onLevelChange.bind(this));
@@ -480,10 +482,10 @@ export class ServicePreview100554 extends ServiceBase {
 
         try {
 
-            if (![2, 5].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
+            if (![2, 3, 4, 7].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
             // if ((this.visible === 'false') && !((fileAction.action as any) === 'openBackground')) return;
-            const eventsValid = ['open', 'openBackground', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated', 'editorChanged'];
+            const eventsValid = ['open', 'openBackground', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated', 'editorChanged', 'openLink'];
 
             if (
                 fileAction.position === this.position ||
@@ -495,6 +497,11 @@ export class ServicePreview100554 extends ServiceBase {
 
             if (fileAction.action === 'editorChanged' && fileAction.extension === '.test.ts') {
                 this.onTsTestChanged();
+                return;
+            }
+
+            if ((fileAction as any).action === 'openLink' && ev.level === 7) {
+                this.onOpenLink(fileAction);
                 return;
             }
 
@@ -517,7 +524,7 @@ export class ServicePreview100554 extends ServiceBase {
                 return;
             }
 
-            if (fileAction.action === 'open') {
+            if (fileAction.action === 'open' && ev.level === 2) {
                 this.loading = true;
                 return;
             }
@@ -536,6 +543,23 @@ export class ServicePreview100554 extends ServiceBase {
             console.info(e);
         }
 
+    }
+
+    private async onOpenLink(fileAction: mls.events.IFileAction) {
+
+        const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.html');
+        const storFileHTML = mls.stor.files[keyToFileInfo];
+        await createAllModels(storFileHTML);
+        this.setModel(storFileHTML);
+        this.actualFile = storFileHTML;
+        this.setThemeByModule();
+
+        this.elPreview = undefined;
+        this.updateLoadingToFalseIfNoTasksRunning();
+        let fullName = `_${fileAction.project}_${fileAction.shortName}`;
+        if(fileAction.folder) fullName = `_${fileAction.project}_${fileAction.folder}/${fileAction.shortName}`;
+
+        this.createPreview(this.lastModePreview , fullName);
     }
 
 

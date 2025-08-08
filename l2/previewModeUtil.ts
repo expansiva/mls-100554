@@ -173,6 +173,38 @@ export function waitForComponents(context: Window, componentNames: string[]) {
     return Promise.all(promises);
 }
 
+function functionReplaceAnchor(e:MouseEvent) {
+
+    e.stopPropagation();
+    e.preventDefault();
+    if (mls.actualLevel !== 7) return;
+
+    const acutalName = mls.actual[mls.actualLevel].getFullName();
+    if (!acutalName) return;
+    const info = mls.l2.getPath(acutalName);
+    if (!info) return;
+
+    const href = (e.target as HTMLAnchorElement).href;
+
+    let name = href ? href.replace('https://collab.codes/', '') : info.shortName;
+    if (name === '') name = info.shortName;
+    
+    const key = mls.stor.getKeyToFiles(info.project, 2, name, info.folder, '.ts');
+
+    if (!mls.stor.files[key]) return;
+
+    const params = {} as mls.events.IFileAction;
+    (params.action as any) = 'openLink';
+    params.level = mls.stor.files[key].level;
+    params.project = mls.stor.files[key].project;
+    params.shortName = name;
+    params.extension = '.ts';
+    params.folder = mls.stor.files[key].folder;
+    params.position = 'left';
+
+    mls.events.fire([mls.actualLevel], ['FileAction'], JSON.stringify(params), 0);
+}
+
 export function addJsReference(ifr: HTMLIFrameElement, level: string) {
 
     const s = document.createElement('script') as HTMLScriptElement;
@@ -235,7 +267,16 @@ export function addJsReference(ifr: HTMLIFrameElement, level: string) {
                     }
 
                     return matchingRules;
-                }`;
+                };
 
+                document.addEventListener('click', (e) => {
+                    const a = e.target.closest('a');
+                    if (a) {
+                        functionReplaceAnchor(e);
+                    }
+                });
+    `;
+    if(ifr.contentWindow) (ifr.contentWindow as any).functionReplaceAnchor = functionReplaceAnchor;
     ifr.contentDocument?.body.appendChild(s);
 }
+

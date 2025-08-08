@@ -3,6 +3,7 @@
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
+import { loadPluginProject } from './_100554_libCommom';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import "./_100554_wcdToolboxItemActionEditAttrOut";
 
@@ -10,14 +11,16 @@ import "./_100554_wcdToolboxItemActionEditAttrOut";
 const message_pt = {
     detailsHint: 'Detalhes do objeto selecionado na página, - help , - ajustes widget como mutations (ica), - ajustes dinâmicos (wcd) , por favor selecione um item na página',
     selectPlugin: 'Por favor selecione um plugin IA',
-    loading: 'Carregando...'
+    loading: 'Carregando...',
+    notFoundPlugin: 'Plugin não encontrado!'
 
 }
 
 const message_en = {
     detailsHint: 'Details of the selected object on the page, - help , - widget settings like mutations (ica), - dynamic settings (wcd), please select an item on the page',
     selectPlugin: 'Please select a plugin IA',
-    loading: 'Loading...'
+    loading: 'Loading...',
+    notFoundPlugin: 'Plugin not found!'
 }
 
 type MessageType = typeof message_en;
@@ -47,13 +50,14 @@ export class ServiceOrganism100554 extends ServiceBase {
 
     private setEvents(): void {
         mls.events.addListener(3, 'WCDEvent' as any, (ev) => this.onWCDEvent(ev));
+        mls.events.addEventListener([3], ['FileAction'], this.onMLSFileAction.bind(this));
     }
 
     //-------SERVICE---------------
 
     public details: IService = {
         icon: '&#xf471',
-        state: 'foreground',
+        state: 'background',
         position: 'right',
         tooltip: 'Organism',
         visible: true,
@@ -133,7 +137,7 @@ export class ServiceOrganism100554 extends ServiceBase {
 
     renderNavigation() {
         // this.openService('_100554_servicePreview', 'right', 3);
-        return html` ${this.pluginNav ? unsafeHTML(`<${this.pluginNav} .service=${this}></${this.pluginNav}>`) : `<div>${this.msg.loading}</div>`}`;
+        return html` ${this.pluginNav ? unsafeHTML(`<${this.pluginNav} .service=${this}></${this.pluginNav}>`) : unsafeHTML(`<div>${this.msg.notFoundPlugin}</div>`)}`;
     }
 
     renderProperties() {
@@ -156,10 +160,10 @@ export class ServiceOrganism100554 extends ServiceBase {
 
         const  project  = mls.actualProject;
         if (!project) return;
-        await mls.plugin.loadAll(project, true);
-        const plgNav = mls.plugin.getAllMenuActions(project, { scope: 'l3PageNavigation' } as any);
-        const plgProp = mls.plugin.getAllMenuActions(project, { scope: 'l3PageProperties' } as any);
-        const plgStyle = mls.plugin.getAllMenuActions(project, { scope: 'l3PageStyle' } as any);
+
+        const plgNav = await loadPluginProject(project, 'l3PageNavigation');
+        const plgProp = await loadPluginProject(project, 'l3PageProperties');
+        const plgStyle = await loadPluginProject(project, 'l3PageStyle');
         const plgNavName = plgNav[0] ? plgNav[0].widget : '';
         const plgPropName = plgProp[0] ? plgProp[0].widget : '';
         const plgStlpName = plgStyle[0] ? plgStyle[0].widget : '';
@@ -189,6 +193,34 @@ export class ServiceOrganism100554 extends ServiceBase {
         if (this.menu.setTabActive) {
             this.openMe();
             this.menu.setTabActive(ESceneries[data.op]);
+        }
+
+    }
+
+    private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
+
+        try {
+
+            if (![3].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
+
+            const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
+            
+            const eventsValid = ['open'];
+
+            if (
+                fileAction.position === 'right' ||
+                !eventsValid.includes(fileAction.action)
+            ) return;
+
+            
+            if (!this.visible || this.visible === 'false') {
+                this.openMe();
+            }
+            
+            setTimeout(()=>this.requestUpdate(),500);
+
+        } catch (e) {
+            console.info(e);
         }
 
     }
