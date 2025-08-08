@@ -1,0 +1,277 @@
+<div
+	class='widget-showcase'
+	style='max-width:600px;margin:32px auto;padding:24px 16px;background:#fff;border-radius:18px;box-shadow:0 4px 24px 0 rgba(30,34,90,0.10);font-family:"Inter",Arial,sans-serif;color:#23263b;'>
+	<section
+		class='section_title'
+		style='text-align:center;margin-bottom:18px;'>
+		<h1
+			style='font-size:2.1rem;font-weight:700;letter-spacing:-1px;margin:0 0 8px 0;line-height:1.1;'>
+			widget-text2-collab-messages-md
+		</h1>
+		<h2
+			style='font-size:1.18rem;font-weight:400;color:#5a5e7a;margin:0;'>
+			Transforme mensagens Markdown Slack-style em HTML seguro e bonito, pronto para colaboração.
+		</h2>
+	</section>
+	<section
+		class='section_info'
+		style='text-align:center;margin:28px 0 18px 0;'>
+		<p
+			style='font-size:1.08rem;line-height:1.6;color:#3b3e5a;margin:0 0 8px 0;'>
+			O
+			<strong>
+				widget-text2-collab-messages-m-d-100554
+			</strong>
+			converte textos em Markdown no estilo Slack (com menções, canais, comandos, listas, links e muito mais) em HTML seguro e estilizado, ideal para chats, feeds colaborativos e integrações modernas.
+		</p>
+		<p
+			style='font-size:0.98rem;color:#7a7e9a;margin:0;'>
+			Perfeito para exibir mensagens de usuários, bots ou sistemas, mantendo o visual limpo e seguro.
+		</p>
+	</section>
+	<section
+		class='section_demo'
+		style='margin:32px 0 24px 0;'>
+		<h3
+			style='text-align:center;font-size:1.25rem;font-weight:600;color:#2a2e5a;margin-bottom:18px;'>
+			Demonstração
+		</h3>
+		<widget-playground-state-100554
+			state='
+			{"playground":{
+				"text1":"Olá **mundo**! Veja o canal #geral, fale com @lucas ou use /ajuda.\n- Item 1\n- Item 2\n> Dica: use `código` ou \n>```text\n bloco de código```\n.",
+				"text2":"@ana, confira [documentação](https://collabcodes.com) e _destaque_ comandos como /start. #devs",
+				"text3":"> Citação\n>**Negrito** e  _itálico_ juntos!",
+				"text4":"**página de exemplos**\n\n?teste\n_teste\n\nuse o comando /start da proxima vez\n\n_Exemplo de referencia_\n@@agentana fale com o @wagner e o @lucas sobre o teste realizado no canal #dev1\n\n_Exemplo de marcação_\n\n- Linha 1\n- Linha 2\n- Linha 3\n\n_Exemplo de lista numerada_\n\n1. Exemplo 1\n2. Exemplo 2\n3. Exemplo\n4. Link do site: [expansiva](https://www.expansiva.com.br)\n\n_Exemplo de linha de código_\n\n`const l = 500;`\n\n_Exemplo de bloco de código_\n\n```html\n<main>\n    <div>teste1</div>\n    <div>teste2</div>\n</main>```\n\n```javascript\nconst nomes = [`teste1`,`teste2`,`teste3`] ;\n\nfor (let i=0; i < nomes.lenght; i++) {\n    console.log(nomes[i]);\n}\n```\n\n```json\n[\n    {\"nome\":\"lucas\"},\n    {\"nome\":\"wagner\"},\n    {\"nome\":\"guilherme\"}\n]```\n\n_Exemplo de citação em bloco_\n\n> Exemplo 1\n>Linha 2\n>Linha 3\nMais um texto aqui\ne outro aqui na próxima linha\n\n_Exemplo de texto tachado_\n\n~~este texto será tachado~~\n\n```vbnet\nDim t as String = \"teste\"\nMsgBox(t)\n```"
+			}}'>
+		</widget-playground-state-100554>
+		<div
+			style='display:flex;flex-direction:column;gap:22px;align-items:stretch;margin-top:10px;'>
+			<demo
+				style='background:linear-gradient(90deg,#f7f8fa 60%,#eaf1ff 100%);border-radius:12px;padding:18px 14px 12px 14px;box-shadow:0 2px 8px 0 rgba(30,34,90,0.06);margin-bottom:0;'>
+				<widget-text2-collab-messages-m-d-100554
+					text='{{playground.text4}}'>
+				</widget-text2-collab-messages-m-d-100554>
+				<fieldset
+					style='margin-top:16px;border:1px solid #e0e3f0;border-radius:8px;padding:10px 12px 8px 12px;background:#fafdff;'>
+					<legend
+						style='font-size:0.98rem;color:#5a5e7a;font-weight:500;padding:0 8px;'>
+						Properties
+					</legend>
+					<widget-input-text-100554
+						label='Prop. text:'
+						value='{{playground.text4}}'>
+					</widget-input-text-100554>
+				</fieldset>
+			</demo>
+			<demo
+				style='background:linear-gradient(90deg,#f7f8fa 60%,#eaf1ff 100%);border-radius:12px;padding:18px 14px 12px 14px;box-shadow:0 2px 8px 0 rgba(30,34,90,0.06);margin-bottom:0;'>
+				<widget-text2-collab-messages-m-d-100554
+					text='{{playground.text2}}'>
+				</widget-text2-collab-messages-m-d-100554>
+				<fieldset
+					style='margin-top:16px;border:1px solid #e0e3f0;border-radius:8px;padding:10px 12px 8px 12px;background:#fafdff;'>
+					<legend
+						style='font-size:0.98rem;color:#5a5e7a;font-weight:500;padding:0 8px;'>
+						Properties
+					</legend>
+					<widget-input-text-100554
+						label='Prop. text:'
+						value='{{playground.text2}}'>
+					</widget-input-text-100554>
+				</fieldset>
+			</demo>
+			<demo
+				style='background:linear-gradient(90deg,#f7f8fa 60%,#eaf1ff 100%);border-radius:12px;padding:18px 14px 12px 14px;box-shadow:0 2px 8px 0 rgba(30,34,90,0.06);margin-bottom:0;'>
+				<widget-text2-collab-messages-m-d-100554
+					text='{{playground.text3}}'>
+				</widget-text2-collab-messages-m-d-100554>
+				<fieldset
+					style='margin-top:16px;border:1px solid #e0e3f0;border-radius:8px;padding:10px 12px 8px 12px;background:#fafdff;'>
+					<legend
+						style='font-size:0.98rem;color:#5a5e7a;font-weight:500;padding:0 8px;'>
+						Properties
+					</legend>
+					<widget-input-text-100554
+						label='Prop. text:'
+						value='{{playground.text3}}'>
+					</widget-input-text-100554>
+				</fieldset>
+			</demo>
+		</div>
+	</section>
+	<section
+		class='section_benefits'
+		style='margin:32px 0 18px 0;'>
+		<h3
+			style='text-align:center;font-size:1.13rem;font-weight:600;color:#2a2e5a;margin-bottom:12px;'>
+			Por que usar este componente?
+		</h3>
+		<ul
+			style='list-style:none;padding:0;max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:10px;'>
+			<li
+				style='display:flex;align-items:flex-start;gap:10px;font-size:1rem;color:#3b3e5a;'>
+				<span
+					style='font-size:1.2em;'>
+					🔒
+				</span>
+				<span>
+					<strong>
+						Seguro por padrão:
+					</strong>
+					Sanitiza o HTML e evita XSS automaticamente.
+				</span>
+			</li>
+			<li
+				style='display:flex;align-items:flex-start;gap:10px;font-size:1rem;color:#3b3e5a;'>
+				<span
+					style='font-size:1.2em;'>
+					✨
+				</span>
+				<span>
+					<strong>
+						Visual moderno:
+					</strong>
+					Renderiza menções, canais, comandos, listas, links e blocos de código com destaque visual.
+				</span>
+			</li>
+			<li
+				style='display:flex;align-items:flex-start;gap:10px;font-size:1rem;color:#3b3e5a;'>
+				<span
+					style='font-size:1.2em;'>
+					⚡
+				</span>
+				<span>
+					<strong>
+						Pronto para colaboração:
+					</strong>
+					Ideal para chats, feeds, bots e integrações em tempo real.
+				</span>
+			</li>
+			<li
+				style='display:flex;align-items:flex-start;gap:10px;font-size:1rem;color:#3b3e5a;'>
+				<span
+					style='font-size:1.2em;'>
+					🛠️
+				</span>
+				<span>
+					<strong>
+						Fácil integração:
+					</strong>
+					Use como qualquer WebComponent, sem dependências extras.
+				</span>
+			</li>
+			<li
+				style='display:flex;align-items:flex-start;gap:10px;font-size:1rem;color:#3b3e5a;'>
+				<span
+					style='font-size:1.2em;'>
+					🧩
+				</span>
+				<span>
+					<strong>
+						Customizável:
+					</strong>
+					Controle o texto dinamicamente via state ou props.
+				</span>
+			</li>
+		</ul>
+	</section>
+	<section
+		class='section_code'
+		style='margin:32px 0 18px 0;'>
+		<h3
+			style='text-align:center;font-size:1.13rem;font-weight:600;color:#2a2e5a;margin-bottom:10px;'>
+			Como usar
+		</h3>
+		<div
+			style='background:#f7f8fa;border-radius:8px;padding:14px 12px;font-size:0.98rem;font-family:"Fira Mono",monospace,monospace;color:#2a2e5a;overflow-x:auto;'>
+			<span
+				style='float:right;cursor:pointer;font-size:1.1em;color:#7a7e9a;'
+				title='Copiar código'>
+				📋
+			</span>
+			&lt;widget-text2-collab-messages-m-d-100554-100554<br>&nbsp;&nbsp;text="Olá **mundo**! Veja o canal #geral, fale com @lucas ou use /ajuda."<br>/&gt;
+		</div>
+	</section>
+	<section
+		class='section_use_cases'
+		style='margin:32px 0 0 0;'>
+		<h3
+			style='text-align:center;font-size:1.13rem;font-weight:600;color:#2a2e5a;margin-bottom:10px;'>
+			Exemplos de integração
+		</h3>
+		<div
+			style='display:flex;flex-direction:column;gap:10px;max-width:440px;margin:0 auto;'>
+			<div
+				style='display:flex;align-items:flex-start;gap:10px;font-size:1rem;color:#3b3e5a;'>
+				<span
+					style='font-size:1.2em;'>
+					💬
+				</span>
+				<span>
+					<strong>
+						Chat colaborativo:
+					</strong>
+					Exiba mensagens de usuários com menções, canais e comandos destacados.
+				</span>
+			</div>
+			<div
+				style='display:flex;align-items:flex-start;gap:10px;font-size:1rem;color:#3b3e5a;'>
+				<span
+					style='font-size:1.2em;'>
+					🤖
+				</span>
+				<span>
+					<strong>
+						Respostas de bots:
+					</strong>
+					Formate respostas automáticas com links, listas e blocos de código.
+				</span>
+			</div>
+			<div
+				style='display:flex;align-items:flex-start;gap:10px;font-size:1rem;color:#3b3e5a;'>
+				<span
+					style='font-size:1.2em;'>
+					📢
+				</span>
+				<span>
+					<strong>
+						Feeds e notificações:
+					</strong>
+					Destaque comandos, canais e menções em painéis de atividades.
+				</span>
+			</div>
+			<div
+				style='display:flex;align-items:flex-start;gap:10px;font-size:1rem;color:#3b3e5a;'>
+				<span
+					style='font-size:1.2em;'>
+					🔗
+				</span>
+				<span>
+					<strong>
+						Documentação interativa:
+					</strong>
+					Permita que usuários insiram exemplos de código e links facilmente.
+				</span>
+			</div>
+		</div>
+		<p
+			style='text-align:center;font-size:0.98rem;color:#7a7e9a;margin:18px 0 0 0;'>
+			Basta passar o texto em Markdown Slack-style na propriedade
+			<code
+				style='background:#eaf1ff;padding:2px 6px;border-radius:4px;'>
+				text
+			</code>
+			.
+			<br>
+			</br>
+			<br>
+			</br>
+			<br>
+			</br>
+			<br>
+			</br>
+			O componente cuida do resto!
+		</p>
+	</section>
+</div>
