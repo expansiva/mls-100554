@@ -3,9 +3,9 @@
 import { html, repeat } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { loadChatPreferences, IChatPreferences, saveChatPreferences } from './_100554_collabMessageHelper';
+import { loadChatPreferences, IChatPreferences, saveChatPreferences, getUserId } from './_100554_collabMessageHelper';
 import { IAgent } from './_100554_aiAgentBase';
-import { getUserIdLocalStorage, getTemporaryContext } from './_100554_aiAgentHelper';
+import {  getTemporaryContext } from './_100554_aiAgentHelper';
 import { listThreads } from './_100554_msgDBController';
 import { updateHTML } from './_100554_collabDOMSync';
 import { collab_trash } from './_100554_collabIcons';
@@ -372,7 +372,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
             return `Agent "${agentName}" error:
 Please configure your maintenance thread at: CollabMessage > Settings > Chat Preferences`;
         }
-        const userId = getUserIdLocalStorage();
+        const userId = getUserId();
         const threadId = this.chatPreferences.threadMaintenance;
         if (!userId) return `Agent "${agentName}" error: Not found userID`;
         let context; 

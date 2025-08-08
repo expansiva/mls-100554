@@ -4,8 +4,7 @@ import { html, css, repeat } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { ServiceBase } from './_100554_serviceBase';
-import { getUserIdLocalStorage } from "./_100554_aiAgentHelper";
-
+import { getUserId } from "./_100554_collabMessageHelper";
 
 import './_100554_collabMessagesTaskDetails';
 
@@ -102,7 +101,7 @@ export class CollabMessagesFindTask100554 extends StateLitElement {
     private async findThread() {
         this.isLoading = true;
         try {
-            const user = getUserIdLocalStorage();
+            const user = getUserId();
             if (!this.taskId || !this.threadId || !user) return;
             const rc = await mls.api.msgGetTaskUpdate({
                 messageId: this.threadId,

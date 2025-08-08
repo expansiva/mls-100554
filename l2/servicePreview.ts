@@ -2,23 +2,22 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_serviceBase';
-import { StateLitElement } from './_100554_stateLitElement';
 import { getTokens } from './_100554_designSystemBase';
 import { getConfigProject } from './_100554_libProjectConfig';
 import { createPath } from './_100554_libCommom';
 import { collabImport } from './_100554_collabImport';
-
-
 import { globalState, setState, initState, getState } from './_100554_collabState';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test, collab_xmark } from './_100554_collabIcons';
+import { loadChatPreferences, getUserId } from './_100554_collabMessageHelper';
+import {  getTemporaryContext } from './_100554_aiAgentHelper';
+import { PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
+
+import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_serviceBase';
+import { StateLitElement } from './_100554_stateLitElement';
+import { IAgent } from './_100554_aiAgentBase';
 import { CollabState } from './_100554_collabState';
 import { TsTestAst } from './_100554_tsTestAST';
-import { loadChatPreferences } from './_100554_collabMessageHelper';
-import { getUserIdLocalStorage, getTemporaryContext } from './_100554_aiAgentHelper';
-import { PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
-import { IAgent } from './_100554_aiAgentBase';
 
 import './_100554_collabConsole';
 import './_100554_collabResultTest';
@@ -667,7 +666,7 @@ export class ServicePreview100554 extends ServiceBase {
             return;
         }
 
-        const userId = getUserIdLocalStorage();
+        const userId = getUserId();
         const threadId = pref.threadMaintenance;
         if (!userId) return;
 

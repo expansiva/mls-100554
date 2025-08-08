@@ -3,17 +3,33 @@
 import { html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation } from './_100554_collabIcons';
-import { IAgent } from './_100554_aiAgentBase';
-import { getTemporaryContext, formatTimestamp, getNextResultStep, notifyThreadChange } from './_100554_aiAgentHelper';
-import { addOrUpdateTask, addMessages, addMessage, updateThread, updateUsers, getMessage, getMessagesByThreadId } from './_100554_msgDBController';
+import { collabImport } from './_100554_collabImport';
+import { removeThreadFromSync } from './_100554_collabMessagesSyncNotifications';
+
+import {
+    getTemporaryContext,
+    formatTimestamp,
+    getNextResultStep,
+    notifyThreadChange
+} from './_100554_aiAgentHelper';
+
+import {
+    addOrUpdateTask,
+    addMessages,
+    addMessage,
+    updateThread,
+    updateUsers,
+    getMessage,
+    getMessagesByThreadId
+} from './_100554_msgDBController';
+
 import {
     loadChatPreferences,
     getBotsContext,
     registerToken,
     loadNotificationPreferences,
-    loadNotificationToken
+    loadNotificationDeviceId
 } from './_100554_collabMessageHelper';
-import { collabImport } from './_100554_collabImport';
 
 import './_100554_collabMessagesTaskInfo';
 import './_100554_collabMessagesTask';
@@ -24,6 +40,7 @@ import './_100554_collabMessagesThreadDetails';
 import { IChatPreferences, AGENTDEFAULT, PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
 import { StateLitElement } from './_100554_stateLitElement';
 import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt';
+import { IAgent } from './_100554_aiAgentBase';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -73,6 +90,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     @property() group: 'CONNECT' | 'APPS' | 'DOCS' | 'CRM' = 'CONNECT';
     @property() userId: string | undefined;
+    @property() userDeviceId: string | undefined;
     @property() activeScenerie: IScenery = 'list';
     @property() actualThread: IThreadInfo | undefined;
     @property() actualTask: mls.msg.TaskData | undefined;
@@ -196,7 +214,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (!this.actualThread) return html``;
         if (this.actualThread.thread.status === 'archived') {
             const formatedTimestamp = formatTimestamp(this.actualThread.thread.archivedAt || '');
-            const archivedAt = this.parseLocalDate(formatedTimestamp.dateFull);
+            const archivedAt = this.parseLocalDate(formatedTimestamp?.dateFull || '');
             const archivedBy = this.actualThread.users.find((user) => user.userId === this.actualThread?.thread.archivedBy)
             return html`
                 <div>${this.msg.threadArchived.replace('[user]', archivedBy?.name || '').replace('[date]', archivedAt.datafull)}</div>
@@ -390,12 +408,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private renderThreadsByStatus() {
 
-        const unreadCount = 0;
-
         return html`
         <ul class="thread-list">
             ${this.filteredThreads.active.map((item) => {
             const randomImage = this.imageUrls[Math.floor(Math.random() * this.imageUrls.length)];
+            const unreadCount = item.thread.unreadCount || 0;
             const now = new Date();
             const isToday =
                 item._lastMessageDate.dateObject.getFullYear() === now.getFullYear() &&
@@ -566,12 +583,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
                     ? item.thread.lastMessageTime
                     : item.thread.history[0].timestamp;
 
-                const formatedTimestamp = formatTimestamp(lastTimestamp).dateFull;
-                const lastMessageDate = this.parseLocalDate(formatedTimestamp);
+                const formatedTimestamp = formatTimestamp(lastTimestamp)?.dateFull;
+                const lastMessageDate = this.parseLocalDate(formatedTimestamp || '');
                 let lastMessageDateArchived;
                 if (item.thread.status === 'archived' && item.thread.archivedAt) {
-                    const formatedTimestampArchived = formatTimestamp(item.thread.archivedAt).dateFull;
-                    lastMessageDateArchived = this.parseLocalDate(formatedTimestampArchived);
+                    const formatedTimestampArchived = formatTimestamp(item.thread.archivedAt)?.dateFull;
+                    lastMessageDateArchived = this.parseLocalDate(formatedTimestampArchived || '');
                 }
 
                 return {
@@ -693,6 +710,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private parseLocalDate(dateString: string) {
+
         const normalized = dateString.includes(' ')
             ? dateString.replace(' ', 'T')
             : `${dateString}T00:00:00`;
@@ -741,10 +759,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
             threadInfo = await this.updateMessagesOnDb(threadInfo, threadByServer.messages);
             await updateUsers(threadByServer.users);
 
-            // console.info(threadByServer.hasMore)
-            // if (threadByServer.hasMore) await this.loadAllMessages(threadInfo);
-
-            if (threadInfo.messages && threadInfo.messages.length >= 100) await this.loadAllMessages(threadInfo);
+            if (threadByServer.hasMore) await this.loadAllMessages(threadInfo);
+            // if (threadInfo.messages && threadInfo.messages.length >= 100) await this.loadAllMessages(threadInfo);
             this.checkForRegisterNotification();
 
         } catch (err: any) {
@@ -768,8 +784,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
             return;
         }
         threadInfo = await this.updateMessagesOnDb(threadInfo, response.data);
-        // if (!response.hasMore) return;
-        if (response.data.length < 100) return;
+        if (!response.hasMore) return;
+        // if (response.data.length < 100) return;
         return this.loadAllMessages(threadInfo);
     }
 
@@ -785,6 +801,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
         await addMessages(newMessages);
         this.actualMessages = this.mergeMessages(this.actualMessages, newMessages);
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+        await this.updateLastMessage(threadInfo);
+        return threadInfo;
+    }
+
+    private async updateLastMessage(threadInfo: IThreadInfo) {
         const keys = Object.keys(this.actualMessagesParsed).sort();
         const lastKey = keys.length > 0 ? keys[keys.length - 1] : null;
         const lastArray = lastKey ? this.actualMessagesParsed[lastKey] : [];
@@ -797,12 +818,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 lastMessage.createAt,
                 0
             );
-
             threadInfo.thread = thread;
             notifyThreadChange(thread);
         }
 
-        return threadInfo;
     }
 
     private async onTitleClick() {
@@ -812,6 +831,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             return;
         }
         if (this.activeScenerie === 'details') {
+            this.actualThread = undefined;
             this.activeScenerie = 'list';
             return;
         }
@@ -1068,12 +1088,16 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private async getThreadInfo(threadId: string, userId: string, lastOrderAt: string): Promise<IThreadInfo> {
+        const deviceId = loadNotificationDeviceId();
+
         try {
             const response = await mls.api.msgGetThreadUpdate({
                 threadId,
                 userId,
-                lastOrderAt
+                lastOrderAt,
+                deviceId: deviceId || undefined
             });
+            removeThreadFromSync(threadId);
             return response;
         } catch (err: any) {
             throw new Error(err.message)
@@ -1118,6 +1142,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     };
 
     private onThreadChange = async (e: Event) => {
+
         const customEvent = e as CustomEvent;
         await this.updateMessageAI(customEvent.detail, false);
         const thread = customEvent.detail as mls.msg.Thread;
@@ -1126,8 +1151,19 @@ export class CollabMessagesChat100554 extends StateLitElement {
         else if (thread.group === this.group) {
             this.userThreads[this.group] = [...this.userThreads[this.group], { thread, hasMore: false, users: [] }];
         }
-        if (threadUpdated?.thread.createdAt === this.actualThread?.thread.createdAt) {
+        if (threadUpdated?.thread.threadId === this.actualThread?.thread.threadId) {
             this.actualThread = threadUpdated;
+            if (this.actualThread && this.actualThread.thread.unreadCount && this.actualThread.thread.unreadCount > 0) {
+                const chatEl = this.querySelector('.chat-container') as HTMLElement | null;
+                if (chatEl) {
+                    const isScrolledToBottom = chatEl.scrollTop + chatEl.clientHeight >= chatEl.scrollHeight - 1;
+                    if (isScrolledToBottom) this.isSystemChangeScroll = true;
+                }
+                const messagesInDb = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, 0);
+                this.actualMessages = messagesInDb;
+                this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+                await this.updateLastMessage(this.actualThread);
+            }
         }
         this.requestUpdate();
     };

@@ -3,9 +3,9 @@
 import { html, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { loadChatPreferences, IChatPreferences } from './_100554_collabMessageHelper';
+import { loadChatPreferences,getUserId, IChatPreferences } from './_100554_collabMessageHelper';
 import { IAgent } from './_100554_aiAgentBase';
-import { getUserIdLocalStorage, getTemporaryContext } from './_100554_aiAgentHelper';
+import {  getTemporaryContext } from './_100554_aiAgentHelper';
 import { listThreads } from './_100554_msgDBController';
 import { updateHTML } from './_100554_collabDOMSync';
 
@@ -285,7 +285,7 @@ export class AgentTester extends CollabLitElement {
             Please configure your maintenance thread at: CollabMessage > Settings > Chat Preferences`;
             }
 
-            const userId = getUserIdLocalStorage();
+            const userId = getUserId();
             const threadId = this.chatPreferences.threadMaintenance;
             if (!userId) return `Agente "${agentName}" error:
             Not found userID`;

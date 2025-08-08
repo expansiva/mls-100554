@@ -1,6 +1,6 @@
 /// <mls shortName="collabMessageHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { getTemporaryContext, getUserIdLocalStorage, notifyMessageSendChange } from './_100554_aiAgentHelper';
+import { getTemporaryContext, notifyMessageSendChange } from './_100554_aiAgentHelper';
 import { IAgent } from './_100554_aiAgentBase';
 import { collabImport } from './_100554_collabImport';
 
@@ -19,7 +19,7 @@ export async function registerToken() {
 
     const lastToken = loadNotificationToken();
     if (lastToken === token) return token;
-    
+
     saveNotificationToken(token);
 
     try {
@@ -46,7 +46,7 @@ export async function registerToken() {
 
 export async function addMessage(threadId: string, messageContent: string, contextToBot?: mls.bots.ToolsBeforeSendMessage) {
 
-    const userId = getUserIdLocalStorage() || '';
+    const userId = getUserId() || '';
     if (!userId) throw new Error('Invalid user id');
     const context = getTemporaryContext(threadId, userId, messageContent);
 
@@ -59,7 +59,7 @@ export async function addMessage(threadId: string, messageContent: string, conte
             contextToBot: contextToBot
         };
         const res = await mls.api.msgAddMessage(params);
-        notifyMessageSendChange({ message: res.message, task: undefined })
+        // notifyMessageSendChange({ message: res.message, task: undefined })
         return;
     }
 
@@ -158,6 +158,24 @@ export function loadLastTab(): string {
     return 'CRM';
 }
 
+export function saveUserId(userId: string) {
+    let dataLocal: CollabMessagesLS | undefined = loadLocalStorage();
+    if (!dataLocal) dataLocal = { userId };
+    else dataLocal.userId = userId;
+    saveLocalStorage(dataLocal);
+}
+
+export function getUserId(): string | null {
+    const savedOld = localStorage.getItem('collabMessages_userId');
+    if (savedOld) {
+        saveUserId(savedOld);
+        localStorage.removeItem('collabMessages_userId');
+    }
+    const lsData = loadLocalStorage();
+    if (lsData && lsData.userId) return lsData.userId;
+    return null;
+}
+
 export function loadChatPreferences(): IChatPreferences {
     const savedOld = localStorage.getItem(LS_KEY_OLD);
     if (savedOld) {
@@ -235,6 +253,7 @@ export interface IChatPreferences {
 export interface CollabMessagesLS {
     lastTab?: string,
     chatPreferences?: IChatPreferences,
+    userId?: string,
     tokenFCM?: string,
     deviceId?: string,
     notificationPreference?: NotificationPermission

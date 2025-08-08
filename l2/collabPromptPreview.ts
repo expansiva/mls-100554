@@ -3,9 +3,8 @@
 import { html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { loadChatPreferences } from './_100554_collabMessageHelper';
-
-import { getUserIdLocalStorage, getTemporaryContext } from './_100554_aiAgentHelper';
+import { loadChatPreferences, getUserId } from './_100554_collabMessageHelper';
+import { getTemporaryContext } from './_100554_aiAgentHelper';
 import { createAgent } from './_100554_agentWebCare';
 
 export const initCollabICATree = '';
@@ -52,13 +51,13 @@ export class CollabFCATree extends CollabLitElement {
         </div>
         `;
     }
- 
+
     private async clickSend() {
 
         if (!this.page) {
             this.sendError('Erro page not selected');
             return;
-        } 
+        }
 
         const v = this.inputpromptpreview?.value || '';
 
@@ -66,10 +65,10 @@ export class CollabFCATree extends CollabLitElement {
             this.sendError('Error: Invalid prompt');
             return;
         }
- 
+
         this.loading = true;
         if (this.inputpromptpreview) this.inputpromptpreview.value = '';
-        
+
         try {
             await this.fireCollab(JSON.stringify({ page: this.page, prompt: v }));
         } catch (err: any) {
@@ -77,7 +76,7 @@ export class CollabFCATree extends CollabLitElement {
         } finally {
             this.loading = false;
         }
-    } 
+    }
 
     private sendError(erro: string) {
         const father = this.closest('service-preview-100554') as any;
@@ -93,11 +92,11 @@ export class CollabFCATree extends CollabLitElement {
             return;
         }
 
-        const userId = getUserIdLocalStorage();
+        const userId = getUserId();
         const threadId = pref.threadMaintenance;
         if (!userId) return;
-        
-        const context = getTemporaryContext(threadId, userId, '@@ agentWebCare '+ prompt);
+
+        const context = getTemporaryContext(threadId, userId, '@@ agentWebCare ' + prompt);
         const agent = createAgent();
         await agent.beforePrompt(context);
 

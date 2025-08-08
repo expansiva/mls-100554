@@ -11,7 +11,6 @@ import {
     appendPromptToInteraction,
     appendLongTermMemory,
     getStepById,
-    getUserIdLocalStorage,
     notifyTaskChange,
     dispatchDetailsTaskClose,
     updateTaskTitle,
@@ -20,7 +19,7 @@ import {
 
 import { getTask, getMessage } from "./_100554_msgDBController";
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
-
+import { getUserId } from "./_100554_collabMessageHelper";
 import { loadModuleFromProjectOrDependency} from './_100554_libCommom';
 
 export async function startNewAiTask(
@@ -84,7 +83,7 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
         if (!context.task.messageid_created) throw new Error("addNewInteractionInAiTask: context.task.messageid_created is null");
         const args: mls.msg.RequestAddTaskAIInteraction = {
             action: "addTaskAIInteraction",
-            userId: getUserIdLocalStorage() || context.task.owner,
+            userId: getUserId() || context.task.owner,
             messageId: context.task.messageid_created,
             taskId: context.task.PK,
             parentStepId: stepFather,
@@ -130,7 +129,7 @@ export async function addNewStep(context: mls.msg.ExecutionContext, parentStepId
     try {
 
         const response = await mls.api.msgAddTaskAISteps({
-            userId: getUserIdLocalStorage() || context.message.senderId,
+            userId: getUserId() || context.message.senderId,
             parentStepId,
             steps,
             taskId: context.task.PK,
@@ -449,7 +448,7 @@ export async function postBackClarification(
             status: "failed",
             stepId: ret.step.stepId,
             taskId,
-            userId: getUserIdLocalStorage() || ret.context.message.senderId,
+            userId: getUserId() || ret.context.message.senderId,
             traceMsg: "user cancel the task"
         });
 
@@ -521,7 +520,7 @@ export async function endClarification(clarification: ClarificationValue, action
         status: "failed",
         stepId: ret.step.stepId,
         taskId,
-        userId: getUserIdLocalStorage() || ret.context.message.senderId,
+        userId: getUserId() || ret.context.message.senderId,
         traceMsg: "user cancel the task",
         newTaskStatus: 'failed',
         newTaskTitle: "User canceled task"

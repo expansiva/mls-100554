@@ -370,8 +370,8 @@ export class CollabMessagesSettings100554 extends StateLitElement {
                 avatar_url: this.userPerfil.avatar_url,
                 name: this.userPerfil.name,
                 status: this.userPerfil.status,
-                deviceId: this.userPerfil.deviceId || '',
-                notificationToken: this.userPerfil.notificationToken
+                deviceId: this.userPerfil.notifications ? this.userPerfil.notifications[0].deviceId : '',
+                notificationToken: this.userPerfil.notifications ? this.userPerfil.notifications[0].notificationToken : '',
             });
 
             if (response.statusCode !== 200) {

@@ -11,8 +11,8 @@ import { initState, getState } from './_100554_collabState';
 import { propertyDataSource } from './_100554_collabDecorators';
 import { collab_html, collab_typescript, collab_less, collab_fileTest, collab_file_code } from './_100554_collabIcons';
 import { createAgent } from './_100554_agentFix';
-import { getUserIdLocalStorage, getTemporaryContext } from './_100554_aiAgentHelper';
-import { loadChatPreferences } from './_100554_collabMessageHelper';
+import { getTemporaryContext } from './_100554_aiAgentHelper';
+import { loadChatPreferences, getUserId } from './_100554_collabMessageHelper';
 import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2 } from './_100554_libCommom';
 import { createAllModels, readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 
@@ -640,9 +640,9 @@ export class ServiceSource100554 extends ServiceBase {
             const storFile = mls.stor.files[keyFiles];
             if (!storFile) return;
 
-            if(storFile.extension === '.less') await this.lessChangedEditor(storFile, fileAction.position)
+            if (storFile.extension === '.less') await this.lessChangedEditor(storFile, fileAction.position)
 
-                
+
         };
 
         if (mls.istrace) console.time('onAction_' + fileAction.action + '_' + fileAction.position);
@@ -660,8 +660,8 @@ export class ServiceSource100554 extends ServiceBase {
         if (mls.istrace) console.timeEnd('onAction_' + fileAction.action + '_' + fileAction.position);
     }
 
-    private async lessChangedEditor(storFile: mls.stor.IFileInfo, position:string): Promise<void> {
-    //private async lessChangedEditor(ev: mls.events.IEvent): Promise<void> {
+    private async lessChangedEditor(storFile: mls.stor.IFileInfo, position: string): Promise<void> {
+        //private async lessChangedEditor(ev: mls.events.IEvent): Promise<void> {
 
         /*if (!ev.desc || ev.level !== 2) return;
 
@@ -794,7 +794,7 @@ export class ServiceSource100554 extends ServiceBase {
     private showActiveModel(): boolean {
 
         if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return false;
-        const { shortName, project, status } = this.activeModels.ts.storFile;
+        const { shortName, project, folder } = this.activeModels.ts.storFile;
 
         const model = this.activeModels.ts.model;
         mls.editor.editors[this.position] = this.activeModels;
@@ -802,9 +802,11 @@ export class ServiceSource100554 extends ServiceBase {
         if (model.isDisposed()) return false;
 
         if (!this._ed1 || !this.menu.getLastMode) return false;
-        const changedFile: boolean = this.menu.title !== shortName;
-        (this.menu.title as IOptions).text = `_${project}_${shortName}`;
+        const key = folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`;
+        const changedFile: boolean = this.menu.title !== key;
+        (this.menu.title as IOptions).text = key;
         const lastMode = this.menu.getLastMode();
+
         if (changedFile && lastMode !== 'initial') {
             // user choice another file, goto initial editor
             this._ed1.setModel(model);
@@ -1032,7 +1034,7 @@ export class ServiceSource100554 extends ServiceBase {
             return;
         }
 
-        const userId = getUserIdLocalStorage();
+        const userId = getUserId();
         const threadId = pref.threadMaintenance;
         if (!userId) return;
         this.lockEditorForFile(page);
