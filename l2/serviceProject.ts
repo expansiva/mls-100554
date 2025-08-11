@@ -102,7 +102,7 @@ export class ServiceProject100554 extends ServiceBase {
         main: {},
         tabs: {
             group: 'Mode',
-            type: 'full',
+            type: 'onlyicon',
             selected: 0,
             options: this.getMenuTabsByLevel()
         },
