@@ -428,7 +428,7 @@ export async function loadModuleFromProjectOrDependency(name: string, folder: st
     if (!prj) throw new Error('Not found project actual!');
 
     let key = mls.stor.getKeyToFiles(prj, 2, name, folder, ext);
-    if (mls.stor.files[key]) return await await collabImport({ project: prj, shortName: name, folder: '' });
+    if (mls.stor.files[key]) return await await collabImport({ project: prj, shortName: name, folder: folder });
 
     const info = mls.l5.getProjectDetails(prj);
     if (!info) throw new Error('Not found project details from actual project!');
@@ -444,7 +444,7 @@ export async function loadModuleFromProjectOrDependency(name: string, folder: st
 
     if (!mls.stor.files[key]) throw new Error('File not found in any dependency!');
 
-    return await await collabImport({ project: prjDep, shortName: name, folder: '' });
+    return await await collabImport({ project: prjDep, shortName: name, folder: folder });
 
 }
 

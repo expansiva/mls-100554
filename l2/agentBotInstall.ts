@@ -29,13 +29,13 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         throw new Error(`[${agentName}] beforePrompt: Invalid agent call, in tasks`);
     }
     const args = mls.common.safeParseArgs(context.message.content.split(" ").slice(1).join(" "));
-    mls.common.argsValidator(args, { projectId: { type: "number" }, shortName: { type: "string" }, disable: { type: "boolean", optional: true } });
-    const { projectId, shortName, disable } = args;
+    mls.common.argsValidator(args, { projectId: { type: "number" }, shortName: { type: "string" }, folder: { type: "string" , optional: true }, disable: { type: "boolean", optional: true } });
+    const { projectId, shortName, disable, folder } = args;
     if (disable === true) {
-        disableBot(context, projectId, shortName);
+        disableBot(context, projectId, shortName, folder || '');
         return;
     }
-    const agent = await loadAgent(shortName);
+    const agent = await loadAgent(shortName, folder || '');
     if (!agent) throw new Error(`[${agentName}] beforePrompt: Invalid Agent, check projectID and shortName: _${projectId}_${shortName}`);
     if (!agent.installBot) throw new Error(`[${agentName}] beforePrompt: Invalid Agent, is not a Bot: _${projectId}_${shortName}, ${JSON.stringify(agent)}`);
     notifyMessageSendChange({ message: context.message, task: undefined });
@@ -52,7 +52,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     await executeNextStep(context);
 }
 
-export async function disableBot(context: mls.msg.ExecutionContext, projectId: number, shortName: string): Promise<boolean> {
+export async function disableBot(context: mls.msg.ExecutionContext, projectId: number, shortName: string, folder:string): Promise<boolean> {
     const rc = await mls.api.msgAddOrUpdateThreadBot({
         botId: agentName,
         llmPrompt: "",
