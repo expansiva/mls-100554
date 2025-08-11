@@ -59,7 +59,7 @@ export async function addMessage(threadId: string, messageContent: string, conte
             contextToBot: contextToBot
         };
         const res = await mls.api.msgAddMessage(params);
-        // notifyMessageSendChange({ message: res.message, task: undefined })
+        notifyMessageSendChange({ message: res.message, task: undefined })
         return;
     }
 
