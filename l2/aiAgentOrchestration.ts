@@ -294,7 +294,8 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
     if (!step.agentName) throw new Error("Agent name is missing");
 
     try {
-        const agent = await loadAgent(step.agentName);
+        const info = mls.l2.getPath(`_${mls.actualProject}_${step.agentName}`); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
+        const agent = await loadAgent(info.shortName, info.folder);
         if (!agent) throw new Error(`createAgent function not found in ${mls.actualProject} ${step.agentName}`);
         await agent.beforePrompt(context);
     } catch (error: any) {
@@ -305,10 +306,10 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
     }
 }
 
-export async function loadAgent( shortName: string): Promise<IAgent | undefined> {
+export async function loadAgent( shortName: string, folder:string = '' ): Promise<IAgent | undefined> {
 
     try {
-        const module = await loadModuleFromProjectOrDependency(shortName, '', '.ts');
+        const module = await loadModuleFromProjectOrDependency(shortName, folder, '.ts');
         if (typeof module.createAgent !== "function") throw new Error(`createAgent function not found in ${shortName}`);
         const agent = module.createAgent();
         if (typeof agent.beforePrompt !== "function") throw new Error(`beforePrompt function not found in ${shortName}`);
@@ -340,12 +341,8 @@ async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls
     if (!step.agentName) throw new Error("[executeAgentFunction] Agent name is missing");
 
     try {
-        /*//const fileJS = `./${step.agentName}.js`;
-        const fileJS = `./_100554_${step.agentName}`;
-        const module = await import(fileJS);
-        if (typeof module.createAgent !== "function") throw new Error(`[executeAgentFunction] createAgent function not found in ${fileJS}`);
-        const agent = module.createAgent();*/
-        const agent = await loadAgent(step.agentName) as any;
+        const info = mls.l2.getPath(`_${mls.actualProject}_${step.agentName}`); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
+        const agent = await loadAgent(info.shortName, info.folder) as any;
         if (typeof agent[functionName] !== "function") throw new Error(`[executeAgentFunction] ${functionName} function not found in ${step.agentName}`);
         return await agent[functionName](context, stepId, args);
     } catch (error: any) {
