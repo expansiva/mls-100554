@@ -328,7 +328,7 @@ Can be presented as a dropdown, combobox, etc.
 ## ica-forms-input-multiselect
 Selector for multiple options from a list.
 Ideal for tags, categorias ou filtros múltiplos.
-- Text: label, hint
+- Text: label, name, hint
 - Bind: selectedvalue
 - Cfg: required, disabled, options
 - Example: selectedvalue="{{ui.form.categorias}}" options="['Tecnologia','Design','Marketing']"
@@ -358,7 +358,7 @@ File upload field, supports drag and drop and upload progress.
 - Example: name="anexo" accept=".pdf,.jpg" multiple
 ## ica-forms-records
 Displays records in various visual formats.
-- Cfg: config
+- Cfg: name, config
 - Bind: selected
 - Text: title, subtitle, line1, line2, bottom, image, icon, badge
 - Example:  config={

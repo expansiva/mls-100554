@@ -1,6 +1,6 @@
 /// <mls shortName="libCommom" project="100554" enhancement="_blank" groupName="other" />
 
-import { getMessageKey } from "./_100554_collabLitElement";
+import { getMessageKey } from "./_100554_collabLitElement"; 
 import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
 import { collabImport } from './_100554_collabImport';
@@ -513,7 +513,7 @@ function getAllUserOpenedFiles(): Record<string, UserOpenedFiles> {
     return raw ? JSON.parse(raw) : {};
 }
 
-export function getBaseTemplate(file: IInfoFile, enhancement: string = '_blank'): string{
+export function getBaseTemplate(file: IInfoFile, enhancement: string = '_blank'): string {
 
     const { project, shortName, folder } = file;
 
@@ -530,15 +530,28 @@ export function getBaseTemplate(file: IInfoFile, enhancement: string = '_blank')
 
         default: return '';
     }
-    
+
 }
 
-export async function getInstanceByFile(file: mls.stor.IFileInfo): Promise< Object | undefined>{
+export function verifyNeedAddTripleslach(info:mls.cbe.IPath, src: string, extension:string, enhancement: string = '_blank'): string {
+
+    if (extension === '.html') return src;
+
+    if (enhancement === '_blank' && extension === '.ts') enhancement = '_100554_enhancementLit';
+    if (enhancement === '_blank' && extension === '.less') enhancement = '_100554_enhancementStyle';
+
+    const triple = `/// <mls shortName="${info.shortName}" project="${info.project}" enhancement="${enhancement}" folder="${info.folder}" />\n`;
+
+    if (src.startsWith('/// <mls ')) return src;
+    return triple + src;
+}
+
+export async function getInstanceByFile(file: mls.stor.IFileInfo): Promise<Object | undefined> {
 
     try {
         let { project, shortName, folder, extension } = file;
         if (file.extension === '.ts') extension = '';
-        
+
         let key = `/_${project}_${shortName}${extension}`;
         if (folder) key = `/_${project}_${folder}/${shortName}${extension}`;
         key = key.replace('.ts', '.js');
@@ -547,7 +560,7 @@ export async function getInstanceByFile(file: mls.stor.IFileInfo): Promise< Obje
     } catch (e) {
         return undefined;
     }
-    
+
 }
 
 export type OpenedFile = string | OpenedFileL2;
@@ -571,9 +584,9 @@ interface IRetProjectDetails {
     dependencies: number[]
 }
 
-interface IInfoFile{
+interface IInfoFile {
     project: number,
-    folder:string,
+    folder: string,
     shortName: string,
-    extension:string
+    extension: string
 }
