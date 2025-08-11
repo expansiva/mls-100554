@@ -919,7 +919,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             const response = await mls.api.msgAddMessage(params);
             message.isFailed = false;
             message.isFailedError = '';
-            this.updateMessage2(true, message, response.message, response.botOutputs);
+            this.updateMessage2(false, message, response.message, response.botOutputs);
         } catch (err: any) {
             message.isFailed = true;
             message.isFailedError = err.message;
