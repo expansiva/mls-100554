@@ -2,7 +2,7 @@
 
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { createModel, createAllModels } from './_100554_collabLibModel'
-import { getBaseTemplate } from './_100554_libCommom';
+import { getBaseTemplate, verifyNeedAddTripleslach } from './_100554_libCommom';
 
 export async function createStorFile(req: IReqCreateStorFile, needCreateModel:boolean): Promise<mls.stor.IFileInfo> {
 
@@ -20,8 +20,9 @@ export async function createStorFile(req: IReqCreateStorFile, needCreateModel:bo
 
     file.status = req.status ?? 'new';
 
+    let source = verifyNeedAddTripleslach(params,req.source, req.extension)
     const fileInfo: mls.stor.IFileInfoValue = {
-        content: req.source,
+        content: source,
         contentType: 'string'
     };
 
@@ -251,8 +252,6 @@ export async function undoFile(storFile: mls.stor.IFileInfo, removeProject: bool
         storFile.inLocalStorage = false;
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
     }
-
-    
 
     const keyToModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
     if (!mls.editor.models[keyToModel]) return;

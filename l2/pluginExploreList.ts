@@ -719,7 +719,7 @@ export class PluginExploreList extends PluginBaseModule {
             this.showLoading(true);
             const params = {} as mls.events.IFileAction;
 
-            const files = await createAllModels(file);
+            const files = await createAllModels(file, true);
 
             (params.action as any) = action;
             params.level = file.level;
