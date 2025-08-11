@@ -36,6 +36,8 @@ import './_100554_collabMessagesTask';
 import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
 import './_100554_collabMessagesThreadDetails';
+import './_100554_widgetText2CollabMessagesMD';
+
 
 import { IChatPreferences, AGENTDEFAULT, PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
 import { StateLitElement } from './_100554_stateLitElement';
@@ -294,7 +296,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 <div class="message-result-text">
                     <b>${footer.title?.trim()}</b>
                     <div>
-                        ${footer.lines.join('\n').trim()}
+                        <widget-text2-collab-messages-m-d-100554 text="${footer.lines.join('\n').trim()}"></widget-text2-collab-messages-m-d-100554>
                     </div>
                 </div>`
         })}
@@ -350,28 +352,59 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private renderMessageByLanguage(message: mls.msg.Message) {
         const mode = this.userPreferenceChat?.translationMode || 'icon';
         if (!this.userPreferenceChat || mode === 'none' || !message.translations) {
-            return html`<div class="message-content">${message.content}</div>`
+            return html`
+            <div class="message-content">
+                <widget-text2-collab-messages-m-d-100554 text="${message.content}"></widget-text2-collab-messages-m-d-100554>
+            </div>`
         }
         const { language } = this.userPreferenceChat;
         const messageByLanguagePref = message.translations ? message.translations[language] : '';
         const isSameLanguege = language === message.language_detected;
         switch (mode) {
             case 'icon':
-                return html`<div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>`;
+                return html`
+                <div class="message-content">
+                    <widget-text2-collab-messages-m-d-100554 text="$${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}"></widget-text2-collab-messages-m-d-100554>
+                </div>`;
             case 'text':
                 return html`
-                <div class="message-content">${messageByLanguagePref || message.content}</div>
-                ${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
+                <div class="message-content">
+                    <widget-text2-collab-messages-m-d-100554 text="${messageByLanguagePref || message.content}"></widget-text2-collab-messages-m-d-100554>
+
+                    
+                </div>
+                ${!isSameLanguege ?
+                    html`<small class="message-content translate">
+                            <widget-text2-collab-messages-m-d-100554 text="${message.content}"></widget-text2-collab-messages-m-d-100554>
+                        </small>`
+                        : ''}`;
             case 'iconText':
-                return html`<div class="message-content">${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}</div>
-                ${!isSameLanguege ? html`<small class="message-content translate">${message.content}</small>` : ''}`;
+                return html`
+                    <div class="message-content">
+                        <widget-text2-collab-messages-m-d-100554 text="${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}"></widget-text2-collab-messages-m-d-100554>    
+                    </div>
+                ${!isSameLanguege ?
+                    html`<small class="message-content translate">
+                        <widget-text2-collab-messages-m-d-100554 text="${message.content}"></widget-text2-collab-messages-m-d-100554>    
+                    </small>`
+                        : ''
+                }`;
             case 'trace':
-                return html`<div class="message-content trace">
-                <div><b>[LanguageDetected: ${message.language_detected}]</b> ${message.content}</div>
-                ${Object.keys(message.translations).map((key) => {
-                    if (key === 'language_detected') return ''
-                    if (key === message.language_detected) return ''
-                    return html`<div><b>[${key}]</b> ${message.translations ? message.translations[key] : ''}</div>`
+                return html`
+                <div class="message-content trace">
+                    <div>
+                        <b>[LanguageDetected: ${message.language_detected}]</b>
+                        <widget-text2-collab-messages-m-d-100554 text="${message.content}"></widget-text2-collab-messages-m-d-100554>
+                    </div>
+                    ${Object.keys(message.translations).map((key) => {
+                        if (key === 'language_detected') return ''
+                        if (key === message.language_detected) return ''
+                        return html`
+                            <div>
+                                <b>[${key}]</b>
+                                <widget-text2-collab-messages-m-d-100554 text="${message.translations ? message.translations[key] : ''}"></widget-text2-collab-messages-m-d-100554>
+                    
+                            </div>`
                 })}
                 </div>`
             default:
