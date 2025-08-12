@@ -116,21 +116,21 @@ export class ServiceSource100554 extends ServiceBase {
             if (this._ed1) this.highlightReviewLines(this._ed1);
         }
         if (op === EToolsSource.icStyle) {
-            if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
+            if (!this.activeModels || !this.activeModels.style || !this.activeModels.style.storFile) return;
             this.showThisModel(this.activeModels?.style);
-            this.updateActionBasedOnError('style', this.activeModels?.style?.model.id);
+            mls.editor.forceModelUpdate(this.activeModels.style.model);
+            this.updateActionBasedOnError('style', this.activeModels.style.model.id);
             if (this._ed1) this.highlightReviewLines(this._ed1);
-
         }
 
         if (op === EToolsSource.icTest) {
-            if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return;
+            if (!this.activeModels || !this.activeModels.test || !this.activeModels.test.storFile) return;
             this.showThisModel(this.activeModels?.test);
             this.updateActionBasedOnError('test', this.activeModels?.test?.model.id);
         }
 
         if (op === EToolsSource.icDefs) {
-            if (!this.activeModels || !this.activeModels.ts || !this.activeModels.ts.storFile) return;
+            if (!this.activeModels || !this.activeModels.defs || !this.activeModels.defs.storFile) return;
             this.showThisModel(this.activeModels?.defs);
             this.updateActionBasedOnError('defs', this.activeModels?.defs?.model.id);
         }
@@ -718,13 +718,14 @@ export class ServiceSource100554 extends ServiceBase {
 
             if (storFiles.ts) this.saveLocalStorageLastOpen(storFiles.ts, position);
 
-            if (fileModels && fileModels.ts) mls.editor.forceModelUpdate(fileModels.ts.model);
 
             this.activeModels = fileModels;
             mls.editor.editors[this.position] = fileModels;
             this.showActiveModel();
             if (!this._ed1) return;
+            if (fileModels && fileModels.ts) mls.editor.forceModelUpdate(fileModels.ts.model);
             this.restaureViewState();
+
 
         } catch (e: any) {
 
