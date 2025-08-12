@@ -297,11 +297,11 @@ export class CollabL3EditText extends CollabLitElement {
     public async save() {
 
         if (!this.json) return;
-
-        const info = (top as any)?.mls.actual[2].left
+        const { project, path } = mls.actual[mls.actualLevel];
+        const info = mls.l2.getPath(`_${project}_${path}`)
         if (!info) return;
 
-        const models = (top as any)?.mls.editor.getModels(info.project, info.shortName);
+        const models = mls.editor.getModels(info.project, info.shortName, info.folder);
         if (!models || !models.ts) return;
 
         let edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];

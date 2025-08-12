@@ -2,9 +2,10 @@
 
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { loadPluginProject } from './_100554_libCommom';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase'; 
+import { loadPluginProject,forceServiceInstance } from './_100554_libCommom';
 import { convertFileNameToTag } from './_100554_utilsLit';
+import { readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 import "./_100554_wcdToolboxItemActionEditAttrOut";
 
 /// **collab_i18n_start**
@@ -45,12 +46,27 @@ export class ServiceOrganism100554 extends ServiceBase {
 
     constructor() {
         super();
+        this.init();
+        
+    }
+
+    private async init() {
         this.setEvents();
+        this.fireEventLoadProject();
+        forceServiceInstance(2, '_100554_serviceSource');
     }
 
     private setEvents(): void {
         mls.events.addListener(3, 'WCDEvent' as any, (ev) => this.onWCDEvent(ev));
         mls.events.addEventListener([3], ['FileAction'], this.onMLSFileAction.bind(this));
+    }
+
+    private fireEventThisProject = 0;
+    private fireEventLoadProject(): void {
+
+        if (this.fireEventThisProject === mls.actualProject) return;
+        this.fireEventThisProject = mls.actualProject as number;
+        readProjectTypescriptAndCompile(mls.actualProject as number, '', true);
     }
 
     //-------SERVICE---------------

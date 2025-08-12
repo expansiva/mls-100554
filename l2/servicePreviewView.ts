@@ -2,7 +2,7 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getDependenciesByHtml, getTokens, IJSONDependence } from './_100554_libCompile';
+import { getDependenciesByHtml, getDependenciesByHtmlFile, getTokens, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { createAllModels } from './_100554_collabLibModel';
 
@@ -15,7 +15,7 @@ import { PreviewModeMinimum } from './_100554_previewModeMinimum';
 const message_pt = {
     pageNotDefined: 'Página não definida',
     notFoundStorfile: 'Arquivo não encontrado',
-    errorCompile: 'Erro ao compilar',
+    errorCompile: 'Erro ao compilar typescript',
     configure: 'Configure seu HTML pela opção do editor!',
     width: 'Largura',
     height: 'Altura',
@@ -29,7 +29,7 @@ const message_pt = {
 const message_en = {
     pageNotDefined: 'Page not defined',
     notFoundStorfile: 'Not found storfile',
-    errorCompile: 'Error on compiling',
+    errorCompile: 'Error on compiling typescript',
     configure: 'Configure your html by editor option!',
     width: 'Width',
     height: 'Height',
@@ -257,8 +257,10 @@ export class ServicePreviewView extends StateLitElement {
 
     private async addStyles() {
 
-        if (!this.models || !this.models.style || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
-        const { project, shortName, folder } = this.models.style.storFile;
+        //if (!this.models || !this.models.style || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
+        //const { project, shortName, folder } = this.models.style.storFile;
+        if (!this.file  || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
+        const { project, shortName, folder } = this.file;
         const id = convertFileNameToTag({ project, shortName, folder });
         const oldStyle = window.preview.iframe.contentDocument.head.querySelector(`style[id=${id}]`);
         const newStyle = document.createElement('style');
@@ -301,31 +303,30 @@ export class ServicePreviewView extends StateLitElement {
             this.setTheme(iframe);
             await this.setMyFile();
 
-            if (!this.models
-                || this.models.ts?.storFile.hasError
-                || this.models.style?.storFile.hasError
-                || this.models.html?.storFile.hasError) {
+            if (this.models &&
+                (
+                    
+                    this.models.ts?.storFile.hasError ||
+                    this.models.style?.storFile.hasError ||
+                    this.models.html?.storFile.hasError
+                )
+            ) {
 
-                const trace = this.models?.ts?.compilerResults?.errors.map((err) => err.messageText).join('\n - ');
-                const traceStyle = this.models?.style?.styleResults?.errors.map((err) => err.messageText).join('\n - ');
-
-                this.error = this.msg.errorCompile + '\n' + `<div class="error-list"> ${trace ? `<b>TYPESCRIPT</b> <br> - ${trace}` : ''} <br><br> ${traceStyle ? `<b>LESS</b> <br> - ${traceStyle}` : ''} </div>`;
+                const trace = this.models.ts?.compilerResults?.errors.map((err) => err.messageText).join('\n - ')
+                this.error = this.msg.errorCompile + '\n' + `<div class="error-list"> - ${trace} </div>`;
 
                 this.showLoader(false);
                 this.renderError();
                 return;
             }
 
-            /*let vTesting = this.getTesting();
-            if (this.file && vTesting.includes(this.file.shortName) && (window as any).lastTesting !== this.file.shortName) {
-                (iframe as any).contentDocument.body.innerHTML = `Error: the code might be blocked. Try again.`;
+            if (!this.file) {
+                this.error = this.msg.errorCompile + '\n' + `<div class="error-list"> - Not Found storFile </div>`;
+
                 this.showLoader(false);
-                iframe.style.display = '';
-                vTesting = this.removerTesting(vTesting, this.file.shortName);
-                this.setTesting(vTesting);
-                (window as any).lastTesting = this.file.shortName
+                this.renderError();
                 return;
-            }*/
+            }
 
             if ((window as any).securityMode) {
 
@@ -368,7 +369,7 @@ export class ServicePreviewView extends StateLitElement {
 
             this.showLoader(false);
             this.dispatchEvent(new CustomEvent('preview-loaded', {
-                detail: { shortName: this.models.ts?.storFile.shortName, project: this.models.ts?.storFile.project },
+                detail: { shortName: this.file.shortName, project: this.file.project },
                 bubbles: true,
                 composed: true,
             }));
@@ -419,11 +420,12 @@ export class ServicePreviewView extends StateLitElement {
         const mkey = mls.editor.getKeyModel(info.project as number, info.shortName as string, file.folder);
 
         if (!mls.stor.files[key]) throw new Error(this.msg.notFoundStorfile + ': ' + key);
-        if (!mls.editor.models[mkey]) {
+
+        if (!mls.editor.models[mkey] && mls.actualLevel !== 7) {
             await createAllModels(file);
         }
 
-        if (!mls.editor.models[mkey]) throw new Error(this.msg.notFoundStorfile + ': ' + mkey);
+        if (!mls.editor.models[mkey] && mls.actualLevel !== 7) throw new Error(this.msg.notFoundStorfile + ': ' + mkey);
         this.file = mls.stor.files[key];
         this.models = mls.editor.models[mkey];
     }
@@ -442,7 +444,7 @@ export class ServicePreviewView extends StateLitElement {
 
     private async setHTml(iframe: HTMLIFrameElement) {
 
-        if (!iframe.contentDocument || !this.models) return;
+        if (!iframe.contentDocument || !this.file) return;
         let txt = await this.getFileContent();
         this.isService = this.checkIfIsService()
         this.lastHTML = txt;
@@ -452,7 +454,9 @@ export class ServicePreviewView extends StateLitElement {
         let ret;
 
         iframe.contentDocument.body.innerHTML = txt;
-        ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
+        //ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
+        ret = await getDependenciesByHtmlFile(this.file, txt, this.actualtheme, true);
+        
 
         const els = iframe.contentDocument.body.querySelectorAll('*');
         els.forEach((el) => el.setAttribute('mls_origin', 'true'));
@@ -482,7 +486,7 @@ export class ServicePreviewView extends StateLitElement {
     }
 
     private async modeSinglePage(json: IJSONDependence, iframe: HTMLIFrameElement) {
-        if (!this.file || !this.models) return;
+        if (!this.file) return;
         const c = new PreviewModeSinglePage(json, iframe, this.level, this.isService, this.file, this.models);
         await c.init();
     }
@@ -490,7 +494,7 @@ export class ServicePreviewView extends StateLitElement {
 
     private async modeMinimum(json: IJSONDependence, iframe: HTMLIFrameElement) {
 
-        if (!this.file || !this.models) return;
+        if (!this.file) return;
         const c = new PreviewModeMinimum(json, iframe, this.level, this.isService, this.file, this.models);
         await c.init();
     }
@@ -520,8 +524,8 @@ export class ServicePreviewView extends StateLitElement {
     }
 
     private getIdTokens() {
-        if (!this.models || !this.models.ts) return 'ds_tokens';
-        const { project } = this.models.ts.storFile
+        if (!this.file ) return 'ds_tokens';
+        const { project } = this.file
         return '_' + project + '_ds_tokens';
     }
 

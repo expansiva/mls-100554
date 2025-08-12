@@ -37,16 +37,16 @@ export function mountCSS(ifr: HTMLIFrameElement): void {
     }
 }
 
-export function mountTokens(tokens: string, models: mls.editor.IModels): void {
+export function mountTokens(tokens: string, file: mls.stor.IFileInfo): void {
     try {
         const iframe = window.preview.iframe;
         if (!iframe || !iframe.contentDocument) return;
-        removeOlderTokens(iframe, models);
+        removeOlderTokens(iframe, file);
         const css = tokens || '';
         if (!css) return;
         const style = document.createElement('style');
         style.textContent = css;
-        style.id = getIdTokens(models);
+        style.id = getIdTokens(file);
         iframe.contentDocument.head.appendChild(style);
 
     } catch (e: any) {
@@ -54,16 +54,16 @@ export function mountTokens(tokens: string, models: mls.editor.IModels): void {
     }
 }
 
-export function removeOlderTokens(ifr: HTMLIFrameElement, models: mls.editor.IModels) {
-    const id = getIdTokens(models);
+export function removeOlderTokens(ifr: HTMLIFrameElement, file: mls.stor.IFileInfo) {
+    const id = getIdTokens(file);
     if (!ifr.contentDocument || !id) return;
     const st = ifr.contentDocument.head.querySelectorAll(`#${id}`);
     st.forEach((s) => s.remove());
 }
 
-export function getIdTokens(models: mls.editor.IModels) {
-    if (!models || !models.ts) return 'ds_tokens';
-    const { project } = models.ts.storFile
+export function getIdTokens(file: mls.stor.IFileInfo) {
+    if (!file ) return 'ds_tokens';
+    const { project } = file
     return '_' + project + '_ds_tokens';
 }
 

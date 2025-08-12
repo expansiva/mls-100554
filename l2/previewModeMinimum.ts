@@ -12,7 +12,7 @@ export class PreviewModeMinimum {
     private models: mls.editor.IModels | undefined = undefined;
     private file: mls.stor.IFileInfo | undefined = undefined;
 
-    constructor(_j: IJSONDependence, _i: HTMLIFrameElement, _l: string, _s:boolean, _f: mls.stor.IFileInfo, _m: mls.editor.IModels) {
+    constructor(_j: IJSONDependence, _i: HTMLIFrameElement, _l: string, _s:boolean, _f: mls.stor.IFileInfo, _m: mls.editor.IModels | undefined) {
 
         this.json = _j;
         this.ifr = _i;
@@ -24,12 +24,12 @@ export class PreviewModeMinimum {
 
     public async init() {
 
-        if (!this.json || !this.ifr || !this.models) return;
+        if (!this.json || !this.ifr || !this.file) return;
 
         util.mountJSImporMap(this.json, this.ifr);
         this.mountJS(this.json, this.ifr);
         util.mountCSS(this.ifr);
-        util.mountTokens(this.json.tokens || '', this.models);
+        util.mountTokens(this.json.tokens || '', this.file);
     }
 
     private mountJS(info: IJSONDependence, ifr: HTMLIFrameElement): void {
