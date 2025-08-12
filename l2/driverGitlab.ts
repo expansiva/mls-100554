@@ -403,7 +403,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
                 data.data.project.repository.tree.blobs.nodes.forEach((obj1: any) => {
 
                     const obj = {
-                        ShortPath: obj1.path,
+                        shortPath: obj1.path,
                         versionRef: obj1.sha,
                         Length: 0,
                     };

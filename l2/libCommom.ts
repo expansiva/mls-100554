@@ -314,14 +314,11 @@ export async function loadPluginProject(project: number, scope: string, onlyEnab
 
 const KeyProject = 'projectDetails'
 export function setProjectDetails(project: number) {
-    const detail = mls.l5.getProjectDetails(project);
-    localStorage.setItem(KeyProject, JSON.stringify({ project, dependencies: detail ? detail.prj_dependencies : [] }));
+    localStorage.setItem(KeyProject, JSON.stringify({ project}));
 }
 
-export function getProjectDetails(): IRetProjectDetails | undefined {
-    const info = localStorage.getItem(KeyProject);
-    if (!info) return undefined;
-    return JSON.parse(info);
+export function getProjectDetails(): mls.stor.localStor.IRetProjectDetails | undefined {
+    return mls.stor.localStor.getProjectDetails();
 }
 
 export function calculateTotalStringSize(source: string, limitBase: number): ICalculateTotalStringSize {
