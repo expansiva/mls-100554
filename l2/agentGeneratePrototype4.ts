@@ -8,6 +8,8 @@ import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { createNewFile } from "./_100554_pluginNewFileBase";
 import { formatHtml } from './_100554_collabDOMSync';
 import { addNewTokensTheme } from './_100554_designSystemBase';
+import { addModule } from './_100554_projectAST';
+import { createModel } from './_100554_collabLibModel';
 
 import {
   getNextPendingStepByAgentName,
@@ -40,7 +42,7 @@ export function createAgent(): IAgent {
     agentName,
     avatar_url: svg_agent,
     agentDescription: "Agent for create a new Module - 4",
-    visibility: "public",
+    visibility: "private",
     async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
       return _beforePrompt(context);
     },
@@ -175,17 +177,21 @@ async function createPage(context: mls.msg.ExecutionContext) {
   if (!folder) throw new Error(`[${agentName}] [createPage] Invalid module name`)
 
   const groupName = folder;
+  const pageData = payload3.pages[actualTaskIndex];
+  const shortName = pageData.pageName;
+  const shortName1 = sanitizeMeta(shortName, projectToSave, folder);
 
   if (actualTaskIndex === 0) {
-    //await updateTokensTheme(projectToSave, 'Default', payload3.tokens);
     payload3.tokens.themeName = folder;
     await addNewTokensTheme(projectToSave, payload3.tokens);
-    await createProjectFile(projectToSave, folder, payload3)
+    await createModuleFile(shortName1, projectToSave, folder, payload3);
+    await createProjectFile(groupName, projectToSave, payload3);
+
   }
 
   const organismUsed = extractOrganismTags(finalSource);
   await updateLongMemory(context, organismUsed, actualTaskIndex);
-  await generateFiles(step, context.task, payload4, payload3, finalSource, organismUsed, projectToSave, folder, groupName, actualTaskIndex);
+  await generateFiles(step, context.task, payload4, payload3, finalSource, organismUsed, projectToSave, folder, groupName, shortName1, actualTaskIndex);
   return context;
 }
 
@@ -303,18 +309,15 @@ async function generateFiles(
   project: number,
   folder: string,
   groupName: string,
+  shortName: string,
   index: number
 ): Promise<string> {
   try {
 
     const { html, style } = extractStyleFromHtml(htmlFull);
 
-    const pageData = payload3.pages[index];
     const enhancement = enhancementTs;
-    const shortName = pageData.pageName;
-    const shortName1 = sanitizeMeta(shortName, project, folder);
-
-    const pageTagName = convertFileNameToTag({ project, shortName: shortName1, folder });
+    const pageTagName = convertFileNameToTag({ project, shortName, folder });
     const info = convertTagToFileName(pageTagName);
     if (!info) return '';
 
@@ -334,23 +337,50 @@ async function generateFiles(
   }
 }
 
-async function createProjectFile(project: number, folder: string, payload3: PayLoad3) {
+async function createProjectFile(moduleName: string, project: number, payload3: PayLoad3) {
 
-  const shortName = 'module';
+  const shortName = 'project';
+  const folder = '';
+  const enhancement = '_blank';
+  const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
+  const storFile = mls.stor.files[key];
+  if (!storFile) {
+    const ts = `
+/// <mls shortName="${shortName}" project="${project}" folder="${folder}" enhancement="_blank" />
+
+export const modules = [{ name: '${moduleName}' }];
+
+`;
+
+    await createNewFile({ project, shortName, folder, position: 'right', enhancement, sourceTS: ts.trim(), sourceHTML: '', sourceLess: '', sourceDefs: '', openPreview: false });
+  } else {
+
+    const modelTS = await createModel(storFile);
+    addModule(modelTS?.model, moduleName);
+
+  }
+
+
+}
+
+async function createModuleFile(shortName: string, project: number, folder: string, payload3: PayLoad3) {
+
+  const moduleShortName = 'module';
   const enhancement = '_blank';
 
   const ts = `
-/// <mls shortName="${shortName}" project="${project}" folder="${folder}" enhancement="_blank" />
+/// <mls shortName="${moduleShortName}" project="${project}" folder="${folder}" enhancement="_blank" />
 
 export const moduleConfig = {
-  theme: "${folder}"
+  theme: "${folder}",
+  initialPage: ${shortName}
 }
 
 export const payload3 = ${JSON.stringify(payload3, null, 2)}
 
 `;
 
-  await createNewFile({ project, shortName, folder, position: 'right', enhancement, sourceTS: ts.trim(), sourceHTML: '', sourceLess: '', sourceDefs: '', openPreview: false });
+  await createNewFile({ project, shortName: moduleShortName, folder, position: 'right', enhancement, sourceTS: ts.trim(), sourceHTML: '', sourceLess: '', sourceDefs: '', openPreview: false });
 
 }
 
