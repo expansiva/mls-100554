@@ -443,7 +443,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				arr.push(
 					{
-						ShortPath: 'l0/' + obj.name,
+						shortPath: 'l0/' + obj.name,
 						versionRef: obj.oid,
 						Length: obj.size,
 					}
