@@ -21,7 +21,7 @@ import {
 import { getTask, getMessage } from "./_100554_msgDBController";
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getUserId } from "./_100554_collabMessageHelper";
-import { loadModuleFromProjectOrDependency} from './_100554_libCommom';
+import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
 
 export async function startNewAiTask(
     agentName: string,
@@ -35,6 +35,8 @@ export async function startNewAiTask(
     longTermMemory?: Record<string, string>
 
 ): Promise<void> {
+
+    const oldContextCreateAt = context.message.createAt;
     try {
         const args: mls.msg.RequestAddMessageAI = {
             action: "addMessageAI",
@@ -46,7 +48,6 @@ export async function startNewAiTask(
             inputAI,
         };
 
-        const oldContextCreateAt = context.message.createAt;
         const value = await mls.api.msgAddMessageAI(args);
         if (!value) throw new Error("Error on return addMessageAI, no return");
         if (value.statusCode !== 200) throw new Error("Error on addMessageAI: " + (value.msg || ''));
@@ -64,13 +65,7 @@ export async function startNewAiTask(
         await afterPrompt(context);
 
     } catch (error: any) {
-        if (context && context.task && 1) {
-            const msg = 'Error: ' + error.message || 'addNewStep ';
-            context.task = await updateTaskTitle(context.task, msg.substring(0, 100));
-            await setFailedStatus(context, 1);
-            const step = getNextPendentStep(context.task);
-            if (step) setFailedStatus(context, step.stepId);
-        }
+        onError(context, 1, error.message, oldContextCreateAt);
         throw new Error(`[startNewAiTask] ${error.message || error}`);
     }
 }
@@ -93,12 +88,8 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
 
         const value = await mls.api.msgAddTaskAIInteraction(args);
 
-        if (!value) {
-            throw new Error("Error on return addTaskAIInteraction, no return");
-        }
-        if (value.statusCode !== 200) {
-            throw new Error("Error on addTaskAIInteraction: " + (value.msg || ''));
-        }
+        if (!value) throw new Error("Error on return addTaskAIInteraction, no return");
+        if (value.statusCode !== 200) throw new Error("Error on addTaskAIInteraction: " + (value.msg || ''));
 
         const ret = value as mls.msg.ResponseAddTaskAIInteraction
         context.task = ret.task;
@@ -111,13 +102,8 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
         await afterPrompt(context);
     }
     catch (error: any) {
-        if (context && context.task && stepFather) {
-            const msg = 'Error: ' + error.message || 'startNewInteractionInAiTask ';
-            context.task = await updateTaskTitle(context.task, msg.substring(0, 100));
-            await setFailedStatus(context, stepFather);
-            const step = getNextPendentStep(context.task);
-            if (step) setFailedStatus(context, step.stepId);
-        }
+        const msg = 'Error: ' + error.message || 'startNewInteractionInAiTask ';
+        onError(context, stepFather, msg);
         console.error(`[startNewInteractionInAiTask] ${error.message || error}`);
     }
 }
@@ -142,16 +128,12 @@ export async function addNewStep(context: mls.msg.ExecutionContext, parentStepId
         });
 
         context.task = response.task;
-        // context.task = await updateStepStatus(context.task, parentStep, "completed");
         notifyTaskChange(context);
         executeNextStep(context);
 
     } catch (error: any) {
-        if (context && context.task && parentStepId) {
-            const msg = 'Error: ' + error.message || 'addNewStep ';
-            context.task = await updateTaskTitle(context.task, msg.substring(0, 100));
-            setFailedStatus(context, parentStepId);
-        }
+        const msg = 'Error: ' + error.message || 'addNewStep ';
+        onError(context, parentStepId, msg);
         console.error(`[startNewInteractionInAiTask] ${error.message || error}`);
     }
 
@@ -266,11 +248,7 @@ export async function executeTool(toolName: string, args: string): Promise<IExec
         return rc;
     };
     try {
-        /*//const fileJS = `./${toolName}.js`;
-        const fileJS = `./_100554_${toolName}`;
-        const module = await import(fileJS);
-        if (typeof module.createTool !== "function") throw new Error(`createTool function not found in ${fileJS}`);
-        const tool = module.createTool();*/
+
         const tool = await loadTool(toolName);
         if (!args) {
             // no args provided
@@ -294,35 +272,42 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
     if (!step.agentName) throw new Error("Agent name is missing");
 
     try {
+
         const info = mls.l2.getPath(`_${mls.actualProject}_${step.agentName}`); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
         const agent = await loadAgent(info.shortName, info.folder);
         if (!agent) throw new Error(`createAgent function not found in ${mls.actualProject} ${step.agentName}`);
         await agent.beforePrompt(context);
+
     } catch (error: any) {
+
         const msg = 'Error: ' + error.message || 'beforePrompt ' + step.agentName;
-        context.task = await updateTaskTitle(context.task, msg.substring(0, 100));
-        setFailedStatus(context, step.stepId);
+        onError(context, step.stepId, msg);
         console.error(`[executeNextAgent] ${error.message || error}`);
+
     }
 }
 
-export async function loadAgent( shortName: string, folder:string = '' ): Promise<IAgent | undefined> {
+export async function loadAgent(shortName: string, folder: string = ''): Promise<IAgent | undefined> {
 
     try {
+
         const module = await loadModuleFromProjectOrDependency(shortName, folder, '.ts');
         if (typeof module.createAgent !== "function") throw new Error(`createAgent function not found in ${shortName}`);
         const agent = module.createAgent();
         if (typeof agent.beforePrompt !== "function") throw new Error(`beforePrompt function not found in ${shortName}`);
         if (typeof agent.afterPrompt !== "function") throw new Error(`afterPrompt function not found in ${shortName}`);
         return agent;
+
     } catch (error: any) {
+
         console.error(`[loadAgent] ${error.message || error}`);
         return undefined;
+
     }
 
 }
 
-export async function loadTool( shortName: string): Promise<any | undefined> {
+export async function loadTool(shortName: string): Promise<any | undefined> {
 
     try {
         const module = await loadModuleFromProjectOrDependency(shortName, '', '.ts');
@@ -348,6 +333,7 @@ async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls
     } catch (error: any) {
         console.error(`[executeAgentFunction] ${error.message || error}`);
     }
+
 }
 
 async function executeNextResult(context: mls.msg.ExecutionContext, step: mls.msg.AIResultStep) {
@@ -356,6 +342,7 @@ async function executeNextResult(context: mls.msg.ExecutionContext, step: mls.ms
     context = await updateStepStatus(context, step.stepId, "completed");
     notifyTaskChange(context);
     return executeNextStep(context);
+
 }
 
 async function executeNextFlexible(context: mls.msg.ExecutionContext, step: mls.msg.AIFlexibleResultStep) {
@@ -549,6 +536,21 @@ async function setFailedStatus(context: mls.msg.ExecutionContext, step: number) 
     if (!context.task) throw new Error("[setFailedStatus] Invalid context task");
     context = await updateStepStatus(context, step, "failed");
     notifyTaskChange(context);
+}
+
+async function onError(context: mls.msg.ExecutionContext, stepId: number, messageError: string, oldContextCreateAt?: string) {
+    try {
+        if (context && context.task) {
+            const msg = 'Error: ' + messageError || 'addNewStep ';
+            context.task = await updateTaskTitle(context.task, msg.substring(0, 100));
+            await setFailedStatus(context, stepId);
+            const step = getNextPendentStep(context.task);
+            if (step) setFailedStatus(context, step.stepId);
+        }
+    } catch (err) {
+        if (context.task) context.task.status = 'failed';
+        notifyTaskChange(context, oldContextCreateAt);
+    }
 }
 
 // Types for the JSON structure

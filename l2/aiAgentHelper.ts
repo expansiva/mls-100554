@@ -219,21 +219,24 @@ export async function appendLongTermMemory(context: mls.msg.ExecutionContext, lo
   const messageId: string | undefined = context.task.messageid_created;
   if (!messageId) throw new Error("[appendLongTermMemory] Invalid messageId");
 
-  const ret = await mls.api.msgAppendLongTermMemory({
-    longTermMemory,
-    messageId,
-    taskId: context.task.PK,
-    userId: getUserId() || context.message.senderId,
+  try {
+    const ret = await mls.api.msgAppendLongTermMemory({
+      longTermMemory,
+      messageId,
+      taskId: context.task.PK,
+      userId: getUserId() || context.message.senderId,
+    });
 
-  });
-
-  if (!ret || ret.statusCode !== 200) throw new Error("error on AI appendLongTermMemory , stoped");
-  return (ret as mls.msg.ResponseAppendLongTermMemory).task;
+    if (!ret || ret.statusCode !== 200) throw new Error("error on AI appendLongTermMemory , stoped");
+    return (ret as mls.msg.ResponseAppendLongTermMemory).task;
+  } catch (err: any) {
+    throw new Error('[appendLongTermMemory] ' + err.message);
+  }
 
 }
 
 export const updateStepStatus = async (context: mls.msg.ExecutionContext, stepId: number, status: mls.msg.AIStepStatus, traceMsg?: string): Promise<mls.msg.ExecutionContext> => {
-  if(!context.task) throw new Error("error on AI updateStepStatus , invalid task");
+  if (!context.task) throw new Error("[updateStepStatus] , invalid task");
   const args: mls.msg.RequestUpdateStepStatus = {
     "action": "updateStepStatus",
     "userId": getUserId() || context.task.owner || '',
@@ -244,15 +247,20 @@ export const updateStepStatus = async (context: mls.msg.ExecutionContext, stepId
     traceMsg
   };
 
-  const ret = await mls.api.msgUpdateStepStatus(args);
-  if (!ret || ret.statusCode !== 200) throw new Error("error on AI update status , stoped");
-  if (ret.message) {
-    context.message = ret.message;
-    await updateMessage(ret.message);
+  try {
+    const ret = await mls.api.msgUpdateStepStatus(args);
+    if (!ret || ret.statusCode !== 200) throw new Error("error on AI update status , stoped");
+    if (ret.message) {
+      context.message = ret.message;
+      await updateMessage(ret.message);
+    }
+
+    context.task = ret.task;
+    return context;
+  } catch (err: any) {
+    throw new Error("[updateStepStatus] " + err.message);
   }
 
-  context.task = ret.task;
-  return context;
 
 }
 
@@ -264,9 +272,14 @@ export const updateTaskTitle = async (task: mls.msg.TaskData, newTitle: string):
     messageId: task.messageid_created || '',
     action: 'updateTaskTitle',
   };
-  const ret = await mls.api.msgUpdateTaskTitle(args);
-  if (!ret || ret.statusCode !== 200) throw new Error("error on AI update task title , stoped");
-  return (ret as mls.msg.ResponseUpdateTaskTitle).task;
+  try {
+    const ret = await mls.api.msgUpdateTaskTitle(args);
+    if (!ret || ret.statusCode !== 200) throw new Error("[updateTaskTitle] , stoped");
+    return (ret as mls.msg.ResponseUpdateTaskTitle).task;
+  } catch (err: any) {
+    throw new Error("[updateTaskTitle] " + err.message);
+  }
+
 }
 
 export async function appendPromptToInteraction(
