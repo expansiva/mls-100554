@@ -557,9 +557,9 @@ export class ServicePreview100554 extends ServiceBase {
         this.elPreview = undefined;
         this.updateLoadingToFalseIfNoTasksRunning();
         let fullName = `_${fileAction.project}_${fileAction.shortName}`;
-        if(fileAction.folder) fullName = `_${fileAction.project}_${fileAction.folder}/${fileAction.shortName}`;
+        if (fileAction.folder) fullName = `_${fileAction.project}_${fileAction.folder}/${fileAction.shortName}`;
 
-        this.createPreview(this.lastModePreview , fullName);
+        this.createPreview(this.lastModePreview, fullName);
     }
 
 
@@ -664,7 +664,8 @@ export class ServicePreview100554 extends ServiceBase {
         );
 
 
-        if (contextChanged && task && (task.status === 'failed' || task.status === 'done')) {
+
+        if (!task && contextChanged || (contextChanged && task && (task.status === 'failed' || task.status === 'done'))) {
             tasks.delete(contextChanged);
             if (tasks.size === 0) this.tasksInProgress.delete(this.page);
         }

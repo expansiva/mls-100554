@@ -15,7 +15,7 @@ import { PreviewModeMinimum } from './_100554_previewModeMinimum';
 const message_pt = {
     pageNotDefined: 'Página não definida',
     notFoundStorfile: 'Arquivo não encontrado',
-    errorCompile: 'Erro ao compilar typescript',
+    errorCompile: 'Erro ao compilar',
     configure: 'Configure seu HTML pela opção do editor!',
     width: 'Largura',
     height: 'Altura',
@@ -29,7 +29,7 @@ const message_pt = {
 const message_en = {
     pageNotDefined: 'Page not defined',
     notFoundStorfile: 'Not found storfile',
-    errorCompile: 'Error on compiling typescript',
+    errorCompile: 'Error on compiling',
     configure: 'Configure your html by editor option!',
     width: 'Width',
     height: 'Height',
@@ -306,8 +306,10 @@ export class ServicePreviewView extends StateLitElement {
                 || this.models.style?.storFile.hasError
                 || this.models.html?.storFile.hasError) {
 
-                const trace = this.models?.ts?.compilerResults?.errors.map((err) => err.messageText).join('\n - ')
-                this.error = this.msg.errorCompile + '\n' + `<div class="error-list"> - ${trace} </div>`;
+                const trace = this.models?.ts?.compilerResults?.errors.map((err) => err.messageText).join('\n - ');
+                const traceStyle = this.models?.style?.styleResults?.errors.map((err) => err.messageText).join('\n - ');
+
+                this.error = this.msg.errorCompile + '\n' + `<div class="error-list"> ${trace ? `<b>TYPESCRIPT</b> <br> - ${trace}` : ''} <br><br> ${traceStyle ? `<b>LESS</b> <br> - ${traceStyle}` : ''} </div>`;
 
                 this.showLoader(false);
                 this.renderError();

@@ -8,7 +8,7 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 
 export async function readProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true) {
 
-    if (projectsLoaded.includes(project)) return; 
+    if (projectsLoaded.includes(project)) return;
     if (mls.istrace) console.log('loading files from project ' + project);
     projectsLoaded.push(project);
 
@@ -122,6 +122,10 @@ export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boo
             await mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
         }
 
+        if (needCompile && modelBase.storFile.extension.endsWith('.less')) {
+            await mls.l2.less.compileStyle(modelBase);
+        }
+
         return modelBase;
     })();
 
@@ -196,12 +200,12 @@ async function _createModel(storFile: mls.stor.IFileInfo, ext: Extesion, content
     let src: string | Blob | null | undefined = undefined;
     let haveInfo: boolean = false;
     let info: mls.stor.IFileInfoValue | null = null;
-    
-    if (ext !== '.d.ts') { 
+
+    if (ext !== '.d.ts') {
 
         if (!storFile) throw new Error(`Invalid file: ${ext}`);
 
-        if (storFile.project !== 0) { 
+        if (storFile.project !== 0) {
             info = storFile.getValueInfo ? await storFile.getValueInfo() : null;
             haveInfo = !!info && !!info.content;
         }
@@ -219,7 +223,7 @@ async function _createModel(storFile: mls.stor.IFileInfo, ext: Extesion, content
     let originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src).toString(16);
 
     if (ext === '.less') {
-        originalCRC = mls.common.crc.crc32(removeTokensFromSource(src)).toString(16)
+        originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(removeTokensFromSource(src)).toString(16)
     }
 
     const originalProject: number | undefined = haveInfo ? info?.originalProject : undefined;
