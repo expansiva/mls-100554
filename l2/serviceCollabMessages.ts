@@ -185,6 +185,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
                     .filter((key) => this.userThreads[key].thread.group === 'CRM')
                     .map((key) => this.userThreads[key])
             }} 
+            .allThreads=${Object.keys(this.userThreads).map((key) => this.userThreads[key].thread)}
+            
             userId=${this.userPerfil?.userId} 
         ></collab-messages-chat-100554>`
     }
@@ -208,6 +210,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
                     .filter((key) => this.userThreads[key].thread.group === 'DOCS')
                     .map((key) => this.userThreads[key])
             }} 
+            .allThreads=${Object.keys(this.userThreads).map((key) => this.userThreads[key].thread)}
             userId=${this.userPerfil?.userId} 
         ></collab-messages-chat-100554>`
     }
@@ -223,7 +226,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
                 CONNECT: Object.keys(this.userThreads)
                     .filter((key) => this.userThreads[key].thread.group === 'CONNECT')
                     .map((key) => this.userThreads[key])
-            }} 
+            }}
+            .allThreads=${Object.keys(this.userThreads).map((key) => this.userThreads[key].thread)}
             userId=${this.userPerfil?.userId} 
         ></collab-messages-chat-100554>`
     }

@@ -1,6 +1,6 @@
 /// <mls shortName="collabMessagesChat" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation } from './_100554_collabIcons';
 import { collabImport } from './_100554_collabImport';
@@ -36,8 +36,8 @@ import './_100554_collabMessagesTask';
 import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
 import './_100554_collabMessagesThreadDetails';
-import './_100554_widgetText2CollabMessagesMD';
-
+import './_100554_collabMessagesRichPreview';
+import './_100554_collabMessagesUserModal';
 
 import { IChatPreferences, AGENTDEFAULT, PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
 import { StateLitElement } from './_100554_stateLitElement';
@@ -89,6 +89,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @state() userPreferenceChat?: IChatPreferences;
     @state() isLoadingThread: boolean = false;
     @state() filteredThreads: IFilteredThreadsByStatus = { active: [], archived: [], deleted: [] };
+    @state() allUsers: mls.msg.User[] = [];
 
     @property() group: 'CONNECT' | 'APPS' | 'DOCS' | 'CRM' = 'CONNECT';
     @property() userId: string | undefined;
@@ -102,6 +103,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @property() isLoadingMessages: boolean = false;
     @property() searchTerm: string = '';
     @property({ attribute: false }) userThreads: IThread = {};
+    @property({ attribute: false }) allThreads: mls.msg.Thread[] = []
 
     private isSystemChangeScroll: boolean = false;
     private savedScrollTop = 0;
@@ -296,11 +298,44 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 <div class="message-result-text">
                     <b>${footer.title?.trim()}</b>
                     <div>
-                        <widget-text2-collab-messages-m-d-100554 text="${footer.lines.join('\n').trim()}"></widget-text2-collab-messages-m-d-100554>
+                        ${this.renderCollabMessagesRichPreview(footer.lines.join('\n').trim())}                    
                     </div>
                 </div>`
         })}
         </div>`
+    }
+
+    private renderCollabMessagesRichPreview(text: string) {
+
+        return html`
+        <collab-messages-rich-preview-100554 
+            @mention-hover=${this.onMentionHover}
+            .allUsers=${this.allUsers} 
+            .allThreads=${this.allThreads}
+            text="${text}"
+        ></collab-messages-rich-preview-100554>`
+    }
+
+    private async onMentionHover(ev: CustomEvent) {
+
+        this.removeAllUserModal();
+        if (!ev.detail || !ev.detail.value || !ev.detail.element) return;
+        const actualUserModal = this.allUsers.find((user) => user.name === ev.detail.value);
+
+        const rects = (ev.detail.element as HTMLElement).getBoundingClientRect();
+        const modal = document.createElement('collab-messages-user-modal-100554');
+        (modal as any).user = actualUserModal;
+        this.appendChild(modal);
+        await (modal as LitElement).updateComplete;
+        const rectsModal = modal.getBoundingClientRect();
+        modal.style.top = (rects.top - rectsModal.height - rects.height - 70) + 'px';
+        modal.style.left = '20px';
+
+    }
+
+    private removeAllUserModal() {
+        const all = this.querySelectorAll('collab-messages-user-modal-100554');
+        all.forEach((item) => item.remove());
     }
 
     private renderMessageResultByLanguage(message: mls.msg.Message) {
@@ -354,7 +389,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (!this.userPreferenceChat || mode === 'none' || !message.translations) {
             return html`
             <div class="message-content">
-                <widget-text2-collab-messages-m-d-100554 text="${message.content}"></widget-text2-collab-messages-m-d-100554>
+                ${this.renderCollabMessagesRichPreview(message.content)} 
             </div>`
         }
         const { language } = this.userPreferenceChat;
@@ -364,46 +399,45 @@ export class CollabMessagesChat100554 extends StateLitElement {
             case 'icon':
                 return html`
                 <div class="message-content">
-                    <widget-text2-collab-messages-m-d-100554 text="$${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}"></widget-text2-collab-messages-m-d-100554>
+                    ${this.renderCollabMessagesRichPreview(messageByLanguagePref || message.content)} 
+                     ${!isSameLanguege ? collab_translate : ''}
                 </div>`;
             case 'text':
                 return html`
                 <div class="message-content">
-                    <widget-text2-collab-messages-m-d-100554 text="${messageByLanguagePref || message.content}"></widget-text2-collab-messages-m-d-100554>
-
-                    
+                    ${this.renderCollabMessagesRichPreview(messageByLanguagePref || message.content)}   
                 </div>
                 ${!isSameLanguege ?
-                    html`<small class="message-content translate">
-                            <widget-text2-collab-messages-m-d-100554 text="${message.content}"></widget-text2-collab-messages-m-d-100554>
+                        html`<small class="message-content translate">
+                            ${this.renderCollabMessagesRichPreview(message.content)}   
                         </small>`
                         : ''}`;
             case 'iconText':
                 return html`
                     <div class="message-content">
-                        <widget-text2-collab-messages-m-d-100554 text="${messageByLanguagePref || message.content} ${!isSameLanguege ? collab_translate : ''}"></widget-text2-collab-messages-m-d-100554>    
+                        ${this.renderCollabMessagesRichPreview(messageByLanguagePref || message.content)}   
+                        ${!isSameLanguege ? collab_translate : ''}
                     </div>
                 ${!isSameLanguege ?
-                    html`<small class="message-content translate">
-                        <widget-text2-collab-messages-m-d-100554 text="${message.content}"></widget-text2-collab-messages-m-d-100554>    
+                        html`<small class="message-content translate">
+                        ${this.renderCollabMessagesRichPreview(message.content)}    
                     </small>`
                         : ''
-                }`;
+                    }`;
             case 'trace':
                 return html`
                 <div class="message-content trace">
                     <div>
                         <b>[LanguageDetected: ${message.language_detected}]</b>
-                        <widget-text2-collab-messages-m-d-100554 text="${message.content}"></widget-text2-collab-messages-m-d-100554>
+                        ${this.renderCollabMessagesRichPreview(message.content)}   
                     </div>
                     ${Object.keys(message.translations).map((key) => {
-                        if (key === 'language_detected') return ''
-                        if (key === message.language_detected) return ''
-                        return html`
+                    if (key === 'language_detected') return ''
+                    if (key === message.language_detected) return ''
+                    return html`
                             <div>
                                 <b>[${key}]</b>
-                                <widget-text2-collab-messages-m-d-100554 text="${message.translations ? message.translations[key] : ''}"></widget-text2-collab-messages-m-d-100554>
-                    
+                                ${this.renderCollabMessagesRichPreview(message.translations ? message.translations[key] : '')}                        
                             </div>`
                 })}
                 </div>`
@@ -791,9 +825,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
             await updateThread(threadByServer.thread.threadId, threadByServer.thread);
             threadInfo = await this.updateMessagesOnDb(threadInfo, threadByServer.messages);
             await updateUsers(threadByServer.users);
-
+            this.allUsers = threadByServer.users;
             if (threadByServer.hasMore) await this.loadAllMessages(threadInfo);
-            // if (threadInfo.messages && threadInfo.messages.length >= 100) await this.loadAllMessages(threadInfo);
             this.checkForRegisterNotification();
 
         } catch (err: any) {

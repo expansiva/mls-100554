@@ -1,0 +1,80 @@
+/// <mls shortName="collabMessagesUserModal" project="100554" enhancement="enhancementStyle" folder="" />
+
+collab-messages-user-modal-100554 {
+    z-index: 9999;
+    position: absolute;
+    .collab-messages-user-modal-box {
+        background: @bg-primary-color-darker;
+        color: @text-primary-color;
+        border-radius: 8px;
+        padding: 16px;
+        width: 280px;
+        font-family: sans-serif;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .collab-messages-user-modal-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .collab-messages-user-modal-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 4px;
+        margin-right: 12px;
+    }
+
+    .collab-messages-user-modal-userName {
+        font-weight: bold;
+        font-size: @font-size-16;
+    }
+
+    .collab-messages-user-modal-userId {
+        font-size: @font-size-12;
+        color: @text-primary-color-lighter;
+    }
+
+    .collab-messages-user-modal-userStatus {
+        margin-top: .5rem;
+        font-size: @font-size-12;
+        color: @grey-color-darker;
+
+        &.active {
+            color: @success-color;
+        }
+    }
+
+
+    .collab-messages-user-modal-actions {
+        display: flex;
+        gap: 8px;
+
+        button {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            padding: 6px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+
+            svg {
+                fill: currentColor;
+            }
+        }
+    }
+
+
+    .collab-messages-user-modal-message-btn {
+        background: #3F46AD;
+        color: white;
+    }
+
+}
+
+
