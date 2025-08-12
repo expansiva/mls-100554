@@ -6,7 +6,7 @@ import * as util from './_100554_previewModeUtil';
 
 export class PreviewModeSinglePage {
 
-    private level: string | undefined;
+    private level: string | undefined; 
     private json: IJSONDependence | undefined;
     private ifr: HTMLIFrameElement | undefined;
     private isService: boolean = false;
@@ -14,7 +14,7 @@ export class PreviewModeSinglePage {
     private file: mls.stor.IFileInfo | undefined = undefined;
     private esbuild: any;
 
-    constructor(_j: IJSONDependence, _i: HTMLIFrameElement, _l: string, _s: boolean, _f: mls.stor.IFileInfo, _m: mls.editor.IModels) {
+    constructor(_j: IJSONDependence, _i: HTMLIFrameElement, _l: string, _s: boolean, _f: mls.stor.IFileInfo, _m: mls.editor.IModels | undefined) {
         this.json = _j;
         this.ifr = _i;
         this.level = _l;
@@ -31,7 +31,7 @@ export class PreviewModeSinglePage {
 
     private async configIframe() {
 
-        if (!this.json || !this.ifr || !this.esbuild || !this.models) return;
+        if (!this.json || !this.ifr || !this.esbuild || !this.file) return;
 
         const myMap = this.parseImportsMap(this.json.importsMap);
         const find = this.findWidgets(this.ifr.contentDocument?.body)
@@ -139,7 +139,7 @@ export class PreviewModeSinglePage {
         });
 
         util.mountJSImporMap(this.json, this.ifr);
-        util.mountTokens(this.json.tokens || '', this.models);
+        util.mountTokens(this.json.tokens || '', this.file);
         util.addJsReference(this.ifr, this.level || '2');
         const s = document.createElement('script') as HTMLScriptElement;
         s.textContent = result.outputFiles[0].text;

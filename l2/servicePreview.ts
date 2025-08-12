@@ -484,7 +484,7 @@ export class ServicePreview100554 extends ServiceBase {
 
             if (![2, 3, 4, 7].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
-            // if ((this.visible === 'false') && !((fileAction.action as any) === 'openBackground')) return;
+            
             const eventsValid = ['open', 'openBackground', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated', 'editorChanged', 'openLink'];
 
             if (
@@ -549,7 +549,7 @@ export class ServicePreview100554 extends ServiceBase {
 
         const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.html');
         const storFileHTML = mls.stor.files[keyToFileInfo];
-        await createAllModels(storFileHTML);
+        //await createAllModels(storFileHTML);
         this.setModel(storFileHTML);
         this.actualFile = storFileHTML;
         this.setThemeByModule();
@@ -1155,7 +1155,7 @@ export class ServicePreview100554 extends ServiceBase {
         const uri = this.getUri(`_${storFile.project}_${storFile.shortName}`, '.html');
         let model = monaco.editor.getModel(uri);
         if (model) return model;
-        if (this.level !== 2) mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile));
+        if (![7,2].includes(this.level) ) mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile));
         return model;
     }
 
@@ -1518,7 +1518,7 @@ export class ServicePreview100554 extends ServiceBase {
         }
 
         const { folder, shortName } = getFolderAndName(path)
-        const keyStorFile = mls.stor.getKeyToFiles(project, level, shortName, folder, '.ts');
+        const keyStorFile = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
         const storFile = mls.stor.files[keyStorFile];
         const fullname = `_${project}_${path}`;
         this.actualFile = storFile;

@@ -92,7 +92,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         const ar = this.getComponents();
-        this.fireEventMode('edit');
+        //this.fireEventMode('edit');
         if (ar && ar.length > 0) return this.createNavigation(ar);
         this.tryRenderAgain();
         return html`<h3 style="padding:1rem">${this.msg.noItens}<h3>`;
@@ -153,7 +153,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     private tryRenderAgain() {
         
-        if (this.tryRender === 3) return;
+        if (this.tryRender === 10) return;
         this.tryRender++;
         setTimeout(() => this.forceUpdate(), 800);
         
@@ -275,7 +275,11 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     private highlightElement(el: HTMLElement) {
 
-        if (!this.elOverlay)this.elOverlay = this.createOverlay();
+        if (!this.elOverlay) this.elOverlay = this.createOverlay();
+        if (!this.elOverlay.isConnected) {
+            const scope = window.preview?.iframe?.contentDocument?.body;
+            if (scope) scope.appendChild(this.elOverlay);
+        }
         const rect = el.getBoundingClientRect();
         this.elOverlay.style.display = 'block';
         this.elOverlay.style.top = `${rect.top + window.scrollY}px`;
