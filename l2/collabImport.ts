@@ -16,10 +16,10 @@ const staticImports = new Set<string>(); // Tracks modules imported outside dev 
 export async function collabImport(opts: CollabImportOptions): Promise<any> {
 
     const moduleId = opts.folder ? `${opts.project}-${opts.folder}/${opts.shortName}` : `${opts.project}-/${opts.shortName}`;
-    const isDev = await fileInDevelopment(opts);
+    const {isDev, storFile} = await fileInDevelopment(opts);
 
     if (!isDev) {
-        const url = getUrlFromFileInfo(opts, null);
+        const url = getUrlFromFileInfo(opts, storFile ? storFile.versionRef : '', false);
         staticImports.add(moduleId);
         return import(/* @vite-ignore */ url);
 
@@ -28,21 +28,21 @@ export async function collabImport(opts: CollabImportOptions): Promise<any> {
     const version = await getFileVersion(opts);
     const cached = moduleRegistry.get(moduleId);
 
-    if (cached && cached.version === version) {
+    if (cached && cached.version === version && opts.shortName !== 'designSystem') {
         return cached.modulePromise;
     }
 
-    const url = getUrlFromFileInfo(opts, version);
+    const url = getUrlFromFileInfo(opts, version, true);
     const modulePromise = import(/* @vite-ignore */ url);
 
     moduleRegistry.set(moduleId, { version, modulePromise });
     return modulePromise;
 }
 
-async function fileInDevelopment(opts: CollabImportOptions): Promise<boolean> {
+async function fileInDevelopment(opts: CollabImportOptions): Promise<{isDev:boolean, storFile:mls.stor.IFileInfo | undefined}> {
     const keyToStorFile = mls.stor.getKeyToFiles(opts.project, 2, opts.shortName, opts.folder, '.ts');
     const storFile = mls.stor.files[keyToStorFile];
-    return !!storFile?.inLocalStorage;
+    return {isDev:!!storFile?.inLocalStorage, storFile};
 }
 
 async function getFileVersion(opts: CollabImportOptions): Promise<string> {
@@ -53,7 +53,13 @@ async function getFileVersion(opts: CollabImportOptions): Promise<string> {
     return crcActual === model.ts.originalCRC ? '' : crcActual;
 }
 
-function getUrlFromFileInfo(opts: CollabImportOptions, version: string | null): string {
+function getUrlFromFileInfo(opts: CollabImportOptions, version: string | null, isDev:boolean): string {
+
+    if (opts.shortName === 'designSystem') {
+        const base = opts.folder ? `/_${opts.project}_${opts.folder}/${opts.shortName}` : `/_${opts.project}_${opts.shortName}`;
+        return  `${base}?t=${isDev ? Date.now(): version}`;
+    }
+
     const base = opts.folder ? `/_${opts.project}_${opts.folder}/${opts.shortName}` : `/_${opts.project}_${opts.shortName}`;
     return version ? `${base}?t=${version}` : base;
 }
