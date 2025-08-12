@@ -51,8 +51,8 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!context || !context.message) throw new Error("Invalid context");
 
     if (!context.task) {
-        // const inputs: any = await getPrompts(context.message.content || getPromptMock());
-        const inputs: any = await getPrompts(getPromptMock());
+        const inputs: any = await getPrompts(context.message.content || getPromptMock());
+        //const inputs: any = await getPrompts(getPromptMock());
         await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt, { "project": mls.actualProject?.toString() || '0' });
         return;
     }
