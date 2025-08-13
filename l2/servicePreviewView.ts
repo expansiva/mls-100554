@@ -88,6 +88,7 @@ export class ServicePreviewView extends StateLitElement {
 
     private setEventsCollab(): void {
         mls.events.addListener(2, 'WidgetAction', this.onWidgetActionEvents.bind(this));
+        mls.events.addListener(3, 'L3EditEvents' as any, this.onL3EditEvents.bind(this));
     }
 
     connectedCallback() {
@@ -176,6 +177,43 @@ export class ServicePreviewView extends StateLitElement {
         const json = JSON.parse(ev.desc);
         if (json.op !== 'SelectWidget') return;
         this.selectIdinPreview(json.id, json.origin);
+    }
+
+    private onL3EditEvents(ev: mls.events.IEvent) {
+
+        if (!ev.desc || ev.level !== 3) return;
+
+        const info = JSON.parse(ev.desc);
+
+        if (!info || !info.action || !info.position || info.position === 'right') return;
+
+        switch (info.action) {
+            case ('select'):
+                this.onSelect(info);
+                break;
+
+
+        }
+
+
+    }
+
+    private onSelect(info: any) {
+
+        if (!info.id) return;
+
+        const iframe = this.querySelector('iframe');
+        if (!iframe || !iframe.contentDocument) return;
+
+        const body = iframe.contentDocument.body;
+        if (!body) return;
+        const el = body.querySelector('#' + info.id) as HTMLElement;
+        if (!el) return;
+
+        const els = body.querySelectorAll('*[clb_mode="edit"]');
+        els.forEach((e) => e.removeAttribute('clb_mode'));
+        el.setAttribute('clb_mode', 'edit');
+
     }
 
     private selectIdinPreview(id: string, origin: 'editor' | 'preview'): void {
@@ -355,9 +393,6 @@ export class ServicePreviewView extends StateLitElement {
             }
 
             if (iframe.contentDocument) {
-                // iframe.contentDocument.body.style.padding = '35px';
-                // iframe.contentDocument.body.style.height = 'calc(100% - 70px)';
-                // iframe.contentDocument.body.style.width = 'calc(100% - 70px)';
                 iframe.contentDocument.body.style.overflowY = 'auto';
                 iframe.contentDocument.body.style.overflowX = 'hidden';
                 iframe.contentDocument.body.style.margin = '0';
@@ -374,11 +409,6 @@ export class ServicePreviewView extends StateLitElement {
                 bubbles: true,
                 composed: true,
             }));
-
-            /*if (this.file && (window as any).lastTesting !== this.file.shortName) {
-                (window as any).lastTesting = this.file.shortName;
-                this.fireTesting();
-            }*/
 
 
         } catch (e: any) {
@@ -480,8 +510,7 @@ export class ServicePreviewView extends StateLitElement {
     private async getFileContent(): Promise<string> {
 
         let txt = '<h3>' + this.msg.configure + '</h3>';
-        if (this.file && this.file.getValueInfo) txt = (await this.file.getValueInfo()).content as string;
-        if (this.file && txt === null) txt = await this.file.getContent() as string;
+        if (this.file) txt = await this.file.getContent() as string;
         return txt;
 
     }
