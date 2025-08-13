@@ -278,7 +278,7 @@ export async function undoAllFiles(storFile: mls.stor.IFileInfo): Promise<void> 
     }
 
     await mls.stor.localDB.removePrjInfo(storFile.project);
-    createAllModels(storFile)
+    createAllModels(storFile, true)
 }
 
 function isNewNameValid(newShortName: string): boolean {

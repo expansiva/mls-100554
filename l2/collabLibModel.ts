@@ -119,11 +119,11 @@ export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boo
         if (needCompile && modelBase.storFile.extension.endsWith('.ts')) {
             const modelTs = modelBase as mls.editor.IModelTS;
             if (modelTs && modelTs.compilerResults) modelTs.compilerResults.modelNeedCompile = true;
-            await mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
+            mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
         }
 
         if (needCompile && modelBase.storFile.extension.endsWith('.less')) {
-            await mls.l2.less.compileStyle(modelBase);
+            mls.l2.less.compileStyle(modelBase);
         }
 
         return modelBase;

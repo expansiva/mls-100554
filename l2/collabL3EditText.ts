@@ -20,46 +20,6 @@ export class CollabL3EditText extends CollabLitElement {
 
     constructor() {
         super();
-        this.setEvents();
-    }
-
-    //----------EVENTS-----------
-    private setEvents(): void {
-        mls.events.addListener(3, 'L3EditEvents' as any, this.onL3EditEvents.bind(this));
-    }
-
-    private onL3EditEvents(ev: mls.events.IEvent) {
-
-        if (!ev.desc || ev.level !== 3) return;
-
-        const info = JSON.parse(ev.desc);
-
-        if (!info || !info.action || !info.position || info.position === 'right') return;
-
-        switch (info.action) {
-            case ('select'):
-                this.onSelect(info);
-                break;
-
-
-        }
-
-
-    }
-
-    private onSelect(info: any) {
-        if (!info.id) return;
-        info.id;
-
-        const body = this.closest('body');
-        if (!body) return;
-        const el = body.querySelector('#' + info.id) as HTMLElement;
-        if (!el) return;
-
-        const els = body.querySelectorAll('*[clb_mode="edit"]');
-        els.forEach((e) => e.removeAttribute('clb_mode'));
-        el.setAttribute('clb_mode', 'edit');
-
     }
 
     //-------COMPONENT-----------

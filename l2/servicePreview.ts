@@ -104,6 +104,7 @@ export class ServicePreview100554 extends ServiceBase {
     private themes: string[] = ['Default'];
 
     private actualTheme = '';
+    private actualThemeIndex = -1;
 
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
 
@@ -578,6 +579,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     render() {
+
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         return html`
@@ -1089,6 +1091,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (this.menu.tools.theme.selected === undefined) return;
         const opMenu = this.menu.tools.theme.options[this.menu.tools.theme.selected as number].text;
         this.actualTheme = opMenu;
+        this.actualThemeIndex = this.menu.tools.theme.selected as number;
         this.onStyleChanged();
         return true;
     }
@@ -1222,7 +1225,6 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private async setThemeByModule() {
-
         if (!this.actualFile) return;
         const theme = await this.getFileModuleName();
         if (!this.actualTheme) {
@@ -1231,11 +1233,14 @@ export class ServicePreview100554 extends ServiceBase {
                 const index = this.menu.tools.theme.options.findIndex((item) => item.text === theme);
                 if (this.menu.tools.theme) {
                     this.menu.tools.theme.selected = index;
+                    this.actualThemeIndex = index;
                 }
             }
             this.onStyleChanged();
+        } else if (this.actualTheme && this.actualThemeIndex) {
+            this.menu.tools.theme.selected = this.actualThemeIndex;
         }
-
+    
     }
 
     private async setTheme() {
@@ -1460,6 +1465,7 @@ export class ServicePreview100554 extends ServiceBase {
     // Title changes
 
     private async preview(mode: string) {
+        await this.updateComplete;
         const actual = mls.actual[mls.actualLevel];
         switch (actual.level) {
             case 2:

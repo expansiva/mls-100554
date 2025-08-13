@@ -746,11 +746,11 @@ export class PluginExploreList extends PluginBaseModule {
 
             }
 
-            mls.events.fire([mls.actualLevel], ['FileAction'], JSON.stringify(params), timeout);
-
             if (action === 'open') {
                 this.saveLocalStorageLastOpen(file, this.position as any);
             }
+
+            mls.events.fire([mls.actualLevel], ['FileAction'], JSON.stringify(params), timeout);
 
             if (['open'].includes(action) && mls.actualLevel === 2) {
                 return;
@@ -791,7 +791,8 @@ export class PluginExploreList extends PluginBaseModule {
 
     private extensionLevel = {
         2: '.ts',
-        4: '.html'
+        3: '.ts',
+        4: '.ts'
     }
 
 
@@ -1012,6 +1013,32 @@ export class PluginExploreList extends PluginBaseModule {
         );
     }
 
+    private validFileByLevel(sf: mls.stor.IFileInfo): boolean {
+    
+        const ext = (this.extensionLevel as any)[this.levelFiles as any] as string;
+
+        if (    
+            !this.myDep.includes(sf.project) ||
+            sf.level !== +(this.levelFiles as any) ||
+            sf.extension !== ext
+        ) return false;
+
+        if (this.project === mls.actualProject && sf.project !== this.project) return false;
+
+        if (this.project === -1 && sf.project !== mls.actualProject) return false;
+
+        if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
+            return false;
+        }
+
+        if ([2, 4, 5, 6, 7].includes(mls.actualLevel) && sf.shortName.startsWith('be')) {
+            return false;
+        }
+
+        return true;
+
+    }
+
     private async getFilesProject(): Promise<mls.stor.IFileInfo[]> {
 
         if (!window['mls']) return [];
@@ -1022,23 +1049,7 @@ export class PluginExploreList extends PluginBaseModule {
         for (const i of Object.keys(mls.stor.files)) {
 
             const sf = mls.stor.files[i];
-            if (
-                //sf.project !== this.project  ||
-                !this.myDep.includes(sf.project) ||
-                sf.level !== +(this.levelFiles as any) ||
-                sf.extension !== ext
-            ) continue;
-
-            if (this.project === mls.actualProject && sf.project !== this.project) continue;
-
-            if (this.project === -1 && sf.project !== mls.actualProject) continue;
-
-            if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
-                continue;
-            }
-            else if ([2, 4, 5, 6, 7].includes(mls.actualLevel) && sf.shortName.startsWith('be')) {
-                continue;
-            }
+            if (!this.validFileByLevel(sf)) continue;
 
             const keyHtml = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.html');
             const keyStyle = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.less');
@@ -1167,20 +1178,10 @@ export class PluginExploreList extends PluginBaseModule {
                     await mls.stor.server.loadProjectInfoIfNeeded(i.project);
                     key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
                 }
+                
+                if (!mls.stor.files[key] || !this.validFileByLevel(mls.stor.files[key])) continue;
+                arraySfHistory.push(mls.stor.files[key]);
 
-                if (!mls.stor.files[key] || (i.project !== +this.project && +this.project !== 0)) continue;
-
-                if (i.project !== mls.actualProject && !this.myDep.includes(i.project)) continue;
-
-                if (mls.actualLevel == 1 && i.shortName.startsWith('be')) {
-                    arraySfHistory.push(mls.stor.files[key]);
-                }
-                else if (mls.actualLevel == 3 && i.shortName.startsWith('page')) {
-                    arraySfHistory.push(mls.stor.files[key]);
-                }
-                else if ([2, 4, 5, 6, 7].includes(mls.actualLevel) && !i.shortName.startsWith('be')) {
-                    arraySfHistory.push(mls.stor.files[key]);
-                }
 
             }
 
@@ -1207,14 +1208,14 @@ export class PluginExploreList extends PluginBaseModule {
 
     private getHistory(): { project: number, shortName: string, extension: string, folder: string }[] {
 
-        const info = localStorage.getItem('mlsInfoHistoryL' + this.levelFiles as any);
+        const info = localStorage.getItem('mlsInfoHistoryL' + mls.actualLevel);
         return info ? JSON.parse(info) : [];
 
     }
 
     private setHistory(file: mls.stor.IFileInfo): void {
 
-        const info = localStorage.getItem('mlsInfoHistoryL' + this.levelFiles as any);
+        const info = localStorage.getItem('mlsInfoHistoryL' + mls.actualLevel);
         const res: any[] = info ? JSON.parse(info) : [];
         let idx = -1;
         res.forEach((i: any, index) => {
@@ -1235,7 +1236,7 @@ export class PluginExploreList extends PluginBaseModule {
             }
         }
 
-        localStorage.setItem('mlsInfoHistoryL' + this.levelFiles as any, JSON.stringify(res));
+        localStorage.setItem('mlsInfoHistoryL' + mls.actualLevel, JSON.stringify(res));
 
     }
 
