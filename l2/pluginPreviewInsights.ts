@@ -58,7 +58,7 @@ export class PluginPreviewInsights100554 extends StateLitElement {
   @property({ type: String }) page: string = '';
   @property({ type: String, converter: Number }) level: number = 0;
 
-  @property({ type: String }) fileType?: "page" | "widget" | "plugin" | "module" | "lib" | "table";
+  @property({ type: String }) fileType?: "page" | "widget" | "plugin" | "module" | "lib" | "table" | "organism" | "service" | "info" | undefined
 
   @state() private defs?: mls.l4.BaseDefs;
   @state() private loading: boolean = false;
@@ -681,6 +681,8 @@ export class PluginPreviewInsights100554 extends StateLitElement {
 
   private async setInfos() {
 
+    debugger;
+
     if (!this.page) throw new Error(`Page not found: ${this.page}`);
 
     const { project, folder, shortName } = mls.l2.getPath(this.page);
@@ -688,7 +690,7 @@ export class PluginPreviewInsights100554 extends StateLitElement {
     const mkey = mls.editor.getKeyModel(project, shortName, folder);
     this.models = mls.editor.models[mkey];
 
-    const moduleDefs = await collabImport({ project, folder, shortName });
+    const moduleDefs = await collabImport({ project, folder, shortName, extension: '.defs.ts' });
     if (!moduleDefs) throw new Error('Invalid module defs.ts:' + mkey);
     if (!moduleDefs.defs) throw new Error('Invalid const defs in module .defs.ts:' + mkey);
 
