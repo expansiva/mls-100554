@@ -34,6 +34,7 @@ export function createAgent(): IAgent {
 };
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+
     const taskTitle = "Planning";
 
     if (!context || !context.message) throw new Error("Invalid context");
@@ -116,9 +117,11 @@ async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType
 }
 
 async function getContentByExtension(fullName: string, ext: 'html' | 'ts' | 'style' | 'defs') {
+
+    const info = mls.l2.getPath(fullName);
     try {
-        const models = mls.editor.models[fullName];
-        if (!models) throw new Error(`[${agentName}][getContentByExtension]:Not found models for file:` + fullName);
+        const models = getModel(info)
+        if (!models) throw new Error(`[${agentName}][getContentByExtension]:Not found models for file:` + info.shortName);
         if (!models[ext]) return '';
         return models[ext]?.model.getValue();
     } catch (e: any) {

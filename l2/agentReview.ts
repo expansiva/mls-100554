@@ -108,8 +108,10 @@ async function getPrompts(data: IDataPrompt, mode: 'typescript' | 'html' | 'less
 }
 
 async function getContentByExtension(fullName: string, ext: 'html' | 'ts' | 'style' | 'defs', position: string) {
+    const info = mls.l2.getPath(fullName);
+
     try {
-        let models: mls.editor.IModels | undefined = mls.editor.models[fullName];
+        let models = getModel(info);
 
         if (!models) {
             models = await getModels(fullName, position);
@@ -198,5 +200,5 @@ interface IDataPrompt {
 interface IDataResult {
     html: string,
     ts: string,
-    less:string
+    less: string
 }
