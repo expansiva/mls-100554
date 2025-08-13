@@ -297,7 +297,7 @@ async function systemDefinitionLess(data: IDataPrompt): Promise<mls.msg.IAMessag
 async function systemDefinitionErrorsTs(data: IDataPrompt): Promise<mls.msg.IAMessageInputType> {
 
     try {
-        const models = mls.editor.models[data.page];
+        const models = getModelByDataPage(data.page);
         if (!models || !models.ts) throw new Error(`[${agentName}][systemDefinitionErrorsTs]: not found models for file:` + data.page);
         const markersTs = models.ts ? monaco.editor.getModelMarkers({ resource: models.ts.model.uri }) : [];
         const errors = models.ts.compilerResults?.errors || [];
@@ -322,7 +322,7 @@ async function systemImportsDefinitionTs(data: IDataPrompt): Promise<mls.msg.IAM
 
     try {
 
-        const models = mls.editor.models[data.page];
+        const models = getModelByDataPage(data.page)
         if (!models || !models.ts) throw new Error(`[${agentName}][systemImportsDefinitionTs]: not found models for file:` + data.page);
         const imports = models.ts.compilerResults?.imports || [];
 
@@ -343,7 +343,7 @@ async function systemImportsDefinitionTs(data: IDataPrompt): Promise<mls.msg.IAM
 async function systemDefinitionErrorsLess(data: IDataPrompt): Promise<mls.msg.IAMessageInputType> {
 
     try {
-        const models = mls.editor.models[data.page];
+        const models = getModelByDataPage(data.page)
         if (!models || !models.style) throw new Error(`[${agentName}][systemDefinitionErrorsLess]: not found models for file:` + data.page);
         const markersStyle = models.style ? monaco.editor.getModelMarkers({ resource: models.style.model.uri }) : [];
 
@@ -369,7 +369,7 @@ async function systemDefinitionErrorsLess(data: IDataPrompt): Promise<mls.msg.IA
 
 function systemWidgetsDescriptionsInstruction(data: IDataPrompt): mls.msg.IAMessageInputType {
 
-    const models = mls.editor.models[data.page];
+    const models = getModelByDataPage(data.page)
     if (!models || !models.ts) throw new Error(`[${agentName}][systemImportsDefinitionTs]: not found models for file:` + data.page);
     const imports = models.ts.compilerResults?.imports || [];
 
@@ -443,8 +443,9 @@ ${JSON.stringify(data)}
 }
 
 async function getContentByExtension(fullName: string, ext: 'html' | 'ts' | 'style' | 'defs') {
+    const info = mls.l2.getPath(fullName);
     try {
-        const models = mls.editor.models[fullName];
+        const models = getModel(info);
         if (!models) throw new Error(`[${agentName}][getContentByExtension]:Not found models for file:` + fullName);
         if (!models[ext]) return '';
         return models[ext]?.model.getValue();
@@ -463,7 +464,7 @@ async function getDefinitonsByImports(imports: string[], position: 'left' | 'rig
         if (!importName.startsWith('./')) continue;
         const fullPath = importName.replace('./', '');
         const iPath = mls.l2.getPath(fullPath);
-        const keyToStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.ts');
+        const keyToStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, iPath.folder, '.ts');
         const storFile = mls.stor.files[keyToStorFile];
         if (!storFile) continue;
         await createAllModels(storFile);
@@ -507,7 +508,7 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     const modeMemory = context.task?.iaCompressed?.longMemory['mode'];
     const pageMemory = context.task?.iaCompressed?.longMemory['page'];
     const positionMemory = context.task?.iaCompressed?.longMemory['position'];
-    if(!pageMemory) throw new Error(`[${agentName}][updateFile]: invalid pageMemory`);
+    if (!pageMemory) throw new Error(`[${agentName}][updateFile]: invalid pageMemory`);
 
     const info = mls.l2.getPath(pageMemory);
     const mode = modeMemory;
@@ -557,6 +558,13 @@ function extractComponentMarkdown(md: string, componentName: string): string | n
     }
 
     return '';
+}
+
+function getModelByDataPage(fullName: string) {
+    const info = mls.l2.getPath(fullName);
+    const models = getModel(info);
+    return models;
+
 }
 
 function refreshStateLock(page: string, position: string, value: boolean) {
