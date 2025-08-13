@@ -724,6 +724,7 @@ export class ServiceSource100554 extends ServiceBase {
             this.showActiveModel();
             if (!this._ed1) return;
             if (fileModels && fileModels.ts) mls.editor.forceModelUpdate(fileModels.ts.model);
+            if (fileModels && fileModels.style) mls.editor.forceModelUpdate(fileModels.style.model);
             this.restaureViewState();
 
 

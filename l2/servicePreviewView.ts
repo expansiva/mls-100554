@@ -15,7 +15,7 @@ import { PreviewModeMinimum } from './_100554_previewModeMinimum';
 const message_pt = {
     pageNotDefined: 'Página não definida',
     notFoundStorfile: 'Arquivo não encontrado',
-    errorCompile: 'Erro ao compilar typescript',
+    errorCompile: 'Erro ao compilar',
     configure: 'Configure seu HTML pela opção do editor!',
     width: 'Largura',
     height: 'Altura',
@@ -29,7 +29,7 @@ const message_pt = {
 const message_en = {
     pageNotDefined: 'Page not defined',
     notFoundStorfile: 'Not found storfile',
-    errorCompile: 'Error on compiling typescript',
+    errorCompile: 'Error on compiling',
     configure: 'Configure your html by editor option!',
     width: 'Width',
     height: 'Height',
@@ -259,7 +259,7 @@ export class ServicePreviewView extends StateLitElement {
 
         //if (!this.models || !this.models.style || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
         //const { project, shortName, folder } = this.models.style.storFile;
-        if (!this.file  || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
+        if (!this.file || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
         const { project, shortName, folder } = this.file;
         const id = convertFileNameToTag({ project, shortName, folder });
         const oldStyle = window.preview.iframe.contentDocument.head.querySelector(`style[id=${id}]`);
@@ -305,15 +305,16 @@ export class ServicePreviewView extends StateLitElement {
 
             if (this.models &&
                 (
-                    
+
                     this.models.ts?.storFile.hasError ||
                     this.models.style?.storFile.hasError ||
                     this.models.html?.storFile.hasError
                 )
             ) {
 
-                const trace = this.models.ts?.compilerResults?.errors.map((err) => err.messageText).join('\n - ')
-                this.error = this.msg.errorCompile + '\n' + `<div class="error-list"> - ${trace} </div>`;
+                const trace = this.models?.ts?.compilerResults?.errors.map((err) => err.messageText).join('\n - ');
+                const traceStyle = this.models?.style?.styleResults?.errors.map((err) => err.messageText).join('\n - ');
+                this.error = this.msg.errorCompile + '\n' + `<div class="error-list"> ${trace ? `<b>TYPESCRIPT</b> <br> - ${trace}` : ''} <br><br> ${traceStyle ? `<b>LESS</b> <br> - ${traceStyle}` : ''} </div>`;
 
                 this.showLoader(false);
                 this.renderError();
@@ -456,7 +457,7 @@ export class ServicePreviewView extends StateLitElement {
         iframe.contentDocument.body.innerHTML = txt;
         //ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
         ret = await getDependenciesByHtmlFile(this.file, txt, this.actualtheme, true);
-        
+
 
         const els = iframe.contentDocument.body.querySelectorAll('*');
         els.forEach((el) => el.setAttribute('mls_origin', 'true'));
@@ -524,7 +525,7 @@ export class ServicePreviewView extends StateLitElement {
     }
 
     private getIdTokens() {
-        if (!this.file ) return 'ds_tokens';
+        if (!this.file) return 'ds_tokens';
         const { project } = this.file
         return '_' + project + '_ds_tokens';
     }
