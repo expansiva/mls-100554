@@ -149,7 +149,7 @@ function replaceByPriority(source: string, key: string, value: string): string {
     return source.replace(pattern3, value);
   }
 
-  return source; // não encontrou nada
+  return source;
 }
 
 async function createPage(context: mls.msg.ExecutionContext) {
@@ -373,7 +373,7 @@ async function createModuleFile(shortName: string, project: number, folder: stri
 
 export const moduleConfig = {
   theme: "${folder}",
-  initialPage: ${shortName}
+  initialPage: "${shortName}"
 }
 
 export const payload3 = ${JSON.stringify(payload3, null, 2)}
