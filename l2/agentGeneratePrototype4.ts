@@ -516,6 +516,13 @@ function generateHtmlPage(
         countByTags[tag]++;
       }
       element.id = pageName + tag.replace('organism', '') + countByTags[tag].toString()
+    } else {
+      if (!countByTags[tag]) {
+        countByTags[tag] = 1;
+      } else {
+        countByTags[tag]++;
+      }
+      element.id = pageName + '-core-' + tag + countByTags[tag].toString()
     }
   });
 
