@@ -16,17 +16,32 @@ plugin-page-navigation-100554 {
         border-left: 1px solid #d4d4d4;
     }
 
-    ul li {
+    ul li.nav-item {
         position: relative;
         user-select: none;
 
-    }
+        .move-icon {
+            opacity: 0;
+            cursor: grab;
+            margin-right: .1rem;
+            font-size: 1rem;
+            user-select: none;
+        }
 
-    .dragging {
-      opacity: 0.5;
-    }
-    .drop-target {
-      background: #d3f9d8;
+
+        &:hover .move-icon {
+            opacity: 1;
+        }
+
+        &[draggable="true"] .move-icon:active {
+            cursor: grabbing;
+        }
+
+        small {
+            font-weight: 700;
+            font-size: 11px;
+        }
+
     }
 
     ul li .header {
@@ -37,13 +52,12 @@ plugin-page-navigation-100554 {
 
     ul li .header:hover {
         border: 1px solid #d4d4d4;
-
     }
 
     ul li div.activeBranch {
         border: 1px solid #d4d4d4;
         display: flex;
-        justify-content: space-between;
+        justify-content: start;
         align-items: center;
         border-radius: 5px;
         background: var(--bg-primary-color-disabled);
@@ -65,10 +79,10 @@ plugin-page-navigation-100554 {
         padding: .3rem;
         transition: all 0.5s;
         cursor: pointer;
-        display: none; //flex!important;
+        display: none;
         z-index: 9;
         height: .7rem;
-
+        margin-left: auto;
     }
 
     ul li div.activeBranch .groupHiddenList {
@@ -113,132 +127,8 @@ plugin-page-navigation-100554 {
         float: left;
     }
 
-    mic-command {
-        background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d='M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L472.1 344.7c15.2-26 23.9-56.3 23.9-88.7l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 21.2-5.1 41.1-14.2 58.7L416 300.8 416 96c0-53-43-96-96-96s-96 43-96 96l0 54.3L38.8 5.1zM344 430.4c20.4-2.8 39.7-9.1 57.3-18.2l-43.1-33.9C346.1 382 333.3 384 320 384c-70.7 0-128-57.3-128-128l0-8.7L144.7 210c-.5 1.9-.7 3.9-.7 6l0 40c0 89.1 66.2 162.7 152 174.4l0 33.6-48 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l72 0 72 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0 0-33.6z'/></svg>");
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: contain;
-        width: 20px;
-        height: 20px;
-        display: block;
-        cursor: pointer;
-    }
 
-    mic-command.active {
-        background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d='M192 0C139 0 96 43 96 96l0 160c0 53 43 96 96 96s96-43 96-96l0-160c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 89.1 66.2 162.7 152 174.4l0 33.6-48 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l72 0 72 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0 0-33.6c85.8-11.7 152-85.3 152-174.4l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 70.7-57.3 128-128 128s-128-57.3-128-128l0-40z'/></svg>") !important;
 
-    }
 }
 
-//Start Less Tokens
-@text-primary-color-lighter: #535353;
-@text-primary-color-lighter-hover: #5f5f5f;
-@text-primary-color-lighter-focus: #4a4a4a;
-@text-primary-color-lighter-disabled: #696969;
-@text-primary-color: #403f3f;
-@text-primary-color-hover: #4b4a4a;
-@text-primary-color-focus: #353434;
-@text-primary-color-disabled: #525151;
-@text-primary-color-darker: #000000;
-@text-primary-color-darker-hover: #1a1a1a;
-@text-primary-color-darker-focus: #0d0d0d;
-@text-primary-color-darker-disabled: #262626;
-@text-secondary-color-lighter: #408EC8;
-@text-secondary-color-lighter-hover: #4a9adb;
-@text-secondary-color-lighter-focus: #377bb0;
-@text-secondary-color-lighter-disabled: #629fd2;
-@text-secondary-color: #1C91CD;
-@text-secondary-color-hover: #2a9edb;
-@text-secondary-color-focus: #1786b7;
-@text-secondary-color-disabled: #55b4e1;
-@text-secondary-color-darker: #0F6FA9;
-@text-secondary-color-darker-hover: #1b7bb5;
-@text-secondary-color-darker-focus: #0c6495;
-@text-secondary-color-darker-disabled: #3a9ec1;
-@bg-primary-color-lighter: #ffffff;
-@bg-primary-color-lighter-hover: #f2f2f2;
-@bg-primary-color-lighter-focus: #e6e6e6;
-@bg-primary-color-lighter-disabled: #d9d9d9;
-@bg-primary-color: #ffffff;
-@bg-primary-color-hover: #f2f2f2;
-@bg-primary-color-focus: #e6e6e6;
-@bg-primary-color-disabled: #d9d9d9;
-@bg-primary-color-darker: #fafafa;
-@bg-primary-color-darker-hover: #f5f5f5;
-@bg-primary-color-darker-focus: #eeeeee;
-@bg-primary-color-darker-disabled: #e0e0e0;
-@bg-secondary-color-lighter: #F9F9F9;
-@bg-secondary-color-lighter-hover: #f4f4f4;
-@bg-secondary-color-lighter-focus: #efefef;
-@bg-secondary-color-lighter-disabled: #eaeaea;
-@bg-secondary-color: #E6E6E6;
-@bg-secondary-color-hover: #d9d9d9;
-@bg-secondary-color-focus: #cccccc;
-@bg-secondary-color-disabled: #bfbfbf;
-@bg-secondary-color-darker: #C0C0C0;
-@bg-secondary-color-darker-hover: #b3b3b3;
-@bg-secondary-color-darker-focus: #a6a6a6;
-@bg-secondary-color-darker-disabled: #999999;
-@grey-color-lighter: #F9FAFB;
-@grey-color-light: #F2F2F2;
-@grey-color: #E6E6E6;
-@grey-color-dark: #D3D3D3;
-@grey-color-darker: #C0C0C0;
-@error-color: #FF4D4F;
-@error-color-hover: #ff6666;
-@error-color-focus: #e63e3e;
-@error-color-disabled: #ff9999;
-@success-color: #52C41A;
-@success-color-hover: #66d93f;
-@success-color-focus: #4ca610;
-@success-color-disabled: #8cd78e;
-@warning-color: #FAAD14;
-@warning-color-hover: #fbbd34;
-@warning-color-focus: #e09a0e;
-@warning-color-disabled: #fdd55e;
-@info-color: #0a6dc9;
-@info-color-hover: #1b7edb;
-@info-color-focus: #006ab3;
-@info-color-disabled: #66a8e1;
-@active-color: #1890FF;
-@active-color-hover: #1a99ff;
-@active-color-focus: #0e80cc;
-@active-color-disabled: #66b3ff;
-@link-color: #1890FF;
-@link-color-hover: #1a99ff;
-@link-color-focus: #0e80cc;
-@link-color-disabled: #66b3ff;
-@font-base-unit: .25rem;
-@font-family-primary: 'Charlie Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-@font-family-secondary: serif;
-@font-size-12: calc(@font-base-unit * 3);
-@font-size-16: calc(@font-base-unit * 4);
-@font-size-20: calc(@font-base-unit * 5);
-@font-size-24: calc(@font-base-unit * 6);
-@font-size-40: calc(@font-base-unit * 10);
-@font-size-48: calc(@font-base-unit * 12);
-@font-size-64: calc(@font-base-unit * 16);
-@line-height-base-unit: 1;
-@line-height-small: calc(@line-height-base-unit * 1.1);
-@line-height-medium: calc(@line-height-base-unit * 1.3);
-@line-height-large: calc(@line-height-base-unit * 1.5);
-@font-weight-lighter: 100;
-@font-weight-light: 200;
-@font-weight-normal: 400;
-@font-weight-bold: 700;
-@font-weight-bolder: 900;
-@breakpoint-small: 544px;
-@breakpoint-medium: 768px;
-@breakpoint-large: 1012px;
-@transition-slow: 0.2s;
-@transition-normal: 0.3s;
-@transition-fast: 0.5s;
-@space-base-unit: 0.25rem;
-@space-8: calc(@space-base-unit * 2);
-@space-16: calc(@space-base-unit * 4);
-@space-24: calc(@space-base-unit * 6);
-@space-32: calc(@space-base-unit * 8);
-@space-40: calc(@space-base-unit * 10);
-@space-48: calc(@space-base-unit * 12);
-@space-64: calc(@space-base-unit * 16);
-//End Less Tokens
+

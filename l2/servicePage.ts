@@ -3,8 +3,10 @@
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import "./_100554_wcdToolboxItemActionEditAttrOut";
+
+import "./_100554_pluginPrototypeImprove";
+import "./_100554_pluginExploreList";
+import "./_100554_pluginPageNavigation";
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -31,23 +33,16 @@ const messages: { [key: string]: MessageType } = {
 @customElement('service-page-100554')
 export class ServicePage100554 extends ServiceBase {
 
-    private msg: MessageType = messages['en'];
-
-    @property() activeTab: ITabType = 'icDetails';
-    @property() pluginNav: string = '';
-    @property() pluginProp: string = '';
-    @property() pluginsIA: { [key: string]: mls.plugin.MenuAction[] } = {};
-    @property() pluginIALoaded: boolean = false;
-
 
     constructor() {
         super();
-        this.setEvents();
+        mls.events.addListener(4, 'FileAction', this.onFileAction.bind(this));
     }
 
-    private setEvents(): void {
-        mls.events.addListener(3, 'WCDEvent' as any, (ev) => this.onWCDEvent(ev));
-    }
+    private msg: MessageType = messages['en'];
+
+    @property() activeTab: ITabType = 'icNavigation';
+
 
     //-------SERVICE---------------
 
@@ -78,11 +73,9 @@ export class ServicePage100554 extends ServiceBase {
             type: 'onlyicon',
             selected: 0,
             options: [
-                { text: 'Details', icon: '3f' },
+                { text: 'Explore', icon: 'e521' },
                 { text: 'Navigation', icon: 'f041' },
-                { text: 'Properties', icon: 'f0ce' },
-                { text: 'IA', icon: 'f5dc' },
-
+                { text: 'Improve', icon: 'f5dc' },
             ]
         },
         tools: {},
@@ -103,8 +96,6 @@ export class ServicePage100554 extends ServiceBase {
 
     async firstUpdated() {
         if (this.menu.setTabActive) this.menu.setTabActive(ESceneries[this.activeTab]);
-        await this.loadPlugins();
-        await this.setPluginIA();
     }
 
     render() {
@@ -119,104 +110,33 @@ export class ServicePage100554 extends ServiceBase {
     renderContent() {
 
         switch (this.activeTab) {
+            case 'icExplorer':
+                return this.renderExplorer();
             case 'icNavigation':
                 return this.renderNavigation();
-            case 'icProperties':
-                return this.renderProperties();
-            case 'icDetails':
-                return this.renderDetails();
-            case 'icIA':
-                return this.renderIA();
+            case 'icImprove':
+                return this.renderImprove();
             default:
                 return html``;
         }
     }
 
     renderNavigation() {
-        // this.openService('_100554_servicePreview', 'right', 3);
-        return html` ${this.pluginNav ? unsafeHTML(`<${this.pluginNav} .service=${this}></${this.pluginNav}>`) : `<div>${this.msg.loading}</div>`}`;
+        return html`<plugin-page-navigation-100554></plugin-page-navigation-100554>`;
     }
 
-    renderProperties() {
-        // this.openService('_100554_servicePreview', 'right', 3);
-        return html`<wcd-toolbox-item-action-edit-attr-out-100554></wcd-toolbox-item-action-edit-attr-out-100554>`;
+    renderExplorer() {
+        return html`<plugin-explore-list-100554 autoprepare="true"></plugin-explore-list-100554>`;
     }
 
-    renderDetails() {
-        return html`<div>${this.msg.detailsHint}</div>`;
+    renderImprove() {
+        return html`<plugin-prototype-improve-100554></plugin-prototype-improve-100554>`;
     }
 
-    renderIA() {
 
-        const keys = Object.keys(this.pluginsIA);
-        return html`
-
-            ${!this.pluginIALoaded
-                ? html`<div>${this.msg.loading}</div>`
-                : html`
-                <div>
-                    ${repeat(keys, (
-                    (key: string, idx: number) => key + idx) as any,
-                    ((item: string, index: any) => {
-                        return html`<collab-panel-100554 .myData=${this.pluginsIA[item]}>
-                    </collab-panel-100554>`;
-                    }) as any
-                )}
-                </div>`
-            }
-        `
-    }
-
-    //---------IMPLEMENTATION------------
-
-    private async loadPlugins() {
-
-        const  project  = mls.actualProject;
-        if (!project) return;
-        await mls.plugin.loadAll(project, true);
-        const plgNav = mls.plugin.getAllMenuActions(project, { scope: 'l3PageNavigation' } as any);
-        const plgProp = mls.plugin.getAllMenuActions(project, { scope: 'l3PageProperties' } as any);
-        const plgNavName = plgNav[0] ? plgNav[0].widget : '';
-        const plgPropName = plgProp[0] ? plgProp[0].widget : '';
-        if (plgNavName) {
-            const { folder, project, shortName } = mls.l2.getPath(plgNavName);
-            await import(`./_${project}_${shortName}`);
-            this.pluginNav = convertFileNameToTag({ project, shortName, folder });
-        }
-        if (plgPropName) {
-            const { folder, project, shortName } = mls.l2.getPath(plgPropName);
-            await import(`./_${project}_${shortName}`);
-            this.pluginProp = convertFileNameToTag({ project, shortName, folder });
-        }
-    }
-
-    private async setPluginIA() {
-
-        const  project  = mls.actualProject;
-        if (!project) return;
-        let array: any[] = [];
-        await mls.plugin.loadAll(project, false);
-        array = mls.plugin.getAllMenuActions(project, { scope: 'l3PageAI' } as any);
-
-        array.forEach((item: mls.plugin.MenuAction) => {
-            const cat = item.category as string;
-            if (!this.pluginsIA[cat]) this.pluginsIA[cat] = [item]
-            else this.pluginsIA[cat].push(item);
-        });
-
-        this.pluginIALoaded = true;
-        this.requestUpdate();
-    }
-
-    private onWCDEvent(ev: mls.events.IEvent) {
-
-        if (!ev.desc) return;
-        const data: IWCDParams = JSON.parse(ev.desc);
-        if (this.menu.setTabActive) {
-            this.openMe();
-            this.menu.setTabActive(ESceneries[data.op]);
-        }
-
+    private onFileAction(ev: mls.events.IEvent) {
+        if (ev.level !== 4 || (ev.type !== 'FileAction')) return;
+        if (this.menu && this.menu.setTabActive) this.menu.setTabActive(ESceneries.icNavigation);
     }
 
 
@@ -229,11 +149,10 @@ export interface IWCDParams {
     op: ITabType,
 }
 
-export type ITabType = 'icDetails' | 'icNavigation' | 'icProperties' | 'icIA';
+export type ITabType = 'icExplorer' | 'icNavigation' | 'icImprove';
 
 enum ESceneries {
-    'icDetails' = 0,
+    'icExplorer' = 0,
     'icNavigation' = 1,
-    'icProperties' = 2,
-    'icIA' = 3,
+    'icImprove' = 2,
 } 

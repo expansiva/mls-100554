@@ -9,7 +9,7 @@ export function sync() {
     if (!model) return;
     const newHTMLOnlyICA = clearTree(window.preview.iframe)
     const formatedNewHTML = formatHtml(newHTMLOnlyICA);
-    setValueInModeKeepingUndo2(model, formatedNewHTML);
+    setValueInModeKeepingUndo(model, formatedNewHTML);
 
 }
 
@@ -20,11 +20,11 @@ export function updateHTML(html: string, format: boolean = true) {
     if (!model) return;
     const newHTMLOnlyICA = html
     const formatedNewHTML = format ? formatHtml(newHTMLOnlyICA) : newHTMLOnlyICA;
-    setValueInModeKeepingUndo2(model, formatedNewHTML);
+    setValueInModeKeepingUndo(model, formatedNewHTML);
 
 }
 
-function setValueInModeKeepingUndo2(model: monaco.editor.ITextModel, newContent: string) {
+export function setValueInModeKeepingUndo(model: monaco.editor.ITextModel, newContent: string) {
     const editor = window.preview.editor;
     if (!editor)
         throw new Error('No find editor');
