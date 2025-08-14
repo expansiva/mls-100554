@@ -661,30 +661,33 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private async lessChangedEditor(storFile: mls.stor.IFileInfo, position: string): Promise<void> {
-        //private async lessChangedEditor(ev: mls.events.IEvent): Promise<void> {
+        try {
 
-        /*if (!ev.desc || ev.level !== 2) return;
+            const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
+            const models = mls.editor.models[keyModel];
+            if (!models || !models.style) this.setError('[lessChangedEditor] Not found model');
 
-        const info = JSON.parse(ev.desc);
-        if (info.position !== this.position) return;*/
+            const lastemitter = getState(`less.${position}.emitter`) || 'editor';
 
-        const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
-        const models = mls.editor.models[keyModel];
-        if (!models || !models.style) this.setError('[lessChangedEditor] Not found model');
+            if (this.lessCSS && this._ed1) {
+                const uri = this.getUri(storFile, '.less');
+                const lastSelector = this.lessCSS.selector;
+                this.lessCSS = new LessCSS(uri.toString(), this._ed1, position as 'left' | 'right');
+                this.lessCSS.setEditor(this._ed1);
+                this.lessCSS.setSelector(lastSelector);
+                const monacoPosition = this._ed1.getPosition();
+                if (!monacoPosition) return;
+                const lineContent = models?.ts?.model.getLineContent(monacoPosition.lineNumber);
+                this.lessCSS.setStateByLine(monacoPosition.lineNumber, lineContent || '', lastemitter);
+            }
 
-        const lastemitter = getState(`less.${position}.emitter`) || 'editor';
+        } catch (e) {
 
-        if (this.lessCSS && this._ed1) {
-            const uri = this.getUri(storFile, '.less');
-            const lastSelector = this.lessCSS.selector;
-            this.lessCSS = new LessCSS(uri.toString(), this._ed1, position as 'left' | 'right');
-            this.lessCSS.setEditor(this._ed1);
-            this.lessCSS.setSelector(lastSelector);
-            const monacoPosition = this._ed1.getPosition();
-            if (!monacoPosition) return;
-            const lineContent = models?.ts?.model.getLineContent(monacoPosition.lineNumber);
-            this.lessCSS.setStateByLine(monacoPosition.lineNumber, lineContent || '', lastemitter);
+            console.info(e);
+            
         }
+
+
 
     }
 
