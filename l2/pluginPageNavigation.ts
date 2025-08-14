@@ -87,63 +87,75 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     }
     renderItemTree(item: IInfoElChildren, idx: string, parentArray: IInfoElChildren[] = this.nodes) {
 
-        const cls = item.elDomNavigator?.id === this.activeId || item.elDomNavigator?.hasAttribute('clb_mode') ? 'activeBranch' : '';
+        const cls = (item.elDomNavigator && this.activeId && item.elDomNavigator.id === this.activeId) ? 'activeBranch' : '';
         let mySymbol = 'fa-cubes';
+        const info = this.getActualFileL4();
 
-        return html`
-        <li 
-            class="nav-item"
-            draggable="true"
-            @dragstart=${(e: DragEvent) => this.onDragStart(e, item, parentArray)}
-            @dragover=${(e: DragEvent) => this.onDragOver(e, item)}
-            @dragleave=${(e: DragEvent) => this.onDragLeave(e)}
-            @drop=${(e: DragEvent) => this.onDrop(e, item, parentArray)}
-            @dragend=${() => this.onDragEnd()}
-        >
-            <div 
-                .info=${item}
-                id="${item.tagName + idx}"                      
-                class="header ${cls}" 
-                @click="${(e: MouseEvent) => this.selectItem(e, item)}" 
-                @mouseover="${() => this.onMouseover(item)}"
-                @mouseleave="${() => this.onMouseout(item)}"   
-            >
-                <span class="move-icon" title="Mover">
-                    ${collab_bars}
-                </span>
-                <info-item .info=${item}>
-                    <span class="fa ${mySymbol}" style="margin-right:.5rem"></span>
-                    ${this.slugToTitle(item.tagName)}
-                </info-item>
+        const draggable = item.tagName !== info?.tagName;
 
-                <div class="groupHiddenList" .info=${item}  @click="${this.clickGroupHidden}">
-                    ${item.isOrganism ? html`
-                        <span 
-                            class="mls-gpbtnslider-item"
-                            @click="${(e: MouseEvent) => this.editEl(e, item)}" 
-                            title="edit"
-                        >
-                        ${collab_pencil}</span>
+        const renderHeader = () => {
+            return html`
+                <div 
+                    .info=${item}
+                    id="${item.tagName + idx}"                      
+                    class="header ${cls}" 
+                    @click="${(e: MouseEvent) => this.selectItem(e, item)}" 
+                    @mouseover="${() => this.onMouseover(item)}"
+                    @mouseleave="${() => this.onMouseout(item)}"   
+                >
+                    <span class="move-icon" title="Mover">
+                        ${collab_bars}
+                    </span>
+                    <info-item .info=${item}>
+                        <span class="fa ${mySymbol}" style="margin-right:.5rem"></span>
+                        ${this.slugToTitle(item.tagName)}
+                    </info-item>
+
+                    <div class="groupHiddenList" .info=${item}  @click="${this.clickGroupHidden}">
+                        ${item.isOrganism ? html`
+                            <span 
+                                class="mls-gpbtnslider-item"
+                                @click="${(e: MouseEvent) => this.editEl(e, item)}" 
+                                title="edit"
+                            >
+                            ${collab_pencil}</span>
+                        
+                        `
+                    : ''}
                     
-                    `
-                : ''}
-                
-                    <span
-                        class="mls-gpbtnslider-item"
-                        @click="${this.delEl}" 
-                        title="remove"
-                    >${collab_trash}</span>
+                        <span
+                            class="mls-gpbtnslider-item"
+                            @click="${this.delEl}" 
+                            title="remove"
+                        >${collab_trash}</span>
+                    </div>
                 </div>
-            </div>
-            <ul>
-                ${repeat(
-                    item.children,
-                    ((c: IInfoElChildren, idx: number) => c.tagName + idx) as any,
-                    ((i: IInfoElChildren, idxI: number) => this.renderItemTree(i, idx + '_' + idxI, item.children)) as any
-                )}
-            </ul>
-        </li>
-    `;
+                <ul>
+                    ${repeat(
+                        item.children,
+                        ((c: IInfoElChildren, idx: number) => c.tagName + idx) as any,
+                        ((i: IInfoElChildren, idxI: number) => this.renderItemTree(i, idx + '_' + idxI, item.children)) as any
+                    )}
+                </ul>
+            `
+        }
+
+        if (draggable) {
+            return html`
+                <li 
+                    class="nav-item"
+                    draggable=${draggable} 
+                    @dragstart=${(e: DragEvent) => this.onDragStart(e, item, parentArray)}
+                    @dragover=${(e: DragEvent) => this.onDragOver(e, item)}
+                    @dragleave=${(e: DragEvent) => this.onDragLeave(e)}
+                    @drop=${(e: DragEvent) => this.onDrop(e, item, parentArray)}
+                    @dragend=${() => this.onDragEnd()}
+                >
+                    ${renderHeader()}
+            </li>`;
+        } else {
+            return html`<li class="nav-item">${renderHeader()}</li>`;
+        }
     }
 
     //-------- IMPLEMENTATION --------------
@@ -352,7 +364,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     private dragItem?: IInfoElChildren;
     private dragParentArray?: IInfoElChildren[];
-    private dropPosition: 'before' | 'after' | 'inside' = 'after';
+    private dropPosition: 'before' | 'after' | 'inside' | 'invalid' = 'after';
     private dragOverTarget?: HTMLElement;
 
     private onDragStart(e: DragEvent, item: IInfoElChildren, parentArray: IInfoElChildren[]) {
@@ -373,18 +385,18 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         const y = e.clientY - rect.top;
 
         const third = rect.height / 3;
-        let position: 'before' | 'after' | 'inside';
+        let position: 'before' | 'after' | 'inside' | 'invalid';
 
-        if (y < third) {
-            position = 'before';
-        } else if (y > rect.height - third) {
-            position = 'after';
-        } else {
-            position = 'inside';
-        }
+        if (y < third) position = 'before';
+        else if (y > rect.height - third) position = 'after';
+        else position = 'inside';
 
         if (position === 'inside' && targetItem.isOrganism) {
             position = 'after';
+        }
+
+        if (this.isDescendant(this.dragItem, targetItem)) {
+            position = 'invalid';
         }
 
         this.dropPosition = position;
@@ -395,15 +407,21 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         borderTarget.style.borderBottom = '';
         borderTarget.style.border = '';
 
+        liTarget.style.cursor = 'grab';
+
         if (position === 'before') {
             borderTarget.style.borderTop = '1px solid blue';
         } else if (position === 'after') {
             borderTarget.style.borderBottom = '1px solid blue';
         } else if (position === 'inside') {
             borderTarget.style.border = '1px solid blue';
+        } else if (position === 'invalid') {
+            borderTarget.style.border = '1px solid red';
+            e.dataTransfer!.dropEffect = 'none';
+            liTarget.style.cursor = 'not-allowed';
         }
 
-        console.info(position)
+
     }
 
 
@@ -420,7 +438,11 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         e.stopPropagation();
 
         if (!this.dragItem || !this.dragParentArray || !this.domNavigator) return;
-        if (this.dragItem === targetItem) return;
+        if (this.dragItem === targetItem || this.isDescendant(this.dragItem, targetItem)) {
+            console.warn('Não é permitido mover um pai para dentro do filho');
+            this.onDragEnd();
+            return;
+        }
 
         const fromIndex = this.dragParentArray.indexOf(this.dragItem);
         if (fromIndex > -1) {
@@ -470,14 +492,24 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         });
     }
 
+    private isDescendant(parent: IInfoElChildren | undefined, child: IInfoElChildren): boolean {
+        if (!parent) return false;
+        if (!parent.children || parent.children.length === 0) return false;
+        for (const c of parent.children) {
+            if (c === child) return true;
+            if (this.isDescendant(c, child)) return true;
+        }
+        return false;
+    }
+
     private prepareHTMLAndSync() {
 
         this.requestUpdate();
         const rootEl = this.domNavigator;
         if (!rootEl) return;
         const newHtml = formatHtml(rootEl.outerHTML);
-
         const actualInfo = this.getActualFileL4();
+        
         if (actualInfo && actualInfo.models && actualInfo.models.html) {
             actualInfo.models.html.model.setValue(newHtml);
             setValueInModeKeepingUndo(actualInfo.models && actualInfo.models.html.model, newHtml);
