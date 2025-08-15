@@ -591,6 +591,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private async onChatScroll(e: Event) {
+
+        this.removeAllUserModal();
+        
         if (this.isSystemChangeScroll) {
             this.isSystemChangeScroll = false;
             return;
