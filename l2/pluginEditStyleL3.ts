@@ -1,10 +1,10 @@
 /// <mls shortName="pluginEditStyleL3" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, repeat } from 'lit';
+import { html, repeat } from 'lit'; 
 import { customElement, query, property, state } from 'lit/decorators.js';
+import { convertFileNameToTag } from './_100554_utilsLit';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { LessCSS } from "./_100554_lessCSS";
-import { getState } from './_100554_collabState';
+import { LessAST } from "./_100554_pluginEditStyleAST";
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -22,7 +22,6 @@ const messages: { [key: string]: MessageType } = {
     'pt': message_pt
 }
 /// **collab_i18n_end**
-
 @customElement('plugin-edit-style-l3-100554')
 export class PluginEditStyleL3 extends PluginBaseModule {
 
@@ -32,12 +31,19 @@ export class PluginEditStyleL3 extends PluginBaseModule {
     @state() error = '';
 
     //--------VARIABLES-----------
+    private inEdit = false;
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
+    private _ed2: monaco.editor.IStandaloneCodeEditor | undefined;
+    private initalSelectors: string[] = [];
+
     private msg: MessageType = messages['en'];
     private model: monaco.editor.ITextModel | undefined;
+    private modelDest: monaco.editor.ITextModel | undefined;
+    public modelBase: mls.editor.IModels | undefined;
 
-    public modelLessCSS: LessCSS | undefined;
-    public lessCSS: LessCSS | undefined;
+    public lessAst: LessAST | undefined;
+    public lessAstDest: LessAST | undefined;
+
     private keysResolve: any = {};
 
     //-----------INIT------------
@@ -126,7 +132,8 @@ export class PluginEditStyleL3 extends PluginBaseModule {
 
         if (!this.editorEl) return;
 
-        this._ed1 = monaco.editor.create(this.editorEl, mls.editor.conf[this.confE] as monaco.editor.IEditorOptions);
+        this._ed1 = monaco.editor.create(this.editorEl, { minimap: { enabled: false } });
+        this._ed2 = monaco.editor.create(document.createElement('div'), { minimap: { enabled: false } });
 
         (this.editorEl as any)['mlsEditor'] = this._ed1;
         mls.editor.instances[this.confE] = this._ed1;
@@ -136,7 +143,11 @@ export class PluginEditStyleL3 extends PluginBaseModule {
 
     private async openFile() {
 
-        if (!mls.actual[2].left) {
+        const path = mls.l2.getPath(mls.actual[3].getFullName());
+        const key = mls.stor.getKeyToFiles(path.project, 2, path.shortName, path.folder, '.ts');
+        const file = mls.stor.files[key];
+
+        if (!file) {
             this.error = 'Not found storfile';
             return;
         }
@@ -149,18 +160,41 @@ export class PluginEditStyleL3 extends PluginBaseModule {
             return;
         }
 
-        if (!this.model) this.model = await this.createModel(mls.actual[2].left);
+        if (!this.model) this.model = await this.createModel(file, 'ori');
+        if (!this.modelDest) this.modelDest = await this.createModel(file, 'dest');
 
-        if (!this._ed1 || !this.model) {
+
+        const modelBase = mls.editor.getModels(file.project, file.shortName, file.folder);
+
+        if (!modelBase || !modelBase.style) {
+            this.error = 'Not found base model';
+            return;
+        }
+
+        if (!this._ed1 || !this.model || !this._ed2 || !this.modelDest) {
             this.error = 'Not found model';
             return;
         }
 
         this._ed1.setModel(this.model);
+        this._ed2.setModel(this.modelDest)
 
+        this.modelBase = modelBase;
+
+        this.setContentDest();
         this.setContent(scope, iframeDoc);
 
         this.updatedMSizeEditor();
+
+    }
+
+    private setContentDest() {
+
+
+        if (!this.modelDest || !this.modelBase || !this.modelBase.style) return;
+
+        this.modelDest.setValue(this.modelBase.style.model.getValue());
+        this._ed2?.getAction('editor.action.formatDocument')?.run();
 
     }
 
@@ -172,52 +206,50 @@ export class PluginEditStyleL3 extends PluginBaseModule {
             return;
         }
 
-        this.modelLessCSS = getState(`less.left.lessCSS`);
-        if (!this.modelLessCSS) return;
+        if (!this.lessAstDest) return;
 
         let cssText = '';
         const sel = this.getMatchingRulesForElement(active, iframeDoc);
-        console.info(sel);
-
-        Object.keys(this.modelLessCSS.lessAST.ast).forEach((key) => {
-
-            const selector = this.resolveSelector(key);
-            if (this.keysResolve[selector]) return;
-            this.keysResolve[selector] = key;
-
-        });
-
         sel.forEach((selector) => {
 
-            if (!this.modelLessCSS) return;
-            const keyCss = this.keysResolve[selector.selector];
-            if (!keyCss) return;
-            const baseRule = this.modelLessCSS.lessAST.ast[keyCss];
-            if (!baseRule) return;
-            cssText += `\n${selector.selector}{`
-            for (const key of Object.keys(baseRule)) {
-                const info = baseRule[key];
-                if (!info || typeof info === 'number') continue;
-                cssText += `\n${key}: ${info.value};`
-            }
-
-            cssText += `\n}`
+            if (!this.lessAstDest) return;
+            this.lessAstDest.select(selector.selector);
+            cssText += `\n${this.lessAstDest.exportSelectorGroupStrict(selector.selector)}`;
 
         });
+
+        if (!cssText) {
+
+            const { project, path} = mls.actual[3];
+            const info = mls.l2.getPath(`_${project}_${path}`);
+            const nameTag = convertFileNameToTag(info);
+            cssText += `
+            ${nameTag}{
+                #${active.id}{
+
+                }
+            }
+    
+            `    
+        }
 
         this.model?.setValue(cssText);
         this._ed1?.getAction('editor.action.formatDocument')?.run();
 
     }
 
-    private async createModel(storFile: mls.stor.IFileInfo): Promise<monaco.editor.ITextModel | undefined> {
+    private async createModel(storFile: mls.stor.IFileInfo, mode: 'ori' | 'dest'): Promise<monaco.editor.ITextModel | undefined> {
 
         try {
-            const uri = monaco.Uri.parse(`file://server/_${storFile.project}_l3_editor.less`);
+            const uri = monaco.Uri.parse(`file://server/_${storFile.project + mode}_l3_editor.less`);
             let model = monaco.editor.getModel(uri);
             if (!model) model = monaco.editor.createModel('', 'less', uri)
 
-            model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => this._onModelChange(e, model, storFile));
+            model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => {
+                this._onModelChange(e, mode);
+
+            }
+            );
 
             return model;
         } catch (e: any) {
@@ -225,14 +257,23 @@ export class PluginEditStyleL3 extends PluginBaseModule {
         }
     }
 
-    private _onModelChange(e: monaco.editor.IModelContentChangedEvent, activeModel: monaco.editor.ITextModel | null, storFile: mls.stor.IFileInfo): void {
+    private _onModelChange(e: monaco.editor.IModelContentChangedEvent, mode: 'ori' | 'dest'): void {
 
-        if (this._ed1) {
-            const uri = `file://server/_${storFile.project}_l3_editor.less`;
-            this.lessCSS = new LessCSS(uri.toString(), this._ed1, 'right');
-            this.lessCSS.setEditor(this._ed1);
+        if (this.inEdit) return;
 
-            this.changeLessOrigin();
+        if (mode === 'ori' && this.model) {
+
+            let isfirtTime = !this.lessAst;
+            this.lessAst = new LessAST(this.model);
+
+            if (isfirtTime) {
+
+                this.initalSelectors = [...this.lessAst.blocks.keys()].filter((i) => i.indexOf(' ') >= 0);
+
+            } else this.changeLessOrigin();
+
+        } else if (mode === 'dest' && this.modelDest) {
+            this.lessAstDest = new LessAST(this.modelDest);
         }
 
     }
@@ -242,35 +283,67 @@ export class PluginEditStyleL3 extends PluginBaseModule {
         clearTimeout(this.timeOnChangeLessOrigin);
         this.timeOnChangeLessOrigin = setTimeout(() => {
             this.changeLessOrigin2();
-        }, 500);
+        }, 600);
     }
 
     private changeLessOrigin2() {
 
-        if (!this.lessCSS || !this.modelLessCSS) return;
+        if (!this.lessAst || !this.lessAstDest) return;
 
-        const keys = Object.keys(this.lessCSS.lessAST.ast);
+        this.inEdit = true;
+        const keys = [...this.lessAst.blocks.keys()].filter((i) => i.indexOf(' ') >= 0);
         keys.forEach((myKey) => {
 
-            if (!this.lessCSS || !this.modelLessCSS) return;
-            const keyCss = this.keysResolve[myKey];
+            if (!this.lessAst || !this.lessAstDest) return;
+            const keyCss = this.keysResolve[myKey] || myKey;
             if (!keyCss) return;
 
-            if (this.modelLessCSS.lessAST.ast[keyCss]) {
-                this.modelLessCSS.setSelector(keyCss);
-                this.lessCSS.setSelector(myKey);
+            if (this.lessAstDest.blocks.get(keyCss)) {
+                this.lessAstDest.select(keyCss);
+                this.lessAst.select(keyCss);
+                this.mergeCssDeclarations();
 
-                const baseRules = this.lessCSS.lessAST.ast[myKey];
-                for (const attr of Object.keys(baseRules)) {
-                    const info = baseRules[attr];
-                    if (!info || typeof info === 'number' || typeof attr === 'number' || (this.modelLessCSS.styles as any)[attr] === info.value) continue;
-                    (this.modelLessCSS.styles as any)[attr] = info.value;
-                }
-
+            } else if (!this.lessAstDest.blocks.get(keyCss)) {
+                this.lessAst.select(myKey);
+                this.initalSelectors.push(keyCss);
+                this.lessAstDest.addSelector(keyCss, this.lessAst.rules as Record<string, string>);
             }
 
         });
 
+        const diff = this.initalSelectors.filter(item => !keys.includes(item));
+
+        diff.forEach((myKey) => {
+
+            if (!this.lessAst || !this.lessAstDest) return;
+            const keyCss = this.keysResolve[myKey] || myKey;
+            this.lessAstDest.removeSelector(keyCss);
+
+        });
+
+        const newLess = this.modelDest?.getValue() || '';
+        if (this.modelBase && this.modelBase.style && this.modelDest) this.modelBase.style.model.setValue(newLess);
+ 
+        this.inEdit = false;
+        setTimeout(() => {
+            this.modelDest?.setValue(newLess);
+            if (this.modelBase && this.modelBase.ts && this.modelBase.style) {
+                //mls.events.fireFileAction('editorChanged', this.modelBase.style.storFile, 'left', 0);
+                mls.events.fire([3], ['styleChanged'] as any, JSON.stringify({ position:'left', storFile:this.modelBase.style.storFile }));
+            }
+        }, 500)
+
+
+    }
+
+    private mergeCssDeclarations() {
+
+        if (!this.lessAst || !this.lessAstDest || !this.lessAst.rules) return;
+
+        for (const prop of Object.keys(this.lessAst.rules)) {
+            const vl = this.lessAst.rules[prop];
+            if (vl) this.lessAstDest.setRule(prop, vl);
+        }
     }
 
     private getMatchingRulesForElement(element: HTMLElement, iframeDoc: Window): ISelector[] {
@@ -288,11 +361,11 @@ export class PluginEditStyleL3 extends PluginBaseModule {
 
         for (const part of parts) {
             if (part.startsWith('&.')) {
-                const className = part.slice(1); // remove o '&'
+                const className = part.slice(1);
                 if (result.length > 0) {
-                    result[result.length - 1] += className; // junta com o anterior
+                    result[result.length - 1] += className;
                 } else {
-                    result.push(className); // fallback se for o primeiro
+                    result.push(className);
                 }
             } else {
                 result.push(part);

@@ -212,7 +212,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
             folder: split.length > 0 ? split.join('/') : '',
             extension: '.ts'
         });
-        if (!isValidName) return false;
+        if (!isValidName || name.indexOf('-') >= 0) return false;
         return true;
     }
 

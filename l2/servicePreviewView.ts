@@ -88,7 +88,6 @@ export class ServicePreviewView extends StateLitElement {
 
     private setEventsCollab(): void {
         mls.events.addListener(2, 'WidgetAction', this.onWidgetActionEvents.bind(this));
-        mls.events.addListener(3, 'L3EditEvents' as any, this.onL3EditEvents.bind(this));
     }
 
     connectedCallback() {
@@ -179,43 +178,6 @@ export class ServicePreviewView extends StateLitElement {
         this.selectIdinPreview(json.id, json.origin);
     }
 
-    private onL3EditEvents(ev: mls.events.IEvent) {
-
-        if (!ev.desc || ev.level !== 3) return;
-
-        const info = JSON.parse(ev.desc);
-
-        if (!info || !info.action || !info.position || info.position === 'right') return;
-
-        switch (info.action) {
-            case ('select'):
-                this.onSelect(info);
-                break;
-
-
-        }
-
-
-    }
-
-    private onSelect(info: any) {
-
-        if (!info.id) return;
-
-        const iframe = this.querySelector('iframe');
-        if (!iframe || !iframe.contentDocument) return;
-
-        const body = iframe.contentDocument.body;
-        if (!body) return;
-        const el = body.querySelector('#' + info.id) as HTMLElement;
-        if (!el) return;
-
-        const els = body.querySelectorAll('*[clb_mode="edit"]');
-        els.forEach((e) => e.removeAttribute('clb_mode'));
-        el.setAttribute('clb_mode', 'edit');
-
-    }
-
     private selectIdinPreview(id: string, origin: 'editor' | 'preview'): void {
 
         if (!id) return;
@@ -295,14 +257,12 @@ export class ServicePreviewView extends StateLitElement {
 
     private async addStyles() {
 
-        //if (!this.models || !this.models.style || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
-        //const { project, shortName, folder } = this.models.style.storFile;
         if (!this.file || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
         const { project, shortName, folder } = this.file;
         const id = convertFileNameToTag({ project, shortName, folder });
         const oldStyle = window.preview.iframe.contentDocument.head.querySelector(`style[id=${id}]`);
         const newStyle = document.createElement('style');
-        const newLess = await compileStyleUsingStorFile(shortName, project, this.actualtheme);
+        const newLess = await compileStyleUsingStorFile(shortName, project, folder, this.actualtheme);
         if (newLess) {
             newStyle.id = id;
             newStyle.textContent = newLess;
@@ -476,7 +436,7 @@ export class ServicePreviewView extends StateLitElement {
     private async setHTml(iframe: HTMLIFrameElement) {
 
         if (!iframe.contentDocument || !this.file) return;
-        let txt = await this.getFileContent();
+        let txt = await this.setHtmlByLevel()
         this.isService = this.checkIfIsService()
         this.lastHTML = txt;
 
@@ -505,6 +465,15 @@ export class ServicePreviewView extends StateLitElement {
             default: this.modeMinimum(ret, iframe); break;
         }
 
+    }
+
+    private async setHtmlByLevel():Promise<string> {
+
+        let txt = await this.getFileContent();
+        if (this.level === '3') txt = '<collab-preview-l3-100554>' + txt + '</collab-preview-l3-100554>';
+        if (this.level === '4') txt = '<collab-preview-l4-100554>' + txt + '</collab-preview-l4-100554>';
+        return txt;
+        
     }
 
     private async getFileContent(): Promise<string> {
