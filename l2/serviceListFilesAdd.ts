@@ -212,8 +212,14 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
             folder: split.length > 0 ? split.join('/') : '',
             extension: '.ts'
         });
-        if (!isValidName || name.indexOf('-') >= 0) return false;
+        if (!isValidName || this.hasInvalidCharacter(name)) return false;
         return true;
+    }
+
+    private hasInvalidCharacter(name:string) {
+        const invalidCharacters = /[_\{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
+        if (invalidCharacters.test(name) || name.indexOf("\\") >= 0) return true;
+        return false
     }
 
     private isValidNewName(obj: { shortName: string, project: number, level: number, extension: string, folder: string }): boolean {
