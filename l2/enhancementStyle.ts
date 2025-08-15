@@ -211,7 +211,7 @@ export async function compileStyleUsingStorFile(shortName: string, project: numb
     const storFileLess = mls.stor.files[keyToStorFileLess];
     if (!storFileLess) return;
 
-    let val = await storFileLess.getContent();
+    let val = storFileLess.getValueInfo ? (await storFileLess.getValueInfo()).content : await storFileLess.getContent();
     if (!val || typeof val !== 'string') return '';
 
     val = removeTokensFromSource(val);

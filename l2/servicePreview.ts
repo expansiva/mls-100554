@@ -340,7 +340,7 @@ export class ServicePreview100554 extends ServiceBase {
 
         mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['ModelHTMLCreated'] as any, (ev: mls.events.IEvent) => { this.onModelHTMLCreated(ev); });
         mls.events.addEventListener([2, 3, 4, 7], ['FileAction'], this.onMLSFileAction.bind(this));
-        mls.events.addListener(2, 'styleChanged' as any, this.onStyleChanged.bind(this));
+        mls.events.addEventListener([2,3], ['styleChanged' as any], this.onStyleChanged.bind(this));
         //mls.events.addListener(2, 'tsTestChanged' as any, this.onTsTestChanged.bind(this));
         mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['LevelChanged'] as any, this.onLevelChange.bind(this));
         mls.events.addListener(3, 'L3EditEvents' as any, this.onL3EditEvents.bind(this));

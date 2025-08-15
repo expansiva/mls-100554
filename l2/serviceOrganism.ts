@@ -7,6 +7,7 @@ import { loadPluginProject,forceServiceInstance } from './_100554_libCommom';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 import "./_100554_wcdToolboxItemActionEditAttrOut";
+import "./_100554_pluginExploreList";
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -98,6 +99,7 @@ export class ServiceOrganism100554 extends ServiceBase {
             type: 'onlyicon',
             selected: 0,
             options: [
+                { text: 'Explore', icon: 'e521' },
                 { text: 'Navigation', icon: 'f041' },
                 { text: 'Properties', icon: 'f0ce' },
                 { text: 'Style', icon: 'f53f' },
@@ -138,6 +140,8 @@ export class ServiceOrganism100554 extends ServiceBase {
     renderContent() {
 
         switch (this.activeTab) {
+            case 'icExplorer':
+                return this.renderExplorer();
             case 'icNavigation':
                 return this.renderNavigation();
             case 'icProperties':
@@ -149,6 +153,10 @@ export class ServiceOrganism100554 extends ServiceBase {
             default:
                 return html``;
         }
+    }
+
+    renderExplorer() {
+        return html`<plugin-explore-list-100554 .service=${this} autoprepare="true"></plugin-explore-list-100554>`;
     }
 
     renderNavigation() {
@@ -232,6 +240,8 @@ export class ServiceOrganism100554 extends ServiceBase {
             if (!this.visible || this.visible === 'false') {
                 this.openMe();
             }
+
+            if(this.menu.setTabActive) this.menu.setTabActive(1);
             
             setTimeout(()=>this.requestUpdate(),500);
 
@@ -251,11 +261,12 @@ export interface IWCDParams {
     op: ITabType,
 }
 
-export type ITabType = 'icDetails' | 'icNavigation' | 'icProperties' | 'icStyle';
+export type ITabType = 'icExplorer' | 'icDetails' | 'icNavigation' | 'icProperties' | 'icStyle';
 
 enum ESceneries {
-    'icNavigation' = 0,
-    'icProperties' = 1,
-    'icStyle' = 2,
-    'icDetails' = 3,
+    'icExplorer' = 0,
+    'icNavigation' = 1,
+    'icProperties' = 2,
+    'icStyle' = 3,
+    'icDetails' = 4,
 } 

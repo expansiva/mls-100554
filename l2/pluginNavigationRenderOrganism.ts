@@ -1,8 +1,9 @@
 /// <mls shortName="pluginNavigationRenderOrganism" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, repeat } from 'lit';
+import { html, repeat } from 'lit'; 
 import { customElement, state } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
+import { CollabPreviewL3 } from './_100554_collabPreviewL3';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -26,6 +27,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     private msg: MessageType = messages['en'];
     private atributeBase = 'id';
+    private elPreviewL3: CollabPreviewL3 | undefined;
 
     constructor() {
         super();
@@ -91,8 +93,8 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
+        this.setElPreview();
         const ar = this.getComponents();
-        //this.fireEventMode('edit');
         if (ar && ar.length > 0) return this.createNavigation(ar);
         this.tryRenderAgain();
         return html`<h3 style="padding:1rem">${this.msg.noItens}<h3>`;
@@ -159,6 +161,12 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         
     }
 
+    private setElPreview() {
+        const scope = window.preview?.iframe?.contentDocument?.body;
+        if (!scope) return;
+        this.elPreviewL3 = scope.querySelector('collab-preview-l3-100554') as CollabPreviewL3;
+    }
+
     private getComponents(): IInfoElChildren[] {
         const lessTags = ['script', 'style', 'body', 'head', 'html'];
         let ret: IInfoElChildren[] = [];
@@ -215,7 +223,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         if (active) active.classList.remove('activeBranch');
         target.classList.add('activeBranch')
 
-        this.fireSelectEdit(item.id);
+        if (this.elPreviewL3) this.elPreviewL3.selectElement(item.el);
 
     }
 
@@ -260,64 +268,17 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         this.unhighlightElement(item.el);
     };
 
-    private elOverlay: HTMLElement | undefined;
-    private createOverlay() {
-        const div = document.createElement("collab-aux-overlay");
-        div.style.outlineOffset = '-2px';
-        div.style.position = 'absolute';
-        div.style.backgroundColor = 'rgb(0 183 255 / 22%)';
-        div.style.zIndex = '99999';
-        const scope = window.preview?.iframe?.contentDocument?.body;
-        if (!scope) return div;
-        scope.appendChild(div);
-        return div;
-    }
-
     private highlightElement(el: HTMLElement) {
-
-        if (!this.elOverlay) this.elOverlay = this.createOverlay();
-        if (!this.elOverlay.isConnected) {
-            const scope = window.preview?.iframe?.contentDocument?.body;
-            if (scope) scope.appendChild(this.elOverlay);
-        }
-        const rect = el.getBoundingClientRect();
-        this.elOverlay.style.display = 'block';
-        this.elOverlay.style.top = `${rect.top + window.scrollY}px`;
-        this.elOverlay.style.left = `${rect.left + window.scrollX}px`;
-        this.elOverlay.style.width = `${rect.width}px`;
-        this.elOverlay.style.height = `${rect.height}px`;
+        if (!this.elPreviewL3) return;
+        this.elPreviewL3.setHover(el, true);
     }
 
     private unhighlightElement(el: HTMLElement) {
-        if (this.elOverlay) this.elOverlay.style.display = 'none';
+        
+        if (!this.elPreviewL3) return;
+        this.elPreviewL3.setHover(el, false);
     }
 
-    private timeFireEventMode = 0;
-    private fireEventMode(mode: 'edit' | 'noEdit') {
-        clearTimeout(this.timeFireEventMode);
-        this.timeFireEventMode = setTimeout(() => {
-            const param = {
-                'position': 'left',
-                'action': mode === 'edit' ? 'modeEdit' : 'modePreview'
-            }
-            mls.events.fire(3, 'L3EditEvents' as any, JSON.stringify(param));
-        }, 500);
-
-    }
-
-    private timeFireSelectEdit = 0;
-    private fireSelectEdit(id: string) {
-        clearTimeout(this.timeFireSelectEdit);
-        this.timeFireSelectEdit = setTimeout(() => {
-            const param = {
-                'position': 'left',
-                'action': 'select',
-                'id': id,
-            }
-            mls.events.fire(3, 'L3EditEvents' as any, JSON.stringify(param));
-        }, 500);
-
-    }
 
 }
 

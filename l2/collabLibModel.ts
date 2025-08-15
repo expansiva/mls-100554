@@ -376,12 +376,12 @@ async function _updateModelStatusLess(modelBase: mls.editor.IModelStyle, changed
         await mls.l2.typescript.compileAndPostProcess(fileModels.ts, true, true);
     }
 
-    //_dispatchEventLessChanged(position, modelBase.storFile)
-    _dispatchEventChanged(position, modelBase.storFile);
+    
+    //_dispatchEventChanged(position, modelBase.storFile);
     await _checkSameContent(modelBase, modelBase.storFile);
-
+    _dispatchEventChangedLess(position, modelBase.storFile)
     _dispatchEventEditorEvents(position, modelBase.storFile);
-    _dispatchEventStatusOrErrorChanged(position, modelBase.storFile);
+    //_dispatchEventStatusOrErrorChanged(position, modelBase.storFile);
 
 }
 
@@ -531,6 +531,15 @@ function _dispatchEventChanged(position: 'left' | 'right' | 'all', storFile: mls
         return;
     }
     mls.events.fireFileAction('editorChanged', storFile, position, 200);
+}
+
+function _dispatchEventChangedLess(position: 'left' | 'right' | 'all', storFile: mls.stor.IFileInfo) {
+    if (position === 'all') {
+        mls.events.fire([2], ['styleChanged'] as any, JSON.stringify({ position:'left', storFile }), 200);
+        mls.events.fire([2], ['styleChanged'] as any, JSON.stringify({ position:'right', storFile }),200);
+        return;
+    }
+    mls.events.fire([2], ['styleChanged'] as any, JSON.stringify({ position, storFile }),200);
 }
 
 async function createStorFiles(fileBase: mls.stor.IFileInfo | undefined, ext: string): Promise<mls.stor.IFileInfo> {
