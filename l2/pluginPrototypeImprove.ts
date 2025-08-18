@@ -579,14 +579,14 @@ updateNotes(value: string) {
         </div>
     </details>
 
-<pre>${JSON.stringify(this.improve, null, 2)}</pre>
+
 
       
     `;
   }
 }
 
-//
+//<pre>${JSON.stringify(this.improve, null, 2)}</pre>
 
 type Tone = 'friendly' | 'professional' | 'concise';
 type Grid = 'auto' | '1-col' | '2-col' | '3-col';
