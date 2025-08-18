@@ -8,6 +8,7 @@ import { convertFileNameToTag } from './_100554_utilsLit';
 import { readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 import "./_100554_wcdToolboxItemActionEditAttrOut";
 import "./_100554_pluginExploreList";
+import "./_100554_pluginPrototypeImprove";
 
 /// **collab_i18n_start**
 const message_pt = {
