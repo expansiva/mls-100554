@@ -2,8 +2,8 @@
 
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase'; 
-import { loadPluginProject,forceServiceInstance } from './_100554_libCommom';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
+import { loadPluginProject, forceServiceInstance } from './_100554_libCommom';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 import "./_100554_wcdToolboxItemActionEditAttrOut";
@@ -48,7 +48,7 @@ export class ServiceOrganism100554 extends ServiceBase {
     constructor() {
         super();
         this.init();
-        
+
     }
 
     private async init() {
@@ -103,8 +103,9 @@ export class ServiceOrganism100554 extends ServiceBase {
                 { text: 'Navigation', icon: 'f041' },
                 { text: 'Properties', icon: 'f0ce' },
                 { text: 'Style', icon: 'f53f' },
-                { text: 'Details', icon: '3f' }
-                
+                { text: 'Details', icon: '3f' },
+                { text: 'Improve', icon: 'f5dc' },
+
             ]
         },
         tools: {},
@@ -150,6 +151,8 @@ export class ServiceOrganism100554 extends ServiceBase {
                 return this.renderDetails();
             case 'icStyle':
                 return this.renderStyle();
+            case 'icImprove':
+                return this.renderImprove();
             default:
                 return html``;
         }
@@ -178,11 +181,15 @@ export class ServiceOrganism100554 extends ServiceBase {
         return html`<plugin-edit-style-l3-100554 .service=${this} msize="${this.msize}"></plugin-edit-style-l3-100554>`;
     }
 
+    renderImprove() {
+        return html`<plugin-prototype-improve-100554 scope="organism" ></plugin-prototype-improve-100554>`;
+    }
+
     //---------IMPLEMENTATION------------
 
     private async loadPlugins() {
 
-        const  project  = mls.actualProject;
+        const project = mls.actualProject;
         if (!project) return;
 
         const plgNav = await loadPluginProject(project, 'l3PageNavigation');
@@ -228,7 +235,7 @@ export class ServiceOrganism100554 extends ServiceBase {
             if (![3].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
 
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
-            
+
             const eventsValid = ['open'];
 
             if (
@@ -236,14 +243,14 @@ export class ServiceOrganism100554 extends ServiceBase {
                 !eventsValid.includes(fileAction.action)
             ) return;
 
-            
+
             if (!this.visible || this.visible === 'false') {
                 this.openMe();
             }
 
-            if(this.menu.setTabActive) this.menu.setTabActive(1);
-            
-            setTimeout(()=>this.requestUpdate(),500);
+            if (this.menu.setTabActive) this.menu.setTabActive(1);
+
+            setTimeout(() => this.requestUpdate(), 500);
 
         } catch (e) {
             console.info(e);
@@ -261,7 +268,7 @@ export interface IWCDParams {
     op: ITabType,
 }
 
-export type ITabType = 'icExplorer' | 'icDetails' | 'icNavigation' | 'icProperties' | 'icStyle';
+export type ITabType = 'icExplorer' | 'icDetails' | 'icNavigation' | 'icProperties' | 'icStyle' | 'icImprove';
 
 enum ESceneries {
     'icExplorer' = 0,
@@ -269,4 +276,6 @@ enum ESceneries {
     'icProperties' = 2,
     'icStyle' = 3,
     'icDetails' = 4,
+    'icImprove' = 5,
+
 } 

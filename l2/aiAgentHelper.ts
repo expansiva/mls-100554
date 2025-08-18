@@ -1,6 +1,6 @@
 /// <mls shortName="aiAgentHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { updateMessage, addMessages } from "./_100554_msgDBController";
+import { updateMessage, getMessage } from "./_100554_msgDBController";
 import { getUserId } from "./_100554_collabMessageHelper";
 
 
@@ -73,6 +73,12 @@ export const getNextPendingStepByAgentName = (task: mls.msg.TaskData, agentName:
   const allSteps = getAllSteps(task.iaCompressed?.nextSteps);
   const agentSteps = allSteps.filter((step): step is mls.msg.AIAgentStep => step.type === 'agent');
   return agentSteps.find(step => step.status === 'pending' && step.agentName === agentName) || null;
+}
+
+export const getNextFlexiblePendingStep = (task: mls.msg.TaskData): mls.msg.AIFlexibleResultStep | null => {
+  const allSteps = getAllSteps(task.iaCompressed?.nextSteps);
+  const agentSteps = allSteps.filter((step): step is mls.msg.AIFlexibleResultStep => step.type === 'flexible');
+  return agentSteps.find(step => step.status === 'pending') || null;
 }
 
 export const getNextInProgressStepByAgentName = (task: mls.msg.TaskData, agentName: string): mls.msg.AIAgentStep | null => {
@@ -252,7 +258,8 @@ export const updateStepStatus = async (context: mls.msg.ExecutionContext, stepId
     if (!ret || ret.statusCode !== 200) throw new Error("error on AI update status , stoped");
     if (ret.message) {
       context.message = ret.message;
-      await updateMessage(ret.message);
+      const message = await getMessage(`${ret.message.threadId}/${ret.message.createAt}`);
+      if (message) await updateMessage(ret.message);
     }
 
     context.task = ret.task;
