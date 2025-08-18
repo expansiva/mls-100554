@@ -672,7 +672,10 @@ export class ServicePreview100554 extends ServiceBase {
             if (tasks.size === 0) this.tasksInProgress.delete(this.page);
         }
 
-        if (!this.tasksInProgress.get(this.page) || this.tasksInProgress.get(this.page)?.size === 0) this.updateLoadingToFalseIfNoTasksRunning();
+        if (!this.tasksInProgress.get(this.page) || this.tasksInProgress.get(this.page)?.size === 0) {
+            this.updateLoadingToFalseIfNoTasksRunning();
+            this.preview(this.lastModePreview);
+        }
 
     };
 

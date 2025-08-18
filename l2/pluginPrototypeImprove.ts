@@ -1,13 +1,15 @@
 /// <mls shortName="pluginPrototypeImprove" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
 
 import { html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, state, property } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { collab_file_pen, collab_magnifying_glass } from './_100554_collabIcons';
-
+import { getState } from './_100554_collabState';
 
 @customElement('plugin-prototype-improve-100554')
 export class PluginPrototypeImprove100554 extends StateLitElement {
+
+  @property() scope: Scope = 'page'
 
   @state() improve: PrototypeImprove = {
     scope: 'page',
@@ -34,73 +36,179 @@ export class PluginPrototypeImprove100554 extends StateLitElement {
         action: [...actions, action],
       };
     }
+    this.onUpdateImproves();
+
   }
 
-  updateTextOption(option: keyof NonNullable<PrototypeImprove['text']>, value: any) {
-    this.improve = {
-      ...this.improve,
-      text: {
-        ...this.improve.text,
-        [option]: value,
-      },
-    };
+updateTextOption(option: keyof NonNullable<PrototypeImprove['text']>, value: any) {
+  const current = this.improve.text?.[option];
+  this.improve = {
+    ...this.improve,
+    text: {
+      ...this.improve.text,
+      [option]: current === value ? undefined : value,
+    },
+  };
+  this.onUpdateImproves();
+}
+
+updateLayoutOption(option: keyof NonNullable<PrototypeImprove['layout']>, value: any) {
+  const current = this.improve.layout?.[option];
+  this.improve = {
+    ...this.improve,
+    layout: {
+      ...this.improve.layout,
+      [option]: current === value ? undefined : value,
+    },
+  };
+  this.onUpdateImproves();
+}
+
+updateVisualOption(option: keyof NonNullable<PrototypeImprove['visual']>, value: any) {
+  const current = this.improve.visual?.[option];
+  this.improve = {
+    ...this.improve,
+    visual: {
+      ...this.improve.visual,
+      [option]: current === value ? undefined : value,
+    },
+  };
+  this.onUpdateImproves();
+}
+
+updateInteractionOption(option: keyof NonNullable<PrototypeImprove['interaction']>, value: any) {
+  const current = this.improve.interaction?.[option];
+  this.improve = {
+    ...this.improve,
+    interaction: {
+      ...this.improve.interaction,
+      [option]: current === value ? undefined : value,
+    },
+  };
+  this.onUpdateImproves();
+}
+
+updateAccessibilityOption(option: keyof NonNullable<PrototypeImprove['accessibility']>, value: any) {
+  const current = this.improve.accessibility?.[option];
+  this.improve = {
+    ...this.improve,
+    accessibility: {
+      ...this.improve.accessibility,
+      [option]: current === value ? undefined : value,
+    },
+  };
+  this.onUpdateImproves();
+}
+
+updateResponsivenessOption(option: keyof NonNullable<PrototypeImprove['responsiveness']>, value: any) {
+  const current = this.improve.responsiveness?.[option];
+  this.improve = {
+    ...this.improve,
+    responsiveness: {
+      ...this.improve.responsiveness,
+      [option]: current === value ? undefined : value,
+    },
+  };
+  this.onUpdateImproves();
+}
+
+updateNotes(value: string) {
+  this.improve = {
+    ...this.improve,
+    notes: value,
+  };
+  this.onUpdateImproves();
+}
+
+
+  onUpdateImproves() {
+    this.improve.scope = this.scope || 'page';
+    const prompt: string = this.buildImprovePrompt(this.improve);
+    const service = getState('preview.service');
+    if (!service) return;
+    const collabMessagesPrompt: HTMLElement = service.querySelector('collab-messages-prompt-100554');
+    if (!collabMessagesPrompt) return;
+    const text = `@@ImprovePrototype ${prompt}`
+    collabMessagesPrompt.setAttribute('text', text);
   }
 
-  updateLayoutOption(option: keyof NonNullable<PrototypeImprove['layout']>, value: any) {
-    this.improve = {
-      ...this.improve,
-      layout: {
-        ...this.improve.layout,
-        [option]: value,
-      },
-    };
-  }
+  private buildImprovePrompt(config: PrototypeImprove): string {
+    const parts: string[] = [];
 
-  updateVisualOption(option: keyof NonNullable<PrototypeImprove['visual']>, value: any) {
-    this.improve = {
-      ...this.improve,
-      visual: {
-        ...this.improve.visual,
-        [option]: value,
-      },
-    };
-  }
+    // Scope
+    if (config.scope === "page") {
+      parts.push("Improve the entire page.");
+    } else if (config.scope === "section") {
+      parts.push(`Improve the section with ID "${config.targetId}".`);
+    } else if (config.scope === "widget") {
+      parts.push(`Improve the widget with ID "${config.targetId}".`);
+    }
 
-  updateInteractionOption(option: keyof NonNullable<PrototypeImprove['interaction']>, value: any) {
-    this.improve = {
-      ...this.improve,
-      interaction: {
-        ...this.improve.interaction,
-        [option]: value,
-      },
-    };
-  }
+    // Actions
+    if (config.action?.length) {
+      parts.push(`Focus on actions: ${config.action.join(", ")}.`);
+    }
 
-  updateAccessibilityOption(option: keyof NonNullable<PrototypeImprove['accessibility']>, value: any) {
-    this.improve = {
-      ...this.improve,
-      accessibility: {
-        ...this.improve.accessibility,
-        [option]: value,
-      },
-    };
-  }
+    // Text
+    if (config.text) {
+      if (config.text.tone) parts.push(`Make the tone more ${config.text.tone}.`);
+      if (config.text.clarity) parts.push("Increase clarity.");
+      if (config.text.shorter) parts.push("Make the text shorter.");
+    }
 
-  updateResponsivenessOption(option: keyof NonNullable<PrototypeImprove['responsiveness']>, value: any) {
-    this.improve = {
-      ...this.improve,
-      responsiveness: {
-        ...this.improve.responsiveness,
-        [option]: value,
-      },
-    };
-  }
+    // Layout
+    if (config.layout) {
+      if (config.layout.grid) parts.push(`Use a ${config.layout.grid} grid layout.`);
+      if (config.layout.spacing) parts.push(`Apply ${config.layout.spacing} spacing.`);
+      if (config.layout.alignToGrid) parts.push("Align elements strictly to the grid.");
+      if (config.layout.reorderSections) parts.push("Consider reordering sections.");
+    }
 
-  updateNotes(value: string) {
-    this.improve = {
-      ...this.improve,
-      notes: value,
-    };
+    // Visual
+    if (config.visual) {
+      if (config.visual.contrast) parts.push(`Improve visual contrast: ${config.visual.contrast}.`);
+      if (config.visual.emphasizeHeaders) parts.push("Emphasize headers.");
+      if (config.visual.imagery) {
+        if (config.visual.imagery === "add") parts.push("Add more imagery.");
+        if (config.visual.imagery === "reduce") parts.push("Reduce the amount of imagery.");
+        if (config.visual.imagery === "keep") parts.push("Keep imagery as is.");
+      }
+    }
+
+    // Interaction
+    if (config.interaction) {
+      if (config.interaction.ctaProminence) {
+        parts.push(`Make CTAs more ${config.interaction.ctaProminence}.`);
+      }
+      if (config.interaction.navigationSimplify) {
+        parts.push("Simplify navigation.");
+      }
+      if (config.interaction.addFeedbackStates) {
+        parts.push("Add interactive feedback states.");
+      }
+    }
+
+    // Accessibility
+    if (config.accessibility?.largeTouchTargets) {
+      parts.push("Ensure large touch targets for accessibility.");
+    }
+
+    // Responsiveness
+    if (config.responsiveness) {
+      if (config.responsiveness.optimizeFor) {
+        parts.push(`Optimize for ${config.responsiveness.optimizeFor}.`);
+      }
+      if (config.responsiveness.stickyHeader) {
+        parts.push("Add a sticky header.");
+      }
+    }
+
+    // Notes
+    if (config.notes) {
+      parts.push(`Notes: ${config.notes}`);
+    }
+
+    return parts.join(" ");
   }
 
   renderContrastOptions() {
@@ -486,9 +594,10 @@ type Spacing = 'compact' | 'comfortable' | 'roomy';
 type Density = 'low' | 'medium' | 'high';
 type Contrast = 'normal' | 'high';
 type CtaLevel = 'low' | 'medium' | 'high';
+type Scope = 'page' | 'section' | 'widget';
 
 interface PrototypeImprove {
-  scope: 'page' | 'section' | 'widget';
+  scope: Scope
   targetId?: string;
   action?: ('review' | 'rewrite')[];
   text?: {

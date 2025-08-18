@@ -18,7 +18,7 @@ import {
 } from "./_100554_aiAgentHelper";
 
 
-import { getTask, getMessage } from "./_100554_msgDBController";
+import { getTask, getMessage, addMessage } from "./_100554_msgDBController";
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getUserId } from "./_100554_collabMessageHelper";
 import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
@@ -144,19 +144,25 @@ const maxStepsByTask = 100;
 
 export async function executeNextStep(context: mls.msg.ExecutionContext): Promise<void> {
     if (!context || !context.message || !context.task || !context.task.iaCompressed) throw new Error("Invalid context");
-    if (context.task.status === "paused" || context.task.status === "done" || context.modeSingleStep === true) return;
+    if (context.task.status === "paused" || context.task.status === "done" || context.modeSingleStep === true) {
+        notifyTaskChange(context);
+        return;
+    }
     const step = getNextPendentStep(context.task);
     if (!step) {
+        notifyTaskChange(context);
         console.error("finished all steps");
         return;
     }
 
     const { totalCost, totalSteps } = calculateStepsStatistics(context.task.iaCompressed.nextSteps, false);
     if (totalCost > maxCostByTask) {
+        notifyTaskChange(context);
         console.error("max cost reached");
         return;
     }
     if (totalSteps > maxStepsByTask) {
+        notifyTaskChange(context);
         console.error("max steps reached");
         return;
     }
