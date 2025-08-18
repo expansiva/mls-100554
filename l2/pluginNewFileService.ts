@@ -123,7 +123,12 @@ export class [className] extends ServiceBase {
             newExample = changeClassName(newExample, this.project, this.shortName);
             newExample = changeWidget(newExample, this.project, name);
         }
-        return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${this.enhancement}" groupName="${this.groupName}" folder="${this.folder}" />\n${newExample}\n`;;
+
+        const group = this.groupName && this.groupName != 'other' ? ` groupName="${this.groupName}"` : '';
+        const folder = this.folder ? ` folder="${this.folder}"` : '';
+        const enhancement =  this.enhancement ? this.enhancement : '_blank';
+
+        return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${enhancement}"${group}${folder} />\n${newExample}\n`;;
     }
 
     private async handleAddFile() {

@@ -90,7 +90,9 @@ export class PluginExploreList extends PluginBaseModule {
 
     @property() levelFiles: number = 2;
 
-    @property() project: number = 1; // -1: mode folder; 0: all project
+    @property() project: number = -1; // -1: noFilter; 0: all project
+
+    @property() filterProject: number = -1; // -1: noFilter; 0: all project
 
     @property() modeView: number = 0; // 0: alphabetical; 1: folder
 
@@ -311,7 +313,7 @@ export class PluginExploreList extends PluginBaseModule {
             ${this.history.length <= 0 ? '' :
                 html`
                     <li class="headerTitle">
-                        ${+this.project === 0 ? `${this.msg.history} (All Projects)` : `${this.msg.history}`}
+                        ${+this.filterProject === 0 ? `${this.msg.history} (All Projects)` : `${this.msg.history}`}
                     </li>
                     ${repeat(
                     this.history,
@@ -358,7 +360,7 @@ export class PluginExploreList extends PluginBaseModule {
         const folders: Record<string, mls.stor.IFileInfo[]> = {};
         this.files.forEach((f) => {
             let folder = f.folder;
-            let aux = this.project === 0 ? f.project + '/' : '';
+            let aux = this.filterProject === 0 ? f.project + '/' : '';
             if (!f.folder) folder = 'root';
 
             const keyFolder = aux + folder;
@@ -463,7 +465,7 @@ export class PluginExploreList extends PluginBaseModule {
         const actualL2 = (mls.actual[2] as any)[this.position]?.shortName;
         const actualL2Folder = (mls.actual[2] as any)[this.position]?.folder;
 
-        const validProject = this.project === 0 && mls.actualProject !== file.project && file.project !== 0 ? false : true;
+        const validProject = this.filterProject === 0 && mls.actualProject !== file.project && file.project !== 0 ? false : true;
 
         let auxValidProject = '';
 
@@ -494,16 +496,16 @@ export class PluginExploreList extends PluginBaseModule {
     private getAllName(file: mls.stor.IFileInfo, isHistory = false): string {
         let name = '';
         const folder = file.folder ? file.folder : '';
-        if (this.modeView === 0 && this.project === 0) {
+        if (this.modeView === 0 && this.filterProject === 0) {
             name = '_' + file.project + '_' + folder + '/' + file.shortName
-        } else if (this.modeView === 0 && this.project > 0) {
+        } else if (this.modeView === 0 && this.filterProject > 0) {
             name = folder ? folder + '/' + file.shortName : file.shortName;
         } else {
             name = file.shortName;
         }
 
         if (isHistory && folder) name = folder + '/' + file.shortName;
-        if (isHistory && this.project === 0) name = file.project + '_' + folder + '/' + file.shortName;
+        if (isHistory && this.filterProject === 0) name = file.project + '_' + folder + '/' + file.shortName;
 
         return name;
     }
@@ -615,8 +617,18 @@ export class PluginExploreList extends PluginBaseModule {
         spanFileName.onkeydown = (event: KeyboardEvent) => {
 
             if (event.key === "Enter") {
-                event.preventDefault(); // evita quebra de linha
-                const param = { project: mfile.project.toString(), name: spanFileName.innerText.trim(), mode: 'rename' };
+                event.preventDefault();
+
+                let name = spanFileName.innerText.trim();
+                let folder = '';
+
+                if (name.indexOf('/') >= 0) {
+                    const split1 = name.split('/');
+                    name = split1.pop() || '';
+                    folder = split1.join('/');
+                }
+
+                const param = { project: mfile.project.toString(), name, folder, mode: 'rename' };
                 if (!this.isValidNewName(mfile, param)) {
                     this.showError('[rename] invalid name');
                     return;
@@ -664,7 +676,7 @@ export class PluginExploreList extends PluginBaseModule {
             while (!isvalidName) {
 
                 name = storFile.shortName + idx;
-                const ret = this.isValidNewName(storFile, { project: storFile.project.toString(), name: name, mode: 'clone' });
+                const ret = this.isValidNewName(storFile, { project: storFile.project.toString(), name: name, folder: storFile.folder, mode: 'clone' });
                 if (!ret) {
                     idx++;
                 } else {
@@ -690,11 +702,11 @@ export class PluginExploreList extends PluginBaseModule {
 
     }
 
-    private async renameFile(storFile: mls.stor.IFileInfo, info: { project: string, name: string }) {
+    private async renameFile(storFile: mls.stor.IFileInfo, info: { project: string, name: string, folder: string }) {
 
         try {
             this.showLoading(true);
-            const file = await renameAllFiles(storFile, +info.project, info.name)
+            const file = await renameAllFiles(storFile, +info.project, info.name, info.folder)
             if (!file.ts || file.ts instanceof Error) return;
 
             this.setHistory(file.ts);
@@ -802,7 +814,8 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.project = mls.actualProject || 0;
+        this.project = this.project === -1 ? mls.actualProject || 0 : this.project;
+        this.filterProject = this.filterProject === -1 ? mls.actualProject || 0 : this.filterProject;
         const prjs = mls.l5.getProjectDetails(this.project)?.prj_dependencies || []
         this.myDep = [...prjs];
         this.myDep.push(this.project);
@@ -864,7 +877,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.project = 0;
+        this.filterProject = 0;
         await this.getFiles();
 
     }
@@ -875,7 +888,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.project = -1;
+        this.filterProject = -1;
         await this.getFiles();
 
     }
@@ -886,7 +899,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.project = mls.actualProject as number;
+        this.filterProject = mls.actualProject as number;
         this.getFiles();
     }
 
@@ -1014,18 +1027,18 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
     private validFileByLevel(sf: mls.stor.IFileInfo): boolean {
-    
+
         const ext = (this.extensionLevel as any)[this.levelFiles as any] as string;
 
-        if (    
+        if (
             !this.myDep.includes(sf.project) ||
             sf.level !== +(this.levelFiles as any) ||
             sf.extension !== ext
         ) return false;
 
-        if (this.project === mls.actualProject && sf.project !== this.project) return false;
+        if (this.filterProject === mls.actualProject && sf.project !== this.filterProject) return false;
 
-        if (this.project === -1 && sf.project !== mls.actualProject) return false;
+        if (this.filterProject === -1 && sf.project !== mls.actualProject) return false;
 
         if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
             return false;
@@ -1174,11 +1187,11 @@ export class PluginExploreList extends PluginBaseModule {
 
                 let key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
 
-                if (!mls.stor.files[key] && +this.project === 0) {
+                if (!mls.stor.files[key] && +this.filterProject === 0) {
                     await mls.stor.server.loadProjectInfoIfNeeded(i.project);
                     key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
                 }
-                
+
                 if (!mls.stor.files[key] || !this.validFileByLevel(mls.stor.files[key])) continue;
                 arraySfHistory.push(mls.stor.files[key]);
 
@@ -1240,43 +1253,15 @@ export class PluginExploreList extends PluginBaseModule {
 
     }
 
-    private validInputsAux(file: mls.stor.IFileInfo, action: { mode: string, project: string, name: string }): void {
 
-        if (file.hasError && ['clone', 'rename'].includes(action.mode)) throw new Error('It is not possible to perform this action on files with an error.');
-
-        if (action.mode === 'clone' && !action.name) {
-
-            let idx = 2;
-            let isvalidName = false;
-            while (!isvalidName) {
-
-                action.name = file.shortName + idx;
-                const ret = this.isValidNewName(file, action);
-                if (!ret) {
-                    idx++;
-                } else {
-                    isvalidName = true;
-                }
-
-            }
-
-            let elContentAux = this.querySelector('.elContentAux') as HTMLElement;
-            const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
-            if (iptName) iptName.value = action.name;
-
-        }
-
-        if (!this.isValidNewName(file, action)) throw new Error('Invalid name');
-
-    }
-
-    private isValidNewName(file: mls.stor.IFileInfo, action: { mode: string, project: string, name: string }): boolean {
+    private isValidNewName(file: mls.stor.IFileInfo, action: { mode: string, project: string, name: string, folder:string }): boolean {
 
         if (action.project === '' || action.name === '') return false;
         if (action.name.length === 0 || action.name.length > 255) return false;
-        const invalidCharacters = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
-        if (invalidCharacters.test(action.name)) return false;
-        const key = mls.stor.getKeyToFiles(+action.project, this.levelFiles as any, action.name, file.folder, file.extension);
+        const invalidCharacters = /[_\{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
+        if (invalidCharacters.test(action.name) || invalidCharacters.test(action.folder)) return false;
+
+        const key = mls.stor.getKeyToFiles(+action.project, this.levelFiles as any, action.name, action.folder, file.extension);
         return !mls.stor.files[key];
 
     }
