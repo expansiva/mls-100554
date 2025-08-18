@@ -126,17 +126,19 @@ export async function deleteAllFiles(storFile: mls.stor.IFileInfo): Promise<void
 
 }
 
-export async function renameFile(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): Promise<mls.stor.IFileInfo> {
+export async function renameFile(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder:string): Promise<mls.stor.IFileInfo> {
 
     let source = await storFile.getContent() as string;
     if (!source) throw new Error('[renameFile] Impossible rename this file:' + storFile.shortName);
 
-    source = replaceTripleslashAndTag(storFile, newProject, newShortName, storFile.folder, source);
+    if (!newFolder) newFolder = storFile.folder;
+
+    source = replaceTripleslashAndTag(storFile, newProject, newShortName, newFolder, source);
 
     const param: IReqCreateStorFile = {
         shortName: newShortName,
         project: newProject,
-        folder: storFile.folder,
+        folder: newFolder,
         level: storFile.level,
         source: source,
         extension: storFile.extension,
@@ -155,7 +157,7 @@ export async function renameFile(storFile: mls.stor.IFileInfo, newProject: numbe
     return file;
 }
 
-export async function renameAllFiles(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): Promise<IRetAllFiles> {
+export async function renameAllFiles(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder:string): Promise<IRetAllFiles> {
 
     const ret: IRetAllFiles = {};
 
@@ -166,7 +168,7 @@ export async function renameAllFiles(storFile: mls.stor.IFileInfo, newProject: n
         if (!mls.stor.files[key]) continue;
 
         const prop = mapExt[ext];
-        ret[prop] = await safeRename(mls.stor.files[key], newProject, newShortName);
+        ret[prop] = await safeRename(mls.stor.files[key], newProject, newShortName, newFolder);
 
     }
 
@@ -313,7 +315,7 @@ function replaceTripleslashAndTag(storFile: mls.stor.IFileInfo, newProject: numb
     const newTag = convertFileNameToTag({ folder: newFolder, project: newProject, shortName: newShortName });
     const regex = new RegExp(oldTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
 
-    src = src.replace(/shortName="[^"]*"/, `shortName="${newShortName}"`).replace(/project="[^"]*"/, `project="${newProject}"`);
+    src = src.replace(/shortName="[^"]*"/, `shortName="${newShortName}"`).replace(/project="[^"]*"/, `project="${newProject}"`).replace(/folder="[^"]*"/, `folder="${newFolder}"`);
     return src.replace(regex, newTag);
 
 }
@@ -334,9 +336,9 @@ async function safeCreate(param: IReqCreateStorFile, createMdl:boolean): Promise
     }
 }
 
-async function safeRename(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string): Promise<mls.stor.IFileInfo | Error> {
+async function safeRename(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder:string): Promise<mls.stor.IFileInfo | Error> {
     try {
-        return await renameFile(storFile, newProject, newShortName);
+        return await renameFile(storFile, newProject, newShortName, newFolder);
     } catch (err) {
         return err instanceof Error ? err : new Error(String(err));
     }
@@ -357,7 +359,7 @@ async function undoFileRenamed(storFile: mls.stor.IFileInfo) {
     if (!info.originalProject || !info.originalShortName)
         throw new Error('[undoFileRenamed] Not found info base for rename');
 
-    const originalKey = mls.stor.getKeyToFiles(info.originalProject, storFile.level, info.originalShortName, storFile.folder, storFile.extension);
+    const originalKey = mls.stor.getKeyToFiles(info.originalProject, storFile.level, info.originalShortName, info.originalFolder || storFile.folder, storFile.extension);
 
     const key = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
 
@@ -368,7 +370,7 @@ async function undoFileRenamed(storFile: mls.stor.IFileInfo) {
             shortName: info.originalShortName,
             extension: storFile.extension,
             versionRef: '0',
-            folder: storFile.folder
+            folder: info.originalFolder || storFile.folder
         };
         await mls.stor.addOrUpdateFile(params);
     }

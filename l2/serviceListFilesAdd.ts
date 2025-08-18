@@ -113,7 +113,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
                     </div>
                     <div>
                         <label>${this.msg.labelShortName}:</label>
-                        <input value=${this.shortName} type="text" id="iptShortName" @input=${this.handleInputInput}/>
+                        <input autocomplete="off" value=${this.shortName} type="text" id="iptShortName" @input=${this.handleInputInput}/>
                         <span>${this.error}</span>
                     </div>
                 </div>
