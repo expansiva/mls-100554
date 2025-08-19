@@ -7,6 +7,7 @@ import { collab_trash, collab_pencil, collab_bars } from './_100554_collabIcons'
 import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
 import { selectLevel, openService } from './_100554_libCommom';
 import { formatHtml, setValueInModeKeepingUndo } from './_100554_collabDOMSync';
+import { CollabPreviewL4 } from './_100554_collabPreviewL4';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -30,6 +31,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     private msg: MessageType = messages['en'];
     private atributeBase = 'id';
+    private elPreviewL4: CollabPreviewL4 | undefined;
 
     @state() nodes: IInfoElChildren[] = [];
 
@@ -42,6 +44,51 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     private setEvents(): void {
         mls.events.addEventListener([1, 2, 3, 4, 5, 6, 7], ['ToolBarSelected'], (ev) => this.onlevelChange(ev));
+
+        mls.events.addListener(4, 'L4EditEvents' as any, this.onL4EditEvents.bind(this));
+    }
+
+    private onL4EditEvents(ev: mls.events.IEvent) {
+
+        if (!ev.desc || ev.level !== 4) return;
+
+        const info = JSON.parse(ev.desc);
+
+        if (!info || !info.action || !info.position || info.position === 'left') return;
+
+        switch (info.action) {
+            case ('select'):
+                this.onSelect(info);
+                break;
+            case ('navigation'):
+                this.onNavigation(info);
+                break;
+            case ('openL3'):
+                this.onOpenL3(info);
+                break;
+            
+        }
+
+    }
+
+    private onSelect(info: any) {
+        if (!info.id) return;
+
+        const els = this.querySelectorAll('.activeBranch');
+        els.forEach((el) => el.classList.remove('activeBranch'));
+        this.activeId = info.id;
+    }
+
+    private onOpenL3(info: any) {
+        if ( !info.folder || !info.project || !info.shortName) return;
+        
+        const { folder, project, shortName } = info;
+        mls.actual[3].setFullName(folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`);
+        openService('_100554_serviceOrganism', 'left', 3);
+    }
+
+    private onNavigation(info: any) {
+        this.requestUpdate();
     }
 
     private onlevelChange(ev: mls.events.IEvent) {
@@ -101,7 +148,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
                     class="header ${cls}" 
                     @click="${(e: MouseEvent) => this.selectItem(e, item)}" 
                     @mouseover="${() => this.onMouseover(item)}"
-                    @mouseleave="${() => this.onMouseout(item)}"   
+                    @mouseout="${() => this.onMouseout(item)}"   
                 >
                     <span class="move-icon" title="Mover">
                         ${collab_bars}
@@ -133,7 +180,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
                 <ul>
                     ${repeat(
                         item.children,
-                        ((c: IInfoElChildren, idx: number) => c.tagName + idx) as any,
+                        ((c: IInfoElChildren, idx: number) => c.tagName + item.elDomNavigator?.id + idx) as any,
                         ((i: IInfoElChildren, idxI: number) => this.renderItemTree(i, idx + '_' + idxI, item.children)) as any
                     )}
                 </ul>
@@ -151,7 +198,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
                     @drop=${(e: DragEvent) => this.onDrop(e, item, parentArray)}
                     @dragend=${() => this.onDragEnd()}
                 >
-                    ${renderHeader()}
+                    ${renderHeader()} 
             </li>`;
         } else {
             return html`<li class="nav-item">${renderHeader()}</li>`;
@@ -244,12 +291,13 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
             block: "start",
             inline: "nearest"
         });
-        this.unhighlightElement();
-        setTimeout(() => {
-            this.highlightElement(item);
-        }, 100)
-        this.fireSelectEdit(item.id);
 
+        if (!this.elPreviewL4 || !this.elPreviewL4.selectElement || !this.elPreviewL4.isConnected) this.setElPreview();
+
+        if (!this.elPreviewL4 || !this.elPreviewL4.selectElement || !item.el) return;
+
+        this.elPreviewL4.selectElement(item.id);
+ 
     }
 
     private clickGroupHidden(e: MouseEvent) {
@@ -275,81 +323,25 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     private onMouseover(item: IInfoElChildren) {
 
-        setTimeout(() => {
-            this.highlightElement(item);
-        }, 50);
+        if (!this.elPreviewL4 || !this.elPreviewL4.setHover|| !this.elPreviewL4.isConnected) this.setElPreview();
+
+        if (!this.elPreviewL4 || !this.elPreviewL4.setHover || !item.el) return;
+
+        this.elPreviewL4.setHover(item.id, true);
     }
 
     private onMouseout(item: IInfoElChildren) {
-        this.unhighlightElement();
+        if (!this.elPreviewL4 || !this.elPreviewL4.setHover || !this.elPreviewL4.isConnected) this.setElPreview();
+
+        if (!this.elPreviewL4 || !this.elPreviewL4.setHover || !item.el) return;
+
+        this.elPreviewL4.setHover(item.id, false);
     };
 
-    private elOverlay: HTMLElement | undefined;
-    private createOverlay() {
-        const div = document.createElement("collab-aux-overlay");
-        div.style.outlineOffset = '-2px';
-        div.style.position = 'absolute';
-        div.style.backgroundColor = 'rgb(0 183 255 / 22%)';
-        div.style.zIndex = '99999';
+    private setElPreview() {
         const scope = window.preview?.iframe?.contentDocument?.body;
-        if (!scope) return div;
-        scope.appendChild(div);
-        return div;
-    }
-
-    private highlightElement(item: IInfoElChildren) {
-        if (!item.el) return;
-        const scope = window.preview?.iframe?.contentDocument?.body;
-
-        if (!this.elOverlay) this.elOverlay = this.createOverlay();
-        if (!this.elOverlay.isConnected) {
-            if (scope) scope.appendChild(this.elOverlay);
-        }
-
-        if (item.id && scope) {
-            const elPreview = scope.querySelector(`#${item.id}`) as HTMLElement;
-            if (!elPreview) return;
-            item.el = elPreview;
-        }
-
-        const rect = item.el.getBoundingClientRect();
-        this.elOverlay.style.display = 'block';
-        this.elOverlay.style.top = `${rect.top + window.scrollY}px`;
-        this.elOverlay.style.left = `${rect.left + window.scrollX}px`;
-        this.elOverlay.style.width = `${rect.width}px`;
-        this.elOverlay.style.height = `${rect.height}px`;
-
-    }
-
-    private unhighlightElement() {
-        if (this.elOverlay) this.elOverlay.style.display = 'none';
-    }
-
-    private timeFireEventMode = 0;
-    private fireEventMode(mode: 'edit' | 'noEdit') {
-        clearTimeout(this.timeFireEventMode);
-        this.timeFireEventMode = setTimeout(() => {
-            const param = {
-                'position': 'left',
-                'action': mode === 'edit' ? 'modeEdit' : 'modePreview'
-            }
-            mls.events.fire(3, 'L3EditEvents' as any, JSON.stringify(param));
-        }, 500);
-
-    }
-
-    private timeFireSelectEdit = 0;
-    private fireSelectEdit(id: string) {
-        clearTimeout(this.timeFireSelectEdit);
-        this.timeFireSelectEdit = setTimeout(() => {
-            const param = {
-                'position': 'left',
-                'action': 'select',
-                'id': id,
-            }
-            mls.events.fire(3, 'L3EditEvents' as any, JSON.stringify(param));
-        }, 500);
-
+        if (!scope) return;
+        this.elPreviewL4 = scope.querySelector('collab-preview-l4-100554') as CollabPreviewL4;
     }
 
     private slugToTitle(slug: string): string {

@@ -1,7 +1,7 @@
 /// <mls shortName="serviceSave" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, unsafeHTML, repeat } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IServiceMenu } from './_100554_serviceBase';
 import { collab_branch } from './_100554_collabIcons';
 import { undoFile } from './_100554_collabLibStor';
@@ -76,7 +76,9 @@ export class ServiceSave extends ServiceBase {
     private scenery: string = 'save';
     private exceededLimit: boolean = false;
 
-    @property() freeToSave: boolean = false;
+    @state() freeToSave: { ts: boolean, less: boolean, hasDS: boolean } = { ts: false, less: false, hasDS: false };
+
+    @property() isFreeToSave: boolean = false;
     @property() itens: IDefItem | undefined = undefined;
     @property() otherProjects: number[] = [];
     @property() error: string = '';
@@ -152,11 +154,21 @@ export class ServiceSave extends ServiceBase {
     private onFreeToSave: mls.events.Listener = async (ev: mls.events.IEvent): Promise<void> => {
         if (ev.type !== ('ProjectCompilationComplete' as mls.events.TypeEvent)) return;
         const v = JSON.parse(ev.desc as string);
-        if (v.free !== true) {
+        if (v.tsFree === false) {
             this.setError(this.myMessage.errorVerify);
             return;
+        }else if(v.tsFree){
+            this.freeToSave.ts = true;
         }
-        this.freeToSave = true;
+
+        if (v.lessFree === false) {
+            this.setError(this.myMessage.errorVerify);
+            return;
+        } else if(v.lessFree) {
+            this.freeToSave.less = true;
+        }
+
+        this.isFreeToSave = this.freeToSave.hasDS ? this.freeToSave.ts && this.freeToSave.less : this.freeToSave.ts;
     }
 
     private isServiceVisible(): boolean {
@@ -292,7 +304,7 @@ export class ServiceSave extends ServiceBase {
                         <h4 class="mt-3">${this.myMessage.comments}:</h4>
                         <div style="display:flex; gap:1rem; align-items:center;">
                             <textarea id="commitMessage" class="form-control" style="max-width:600px;" maxlength="50"></textarea>
-                            <button id="btn_save" ?disabled=${!this.freeToSave} class="btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
+                            <button id="btn_save" ?disabled=${!this.isFreeToSave} class="btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
                         </div>
                         <small style="font-size:12px;font-weight:bold">*${this.myMessage.obsVerify}</small>
                     </div>
@@ -357,6 +369,7 @@ export class ServiceSave extends ServiceBase {
         const objP = this.itens[+project];
         const fileInfo = objP[+level] as Ifile;
         let itens = fileInfo[file];
+        let forceError = itens.filter((i) => i.file.hasError === true).length > 0;
         itens = itens.sort((a, b) => a.text.localeCompare(b.text));
         return html`
             <li class="">
@@ -364,23 +377,23 @@ export class ServiceSave extends ServiceBase {
                     <span class="fatv fa-caret-righttv" @click="${this.openMeList}" > 
                         <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
                     </span>
-                    <input type = "checkbox" id = "l2-${indexPP}-${indexP}-${index}" @click="${this.clickSetValueAllChilds}"/> 
+                    <input type = "checkbox" ?disabled=${forceError} id = "l2-${indexPP}-${indexP}-${index}" @click="${this.clickSetValueAllChilds}"/> 
                     <label for= "l2-${indexPP}-${indexP}-${index}" > ${file} </label>
                 </div>
                 <ul>
-                    ${repeat(itens, ((item: any) => item) as any, ((i: any, indexI: any) => { return this.renderItem(i, indexPP, indexP, index, indexI); }) as any)}
+                    ${repeat(itens, ((item: any) => item) as any, ((i: any, indexI: any) => { return this.renderItem(i, indexPP, indexP, index, indexI, forceError); }) as any)}
                 </ul>
             </li>
         `;
     }
 
 
-    renderItem(item: Iitem, indexP: number, indexL: number, indexM: number, index: number) {
+    renderItem(item: Iitem, indexP: number, indexL: number, indexM: number, index: number, forceError:boolean) {
 
         return html`
-            <li style="padding-left: 1.1rem;" class="${item.errorLocal ? 'errorLocal' : ''}">
+            <li style="padding-left: 1.1rem;" class="${item.errorLocal  ? 'errorLocal' : ''}">
                 <div style="align-items: center;">
-                    ${item.disabled || item.onlyFather || item.errorLocal
+                    ${item.disabled || item.onlyFather || item.errorLocal || forceError
                 ? html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
                 : html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
             }
@@ -514,7 +527,6 @@ export class ServiceSave extends ServiceBase {
     private async setInfos() {
         try {
 
-            this.freeToSave = this.freeToSave;
             const objProjects: any = {};
             const filesKeys = Object.keys(mls.stor.files);
             this.otherProjects = await mls.stor.localDB.getAllProjects();
@@ -792,6 +804,7 @@ export class ServiceSave extends ServiceBase {
 
             const msg = txt.value;
             const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
+            this.verifyNeedSelectDS(array);
             this.arrayRollback = array;
             const oldOwner = this.owner;
             const oldRepo = this.repo;
@@ -837,6 +850,15 @@ export class ServiceSave extends ServiceBase {
             this.showLoader(false);
             console.info('Error onSave:', err);
         }
+    }
+
+    private verifyNeedSelectDS(array:mls.stor.IFileInfo[]) {
+
+        if (!this.freeToSave.hasDS) return;
+        const has = array.filter((a) => a.project === mls.actualProject  && a.shortName === 'designSystem' && a.extension === '.ts' && a.folder === '' ).length > 0;
+
+        if (!has) throw new Error('Design system needs to be saved along with upcoming changes!');
+        
     }
 
     private async afterSave(fileInfos: mls.stor.IFileInfo[]) {
@@ -1226,10 +1248,21 @@ export class ServiceSave extends ServiceBase {
     }
 
     private fireEventsDetails() {
+
+        this.isFreeToSave = false;
+        this.freeToSave = { ts: false, less: false, hasDS: false };
+        const key = mls.stor.getKeyToFiles(mls.actualProject as number, 2, 'designSystem', '', '.ts');
+        const file = mls.stor.files[key];
+        let aux = '';
+        if (file && file.inLocalStorage) { 
+            this.freeToSave.hasDS = true;
+            aux = '<plugin-verify-error-design-system-100554 autoPrepare="true"></plugin-verify-error-design-system-100554>'
+        }
+
         const options = {
             shortName: undefined,
             project: undefined,
-            htmlText: '<plugin-pullrequest-100554 autoPrepare="true"></plugin-pullrequest-100554><plugin-verify-error-100554 autoPrepare="true"></plugin-verify-error-100554>'
+            htmlText: '<plugin-pullrequest-100554 autoPrepare="true"></plugin-pullrequest-100554><plugin-verify-error-100554 autoPrepare="true"></plugin-verify-error-100554>' + aux
         }
         mls.events.fire(
             mls.actualLevel as any,
