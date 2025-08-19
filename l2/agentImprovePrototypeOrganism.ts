@@ -5,6 +5,8 @@ import { getPromptByHtml } from './_100554_aiPrompts';
 import { convertTagToFileName } from './_100554_utilsLit';
 import { createAllModels } from './_100554_collabLibModel';
 import { getImages } from './_100554_libUnsplash';
+import { getTokensLess } from './_100554_designSystemBase';
+import { removeTokensFromSource } from './_100554_enhancementStyle';
 
 import {
     getNextPendingStepByAgentName,
@@ -47,7 +49,7 @@ export function createAgent(): IAgent {
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
     if (!context || !context.message) throw new Error("Invalid context");
 
-    
+
     if (!context.task) {
 
         let messageReplace = context.message.content
@@ -87,8 +89,6 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         return;
     }
 
-    console.info(context.task);
-
     const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
     context = await updateStepStatus(context, step.stepId, "in_progress");
@@ -117,11 +117,12 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    context = await updateFile(context);
+    const rc = await updateFile(context);
+    if (rc.context) context = rc.context;
     context = await updateStepStatus(context, step.stepId, "completed");
     if (!context.task) throw new Error("Invalid context task");
     context.task = await updateTaskTitle(context.task, "Organism improved");
-    await executeNextStep(context);
+    if (!rc.hasNewSteps) await executeNextStep(context);
 
 }
 
@@ -153,18 +154,88 @@ async function updateFile(context: mls.msg.ExecutionContext) {
         for (const [key, url] of Object.entries(resolvedImages)) {
             contentTS = replaceByPriority(contentTS, key, url);
         }
-
     }
+
+    let hasErrorLess: boolean = false;
+    let hasErrorTypescript: boolean = false;
 
     if (contentHTML && models.html) models.html.model.setValue(contentHTML);
     if (contentTS && models.ts) {
-
         models.ts.model.setValue(contentTS);
+        const ok = await mls.l2.typescript.compileAndPostProcess(models.ts, true, false);
+        hasErrorTypescript = ok === false;
     }
-    if (contentLess && models.style) models.style.model.setValue(contentLess);
-    context = await updateStepStatus(context, step.stepId, "completed");
-    return context;
+    if (contentLess && models.style) {
+        models.style.model.setValue(contentLess);
+        const ok = await mls.l2.less.compileStyle(models.style);
+        hasErrorLess = ok === false;
+    }
 
+    context = await updateStepStatus(context, step.stepId, "completed");
+
+    if ((hasErrorLess || hasErrorTypescript)) {
+        const res = await fireAgentFix(context, hasErrorLess, hasErrorTypescript, +projectMemory, folderMemory, shortNameMemory, step.stepId);
+        if (res) context = res;
+        return {
+            hasNewSteps: true,
+            context
+        }
+    }
+
+    return {
+        hasNewSteps: false,
+        context
+    };
+
+}
+
+async function fireAgentFix(
+    context: mls.msg.ExecutionContext,
+    hasErrorLess: boolean,
+    hasErrorTypescript: boolean,
+    project: number,
+    folder: string | undefined,
+    shortName: string,
+    stepId: number
+) {
+
+    const page = folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`
+
+    const nextStepsFix = [];
+    let nextStepId = stepId + 1;
+    if (hasErrorLess) {
+        const data = { page, prompt: 'Fix errors in files', position: 'left', mode: 'less' }
+        const newStep: mls.msg.AIPayload = {
+            agentName: 'agentFix',
+            prompt: JSON.stringify(data),
+            status: 'pending',
+            stepId: nextStepId,
+            interaction: null,
+            nextSteps: null,
+            rags: null,
+            type: 'agent'
+        };
+
+        nextStepId = nextStepId + 1;
+        nextStepsFix.push(newStep);
+    }
+
+    if (hasErrorTypescript) {
+        const data = { page, prompt: 'Fix errors in files', position: 'left', mode: 'typescript' }
+        const newStep: mls.msg.AIPayload = {
+            agentName: 'agentFix',
+            prompt: JSON.stringify(data),
+            status: 'pending',
+            stepId: nextStepId,
+            interaction: null,
+            nextSteps: null,
+            rags: null,
+            type: 'agent'
+        };
+        nextStepsFix.push(newStep);
+    }
+
+    return await addNewStep(context, stepId, nextStepsFix);
 
 }
 
@@ -172,12 +243,18 @@ async function updateFile(context: mls.msg.ExecutionContext) {
 async function getPrompts(data: IDataMessage, info: mls.cbe.IPath): Promise<mls.msg.IAMessageInputType[]> {
 
     const typescript = await getContentByExtension(info, 'ts');
-    const html = await getContentByExtension(info, 'html');
-    const less = await getContentByExtension(info, 'style');
+    let less = await getContentByExtension(info, 'style');
+    if (less) less = removeTokensFromSource(less);
 
+    const themeModule = await import(`./_${info.project}_${info.folder}/module`);
+    let theme = 'Default';
+    if (themeModule && themeModule.moduleConfig && themeModule.moduleConfig.theme && typeof themeModule.moduleConfig.theme === 'string') {
+        theme = themeModule.moduleConfig.theme;
+    }
+    const tokens = await getTokensLess(info.project, theme);
     const dataForReplace = {
         typescript,
-        html,
+        tokens,
         less,
         promptUser: data.prompt
     }
