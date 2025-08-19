@@ -6,7 +6,7 @@ import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
     updateStepStatus,
-    getNextPendentStep,
+    getNextFlexiblePendingStep,
     updateTaskTitle,
     appendLongTermMemory,
 } from "./_100554_aiAgentHelper";
@@ -96,9 +96,11 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
+    console.info({ step });
 
+    context = await updateFile(context);
     context = await updateStepStatus(context, step.stepId, "completed");
-    await updateFile(context);
+
     if (!context.task) throw new Error("Invalid context task");
     context.task = await updateTaskTitle(context.task, "Widget fixed");
     await executeNextStep(context);
@@ -496,8 +498,8 @@ async function updateFile(context: mls.msg.ExecutionContext) {
 
 
     if (!context || !context.task) throw new Error('Not found context to updateFile');
-    const step = getNextPendentStep(context.task);
-
+    const step = getNextFlexiblePendingStep(context.task);
+    
     if (!step || step.type !== 'flexible') throw new Error('Invalid step in updateFile');
     const result: IDataResult = step.result;
 
@@ -539,6 +541,9 @@ async function updateFile(context: mls.msg.ExecutionContext) {
 
     refreshStateLock(pageMemory, position, false);
     serviceSource.formatMonaco();
+
+    context = await updateStepStatus(context, step.stepId, "completed");
+    return context;
 
 }
 

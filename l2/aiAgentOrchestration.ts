@@ -108,7 +108,7 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
     }
 }
 
-export async function addNewStep(context: mls.msg.ExecutionContext, parentStepId: number, steps: mls.msg.AIPayload[], newTaskTitle = "Pending") {
+export async function addNewStep(context: mls.msg.ExecutionContext, parentStepId: number, steps: mls.msg.AIPayload[], newTaskTitle = "Pending"): Promise<mls.msg.ExecutionContext | undefined> {
 
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     if (!context.task.messageid_created) throw new Error("addNewInteractionInAiTask: context.task.messageid_created is null");
@@ -130,6 +130,7 @@ export async function addNewStep(context: mls.msg.ExecutionContext, parentStepId
         context.task = response.task;
         notifyTaskChange(context);
         executeNextStep(context);
+        return context;
 
     } catch (error: any) {
         const msg = 'Error: ' + error.message || 'addNewStep ';
@@ -236,7 +237,8 @@ async function executeNextTool(context: mls.msg.ExecutionContext, step: mls.msg.
         }
 
         if ((mls as any).istraceAgent) console.log(JSON.stringify(context.task, null, 2));
-        return await addNewStep(context, stepdIdToChangeStatus, [newStep]);
+        await addNewStep(context, stepdIdToChangeStatus, [newStep]);
+        return;
 
     }
 
