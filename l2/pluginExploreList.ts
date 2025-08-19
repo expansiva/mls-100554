@@ -80,6 +80,8 @@ export class PluginExploreList extends PluginBaseModule {
 
     public service: ServiceBase | undefined;
 
+    private filterByLevel: Record<string, { prj: number, group: number }> = {};
+
     @property({ type: Boolean }) autoPrepare: boolean = false;
 
     @property() mode: string = 'list';
@@ -105,6 +107,8 @@ export class PluginExploreList extends PluginBaseModule {
     @property({ type: Array }) history: mls.stor.IFileInfo[] = [];
 
     @queryAll('li') lis: HTMLElement[] | undefined;
+
+
 
     constructor() {
         super();
@@ -258,6 +262,8 @@ export class PluginExploreList extends PluginBaseModule {
             auxS = `<b>[${this.info.storage}]</b> <span class="fa fa-location-dot"></span> <b>${this.msg.filesInLocalStorage}.</b>`;
         }
 
+
+
         return html`
         <div class="groupHeader">
             <header class="toolbar">
@@ -268,25 +274,25 @@ export class PluginExploreList extends PluginBaseModule {
                 <div class="toolbar__center">
                     <div class="toolbar__radio-group">
                         <label @click="${this.clickRadioProjectActual}" title="project">
-                            <input type="radio" name="${this.position}project" value="${this.projectLabel}" checked />
-                            <span>${this.projectLabel}</span>
+                            <input type="radio" name="${this.position + mls.actualLevel}project" value="${this.projectLabel}" ?checked=${ this.filterProject !== 0} />
+                            <span class="${this.filterProject !== 0 ? 'checked' : ''}">${this.projectLabel}</span>
                         </label>
                         <label @click="${this.clickRadioProject0}" title="all project">
-                            <input type="radio" name="${this.position}project" value="0" />
-                            <span>${this.msg.localProject}</span>
+                            <input type="radio" name="${this.position + mls.actualLevel}project" value="0" ?checked=${ this.filterProject === 0} />
+                            <span class="${this.filterProject === 0 ? 'checked' : ''}">${this.msg.localProject}</span>
                         </label>
                     </div>
 
                     <div class="toolbar__radio-group">
                         <label @click="${this.clickRadioSortAlph}" title="sort alphabetical">
-                            <input type="radio" name="${this.position}group"  value="alphabetical" checked />
-                            <span>
+                            <input type="radio" name="${this.position + mls.actualLevel}group"  value="alphabetical" ?checked=${this.modeView === 0} />
+                            <span class="${this.modeView === 0 ? 'checked' : ''}">
                             <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 576 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M183.6 469.6C177.5 476.2 169 480 160 480s-17.5-3.8-23.6-10.4l-88-96c-11.9-13-11.1-33.3 2-45.2s33.3-11.1 45.2 2L128 365.7 128 64c0-17.7 14.3-32 32-32s32 14.3 32 32l0 301.7 32.4-35.4c11.9-13 32.2-13.9 45.2-2s13.9 32.2 2 45.2l-88 96zM320 320c0-17.7 14.3-32 32-32l128 0c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9L429.3 416l50.7 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-128 0c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9L402.7 352 352 352c-17.7 0-32-14.3-32-32zM416 32c12.1 0 23.2 6.8 28.6 17.7l64 128 16 32c7.9 15.8 1.5 35-14.3 42.9s-35 1.5-42.9-14.3L460.2 224l-88.4 0-7.2 14.3c-7.9 15.8-27.1 22.2-42.9 14.3s-22.2-27.1-14.3-42.9l16-32 64-128C392.8 38.8 403.9 32 416 32zM395.8 176l40.4 0L416 135.6 395.8 176z"/></svg>
                             </span>
                         </label>
                         <label @click="${this.clickRadioSortFolder}" title="sort folder">
-                            <input type="radio" name="${this.position}group" value="folder" />
-                            <span>
+                            <input type="radio" name="${this.position + mls.actualLevel}group" value="folder" ?checked=${this.modeView !== 0} />
+                            <span class="${this.modeView !== 0 ? 'checked' : ''}">
                             <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 576 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32l0 96L0 384c0 35.3 28.7 64 64 64l192 0 0-64L64 384l0-224 192 0 0-64L64 96l0-64zM288 192c0 17.7 14.3 32 32 32l224 0c17.7 0 32-14.3 32-32l0-128c0-17.7-14.3-32-32-32l-98.7 0c-8.5 0-16.6-3.4-22.6-9.4L409.4 9.4c-6-6-14.1-9.4-22.6-9.4L320 0c-17.7 0-32 14.3-32 32l0 160zm0 288c0 17.7 14.3 32 32 32l224 0c17.7 0 32-14.3 32-32l0-128c0-17.7-14.3-32-32-32l-98.7 0c-8.5 0-16.6-3.4-22.6-9.4l-13.3-13.3c-6-6-14.1-9.4-22.6-9.4L320 288c-17.7 0-32 14.3-32 32l0 160z"/></svg></span>
                         </label>
                     </div>
@@ -814,14 +820,26 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.project = this.project === -1 ? mls.actualProject || 0 : this.project;
-        this.filterProject = this.filterProject === -1 ? mls.actualProject || 0 : this.filterProject;
+        this.setLastFilter();
         const prjs = mls.l5.getProjectDetails(this.project)?.prj_dependencies || []
         this.myDep = [...prjs];
         this.myDep.push(this.project);
         this.projectLabel = this.project.toString();
         this.fireEventLoadProject();
         await this.getFiles();
+
+    }
+
+    private setLastFilter() {
+        this.project = this.project === -1 ? mls.actualProject || 0 : this.project;
+        if (this.filterByLevel[mls.actualLevel]) {
+
+            this.filterProject = this.filterByLevel[mls.actualLevel].prj;
+            this.modeView = this.filterByLevel[mls.actualLevel].group;
+        } else {
+
+            this.filterProject = this.filterProject === -1 ? mls.actualProject || 0 : this.filterProject;
+        }
 
     }
 
@@ -878,17 +896,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.storage = 0;
         this.info.error = 0;
         this.filterProject = 0;
-        await this.getFiles();
-
-    }
-
-    private async clickRadioProject1(e: MouseEvent) {
-
-        this.info.tot = 0;
-        this.info.version = 0;
-        this.info.storage = 0;
-        this.info.error = 0;
-        this.filterProject = -1;
+        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
         await this.getFiles();
 
     }
@@ -900,15 +908,18 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.storage = 0;
         this.info.error = 0;
         this.filterProject = mls.actualProject as number;
+        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
         this.getFiles();
     }
 
     private clickRadioSortAlph(e: MouseEvent): void {
         this.modeView = 0;
+        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
     }
 
     private clickRadioSortFolder(e: MouseEvent): void {
         this.modeView = 1;
+        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
     }
 
     private inFilter = false;
@@ -1254,7 +1265,7 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
 
-    private isValidNewName(file: mls.stor.IFileInfo, action: { mode: string, project: string, name: string, folder:string }): boolean {
+    private isValidNewName(file: mls.stor.IFileInfo, action: { mode: string, project: string, name: string, folder: string }): boolean {
 
         if (action.project === '' || action.name === '') return false;
         if (action.name.length === 0 || action.name.length > 255) return false;
