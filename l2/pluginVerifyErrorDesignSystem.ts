@@ -1,21 +1,21 @@
-/// <mls shortName="pluginVerifyError" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="pluginVerifyErrorDesignSystem" project="100554" enhancement="_100554_enhancementLit" />
 
 import { html, repeat } from 'lit';
-import { property } from 'lit/decorators.js';
+import { property, customElement } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { initCompileMonaco } from './_100554_collabInit';
+import { preCompileLessByThemeOrDefault } from './_100554_designSystemBase';
 
 /// **collab_i18n_start**
 const message_pt = {
-    fileVerification: 'Verificação de arquivos',
-    checkFiles: 'Verificando arquivos',
+    fileVerification: 'Verificação de arquivos less',
+    checkFiles: 'Verificando arquivos less',
     noErros: "Nenhum erro encontrado",
     cancel: 'Cancelar verificação'
 };
 
 const message_en = {
-    fileVerification: 'File verification',
-    checkFiles: 'Checking files',
+    fileVerification: 'Less file verification',
+    checkFiles: 'Checking less files',
     noErros: 'No errors found',
     cancel: 'Cancel verification',
 };
@@ -28,7 +28,8 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
-export class PluginVerifyError extends PluginBaseModule {
+@customElement('plugin-verify-error-design-system-100554')
+export class PluginVerifyErrorDesignSystem extends PluginBaseModule {
 
     private msg = messages['en'];
     private continueVerify = true;
@@ -129,13 +130,16 @@ export class PluginVerifyError extends PluginBaseModule {
             const prj = mls.actualProject;
             if (!prj) throw new Error('Not found project');
 
-            await initCompileMonaco(prj);
-
-            const ret = await mls.l2.typescript.compileAll(prj, this.progressCallback.bind(this));
+            const key = mls.stor.getKeyToFiles(prj, 2, 'designSystem', '', '.ts');
+            const file = mls.stor.files[key];
+            let ret: any = [];
+            if (file && file.inLocalStorage) {
+                ret = await this.compileAll(prj, this.progressCallback.bind(this));
+            }
 
             this.listErrors = ret;
             this.setFilesErros(this.listErrors);
-            
+
             if (!this.continueVerify) this.fireEvent(true);
             else this.fireEvent(this.listErrors.length === 0);
 
@@ -146,6 +150,46 @@ export class PluginVerifyError extends PluginBaseModule {
             this.error = e.message;
         }
 
+    }
+
+    private async compileAll(
+        project: number,
+        onProgress?: (current: number, total: number, results: string[]) => boolean
+    ): Promise<string[]> {
+
+        const files: mls.stor.IFileInfo[] = Object.keys(mls.stor.files)
+            .filter(key => {
+                const fi = mls.stor.files[key];
+                return fi.project === project && fi.extension === '.less';
+            })
+            .map(key => mls.stor.files[key]);
+
+        const result: string[] = [];
+
+        for await (const file2 of files) {
+
+
+            try {
+
+                let src = file2.getValueInfo ? (await file2.getValueInfo()).content as string : await file2.getContent() as string;
+                if (src === null) src = await file2.getContent() as string;
+
+                if (!src || src === null) continue;
+
+                const theme = file2.folder ? file2.folder : 'Default';
+                await preCompileLessByThemeOrDefault(mls.actualProject as number, src, theme);
+                
+            } catch (e:any) {
+
+                const name = file2.folder ? `_${file2.project}_${file2.folder}/${file2.shortName}` : `_${file2.project}_${file2.shortName}`;
+
+                result.push(`--- Error compiling ${name} ${e.message}`);
+            }
+        
+            if (onProgress && !onProgress(files.indexOf(file2), files.length, result)) break
+        }
+    
+        return result;
     }
 
     private setFilesErros(array: string[]) {
@@ -186,12 +230,8 @@ export class PluginVerifyError extends PluginBaseModule {
         mls.events.fire(
             mls.actualLevel as any,
             'ProjectCompilationComplete',
-            JSON.stringify({ tsFree: free }),
+            JSON.stringify({ lessFree: free }),
             0
         );
     }
-}
-
-if (!customElements.get('plugin-verify-error-100554')) {
-    customElements.define('plugin-verify-error-100554', PluginVerifyError);
 }

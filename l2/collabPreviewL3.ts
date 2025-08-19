@@ -48,8 +48,6 @@ export class CollabPreviewL3 extends CollabLitElement {
         if (this.elOverlayHover && this.elOverlayHover.isConnected) return;
         const div = document.createElement("collab-aux-overlay");
         div.style.outlineOffset = '-2px';
-        div.style.position = 'absolute';
-        div.style.backgroundColor = 'rgb(0 183 255 / 22%)';
         div.style.zIndex = '99999';
         div.style.display = 'block';
         this.appendChild(div);
@@ -62,10 +60,6 @@ export class CollabPreviewL3 extends CollabLitElement {
         if (this.elOverlaySelected && this.elOverlaySelected.isConnected) return;
         const div = document.createElement("collab-selected-overlay");
         div.style.outlineOffset = '-2px';
-        div.style.position = 'absolute';
-        div.style.background = 'transparent';
-        div.style.border = '1px solid rgb(0 183 255 / 22%)';
-        div.style.zIndex = '-1';
         div.style.display = 'block';
         this.appendChild(div);
         this.elOverlaySelected = div;
@@ -110,6 +104,8 @@ export class CollabPreviewL3 extends CollabLitElement {
 
         if (!this.elOverlaySelected) this.createOverlaySelected();
         if (!this.elOverlaySelected) return;
+
+        if (this.elOverlayHover) this.elOverlayHover.style.display = 'none';
 
         const rect = el.getBoundingClientRect();
         this.elOverlaySelected.style.display = 'block';

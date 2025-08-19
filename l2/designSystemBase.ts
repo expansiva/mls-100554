@@ -227,8 +227,36 @@ export async function preCompileLess(project: number, less: string, theme: strin
     const prefix = ':root';
 
     try {
+
+        less = removeTokensFromSource(less);
         const tokenInfo = tokens.find((item) => item.themeName === theme);
         if (!tokenInfo) return '';
+        const allTokens = { ...tokenInfo.color, ...tokenInfo.typography, ...tokenInfo.global };
+        const darkAndLight = getDarkAndLight(allTokens);
+        const newLess = convertLessTokensToCss(less, darkAndLight['root']);
+        const tokensLess = await getTokensLess(project, theme);
+        const res = await compileLess(`${newLess}\n${tokensLess}`)
+        return res;
+    } catch (err: any) {
+        throw new Error(`Error on pre compile tokens Less: ${err.message}`);
+    }
+
+}
+
+export async function preCompileLessByThemeOrDefault(project: number, less: string, theme: string): Promise<string> {
+
+    const tokens = await getTokens(project);
+    const prefix = ':root';
+
+    try {
+
+        less = removeTokensFromSource(less);
+        let tokenInfo = tokens.find((item) => item.themeName === theme);
+        if (!tokenInfo) {
+            tokenInfo = tokens.find((item) => item.themeName === 'Default');
+            theme = 'Default';
+        }
+        if (!tokenInfo) throw new Error(`Not found tokens`);
         const allTokens = { ...tokenInfo.color, ...tokenInfo.typography, ...tokenInfo.global };
         const darkAndLight = getDarkAndLight(allTokens);
         const newLess = convertLessTokensToCss(less, darkAndLight['root']);
@@ -317,6 +345,11 @@ function convertLessTokensToCss(less: string, tokens: IKeyValueToken): string {
 
         return `var(--${token})`;
     });
+}
+
+export function removeTokensFromSource(src: string) {
+    const regex = /\/\/Start Less Tokens[\s\S]*?\/\/End Less Tokens/g;
+    return src.replace(regex, '');
 }
 
 
