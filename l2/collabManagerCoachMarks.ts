@@ -90,7 +90,7 @@ const infoMark: { [key: string]: ICoachMarks } = {
                 autoClose: true
             },
             {
-                elementRef: `collab-nav-2-item[data-service="_100554_serviceProject"]`,
+                elementRef: `collab-nav-2-item[data-service="_100554_serviceUnit"]`,
                 text: msg.project,
                 position: "bottom",
                 marginV: 25,
