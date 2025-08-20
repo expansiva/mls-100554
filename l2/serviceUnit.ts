@@ -51,7 +51,7 @@ export class ServiceUnit extends ServiceBase {
     }
 
     public details: IService = {
-        icon: '&#xf07c',
+        icon: '&#xf5da',
         state: 'foreground',
         position: 'left',
         tooltip: 'Unit',
@@ -69,24 +69,6 @@ export class ServiceUnit extends ServiceBase {
         this.activeTab = ETabs[index] as IScenery;
     }
 
-    private getMenuTabsByLevel(): IOptions[] {
-        if (!this.level) return [];
-        if (!this.position) {
-            return [
-                { text: 'Explore', icon: 'e521' }
-            ]
-        }
-
-        if (this.level === 2 && this.position === 'right') {
-            return [
-                { text: 'Explore', icon: 'e521' }
-            ]
-        }
-        return [
-            { text: 'Explore', icon: 'e521' },
-            { text: 'ShowCase', icon: 'f5da' }
-        ]
-    }
 
     public menu: IServiceMenu = {
         title: '',
@@ -95,7 +77,7 @@ export class ServiceUnit extends ServiceBase {
             group: 'Mode',
             type: 'onlyicon',
             selected: 0,
-            options: this.getMenuTabsByLevel()
+            options: [ { text: 'Explore', icon: 'e521' } ]
         },
         tools: {},
         onClickMain: this.onClickMain.bind(this),
@@ -133,7 +115,6 @@ export class ServiceUnit extends ServiceBase {
 
         if (this.visible && this.level !== this.lastLevel) {
             this.lastLevel = this.level;
-            this.updateIconsByLevel();
         }
 
         if (this.visible) {
@@ -158,22 +139,10 @@ export class ServiceUnit extends ServiceBase {
         });
     }
 
-    private updateIconsByLevel() {
-        if (!this.menu || !this.menu.refresh || !this.menu.tabs || !this.menu.setTabActive) return;
-        const menu = this.getMenuTabsByLevel();
-        this.menu.tabs.options = menu;
-        this.menu.refresh();
-        if (this.menu.setTabActive) {
-            this.menu.setTabActive(this.lastActiveTabByLevel[this.level]);
-        }
-    }
-
     private renderContent() {
         switch (this.activeTab) {
             case 'Explore':
                 return this.renderExplore();
-            case 'ShowCase':
-                return this.renderShowCase();
             default:
                 return html``;
         }
