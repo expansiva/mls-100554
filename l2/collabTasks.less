@@ -1,274 +1,122 @@
 /// <mls shortName="collabTasks" project="100554" enhancement="enhancementStyle" />
 
 collab-tasks-100554 {
-    
-    font-size: @font-size-12;
-    .task-container {
-        .task-columns {
-            display: flex;
-            flex-direction: row;
-            padding: 0 6px;
-            transition: padding 0.2s ease-in-out;
-            list-style: none;
-            margin-bottom: 8px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding-bottom: 8px;
-            padding-top: 2px;
-            scrollbar-color: #fff6 #00000026;
-            scrollbar-width: auto;
-            -webkit-user-select: none;
-            user-select: none;
-            white-space: nowrap;
 
-
-
-            .task-column {
-                display: block;
-                flex-shrink: 0;
-                align-self: flex-start;
-                padding: 0 6px;
-                height: 100%;
-                width: 272px;
-                white-space: nowrap;
-
-                .task-column-container {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 1rem;
-                    position: relative;
-                    box-sizing: border-box;
-                    align-self: start;
-                    justify-content: space-between;
-                    width: 272px;
-                    max-height: 100%;
-                    padding-bottom: 8px;
-                    border-radius: 12px;
-                    box-shadow: 0px 1px 1px #091e4240, 0px 0px 1px #091e424f;
-                    vertical-align: top;
-                    white-space: normal;
-                    background: @bg-primary-color-darker;
-                    scroll-margin: 8px;
-
-                    .task-column-title {
-                        padding: @space-16 0 0 @space-16;
-                        display: flex;
-                        font-weight: @font-weight-bold;
-
-                    }
-                }
-
-            }
-
-            .task-items-add {
-                padding: .5rem 1rem;
-                margin: 0 4px;
-                cursor: pointer;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                gap: .5rem;
-
-                svg {
-                    fill: currentColor;
-                }
-
-                &:hover {
-                    background-color: @grey-color;
-                }
-            }
-
-            .task-items {
-
-                margin-inline-start: 0;
-                padding-inline-start: 0;
-                display: flex;
-                z-index: 1;
-                flex: 1 1 auto;
-                flex-direction: column;
-                margin: 0 4px;
-                padding: 2px 4px;
-                overflow-x: hidden;
-                overflow-y: auto;
-                list-style: none;
-                row-gap: 8px;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-color: #091e4224 #091e420f;
-                scrollbar-width: thin;
-
-                .task-item {
-
-                    display: flex;
-                    flex-direction: column;
-                    gap: .25rem;
-                    box-shadow: 0px 1px 1px #091e4240, 0px 0px 1px #091e424f;
-                    padding: .5rem;
-                    cursor: pointer;
-                    min-height: 36px;
-                    border-radius: 8px;
-                    background: @bg-primary-color;
-
-
-                    .task-item-title {
-                        font-size: @font-size-12;
-                        text-align: left;
-                        width: 100%;
-                        font-weight: 600;
-                    }
-
-                    .task-item-body {
-                        font-size: @font-size-12;
-                    }
-
-                    .task-item-actions {
-                        display: flex;
-                        gap: .25rem;
-
-                        .task-item-actions-info{
-                            flex: 1;
-                            display: flex;
-                            gap: .3rem;
-                            align-items: center;
-                            svg {
-                                width: 10px;
-                                height: 10px;
-                            }
-                            span {
-                                font-size: @font-size-12;
-                            }
-                        }
-
-                        .task-item-actions-user {
-
-                            img {
-                                width: 25px;
-                                height: 25px;
-                                background-size: cover;
-                                background-position: top center;
-                                border-radius: 50%;
-                            }
-
-                        }
-                    }
-
-
-
-                }
-            }
-        }
+    .task-details {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
+
+    .back-btn {
+        background: none;
+        border: none;
+        color: @grey-color-darker;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .back-btn:hover {
+        text-decoration: underline;
+    }
+
+
+    .task-list-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    .task-stage {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .task-stage-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: @font-size-12;
+        font-weight: bold;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stage-name {
+        text-transform: uppercase;
+    }
+
+    .stage-count {
+        color: @grey-color-darker;
+    }
+
+    .stage-add {
+        margin-left: auto;
+        font-weight: normal;
+        color: @grey-color-darker;
+        cursor: pointer;
+    }
+
+    .stage-add:hover {
+        text-decoration: underline;
+    }
+
+    .task-items {
+        list-style: none;
+        margin: 0;
+        padding: 0.25rem 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .task-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: @font-size-12;
+        padding: 0.5rem 0.25rem;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .task-row:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .task-title {
+        flex: 1;
+    }
+
+    .task-check {
+        font-size: 12px;
+        opacity: 0.7;
+    }
+
+    .task-meta {
+        font-size: 11px;
+        opacity: 0.6;
+    }
+
+    .task-tag {
+        font-size: 10px;
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
+        text-transform: uppercase;
+    }
+
+    .task-tag.bug {
+        background: #d32f2f;
+        color: white;
+    }
+
+
 
 }
 
-//Start Less Tokens
-@text-primary-color-lighter: #535353;
-@text-primary-color-lighter-hover: #5f5f5f;
-@text-primary-color-lighter-focus: #4a4a4a;
-@text-primary-color-lighter-disabled: #696969;
-@text-primary-color: #403f3f;
-@text-primary-color-hover: #4b4a4a;
-@text-primary-color-focus: #353434;
-@text-primary-color-disabled: #525151;
-@text-primary-color-darker: #000000;
-@text-primary-color-darker-hover: #1a1a1a;
-@text-primary-color-darker-focus: #0d0d0d;
-@text-primary-color-darker-disabled: #262626;
-@text-secondary-color-lighter: #408EC8;
-@text-secondary-color-lighter-hover: #4a9adb;
-@text-secondary-color-lighter-focus: #377bb0;
-@text-secondary-color-lighter-disabled: #629fd2;
-@text-secondary-color: #1C91CD;
-@text-secondary-color-hover: #2a9edb;
-@text-secondary-color-focus: #1786b7;
-@text-secondary-color-disabled: #55b4e1;
-@text-secondary-color-darker: #0F6FA9;
-@text-secondary-color-darker-hover: #1b7bb5;
-@text-secondary-color-darker-focus: #0c6495;
-@text-secondary-color-darker-disabled: #3a9ec1;
-@bg-primary-color-lighter: #ffffff;
-@bg-primary-color-lighter-hover: #f2f2f2;
-@bg-primary-color-lighter-focus: #e6e6e6;
-@bg-primary-color-lighter-disabled: #d9d9d9;
-@bg-primary-color: #ffffff;
-@bg-primary-color-hover: #f2f2f2;
-@bg-primary-color-focus: #e6e6e6;
-@bg-primary-color-disabled: #d9d9d9;
-@bg-primary-color-darker: #fafafa;
-@bg-primary-color-darker-hover: #f5f5f5;
-@bg-primary-color-darker-focus: #eeeeee;
-@bg-primary-color-darker-disabled: #e0e0e0;
-@bg-secondary-color-lighter: #F9F9F9;
-@bg-secondary-color-lighter-hover: #f4f4f4;
-@bg-secondary-color-lighter-focus: #efefef;
-@bg-secondary-color-lighter-disabled: #eaeaea;
-@bg-secondary-color: #E6E6E6;
-@bg-secondary-color-hover: #d9d9d9;
-@bg-secondary-color-focus: #cccccc;
-@bg-secondary-color-disabled: #bfbfbf;
-@bg-secondary-color-darker: #C0C0C0;
-@bg-secondary-color-darker-hover: #b3b3b3;
-@bg-secondary-color-darker-focus: #a6a6a6;
-@bg-secondary-color-darker-disabled: #999999;
-@grey-color-lighter: #F9FAFB;
-@grey-color-light: #F2F2F2;
-@grey-color: #E6E6E6;
-@grey-color-dark: #D3D3D3;
-@grey-color-darker: #C0C0C0;
-@error-color: #FF4D4F;
-@error-color-hover: #ff6666;
-@error-color-focus: #e63e3e;
-@error-color-disabled: #ff9999;
-@success-color: #52C41A;
-@success-color-hover: #66d93f;
-@success-color-focus: #4ca610;
-@success-color-disabled: #8cd78e;
-@warning-color: #FAAD14;
-@warning-color-hover: #fbbd34;
-@warning-color-focus: #e09a0e;
-@warning-color-disabled: #fdd55e;
-@info-color: #0a6dc9;
-@info-color-hover: #1b7edb;
-@info-color-focus: #006ab3;
-@info-color-disabled: #66a8e1;
-@active-color: #1890FF;
-@active-color-hover: #1a99ff;
-@active-color-focus: #0e80cc;
-@active-color-disabled: #66b3ff;
-@link-color: #1890FF;
-@link-color-hover: #1a99ff;
-@link-color-focus: #0e80cc;
-@link-color-disabled: #66b3ff;
-@font-base-unit: .25rem;
-@font-family-primary: 'Charlie Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-@font-family-secondary: serif;
-@font-size-12: calc(@font-base-unit * 3);
-@font-size-16: calc(@font-base-unit * 4);
-@font-size-20: calc(@font-base-unit * 5);
-@font-size-24: calc(@font-base-unit * 6);
-@font-size-40: calc(@font-base-unit * 10);
-@font-size-48: calc(@font-base-unit * 12);
-@font-size-64: calc(@font-base-unit * 16);
-@line-height-base-unit: 1;
-@line-height-small: calc(@line-height-base-unit * 1.1);
-@line-height-medium: calc(@line-height-base-unit * 1.3);
-@line-height-large: calc(@line-height-base-unit * 1.5);
-@font-weight-lighter: 100;
-@font-weight-light: 200;
-@font-weight-normal: 400;
-@font-weight-bold: 700;
-@font-weight-bolder: 900;
-@breakpoint-small: 544px;
-@breakpoint-medium: 768px;
-@breakpoint-large: 1012px;
-@transition-slow: 0.2s;
-@transition-normal: 0.3s;
-@transition-fast: 0.5s;
-@space-base-unit: 0.25rem;
-@space-8: calc(@space-base-unit * 2);
-@space-16: calc(@space-base-unit * 4);
-@space-24: calc(@space-base-unit * 6);
-@space-32: calc(@space-base-unit * 8);
-@space-40: calc(@space-base-unit * 10);
-@space-48: calc(@space-base-unit * 12);
-@space-64: calc(@space-base-unit * 16);
-//End Less Tokens
+

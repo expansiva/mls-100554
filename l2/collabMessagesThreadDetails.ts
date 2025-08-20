@@ -24,6 +24,7 @@ const message_pt = {
     statusActive: 'Ativo',
     statusArchived: 'Arquivado',
     statusDeleted: 'Deletado',
+    statusDeleting: 'Deletando',
     remove: 'Remover',
     disable: 'Desalibitar',
     users: 'Usuários',
@@ -58,6 +59,7 @@ const message_en = {
     statusActive: 'Active',
     statusArchived: 'Archived',
     statusDeleted: 'Deleted',
+    statusDeleting: 'Deleting',
     remove: 'Remove',
     disable: 'Disable',
     group: 'Group',
@@ -135,6 +137,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
+        const isDm = this.threadDetails?.thread?.name.startsWith('@');
 
         return html`
       <div class="content">
@@ -144,7 +147,8 @@ export class CollabMessagesThreadDetails extends StateLitElement {
             <label>${this.msg.threadName}
                 <input type="text" name="name" required
                     .value=${this.editedThreadDetails?.thread.name}
-                    @input=${(e: Event) => { if (this.editedThreadDetails) this.editedThreadDetails.thread.name = (e.target as HTMLInputElement).value }}>
+                    ?disabled=${isDm}
+                    @input=${(e: Event) => { if (this.editedThreadDetails && !isDm) this.editedThreadDetails.thread.name = (e.target as HTMLInputElement).value }}>
             </label>
                 <label>${this.msg.status}
                 <select name="status" required
@@ -153,13 +157,16 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                     <option value="active">${this.msg.statusActive}</option>
                     <option value="archived">${this.msg.statusArchived}</option>
                     <option value="deleted">${this.msg.statusDeleted}</option>
+                    <option value="deleting">${this.msg.statusDeleting}</option>
+
                 </select>
             </label>
 
              <label> ${this.msg.visibility}
                 <select name="visibility" required
+                    ?disabled=${isDm}
                     .value=${this.editedThreadDetails?.thread.visibility}
-                    @change=${(e: Event) => { if (this.editedThreadDetails) this.editedThreadDetails.thread.visibility = (e.target as HTMLInputElement).value as mls.msg.ThreadVisibility }}>
+                    @change=${(e: Event) => { if (this.editedThreadDetails && !isDm) this.editedThreadDetails.thread.visibility = (e.target as HTMLInputElement).value as mls.msg.ThreadVisibility }}>
                     <option value="public">${this.msg.visibilityPublic}</option>
                     <option value="private">${this.msg.visibilityPrivate}</option>
                     <option value="company">${this.msg.visibilityCompany}</option>
@@ -192,7 +199,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         ${this.renderUsers()}
         ${this.renderBots()}
 
-        
       </div>
 
     `;
@@ -200,6 +206,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
     private renderUsers() {
         const users = this.editedThreadDetails?.users || [];
+        const isDm = this.threadDetails?.thread?.name.startsWith('@');
 
         return html`
         <div class="users">
@@ -214,8 +221,12 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                                 <li>
                                     <img src="${details?.avatar_url}" alt="${details?.name}" width="32" height="32" />
                                     <small>${details?.name}<b>(${user.auth})</b> - ${user.userId}</small>
-                    
-                                    <button class="remove" @click="${(e: MouseEvent) => this.removeUser(e, user.userId)}">${this.msg.remove}</button>
+
+                                    ${!isDm
+                        ? html`<button class="remove" @click="${(e: MouseEvent) => this.removeUser(e, user.userId)}">${this.msg.remove}</button>`
+                        : ''
+                    }
+                                    
                                 </li>
                     `;
             }
@@ -223,12 +234,16 @@ export class CollabMessagesThreadDetails extends StateLitElement {
             </ul>
             ${this.labelErrorRemoveUser ? html`<small class="saving-error">${collab_triangle_exclamation} ${this.labelErrorRemoveUser}<small>` : ''}   
 
-            <details class="details-add-participant">
-                <summary>${this.msg.addParticipant}</summary>
-                <div>
-                    <collab-messages-add-participant-100554 userId=${this.userId} .actualThread=${{ ...this.threadDetails }}></collab-messages-add-participant-100554>
-                </div>
-            </details>
+            ${!isDm
+                ? html`<details class="details-add-participant">
+                            <summary>${this.msg.addParticipant}</summary>
+                            <div>
+                                <collab-messages-add-participant-100554 userId=${this.userId} .actualThread=${{ ...this.threadDetails }}></collab-messages-add-participant-100554>
+                            </div>
+                        </details>`
+                : ''
+            }
+            
         </div>
         `
     }
@@ -271,6 +286,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
             const newThread = await this.removeUserFromThread(this.threadDetails.thread.threadId, this.userId, userId);
             if (newThread) {
                 this.threadDetails = JSON.parse(JSON.stringify(this.editedThreadDetails));
+                this.editedThreadDetails.thread = { ...newThread };
                 const threadCache = await updateThread(newThread.threadId, newThread);
                 notifyThreadChange(threadCache);
             }
@@ -287,7 +303,10 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         const button = (e.target as HTMLElement).closest('button');
         try {
             button?.classList.add('loading');
-            await this.disableBot(botName, this.threadDetails.thread.threadId, this.userId)
+            const newThread = await this.disableBot(botName, this.threadDetails.thread.threadId, this.userId);
+            this.threadDetails = JSON.parse(JSON.stringify(this.editedThreadDetails));
+            this.editedThreadDetails.thread = { ...newThread };
+
         } catch (err: any) {
             this.labelErrorRemoveBoot = err.message;
         } finally {
@@ -295,7 +314,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         }
     }
 
-    private async disableBot(botId: string, threadId: string, userId: string): Promise<boolean> {
+    private async disableBot(botId: string, threadId: string, userId: string): Promise<mls.msg.Thread> {
 
         try {
             const rc = await mls.api.msgAddOrUpdateThreadBot({
@@ -312,7 +331,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                 const threadCache = await updateThread(threadId, rc.thread);
                 notifyThreadChange(threadCache);
                 await addMessage(threadId, `Bot ${botId} disabled OK!`);
-                return true;
+                return rc.thread;
             };
 
             throw new Error(`"error on disable bot", ${rc.statusCode} : ${rc.msg}`)

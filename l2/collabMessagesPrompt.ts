@@ -7,8 +7,10 @@ import { collab_arrow_up_long } from './_100554_collabIcons';
 import { getThread, listUsers } from './_100554_msgDBController';
 import { IAgent } from './_100554_aiAgentBase'
 import './_100554_collabMessagesAvatar';
+
 @customElement('collab-messages-prompt-100554')
 export class CollabMessagesPrompt100554 extends StateLitElement {
+
     @query('textarea') textArea: HTMLTextAreaElement | undefined;
     @query('.mention-suggestions') mentionSuggestionsElement?: HTMLElement;
     @query('.wrapper') wrapper?: HTMLElement;

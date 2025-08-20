@@ -81,11 +81,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     }
 
-    public onClickTools(op: string) {
-        if (op === 'toolAdd') this.openAdd();
-        else throw new Error('Invalid option')
-    }
-
     public menu: IServiceMenu = {
         title: '',
         main: {
@@ -94,13 +89,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             opFindTask: { text: 'Find Task', icon: 'f002' },
         },
         tools: {
-            toolAdd: {
-                type: 'link',
-                options: [
-                    { text: 'Add Thread', icon: '2b' },
-                ]
-            }
-
         },
         tabs: {
             group: 'Mode',
@@ -115,7 +103,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         },
         onClickMain: this.onClickMain.bind(this),
         onClickTabs: this.onClickTabs.bind(this),
-        onClickTools: this.onClickTools.bind(this),
+
 
     }
 
@@ -165,8 +153,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
                 return this.renderDocs();
             case 'CONNECT':
                 return this.renderConnect();
-            case 'Add':
-                return this.renderAdd();
             case 'Loading':
                 return html`${this.msg.loading}`
             default:
@@ -233,19 +219,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
 
-    renderAdd() {
-
-        const onAddSuccess = () => {
-            this.activeTab = this.groupSelected;
-        }
-
-        return html`
-            <collab-messages-add-100554 
-                .onAddSuccess=${onAddSuccess.bind(this)}
-                .group=${this.groupSelected}
-                userId=${this.userPerfil?.userId} 
-            ></collab-messages-add-100554>`
-    }
 
     private openAdd() {
         this.activeTab = 'Add';
