@@ -137,7 +137,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     public onClickTitle = () => {
-        this.openService('_100554_serviceProject', this.position, 2, { activeTab: 'Explore' });
+        this.openService('_100554_serviceUnit', this.position, 2, { activeTab: 'Explore' });
     }
 
     public onClickTools(op: string): void {
@@ -1530,7 +1530,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const lastOpenedFile = getLastOpenedFiles(actualProject);
         const lastL2 = lastOpenedFile[2] as OpenedFileL2;
         if (!lastL2) {
-            this.openService('_100554_serviceProject', position, this.level)
+            this.openService('_100554_serviceUnit', position, this.level)
             return;
         }
         const lastL2ByPosition = lastL2[position];
