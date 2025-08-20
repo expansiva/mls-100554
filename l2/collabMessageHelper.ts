@@ -1,8 +1,9 @@
 /// <mls shortName="collabMessageHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { getTemporaryContext, notifyMessageSendChange } from './_100554_aiAgentHelper';
+import { getTemporaryContext, notifyMessageSendChange, notifyThreadChange } from './_100554_aiAgentHelper';
 import { IAgent } from './_100554_aiAgentBase';
 import { collabImport } from './_100554_collabImport';
+import { addThread } from './_100554_msgDBController';
 
 const LS_KEY_OLD = 'collabChatPreferences';
 const LOCAL_STORAGE_KEY = '_100554_serviceCollabMessages';
@@ -240,6 +241,43 @@ function extractAgentName(str: string) {
         return name;
     }
     return 'agent' + name[0].toUpperCase() + name.slice(1);
+}
+
+
+export async function checkThreadAlreadyExist(threadName: string) {
+    const userId = getUserId();
+    if (!userId) throw new Error('No find user id');
+
+
+}
+
+
+export async function createThread(threadName: string, languages: string[], visibility: mls.msg.ThreadVisibility, avatar_url: string = '') {
+
+    const userId = getUserId();
+    if (!userId) throw new Error('No find user id');
+    const params: mls.msg.RequestAddThread = {
+        action: 'addThread',
+        name: threadName,
+        group: 'CONNECT',
+        languages,
+        userId,
+        visibility,
+        status: 'active',
+        avatar_url
+    };
+
+    try {
+        const response = await mls.api.msgAddThread(params);
+        if (response.thread) {
+            const thr = await addThread(response.thread);
+            notifyThreadChange(thr);
+            return response.thread;
+        }
+    } catch (err: any) {
+        console.error(err);
+        throw new Error(err.message);
+    }
 }
 
 export type TranslateMode = "none" | "icon" | "text" | "iconText" | "trace"

@@ -1,10 +1,11 @@
 /// <mls shortName="collabMessagesChat" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, LitElement } from 'lit';
+import { html, LitElement, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation } from './_100554_collabIcons';
+import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation, collab_plus } from './_100554_collabIcons';
 import { collabImport } from './_100554_collabImport';
 import { removeThreadFromSync } from './_100554_collabMessagesSyncNotifications';
+import { openElementInDetails } from './_100554_libCommom'
 
 import {
     getTemporaryContext,
@@ -33,11 +34,13 @@ import {
 
 import './_100554_collabMessagesTaskInfo';
 import './_100554_collabMessagesTask';
+import './_100554_collabMessagesTopics';
 import './_100554_collabMessagesPrompt';
 import './_100554_collabMessagesAvatar';
 import './_100554_collabMessagesThreadDetails';
 import './_100554_collabMessagesRichPreview';
 import './_100554_collabMessagesUserModal';
+import './_100554_collabMessagesAdd';
 
 import { IChatPreferences, AGENTDEFAULT, PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
 import { StateLitElement } from './_100554_stateLitElement';
@@ -53,7 +56,9 @@ const message_pt = {
     noThreads: 'Nenhuma sala disponível no momento.',
     placeholderSearch: 'Digite para filtrar',
     threadArchived: 'A thread foi arquivada por [user] em [date]',
+    threadDeleting: 'A thread está sendo deletada em [date]',
     archived: 'Arquivado',
+    deleting: 'Deletando',
 }
 
 const message_en = {
@@ -64,9 +69,9 @@ const message_en = {
     noThreads: 'No threads available at the moment.',
     placeholderSearch: 'Type to filter',
     threadArchived: 'Thread is archived by [user] in [date]',
+    threadDeleting: 'Thread is being deleted in [date]',
     archived: 'Archived',
-
-
+    deleting: 'Deleting',
 }
 
 type MessageType = typeof message_en;
@@ -88,8 +93,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     @state() userPreferenceChat?: IChatPreferences;
     @state() isLoadingThread: boolean = false;
-    @state() filteredThreads: IFilteredThreadsByStatus = { active: [], archived: [], deleted: [] };
+    @state() filteredThreads: IFilteredThreadsByStatus = { active: [], archived: [], deleted: [], deleting: [] };
     @state() allUsers: mls.msg.User[] = [];
+    @state() isThreadError: boolean = false;
+    @state() threadErrorMsg: string = '';
 
     @property() group: 'CONNECT' | 'APPS' | 'DOCS' | 'CRM' = 'CONNECT';
     @property() userId: string | undefined;
@@ -188,11 +195,19 @@ export class CollabMessagesChat100554 extends StateLitElement {
             case 'list':
                 return html`<div class="header">
                     ${this.renderThreadSearch()}
+                    <div class="header-actions">
+                            <span @click=${this.onThreadAddClick}>${collab_plus}</span>
+                    </div>
                 </div>`;
             case 'threadDetails':
                 return html`
                     <div class="header">
                         <span @click=${this.onTitleClick}>${collab_chevron_left} ${this.msg.threadDetails}</span>
+                    </div>`;
+            case 'threadAdd':
+                return html`
+                    <div class="header">
+                        <span @click=${this.onTitleClick}>${collab_chevron_left} Threads</span>
                     </div>`;
             default:
                 return null;
@@ -209,6 +224,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 return this.renderTaskDetails();
             case 'threadDetails':
                 return this.renderThreadDetails();
+            case 'threadAdd':
+                return this.renderThreadAdd();
             default:
                 return null;
         }
@@ -216,6 +233,16 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private renderChatMessages() {
         if (!this.actualThread) return html``;
+
+        if (this.actualThread.thread.status === 'deleting') {
+            const formatedTimestamp = formatTimestamp(this.actualThread.thread.deletedAt || '');
+            const deletedAt = this.parseLocalDate(formatedTimestamp?.dateFull || '');
+
+            return html`
+                <div>${this.msg.threadDeleting.replace('[date]', deletedAt.datafull)}</div>
+            `
+        }
+
         if (this.actualThread.thread.status === 'archived') {
             const formatedTimestamp = formatTimestamp(this.actualThread.thread.archivedAt || '');
             const archivedAt = this.parseLocalDate(formatedTimestamp?.dateFull || '');
@@ -229,7 +256,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
             .map(([date, value]) => [date.trim(), value])
             .sort(([a], [b]) => new Date(a as string).getTime() - new Date(b as string).getTime());
         const sortedObj: IMessageGrouped = Object.fromEntries(sortedEntries);
+
         return html`
+        ${this.renderTopics()}
         <div @scroll=${this.onChatScroll} class="chat-container">
             ${Object.keys(sortedObj).map((key) => {
             const threadMessages = sortedObj[key];
@@ -243,46 +272,47 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 const cls = message.senderId === this.userId ? 'user' : 'system';
                 const isSame = message.isSame;
                 const titleTranslated = this.getTitleMessageTranslated(message)
-
                 return html`
-                            <div class="message ${cls} ${isSame ? 'same' : ''}">
-                                <div class="message-group">
-                                    <div class="message-row">
-                                        <div class="message-card ${cls} ${isSame ? 'same' : ''}">
-                                            ${!isSame ? html`<div class="message-title">@${userName}</div>` : ``}
-                                            ${this.renderMessageByLanguage(message)}
-                                            ${message.isLoading ? html`<span class="loader"></span>` : ''}
-                                            ${message.isFailed ? html`<div class="failed">
-                                                <div>
-                                                    <span>${collab_circle_exclamation}</span>
-                                                    <small>${this.msg.msgNotSend}</small>
-                                                </div>
-                                                <small>${message.isFailedError}</small>
-                                            </div>`: ''}
-                                            ${message.taskId ? html`
-                                                <div class="message-ai">
-                                                    <collab-messages-task-100554
-                                                        messageId=${message.createAt}
-                                                        .context= ${message.context}
-                                                        lastChanged= ${message.lastChanged}
-                                                        taskId=${message.taskId}
-                                                        title=${titleTranslated}
-                                                        status=${message.taskStatus}
-                                                        @taskclick=${() => this.onTaskClick(message?.taskId || '', message.createAt, message.threadId, message)}
-                                                    >
-                                                    </collab-messages-task-100554>
-                                                </div> `: html``}
-                                            ${this.renderMessageResultByLanguage(message)}
-                                            ${this.renderMessageFooterResult(message)}
-                                            <div class="message-footer">${dateFormated?.timeShort}</div>
+                    <div class="message ${cls} ${isSame ? 'same' : ''}">
+                        <div class="message-group">
+                            <div class="message-row">
+                                <div class="message-card ${cls} ${isSame ? 'same' : ''}">
+                                    ${!isSame ? html`<div class="message-title">@${userName}</div>` : ``}
+                                    ${this.renderMessageByLanguage(message)}
+                                    ${message.isLoading ? html`<span class="loader"></span>` : ''}
+                                    ${message.isFailed ? html`<div class="failed">
+                                        <div>
+                                            <span>${collab_circle_exclamation}</span>
+                                            <small>${this.msg.msgNotSend}</small>
                                         </div>
-                                        ${cls === 'system' && !isSame ? html`<collab-messages-avatar-100554 avatar=${userAvatar}></collab-messages-avatar-100554>` : ''}
-                                    </div>
+                                        <small>${message.isFailedError}</small>
+                                    </div>`: ''}
+                                    ${message.taskId ? html`
+                                        <div class="message-ai">
+                                            <collab-messages-task-100554
+                                                messageId=${message.createAt}
+                                                .context= ${message.context}
+                                                lastChanged= ${message.lastChanged}
+                                                taskId=${message.taskId}
+                                                title=${titleTranslated}
+                                                status=${message.taskStatus}
+                                                @taskclick=${() => this.onTaskClick(message?.taskId || '', message.createAt, message.threadId, message)}
+                                            >
+                                            </collab-messages-task-100554>
+                                        </div> `: html``}
+                                    ${this.renderMessageResultByLanguage(message)}
+                                    ${this.renderMessageFooterResult(message)}
+                                    <div class="message-footer">${dateFormated?.timeShort}</div>
                                 </div>
-                            </div>`
+                                ${cls === 'system' && !isSame ? html`<collab-messages-avatar-100554 avatar=${userAvatar}></collab-messages-avatar-100554>` : ''}
+                            </div>
+                        </div>
+                    </div>`
             })}`
         })}
         ${this.isLoadingMessages ? html`<div class="unread-messages" id="unread">Loading messages...</div>` : html``}
+        ${this.isThreadError ? html`<div class="error-messages">${this.threadErrorMsg}</div>` : html``}
+
 </div>
         ${this.renderPrompt()}
 `
@@ -314,6 +344,21 @@ export class CollabMessagesChat100554 extends StateLitElement {
             .allThreads=${this.allThreads}
             text="${text}"
         ></collab-messages-rich-preview-100554>`
+    }
+
+    private renderTopics() {
+        return html`
+            <collab-messages-topics-100554
+                .messages=${this.actualMessages}
+                @topic-selected=${(e: CustomEvent) => this.onTopicClick(e)}
+            ></collab-messages-topics-100554>
+        `
+    }
+
+    private onTopicClick(e: CustomEvent) {
+        console.log('clicou no tópico:', e.detail.topic)
+        if (e.detail.topic === 'all') this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+        else this.actualMessagesParsed = this.parseMessages(this.actualMessages, e.detail.topic);
     }
 
     private async onMentionHover(ev: CustomEvent) {
@@ -473,12 +518,34 @@ export class CollabMessagesChat100554 extends StateLitElement {
         `;
     }
 
+    private getThreadAvatar(item: IFilteredThreads) {
+        let threadAvatar = this.imageUrls[Math.floor(Math.random() * this.imageUrls.length)];
+        if (item.thread.name.startsWith('@') && item.thread.users.length === 2) {
+            const user = item.users.find((user) => user.userId !== this.userId);
+            if (user && user.avatar_url) threadAvatar = user.avatar_url;
+        } else if (item.thread.avatar_url) {
+            threadAvatar = item.thread.avatar_url;
+        }
+        return threadAvatar;
+    }
+
+    private getThreadName(item: IFilteredThreads) {
+        if (item.thread.name.startsWith('@') && item.thread.users.length === 2) {
+            const user = item.users.find((user) => user.userId !== this.userId);
+            if (user) return user.name;
+        }
+        return item.thread.name || item.thread.threadId;
+    }
+
     private renderThreadsByStatus() {
 
         return html`
         <ul class="thread-list">
             ${this.filteredThreads.active.map((item) => {
-            const randomImage = this.imageUrls[Math.floor(Math.random() * this.imageUrls.length)];
+
+            let threadAvatar = this.getThreadAvatar(item);
+            let threadName = this.getThreadName(item);
+
             const unreadCount = item.thread.unreadCount || 0;
             const now = new Date();
             const isToday =
@@ -493,11 +560,14 @@ export class CollabMessagesChat100554 extends StateLitElement {
             return html`
                 <li @click=${() => this.onThreadClick(item)} class="thread-item">
                     <div class="thread-item-avatar">
-                        <img src="${randomImage}"></img>
+                    ${threadAvatar.startsWith('<') && threadAvatar.endsWith('>') ?
+                    html`${unsafeHTML(threadAvatar)}` :
+                    html`<img src="${threadAvatar}"></img>`
+                }
                     </div>
                     <div class="thread-content">
                         <div class="thread-item-header">
-                            <span class="thread-name">${item.thread.name || item.thread.threadId}</span>
+                            <span class="thread-name">${threadName}</span>
                             <span class="last-update">${displayDate}</span>
                         </div>
                         <div class="thread-summary">
@@ -509,6 +579,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 `;
         })}
             ${this.renderArchivedThreads()}
+            ${this.renderDeletingThreads()}
+
         </ul>
         `
     }
@@ -517,7 +589,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (this.filteredThreads.archived.length === 0) return html``;
         return html`        
             ${this.filteredThreads.archived.map((item) => {
-            const randomImage = this.imageUrls[Math.floor(Math.random() * this.imageUrls.length)];
+
+            let threadAvatar = this.getThreadAvatar(item);
 
             function isWithinLastWeek(date: Date): boolean {
                 const now = new Date();
@@ -534,11 +607,52 @@ export class CollabMessagesChat100554 extends StateLitElement {
                     : html`
                         <li @click=${() => this.onThreadClick(item)} class="thread-item">
                             <div class="thread-item-avatar">
-                                <img src="${randomImage}"></img>
+                                    ${threadAvatar.startsWith('<') && threadAvatar.endsWith('>') ?
+                            html`${unsafeHTML(threadAvatar)}` :
+                            html`<img src="${threadAvatar}"></img>`
+                        }
                             </div>
                             <div class="thread-content">
                                 <div class="thread-item-header">
                                     <span class="thread-name">(${this.msg.archived}) ${item.thread.name || item.thread.threadId}</span>
+                                </div>
+                            </div>
+                        </li>`
+                }`
+        })}
+        `
+    }
+
+    private renderDeletingThreads() {
+        if (this.filteredThreads.archived.length === 0) return html``;
+        return html`        
+            ${this.filteredThreads.deleting.map((item) => {
+
+            let threadAvatar = this.getThreadAvatar(item);
+
+            function isWithinLastWeek(date: Date): boolean {
+                const now = new Date();
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(now.getDate() - 7);
+                return date >= oneWeekAgo;
+            }
+
+            if (!item.lastMessageDateDeleting) return html``
+
+            return html`
+                ${!isWithinLastWeek(item.lastMessageDateDeleting.dateObject)
+                    ? html``
+                    : html`
+                        <li @click=${() => this.onThreadClick(item)} class="thread-item">
+                            <div class="thread-item-avatar">
+                                    ${threadAvatar.startsWith('<') && threadAvatar.endsWith('>') ?
+                            html`${unsafeHTML(threadAvatar)}` :
+                            html`<img src="${threadAvatar}"></img>`
+                        }
+                            </div>
+                            <div class="thread-content">
+                                <div class="thread-item-header">
+                                    <span class="thread-name">(${this.msg.deleting}) ${item.thread.name || item.thread.threadId}</span>
                                 </div>
                             </div>
                         </li>`
@@ -567,6 +681,15 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return html`<collab-messages-thread-details-100554 userId=${this.userId} .threadDetails=${{ ...this.actualThread }}></collab-messages-thread-details-100554>`
     }
 
+    private renderThreadAdd() {
+        return html`
+            <collab-messages-add-100554 
+                .onAddSuccess
+                .group=${this.group}
+                userId=${this.userId} 
+            ></collab-messages-add-100554>`
+    }
+
     private onSearchInput(e: Event) {
         const target = e.target as HTMLInputElement;
         this.searchTerm = target.value.toLowerCase();
@@ -593,7 +716,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private async onChatScroll(e: Event) {
 
         this.removeAllUserModal();
-        
+
         if (this.isSystemChangeScroll) {
             this.isSystemChangeScroll = false;
             return;
@@ -656,15 +779,24 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 const formatedTimestamp = formatTimestamp(lastTimestamp)?.dateFull;
                 const lastMessageDate = this.parseLocalDate(formatedTimestamp || '');
                 let lastMessageDateArchived;
+                let lastMessageDateDeleting;
+
                 if (item.thread.status === 'archived' && item.thread.archivedAt) {
                     const formatedTimestampArchived = formatTimestamp(item.thread.archivedAt)?.dateFull;
                     lastMessageDateArchived = this.parseLocalDate(formatedTimestampArchived || '');
                 }
 
+                if (item.thread.status === 'deleting' && item.thread.deletedAt) {
+                    const formatedTimestampArchived = formatTimestamp(item.thread.deletedAt)?.dateFull;
+                    lastMessageDateDeleting = this.parseLocalDate(formatedTimestampArchived || '');
+                }
+
                 return {
                     ...item,
                     _lastMessageDate: lastMessageDate,
-                    _lastMessageDateArchived: lastMessageDateArchived
+                    _lastMessageDateArchived: lastMessageDateArchived,
+                    lastMessageDateDeleting: lastMessageDateDeleting,
+
                 };
             })
             .sort((a, b) =>
@@ -675,6 +807,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         const result = {
             archived: [] as IFilteredThreads[],
             deleted: [] as IFilteredThreads[],
+            deleting: [] as IFilteredThreads[],
             active: [] as IFilteredThreads[],
         };
 
@@ -683,6 +816,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 result.archived.push(threadInfo);
             } else if (threadInfo.thread.status === 'deleted') {
                 result.deleted.push(threadInfo);
+            } else if (threadInfo.thread.status === 'deleting') {
+                result.deleting.push(threadInfo);
             } else {
                 result.active.push(threadInfo);
             }
@@ -695,7 +830,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
         if (!this.searchTerm) return ordened;
         Object.keys(ordened).forEach((key: string) => {
-            const key2 = key as 'deleted' | 'archived' | 'active';
+            const key2 = key as 'deleted' | 'archived' | 'active' | 'deleting';
             ordened[key2] = ordened[key2].filter(item => {
                 const threadMatch = item.thread.name?.toLowerCase().includes(this.searchTerm);
                 return threadMatch;
@@ -732,19 +867,38 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     }
 
-    private parseMessages(rawData: mls.msg.MessagePerformanceCache[]): IMessageGrouped {
+    private parseMessages(
+        rawData: mls.msg.MessagePerformanceCache[],
+        topic?: string
+    ): IMessageGrouped {
         const groupedByDay: IMessageGrouped = {};
+
         rawData.forEach(msg => {
+
+            if (topic && (!msg.content || !msg.content.includes(topic))) {
+                return;
+            }
+
             const formatted = formatTimestamp(msg.createAt);
-            const dateKey = formatted?.date || msg.createAt.slice(0, 8).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+            const dateKey =
+                formatted?.date ||
+                msg.createAt
+                    .slice(0, 8)
+                    .replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+
             if (!groupedByDay[dateKey]) {
                 groupedByDay[dateKey] = [];
             }
             groupedByDay[dateKey].push(msg);
         });
+
+
         for (const day in groupedByDay) {
-            groupedByDay[day].sort((a, b) => a.orderAt.localeCompare(b.orderAt));
+            groupedByDay[day].sort((a, b) =>
+                a.orderAt.localeCompare(b.orderAt)
+            );
         }
+
         return this.groupMessages(groupedByDay);
     }
 
@@ -795,8 +949,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         };
     }
 
-
-
     private mergeMessages(
         array1: mls.msg.MessagePerformanceCache[],
         array2: mls.msg.MessagePerformanceCache[]
@@ -822,9 +974,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
         this.activeScenerie = 'details';
         this.isLoadingMessages = true;
+        this.isThreadError = false;
+        this.threadErrorMsg = '';
+
         try {
             if (!this.userId) return;
-            const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId, threadInfo.thread.lastMessageTime || '');
+            const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId, threadInfo.thread.lastMessageTime || new Date('2000-01-01').toISOString());
             await updateThread(threadByServer.thread.threadId, threadByServer.thread);
             threadInfo = await this.updateMessagesOnDb(threadInfo, threadByServer.messages);
             await updateUsers(threadByServer.users);
@@ -833,6 +988,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.checkForRegisterNotification();
 
         } catch (err: any) {
+            this.isThreadError = true;
+            this.threadErrorMsg = err.message || 'Error on read thread';
             throw new Error('Error on loading messages: ' + err.message);
         } finally {
             this.isLoadingMessages = false;
@@ -854,7 +1011,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         }
         threadInfo = await this.updateMessagesOnDb(threadInfo, response.data);
         if (!response.hasMore) return;
-        // if (response.data.length < 100) return;
         return this.loadAllMessages(threadInfo);
     }
 
@@ -890,7 +1046,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
             threadInfo.thread = thread;
             notifyThreadChange(thread);
         }
-
     }
 
     private async onTitleClick() {
@@ -899,7 +1054,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.activeScenerie = 'details';
             return;
         }
-        if (this.activeScenerie === 'details') {
+        if (this.activeScenerie === 'details' || this.activeScenerie === 'threadAdd') {
             this.actualThread = undefined;
             this.activeScenerie = 'list';
             return;
@@ -913,6 +1068,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private onThreadDetailsClick() {
         this.saveScrollPosition();
         this.activeScenerie = 'threadDetails';
+    }
+
+    private onThreadAddClick() {
+        this.activeScenerie = 'threadAdd';
     }
 
     private async handleSend(value: string, opt: { isSpecialMention: boolean, agentName: string }) {
@@ -955,7 +1114,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             const response = await mls.api.msgAddMessage(params);
             message.isFailed = false;
             message.isFailedError = '';
-            this.updateMessage2(false, message, response.message, response.botOutputs);
+            this.updateMessage2(false, true, message, response.message, response.botOutputs);
         } catch (err: any) {
             message.isFailed = true;
             message.isFailedError = err.message;
@@ -980,7 +1139,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (agentName) agentToCall = agentName;
         const message: IMessage = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
         try {
-            // const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentToCall}`);
             const moduleAgent = await collabImport({ project: PROJECTAGENTDEFAULT, shortName: agentToCall, folder: '' });
             if (!moduleAgent || !moduleAgent.createAgent || typeof moduleAgent.createAgent !== 'function') throw new Error('Invalid agent')
             const agent: IAgent = moduleAgent.createAgent()
@@ -998,6 +1156,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private async updateMessageAI(context: mls.msg.ExecutionContext, updateThreadDB: boolean, oldContextCreateAt?: string) {
+
         if (this.activeScenerie !== 'details') return;
         if (!context.message) return;
 
@@ -1024,7 +1183,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 if (this.actualThread) this.actualThread.thread = thread;
             }
             if (taskId) newMessage.taskId = taskId;
-            this.actualMessages.push({ context, lastChanged: new Date().getTime(), ...newMessage });
+            this.actualMessages.unshift({ context, lastChanged: new Date().getTime(), ...newMessage });
             this.actualMessagesParsed = this.parseMessages(this.actualMessages);
             await addMessage(newMessage);
             this.requestUpdate();
@@ -1076,16 +1235,22 @@ export class CollabMessagesChat100554 extends StateLitElement {
             footers: []
         }
         if (taskId) newMessage.taskId = taskId;
-        this.actualMessages.push(newMessage);
+        this.actualMessages.unshift(newMessage);
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
         this.requestUpdate();
         return newMessage;
     }
 
-    private async updateMessage2(updateThreadDB: boolean, oldMessage: IMessage, newMessage: mls.msg.Message, outputs: mls.msg.BotOutput[] | undefined) {
+    private async updateMessage2(updateCreateAtThreadDB: boolean, updateLastMessageThreadDB: boolean, oldMessage: IMessage, newMessage: mls.msg.Message, outputs: mls.msg.BotOutput[] | undefined) {
 
-        if (updateThreadDB && this.actualThread) {
-            const thread = await updateThread(newMessage.threadId, this.actualThread.thread, newMessage.content, newMessage.createAt, 0);
+        if (this.actualThread && (updateCreateAtThreadDB || updateLastMessageThreadDB)) {
+
+            const thread = await updateThread(
+                newMessage.threadId,
+                this.actualThread.thread,
+                updateLastMessageThreadDB ? newMessage.content : undefined,
+                updateCreateAtThreadDB ? newMessage.createAt : undefined,
+                0);
             if (this.actualThread) this.actualThread.thread = thread;
             notifyThreadChange(this.actualThread.thread);
         }
@@ -1118,7 +1283,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 }
                 return item;
             });
-        } else this.actualMessages.push({ ...newMessage, footers: footerData });
+        } else this.actualMessages.unshift({ ...newMessage, footers: footerData });
         this.actualMessagesParsed = this.parseMessages(this.actualMessages);
 
         const m = newMessage as IMessage;
@@ -1134,12 +1299,21 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private async onTaskClick(taskId: string, messageId: string, threadId: string, message: IMessage) {
         this.saveScrollPosition();
-        this.activeScenerie = 'loading';
+        // this.activeScenerie = 'loading';
         const task = await this.getTaskUpdate(taskId, messageId, threadId);
         addOrUpdateTask(task);
         this.actualTask = task;
         this.actualMessage = message;
-        this.activeScenerie = 'task';
+
+        const messageId2 = `${this.actualThread?.thread.threadId}/${this.actualMessage?.createAt}`
+        const el = document.createElement('collab-messages-task-info-100554');
+        el.setAttribute('messageId', messageId2);
+        if (this.actualTask && this.actualTask.PK) el.setAttribute('taskId', this.actualTask.PK);
+        (el as any)['task'] = this.actualTask;
+        (el as any)['message'] = this.actualMessage;
+
+        openElementInDetails(el);
+        // this.activeScenerie = 'task';
     }
 
     private async getTaskUpdate(taskId: string, createdAt: string, threadId: string) {
@@ -1167,6 +1341,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 deviceId: deviceId || undefined
             });
             removeThreadFromSync(threadId);
+
+            if (response.statusCode === 403) {
+                throw new Error(response.msg);
+            }
+
             return response;
         } catch (err: any) {
             throw new Error(err.message)
@@ -1241,10 +1420,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
         const customEvent = e as CustomEvent;
         const message: mls.msg.Message = customEvent.detail.context.message;
         const outputs: mls.msg.BotOutput[] = customEvent.detail.context.botOutput;
-
         const thId = message?.threadId;
         if (!this.actualThread || !thId || thId !== this.actualThread.thread.threadId) return;
-        this.updateMessage2(false, { ...message, footers: [] }, message, outputs);
+        this.updateMessage2(false, true, { ...message, footers: [] }, message, outputs);
     };
 }
 
@@ -1276,6 +1454,7 @@ interface IMessageFooter {
 interface IFilteredThreadsByStatus {
     archived: IFilteredThreads[];
     deleted: IFilteredThreads[];
+    deleting: IFilteredThreads[];
     active: IFilteredThreads[];
 }
 
@@ -1292,10 +1471,16 @@ interface IFilteredThreads {
         date: string;
         time: string;
     };
+    lastMessageDateDeleting?: {
+        dateObject: Date;
+        datafull: string;
+        date: string;
+        time: string;
+    };
     hasMore?: boolean | undefined,
     thread: mls.msg.ThreadPerformanceCache;
     users: mls.msg.User[];
 }
 type IMessageGrouped = { [key: string]: IMessage[] }
 type IThread = { [key: string]: IThreadInfo[] }
-type IScenery = 'list' | 'details' | 'loading' | 'task' | 'threadDetails'
+type IScenery = 'list' | 'details' | 'loading' | 'task' | 'threadDetails' | 'threadAdd'

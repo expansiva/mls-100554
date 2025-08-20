@@ -8,7 +8,8 @@ import { getTokens } from './_100554_designSystemBase';
 import { getConfigProject } from './_100554_libProjectConfig';
 import { createPath } from './_100554_libCommom';
 import { collabImport } from './_100554_collabImport';
-
+import { createThread } from './_100554_collabMessageHelper';
+import { getThreadByName } from './_100554_msgDBController';
 
 import { globalState, setState, initState, getState } from './_100554_collabState';
 import { convertTagToFileName } from './_100554_utilsLit';
@@ -340,7 +341,7 @@ export class ServicePreview100554 extends ServiceBase {
 
         mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['ModelHTMLCreated'] as any, (ev: mls.events.IEvent) => { this.onModelHTMLCreated(ev); });
         mls.events.addEventListener([2, 3, 4, 7], ['FileAction'], this.onMLSFileAction.bind(this));
-        mls.events.addEventListener([2,3], ['styleChanged' as any], this.onStyleChanged.bind(this));
+        mls.events.addEventListener([2, 3], ['styleChanged' as any], this.onStyleChanged.bind(this));
         //mls.events.addListener(2, 'tsTestChanged' as any, this.onTsTestChanged.bind(this));
         mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['LevelChanged'] as any, this.onLevelChange.bind(this));
         mls.events.addListener(3, 'L3EditEvents' as any, this.onL3EditEvents.bind(this));
@@ -485,7 +486,7 @@ export class ServicePreview100554 extends ServiceBase {
 
             if (![2, 3, 4, 7].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
-            
+
             const eventsValid = ['open', 'openBackground', 'statusOrErrorChanged', 'changed', 'new', 'modeCreated', 'editorChanged', 'openLink'];
 
             if (
@@ -690,15 +691,24 @@ export class ServicePreview100554 extends ServiceBase {
     private tasksInProgress: Map<string, Set<mls.msg.ExecutionContext>> = new Map();
     private async fireCollab(agentName: string, prompt: string) {
 
-        const pref = loadChatPreferences();
-        if (!pref.threadMaintenance) {
-            this.setError('Please configure your maintenance thread at: CollabMessage > Settings > Chat Preferences');
-            return;
+        // const pref = loadChatPreferences();
+        // if (!pref.threadMaintenance) {
+        //     this.setError('Please configure your maintenance thread at: CollabMessage > Settings > Chat Preferences');
+        //     return;
+        // }
+
+        let thread = await getThreadByName(this.page);
+        if (!thread) {
+            thread = await createThread(this.page, [], 'company');
         }
 
         const userId = getUserId();
-        const threadId = pref.threadMaintenance;
         if (!userId) return;
+        const threadId = thread?.threadId;
+        if (!threadId) {
+            this.setError('Cannot find thread');
+            return;
+        }
 
         const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentName}`);
         if (!moduleAgent || !moduleAgent.createAgent || typeof moduleAgent.createAgent !== 'function') throw new Error('Invalid agent');
@@ -1161,7 +1171,7 @@ export class ServicePreview100554 extends ServiceBase {
         const uri = this.getUri(`_${storFile.project}_${storFile.shortName}`, '.html');
         let model = monaco.editor.getModel(uri);
         if (model) return model;
-        if (![7,2].includes(this.level) ) mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile));
+        if (![7, 2].includes(this.level)) mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile));
         return model;
     }
 
@@ -1243,7 +1253,7 @@ export class ServicePreview100554 extends ServiceBase {
         } else if (this.actualTheme && this.actualThemeIndex) {
             this.menu.tools.theme.selected = this.actualThemeIndex;
         }
-    
+
     }
 
     private async setTheme() {

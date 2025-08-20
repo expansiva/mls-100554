@@ -1,148 +1,110 @@
 /// <mls shortName="collabTasks" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
-import { collab_plus, collab_message } from './_100554_collabIcons';
+import { collab_spinner_clock } from './_100554_collabIcons';
 
 @customElement('collab-tasks-100554')
 export class CollabTasks100554 extends StateLitElement {
 
-    render() {
-        return html`<div class="task-container">
 
-         <ol class="task-columns">
-            <li class="task-column">
-                <div class="task-column-container"> 
-                <div class="task-column-title">Pending</div>
-                    <ul class="task-items">
-                        <li class="task-item">  
-                            <div class="task-item-title"> Task 1</div>
-                            <div class="task-item-body"></div>
-                            <div class="task-item-actions">
-                            <div class="task-item-actions-info">
-                                <div class="info-messages"> ${collab_message} <span>10</span></div>
-                                </div>
-                                <div class="task-item-actions-user">
-                                    <img class="avatar" src="https://lh3.googleusercontent.com/a-/AOh14GjhEPN7UazL97l6qFIRIYUoLY-PNNPC93Zw4EVT=s96-c" alt="user avatar">
-                                </div>
-                            </div>
-                        </li>
-                        <li class="task-item">  
-                            <div class="task-item-title"> Task 2</div>
-                            <div class="task-item-body"></div>
-                            <div class="task-item-actions">
-                                <div class="task-item-actions-info"></div>
-                                <div class="task-item-actions-user">
-                                    <img class="avatar" src="https://avatars.githubusercontent.com/u/57486730?v=4" alt="user avatar">
-                                </div>
-                            </div>
-                        </li>
-                        <li class="task-item">  
-                            <div class="task-item-title"> Task 3</div>
-                            <div class="task-item-body"></div>
-                            <div class="task-item-actions">
-                                <div class="task-item-actions-info"></div>
-                                <div class="task-item-actions-user">
-                                    <img class="avatar" src="https://avatars.githubusercontent.com/u/57486730?v=4" alt="user avatar">
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                    <div class="task-items-add">
-                        ${collab_plus}
-                        <span>Add new task</span>
-                    </div>
-                </div>
-            
-            </li>
 
-            <li class="task-column">
-                <div class="task-column-container"> 
-                <div class="task-column-title">In progress</div>
-                    <ul class="task-items">
-                        <li class="task-item">  
-                            <div class="task-item-title"> Task 4</div>
-                            <div class="task-item-body"></div>
-                            <div class="task-item-actions">
-                                <div class="task-item-actions-info">
-                                    <div class="info-messages"> ${collab_message} <span>1</span></div>
-                                </div>
-                                <div class="task-item-actions-user">
-                                    <img class="avatar" src="https://avatars.githubusercontent.com/u/36516904?v=4" alt="user avatar">
-                                </div>
-                            </div>
-                        </li>
-                        <li class="task-item">  
-                            <div class="task-item-title"> Task 5</div>
-                            <div class="task-item-body"></div>
-                            <div class="task-item-actions">
-                                <div class="task-item-actions-info"></div>
-                                <div class="task-item-actions-user">
-                                    <img class="avatar" src="https://lh3.googleusercontent.com/a-/AOh14GjhEPN7UazL97l6qFIRIYUoLY-PNNPC93Zw4EVT=s96-c" alt="user avatar">
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                    <div class="task-items-add">
-                        ${collab_plus}
-                        <span>Add new task</span>
-                    </div>
-                </div>
-            </li>
+  @state() private view: 'list' | 'details' = 'list';
+  @state() private selectedTask: any = null;
 
-            <li class="task-column">
-                <div class="task-column-container"> 
-                <div class="task-column-title">Completed</div>
-                    <ul class="task-items">
-                        <li class="task-item">  
-                            <div class="task-item-title"> Task 6</div>
-                            <div class="task-item-body"></div>
-                            <div class="task-item-actions">
-                                <div class="task-item-actions-info">
-                                    <div class="info-messages"> ${collab_message} <span>1</span></div>
-                                </div>
-                                <div class="task-item-actions-user">
-                                    <img class="avatar" src="https://avatars.githubusercontent.com/u/36516904?v=4" alt="user avatar">
-                                </div>
-                            </div>
-                        </li>
-                        <li class="task-item">  
-                            <div class="task-item-title"> Task 7</div>
-                            <div class="task-item-body"></div>
-                            <div class="task-item-actions">
-                                <div class="task-item-actions-info">
-                                    <div class="info-messages"> ${collab_message} <span>3</span></div>
-                                </div>
-                                <div class="task-item-actions-user">
-                                    <img class="avatar" src="https://lh3.googleusercontent.com/a-/AOh14GjhEPN7UazL97l6qFIRIYUoLY-PNNPC93Zw4EVT=s96-c" alt="user avatar">
-                                </div>
-                            </div>
-                        </li>
-                        <li class="task-item">  
-                            <div class="task-item-title"> Task 8</div>
-                            <div class="task-item-body"></div>
-                            <div class="task-item-actions">
-                                <div class="task-item-actions-info">
-                                    <div class="info-messages"> ${collab_message} <span>1</span></div>
-                                </div>
-                                <div class="task-item-actions-user">
-                                    <img class="avatar" src="https://lh3.googleusercontent.com/a-/AOh14GjhEPN7UazL97l6qFIRIYUoLY-PNNPC93Zw4EVT=s96-c" alt="user avatar">
-                                </div>
 
-                            </div>
-                        </li>
-                    </ul>
-                    <div class="task-items-add">
-                        ${collab_plus}
-                        <span>Add new task</span>
-                    </div>
-                </div>
-            </li>
-        
+  private _backToList() {
+    this.view = 'list';
+    this.selectedTask = null;
+  }
 
-         </ol>
-
-         </div>`;
+  render() {
+    if (this.view === 'list') {
+      return this._renderTaskList();
+    } else {
+      return this._renderTaskDetails();
     }
+  }
+
+
+  private _renderTaskDetails() {
+    return html`
+      <div class="task-details">
+        <button class="back-btn" @click=${this._backToList}>← Voltar</button>
+        <h2>${this.selectedTask?.title}</h2>
+        <p>In development</p>
+      </div>
+    `;
+  }
+
+
+  _renderTaskList() {
+    return html`
+      <div class="task-list-container">
+
+        <!-- Stage: Em Progresso -->
+        <div class="task-stage">
+          <div class="task-stage-header">
+            <span class="stage-name">EM PROGRESSO</span>
+            <span class="stage-count">(2)</span>
+            <span class="stage-add">+ Adicionar Tarefa</span>
+          </div>
+          <ul class="task-items">
+            <li class="task-row">
+              <span class="task-check">${collab_spinner_clock}</span>
+              <span class="task-title">Bug explorer</span>
+              <span class="task-tag bug">bug</span>
+            </li>
+            <li class="task-row">
+              <span class="task-check">${collab_spinner_clock}</span>
+              <span class="task-title">collab messages - ajustes</span>
+              <span class="task-meta">3/23</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Stage: Review -->
+        <div class="task-stage">
+          <div class="task-stage-header">
+            <span class="stage-name">REVIEW</span>
+            <span class="stage-count">(4)</span>
+            <span class="stage-add">+ Adicionar Tarefa</span>
+          </div>
+          <ul class="task-items">
+            <li class="task-row" @click=${() => this._openTaskDetails({ id: 1, title: 'Bug add new file' })}>
+              <span class="task-check">✔</span>
+              <span class="task-title">Bug add new file</span>
+            </li>
+            <li class="task-row">✔ <span class="task-title">Bug action</span></li>
+            <li class="task-row">✔ <span class="task-title">agentImprovePrototype</span></li>
+          </ul>
+        </div>
+        
+        <!-- Stage: Pendente -->
+        <div class="task-stage">
+          <div class="task-stage-header">
+            <span class="stage-name">PENDENTE</span>
+            <span class="stage-count">(5)</span>
+            <span class="stage-add">+ Adicionar Tarefa</span>
+          </div>
+          <ul class="task-items">
+            <li class="task-row">⏳ <span class="task-title">criar widgets de galeria imagens</span></li>
+            <li class="task-row">⏳ <span class="task-title">Bug Inicialização</span> <span class="task-tag bug">bug</span></li>
+            <li class="task-row">⏳ <span class="task-title">Bug rename com folder</span></li>
+            <li class="task-row">⏳ <span class="task-title">Bug import entre projetos</span></li>
+            <li class="task-row">⏳ <span class="task-title">collabPreviewL4</span></li>
+          </ul>
+        </div>
+
+      </div>
+    `;
+  }
+
+  private _openTaskDetails(task: any) {
+    this.selectedTask = task;
+    console.info('aq')
+    this.view = 'details';
+  }
+
 }

@@ -48,6 +48,10 @@ export class ServiceDetail100554 extends ServiceBase {
         onClickMain: this.onClickMain.bind(this),
     }
 
+    public updateContentPluginWithElement(element: HTMLElement) {
+        this._updateContentPluginWithElement(element);
+    }
+
     private showAboutThis(): boolean {
 
         const div = document.createElement('div');
@@ -248,9 +252,42 @@ export class ServiceDetail100554 extends ServiceBase {
 
     }
 
+    private _updateContentPluginWithElement(element: HTMLElement) {
+
+        if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
+        let el = this.contentPlugin.querySelector('#' + element.tagName.toLowerCase()) as HTMLElement;
+        if (!el) {
+            el = document.createElement('div');
+            el.id = element.tagName.toLowerCase();
+        }
+
+        this.setContentElement(el, element);
+
+    }
+
+    private setContentElement(el: HTMLElement, elementToAdd: HTMLElement) {
+        if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
+        const allWcs = getAllWebComponentsInSource(elementToAdd.outerHTML);
+        el.innerHTML = '';
+        allWcs.forEach((wc) => {
+            const info = convertTagToFileName(wc);
+            if (info) {
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.id = `_${info.project}_${info.shortName}`;
+                script.src = (`/_${info.project}_${info.shortName}`);
+                el.appendChild(script)
+            }
+        });
+        el.appendChild(elementToAdd);
+        this.contentPlugin.appendChild(el);
+
+    }
+
     private setContentinEl(el: HTMLElement, content: string, args: any) {
 
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
+
 
         const allWcs = getAllWebComponentsInSource(content);
         el.innerHTML = content;

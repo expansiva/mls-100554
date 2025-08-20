@@ -1,7 +1,7 @@
 /// <mls shortName="msgDBController" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 const MAXMESSAGESBYTHREAD = 100;
-const VERSION = 3;
+const VERSION = 4;
 
 export function openDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
@@ -9,9 +9,17 @@ export function openDB(): Promise<IDBDatabase> {
 
         request.onupgradeneeded = (event) => {
             const db = (event.target as IDBOpenDBRequest).result;
+
             if (!db.objectStoreNames.contains("threads")) {
-                db.createObjectStore("threads", { keyPath: "threadId" });
+                const threadStore = db.createObjectStore("threads", { keyPath: "threadId" });
+                threadStore.createIndex("byName", "name", { unique: false });
+            } else {
+                const threadStore = (event.target as IDBOpenDBRequest).transaction!.objectStore("threads");
+                if (!threadStore.indexNames.contains("byName")) {
+                    threadStore.createIndex("byName", "name", { unique: false });
+                }
             }
+
             if (!db.objectStoreNames.contains("users")) {
                 db.createObjectStore("users", { keyPath: "userId" });
             }
@@ -429,6 +437,21 @@ export async function getThread(threadId: string): Promise<mls.msg.ThreadPerform
         request.onerror = () => reject("Erro ao buscar thread");
     });
 }
+
+export async function getThreadByName(threadName: string): Promise<mls.msg.ThreadPerformanceCache | undefined> {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("threads", "readonly");
+        const store = tx.objectStore("threads");
+        const index = store.index("byName");
+        const request = index.get(threadName);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject("Erro ao buscar thread por nome");
+    });
+}
+
 
 export async function listUsers(): Promise<mls.msg.User[]> {
     const db = await openDB();

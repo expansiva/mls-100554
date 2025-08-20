@@ -1,9 +1,10 @@
 /// <mls shortName="libCommom" project="100554" enhancement="_blank" groupName="other" />
 
-import { getMessageKey } from "./_100554_collabLitElement"; 
+import { getMessageKey } from "./_100554_collabLitElement";
 import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
 import { collabImport } from './_100554_collabImport';
+import { ServiceDetail100554 } from './_100554_serviceDetail';
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -314,7 +315,7 @@ export async function loadPluginProject(project: number, scope: string, onlyEnab
 
 const KeyProject = 'projectDetails'
 export function setProjectDetails(project: number) {
-    localStorage.setItem(KeyProject, JSON.stringify({ project}));
+    localStorage.setItem(KeyProject, JSON.stringify({ project }));
 }
 
 export function getProjectDetails(): mls.stor.localStor.IRetProjectDetails | undefined {
@@ -530,7 +531,7 @@ export function getBaseTemplate(file: IInfoFile, enhancement: string = '_blank')
 
 }
 
-export function verifyNeedAddTripleslach(info:mls.cbe.IPath, src: string, extension:string, enhancement: string = '_blank'): string {
+export function verifyNeedAddTripleslach(info: mls.cbe.IPath, src: string, extension: string, enhancement: string = '_blank'): string {
 
     if (extension === '.html') return src;
 
@@ -557,6 +558,14 @@ export async function getInstanceByFile(file: mls.stor.IFileInfo): Promise<Objec
     } catch (e) {
         return undefined;
     }
+
+}
+
+export async function openElementInDetails(el: HTMLElement) {
+    const serviceDetails: ServiceDetail100554 = mls.services['100554_serviceDetail_right'];
+    if (!serviceDetails) return;
+    serviceDetails.openMe();
+    serviceDetails.updateContentPluginWithElement(el);
 
 }
 

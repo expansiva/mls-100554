@@ -11,7 +11,7 @@ export function createAgent(): IAgent {
     return {
         agentName,
         avatar_url: svg_agent,
-        agentDescription: "Intall Bot in a thread",
+        agentDescription: "Install Bot in a thread",
         visibility: "public",
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _beforePrompt(context);

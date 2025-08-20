@@ -15,8 +15,12 @@ export function listenToThreadEvents() {
 
     navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data.type !== "thread-update") return;
+        const id = event.data.id;
         enqueueThreadForSync(event.data?.data?.threadId);
-    })
+        mls.stor.cache.sendACK(id);
+    });
+
+    mls.stor.cache.sendRequestMissed();
 }
 
 function enqueueThreadForSync(threadId: string) {
