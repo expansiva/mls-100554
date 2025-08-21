@@ -176,7 +176,7 @@ export function escapeHTML(str: string) {
 
 
 export function openService(service: string, position: 'left' | 'right', level: number, args?: Record<string, string>) {
-    let page = document.querySelector('collab-page');
+    let page = top?.document.querySelector('collab-page');
     if (!page) return;
     const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
     if (!toolbar) return;
@@ -206,7 +206,7 @@ export function openService(service: string, position: 'left' | 'right', level: 
 
 export function selectLevel(level: number) {
 
-    const page = document.querySelector('collab-page');
+    const page = top?.document.querySelector('collab-page');
     const nav = page?.querySelector('collab-nav-1') as HTMLElement;
     const objIndex = {
         0: 7,
