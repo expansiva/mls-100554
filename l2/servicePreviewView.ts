@@ -444,12 +444,14 @@ export class ServicePreviewView extends StateLitElement {
 
         let ret;
 
-        iframe.contentDocument.body.innerHTML = txt;
+        
         //ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
         ret = await getDependenciesByHtmlFile(this.file, txt, this.actualtheme, true);
 
-
-        const els = iframe.contentDocument.body.querySelectorAll('*');
+        const domVirtual = document.createElement('div');
+        domVirtual.innerHTML = txt;
+        //const els = iframe.contentDocument.body.querySelectorAll('*');
+        const els = domVirtual.querySelectorAll('*');
         els.forEach((el) => el.setAttribute('mls_origin', 'true'));
 
         if (ret.errors.length > 0) {
@@ -464,6 +466,15 @@ export class ServicePreviewView extends StateLitElement {
             case 'singlePage': this.modeSinglePage(ret, iframe); break;
             default: this.modeMinimum(ret, iframe); break;
         }
+
+        iframe.contentDocument.body.innerHTML = domVirtual.innerHTML;
+
+        mls.events.fire(
+            mls.actualLevel as any,
+            'FineshPreview' as any,
+            JSON.stringify({}),
+            0
+        );
 
     }
 

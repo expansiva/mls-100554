@@ -8,6 +8,8 @@ import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles } from './_
 import { createAllModels, readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 import { ServiceBase } from './_100554_serviceBase';
 import './_100554_serviceListFilesAdd';
+import './_100554_pluginExploreListAddL3';
+import './_100554_pluginExploreListAddL4';
 
 /// **collab_i18n_start**
 
@@ -84,7 +86,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     @property({ type: Boolean }) autoPrepare: boolean = false;
 
-    @property() mode: string = 'list';
+    @property() mode: TModeExploreList = 'list';
 
     @property() refresh: string = '';
 
@@ -127,9 +129,23 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
     private async showAdd() {
+        switch (mls.actualLevel) {
+            case (2):
+                this.addModeL2();
+                break;
+            case (3):
+                this.mode = 'addL3';
+                break;
+            case (4):
+                this.mode = 'addL4';
+                break;
+        }
+    }
+
+    private async addModeL2() {
         await import('./_100554_serviceListFilesAdd');
         this.inFilter = false;
-        this.mode = 'add';
+        this.mode = 'addL2';
     }
 
     private filesInLocal: mls.stor.IFileInfo[] = [];
@@ -223,8 +239,21 @@ export class PluginExploreList extends PluginBaseModule {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
 
-        if (this.mode === 'list') {
-            return html`
+        switch (this.mode) {
+            case ('list'):
+                return this.renderModeList();
+            case ('addL2'):
+                return this.renderAdd();
+            case ('addL3'):
+                return this.renderAddL3();
+            case ('addL4'):
+                return this.renderAddL4();
+        }
+
+    }
+
+    renderModeList() {
+        return html`
             <div class="contentServiceList scroll-custom">
                 ${this.renderHeader()}
                 <ul>
@@ -232,13 +261,7 @@ export class PluginExploreList extends PluginBaseModule {
                     ${this.modeView === 1 ? this.renderFolder() : this.renderList()}
                 </ul>
             </div>
-        `;
-        } else {
-
-            return html`${this.renderAdd()}`
-
-        }
-
+        `
     }
 
     renderHeader() {
@@ -497,6 +520,13 @@ export class PluginExploreList extends PluginBaseModule {
         return html`<service-list-files-add-100554 level="${this.levelFiles}" position="${this.position}" .father="${this}"></service-list-files-add-100554>`
     }
 
+    renderAddL3() {
+        return html`<plugin-explore-list-add-l3-100554 autoprepare='ss' position="${this.position}" .father="${this}" .service="${this.service}"></plugin-explore-list-add-l3-100554>`
+    }
+
+    renderAddL4() {
+        return html`<plugin-explore-list-add-l4-100554 autoprepare='ss' position="${this.position}" .father="${this}" .service="${this.service}"></plugin-explore-list-add-l4-100554>`
+    }
     //------------ ACTIONS -----------------
 
     private getAllName(file: mls.stor.IFileInfo, isHistory = false): string {
@@ -1307,6 +1337,8 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
 }
+
+type TModeExploreList = 'list' | 'addL2' | 'addL3' | 'addL4';
 
 if (!customElements.get('plugin-explore-list-100554')) {
     customElements.define('plugin-explore-list-100554', PluginExploreList);

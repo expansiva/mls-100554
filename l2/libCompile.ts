@@ -309,9 +309,9 @@ async function getJS(myImports: string[], enhacementName: string, mfile: mls.cbe
     let key = getImportUrl(mfile);
     if (myImports.includes(key)) return;
     myImports.push(key);
-    const keyTestFile = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, mfile.folder, '.test.ts');
+    /*const keyTestFile = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, mfile.folder, '.test.ts');
     const storFileTest = mls.stor.files[keyTestFile];
-    if (storFileTest) myImports.push(`${key}.test.js`);
+    if (storFileTest) myImports.push(`${key}.test.js`);*/
 }
 
 
