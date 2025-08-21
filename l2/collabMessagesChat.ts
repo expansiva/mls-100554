@@ -4,7 +4,7 @@ import { html, LitElement, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation, collab_plus } from './_100554_collabIcons';
 import { collabImport } from './_100554_collabImport';
-import { removeThreadFromSync } from './_100554_collabMessagesSyncNotifications';
+import { removeThreadFromSync, getThreadUpdateInBackground } from './_100554_collabMessagesSyncNotifications';
 import { openElementInDetails } from './_100554_libCommom'
 
 import {
@@ -97,6 +97,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @state() allUsers: mls.msg.User[] = [];
     @state() isThreadError: boolean = false;
     @state() threadErrorMsg: string = '';
+    @state() lastTopicFilter: string = '';
 
     @property() group: 'CONNECT' | 'APPS' | 'DOCS' | 'CRM' = 'CONNECT';
     @property() userId: string | undefined;
@@ -119,6 +120,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private messagesLimit = 10;
     private messagesOffset = 0;
     private isLoadingMoreMessages = false;
+    private isChangeTopics = false;
     private wasMessagesAtBottom: boolean = true;
 
     private imageUrls = [
@@ -187,7 +189,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             case 'details':
                 return html`
                     <div class="header">
-                        <span @click=${this.onTitleClick}>${collab_chevron_left} Thread: ${this.actualThread?.thread.name || this.actualThread?.thread.threadId}</span>
+                        <span @click=${this.onTitleClick}>${collab_chevron_left} Thread: ${this.getThreadName(this.actualThread)}</span>
                         <div class="header-actions">
                             <span @click=${this.onThreadDetailsClick}>${collab_gear}</span>
                         </div>
@@ -349,16 +351,27 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private renderTopics() {
         return html`
             <collab-messages-topics-100554
+                .selectedTopic=${this.lastTopicFilter === '' ? 'all' : this.lastTopicFilter}
                 .messages=${this.actualMessages}
+                .threadTopics=${this.actualThread?.thread.defaultTopics || []}
                 @topic-selected=${(e: CustomEvent) => this.onTopicClick(e)}
             ></collab-messages-topics-100554>
         `
     }
 
-    private onTopicClick(e: CustomEvent) {
-        console.log('clicou no tópico:', e.detail.topic)
-        if (e.detail.topic === 'all') this.actualMessagesParsed = this.parseMessages(this.actualMessages);
-        else this.actualMessagesParsed = this.parseMessages(this.actualMessages, e.detail.topic);
+    private async onTopicClick(e: CustomEvent) {
+
+        this.lastTopicFilter = e.detail.topic === 'all' ? '' : e.detail.topic;
+        this.isChangeTopics = true;
+        if (e.detail.topic === 'all') this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
+        else this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
+        await this.updateComplete;
+
+        if (this.messageContainer) {
+            const newHeight = this.messageContainer.scrollHeight;
+            this.messageContainer.scrollTop = newHeight;
+        }
+
     }
 
     private async onMentionHover(ev: CustomEvent) {
@@ -529,7 +542,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return threadAvatar;
     }
 
-    private getThreadName(item: IFilteredThreads) {
+    private getThreadName(item: IThreadInfo | undefined) {
+
+        if (!item) return '';
         if (item.thread.name.startsWith('@') && item.thread.users.length === 2) {
             const user = item.users.find((user) => user.userId !== this.userId);
             if (user) return user.name;
@@ -698,8 +713,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private async updateMessagesAfterScrollMore(newMessages: mls.msg.MessagePerformanceCache[], container: HTMLElement, previousHeight: number) {
-        this.actualMessages = [...newMessages, ...this.actualMessages];
-        this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+
+        this.actualMessages = [...this.actualMessages, ...newMessages];
+        this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
         await this.updateComplete;
         const newHeight = container.scrollHeight;
         container.scrollTop = newHeight - previousHeight;
@@ -716,6 +732,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private async onChatScroll(e: Event) {
 
         this.removeAllUserModal();
+        if (this.isChangeTopics) {
+            this.isChangeTopics = false;
+            return;
+        }
 
         if (this.isSystemChangeScroll) {
             this.isSystemChangeScroll = false;
@@ -748,6 +768,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.actualThread &&
             this.hasMoreMessagesLocalDB
         ) {
+
             this.isLoadingMoreMessages = true;
             const newOffset = this.messagesOffset + this.messagesLimit;
             const newMessages = await getMessagesByThreadId(
@@ -869,13 +890,21 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private parseMessages(
         rawData: mls.msg.MessagePerformanceCache[],
-        topic?: string
+        topic: string
     ): IMessageGrouped {
         const groupedByDay: IMessageGrouped = {};
 
-        rawData.forEach(msg => {
+        [...rawData].forEach(msg => {
 
-            if (topic && (!msg.content || !msg.content.includes(topic))) {
+            if (
+                topic &&
+                msg.content &&
+                !(
+                    msg.content.startsWith(`${topic} `) ||
+                    msg.content.endsWith(` ${topic}`) ||
+                    msg.content.includes(` ${topic} `)
+                )
+            ) {
                 return;
             }
 
@@ -965,13 +994,14 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private async onThreadClick(threadInfo: IThreadInfo) {
         this.activeScenerie = 'loading';
+        this.lastTopicFilter = '';
         this.messagesOffset = 0;
         this.hasMoreMessagesLocalDB = true;
         this.hasMoreMessagesBefore = false;
         this.actualThread = threadInfo;
         const messagesInDb = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, 0);
         this.actualMessages = messagesInDb;
-        this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+        this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
         this.activeScenerie = 'details';
         this.isLoadingMessages = true;
         this.isThreadError = false;
@@ -982,6 +1012,16 @@ export class CollabMessagesChat100554 extends StateLitElement {
             const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId, threadInfo.thread.lastMessageTime || new Date('2000-01-01').toISOString());
             await updateThread(threadByServer.thread.threadId, threadByServer.thread);
             threadInfo = await this.updateMessagesOnDb(threadInfo, threadByServer.messages);
+
+            if (threadByServer.threadsPending) {
+                for await (let threadsPending of threadByServer.threadsPending) {
+                    if (threadsPending !== threadInfo.thread.threadId) {
+                        removeThreadFromSync(threadsPending);
+                        getThreadUpdateInBackground(threadsPending);
+                    }
+                }
+            }
+
             await updateUsers(threadByServer.users);
             this.allUsers = threadByServer.users;
             if (threadByServer.hasMore) await this.loadAllMessages(threadInfo);
@@ -1025,7 +1065,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         }
         await addMessages(newMessages);
         this.actualMessages = this.mergeMessages(this.actualMessages, newMessages);
-        this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+        this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
         await this.updateLastMessage(threadInfo);
         return threadInfo;
     }
@@ -1076,6 +1116,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private async handleSend(value: string, opt: { isSpecialMention: boolean, agentName: string }) {
         this.isSystemChangeScroll = true;
+        this.lastTopicFilter = '';
         try {
             if (!opt.isSpecialMention) {
                 await this.addMessage(value);
@@ -1119,7 +1160,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             message.isFailed = true;
             message.isFailedError = err.message;
             message.isLoading = false;
-            this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+            this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
             console.error('Error on send message:' + err.message);
         }
     }
@@ -1150,7 +1191,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 message.isLoading = false;
                 message.isFailed = true;
                 message.isFailedError = err.message;
-                this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+                this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
             }
         }
     }
@@ -1184,7 +1225,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             }
             if (taskId) newMessage.taskId = taskId;
             this.actualMessages.unshift({ context, lastChanged: new Date().getTime(), ...newMessage });
-            this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+            this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
             await addMessage(newMessage);
             this.requestUpdate();
         } else {
@@ -1208,7 +1249,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             delete cloned.context;
             delete cloned.isLoading;
             delete cloned.lastChanged;
-            this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+            this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
             await addMessage(cloned);
             this.requestUpdate();
         }
@@ -1236,7 +1277,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         }
         if (taskId) newMessage.taskId = taskId;
         this.actualMessages.unshift(newMessage);
-        this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+        this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
         this.requestUpdate();
         return newMessage;
     }
@@ -1284,7 +1325,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 return item;
             });
         } else this.actualMessages.unshift({ ...newMessage, footers: footerData });
-        this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+        this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
 
         const m = newMessage as IMessage;
         delete m.isLoading;
@@ -1330,7 +1371,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return taskData.task;
     }
 
-    private async getThreadInfo(threadId: string, userId: string, lastOrderAt: string): Promise<IThreadInfo> {
+    private async getThreadInfo(threadId: string, userId: string, lastOrderAt: string): Promise<mls.msg.ResponseGetThreadUpdate> {
         const deviceId = loadNotificationDeviceId();
 
         try {
@@ -1409,7 +1450,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 }
                 const messagesInDb = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, 0);
                 this.actualMessages = messagesInDb;
-                this.actualMessagesParsed = this.parseMessages(this.actualMessages);
+                this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
                 await this.updateLastMessage(this.actualThread);
             }
         }
@@ -1428,6 +1469,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
 interface IThreadInfo {
     thread: mls.msg.ThreadPerformanceCache,
+    threadsPending?: number[],
     users: mls.msg.User[],
     hasMore?: boolean | undefined,
     messages?: mls.msg.Message[] | undefined

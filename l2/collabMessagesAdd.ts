@@ -407,17 +407,20 @@ export class CollabMessagesAdd100554 extends StateLitElement {
             const response = await mls.api.msgAddThread(params);
 
             if (this.threadType === 'dm') {
+
+                notifyThreadChange(response.thread);
+                const thr = await addThread(response.thread);
+
                 const responseAddUsuer = await mls.api.msgAddUserInThread({
                     auth: 'admin',
                     userIdOrName: this.dmUser.replace('@', ''),
-                    threadId: response.thread.threadId,
+                    threadId: thr.threadId,
                     userId: this.userId,
                 });
 
                 this.labelOk = `${this.msg.successSaving}`;
                 if (responseAddUsuer.thread) {
-                    const thr = await addThread(response.thread);
-                    notifyThreadChange(thr);
+                    notifyThreadChange(responseAddUsuer.thread);
                     if (this.onAddSuccess) this.onAddSuccess();
                 }
             }
@@ -440,23 +443,30 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                             if (threadWithBot && threadWithBot.thread.bots) {
                                 const botInfo = threadWithBot.thread.bots.find((bot) => bot.botId === botSelected.id);
                                 if (botInfo) {
-                                    mls.api.msgAddOrUpdateThreadBot({
+                                    const res = await mls.api.msgAddOrUpdateThreadBot({
                                         botId: botSelected.id,
                                         config: { 'agentConfiguration': this._agentConfig },
                                         llmPrompt: botInfo.llmPrompt,
                                         status: 'active',
                                         threadId: response.thread.threadId,
                                         userId: this.userId
-                                    })
+                                    });
+                                    notifyThreadChange(res.thread);
+                                    if (this.onAddSuccess) this.onAddSuccess();
                                 }
 
+                            } else {
+                                notifyThreadChange(threadWithBot.thread);
+                                if (this.onAddSuccess) this.onAddSuccess();
                             }
 
                         }
 
+                    } else {
+                        notifyThreadChange(thr);
+                        if (this.onAddSuccess) this.onAddSuccess();
                     }
-                    notifyThreadChange(thr);
-                    if (this.onAddSuccess) this.onAddSuccess();
+
                 }
             }
 

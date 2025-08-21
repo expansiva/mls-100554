@@ -25,6 +25,8 @@ const message_pt = {
     statusArchived: 'Arquivado',
     statusDeleted: 'Deletado',
     statusDeleting: 'Deletando',
+    topicsDefault: 'Tópicos',
+    welcomeMessage: 'Mensagem de boas-vindas',
     remove: 'Remover',
     disable: 'Desalibitar',
     users: 'Usuários',
@@ -60,6 +62,8 @@ const message_en = {
     statusArchived: 'Archived',
     statusDeleted: 'Deleted',
     statusDeleting: 'Deleting',
+    topicsDefault: 'Tópicos',
+    welcomeMessage: 'Welcome message',
     remove: 'Remove',
     disable: 'Disable',
     group: 'Group',
@@ -150,17 +154,31 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                     ?disabled=${isDm}
                     @input=${(e: Event) => { if (this.editedThreadDetails && !isDm) this.editedThreadDetails.thread.name = (e.target as HTMLInputElement).value }}>
             </label>
-                <label>${this.msg.status}
-                <select name="status" required
+            <label> ${this.msg.status}
+                <select 
+                    name="status" 
+                    required
+                    .disabled=${this.editedThreadDetails?.thread.status === 'deleting'}
                     .value=${this.editedThreadDetails?.thread.status}
-                    @change=${(e: Event) => { if (this.editedThreadDetails) this.editedThreadDetails.thread.status = (e.target as HTMLSelectElement).value as mls.msg.ThreadStatus }}>
+                    @change=${(e: Event) => {
+                if (this.editedThreadDetails) {
+                    this.editedThreadDetails.thread.status =
+                        (e.target as HTMLSelectElement).value as mls.msg.ThreadStatus;
+                }
+            }}
+                >
                     <option value="active">${this.msg.statusActive}</option>
                     <option value="archived">${this.msg.statusArchived}</option>
+                    <option 
+                        value="deleting" 
+                        ?hidden=${this.editedThreadDetails?.thread.status !== 'deleting'}
+                    >
+                        ${this.msg.statusDeleting}
+                    </option>
                     <option value="deleted">${this.msg.statusDeleted}</option>
-                    <option value="deleting">${this.msg.statusDeleting}</option>
-
                 </select>
             </label>
+
 
              <label> ${this.msg.visibility}
                 <select name="visibility" required
@@ -174,6 +192,23 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                 </select>
             </label>
 
+            
+            <label> ${this.msg.topicsDefault}</label>
+            <collab-input-tag-100554 
+                pattern="^\+[\w-]+$"
+                .value=${this.editedThreadDetails?.thread.defaultTopics?.join(',')}
+                .onValueChanged=${(value: string) => { if (this.editedThreadDetails) this.editedThreadDetails.thread.defaultTopics = value.split(',') }}
+                id="topicsInput"
+            ></collab-input-tag-100554>
+
+            ${!isDm ? html`
+                <label> ${this.msg.welcomeMessage}
+                    <input type="text" name="welcomemessage"
+                        name="welcomemessage"
+                        .value=${this.editedThreadDetails?.thread.wellcomeMessage}
+                        @input=${(e: Event) => { if (this.editedThreadDetails && !isDm) this.editedThreadDetails.thread.wellcomeMessage = (e.target as HTMLInputElement).value }}>
+                </label>
+            ` : ``}
             
             <label> ${this.msg.languages}</label>
             <collab-input-tag-100554 
@@ -348,7 +383,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         const original = this.threadDetails.thread;
         const edited = this.editedThreadDetails.thread;
 
-        const fields: (keyof mls.msg.ThreadPerformanceCache)[] = ['group', 'languages', 'name', 'status', 'visibility'];
+        const fields: (keyof mls.msg.ThreadPerformanceCache)[] = ['group', 'languages', 'name', 'status', 'visibility', 'wellcomeMessage', 'defaultTopics'];
         const changed: mls.msg.RequestUpdateThread = {
             action: 'updateThread',
             threadId: original.threadId,
