@@ -17,9 +17,12 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
 
     if ((window as any).traceLivecicle) console.info('creating: files model ', project);
 
+    const deps = mls.l5.getProjectDependencies(project, false);
+    const projectWithDeps = [project, ...deps]
+
     for (const key of keys) {
         const storFile = mls.stor.files[key];
-        if (storFile.project === project
+        if (projectWithDeps.includes(storFile.project)
             && storFile.level === 2
             && storFile.extension === '.ts'
             && (mls.istrace || storFile.inLocalStorage)
@@ -376,7 +379,7 @@ async function _updateModelStatusLess(modelBase: mls.editor.IModelStyle, changed
         await mls.l2.typescript.compileAndPostProcess(fileModels.ts, true, true);
     }
 
-    
+
     //_dispatchEventChanged(position, modelBase.storFile);
     await _checkSameContent(modelBase, modelBase.storFile);
     _dispatchEventChangedLess(position, modelBase.storFile)
@@ -535,11 +538,11 @@ function _dispatchEventChanged(position: 'left' | 'right' | 'all', storFile: mls
 
 function _dispatchEventChangedLess(position: 'left' | 'right' | 'all', storFile: mls.stor.IFileInfo) {
     if (position === 'all') {
-        mls.events.fire([2], ['styleChanged'] as any, JSON.stringify({ position:'left', storFile }), 200);
-        mls.events.fire([2], ['styleChanged'] as any, JSON.stringify({ position:'right', storFile }),200);
+        mls.events.fire([2], ['styleChanged'] as any, JSON.stringify({ position: 'left', storFile }), 200);
+        mls.events.fire([2], ['styleChanged'] as any, JSON.stringify({ position: 'right', storFile }), 200);
         return;
     }
-    mls.events.fire([2], ['styleChanged'] as any, JSON.stringify({ position, storFile }),200);
+    mls.events.fire([2], ['styleChanged'] as any, JSON.stringify({ position, storFile }), 200);
 }
 
 async function createStorFiles(fileBase: mls.stor.IFileInfo | undefined, ext: string): Promise<mls.stor.IFileInfo> {

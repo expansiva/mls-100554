@@ -61,7 +61,7 @@ export async function startNewAiTask(
         notifyTaskChange(context, oldContextCreateAt);
 
         if ((mls as any).istraceAgent) console.log(JSON.stringify(context, null, 2));
-        if (longTermMemory) await appendLongTermMemory(context, longTermMemory);
+        if (longTermMemory) context.task = await appendLongTermMemory(context, longTermMemory);
         await afterPrompt(context);
 
     } catch (error: any) {
