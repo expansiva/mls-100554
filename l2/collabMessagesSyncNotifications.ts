@@ -11,17 +11,23 @@ export function removeThreadFromSync(threadId: string) {
     threadSyncMap.delete(threadId);
 }
 
-export function listenToThreadEvents() {
+export async function listenToThreadEvents() {
 
-    navigator.serviceWorker.addEventListener('message', (event) => {
+    navigator.serviceWorker.addEventListener('message', async (event) => {
+        if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] Received`)
         if (event.data.type !== "thread-update") return;
-        console.info(event?.data);
+        if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] Data`, event?.data)
         const id = event.data.id;
         enqueueThreadForSync(event.data?.data?.threadId);
-        mls.stor.cache.sendACK(id);
+
+        if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] : sendACK id: ${id}`);
+        await mls.stor.cache.sendACK(id);
+
     });
 
-    mls.stor.cache.sendRequestMissed();
+    if ((mls as any).isTraceNotification) console.info('[NOTIFICATION] : sendRequestMissed');
+    await mls.stor.cache.sendRequestMissed();
+
 }
 
 function enqueueThreadForSync(threadId: string) {
@@ -39,7 +45,9 @@ async function scheduleNextSync() {
         threadSyncMap.delete(threadId);
 
         try {
-            await getThreadUpdate(threadId);
+            if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] : refreshThread : ${threadId}`);
+            await getThreadUpdateInBackground(threadId);
+
         } catch (err) {
             console.error(`Erro ao sincronizar thread ${threadId}`, err);
         }
@@ -48,7 +56,7 @@ async function scheduleNextSync() {
     }, 500);
 }
 
-async function getThreadUpdate(threadId: string): Promise<void> {
+export async function getThreadUpdateInBackground(threadId: string): Promise<void> {
     const userId = getUserId();
     const deviceId = loadNotificationDeviceId();
     if (!userId) throw new Error('Invalid user id');
@@ -63,6 +71,14 @@ async function getThreadUpdate(threadId: string): Promise<void> {
             lastOrderAt,
             deviceId: deviceId || undefined
         });
+
+        if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] : getThreadUpdateInBackground threadsPending: ${response.threadsPending}`);
+
+        if (response.threadsPending) {
+            for (let threadsPending of response.threadsPending) {
+                enqueueThreadForSync(threadsPending);
+            }
+        }
 
         if (!response.messages || response.messages.length === 0) return;
         const lastMessage = response.messages[response.messages.length - 1];

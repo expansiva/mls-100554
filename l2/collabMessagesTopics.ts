@@ -3,6 +3,8 @@
 import { html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
+import { collab_chevron_down, collab_chevron_right } from './_100554_collabIcons';
+
 
 @customElement('collab-messages-topics-100554')
 export class CollabMessagesTopics100554 extends StateLitElement {
@@ -10,19 +12,15 @@ export class CollabMessagesTopics100554 extends StateLitElement {
   @state() messages: IMessage[] = [];
   @state() topics: string[] = [];
   @state() expanded = false;
-  @state() selectedTopic: string | null = null;
+  @property() selectedTopic: string | null = null;
 
   @property() threadTopics: string[] = [];
 
   render() {
 
     this.topics = this.getTopicsFromMessagesOrdered();
+    const headerTopics = this.getHeadersTopicsFromMessages();
     const grouped = this.groupTopics(this.topics);
-
-    let headerTopics = this.topics.slice(0, 3);
-    if (this.selectedTopic && !headerTopics.includes(this.selectedTopic) && this.selectedTopic !== 'all') {
-      headerTopics = [...headerTopics, this.selectedTopic];
-    }
 
     if (!this.topics || this.topics.length === 0) return html``;
 
@@ -44,9 +42,9 @@ export class CollabMessagesTopics100554 extends StateLitElement {
               `)
         : null}
         </div>
-        <button @click=${() => this.expanded = !this.expanded}>
-          ${this.expanded ? 'Hide details' : 'Show details'}
-        </button>
+        <i class="topics-details" @click=${() => this.expanded = !this.expanded}>
+          ${this.expanded ? collab_chevron_down : collab_chevron_right}
+        </i>
       </div>
 
       ${this.expanded ? html`
@@ -78,19 +76,6 @@ export class CollabMessagesTopics100554 extends StateLitElement {
     }));
   }
 
-  private getTopicsFromMessages() {
-    let topicsResult: string[] = [];
-    this.messages.forEach((message) => {
-      if (message.content) {
-        const topics = this.extractTopics(message.content);
-        if (topics.length > 0) {
-          topicsResult = [...topicsResult, ...topics];
-        }
-      }
-    });
-    return topicsResult;
-  }
-
   private extractTopics(message: string): string[] {
     const regex = /\+[a-zA-Z0-9_]+/g;
     const matches = message.match(regex);
@@ -108,6 +93,24 @@ export class CollabMessagesTopics100554 extends StateLitElement {
     return groups;
   }
 
+  private getHeadersTopicsFromMessages() {
+
+    const ordered: string[] = [];
+    this.messages.forEach((message) => {
+      if (message.content) {
+        const topics = this.extractTopics(message.content);
+        topics.forEach(topic => {
+          ordered.push(topic);
+        });
+      }
+    });
+    let headerTopics = Array.from(new Set([...ordered])).slice(0, 3);
+    if (this.selectedTopic && !headerTopics.includes(this.selectedTopic) && this.selectedTopic !== 'all') {
+      headerTopics = [...headerTopics, this.selectedTopic];
+    }
+    return headerTopics;
+  }
+
   private getTopicsFromMessagesOrdered(): string[] {
     const seen = new Set<string>();
     const ordered: string[] = [];
@@ -123,6 +126,14 @@ export class CollabMessagesTopics100554 extends StateLitElement {
         });
       }
     });
+
+    if (this.threadTopics) {
+      this.threadTopics.forEach((thTop) => {
+        if (!ordered.find((item) => item == thTop)) {
+          ordered.push(thTop);
+        } 
+      })
+    }
 
     return ordered;
   }
