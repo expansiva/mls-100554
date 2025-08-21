@@ -17,7 +17,7 @@ export class SimpleGreeting extends CollabLitElement {
 
   render() {
 
-      console.log('teste 1')
+      console.log('teste 2')
         return html`
     <div>
       <h3>Frutas:</h3>
