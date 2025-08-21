@@ -1,6 +1,6 @@
 /// <mls shortName="collabInputTag" project="100554" enhancement="_100554_enhancementLit" groupName="internal" />
 
-import { html } from 'lit';
+import { html, ifDefined } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 
@@ -17,11 +17,12 @@ export class CollabInputTag extends StateLitElement {
     @query('#tag-input')
     input: HTMLInputElement | undefined
 
-    @property({ type: String })
-    pattern: string | null = null;
+    @property({ type: String }) pattern: string | null = null;
+    @property({ type: String }) placeholder: string | null = null;
+
 
     allowDelete = false;
-    @property( { attribute: true, reflect: true }) hasError = false;
+    @property({ attribute: true, reflect: true }) hasError = false;
 
     get value() {
         return this.tags.join(',');
@@ -95,7 +96,7 @@ export class CollabInputTag extends StateLitElement {
         if (!this.input) return;
         const { value } = this.input;
         this.hasError = false;
-        
+
         if (event.keyCode === 13) {
             this._addTag(value);
             if (this.onValueChanged) this.onValueChanged(this.value);
@@ -128,6 +129,7 @@ export class CollabInputTag extends StateLitElement {
             `<div class="collab-tag-input">
                 <input
                     id="tag-input"
+                    placeholder=${ifDefined(!this.value ? this.placeholder : undefined)}
                     @blur=${this.onInputLeave}
                     @keydown=${(ev: KeyboardEvent) => { this.onInputKeyDown(ev) }}
                 ></input>

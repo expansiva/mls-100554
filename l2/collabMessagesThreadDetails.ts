@@ -195,9 +195,14 @@ export class CollabMessagesThreadDetails extends StateLitElement {
             
             <label> ${this.msg.topicsDefault}</label>
             <collab-input-tag-100554 
-                pattern="^\+[\w-]+$"
+                pattern="^\\+[a-zA-Z0-9-]+$"
                 .value=${this.editedThreadDetails?.thread.defaultTopics?.join(',')}
-                .onValueChanged=${(value: string) => { if (this.editedThreadDetails) this.editedThreadDetails.thread.defaultTopics = value.split(',') }}
+                placeholder="#topic"
+                .onValueChanged=${(value: string) => {
+                    if (this.editedThreadDetails) {
+                        this.editedThreadDetails.thread.defaultTopics = value.split(',');
+                    }
+                }}
                 id="topicsInput"
             ></collab-input-tag-100554>
 
