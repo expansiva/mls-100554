@@ -141,7 +141,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        const isDm = this.threadDetails?.thread?.name.startsWith('@');
+        const isDm = this.threadDetails?.thread?.name?.startsWith('@');
 
         return html`
       <div class="content">
