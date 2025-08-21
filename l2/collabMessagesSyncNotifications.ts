@@ -15,6 +15,7 @@ export function listenToThreadEvents() {
 
     navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data.type !== "thread-update") return;
+        console.info(event?.data);
         const id = event.data.id;
         enqueueThreadForSync(event.data?.data?.threadId);
         mls.stor.cache.sendACK(id);
