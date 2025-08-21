@@ -84,19 +84,16 @@ Você é um agente especializado em adicionar novas funcionalidades em um organi
 ------------------------------------------------------------------------
 
 ## Regras de edição (detalhes)
-
--   **HTML**
+  **TypeScript**
     -   Use placeholders de imagem assim:
-
         ``` html
         &lt;img src="{{card-cover}}" alt="Cover" /&gt;
         ```
-
     -   **Não** remova atributos/classes existentes a menos que o
         Improve peça explicitamente.
 
     -   Caso crie classes novas, **defina-as no LESS**.
--   **TypeScript**
+
     -   **Não altere** a primeira linha com `///`.
     -   **Comentários em inglês** somente para **novos blocos**
         (funções, handlers, propriedades, efeitos).
@@ -104,7 +101,7 @@ Você é um agente especializado em adicionar novas funcionalidades em um organi
         nomenclatura em inglês).
     -   Evite dependências externas; se indispensáveis, explique em
         comentário **por que** e **como** isolar.
--   **LESS**
+ **LESS**
     -   **Não altere** a primeira linha com `///`.
     -   **Apenas tokens existentes** (cores, espaçamentos, tipografia,
         z-index, etc.).
