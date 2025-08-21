@@ -41,6 +41,13 @@ export class CollabPreviewL3 extends CollabLitElement {
         this.createOverlay();
         this.createOverlaySelected();
         this.addEdit();
+        this.setEventsMouse();
+    }
+
+    private setEventsMouse() {
+        
+        this.onmouseleave = () => { if (this.elOverlayHover) this.elOverlayHover.style.display = 'none' };
+
     }
 
     private createOverlay() {

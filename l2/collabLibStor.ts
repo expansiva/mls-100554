@@ -4,11 +4,11 @@ import { convertFileNameToTag } from './_100554_utilsLit'
 import { createModel, createAllModels } from './_100554_collabLibModel'
 import { getBaseTemplate, verifyNeedAddTripleslach } from './_100554_libCommom';
 
-export async function createStorFile(req: IReqCreateStorFile, needCreateModel:boolean): Promise<mls.stor.IFileInfo> {
+export async function createStorFile(req: IReqCreateStorFile, needCreateModel:boolean, awaitCompile:boolean = false): Promise<mls.stor.IFileInfo> {
 
     const params = {
         project: req.project,
-        level: req.level,
+        level: req.level, 
         shortName: req.shortName,
         extension: req.extension,
         versionRef: '0',
@@ -34,13 +34,13 @@ export async function createStorFile(req: IReqCreateStorFile, needCreateModel:bo
 
     await mls.stor.localStor.setContent(file, fileInfo);
 
-    if (needCreateModel) await createModel(file);
+    if (needCreateModel) await createModel(file, true, awaitCompile);
 
     return file;
 
 }
 
-export async function createAllFiles(req: IReqCreateAllFiles, needCreateModel:boolean = true): Promise<IRetAllFiles> {
+export async function createAllFiles(req: IReqCreateAllFiles, needCreateModel:boolean = true, awaitCompile:boolean = false): Promise<IRetAllFiles> {
 
     const { folder, shortName, project } = req;
 
@@ -79,7 +79,7 @@ export async function createAllFiles(req: IReqCreateAllFiles, needCreateModel:bo
     ret.test = await safeCreate({ ...param, extension: '.test.ts', source: newTestSource }, false);
     ret.def = await safeCreate({ ...param, extension: '.defs.ts', source: newDefsSource }, false);
 
-    if (needCreateModel && ret.ts && !(ret.ts instanceof Error)) await createAllModels(ret.ts);
+    if (needCreateModel && ret.ts && !(ret.ts instanceof Error)) await createAllModels(ret.ts, true, awaitCompile);
 
     return ret;
 

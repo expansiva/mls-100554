@@ -40,9 +40,8 @@ export class ServiceOrganism100554 extends ServiceBase {
     private msg: MessageType = messages['en'];
     @property({ type: String }) msize = '';
 
-    @property() activeTab: ITabType = 'icDetails';
+    @property() activeTab: ITabType = 'icExplorer';
     @property() pluginNav: string = '';
-    @property() pluginProp: string = '';
     @property() pluginStyle: string = '';
 
 
@@ -74,7 +73,7 @@ export class ServiceOrganism100554 extends ServiceBase {
     //-------SERVICE---------------
 
     public details: IService = {
-        icon: '&#xf471',
+        icon: '&#xf0c1',
         state: 'background',
         position: 'right',
         tooltip: 'Organism',
@@ -102,11 +101,8 @@ export class ServiceOrganism100554 extends ServiceBase {
             options: [
                 { text: 'Explore', icon: 'e521' },
                 { text: 'Navigation', icon: 'f041' },
-                { text: 'Properties', icon: 'f0ce' },
                 { text: 'Style', icon: 'f53f' },
-                { text: 'Details', icon: '3f' },
                 { text: 'Improve', icon: 'f5dc' },
-
             ]
         },
         tools: {},
@@ -146,10 +142,6 @@ export class ServiceOrganism100554 extends ServiceBase {
                 return this.renderExplorer();
             case 'icNavigation':
                 return this.renderNavigation();
-            case 'icProperties':
-                return this.renderProperties();
-            case 'icDetails':
-                return this.renderDetails();
             case 'icStyle':
                 return this.renderStyle();
             case 'icImprove':
@@ -164,17 +156,7 @@ export class ServiceOrganism100554 extends ServiceBase {
     }
 
     renderNavigation() {
-        // this.openService('_100554_servicePreview', 'right', 3);
-        return html` ${this.pluginNav ? unsafeHTML(`<${this.pluginNav} .service=${this}></${this.pluginNav}>`) : unsafeHTML(`<div>${this.msg.notFoundPlugin}</div>`)}`;
-    }
-
-    renderProperties() {
-        // this.openService('_100554_servicePreview', 'right', 3);
-        return html`<wcd-toolbox-item-action-edit-attr-out-100554></wcd-toolbox-item-action-edit-attr-out-100554>`;
-    }
-
-    renderDetails() {
-        return html`<div>${this.msg.detailsHint}</div>`;
+        return html`<plugin-navigation-render-organism-100554 .service=${this} autoprepare="true"></plugin-navigation-render-organism-100554`;
     }
 
     renderStyle() {
@@ -194,10 +176,8 @@ export class ServiceOrganism100554 extends ServiceBase {
         if (!project) return;
 
         const plgNav = await loadPluginProject(project, 'l3PageNavigation');
-        const plgProp = await loadPluginProject(project, 'l3PageProperties');
         const plgStyle = await loadPluginProject(project, 'l3PageStyle');
         const plgNavName = plgNav[0] ? plgNav[0].widget : '';
-        const plgPropName = plgProp[0] ? plgProp[0].widget : '';
         const plgStlpName = plgStyle[0] ? plgStyle[0].widget : '';
 
         if (plgNavName) {
@@ -205,12 +185,7 @@ export class ServiceOrganism100554 extends ServiceBase {
             await import(`./_${project}_${shortName}`);
             this.pluginNav = convertFileNameToTag({ project, shortName, folder });
         }
-        if (plgPropName) {
-            const { folder, project, shortName } = mls.l2.getPath(plgPropName);
-            await import(`./_${project}_${shortName}`);
-            this.pluginProp = convertFileNameToTag({ project, shortName, folder });
-        }
-
+        
         if (plgStlpName) {
             const { folder, project, shortName } = mls.l2.getPath(plgStlpName);
             await import(`./_${project}_${shortName}`);
@@ -269,14 +244,12 @@ export interface IWCDParams {
     op: ITabType,
 }
 
-export type ITabType = 'icExplorer' | 'icDetails' | 'icNavigation' | 'icProperties' | 'icStyle' | 'icImprove';
+export type ITabType = 'icExplorer' | 'icNavigation' |  'icStyle' | 'icImprove';
 
 enum ESceneries {
     'icExplorer' = 0,
     'icNavigation' = 1,
-    'icProperties' = 2,
-    'icStyle' = 3,
-    'icDetails' = 4,
-    'icImprove' = 5,
+    'icStyle' = 2,
+    'icImprove' = 3,
 
 } 

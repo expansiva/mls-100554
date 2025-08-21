@@ -27,7 +27,7 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
             && storFile.extension === '.ts'
             && (mls.istrace || storFile.inLocalStorage)
             && storFile.shortName !== shortName) {
-            promises.push(createAllModels(storFile, false));
+            promises.push(createAllModels(storFile, false, false));
         }
     }
 
@@ -50,42 +50,42 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
 
 }
 
-export async function createAllModels(storFileBase: mls.stor.IFileInfo, needCompile: boolean = true): Promise<mls.editor.IModels | undefined> {
+export async function createAllModels(storFileBase: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile:boolean = false): Promise<mls.editor.IModels | undefined> {
 
     const storFiles = await mls.stor.getFiles({ project: storFileBase.project, shortName: storFileBase.shortName, folder: storFileBase.folder, loadContent: true, });
 
     let fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName, storFileBase.folder);
 
     if (storFiles.less && (!fileModels || !fileModels.style)) {
-        await createModel(storFiles.less, needCompile);
+        await createModel(storFiles.less, needCompile, awaitCompile);
     } else if (!storFiles.less && (!fileModels || !fileModels.style)) {
         storFiles.less = await createStorFiles(storFiles.ts, '.less');
-        await createModel(storFiles.less, needCompile);
+        await createModel(storFiles.less, needCompile, awaitCompile);
     }
 
     if (storFiles.ts && (!fileModels || !fileModels.ts)) {
-        await createModel(storFiles.ts, needCompile);
+        await createModel(storFiles.ts, needCompile, awaitCompile);
     }
 
     if (storFiles.html && (!fileModels || !fileModels.html)) {
-        await createModel(storFiles.html, needCompile);
+        await createModel(storFiles.html, needCompile, awaitCompile);
     } else if (!storFiles.html && (!fileModels || !fileModels.html)) {
         storFiles.html = await createStorFiles(storFiles.ts, '.html');
-        await createModel(storFiles.html, needCompile);
+        await createModel(storFiles.html, needCompile, awaitCompile);
     }
 
     if (storFiles.test && (!fileModels || !fileModels.test)) {
-        await createModel(storFiles.test, needCompile);
+        await createModel(storFiles.test, needCompile, awaitCompile);
     } else if (!storFiles.test && (!fileModels || !fileModels.test)) {
         storFiles.test = await createStorFiles(storFiles.ts, '.test.ts');
-        await createModel(storFiles.test, needCompile);
+        await createModel(storFiles.test, needCompile, awaitCompile);
     }
 
     if (storFiles.defs && (!fileModels || !fileModels.defs)) {
-        await createModel(storFiles.defs, needCompile);
+        await createModel(storFiles.defs, needCompile, awaitCompile);
     } else if (!storFiles.defs && (!fileModels || !fileModels.defs)) {
         storFiles.defs = await createStorFiles(storFiles.ts, '.defs.ts');
-        await createModel(storFiles.defs, needCompile);
+        await createModel(storFiles.defs, needCompile, awaitCompile);
     }
 
     fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName, storFileBase.folder);
@@ -94,7 +94,7 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
 
 }
 
-export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boolean = true): Promise<mls.editor.IModelBase | undefined> {
+export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile:boolean = false): Promise<mls.editor.IModelBase | undefined> {
 
     let fileModels = mls.editor.getModels(storFile.project, storFile.shortName, storFile.folder);
     const prop = mapExt[storFile.extension];
@@ -122,11 +122,13 @@ export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boo
         if (needCompile && modelBase.storFile.extension.endsWith('.ts')) {
             const modelTs = modelBase as mls.editor.IModelTS;
             if (modelTs && modelTs.compilerResults) modelTs.compilerResults.modelNeedCompile = true;
-            mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
+            if (!awaitCompile) mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
+            else await mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
         }
 
         if (needCompile && modelBase.storFile.extension.endsWith('.less')) {
-            mls.l2.less.compileStyle(modelBase);
+            if (!awaitCompile) mls.l2.less.compileStyle(modelBase);
+            else await mls.l2.less.compileStyle(modelBase);
         }
 
         return modelBase;

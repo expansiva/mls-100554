@@ -1,127 +1,266 @@
 /// <mls shortName="pluginNavigationRenderOrganism" project="100554" enhancement="enhancementStyle" />
 
 plugin-navigation-render-organism-100554 {
-    padding: 1rem; 
+
+  display: block;
+  font-family: @font-family-primary;
+  font-size: @font-size-16;
+  font-weight: @font-weight-normal;
+  line-height: 1.5;
+  color: @text-primary-color;
+  background-color: @bg-primary-color;
+
+  .contentNav {
+    padding: 1rem;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0px 0rem 0rem .5rem;
+    border-left: 1px solid #d4d4d4;
+  }
+
+  ul li {
+    position: relative;
+    user-select: none;
+
+    small {
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+  }
+
+  .dragging {
+    opacity: 0.5;
+  }
+
+  .drop-target {
+    background: #d3f9d8;
+  }
+
+  ul li .header {
+    border: 1px solid transparent;
+    padding: .4rem;
+    cursor: pointer;
+  }
+
+  ul li .header:hover {
+    border: 1px solid #d4d4d4;
+
+
+
+  }
+
+  ul li div.activeBranch {
+    border: 1px solid #d4d4d4;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+    background: var(--bg-primary-color-disabled);
+    color: var(--text-primary-color);
+  }
+
+  ul li:before {
+    content: ' ';
+    position: absolute;
+    width: 7px;
+    height: 1px;
+    background: #d4d4d4;
+    top: 1.2rem;
+    left: -8px;
+  }
+
+  .groupHiddenList {
+    border-radius: 4px;
+    padding: .3rem;
+    transition: all 0.5s;
+    cursor: pointer;
+    display: none; //flex!important;
+    z-index: 9;
+    height: .7rem;
+
+  }
+
+  ul li div.activeBranch .groupHiddenList {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .groupHiddenList::after {
+    content: ' ';
+    width: 23px;
+    height: 19px;
+    position: absolute;
+    right: -15px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 512'><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d='M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z' fill='rgb(66,65,65,1)'/></svg>");
+    background-repeat: no-repeat;
+    background-position-y: center;
+  }
+
+  .groupHiddenList .mls-gpbtnslider-item {
+    display: none;
+    transition: 0.5s;
+    margin-left: 1rem;
+    z-index: 10;
+    font-size: 16px;
+    line-height: normal;
+  }
+
+  .groupHiddenList .mls-gpbtnslider-item:hover {
+    color: #1a83ff;
+  }
+
+  info-item {
     display: block;
-    font-family: @font-family-primary;
-    font-size: @font-size-16;
-    font-weight: @font-weight-normal;
-    line-height: 1.5;
+    white-space: nowrap;
+    width: 100%;
+    overflow: hidden;
+    /* "overflow" value must be different from "visible" */
+
+    text-overflow: ellipsis;
+  }
+
+  .activegpbtnslider info-item {
+    visibility: hidden !important;
+    height: 0px;
+  }
+
+  .activegpbtnslider .groupHiddenList {
+    padding-right: 24px;
+    padding-left: 8px;
+  }
+
+  .activegpbtnslider .groupHiddenList .mls-gpbtnslider-item {
+    display: inherit;
+    text-align: center;
+    float: left;
+  }
+
+
+  .headerNav {
+    height: 40px;
+    background: @bg-primary-color-darker-hover;
+    border-bottom: 1px solid @bg-primary-color-lighter;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 1px 3px @bg-primary-color-lighter;
+  }
+
+  .headerNav h1 {
+    font-size: 16px;
+    font-weight: 500;
     color: @text-primary-color;
-    background-color: @bg-primary-color;
+    margin: 0;
+    pointer-events: none;
+    /* evita clique no texto */
+  }
 
-    
+  .headerNav .btn-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background-color: @grey-color-darker;
+    color: @text-primary-color;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
 
-    ul {
-        list-style: none;
-        padding: 0px 0rem 0rem .5rem;
-        border-left: 1px solid #d4d4d4;
-    }
+  .headerNav.left .btn-nav {
+    left: 10px;
+  }
 
-    ul li {
-        position: relative;
-        user-select: none;
+  .headerNav.right .btn-nav {
+    right: 10px;
+  }
 
-        small {
-            font-weight: 700;
-            font-size: 11px;
-        }
+  .headerNav .btn-nav:hover {
+    opacity: .5;
+  }
 
-    }
-
-    .dragging {
-        opacity: 0.5;
-    }
-
-    .drop-target {
-        background: #d3f9d8;
-    }
-
-    ul li .header {
-        border: 1px solid transparent;
-        padding: .4rem;
-        cursor: pointer;
-    }
-
-    ul li .header:hover {
-        border: 1px solid #d4d4d4;
-
-
-
-    }
-
-    ul li div.activeBranch {
-        border: 1px solid #d4d4d4;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-radius: 5px;
-        background: var(--bg-primary-color-disabled);
-        color: var(--text-primary-color);
-    }
-
-    ul li:before {
-        content: ' ';
-        position: absolute;
-        width: 7px;
-        height: 1px;
-        background: #d4d4d4;
-        top: 1.2rem;
-        left: -8px;
-    }
-
-    .groupHiddenList {
-        border-radius: 4px;
-        padding: .3rem;
-        transition: all 0.5s;
-        cursor: pointer;
-        display: none; //flex!important;
-        z-index: 9;
-        height: .7rem;
-
-    }
-
-    ul li div.activeBranch .groupHiddenList {
-        display: flex;
-        align-items: center;
-        position: relative;
-    }
-
-    .groupHiddenList::after {
-        content: ' ';
-        width: 23px;
-        height: 19px;
-        position: absolute;
-        right: -15px;
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 512'><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d='M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z' fill='rgb(66,65,65,1)'/></svg>");
-        background-repeat: no-repeat;
-        background-position-y: center;
-    }
-
-    .groupHiddenList .mls-gpbtnslider-item {
-        display: none;
-        transition: 0.5s;
-        margin-left: 1rem;
-        z-index: 10;
-        font-size: 16px;
-        line-height: normal;
-    }
-
-    .groupHiddenList .mls-gpbtnslider-item:hover {
-        color: #1a83ff;
-    }
+  .headerNav .btn-nav svg {
+    width: 14px;
+    height: 14px;
+    fill: #fff;
+  }
 
 
-    .groupHiddenList.activegpbtnslider {
-        padding-right: 24px;
-        padding-left: 8px;
-    }
+  .form-container {
+    background: @bg-primary-color;
+    color: @text-primary-color;
+    padding: 20px 24px;
+  }
 
-    .groupHiddenList.activegpbtnslider .mls-gpbtnslider-item {
-        display: inherit;
-        text-align: center;
-        float: left;
-    }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 14px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .form-group small {
+    font-size: 11px;
+    color: @text-primary-color-disabled;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 8px 10px;
+    border: 1px solid @grey-color;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-group input:disabled {
+    color: @text-primary-color;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  .btn-save {
+    width: 100%;
+    padding: 10px;
+    background: #4A90E2;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-save:hover {
+    background: #357ABD;
+  }
 
 
 }

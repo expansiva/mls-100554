@@ -126,7 +126,7 @@ export class ServicePage100554 extends ServiceBase {
     }
 
     renderExplorer() {
-        return html`<plugin-explore-list-100554 autoprepare="true"></plugin-explore-list-100554>`;
+        return html`<plugin-explore-list-100554 autoprepare="true" .service=${this}></plugin-explore-list-100554>`;
     }
 
     renderImprove() {

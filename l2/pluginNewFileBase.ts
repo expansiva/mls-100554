@@ -62,7 +62,7 @@ export async function createNewFile(args: IRequestNewFile) {
     if (args.sourceTest) param.testSource = args.sourceTest;
     if (args.sourceDefs) param.defsSource = args.sourceDefs;
 
-    const files = await createAllFiles(param);
+    const files = await createAllFiles(param, true, true);
 
     if (files && files.ts && !(files.ts instanceof Error)) {
         const models = mls.editor.getModels(files.ts.project, files.ts.shortName, files.ts.folder);

@@ -1,18 +1,16 @@
 /// <mls shortName="collabPreviewL4" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
 
 import { html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
-import { selectLevel, openService } from './_100554_libCommom';
-import { initState } from './_100554_collabState';
+import { convertTagToFileName } from './_100554_utilsLit';
 import './_100554_collabL3EditText';
 
 @customElement('collab-preview-l4-100554')
 export class CollabPreviewL4 extends CollabLitElement {
 
-    constructor() { 
-        super(); 
+    constructor() {
+        super();
         this.init();
     }
 
@@ -23,6 +21,11 @@ export class CollabPreviewL4 extends CollabLitElement {
     private elMenuOverlay: HTMLElement | undefined;
 
     //-----COMPONENT----------
+
+    disconnectedCallback() {
+        if (this.observer) this.observer.disconnect();
+        super.disconnectedCallback();
+    }
 
     render() {
         return html``;
@@ -44,10 +47,13 @@ export class CollabPreviewL4 extends CollabLitElement {
         this.createOverlay();
         this.createOverlaySelected();
         this.setEventsMouse();
+        this.observer.observe(document.body);
     }
 
     private setEventsMouse() {
         const allItens = Array.from(this.querySelectorAll('*[mls_origin]')).filter((el) => el.tagName.toLocaleLowerCase().indexOf('organism-') >= 0) as HTMLHtmlElement[];
+
+        this.onmouseleave = () => { if (this.elOverlayHover) this.elOverlayHover.style.display = 'none' };
 
         allItens.forEach((el) => {
 
@@ -98,6 +104,13 @@ export class CollabPreviewL4 extends CollabLitElement {
 
     }
 
+    private observer = new ResizeObserver(() => {
+
+        if (!this.elOverlaySelected) return;
+        this.caculetePosSelected((this.elOverlaySelected as any).el);
+
+    });
+
     private _setElement(el: HTMLElement) {
 
         const els = this.querySelectorAll('*[clb_mode="edit"]');
@@ -105,24 +118,10 @@ export class CollabPreviewL4 extends CollabLitElement {
 
         if (this.elOverlayHover) this.elOverlayHover.style.display = 'none';
         if (!this.elOverlaySelected) this.createOverlaySelected();
-        if (!this.elOverlaySelected ) return;
+        if (!this.elOverlaySelected) return;
 
-        const rect = el.getBoundingClientRect();
-        this.elOverlaySelected.style.display = 'block';
-        this.elOverlaySelected.style.top = `${rect.top + window.document.body.scrollTop - 2}px`;
-        this.elOverlaySelected.style.left = `${rect.left + window.document.body.scrollLeft - 2}px`;
-        this.elOverlaySelected.style.width = `${rect.width + 4}px`;
-        this.elOverlaySelected.style.height = `${rect.height + 4}px`;
-        this.elOverlaySelected.style.setProperty("--id-name", `'${el.tagName.toLocaleLowerCase()}'`);
-        (this.elOverlaySelected as any).el = el;
+        this.caculetePosSelected(el);
 
-        if (this.elMenuOverlay) {
-            this.elMenuOverlay.style.display = "flex";
-            this.elMenuOverlay.style.top = (rect.top + window.document.body.scrollTop - 4) + "px"; // mais perto
-            this.elMenuOverlay.style.left = (rect.left + + window.document.body.scrollLeft + 4) + "px";
-
-        }
-        
         el.setAttribute('clb_mode', 'edit');
 
         const param = {
@@ -174,6 +173,27 @@ export class CollabPreviewL4 extends CollabLitElement {
 
     }
 
+    private caculetePosSelected(el: HTMLElement) {
+
+        if (!this.elOverlaySelected || !el) return;
+
+        const rect = el.getBoundingClientRect();
+        this.elOverlaySelected.style.display = 'block';
+        this.elOverlaySelected.style.top = `${rect.top + window.document.body.scrollTop - 2}px`;
+        this.elOverlaySelected.style.left = `${rect.left + window.document.body.scrollLeft - 2}px`;
+        this.elOverlaySelected.style.width = `${rect.width + 4}px`;
+        this.elOverlaySelected.style.height = `${rect.height + 4}px`;
+        this.elOverlaySelected.style.setProperty("--id-name", `'${el.tagName.toLocaleLowerCase()}'`);
+        (this.elOverlaySelected as any).el = el;
+
+        if (this.elMenuOverlay) {
+            this.elMenuOverlay.style.display = "flex";
+            this.elMenuOverlay.style.top = (rect.top + window.document.body.scrollTop - 4) + "px"; // mais perto
+            this.elMenuOverlay.style.left = (rect.left + + window.document.body.scrollLeft + 4) + "px";
+        }
+
+    }
+
     private _selectElement(elId: string) {
         const els = this.querySelectorAll('*[clb_mode="edit"]');
         els.forEach((e) => e.removeAttribute('clb_mode'));
@@ -190,7 +210,7 @@ export class CollabPreviewL4 extends CollabLitElement {
     private editEl(e: MouseEvent) {
 
         if (!this.elOverlaySelected || !(this.elOverlaySelected as any).el) return;
-         const fileInfo = convertTagToFileName((this.elOverlaySelected as any).el.tagName.toLowerCase());
+        const fileInfo = convertTagToFileName((this.elOverlaySelected as any).el.tagName.toLowerCase());
         if (!fileInfo) return;
         const { folder, project, shortName } = fileInfo;
 
