@@ -15,7 +15,9 @@ export class SimpleGreeting extends CollabLitElement {
         { id: 3, name: 'Uva', color: 'purple' },
     ];
 
-    render() {
+  render() {
+
+      console.log('teste 1')
         return html`
     <div>
       <h3>Frutas:</h3>
