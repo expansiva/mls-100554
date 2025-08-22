@@ -69,7 +69,7 @@ function getAgentsList(): string {
 
     let a: mls.msg.ModelType = '';
     const listAgents = [
-        { agent: 'agentNewModule', description: 'planejamento para a criação de novos projetos, sites ou criação de uma nova página' },
+        { agent: 'agentGeneratePrototype', description: 'planejamento para a criação de novos projetos, sites ou criação de uma nova página' },
         { agent: 'agentNewWidget', description: 'criação de novos componentes UI, web components, widgets, estes widgets podem futuramente serem incluidos em uma página html.' },
         { agent: 'agentPlannerNewAPI', description: 'criação de endpoints ou APIs, será pedido mais informações ao usuário se necessário.' },
         { agent: 'agentSupportExternal', description: 'suporte para usuários externos. Executar rag1 antes de enviar o prompt.' },
