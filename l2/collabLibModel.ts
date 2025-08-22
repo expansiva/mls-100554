@@ -228,7 +228,7 @@ async function _createModel(storFile: mls.stor.IFileInfo, ext: Extesion, content
     let originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src).toString(16);
 
     if (ext === '.less') {
-        originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(removeTokensFromSource(src)).toString(16)
+        originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(removeTokensFromSource(src).trim()).toString(16)
     }
 
     const originalProject: number | undefined = haveInfo ? info?.originalProject : undefined;
@@ -486,7 +486,7 @@ async function _checkSameContent(modelBase: mls.editor.IModelBase, storFile: mls
 
     let sameContent: boolean = modelBase.originalCRC === mls.common.crc.crc32(modelBase.model.getValue()).toString(16);
     if (modelBase.storFile.extension === '.less') {
-        sameContent = modelBase.originalCRC === mls.common.crc.crc32(removeTokensFromSource(modelBase.model.getValue())).toString(16);
+        sameContent = modelBase.originalCRC === mls.common.crc.crc32(removeTokensFromSource(modelBase.model.getValue()).trim()).toString(16);
     };
 
     if (sameContent) {

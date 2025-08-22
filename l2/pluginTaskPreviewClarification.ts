@@ -63,12 +63,14 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
 
     renderInfo() { 
 
-        if (!this.task ||!this.step ) return html`Not found!`;
+        if (!this.task || !this.step) return html`Not found!`;
+
+        const aux = this.step.status === 'in_progress' ? '(in progress)' : '';
 
         return html`
         <div class="containerinputs">
             <details open>
-                <summary> ${this.renderSummary('Clarification')} </summary>
+                <summary> ${this.renderSummary('Clarification '+ aux)} </summary>
                 <ul>
                     <li>
                         #${this.step.stepId} - ${this.step.type} - ${this.step.status} - $${this.step.interaction? this.step.interaction.cost : '0'}

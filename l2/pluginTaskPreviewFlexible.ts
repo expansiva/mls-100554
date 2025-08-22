@@ -2,8 +2,8 @@
 
 import { html, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement'; 
-  
+import { CollabLitElement } from './_100554_collabLitElement';
+
 @customElement('plugin-task-preview-flexible-100554')
 export class pluginTaskPreviewFlexible extends CollabLitElement {
 
@@ -52,17 +52,17 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
     }
 
 
-    renderInfo() { 
+    renderInfo() {
 
-        if (!this.task ||!this.step ) return html`Not found!`;
-
+        if (!this.task || !this.step) return html`Not found!`;
+        const aux = this.step.status === 'in_progress' ? '(in progress)' : '';
         return html`
         <div class="containerinputs">
             <details open>
-                <summary> ${this.renderSummary('Flexible')} </summary>
+                <summary> ${this.renderSummary('Flexible '+aux)} </summary>
                 <ul>
                     <li>
-                        #${this.step.stepId} - ${this.step.type} - ${this.step.status} - $${this.step.interaction? this.step.interaction.cost : '0'}
+                        #${this.step.stepId} - ${this.step.type} - ${this.step.status} - $${this.step.interaction ? this.step.interaction.cost : '0'}
                     </li>
                 </ul>
             </details>
@@ -73,7 +73,7 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
                         <header>
                                 <h2>${this.task.PK}</h2>
                                 <small>Status: ${this.task.status} | Última atualização: ${new Date(
-                            this.task.last_updated
+            this.task.last_updated
         ).toLocaleString()}</small>
                         <br/><small>${this.task.title}</small>
                         </header>
@@ -119,15 +119,15 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
                 <h3>No input found!</h3>
             </div>
         `;
-    
+
         return html`<pre>${JSON.stringify(this.step.result, null, 2)}</pre>`
-        
+
     }
 
     renderResults() {
 
         if (!this.step) return html`Not found step`;
-        
+
         const nextOptions: any[] = [];
         if (this.step.interaction?.payload) {
             nextOptions.push(...this.step.interaction.payload);
@@ -139,7 +139,7 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
         return html`
         <ul>
             ${nextOptions.length === 0 ? html`<li><em>Not next step</em></li>`
-                : nextOptions.map( (ns) => html` <li> [${ns.stepId}] ${ns.type} - ${ns.agentName} </li> ` )}
+                : nextOptions.map((ns) => html` <li> [${ns.stepId}] ${ns.type} - ${ns.agentName} </li> `)}
         </ul>
         `
     }
