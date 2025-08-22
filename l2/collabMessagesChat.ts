@@ -743,7 +743,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 userId=${this.userId} 
             ></collab-messages-add-100554>`
     }
-
+    
     private onSearchInput(e: Event) {
         const target = e.target as HTMLInputElement;
         this.searchTerm = target.value.toLowerCase();

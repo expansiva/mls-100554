@@ -157,7 +157,6 @@ export class CollabMessagesAdd100554 extends StateLitElement {
             }
 
 
-
         }).filter((item) => item !== undefined);
 
         this.agentsBots = [{ id: 'none', name: '', description: '', avatar_url: '' }].concat(agents as IAgentsBots[]);
@@ -404,7 +403,8 @@ export class CollabMessagesAdd100554 extends StateLitElement {
 
         if (this.threadType === 'dm') {
             try {
-                await createThreadDM(threadName, this.dmUser, this.group);
+                const thread = await createThreadDM(threadName, this.dmUser, this.group);
+                if(thread) notifyThreadChange(thread);
                 if (this.onAddSuccess) this.onAddSuccess();
             } catch (err: any) {
                 console.error(err);
