@@ -4,6 +4,7 @@ import { html, repeat, TemplateResult } from 'lit';
 import { customElement, state, property, query } from 'lit/decorators.js';
 import { createAllFiles, IReqCreateAllFiles } from './_100554_collabLibStor';
 import { convertFileNameToTag } from './_100554_utilsLit'
+import { getTemplateImport } from './_100554_pluginNewFileBase';
 import { getInstanceByFile } from './_100554_libCommom';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { ServiceBase } from './_100554_serviceBase';  
@@ -159,7 +160,7 @@ export class PluginExploreListAddL3 extends PluginBaseModule {
 
     import { html } from 'lit';
     import { customElement } from 'lit/decorators.js';
-    import { IcaOrganismBase } from './_100554_icaOrganismBase';
+    import { IcaOrganismBase } from '${getTemplateImport(100554,'icaOrganismBase','')}';
 
     @customElement('${tag}')
     export class ${name} extends IcaOrganismBase {

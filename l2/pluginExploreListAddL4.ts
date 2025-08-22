@@ -3,6 +3,7 @@
 import { html, repeat, TemplateResult } from 'lit';
 import { customElement, state, property, query } from 'lit/decorators.js';
 import { createAllFiles, IReqCreateAllFiles } from './_100554_collabLibStor';
+import { getTemplateImport } from './_100554_pluginNewFileBase';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { getInstanceByFile } from './_100554_libCommom';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
@@ -153,9 +154,9 @@ export class PluginExploreListAddL4 extends PluginBaseModule {
 
             const srcTs = ` /// <mls shortName="${name}" project="${project}" folder="${folder}" enhancement="_100554_enhancementLit" groupName="${folder}" />
 
-import { CollabPageElement } from './_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js';
-import { globalState, initState, setState } from './_100554_collabState';
+import { CollabPageElement } from '${getTemplateImport(100554, 'collabPageElement', '')}';
+import { globalState, initState, setState } from '${getTemplateImport(100554, 'collabState', '')}';
 
 @customElement('${tag}')
 export class ${name} extends CollabPageElement {

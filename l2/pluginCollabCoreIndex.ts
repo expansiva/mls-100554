@@ -68,20 +68,6 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l5ServicesLeft'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_serviceWorkspace'
-            },
-            {
-                category: 'Services',
-                scope: ['l5ServicesLeft'],
-                priority: 2,
-                auth: ['*'],
-                widget: '_100554_servicePanel'
-            },
-            {
-                category: 'Services',
-                scope: ['l5ServicesLeft'],
-                priority: 2,
-                auth: ['*'],
                 widget: '_100554_serviceSave'
             },
             {

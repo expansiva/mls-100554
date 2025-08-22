@@ -30,6 +30,18 @@ export function changeStateName(source: string, stateName: string): string {
     return outputString;
 }
 
+export function getTemplateImport(projectBase: number, shortName: string, folder: string) {
+    // '_100554_/l2/tsTestAST'; './l2/tsTestAST';
+
+    const key = mls.stor.getKeyToFiles(mls.actualProject as number, 2, shortName, folder, '.ts');
+    const file = mls.stor.files[key];
+
+    if (file) {
+        return folder ? `./l2/${folder}/${shortName}` : `./l2/${shortName}`;
+    }
+
+    return folder ? `_${projectBase}_/l2/${folder}/${shortName}` : `_${projectBase}_/l2/${shortName}`;
+}
 
 export interface IRequestNewFile {
     project: number,
