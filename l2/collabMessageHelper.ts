@@ -3,7 +3,7 @@
 import { getTemporaryContext, notifyMessageSendChange, notifyThreadChange } from './_100554_aiAgentHelper';
 import { IAgent } from './_100554_aiAgentBase';
 import { collabImport } from './_100554_collabImport';
-import { addThread } from './_100554_msgDBController';
+import { addThread, listThreads } from './_100554_msgDBController';
 
 const LS_KEY_OLD = 'collabChatPreferences';
 const LOCAL_STORAGE_KEY = '_100554_serviceCollabMessages';
@@ -251,6 +251,18 @@ export async function checkThreadAlreadyExist(threadName: string) {
 
 }
 
+export async function getDmThreadByUsers(userId1: string, userId2: string): Promise<mls.msg.ThreadPerformanceCache | undefined> {
+    const allThreads = await listThreads();
+
+    return allThreads.find(thread => {
+        if (!thread.name.startsWith('@')) return false;
+        if (thread.users.length !== 2) return false;
+
+        const userIds = thread.users.map(u => u.userId);
+        return userIds.includes(userId1) && userIds.includes(userId2);
+    });
+}
+
 
 export async function createThread(threadName: string, languages: string[], visibility: mls.msg.ThreadVisibility, avatar_url: string = '') {
 
@@ -280,6 +292,51 @@ export async function createThread(threadName: string, languages: string[], visi
     }
 }
 
+export async function createThreadDM(threadName: string, dmUser: string, group: mls.msg.ThreadGroup) {
+
+    const userId = getUserId();
+    if (!userId) throw new Error('No find user id');
+
+    const alreadyExistThread = await getDmThreadByUsers(userId, dmUser);
+    if (alreadyExistThread) throw new Error('A direct message thread with this user already exists.')
+
+    const params: mls.msg.RequestAddThread = {
+        action: 'addThread',
+        name: threadName,
+        group,
+        languages: [],
+        userId,
+        visibility: 'private',
+        status: 'active',
+        avatar_url: ''
+    };
+
+    try {
+        const response = await mls.api.msgAddThread(params);
+        if (response.thread) {
+            const thr = await addThread(response.thread);
+            notifyThreadChange(thr);
+
+            const responseAddUsuer = await mls.api.msgAddUserInThread({
+                auth: 'admin',
+                userIdOrName: dmUser,
+                threadId: thr.threadId,
+                userId: userId,
+            });
+
+            if (responseAddUsuer.thread) {
+                notifyThreadChange(responseAddUsuer.thread);
+                return responseAddUsuer.thread;
+            }
+
+            return response.thread;
+        }
+    } catch (err: any) {
+        console.error(err);
+        throw new Error(err.message);
+    }
+}
+
 export type TranslateMode = "none" | "icon" | "text" | "iconText" | "trace"
 
 export interface IChatPreferences {
@@ -295,6 +352,11 @@ export interface CollabMessagesLS {
     tokenFCM?: string,
     deviceId?: string,
     notificationPreference?: NotificationPermission
+}
+
+export interface ICollabMessageEvent {
+    type: 'thread-open',
+    threadId?: string,
 }
 
 

@@ -3,9 +3,12 @@
 import { addCoachMark, ICoachMarks } from './_100554_coachMarks';
 import { html, css, LitElement } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { listThreads, addThread, listUsers, updateUsers } from './_100554_msgDBController';
+import { listThreads, addThread, listUsers, updateUsers, getThread } from './_100554_msgDBController';
 import { saveLastTab, loadLastTab, saveUserId } from "./_100554_collabMessageHelper";
+import { openService } from "./_100554_libCommom";
+
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
+import { ICollabMessageEvent } from './_100554_collabMessageHelper';
 
 import './_100554_collabMessagesAdd';
 import './_100554_collabMessagesChat';
@@ -50,11 +53,12 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     @state() userPerfil: mls.msg.User | undefined;
     @state() userThreads: IThreadData = {}
 
+    @state() threadToOpen: string = '';
     groupSelected: ITabType = 'CRM';
 
     public details: IService = {
         icon: '&#xf086',
-        state: 'foreground',
+        state: 'background',
         position: 'right',
         tooltip: 'Collab Messages',
         visible: true,
@@ -63,6 +67,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
     public onClickTabs(index: number) {
+        this.threadToOpen = '';
         if (this.activeTab === ETabs[index]) {
             this.activeTab = 'Loading';
             setTimeout(() => {
@@ -114,6 +119,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     connectedCallback() {
         super.connectedCallback();
         this.dataLocal.lastTab = loadLastTab() as ITabType;
+        this.setEvents();
     }
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
@@ -124,7 +130,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
         if (changedProperties.has('activeTab') && ['CRM', 'TASK', 'DOCS', 'CONNECT', 'APPS'].includes(this.activeTab)) {
-            this.userPerfil = await this.getUser();
+            if (!this.userPerfil) this.userPerfil = await this.getUser();
             saveUserId(this.userPerfil.userId);
             await this.getThreadFromLocalDB();
             this.updateThreads();
@@ -134,6 +140,11 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
             if (this.menu.setTabActive && this.activeTab !== 'Loading') this.menu.setTabActive(ETabs[this.dataLocal.lastTab])
         }
+    }
+
+
+    setEvents() {
+        mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['collabMessages'] as any, this.onCollabEventsCollabMessages.bind(this));
     }
 
     render() {
@@ -214,17 +225,11 @@ export class ServiceCollabMessages100554 extends ServiceBase {
                     .map((key) => this.userThreads[key])
             }}
             .allThreads=${Object.keys(this.userThreads).map((key) => this.userThreads[key].thread)}
+            threadToOpen=${this.threadToOpen}
             userId=${this.userPerfil?.userId} 
         ></collab-messages-chat-100554>`
     }
 
-
-
-    private openAdd() {
-        this.activeTab = 'Add';
-        if (this.menu.tabs) this.menu.tabs.selected = ETabs.Add;
-        if (this.menu.closeMenu) this.menu.closeMenu();
-    }
 
     private async getUser(): Promise<mls.msg.User> {
         try {
@@ -359,6 +364,28 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             this.menu.setMode('page', settings);
         }
         return true;
+    }
+
+    private async onCollabEventsCollabMessages(ev: mls.events.IEvent) {
+    
+        if (!ev.desc) return;
+        this.threadToOpen = '';
+
+        try {
+            const data: ICollabMessageEvent = JSON.parse(ev.desc);
+            if (data.type === 'thread-open') {
+                if (!data.threadId) return;
+                const thread = await getThread(data.threadId);
+                if (!thread) return;
+                openService('_100554_serviceCollabMessages', 'left', ev.level);
+                const group = thread.group;
+                this.threadToOpen = thread.threadId;
+                if (group !== this.activeTab) this.activeTab = group as ITabType;
+            }
+        } catch (err: any) {
+            console.error(err.message)
+        }
+
     }
 
 

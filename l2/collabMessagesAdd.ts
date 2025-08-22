@@ -6,9 +6,9 @@ import { StateLitElement } from './_100554_stateLitElement';
 import { addThread, getThread } from './_100554_msgDBController';
 import { notifyThreadChange } from './_100554_aiAgentHelper';
 import { CollabInputTag } from './_100554_collabInputTag';
-import { getUserId } from './_100554_collabMessageHelper';
+import { getUserId, getDmThreadByUsers, addMessage, createThreadDM } from './_100554_collabMessageHelper';
 import { IAgent } from './_100554_aiAgentBase'
-import { addMessage } from "./_100554_collabMessageHelper";
+
 
 import './_100554_collabInputTag';
 
@@ -32,10 +32,8 @@ const message_pt = {
     btnAdd: 'Adicionar thread',
     linkSelecionarTemplate: 'Selecionar template',
     successSaving: 'Alterações salvas com sucesso!',
-    dmValidationError: "O usuário DM deve começar com '@'.",
+    dmValidationError: "Usuário inválido",
     channelValidationError: "O nome do canal deve começar com '#'.",
-
-    // Novas chaves para taskDetails
     selectAgent: 'Escolha um AgentBot',
     noneAgent: 'Nenhum – Sem agente automático',
     initialMessage: 'Mensagem inicial (opcional)',
@@ -45,7 +43,8 @@ const message_pt = {
     agentConfig: 'Configuração do agente',
     placeholderConfig: 'Explique como o agente deve funcionar...',
     back: 'Voltar',
-    save: 'Salvar Detalhes'
+    save: 'Salvar Detalhes',
+    threadDmAlreadyExist: 'Já existe uma conversa direta com este usuário.'
 }
 
 const message_en = {
@@ -67,7 +66,7 @@ const message_en = {
     linkSelecionarTemplate: 'Select template',
     btnAdd: 'Add thread',
     successSaving: 'Saved successfully!',
-    dmValidationError: "DM user must start with '@'.",
+    dmValidationError: "Invalid user",
     channelValidationError: "Channel name must start with '#'.",
 
     // Novas chaves para taskDetails
@@ -80,7 +79,8 @@ const message_en = {
     agentConfig: 'Agent configuration',
     placeholderConfig: 'Explain how the agent should work...',
     back: 'Back',
-    save: 'Save Details'
+    save: 'Save Details',
+    threadDmAlreadyExist: 'A direct message thread with this user already exists.'
 }
 
 type MessageType = typeof message_en;
@@ -98,8 +98,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
     @state() private group: mls.msg.ThreadGroup = 'CRM';
     @state() private languages: string[] = [];
     @state() private isLoading: boolean = false;
-    @state() private dmUser: string = '';
-
+    @state() private dmUser: string = ''
     @state() private users: {
         userId: string;
         name: string;
@@ -207,11 +206,10 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                     <input type="text" placeholder="@usuario" 
                         .value=${this.dmUser}
                         list="user-suggestions"
-                        pattern="^@.*" 
                         @input=${(e: Event) => this.dmUser = (e.target as HTMLInputElement).value}>
                 </label>
                  <datalist id="user-suggestions">
-                    ${this.users.map(user => html`<option value="@${user.name}"></option>`)}
+                    ${this.users.map(user => html`<option value="${user.userId}">@${user.name}</option>`)}
                 </datalist>
             ` : ''}
 
@@ -344,7 +342,8 @@ export class CollabMessagesAdd100554 extends StateLitElement {
     private validateForm(): boolean {
         if (this.threadType === 'dm') {
             if (!this.dmUser.trim()) return false;
-            if (!this.dmUser.startsWith('@')) {
+            const userValid = this.users.find((user) => user.userId === this.dmUser);
+            if (!userValid) {
                 this.labelError = this.msg.dmValidationError;
                 return false;
             }
@@ -365,6 +364,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
     }
 
     private async addNewThread() {
+
         if (!this.validateForm() || this.languageInput?.hasError) {
             this.labelError = this.msg.validateFormError;
             this.isLoading = false;
@@ -388,44 +388,50 @@ export class CollabMessagesAdd100554 extends StateLitElement {
             this._selectedAgent = '';
         }
 
-        const params: mls.msg.RequestAddThread = {
-            action: 'addThread',
-            name: this.threadType === 'dm' ? this.dmUser : this.threadName,
-            group: this.group,
-            languages: this.languages,
-            userId: this.userId,
-            visibility: this.threadType === 'dm' ? 'private' : this.visibility,
-            status: 'active',
-            avatar_url,
-            wellcomeMessage: this.threadType === 'channel' ? this._initialMessage : '',
-            defaultTopics: this._topics || [],
-        };
-
         this.isLoading = true;
 
-        try {
-            const response = await mls.api.msgAddThread(params);
+        if (this.threadType === 'dm') {
 
-            if (this.threadType === 'dm') {
+            const alreadyExistThread = await getDmThreadByUsers(this.userId, this.dmUser);
+            if (alreadyExistThread) {
+                this.labelError = this.msg.threadDmAlreadyExist;
+                this.isLoading = false;
+                return;
+            }
+        }
 
-                notifyThreadChange(response.thread);
-                const thr = await addThread(response.thread);
+        const threadName = this.threadType === 'dm' ? `@${this.users.find((user) => user.userId === this.dmUser)?.name}` : this.threadName;
 
-                const responseAddUsuer = await mls.api.msgAddUserInThread({
-                    auth: 'admin',
-                    userIdOrName: this.dmUser.replace('@', ''),
-                    threadId: thr.threadId,
-                    userId: this.userId,
-                });
-
-                this.labelOk = `${this.msg.successSaving}`;
-                if (responseAddUsuer.thread) {
-                    notifyThreadChange(responseAddUsuer.thread);
-                    if (this.onAddSuccess) this.onAddSuccess();
-                }
+        if (this.threadType === 'dm') {
+            try {
+                await createThreadDM(threadName, this.dmUser, this.group);
+                if (this.onAddSuccess) this.onAddSuccess();
+            } catch (err: any) {
+                console.error(err);
+                this.labelError = err.message;
+            } finally {
+                this.isLoading = false;
             }
 
-            if (this.threadType === 'channel') {
+        }
+
+        if (this.threadType === 'channel') {
+
+            const params: mls.msg.RequestAddThread = {
+                action: 'addThread',
+                name: threadName,
+                group: this.group,
+                languages: this.languages,
+                userId: this.userId,
+                visibility: this.visibility,
+                status: 'active',
+                avatar_url,
+                wellcomeMessage: this._initialMessage,
+                defaultTopics: this._topics || [],
+            };
+
+            try {
+                const response = await mls.api.msgAddThread(params);
                 if (response.thread) {
                     const thr = await addThread(response.thread);
                     if (this._selectedAgent && this._selectedAgent !== 'none') {
@@ -468,14 +474,16 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                     }
 
                 }
-            }
 
-        } catch (err: any) {
-            console.error(err);
-            this.labelError = err.message;
-        } finally {
-            this.isLoading = false;
+            } catch (err: any) {
+                console.error(err);
+                this.labelError = err.message;
+            } finally {
+                this.isLoading = false;
+            }
         }
+
+
     }
 }
 

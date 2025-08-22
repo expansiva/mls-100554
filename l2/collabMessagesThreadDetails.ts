@@ -207,12 +207,13 @@ export class CollabMessagesThreadDetails extends StateLitElement {
             ></collab-input-tag-100554>
 
             ${!isDm ? html`
-                <label> ${this.msg.welcomeMessage}
-                    <input type="text" name="welcomemessage"
-                        name="welcomemessage"
-                        .value=${this.editedThreadDetails?.thread.wellcomeMessage}
-                        @input=${(e: Event) => { if (this.editedThreadDetails && !isDm) this.editedThreadDetails.thread.wellcomeMessage = (e.target as HTMLInputElement).value }}>
-                </label>
+                <label> ${this.msg.welcomeMessage}</label>
+                <textarea 
+                    name="welcomemessage"
+                    rows="5" 
+                    .value=${this.editedThreadDetails?.thread.wellcomeMessage}
+                    @input=${(e: Event) => { if (this.editedThreadDetails && !isDm) this.editedThreadDetails.thread.wellcomeMessage = (e.target as HTMLInputElement).value }}
+                ></textarea>                
             ` : ``}
             
             <label> ${this.msg.languages}</label>
@@ -246,7 +247,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
     private renderUsers() {
         const users = this.editedThreadDetails?.users || [];
-        const isDm = this.threadDetails?.thread?.name.startsWith('@');
+        const isDm = this.threadDetails?.thread?.name?.startsWith('@');
 
         return html`
         <div class="users">
