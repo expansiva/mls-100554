@@ -7,7 +7,7 @@ import { StateLitElement } from './_100554_stateLitElement';
 import { getMessageKey } from "./_100554_collabLitElement";
 import { propertyDataSource } from './_100554_collabDecorators';
 import { ServiceBase } from './_100554_serviceBase';
-import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget } from "./_100554_pluginNewFileBase";
+import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget, getTemplateImport } from "./_100554_pluginNewFileBase";
 import './_100554_widgetTextCode';
 
 /// **collab_i18n_start**
@@ -69,7 +69,7 @@ export class PluginNewFileService extends StateLitElement {
     private template: string = `
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '${getTemplateImport(100554,'serviceBase', '')}';
 
 @customElement('[tagName]')
 export class [className] extends ServiceBase {

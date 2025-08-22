@@ -89,6 +89,9 @@ export class CollabPreviewL4 extends CollabLitElement {
         menu.id = 'menu';
         menu.className = 'overlay-menu';
         menu.style.display = 'none';
+        menu.onmouseover = () => {
+            if (this.elOverlayHover) this.elOverlayHover.style.display = 'none';
+        }
 
         const edit = document.createElement("button");
         edit.title = 'Edit';
@@ -188,9 +191,16 @@ export class CollabPreviewL4 extends CollabLitElement {
         (this.elOverlaySelected as any).el = el;
 
         if (this.elMenuOverlay) {
+
+            const menuHeight = 31;
+              
             this.elMenuOverlay.style.display = "flex";
-            this.elMenuOverlay.style.top = (rect.top + window.document.body.scrollTop - 4) + "px"; // mais perto
+            this.elMenuOverlay.style.top = (rect.top + window.document.body.scrollTop - 4) + "px";
             this.elMenuOverlay.style.left = (rect.left + + window.document.body.scrollLeft + 4) + "px";
+
+            if (rect.top < menuHeight) {
+                this.elMenuOverlay.style.top = (rect.bottom + window.document.body.scrollTop + menuHeight + 12) + "px";
+            }
         }
 
     }

@@ -6,7 +6,7 @@ import { convertFileNameToTag } from './_100554_utilsLit';
 import { StateLitElement } from './_100554_stateLitElement';
 import { getMessageKey } from "./_100554_collabLitElement";
 import { propertyDataSource } from './_100554_collabDecorators';
-import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget, changeStateName } from "./_100554_pluginNewFileBase";
+import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget, changeStateName, getTemplateImport } from "./_100554_pluginNewFileBase";
 import { ServiceBase } from './_100554_serviceBase';
 import './_100554_widgetTextCode';
 
@@ -70,31 +70,17 @@ export class PluginNewFilePage extends StateLitElement {
     private service = this.closest('service-detail-100554') as ServiceBase;
 
     private template: string = `
-import { CollabPageElement } from './_100554_collabPageElement';
+import { CollabPageElement } from '${getTemplateImport(100554,'collabPageElement', '')}';
 import { customElement } from 'lit/decorators.js';
-import { globalState, setState, initState } from './_100554_collabState';
+import { globalState, initState, setState } from '${getTemplateImport(100554,'collabState', '')}';
 
- @customElement('[tagName]')
- export class [className] extends CollabPageElement {
+@customElement('[tagName]')
+export class [className] extends CollabPageElement {
+    initPage() {
 
-     initPage() {
-
-        initState('[stateName]', {
-            tables: {
-                 sex: [{ key: 'm', value: 'masculino' }, { key: 'f', value: 'feminino' }],
-             },
-             newUser: {
-                 name: '',
-                 age: 0,
-                 city: '',
-                 sex: ''
-             },
-             sum: 0,
-        });
-
-     }
-
- }`;
+    }
+}
+`;
 
 
     private enhancement: string = `_100554_enhancementLit`;
@@ -124,11 +110,7 @@ import { globalState, setState, initState } from './_100554_collabState';
         if (!this.shortName || !this.project) return '';
 
         const tagName = convertFileNameToTag({ project: this.project, shortName: this.shortName, folder: this.folder });
-        return `<${tagName} modeoverlay="wcd-overlay-mode-default-100554">\n\t<ica-layout-flow-section-100554 id="section1" class="inset" widget="wc-section-100554">
-		\n\t\t<ica-apresentation-text-text-100554 id="apText1" widget="wc-text-100554" text="In development" type="h2">
-		</ica-apresentation-text-text-100554>
-	\n\t</ica-layout-flow-section-100554>
-</${tagName}>`;
+        return `<${tagName}></${tagName}>`;
     }
 
     private async handleAddFile() {
