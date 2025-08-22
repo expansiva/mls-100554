@@ -3,7 +3,7 @@
 import { getTemporaryContext, notifyMessageSendChange, notifyThreadChange } from './_100554_aiAgentHelper';
 import { IAgent } from './_100554_aiAgentBase';
 import { collabImport } from './_100554_collabImport';
-import { addThread, listThreads, updateThread } from './_100554_msgDBController';
+import { addThread, listThreads, updateThread, updateUsers } from './_100554_msgDBController';
 
 const LS_KEY_OLD = 'collabChatPreferences';
 const LOCAL_STORAGE_KEY = '_100554_serviceCollabMessages';

@@ -50,7 +50,6 @@ export class CollabMessagesAddParticipant100554 extends StateLitElement {
     @property() suggestions: string[] = [];
     @property() allUsers: string[] = [];
 
-
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
         const users = await listUsers();
@@ -211,7 +210,15 @@ export class CollabMessagesAddParticipant100554 extends StateLitElement {
             if (response.thread) {
                 const thr = await updateThread(response.thread.threadId, response.thread);
                 notifyThreadChange(thr);
+                this.dispatchEvent(new CustomEvent('add-participant', {
+                    detail: {
+                        thread: thr,
+                    },
+                    bubbles: true,  
+                    composed: true 
+                }));
             }
+
 
             this.labelOkAddParticipant = `${this.msg.successAddParticipant}`;
             setTimeout(() => {

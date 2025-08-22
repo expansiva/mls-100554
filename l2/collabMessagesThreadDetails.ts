@@ -107,7 +107,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
     @property() labelErrorRemoveUser: string = '';
     @property() labelErrorRemoveBoot: string = '';
 
-
     @state() private isLoading: boolean = false;
     @state() private editedThreadDetails?: IThreadDetails;
 
@@ -120,11 +119,16 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         super.updated(changedProperties);
 
         if (changedProperties.has('threadDetails') && this.threadDetails && this.userId) {
+
             for (const user of this.threadDetails?.thread.users || []) {
                 const find = this.threadDetails?.users.find((u) => u.userId === user.userId);
                 if (!find) {
                     const resUser = await getUser(user.userId);
-                    if (resUser) this.threadDetails.users.push(resUser);
+                    if (resUser) {
+                        this.threadDetails.users.push(resUser);
+                        if (this.editedThreadDetails) this.editedThreadDetails.users = [... this.threadDetails.users];
+                        this.requestUpdate();
+                    }
                     else {
                         const data = await this.getThreadInfo(this.threadDetails.thread.threadId, this.userId);
                         this.threadDetails = data;
@@ -135,7 +139,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         }
 
     }
-
 
     render() {
 
@@ -191,7 +194,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                     <option value="team">${this.msg.visibilityTeam}</option>
                 </select>
             </label>
-
             
             <label> ${this.msg.topicsDefault}</label>
             <collab-input-tag-100554 
@@ -199,10 +201,10 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                 .value=${this.editedThreadDetails?.thread.defaultTopics?.join(',')}
                 placeholder="#topic"
                 .onValueChanged=${(value: string) => {
-                    if (this.editedThreadDetails) {
-                        this.editedThreadDetails.thread.defaultTopics = value.split(',');
-                    }
-                }}
+                if (this.editedThreadDetails) {
+                    this.editedThreadDetails.thread.defaultTopics = value.split(',');
+                }
+            }}
                 id="topicsInput"
             ></collab-input-tag-100554>
 
@@ -211,7 +213,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                 <textarea 
                     name="welcomemessage"
                     rows="5" 
-                    .value=${this.editedThreadDetails?.thread.wellcomeMessage}
+                    .value=${this.editedThreadDetails?.thread?.wellcomeMessage || ''}
                     @input=${(e: Event) => { if (this.editedThreadDetails && !isDm) this.editedThreadDetails.thread.wellcomeMessage = (e.target as HTMLInputElement).value }}
                 ></textarea>                
             ` : ``}
@@ -219,7 +221,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
             <label> ${this.msg.languages}</label>
             <collab-input-tag-100554 
                 pattern="^[a-z]{2}$|^[a-z]{2}-[A-Z]{2}$"
-                .value=${this.editedThreadDetails?.thread.languages.join(',')}
+                .value=${this.editedThreadDetails?.thread?.languages?.join(',')}
                 .onValueChanged=${(value: string) => { if (this.editedThreadDetails) this.editedThreadDetails.thread.languages = value.split(',') }}
                 id="languageInput"
             ></collab-input-tag-100554>
@@ -279,7 +281,12 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                 ? html`<details class="details-add-participant">
                             <summary>${this.msg.addParticipant}</summary>
                             <div>
-                                <collab-messages-add-participant-100554 userId=${this.userId} .actualThread=${{ ...this.threadDetails }}></collab-messages-add-participant-100554>
+                                <collab-messages-add-participant-100554
+                                    userId=${this.userId} 
+                                    .actualThread=${{ ...this.threadDetails }}
+                                    @add-participant=${this.onAddParticipant}
+                                    
+                                    ></collab-messages-add-participant-100554>
                             </div>
                         </details>`
                 : ''
@@ -405,6 +412,15 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         }
 
         return changed;
+    }
+
+    private onAddParticipant(ev: CustomEvent) {
+        const thread = ev.detail.thread;
+        if (thread && this.threadDetails) {
+            this.threadDetails.thread = { ...thread };
+            this.editedThreadDetails = { ...this.threadDetails }
+            this.requestUpdate();
+        }
     }
 
     private async saveChanges() {

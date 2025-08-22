@@ -88,6 +88,7 @@ export class CollabMessagesUserModal100554 extends StateLitElement {
                 const threadName = `@${this.user.name}`;
                 thread = await createThreadDM(threadName, this.user.userId, 'CONNECT');
             }
+            this.destroy();
             await mls.events.fire([mls.actualLevel], 'collabMessages' as any, JSON.stringify({ threadId: thread?.threadId, type: 'thread-open' }));
         } catch (err:any) {
             this.errorMessage = err.message;
