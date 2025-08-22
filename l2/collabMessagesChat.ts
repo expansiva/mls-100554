@@ -5,7 +5,8 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation, collab_plus } from './_100554_collabIcons';
 import { collabImport } from './_100554_collabImport';
 import { removeThreadFromSync, getThreadUpdateInBackground } from './_100554_collabMessagesSyncNotifications';
-import { openElementInDetails } from './_100554_libCommom'
+import { openElementInDetails } from './_100554_libCommom';
+import { listUsers } from './_100554_msgDBController';
 
 import {
     getTemporaryContext,
@@ -59,6 +60,8 @@ const message_pt = {
     threadDeleting: 'A thread está sendo deletada em [date]',
     archived: 'Arquivado',
     deleting: 'Deletando',
+    btnNext: 'Continuar',
+
 }
 
 const message_en = {
@@ -72,6 +75,8 @@ const message_en = {
     threadDeleting: 'Thread is being deleted in [date]',
     archived: 'Archived',
     deleting: 'Deleting',
+    btnNext: 'Next',
+
 }
 
 type MessageType = typeof message_en;
@@ -94,13 +99,15 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @state() userPreferenceChat?: IChatPreferences;
     @state() isLoadingThread: boolean = false;
     @state() filteredThreads: IFilteredThreadsByStatus = { active: [], archived: [], deleted: [], deleting: [] };
-    @state() allUsers: mls.msg.User[] = [];
+    @state() allUsersInThread: mls.msg.User[] = [];
     @state() isThreadError: boolean = false;
     @state() threadErrorMsg: string = '';
     @state() lastTopicFilter: string = '';
+    @state() welcomeMessage: string = '';
 
     @property() group: 'CONNECT' | 'APPS' | 'DOCS' | 'CRM' = 'CONNECT';
     @property() userId: string | undefined;
+    @property() threadToOpen: string | undefined;
     @property() userDeviceId: string | undefined;
     @property() activeScenerie: IScenery = 'list';
     @property() actualThread: IThreadInfo | undefined;
@@ -113,6 +120,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @property({ attribute: false }) userThreads: IThread = {};
     @property({ attribute: false }) allThreads: mls.msg.Thread[] = []
 
+    private usersAvaliables: mls.msg.User[] = [];
     private isSystemChangeScroll: boolean = false;
     private savedScrollTop = 0;
     private hasMoreMessagesLocalDB = true;
@@ -134,6 +142,23 @@ export class CollabMessagesChat100554 extends StateLitElement {
             this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
             return;
         }
+
+        if (changedProperties.has('activeScenerie') && (this.activeScenerie === 'list')) {
+            this.usersAvaliables = await listUsers();
+        }
+
+        if (changedProperties.has('threadToOpen')) {
+            if (this.threadToOpen) {
+                if (this.activeScenerie !== 'list') {
+                    this.activeScenerie = 'list';
+                    await this.updateComplete;
+                }
+                const threadElement = this.querySelector(`[threadId="${this.threadToOpen}"]`) as IHTMLLiThreadItem;
+                if (!threadElement) return;
+                this.onThreadClick(threadElement.item);
+            }
+        }
+
         if (changedProperties.has('activeScenerie')
             && (changedProperties.get('activeScenerie') === 'task'
                 || changedProperties.get('activeScenerie') === 'addParticipant'
@@ -166,6 +191,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
         window.addEventListener('task-details-close', this.onTaskDetailsClose);
         window.addEventListener('thread-change', this.onThreadChange);
         window.addEventListener('message-send', this.onMessageSend);
+        // this.usersAvaliables = await listUsers();
+
     }
 
     render() {
@@ -235,6 +262,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private renderChatMessages() {
         if (!this.actualThread) return html``;
+        if (this.welcomeMessage) {
+            return this.renderWelcomeMessage();
+        }
 
         if (this.actualThread.thread.status === 'deleting') {
             const formatedTimestamp = formatTimestamp(this.actualThread.thread.deletedAt || '');
@@ -320,6 +350,14 @@ export class CollabMessagesChat100554 extends StateLitElement {
 `
     }
 
+    private renderWelcomeMessage() {
+        return html`
+            <div class="welcome-message">
+                <p>${this.welcomeMessage}</p>
+                <button @click=${() => { this.welcomeMessage = ''; }}>${this.msg.btnNext}</button>       
+            </div>`
+    }
+
     private renderMessageFooterResult(message: mls.msg.MessagePerformanceCache) {
         if (!message.footers || message.footers.length === 0) return html``;
         return html`<div class="message-result">
@@ -342,7 +380,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return html`
         <collab-messages-rich-preview-100554 
             @mention-hover=${this.onMentionHover}
-            .allUsers=${this.allUsers} 
+            .allUsers=${this.allUsersInThread} 
             .allThreads=${this.allThreads}
             text="${text}"
         ></collab-messages-rich-preview-100554>`
@@ -378,11 +416,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
         this.removeAllUserModal();
         if (!ev.detail || !ev.detail.value || !ev.detail.element) return;
-        const actualUserModal = this.allUsers.find((user) => user.name === ev.detail.value);
+        const actualUserModal = this.allUsersInThread.find((user) => user.name === ev.detail.value);
 
         const rects = (ev.detail.element as HTMLElement).getBoundingClientRect();
         const modal = document.createElement('collab-messages-user-modal-100554');
         (modal as any).user = actualUserModal;
+        (modal as any).setAttribute('actualUserId', this.userId);
         this.appendChild(modal);
         await (modal as LitElement).updateComplete;
         const rectsModal = modal.getBoundingClientRect();
@@ -547,7 +586,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (!item) return '';
         if (item.thread.name.startsWith('@') && item.thread.users.length === 2) {
             const user = item.users.find((user) => user.userId !== this.userId);
-            if (user) return user.name;
+            if (user) return '@' + user.name;
         }
         return item.thread.name || item.thread.threadId;
     }
@@ -573,7 +612,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 : item._lastMessageDate.date;
 
             return html`
-                <li @click=${() => this.onThreadClick(item)} class="thread-item">
+                <li .item=${item} threadId=${item.thread.threadId} @click=${() => this.onThreadClick(item)} class="thread-item">
                     <div class="thread-item-avatar">
                     ${threadAvatar.startsWith('<') && threadAvatar.endsWith('>') ?
                     html`${unsafeHTML(threadAvatar)}` :
@@ -699,7 +738,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private renderThreadAdd() {
         return html`
             <collab-messages-add-100554 
-                .onAddSuccess
+                .onAddSuccess = ${() => { this.activeScenerie = 'list' }}
                 .group=${this.group}
                 userId=${this.userId} 
             ></collab-messages-add-100554>`
@@ -846,20 +885,30 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
         return result;
     }
-
     private getFilteredThreads(ordened: IFilteredThreadsByStatus): IFilteredThreadsByStatus {
-
         if (!this.searchTerm) return ordened;
+
+        const term = this.searchTerm.toLowerCase();
+
         Object.keys(ordened).forEach((key: string) => {
             const key2 = key as 'deleted' | 'archived' | 'active' | 'deleting';
+
             ordened[key2] = ordened[key2].filter(item => {
-                const threadMatch = item.thread.name?.toLowerCase().includes(this.searchTerm);
-                return threadMatch;
-            })
+                const threadName = item.thread.name?.toLowerCase() ?? '';
+
+                if (threadName.startsWith('@')) {
+                    const users = item.thread.users
+                        .map(u => this.usersAvaliables.find(au => au.userId === u.userId));
+                    return users.some(user =>
+                        (`@${user?.name.toLowerCase()}`).includes(term)
+                    );
+                }
+
+                return threadName.includes(term);
+            });
         });
 
         return ordened;
-
     }
 
     private async getMessagesAfter(thread: mls.msg.Thread, lastOrderAt: string = ''): Promise<mls.msg.ResponseGetMessagesAfter | undefined> {
@@ -993,6 +1042,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private async onThreadClick(threadInfo: IThreadInfo) {
+        this.welcomeMessage = '';
         this.activeScenerie = 'loading';
         this.lastTopicFilter = '';
         this.messagesOffset = 0;
@@ -1006,6 +1056,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.isLoadingMessages = true;
         this.isThreadError = false;
         this.threadErrorMsg = '';
+        this.checkWelcomeMessage(this.actualThread.thread, messagesInDb);
 
         try {
             if (!this.userId) return;
@@ -1023,7 +1074,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             }
 
             await updateUsers(threadByServer.users);
-            this.allUsers = threadByServer.users;
+            this.allUsersInThread = threadByServer.users;
             if (threadByServer.hasMore) await this.loadAllMessages(threadInfo);
             this.checkForRegisterNotification();
 
@@ -1034,6 +1085,13 @@ export class CollabMessagesChat100554 extends StateLitElement {
         } finally {
             this.isLoadingMessages = false;
         }
+    }
+
+    private checkWelcomeMessage(thread: mls.msg.ThreadPerformanceCache, messagesInDb: mls.msg.MessagePerformanceCache[]) {
+        if (messagesInDb.length > 0) return;
+        if (!thread.wellcomeMessage) return;
+        this.welcomeMessage = thread.wellcomeMessage;
+
     }
     private alreadyCheckForRegisterToken: boolean = false;
     private async checkForRegisterNotification() {
@@ -1498,6 +1556,10 @@ interface IFilteredThreadsByStatus {
     deleted: IFilteredThreads[];
     deleting: IFilteredThreads[];
     active: IFilteredThreads[];
+}
+
+interface IHTMLLiThreadItem extends HTMLElement {
+    item: IThreadInfo
 }
 
 interface IFilteredThreads {
