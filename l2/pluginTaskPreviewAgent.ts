@@ -1,6 +1,6 @@
 /// <mls shortName="pluginTaskPreviewAgent" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, repeat } from 'lit';
+import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { IAgent } from './_100554_aiAgentBase';
@@ -79,18 +79,27 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
 
     renderInfo() { 
 
-        if (!this.task ||!this.step ) return html`Not found!`;
+        if (!this.task || !this.step) return html`Not found!`;
+
+        let trace = '';
+        if (this.step.interaction && Array.isArray(this.step.interaction.trace)) {
+            this.step.interaction.trace.forEach((i) => trace += `<p>${i}<p>`)
+        } else if (this.step.interaction) {
+            trace = this.step.interaction.trace as any;
+        }
+
+        const aux = this.step.status === 'in_progress' ? '(in progress)' : '';
 
         return html`
         <div class="containerinputs">
             <details open>
-                <summary> ${this.renderSummary('Agent')} </summary>
+                <summary> ${this.renderSummary('Agent '+aux)} </summary>
                 <ul>
                     <li>
                         #${this.step.stepId} - ${this.step.agentName} - ${this.step.status} - $${this.step.interaction?.cost}
                     </li>
                     <li>
-                        <b>Trace: </b>${this.step.interaction?.trace}
+                        <b>Trace: </b>${unsafeHTML(trace)}
                     </li>
                     <li>
                         <b>${this.step.agentName}: </b>${this.agentDescription}
