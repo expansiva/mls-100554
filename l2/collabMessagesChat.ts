@@ -743,7 +743,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 userId=${this.userId} 
             ></collab-messages-add-100554>`
     }
-    
+
     private onSearchInput(e: Event) {
         const target = e.target as HTMLInputElement;
         this.searchTerm = target.value.toLowerCase();
@@ -1061,6 +1061,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         try {
             if (!this.userId) return;
             const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId, threadInfo.thread.lastMessageTime || new Date('2000-01-01').toISOString());
+
             await updateThread(threadByServer.thread.threadId, threadByServer.thread);
             threadInfo = await this.updateMessagesOnDb(threadInfo, threadByServer.messages);
 
@@ -1075,6 +1076,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
             await updateUsers(threadByServer.users);
             this.allUsersInThread = threadByServer.users;
+            this.actualThread = { ...threadByServer };
             if (threadByServer.hasMore) await this.loadAllMessages(threadInfo);
             this.checkForRegisterNotification();
 
@@ -1494,6 +1496,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         await this.updateMessageAI(customEvent.detail, false);
         const thread = customEvent.detail as mls.msg.Thread;
         const threadUpdated = this.userThreads[this.group].find((th) => th.thread.threadId === thread.threadId);
+
         if (threadUpdated) threadUpdated.thread = { ...threadUpdated.thread, ...thread };
         else if (thread.group === this.group) {
             this.userThreads[this.group] = [...this.userThreads[this.group], { thread, hasMore: false, users: [] }];
@@ -1527,7 +1530,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
 interface IThreadInfo {
     thread: mls.msg.ThreadPerformanceCache,
-    threadsPending?: number[],
+    threadsPending?: string[],
     users: mls.msg.User[],
     hasMore?: boolean | undefined,
     messages?: mls.msg.Message[] | undefined

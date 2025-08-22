@@ -105,6 +105,14 @@ export class CollabMessagesTopics100554 extends StateLitElement {
       }
     });
     let headerTopics = Array.from(new Set([...ordered])).slice(0, 3);
+    
+    if (headerTopics.length < 3) {
+      const extras = this.threadTopics.filter(
+        (topic: string) => !headerTopics.includes(topic)
+      );
+      headerTopics = [...headerTopics, ...extras].slice(0, 3);
+    }
+
     if (this.selectedTopic && !headerTopics.includes(this.selectedTopic) && this.selectedTopic !== 'all') {
       headerTopics = [...headerTopics, this.selectedTopic];
     }
@@ -119,7 +127,7 @@ export class CollabMessagesTopics100554 extends StateLitElement {
       if (message.content) {
         const topics = this.extractTopics(message.content);
         topics.forEach(topic => {
-          if (!seen.has(topic)) {
+          if (!seen.has(topic) && topic !== '') {
             seen.add(topic);
             ordered.push(topic);
           }
@@ -129,9 +137,9 @@ export class CollabMessagesTopics100554 extends StateLitElement {
 
     if (this.threadTopics) {
       this.threadTopics.forEach((thTop) => {
-        if (!ordered.find((item) => item == thTop)) {
+        if (!ordered.find((item) => item == thTop) && thTop !== '') {
           ordered.push(thTop);
-        } 
+        }
       })
     }
 
