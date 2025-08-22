@@ -1,4 +1,4 @@
-/// <mls shortName="agentNewModuleCreate" project="100554" enhancement="_blank" folder="" />
+/// <mls shortName="agentNewModule2" project="100554" enhancement="_blank" folder="" />
 
  import { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST';
  export const integrations: ICANIntegration[] = [];
