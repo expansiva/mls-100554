@@ -49,6 +49,17 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     public updateContentPluginWithElement(element: HTMLElement) {
+
+        const tag = element.tagName.toLocaleLowerCase();
+        if (tag.indexOf('-')) {
+            const info = convertTagToFileName(tag);
+            if (info) {
+                this.plugin = {
+                    project: info.project,
+                    shortName: info.folder ? `${info.folder}/${info.shortName}` : info.shortName
+                };
+            }
+        }
         this._updateContentPluginWithElement(element);
     }
 
