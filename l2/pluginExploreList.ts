@@ -1123,6 +1123,8 @@ export class PluginExploreList extends PluginBaseModule {
                 if (!m || !m.defs ||
                     !m.defs.meta || !m.defs.meta.type ||
                     m.defs.meta.type !== 'organism') continue;
+
+                if (mls.actualModule && mls.actualModule !== sf.folder) continue;
             }
 
             if (mls.actualLevel === 4 && !defsFile) {
@@ -1132,6 +1134,8 @@ export class PluginExploreList extends PluginBaseModule {
                 if (!m || !m.defs ||
                     !m.defs.meta || !m.defs.meta.type ||
                     m.defs.meta.type !== 'page') continue;
+
+                if (mls.actualModule && mls.actualModule !== sf.folder) continue;
             }
 
 
