@@ -130,15 +130,15 @@ export class CollabInputTag extends StateLitElement {
                 <input
                     id="tag-input"
                     placeholder=${ifDefined(!this.value ? this.placeholder : undefined)}
+                    autocomplete="off"
                     @blur=${this.onInputLeave}
                     @keydown=${(ev: KeyboardEvent) => { this.onInputKeyDown(ev) }}
                 ></input>
                 ${this.tags.map((tag: string, index: number) => {
                 return html`
-                        <div data-index=${index} class="tag">
-
-                            ${tag}
-                        </div>
+                    <div data-index=${index} class="tag">
+                        ${tag}
+                    </div>
                     `
             })}
         </div>`;

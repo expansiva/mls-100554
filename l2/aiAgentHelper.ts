@@ -1,7 +1,7 @@
 /// <mls shortName="aiAgentHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { updateMessage, getMessage } from "./_100554_msgDBController";
-import { getUserId ,createThread} from "./_100554_collabMessageHelper";
+import { getUserId, createThread } from "./_100554_collabMessageHelper";
 import { getThreadByName } from './_100554_msgDBController';
 import { loadAgent } from './_100554_aiAgentOrchestration';
 
@@ -360,8 +360,15 @@ export function notifyThreadChange(thread: mls.msg.Thread): void {
   scopeWindow.dispatchEvent(event);
 }
 
-
-
+export function notifyThreadCreate(thread: mls.msg.Thread): void {
+  const scopeWindow = window?.top ? window.top : window;
+  const event = new CustomEvent('thread-create', {
+    detail: thread,
+    bubbles: true,
+    composed: true
+  });
+  scopeWindow.dispatchEvent(event);
+}
 
 export function dispatchDetailsTaskClose(): void {
   const scopeWindow = window?.top ? window.top : window;
@@ -436,7 +443,7 @@ export function getNextStepIdAvaliable(task: mls.msg.TaskData): number {
 }
 
 
-export async function executeAgentByFile(agentName: string,  prompt: string, file: mls.stor.IFileInfo) {
+export async function executeAgentByFile(agentName: string, prompt: string, file: mls.stor.IFileInfo) {
 
   const pageName = file.folder ? `_${file.project}_${file.folder}/${file.shortName}` : `${file.project}_${file.shortName}`;
 
@@ -448,12 +455,12 @@ export async function executeAgentByFile(agentName: string,  prompt: string, fil
   const userId = getUserId();
   if (!userId) return;
   const threadId = thread?.threadId;
-  if (!threadId) throw new Error('[executeAgentByFile] Cannot find thread'); 
+  if (!threadId) throw new Error('[executeAgentByFile] Cannot find thread');
 
-  const info = mls.l2.getPath(`_${mls.actualProject}_${agentName}`); 
+  const info = mls.l2.getPath(`_${mls.actualProject}_${agentName}`);
   const agent = await loadAgent(info.shortName, info.folder);
   if (!agent) throw new Error('[executeAgentByFile] Invalid Agent' + agentName);
-  
+
   const context = getTemporaryContext(threadId, userId, prompt);
   await agent.beforePrompt(context);
 

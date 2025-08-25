@@ -101,7 +101,7 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
     //         return `${pre}<span class="mention">@${user}</span>`;
     //     });
     // }
-    private parseMentions(input: string): string {
+    private parseMentions2(input: string): string {
         let output = input;
 
         this.allUsers.forEach(u => {
@@ -116,27 +116,46 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
         return output;
     }
 
-    private parseChannelRefs(input: string): string {
+    private parseMentions(input: string): string {
         let output = input;
 
-        this.allThreads.forEach(c => {
-            const escapedName = c.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`(^|\\s)#(${escapedName})(?=$|\\s|[.,!?])`, 'g');
+        this.allUsers.forEach(u => {
+
+            const escapedName = u.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`(^|\\s)@(${escapedName})(?=$|\\s|[.,!?])`, 'g');
 
             output = output.replace(regex, (_m, pre, name) => {
-                return `${pre}<span class="channel-ref">#${name}</span>`;
+
+                const shortName = name.split(' ')[0];
+                return `${pre}<a 
+                        href="#user/${u.userId}" 
+                        class="mention" 
+                        data-user-id="${u.userId}">
+                        @${shortName}
+                    </a>`;
             });
         });
 
         return output;
     }
 
-    // private parseChannelRefs(input: string): string {
-    //     // #channel
-    //     return input.replace(/(^|\s)#([a-zA-Z0-9_]+)/g, (_m, pre, channel) => {
-    //         return `${pre}<span class="channel-ref">#${channel}</span>`;
-    //     });
-    // }
+    private parseMentionLinks(input: string): string {
+        // @user1
+        return input.replace(/\[@([^\]]+)\]\(([^)]+)\)/g, (_m, name, userId) => {
+            const user = this.allUsers.find(u => u.userId === userId);
+            if (!user) return `[@${name}]`;
+            return `<span class="mention" data-user-id="${user.userId}">@${name}</span>`;
+        });
+    }
+
+    private parseChannelRefs(input: string): string {
+        // #channel-1
+        return input.replace(/#([^\s#.,!?;:]+)/g, (_match, channelName) => {
+            const channel = this.allThreads.filter((thr) => thr.name.startsWith('#')).find(c => c.name === '#' + channelName);
+            if (!channel) return `#${channelName}`;
+            return `<span class="channel-ref">${channel.name}</span>`;
+        });
+    }
 
     private parseAgentMentions(input: string): string {
         // @@agent
@@ -259,12 +278,13 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
         // We do this after code blocks and inline code are protected
         input = input.replace(/~~([^~]+)~~/g, (_m, striked) => `<del>${striked}</del>`);
         // Mentions and commands
-        input = this.parseMentions(input);
+        // input = this.parseMentions(input);
         input = this.parseChannelRefs(input);
         input = this.parseCommands(input)
         input = this.parseAgentMentions(input);
         input = this.parseObjectRefs(input);
         input = this.parseHelpRefs(input);
+        input = this.parseMentionLinks(input);
         input = this.parseMarkdownLinks(input);
         // 🚫 Do NOT escape <, >, & here — this would break the generated HTML
         // Convert line breaks
@@ -322,7 +342,7 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
                 }, { signal: this._abortController.signal });
 
                 //     el.addEventListener('mouseover', (e) => { e.stopPropagation(); emit(el, `${base}-hover`), { signal: this._abortController.signal }; });
-                el.addEventListener('click', () => emit(el, `${base}-click`), { signal: this._abortController.signal });
+                el.addEventListener('click', (e) => { e.preventDefault(); emit(el, `${base}-click`), { signal: this._abortController.signal } });
             });
         });
     }

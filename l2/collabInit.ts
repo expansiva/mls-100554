@@ -26,6 +26,11 @@ export async function initCompileMonaco(project: number): Promise<boolean> {
     return true;
 }
 
+export function setFavicon(notification: boolean) {
+    const link: HTMLLinkElement | null = document.querySelector("#collabcodes_icon[rel~='icon']");
+    if (!link) return;
+    link.href = notification ? iconCollabNotification : iconCollabDefault;
+}
 
 @customElement('collab-init-100554')
 export class CollabInit extends CollabLitElement {
@@ -528,6 +533,11 @@ export class CollabInit extends CollabLitElement {
     }
 
 }
+
+const iconCollabDefault = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSJ0cmFuc3BhcmVudCIgLz4KICA8dGV4dCB4PSIzMCIgeT0iNTYiIGZvbnQtZmFtaWx5PSJWZXJkYW5hIiBmb250LXNpemU9IjcyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iIzQyODVGNCI+QzwvdGV4dD4KICA8dGV4dCB4PSI0MCIgeT0iNDAiIGZvbnQtZmFtaWx5PSJWZXJkYW5hIiBmb250LXNpemU9IjM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iI0VBNDMzNSI+YzwvdGV4dD4KPC9zdmc+Cg==`;
+
+
+const iconCollabNotification = `data:image/svg+xml;base64,Cjxzdmcgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgZmlsbD0idHJhbnNwYXJlbnQiLz4KICA8dGV4dCB4PSIzMCIgeT0iNTYiIGZvbnQtZmFtaWx5PSJWZXJkYW5hIiBmb250LXNpemU9IjcyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iIzQyODVGNCI+QzwvdGV4dD4KICA8dGV4dCB4PSI0MCIgeT0iNDAiIGZvbnQtZmFtaWx5PSJWZXJkYW5hIiBmb250LXNpemU9IjM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iI0VBNDMzNSI+YzwvdGV4dD4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjEwIiByPSI4IiBmaWxsPSIjRkYwMDAwIi8+Cjwvc3ZnPgo=`;
 
 interface IHTMLCollabNav1 extends HTMLElement {
     changeIconToImage: (level: number, avatarUrl: string, additional?: { text: string, img?: string }) => void

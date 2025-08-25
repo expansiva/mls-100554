@@ -16,9 +16,8 @@ import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test, collab_xmark } from './_100554_collabIcons';
 import { CollabState } from './_100554_collabState';
 import { TsTestAst } from './_100554_tsTestAST';
-import { loadChatPreferences, getUserId } from './_100554_collabMessageHelper';
+import { getUserId } from './_100554_collabMessageHelper';
 import { getTemporaryContext } from './_100554_aiAgentHelper';
-import { createAllModels } from './_100554_collabLibModel';
 import { PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
 import { IAgent } from './_100554_aiAgentBase';
 
@@ -47,7 +46,9 @@ const message_pt = {
     testRun: 'Executar',
     testDelete: 'Excluir',
     testEdit: 'Editar',
-    runAllTest: 'Todos os testes'
+    runAllTest: 'Todos os testes',
+    promptPlaceholder: 'Digite aqui @@ para agentes'
+
 }
 
 const message_en = {
@@ -66,7 +67,10 @@ const message_en = {
     testRun: 'Run',
     testDelete: 'Delete',
     testEdit: 'Edit',
-    runAllTest: 'All testes'
+    runAllTest: 'All testes',
+    promptPlaceholder: 'Type here @@ for agents'
+
+
 }
 
 type MessageType = typeof message_en;
@@ -93,6 +97,10 @@ export class ServicePreview100554 extends ServiceBase {
     @query('#preview-container') previewContent: HTMLElement | undefined;
 
     private msg: MessageType = messages['en'];
+
+    private threadCache = new Map<string, Promise<mls.msg.ThreadPerformanceCache | undefined>>();
+
+    private tasksInProgress: Map<string, Set<mls.msg.ExecutionContext>> = new Map();
 
     private lastMode: number = EPreview.icPreviewD;
 
@@ -567,18 +575,6 @@ export class ServicePreview100554 extends ServiceBase {
 
     // -------------- COMPONENT ---------------
 
-    render2() {
-        const lang = this.getMessageKey(messages);
-        this.msg = messages[lang];
-        return html`
-        <collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="var(--bg-primary-color)">
-                <div slot="top" style="height:100%;" id="preview-container"></div>
-                <div slot="bottom">
-                    <collab-messages-prompt-100554 acceptAutoCompleteAgents="true" scope="l${this.level}_preview"  .onSend=${this.handleSend.bind(this)}></collab-messages-prompt-100554>
-                </div>
-            </collab-spliter-vertical-var-fixed-100554>`;
-    }
-
     render() {
 
         const lang = this.getMessageKey(messages);
@@ -596,7 +592,12 @@ export class ServicePreview100554 extends ServiceBase {
                     <div slot="right" style="height:100%;" id="preview-details"></div>
                 </collab-spliter-horizontal-var-fixed-100554>
                 <div slot="bottom">
-                    <collab-messages-prompt-100554 acceptAutoCompleteAgents="true" scope="l${this.level}_preview"  .onSend=${this.handleSend.bind(this)}></collab-messages-prompt-100554>
+                    <collab-messages-prompt-100554
+                    acceptAutoCompleteAgents="true"
+                    scope="l${this.level}_preview"  
+                    placeholder="${this.msg.promptPlaceholder}"
+                    .onSend=${this.handleSend.bind(this)}
+                    ></collab-messages-prompt-100554>
                 </div>
             </collab-spliter-vertical-var-fixed-100554>`;
     }
@@ -688,22 +689,26 @@ export class ServicePreview100554 extends ServiceBase {
         else if (actual.size === 0) this.loading = false;
     }
 
-    private tasksInProgress: Map<string, Set<mls.msg.ExecutionContext>> = new Map();
     private async fireCollab(agentName: string, prompt: string) {
 
-        // const pref = loadChatPreferences();
-        // if (!pref.threadMaintenance) {
-        //     this.setError('Please configure your maintenance thread at: CollabMessage > Settings > Chat Preferences');
-        //     return;
-        // }
+        let threadPromise = this.threadCache.get(this.page);
 
-        let thread = await getThreadByName(this.page);
-        if (!thread) {
-            thread = await createThread(this.page, [], 'company');
+        if (!threadPromise) {
+            threadPromise = (async () => {
+                let thread = await getThreadByName(this.page);
+                if (!thread) {
+                    thread = await createThread(this.page, [], 'company');
+                }
+                return thread;
+            })();
+            this.threadCache.set(this.page, threadPromise);
         }
+
+        const thread = await threadPromise;
 
         const userId = getUserId();
         if (!userId) return;
+
         const threadId = thread?.threadId;
         if (!threadId) {
             this.setError('Cannot find thread');
@@ -711,16 +716,18 @@ export class ServicePreview100554 extends ServiceBase {
         }
 
         const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentName}`);
-        if (!moduleAgent || !moduleAgent.createAgent || typeof moduleAgent.createAgent !== 'function') throw new Error('Invalid agent');
+        if (!moduleAgent?.createAgent || typeof moduleAgent.createAgent !== 'function') {
+            throw new Error('Invalid agent');
+        }
+
         const agent: IAgent = moduleAgent.createAgent();
         const context = getTemporaryContext(threadId, userId, prompt);
 
-        if (!this.tasksInProgress.get(this.page)) this.tasksInProgress.set(this.page, new Set());
-        const actual = this.tasksInProgress.get(this.page);
-        if (actual) actual.add(context);
-
+        if (!this.tasksInProgress.get(this.page)) {
+            this.tasksInProgress.set(this.page, new Set());
+        }
+        this.tasksInProgress.get(this.page)?.add(context);
         await agent.beforePrompt(context);
-
     }
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {

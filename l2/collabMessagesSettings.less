@@ -95,11 +95,11 @@ collab-messages-settings-100554 {
             gap: 1rem;
         }
 
-    
+
 
         .user-info-item {
             margin-bottom: .4rem;
-    
+
 
             label {
                 display: inline;
@@ -168,15 +168,38 @@ collab-messages-settings-100554 {
 
     }
 
-    .notification-preferences{
+    .notification-preferences {
         details {
             margin-top: 1rem;
         }
-        details > summary {
+
+        details>summary {
             cursor: pointer;
         }
-        details > div {
+
+        details>div {
             padding-left: 1rem;
+        }
+
+        .notification-audio-config {
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .notification-audio-config label {
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .notification-audio-config input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
         }
     }
 

@@ -1,8 +1,9 @@
 /// <mls shortName="collabMessagesSyncNotifications" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
 
-import { getUserId, loadNotificationDeviceId } from "./_100554_collabMessageHelper";
+import { getUserId, loadNotificationDeviceId, loadNotificationPreferencesAudio } from "./_100554_collabMessageHelper";
 import { getThread, updateThread, getMessage, addMessages } from './_100554_msgDBController';
 import { notifyThreadChange } from './_100554_aiAgentHelper';
+import { setFavicon } from './_100554_collabInit';
 
 export const threadSyncMap = new Map<string, boolean>();
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -11,14 +12,25 @@ export function removeThreadFromSync(threadId: string) {
     threadSyncMap.delete(threadId);
 }
 
+const notificationSound = new Audio('./l3/_100529_/audio/collabNotification.mp3');
+notificationSound.preload = 'auto';
+notificationSound.volume = 0.5;
+
 export async function listenToThreadEvents() {
 
     navigator.serviceWorker.addEventListener('message', async (event) => {
         if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] Received`)
-        if (event.data.type !== "thread-update") return;
         if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] Data`, event?.data)
         const id = event.data.id;
         enqueueThreadForSync(event.data?.data?.threadId);
+
+        setFavicon(true);
+        mls.services['100554_serviceCollabMessages_left']?.toogleBadge(true, '_100554_serviceCollabMessages');
+        const audioEnabled = loadNotificationPreferencesAudio();
+        if (audioEnabled) {
+            notificationSound.currentTime = 0;
+            notificationSound.play().catch(err => console.warn('Erro on play notification audio:', err));
+        }
 
         if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] : sendACK id: ${id}`);
         await mls.stor.cache.sendACK(id);

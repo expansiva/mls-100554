@@ -5,7 +5,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 
 import { ServiceBase } from './_100554_serviceBase';
-import { loadChatPreferences, saveChatPreferences } from './_100554_collabMessageHelper';
+import { loadChatPreferences, saveChatPreferences, saveNotificationPreferencesAudio, loadNotificationPreferencesAudio } from './_100554_collabMessageHelper';
 import {
     IChatPreferences,
     TranslateMode,
@@ -39,12 +39,13 @@ const message_pt = {
     preferLanguage: 'Idioma preferido',
     threadMaintenance: 'Thread para manutenção',
     userTitle: 'Usuário',
-    chatNotification: 'Preferências de notificação',
+    prefNotification: 'Preferências de notificação',
     infoNotification: 'Avisamos quando houver mudanças e novas mensagens, sem pop-ups, só sincronismo, mais velocidade para você',
     moreNotification: 'Saiba mais',
     notificationStatusEnabled: 'Notificações ativadas',
     notificationStatusFailed: 'Não foi possivel ativar as notificações, verificar permissões no browser',
     btnEnableNotifications: 'Ativar notificações',
+    soundEnable: 'Ativar som nas notificações',
 }
 
 const message_en = {
@@ -61,12 +62,14 @@ const message_en = {
     preferLanguage: 'Preferred language',
     threadMaintenance: 'Thread for maintenance',
     userTitle: 'User',
-    chatNotification: 'Notification Preferences',
+    prefNotification: 'Notification Preferences',
     infoNotification: 'We\'ll notify you when there are changes and new messages — no pop-ups, just seamless syncing for faster performance.',
     moreNotification: 'Learn more',
     notificationStatusEnabled: 'Notifications enabled',
     btnEnableNotifications: 'Enable notifications',
     notificationStatusFailed: 'Unable to enable notifications, check browser permissions',
+    soundEnable: 'Enable sound for notifications',
+
 }
 
 type MessageType = typeof message_en;
@@ -92,6 +95,7 @@ export class CollabMessagesSettings100554 extends StateLitElement {
     };
 
     @state() notificationPreferences?: NotificationPermission | null;
+    @state() audioEnabled: boolean = false;
 
     @property() labelOk: string = '';
     @property() labelError: string = '';
@@ -111,6 +115,8 @@ export class CollabMessagesSettings100554 extends StateLitElement {
         this.list = await listThreads();
         this.userPerfil = await this.getUserPerfil();
         this.chatPreferences = loadChatPreferences();
+        const audioPref = loadNotificationPreferencesAudio();
+        this.audioEnabled = audioPref;
     }
 
     updated() {
@@ -127,7 +133,7 @@ export class CollabMessagesSettings100554 extends StateLitElement {
         return html`
             ${this.renderUser()}
             ${this.renderChatPreferences()}
-            ${this.renderChatNotifications()}
+            ${this.renderPreferencesNotifications()}
 
         `;
     }
@@ -248,13 +254,13 @@ export class CollabMessagesSettings100554 extends StateLitElement {
         `
     }
 
-    private renderChatNotifications() {
+    private renderPreferencesNotifications() {
         this.notificationPreferences = this.getNotificationStatus();
         return html`
         <div>
-            <h4>${collab_bell} ${this.msg.chatNotification}</h4>
+            <h4>${collab_bell} ${this.msg.prefNotification}</h4>
             <div class="section notification-preferences">
-                ${this.notificationPreferences === 'granted' ?
+            ${this.notificationPreferences === 'granted' ?
                 html`
                         <div>${this.msg.notificationStatusEnabled}</div>
                         ${this.renderReadMore()}
@@ -273,6 +279,18 @@ export class CollabMessagesSettings100554 extends StateLitElement {
                     ${this.renderReadMore()}
                     `
             }
+
+            <div>
+
+            <div class="notification-audio-config">
+                <label>
+                    <input 
+                        type="checkbox" 
+                        .checked=${this.audioEnabled} 
+                        @change=${this.handleAudioToggle}
+                    />
+                    ${this.msg.soundEnable}
+                </label>
             </div>
         </div>
 
@@ -310,6 +328,12 @@ export class CollabMessagesSettings100554 extends StateLitElement {
         `
     }
 
+    private handleAudioToggle(e: Event) {
+        const target = e.target as HTMLInputElement;
+        this.audioEnabled = target.checked;
+        saveNotificationPreferencesAudio(this.audioEnabled);
+    }
+
     private async onEnabledNotifications() {
         this.labelErrorNotification = '';
         this.labelOkNotification = '';
@@ -327,7 +351,6 @@ export class CollabMessagesSettings100554 extends StateLitElement {
             console.error('Error on enable notificatin:', err.message);
             this.labelErrorNotification = err.message;
         }
-
 
     }
 
@@ -415,7 +438,6 @@ export class CollabMessagesSettings100554 extends StateLitElement {
         };
     }
 
-
     private handleLanguageInput(e: Event) {
         const target = e.target as HTMLInputElement;
         this.chatPreferences = {
@@ -423,7 +445,6 @@ export class CollabMessagesSettings100554 extends StateLitElement {
             language: target.value
         };
     }
-
 
     private handleThreadChange(e: Event) {
         const target = e.target as HTMLInputElement;

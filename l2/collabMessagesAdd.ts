@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { addThread, getThread } from './_100554_msgDBController';
-import { notifyThreadChange } from './_100554_aiAgentHelper';
+import { notifyThreadChange, notifyThreadCreate } from './_100554_aiAgentHelper';
 import { CollabInputTag } from './_100554_collabInputTag';
 import { getUserId, getDmThreadByUsers, addMessage, createThreadDM } from './_100554_collabMessageHelper';
 import { IAgent } from './_100554_aiAgentBase'
@@ -404,7 +404,6 @@ export class CollabMessagesAdd100554 extends StateLitElement {
         if (this.threadType === 'dm') {
             try {
                 const thread = await createThreadDM(threadName, this.dmUser, this.group);
-                if(thread) notifyThreadChange(thread);
                 if (this.onAddSuccess) this.onAddSuccess();
             } catch (err: any) {
                 console.error(err);
@@ -434,6 +433,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                 const response = await mls.api.msgAddThread(params);
                 if (response.thread) {
                     const thr = await addThread(response.thread);
+                    notifyThreadCreate(thr);
                     if (this._selectedAgent && this._selectedAgent !== 'none') {
                         const botSelected = this.agentsBots.find((item) => item.id === this._selectedAgent);
                         if (!botSelected || !botSelected.info) return;
@@ -469,7 +469,6 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                         }
 
                     } else {
-                        notifyThreadChange(thr);
                         if (this.onAddSuccess) this.onAddSuccess();
                     }
 

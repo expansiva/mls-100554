@@ -1,16 +1,13 @@
 /// <mls shortName="collabMessagesPrompt" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-
-import { html } from 'lit';
-import { customElement, property, state, query } from 'lit/decorators.js';
+import { html , ifDefined} from 'lit';
+import { customElement, property, state, query, } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { collab_arrow_up_long } from './_100554_collabIcons';
 import { getThread, listUsers } from './_100554_msgDBController';
 import { IAgent } from './_100554_aiAgentBase'
 import './_100554_collabMessagesAvatar';
-
 @customElement('collab-messages-prompt-100554')
 export class CollabMessagesPrompt100554 extends StateLitElement {
-
     @query('textarea') textArea: HTMLTextAreaElement | undefined;
     @query('.mention-suggestions') mentionSuggestionsElement?: HTMLElement;
     @query('.wrapper') wrapper?: HTMLElement;
@@ -22,17 +19,18 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
     @state() mentionIndex: number = 0;
     @state() allUsers: mls.msg.User[] = [];
     @state() allAgents: IMentionAgent[] = [];
-
     @state() alreadyLoadingAgents: boolean = false;
     @state() lastScopeLoaded: string | undefined;
 
     @property({ type: Function }) onSend: Function | undefined;
     @property() threadId?: string;
+    @property() placeholder?: string;
     @property() scope?: string;
     @property({
         type: Boolean,
         converter: (value: string | null) => value === 'true'
     }) acceptAutoCompleteUser?: boolean = false;
+
     @property({
         type: Boolean,
         converter: (value: string | null) => value === 'true'
@@ -41,7 +39,6 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
     firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
         this.adjustTextAreaHeight();
-        // if (this.acceptAutoCompleteAgents && !this.scope) this.getAgents();
     }
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
@@ -103,22 +100,19 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         }
         this.mentionSuggestionsElement.style.top = `${calc}px`;
     }
+
     private adjustTextAreaHeight() {
         const maxHeight = 200;
         const minHeight = 40;
-
         if (this.textArea) {
             const prevHeight = this.textArea.offsetHeight;
-
             if (this.text === '') {
                 this.textArea.style.height = `${minHeight}px`;
             } else {
                 this.textArea.style.height = 'auto';
                 this.textArea.style.height = Math.min(this.textArea.scrollHeight, maxHeight) + 'px';
             }
-
             const newHeight = this.textArea.offsetHeight;
-
             if (newHeight !== prevHeight) {
                 this.dispatchEvent(new CustomEvent('textarea-resize', {
                     detail: {
@@ -153,38 +147,32 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
 
     render() {
         return html`
-    </div>
-    <div class="wrapper">
-        <textarea
-            .value=${this.text}
-            @input=${this.handleInput}
-            @focus=${this.handleFocus}
-            @keydown=${this.handleKeyDown}
-            id="prompt_input"
-            placeholder="Digite aqui... (@ para menções) (@@ para agentes)">
-        </textarea>
-        <button
-            @click=${this.handleSend}
-        >
-            ${collab_arrow_up_long}
-        </button>
-        ${this.mentionActive && this.mentionSuggestions.length > 0 ? html`
-            <ul class="mention-suggestions">
-                ${this.mentionSuggestions.map((s, i) => html`
-                    <li
-                        class="${i === this.mentionIndex ? 'active' : ''}"
-                        title=${s.description}
-                        @click=${() => this.selectMention(s)}
-                    >
-                        ${s.avatar_url ? html`<collab-messages-avatar-100554 width="20px" height="20px" avatar=${s.avatar_url}></collab-messages-avatar-100554>` : ''}
-                        ${s.text}
-                    </li>
-                `)}
-            </ul>
-        ` : ''}
-    </div>`
+            </div>
+                <div class="wrapper">
+                    <textarea
+                        .value=${this.text}
+                        @input=${this.handleInput}
+                        @focus=${this.handleFocus}
+                        @keydown=${this.handleKeyDown}
+                        id="prompt_input"
+                        placeholder="${ifDefined(this.placeholder)}">
+                    </textarea>
+                    <button @click=${this.handleSend}>${collab_arrow_up_long}</button>
+                    ${this.mentionActive && this.mentionSuggestions.length > 0 ? html`
+                        <ul class="mention-suggestions">
+                            ${this.mentionSuggestions.map((s, i) => html`
+                                <li
+                                    class="${i === this.mentionIndex ? 'active' : ''}"
+                                    title=${s.description}
+                                    @click=${() => this.selectMention(s)}
+                                >
+                                    ${s.avatar_url ? html`<collab-messages-avatar-100554 width="20px" height="20px" avatar=${s.avatar_url}></collab-messages-avatar-100554>` : ''}
+                                    ${s.text}
+                                </li>`)}
+                        </ul>
+                ` : ''}
+        </div>`
     }
-
     async handleFocus() {
         if (this.acceptAutoCompleteAgents &&
             (!this.alreadyLoadingAgents || this.scope !== this.lastScopeLoaded)
@@ -194,7 +182,6 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             this.getAgents();
         }
     }
-
     async handleInput(e: MouseEvent) {
         if (!e.target) return;
         const target = e.target as HTMLTextAreaElement;
@@ -248,7 +235,6 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             this.mentionQuery = '';
         }
     }
-
     private async handleKeyDown(e: KeyboardEvent) {
         if (e.key === "Enter" && e.ctrlKey && !e.shiftKey) {
             e.preventDefault();
@@ -275,7 +261,6 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             }
         }
     }
-
     private selectMention(suggestion: IMentions) {
         if (!this.textArea) return;
         const cursorPos = this.textArea.selectionStart;
@@ -296,7 +281,6 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             this.textArea.focus();
         });
     }
-
     private extractAgentName(text: string): string | undefined {
         //const match = text.match(/@@(\w+)/);
         const match = text.match(/^@@(\w+)/);
@@ -308,32 +292,37 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         }
         return value;
     }
-
     async handleSend() {
         if (!this.text) return;
         let finalText = this.text.trim();
         let isSpecialMention = false;
         let agentName: string | undefined;
-        if (finalText.startsWith('@@')) {
-            isSpecialMention = true;
-            agentName = this.extractAgentName(finalText.trim())
+        if (this.allUsers.length > 0) {
+            const sortedUsers = [...this.allUsers].sort((a, b) => b.name.length - a.name.length);
+            sortedUsers.forEach(user => {
+                const escapedName = user.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`(^|\\s)@${escapedName}(?=$|\\s|[.,!?])`, 'g');
+                finalText = finalText.replace(regex, `$1[@${user.name}](${user.userId})`);
+            });
         }
 
+        if (finalText.startsWith('@@')) {
+            isSpecialMention = true;
+            agentName = this.extractAgentName(finalText.trim());
+        }
         if (this.onSend && typeof this.onSend === 'function') {
-            this.onSend(finalText.trim(), { isSpecialMention, agentName });
+            this.onSend(finalText, { isSpecialMention, agentName });
         }
         this.text = '';
         this.adjustTextAreaHeight();
     }
 }
-
 interface IMentionAgent {
     name: string,
     description: string,
     alias: string,
     avatar_url?: string,
 }
-
 interface IMentions {
     text: string,
     value: string,
