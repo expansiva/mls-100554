@@ -1,6 +1,6 @@
 /// <mls shortName="collabMessageHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { getTemporaryContext, notifyMessageSendChange, notifyThreadChange } from './_100554_aiAgentHelper';
+import { getTemporaryContext, notifyMessageSendChange, notifyThreadChange, notifyThreadCreate } from './_100554_aiAgentHelper';
 import { IAgent } from './_100554_aiAgentBase';
 import { collabImport } from './_100554_collabImport';
 import { addThread, listThreads, updateThread, updateUsers } from './_100554_msgDBController';
@@ -146,6 +146,19 @@ export function loadNotificationPreferences(): NotificationPermission | null {
     return null;
 }
 
+export function saveNotificationPreferencesAudio(enable: boolean) {
+    let dataLocal: CollabMessagesLS | undefined = loadLocalStorage();
+    if (!dataLocal) dataLocal = { notificationAudio: enable }
+    else dataLocal.notificationAudio = enable;
+    saveLocalStorage(dataLocal);
+}
+
+export function loadNotificationPreferencesAudio(): boolean {
+    const lsData = loadLocalStorage();
+    if (lsData && lsData.notificationAudio) return lsData.notificationAudio;
+    return true;
+}
+
 export function saveLastTab(lastTab: string) {
     let dataLocal: CollabMessagesLS | undefined = loadLocalStorage();
     if (!dataLocal) dataLocal = { lastTab }
@@ -264,7 +277,7 @@ export async function getDmThreadByUsers(userId1: string, userId2: string): Prom
 }
 
 
-export async function createThread(threadName: string, languages: string[], visibility: mls.msg.ThreadVisibility, avatar_url: string = '') {
+export async function createThread(threadName: string, languages: string[], visibility: mls.msg.ThreadVisibility, avatar_url: string = ''): Promise<mls.msg.ThreadPerformanceCache | undefined> {
 
     const userId = getUserId();
     if (!userId) throw new Error('No find user id');
@@ -283,7 +296,7 @@ export async function createThread(threadName: string, languages: string[], visi
         const response = await mls.api.msgAddThread(params);
         if (response.thread) {
             const thr = await addThread(response.thread);
-            notifyThreadChange(thr);
+            notifyThreadCreate(thr);
             return response.thread;
         }
     } catch (err: any) {
@@ -315,7 +328,7 @@ export async function createThreadDM(threadName: string, dmUser: string, group: 
         const response = await mls.api.msgAddThread(params);
         if (response.thread) {
             const thr = await addThread(response.thread);
-            notifyThreadChange(thr);
+            notifyThreadCreate(thr);
 
             const responseAddUsuer = await mls.api.msgAddUserInThread({
                 auth: 'admin',
@@ -353,6 +366,8 @@ export interface CollabMessagesLS {
     tokenFCM?: string,
     deviceId?: string,
     notificationPreference?: NotificationPermission
+    notificationAudio?: boolean
+
 }
 
 export interface ICollabMessageEvent {

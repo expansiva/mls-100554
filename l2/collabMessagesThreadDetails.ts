@@ -10,7 +10,6 @@ import './_100554_collabInputTag';
 import './_100554_collabMessagesAddParticipant';
 import { addMessage } from "./_100554_collabMessageHelper";
 
-
 /// **collab_i18n_start** 
 const message_pt = {
     loading: 'Carregando...',

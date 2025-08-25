@@ -61,7 +61,7 @@ const message_pt = {
     archived: 'Arquivado',
     deleting: 'Deletando',
     btnNext: 'Continuar',
-
+    promptPlaceholder: 'Digite aqui... (@ para menções) (@@ para agentes)'
 }
 
 const message_en = {
@@ -76,7 +76,7 @@ const message_en = {
     archived: 'Archived',
     deleting: 'Deleting',
     btnNext: 'Next',
-
+    promptPlaceholder: 'Type here... (@ for mentions) (@@ for agents)'
 }
 
 type MessageType = typeof message_en;
@@ -191,7 +191,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         window.addEventListener('task-details-close', this.onTaskDetailsClose);
         window.addEventListener('thread-change', this.onThreadChange);
         window.addEventListener('message-send', this.onMessageSend);
-        // this.usersAvaliables = await listUsers();
 
     }
 
@@ -550,6 +549,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 acceptAutoCompleteUser="true"
                 threadId=${this.actualThread?.thread.threadId}
                 .onSend=${this.handleSend.bind(this)}
+                placeholder=${this.msg.promptPlaceholder}
                 @textarea-resize=${this.handlePromptResize}
             ></collab-messages-prompt-100554>
         `;

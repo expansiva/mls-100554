@@ -9,6 +9,7 @@ import { openService } from "./_100554_libCommom";
 
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { ICollabMessageEvent } from './_100554_collabMessageHelper';
+import { setFavicon } from './_100554_collabInit';
 
 import './_100554_collabMessagesAdd';
 import './_100554_collabMessagesChat';
@@ -113,7 +114,10 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
+        if (visible) {
+            setFavicon(false);
+            this.toogleBadge(false, '_100554_serviceCollabMessages')
+        }
     }
 
     connectedCallback() {
@@ -121,6 +125,21 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         this.dataLocal.lastTab = loadLastTab() as ITabType;
         this.setEvents();
     }
+
+    disconnectedCallback() {
+        this.removeEvents();
+    }
+
+    private setEvents() {
+        mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['collabMessages'] as any, this.onCollabEventsCollabMessages.bind(this));
+        window.addEventListener('thread-create', this.onThreadCreate);
+    }
+
+    private removeEvents() {
+        window.removeEventListener('thread-create', this.onThreadCreate);
+        mls.events.removeEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['collabMessages'] as any, this.onCollabEventsCollabMessages.bind(this));
+    }
+
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
@@ -142,10 +161,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         }
     }
 
-
-    setEvents() {
-        mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['collabMessages'] as any, this.onCollabEventsCollabMessages.bind(this));
-    }
 
     render() {
         const lang = this.getMessageKey(messages);
@@ -367,7 +382,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
     private async onCollabEventsCollabMessages(ev: mls.events.IEvent) {
-    
+
         if (!ev.desc) return;
         this.threadToOpen = '';
 
@@ -388,7 +403,18 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     }
 
+    private onThreadCreate = async (e: Event) => {
+        const customEvent = e as CustomEvent;
+        const thread = customEvent.detail as mls.msg.Thread;
+        if (!thread) return;
 
+        this.userThreads[thread.threadId] = {
+            thread: thread,
+            users: []
+        };
+
+        this.requestUpdate();
+    }
 
 }
 
