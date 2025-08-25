@@ -3,6 +3,7 @@
 import { html, css, repeat } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
+import { updateUsers } from './_100554_msgDBController';
 
 import { ServiceBase } from './_100554_serviceBase';
 import { loadChatPreferences, saveChatPreferences, saveNotificationPreferencesAudio, loadNotificationPreferencesAudio } from './_100554_collabMessageHelper';
@@ -403,6 +404,7 @@ export class CollabMessagesSettings100554 extends StateLitElement {
                 return;
             }
             this.labelOk = `${this.msg.successSavingUser}`;
+            await updateUsers([response.user]);
             this.isSavingUser = false;
 
         } catch (error: any) {

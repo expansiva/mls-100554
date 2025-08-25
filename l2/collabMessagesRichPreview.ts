@@ -95,56 +95,12 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
         return { input, inlineCodes };
     }
 
-    // private parseMentions(input: string): string {
-    //     // @user
-    //     return input.replace(/(^|\s)@([a-zA-Z0-9_]+)/g, (_m, pre, user) => {
-    //         return `${pre}<span class="mention">@${user}</span>`;
-    //     });
-    // }
-    private parseMentions2(input: string): string {
-        let output = input;
-
-        this.allUsers.forEach(u => {
-            const escapedName = u.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`(^|\\s)@(${escapedName})(?=$|\\s|[.,!?])`, 'g'); // case-sensitive
-
-            output = output.replace(regex, (_m, pre, name) => {
-                return `${pre}<span class="mention">@${name}</span>`;
-            });
-        });
-
-        return output;
-    }
-
-    private parseMentions(input: string): string {
-        let output = input;
-
-        this.allUsers.forEach(u => {
-
-            const escapedName = u.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`(^|\\s)@(${escapedName})(?=$|\\s|[.,!?])`, 'g');
-
-            output = output.replace(regex, (_m, pre, name) => {
-
-                const shortName = name.split(' ')[0];
-                return `${pre}<a 
-                        href="#user/${u.userId}" 
-                        class="mention" 
-                        data-user-id="${u.userId}">
-                        @${shortName}
-                    </a>`;
-            });
-        });
-
-        return output;
-    }
-
     private parseMentionLinks(input: string): string {
         // @user1
         return input.replace(/\[@([^\]]+)\]\(([^)]+)\)/g, (_m, name, userId) => {
             const user = this.allUsers.find(u => u.userId === userId);
             if (!user) return `[@${name}]`;
-            return `<span class="mention" data-user-id="${user.userId}">@${name}</span>`;
+            return `<span class="mention" data-user-id="${user.userId}">@${user.name}</span>`;
         });
     }
 
