@@ -1,14 +1,16 @@
 /// <mls shortName="collabMessagesThreadDetails" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, repeat } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { html, css, repeat, ifDefined } from 'lit';
+import { customElement, property, state, query } from 'lit/decorators.js';
 import { updateThread, getUser, deleteAllMessagesFromThread } from './_100554_msgDBController';
-import { collab_triangle_exclamation } from './_100554_collabIcons';
+import { collab_triangle_exclamation, collab_user } from './_100554_collabIcons';
 import { notifyThreadChange } from './_100554_aiAgentHelper';
 import { StateLitElement } from './_100554_stateLitElement';
+import { addMessage } from "./_100554_collabMessageHelper";
+
 import './_100554_collabInputTag';
 import './_100554_collabMessagesAddParticipant';
-import { addMessage } from "./_100554_collabMessageHelper";
+import './_100554_collabMessagesChangeAvatar';
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -45,7 +47,8 @@ const message_pt = {
     errorFieldsAddParticipant: 'Preencha todos os campos!',
     errorRemoveUser: 'Erro ao remover usuário',
     successAddParticipant: 'Usuário adicionado com sucesso',
-    threadDetails: 'Detalhes da sala'
+    threadDetails: 'Detalhes da sala',
+    changeAvatar: 'Alterar avatar'
 }
 
 const message_en = {
@@ -82,7 +85,9 @@ const message_en = {
     errorFieldsAddParticipant: 'Fill in all fields!',
     errorRemoveUser: 'Error on remove user',
     successAddParticipant: 'User added sucessfully',
-    threadDetails: 'Thread details'
+    threadDetails: 'Thread details',
+    changeAvatar: 'Change avatar'
+
 }
 
 type MessageType = typeof message_en;
@@ -100,6 +105,8 @@ export class CollabMessagesThreadDetails extends StateLitElement {
     @property() userId: string | undefined = '20250417120841.1000';
 
     @property() threadDetails?: IThreadDetails = { "thread": {} } as IThreadDetails;
+
+    @query('collab-messages-change-avatar-100554') avatarEl?: HTMLElement;
 
     @property() labelOk: string = '';
     @property() labelError: string = '';
@@ -144,12 +151,27 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         const isDm = this.threadDetails?.thread?.name?.startsWith('@');
+        const avatarUrl = this.threadDetails?.thread.avatar_url;
 
         return html`
       <div class="content">
         <div class="details">
             <h3>${this.msg.details}: ${this.threadDetails?.thread.threadId}</h3>
 
+            ${!isDm ? html`
+                <collab-messages-change-avatar-100554
+                    userId=${this.userId}
+                    threadId=${this.threadDetails?.thread.threadId}
+                    value=${ifDefined(this.threadDetails?.thread.avatar_url)}
+                    @value-changed=${(e: CustomEvent<string>) => {
+                        if (this.editedThreadDetails) {
+                        this.editedThreadDetails.thread.avatar_url = e.detail;
+                        }
+                    }}
+                >
+                </collab-messages-change-avatar-100554>
+            `: ''}
+            
             <label>${this.msg.threadName}
                 <input type="text" name="name" required
                     .value=${this.editedThreadDetails?.thread.name}
@@ -198,7 +220,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
             <collab-input-tag-100554 
                 pattern="^\\+[a-zA-Z0-9-]+$"
                 .value=${this.editedThreadDetails?.thread.defaultTopics?.join(',')}
-                placeholder="#topic"
+                placeholder="+topic"
                 .onValueChanged=${(value: string) => {
                 if (this.editedThreadDetails) {
                     this.editedThreadDetails.thread.defaultTopics = value.split(',');
@@ -395,7 +417,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         const original = this.threadDetails.thread;
         const edited = this.editedThreadDetails.thread;
 
-        const fields: (keyof mls.msg.ThreadPerformanceCache)[] = ['group', 'languages', 'name', 'status', 'visibility', 'wellcomeMessage', 'defaultTopics'];
+        const fields: (keyof mls.msg.ThreadPerformanceCache)[] = ['group', 'languages', 'name', 'status', 'visibility', 'wellcomeMessage', 'defaultTopics', 'avatar_url'];
         const changed: mls.msg.RequestUpdateThread = {
             action: 'updateThread',
             threadId: original.threadId,

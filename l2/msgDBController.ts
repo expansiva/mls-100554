@@ -452,6 +452,18 @@ export async function getThreadByName(threadName: string): Promise<mls.msg.Threa
     });
 }
 
+export async function getAllThreads(): Promise<mls.msg.ThreadPerformanceCache[]> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction("threads", "readonly");
+        const store = tx.objectStore("threads");
+
+        const request = store.getAll();
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject("Erro ao listar todas as threads");
+    });
+}
 
 export async function listUsers(): Promise<mls.msg.User[]> {
     const db = await openDB();
