@@ -4,9 +4,10 @@ import { html, LitElement, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation, collab_plus } from './_100554_collabIcons';
 import { collabImport } from './_100554_collabImport';
-import { removeThreadFromSync, getThreadUpdateInBackground } from './_100554_collabMessagesSyncNotifications';
+import { removeThreadFromSync, getThreadUpdateInBackground, checkIfNotificationUnread } from './_100554_collabMessagesSyncNotifications';
 import { openElementInDetails } from './_100554_libCommom';
 import { listUsers } from './_100554_msgDBController';
+import { setFavicon } from './_100554_collabInit';
 
 import {
     getTemporaryContext,
@@ -599,7 +600,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
             let threadAvatar = this.getThreadAvatar(item);
             let threadName = this.getThreadName(item);
-
+            let lastMessage: string = item.thread.lastMessage || '';
             const unreadCount = item.thread.unreadCount || 0;
             const now = new Date();
             const isToday =
@@ -610,6 +611,16 @@ export class CollabMessagesChat100554 extends StateLitElement {
             const displayDate = isToday
                 ? item._lastMessageDate.time
                 : item._lastMessageDate.date;
+
+            if (item.users.length > 0) {
+                const sortedUsers = [...item.users].sort((a, b) => b.name.length - a.name.length);
+
+                lastMessage = lastMessage.replace(/\[@([^\]]+)\]\(([^)]+)\)/g, (_m, name, userId) => {
+                    const user = sortedUsers.find(u => u.userId === userId);
+                    if (!user) return `[@${name}]`;
+                    return `@${user.name}`;
+                });
+            }
 
             return html`
                 <li .item=${item} threadId=${item.thread.threadId} @click=${() => this.onThreadClick(item)} class="thread-item">
@@ -625,7 +636,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                             <span class="last-update">${displayDate}</span>
                         </div>
                         <div class="thread-summary">
-                            <span class="last-message">${item.thread.lastMessage || ''}</span>
+                            <span class="last-message">${lastMessage || ''}</span>
                             ${unreadCount > 0 ? html`<span class="unread-count">${unreadCount}</span>` : ''}
                         </div>
                     </div>
@@ -1042,6 +1053,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private async onThreadClick(threadInfo: IThreadInfo) {
+
         this.welcomeMessage = '';
         this.activeScenerie = 'loading';
         this.lastTopicFilter = '';
@@ -1049,6 +1061,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.hasMoreMessagesLocalDB = true;
         this.hasMoreMessagesBefore = false;
         this.actualThread = threadInfo;
+        this.checkNotificationsUnreadMessages();
         const messagesInDb = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, 0);
         this.actualMessages = messagesInDb;
         this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
@@ -1093,7 +1106,14 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (messagesInDb.length > 0) return;
         if (!thread.wellcomeMessage) return;
         this.welcomeMessage = thread.wellcomeMessage;
+    }
 
+    private async checkNotificationsUnreadMessages() {
+        const hasPendingMessages = await checkIfNotificationUnread();
+        if (!hasPendingMessages) {
+            setFavicon(false);
+            mls.services['100554_serviceCollabMessages_left']?.toogleBadge(false, '_100554_serviceCollabMessages');
+        }
     }
     private alreadyCheckForRegisterToken: boolean = false;
     private async checkForRegisterNotification() {

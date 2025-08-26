@@ -114,10 +114,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-        if (visible) {
-            setFavicon(false);
-            this.toogleBadge(false, '_100554_serviceCollabMessages')
-        }
+        
     }
 
     connectedCallback() {

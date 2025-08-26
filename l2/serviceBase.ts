@@ -70,13 +70,13 @@ export abstract class ServiceBase extends StateLitElement {
         nav3Service.setAttribute('error', error);
     }
 
-    public toogleBadge(show: boolean, serviceName: string) {
+    public toogleBadge(show: boolean, serviceName: string, saveState: boolean = true) {
         const mlsNav2 = this.getMlsNav2();
         if (!mlsNav2) {
             console.error('Function toogleBadge: mls-nav-2 dont exist');
             return;
         }
-        mlsNav2.toogleBadge(show, serviceName);
+        mlsNav2.toogleBadge(show, serviceName, saveState);
     }
 
     public openMe() {
@@ -224,7 +224,7 @@ export interface ISpliterElement extends HTMLElement {
 }
 
 export interface IMlsNav2 extends HTMLElement {
-    toogleBadge: (show: boolean, serviceName: string) => void
+    toogleBadge: (show: boolean, serviceName: string, saveState?: boolean) => void
 }
 
 export interface IMlsNav3 extends HTMLElement {

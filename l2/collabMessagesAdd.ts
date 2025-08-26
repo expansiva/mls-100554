@@ -3,13 +3,11 @@
 import { html, css } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
-import { addThread, getThread } from './_100554_msgDBController';
-import { notifyThreadChange, notifyThreadCreate } from './_100554_aiAgentHelper';
+import { addThread, updateThread } from './_100554_msgDBController';
+import { notifyThreadChange, notifyThreadCreate, getTemporaryContext } from './_100554_aiAgentHelper';
 import { CollabInputTag } from './_100554_collabInputTag';
 import { getUserId, getDmThreadByUsers, addMessage, createThreadDM } from './_100554_collabMessageHelper';
 import { IAgent } from './_100554_aiAgentBase'
-
-
 import './_100554_collabInputTag';
 
 /// **collab_i18n_start** 
@@ -30,7 +28,7 @@ const message_pt = {
     validateFormError: 'Preencha todos os campos obrigatórios.',
     userError: 'ID de usuário inválido.',
     btnAdd: 'Adicionar thread',
-    linkSelecionarTemplate: 'Selecionar template',
+    advanced: 'Configurações avançadas',
     successSaving: 'Alterações salvas com sucesso!',
     dmValidationError: "Usuário inválido",
     channelValidationError: "O nome do canal deve começar com '#'.",
@@ -44,7 +42,9 @@ const message_pt = {
     placeholderConfig: 'Explique como o agente deve funcionar...',
     back: 'Voltar',
     save: 'Salvar Detalhes',
-    threadDmAlreadyExist: 'Já existe uma conversa direta com este usuário.'
+    threadDmAlreadyExist: 'Já existe uma conversa direta com este usuário.',
+    placeholderMessageAvatar: 'Digite aqui sua descrição..',
+    avatarUrl: 'Gerar avatar com IA'
 }
 
 const message_en = {
@@ -63,7 +63,7 @@ const message_en = {
     languagesHint: 'For each message, the language will be detected and translated into the languages above. Leave blank to avoid spending credits.',
     validateFormError: 'Please fill in all required fields.',
     userError: 'Invalid user ID.',
-    linkSelecionarTemplate: 'Select template',
+    advanced: 'Advanced settings',
     btnAdd: 'Add thread',
     successSaving: 'Saved successfully!',
     dmValidationError: "Invalid user",
@@ -80,7 +80,9 @@ const message_en = {
     placeholderConfig: 'Explain how the agent should work...',
     back: 'Back',
     save: 'Save Details',
-    threadDmAlreadyExist: 'A direct message thread with this user already exists.'
+    threadDmAlreadyExist: 'A direct message thread with this user already exists.',
+    placeholderMessageAvatar: "Type your description here...",
+    avatarUrl: 'Generate avatar with AI'
 }
 
 type MessageType = typeof message_en;
@@ -109,6 +111,9 @@ export class CollabMessagesAdd100554 extends StateLitElement {
     @state() _initialMessage: string = '';
     @state() _topics: string[] = [];
     @state() _agentConfig: string = '';
+    @state() _promptToAvatar: string = '';
+
+
 
     @state() private view: 'add' | 'templates' = 'add';
 
@@ -131,7 +136,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
         if (this.view === 'add') {
             return this._renderAdd();
         } else {
-            return this._renderTaskDetails();
+            return this._renderAdvanced();
         }
     }
 
@@ -219,16 +224,8 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                          pattern="^#.*"
                         @input=${(e: Event) => this.threadName = (e.target as HTMLInputElement).value}>
                 </label>
-
-                <label>${this.msg.channelTemplate}:</label>
-                <a href="#" @click=${this.openTemplateScenario}>
-                    ${this._selectedAgent ? `Template: ${this._selectedAgent}` : this.msg.linkSelecionarTemplate}
-                </a>
             ` : ''}
 
-            <!-- visibilidade -->
-            <br>
-            <br>
             ${this.threadType === 'channel' ? html`
                 <label> ${this.msg.visibility}
                 <select name="visibility" required
@@ -242,7 +239,6 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                 </label>            
             `: ''}
             
-            <!-- grupo -->
             <label> ${this.msg.group}
                 <select name="group" required
                     .value=${this.group}
@@ -255,16 +251,24 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                 </select>
             </label>
 
-            <!-- idiomas -->
             <label> ${this.msg.languages}
                 <collab-input-tag-100554 
                     pattern="^[a-z]{2}$|^[a-z]{2}-[A-Z]{2}$"
                     .value=${this.languages.join(',')}
+                    placeholder="+topic"
                     .onValueChanged=${(value: string) => this.languages = value.split(',')}
                     id="languageInput"
                 ></collab-input-tag-100554>
                 <small> ${this.msg.languagesHint}</small>
             </label>
+
+            ${this.threadType === 'channel' ? html`
+                <a href="#" @click=${this.openTemplateScenario}>
+                    ${this.msg.advanced}
+                </a>
+                <br>
+                <br>
+            ` : ''}
 
             <button
                 @click=${this.addNewThread}
@@ -278,7 +282,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
         </div>`;
     }
 
-    private _renderTaskDetails() {
+    private _renderAdvanced() {
 
         return html`
         <div class="section-thread-details">
@@ -317,6 +321,15 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                     @input=${(e: Event) => this._agentConfig = (e.target as HTMLTextAreaElement).value}
                 ></textarea>
             ` : ''}
+
+
+            <label>${this.msg.avatarUrl}</label>
+            <textarea 
+                rows="5" 
+                .value=${this._promptToAvatar}
+                placeholder=${this.msg.placeholderMessageAvatar}
+                @input=${(e: Event) => this._promptToAvatar = (e.target as HTMLTextAreaElement).value}
+            ></textarea>
 
             <div class="actions">
                 <button @click=${this._backToAdd}>${this.msg.back}</button>
@@ -435,42 +448,14 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                     const thr = await addThread(response.thread);
                     notifyThreadCreate(thr);
                     if (this._selectedAgent && this._selectedAgent !== 'none') {
-                        const botSelected = this.agentsBots.find((item) => item.id === this._selectedAgent);
-                        if (!botSelected || !botSelected.info) return;
-                        await addMessage(response.thread.threadId, `@@BotInstall {"projectId":${botSelected.info.project}, "shortName":"${botSelected.info.shortName}", "folder":${botSelected.info.folder || '""'}}`);
-
-                        if (this._agentConfig) {
-
-                            const threadWithBot = await mls.api.msgGetThreadUpdate({
-                                threadId: response.thread.threadId,
-                                userId: this.userId
-                            });
-
-                            if (threadWithBot && threadWithBot.thread.bots) {
-                                const botInfo = threadWithBot.thread.bots.find((bot) => bot.botId === botSelected.id);
-                                if (botInfo) {
-                                    const res = await mls.api.msgAddOrUpdateThreadBot({
-                                        botId: botSelected.id,
-                                        config: { 'agentConfiguration': this._agentConfig },
-                                        llmPrompt: botInfo.llmPrompt,
-                                        status: 'active',
-                                        threadId: response.thread.threadId,
-                                        userId: this.userId
-                                    });
-                                    notifyThreadChange(res.thread);
-                                    if (this.onAddSuccess) this.onAddSuccess();
-                                }
-
-                            } else {
-                                notifyThreadChange(threadWithBot.thread);
-                                if (this.onAddSuccess) this.onAddSuccess();
-                            }
-
-                        }
-
-                    } else {
-                        if (this.onAddSuccess) this.onAddSuccess();
+                        await this.addBot(response.thread.threadId, this.userId);
                     }
+
+                    if (this._promptToAvatar) {
+                        await this.generateAvatar(response.thread.threadId, this.userId);
+
+                    }
+                    if (this.onAddSuccess) this.onAddSuccess();
 
                 }
 
@@ -483,6 +468,86 @@ export class CollabMessagesAdd100554 extends StateLitElement {
         }
 
 
+    }
+
+    private async addBot(threadId: string, userId: string) {
+        const botSelected = this.agentsBots.find((item) => item.id === this._selectedAgent);
+        if (!botSelected || !botSelected.info) return;
+        await addMessage(threadId, `@@BotInstall {"projectId":${botSelected.info.project}, "shortName":"${botSelected.info.shortName}", "folder":${botSelected.info.folder || '""'}}`);
+
+        if (this._agentConfig) {
+
+            const threadWithBot = await mls.api.msgGetThreadUpdate({
+                threadId,
+                userId
+            });
+
+            if (threadWithBot && threadWithBot.thread.bots) {
+                const botInfo = threadWithBot.thread.bots.find((bot) => bot.botId === botSelected.id);
+                if (botInfo) {
+                    const res = await mls.api.msgAddOrUpdateThreadBot({
+                        botId: botSelected.id,
+                        config: { 'agentConfiguration': this._agentConfig },
+                        llmPrompt: botInfo.llmPrompt,
+                        status: 'active',
+                        threadId,
+                        userId
+                    });
+                    notifyThreadChange(res.thread);
+                    if (this.onAddSuccess) this.onAddSuccess();
+                }
+
+            } else {
+                notifyThreadChange(threadWithBot.thread);
+                if (this.onAddSuccess) this.onAddSuccess();
+            }
+
+        }
+    }
+
+    private async generateAvatar(threadId: string, userId: string) {
+        try {
+            const agentName = '_100554_agentGenerateAvatarSvg';
+            const moduleAgent = await import(`/${agentName}`);
+            if (!moduleAgent?.createAgent || typeof moduleAgent.createAgent !== 'function') {
+                throw new Error('Invalid agent');
+            }
+
+            const agent: IAgent = moduleAgent.createAgent();
+            const context = getTemporaryContext(threadId, userId, this._promptToAvatar);
+            await agent.beforePrompt(context);
+
+            if (context.task &&
+                context.task.iaCompressed &&
+                context.task.iaCompressed.nextSteps &&
+                context.task.iaCompressed.nextSteps[0] &&
+                context.task.iaCompressed.nextSteps[0].interaction &&
+                context.task.iaCompressed.nextSteps[0].interaction.payload &&
+                context.task.iaCompressed.nextSteps[0].interaction.payload[0]
+
+            ) {
+
+                const svg: string = (context.task.iaCompressed?.nextSteps[0]?.interaction?.payload[0] as mls.msg.AIFlexibleResultStep).result
+                if (svg && typeof svg === 'string') {
+                    const args: mls.msg.RequestUpdateThread = {
+                        action: 'updateThread',
+                        threadId,
+                        userId,
+                        avatar_url: svg
+                    };
+                    const response = await mls.api.msgUpdateThread(args);
+                    if (response.statusCode !== 200) {
+                        this.labelError = `${response.msg}`;
+                    } else {
+                        const threadCache = await updateThread(threadId, response.thread)
+                        notifyThreadChange(threadCache);
+                    }
+                }
+            }
+
+        } catch (err: any) {
+            console.error("Erro ao gerar avatar via IA", err);
+        }
     }
 }
 

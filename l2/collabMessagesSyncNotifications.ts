@@ -1,7 +1,7 @@
 /// <mls shortName="collabMessagesSyncNotifications" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
 
 import { getUserId, loadNotificationDeviceId, loadNotificationPreferencesAudio } from "./_100554_collabMessageHelper";
-import { getThread, updateThread, getMessage, addMessages } from './_100554_msgDBController';
+import { getThread, updateThread, getMessage, addMessages, getAllThreads } from './_100554_msgDBController';
 import { notifyThreadChange } from './_100554_aiAgentHelper';
 import { setFavicon } from './_100554_collabInit';
 
@@ -14,7 +14,20 @@ export function removeThreadFromSync(threadId: string) {
 
 const notificationSound = new Audio('./l3/_100529_/audio/collabNotification.mp3');
 notificationSound.preload = 'auto';
-notificationSound.volume = 0.5;
+notificationSound.volume = 1;
+
+export async function checkIfNotificationUnread(): Promise<boolean>{
+
+    const threads = await getAllThreads();
+    let hasPendingMessages: boolean = false;
+    for (let thread of threads) {
+        if (thread.unreadCount && thread.unreadCount > 0) {
+            hasPendingMessages = true;
+            break;
+        }
+    }
+    return hasPendingMessages;
+}
 
 export async function listenToThreadEvents() {
 
