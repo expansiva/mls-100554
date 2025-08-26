@@ -132,6 +132,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private isChangeTopics = false;
     private wasMessagesAtBottom: boolean = true;
 
+
     private imageUrls = [
         "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ];
@@ -168,10 +169,13 @@ export class CollabMessagesChat100554 extends StateLitElement {
             && this.activeScenerie === 'details') {
             this.restoreScrollPosition();
         }
+
         if (changedProperties.has('actualMessagesParsed') && this.actualMessagesParsed !== undefined) {
-            if (this.messageContainer && this.isSystemChangeScroll) {
+
+            if (this.messageContainer && (this.isSystemChangeScroll)) {
                 this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
                 this.isSystemChangeScroll = false;
+
             }
         }
     }
@@ -359,6 +363,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private renderMessageFooterResult(message: mls.msg.MessagePerformanceCache) {
+
         if (!message.footers || message.footers.length === 0) return html``;
         return html`<div class="message-result">
             ${message.footers?.map((footer) => {
@@ -373,6 +378,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 </div>`
         })}
         </div>`
+
     }
 
     private renderCollabMessagesRichPreview(text: string) {
@@ -437,7 +443,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private renderMessageResultByLanguage(message: mls.msg.Message) {
 
-        if (!message.taskResults || message.taskResults.length === 0 || message.taskStatus !== 'done' || !message.taskResultsTranslated) return html``;
+        if (!message.taskResults || message.taskResults.length === 0 || message.taskStatus !== 'done') return html``;
         const mode = this.userPreferenceChat?.translationMode || 'icon';
         if (!this.userPreferenceChat || mode === 'none') {
             return html`<div class="message-content">${message.taskResults[0]}</div>`
@@ -445,7 +451,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         const response = message.taskResults[0];
         const { language } = this.userPreferenceChat;
         const messageByLanguagePref = message.taskResultsTranslated ? message.taskResultsTranslated[language] : '';
-        const isSameLanguege = language === message.taskResultsTranslated.language_detected;
+        const isSameLanguege = language === message.taskResultsTranslated?.language_detected;
 
         switch (mode) {
             case 'icon':
@@ -1218,7 +1224,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private async addMessage(prompt: string) {
         if (!this.userId || !this.actualThread) return;
 
-        const message: IMessage = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
+        const message: IMessage = await this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
         try {
             const context: mls.msg.ExecutionContext = {
                 message,
@@ -1258,7 +1264,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, prompt);
         let agentToCall = AGENTDEFAULT;
         if (agentName) agentToCall = agentName;
-        const message: IMessage = this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
+        const message: IMessage = await this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
         try {
             const moduleAgent = await collabImport({ project: PROJECTAGENTDEFAULT, shortName: agentToCall, folder: '' });
             if (!moduleAgent || !moduleAgent.createAgent || typeof moduleAgent.createAgent !== 'function') throw new Error('Invalid agent')
@@ -1335,7 +1341,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         }
     }
 
-    private createTempMessage(content: string, senderId: string, threadId: string, taskId?: string) {
+    private async createTempMessage(content: string, senderId: string, threadId: string, taskId?: string) {
         const now = new Date();
         const formattedDate = now.getFullYear().toString()
             + String(now.getMonth() + 1).padStart(2, '0')
@@ -1414,7 +1420,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         delete m.isSame;
         if (outputs) m.footers = footerData;
         addMessage(m);
-        this.isSystemChangeScroll = true;
         this.requestUpdate();
     }
 
@@ -1432,7 +1437,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (this.actualTask && this.actualTask.PK) el.setAttribute('taskId', this.actualTask.PK);
         (el as any)['task'] = this.actualTask;
         (el as any)['message'] = this.actualMessage;
-
         openElementInDetails(el);
         // this.activeScenerie = 'task';
     }
