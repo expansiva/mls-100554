@@ -184,7 +184,7 @@ async function createPage(context: mls.msg.ExecutionContext) {
   if (actualTaskIndex === 0) {
     payload3.tokens.themeName = folder;
     await addNewTokensTheme(projectToSave, payload3.tokens);
-    await createModuleFile(shortName1, projectToSave, folder, payload3);
+    await createModuleFile(shortName1, projectToSave, folder, groupName, payload3);
     await createProjectFile(groupName, projectToSave, payload3);
 
   }
@@ -363,13 +363,13 @@ export const modules = [{ name: '${moduleName}' }];
 
 }
 
-async function createModuleFile(shortName: string, project: number, folder: string, payload3: PayLoad3) {
+async function createModuleFile(shortName: string, project: number, folder: string, groupName: string, payload3: PayLoad3) {
 
   const moduleShortName = 'module';
   const enhancement = '_blank';
 
   const ts = `
-/// <mls shortName="${moduleShortName}" project="${project}" folder="${folder}" enhancement="_blank" />
+/// <mls shortName="${moduleShortName}" project="${project}" folder="${folder}" groupName="${groupName}" enhancement="_blank" />
 
 export const moduleConfig = {
   theme: "${folder}",

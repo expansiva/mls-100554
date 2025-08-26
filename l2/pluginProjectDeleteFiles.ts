@@ -4,6 +4,8 @@ import { html, svg, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { getListNewFilesToDeleteByGroup, deleteAllFiles } from './_100554_libCommom';
+import { removeModule } from './_100554_projectAST';
+import { removeTokensTheme } from './_100554_designSystemBase';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -111,7 +113,7 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
                             } else {
                                 this.selectedFiles.delete(fileKey);
                             }
-                            this.requestUpdate(); // atualiza o render
+                            this.requestUpdate();
                         }}
                                 />
                                 ${fileKey}
@@ -161,12 +163,18 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
     async onDelete() {
         const files: mls.stor.IFileInfo[] = Array.from(this.selectedFiles.values());
         this.filesToDelete = [];
-
+        const project = mls.actualProject;
+        if (!project) {
+            this.logs.push('No project selected');
+            return;
+        }
         for await (const log of deleteAllFiles(files)) {
             this.logs.push(log);
             this.requestUpdate();
         }
 
+        await this.removeThemeFromDesignSystem(this.groupName, project);
+        await this.removeModuleFromProjectFile(this.groupName, project);
         this.logs.push('All files removed');
         const key = mls.stor.getKeyToFiles(100554, 2, 'pluginProjectDeleteFiles', '', '.ts');
         const storFile = mls.stor.files[key];
@@ -175,7 +183,37 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
 
     }
 
+
+
+    private async removeThemeFromDesignSystem(moduleName: string, project: number) {
+        const shortName = 'designSystem';
+        const folder = '';
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
+        const keyModels = mls.editor.getKeyModel(project, shortName, folder)
+        const storFile = mls.stor.files[key];
+        const models = mls.editor.models[keyModels];
+        if (!storFile || !models || !models.ts) return;
+        await removeTokensTheme(project, moduleName);
+        this.logs.push('Theme removed from designSystem.ts');
+    }
+
+    private async removeModuleFromProjectFile(moduleName: string, project: number) {
+
+        const shortName = 'project';
+        const folder = '';
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
+        const keyModels = mls.editor.getKeyModel(project, shortName, folder)
+        const storFile = mls.stor.files[key];
+        const models = mls.editor.models[keyModels];
+        if (!storFile || !models || !models.ts) return;
+        await removeModule(models.ts.model, moduleName);
+        this.logs.push('Modules removed from modules.ts');
+
+    }
+
+
 }
+
 
 if (!customElements.get('plugin-project-delete-files-100554')) {
     customElements.define('plugin-project-delete-files-100554', PluginProjectDeleteFiles);

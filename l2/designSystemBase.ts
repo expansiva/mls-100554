@@ -156,6 +156,14 @@ export async function addNewTokensTheme(project: number, tokenData: IDesignSyste
 
 }
 
+export async function removeTokensTheme(project: number, themeName: string): Promise<void> {
+    const actualTokens = await getTokens(project);
+    const themeIndex = actualTokens.findIndex((theme) => theme.themeName === themeName);
+    if (themeIndex === -1) return;
+    actualTokens.splice(themeIndex, 1);
+    await serializeTokens(project, actualTokens);
+}
+
 async function serializeTokens(project: number, tokens: IDesignSystemTokens[]) {
     const content = tokens.map(t => JSON.stringify(t, null, 4)).join(",\n\n");
     const key = mls.stor.getKeyToFiles(project, 2, 'designSystem', '', '.ts');
