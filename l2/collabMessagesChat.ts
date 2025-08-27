@@ -173,6 +173,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (changedProperties.has('actualMessagesParsed') && this.actualMessagesParsed !== undefined) {
 
             if (this.messageContainer && (this.isSystemChangeScroll)) {
+                await this.updateComplete;
                 this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
                 this.isSystemChangeScroll = false;
 
@@ -183,7 +184,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
     disconnectedCallback() {
         super.disconnectedCallback();
         window.removeEventListener('task-change', this.onTaskChange);
-        window.removeEventListener('task-completed', this.onTaskCompleted);
         window.removeEventListener('task-details-close', this.onTaskDetailsClose);
         window.removeEventListener('thread-change', this.onThreadChange);
         window.removeEventListener('message-send', this.onMessageSend);
@@ -192,11 +192,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
         window.addEventListener('task-change', this.onTaskChange);
-        window.addEventListener('task-completed', this.onTaskCompleted);
         window.addEventListener('task-details-close', this.onTaskDetailsClose);
         window.addEventListener('thread-change', this.onThreadChange);
         window.addEventListener('message-send', this.onMessageSend);
-
     }
 
     render() {
@@ -271,8 +269,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (this.welcomeMessage && !['deleting', 'deleted', 'archived'].includes(this.actualThread?.thread.status)) {
             return this.renderWelcomeMessage();
         }
-
-
 
         if (this.actualThread.thread.status === 'deleting' || this.actualThread.thread.status === 'deleted') {
             const formatedTimestamp = formatTimestamp(this.actualThread.thread.deletedAt || '');
@@ -1106,6 +1102,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
             if (['deleted'].includes(threadByServer.thread.status)) {
                 this.checkForDeleteMessagesInDB(threadByServer.thread, threadByServer.thread.threadId);
+                notifyThreadChange(threadByServer.thread)
             }
 
             this.checkNotificationsUnreadMessages();
@@ -1122,8 +1119,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private checkWelcomeMessage(thread: mls.msg.ThreadPerformanceCache, messagesInDb: mls.msg.MessagePerformanceCache[]) {
         if (messagesInDb.length > 0) return;
-        if (!thread.wellcomeMessage) return;
-        this.welcomeMessage = thread.wellcomeMessage;
+        if (!thread.welcomeMessage) return;
+        this.welcomeMessage = thread.welcomeMessage;
     }
 
     private async checkNotificationsUnreadMessages() {
@@ -1263,14 +1260,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         }
     }
 
-    private async addMessageResponse(task: mls.msg.TaskData) {
-        const stepResult = getNextResultStep(task);
-        if (!stepResult) return;
-        const value = typeof stepResult.result === 'object' ? JSON.stringify(stepResult.result) : stepResult.result;
-        if (!addMessage || typeof value !== 'string') return;
-        this.addMessage(`IA: ${value} `);
-    }
-
     private async addMessageIA(prompt: string, agentName: string) {
         if (!this.userId || !this.actualThread) return;
         const context = getTemporaryContext(this.actualThread.thread.threadId, this.userId, prompt);
@@ -1347,9 +1336,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
             delete cloned.context;
             delete cloned.isLoading;
             delete cloned.lastChanged;
+
+            if (oldContextCreateAt) this.isSystemChangeScroll = true;
             this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
             await addMessage(cloned);
             this.requestUpdate();
+
         }
     }
 
@@ -1511,19 +1503,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (task) await addOrUpdateTask(customEvent.detail.context.task);
     };
 
-    private onTaskCompleted = async (e: Event) => {
-        const customEvent = e as CustomEvent;
-        const message: mls.msg.Message = customEvent.detail.context.message;
-        const task: mls.msg.TaskData = customEvent.detail.context.task;
-        const thId = message?.threadId;
-        if (!this.actualThread || !thId || thId !== this.actualThread.thread.threadId) return;
-        if (task.status === 'done') {
-            this.addMessageResponse(task);
-        }
-    };
+
 
     private onTaskDetailsClose = async (_e: Event) => {
-        // this.onTitleClick();
         clearServiceDetails();
     };
 

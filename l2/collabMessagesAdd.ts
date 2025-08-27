@@ -439,7 +439,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                 visibility: this.visibility,
                 status: 'active',
                 avatar_url,
-                wellcomeMessage: this._initialMessage,
+                welcomeMessage: this._initialMessage,
                 defaultTopics: this._topics || [],
             };
 

@@ -62,7 +62,7 @@ export class WidgetAiTask100554 extends StateLitElement {
             if (this.context && this.context.task) {
                 this.task = this.context.task;
                 const nextStep = getNextPendentStep(this.task);
-                if (!nextStep || nextStep.status === 'pending') {
+                if (!nextStep || nextStep.type === 'clarification') {
                     this.resetTimer();
                     this.lastStep = undefined;
                 } else {
@@ -105,7 +105,7 @@ export class WidgetAiTask100554 extends StateLitElement {
             ${this.renderIconTask()}
             <span class="card-title"> ${title}</span>
             <span class="card-price"> ${price ? collab_money : ''}${price}</span>
-            ${this.lastStep ? html`<span class="${timeClass}">${timeDisplay}</span>`: ''}
+            ${this.lastStep ? html`<span class="${timeClass}">${timeDisplay}</span>` : ''}
         </div>
      </div>`;
     }

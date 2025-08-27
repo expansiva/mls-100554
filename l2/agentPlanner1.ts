@@ -1,13 +1,12 @@
 /// <mls shortName="agentPlanner1" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { initState } from './_100554_collabState';
+
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
     calculateStepsStatistics,
     updateStepStatus,
-    notifyTaskCompleted,
     getStepById,
     updateTaskTitle,
     notifyTaskChange
