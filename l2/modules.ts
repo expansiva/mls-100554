@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { getInstanceByFile, openService } from './_100554_libCommom';
+import { getInstanceByFile, openService, saveOpenedFile } from './_100554_libCommom';
 import { StateLitElement } from './_100554_stateLitElement';
 
 @customElement('modules-100554')
@@ -243,12 +243,17 @@ export class Modules100554 extends StateLitElement {
           if (!mm || !mm.moduleConfig) throw new Error('[goToL4] Not found moduleConfig');
 
           const folder = mls.actualModule || '';
-          const project = mls.actualProject;
+          const project = mls.actualProject || 0;
           const shortName = mm.moduleConfig.initialPage;
           const fullName = folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`;
           
           mls.actual[4].setFullName(fullName);
           mls.actual[7].setFullName(fullName);
+
+          
+
+          saveOpenedFile(project, 4, fullName);
+          saveOpenedFile(project, 7, fullName);
 
         }
 
