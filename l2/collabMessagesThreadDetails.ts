@@ -250,8 +250,8 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                 <textarea 
                     name="welcomemessage"
                     rows="5" 
-                    .value=${this.editedThreadDetails?.thread?.wellcomeMessage || ''}
-                    @input=${(e: Event) => { if (this.editedThreadDetails && this.isChannel) this.editedThreadDetails.thread.wellcomeMessage = (e.target as HTMLInputElement).value }}
+                    .value=${this.editedThreadDetails?.thread?.welcomeMessage || ''}
+                    @input=${(e: Event) => { if (this.editedThreadDetails && this.isChannel) this.editedThreadDetails.thread.welcomeMessage = (e.target as HTMLInputElement).value }}
                 ></textarea>  
             ` : ''}
                 
@@ -444,7 +444,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         const original = this.threadDetails.thread;
         const edited = this.editedThreadDetails.thread;
 
-        const fields: (keyof mls.msg.ThreadPerformanceCache)[] = ['group', 'languages', 'name', 'status', 'visibility', 'wellcomeMessage', 'defaultTopics', 'avatar_url'];
+        const fields: (keyof mls.msg.ThreadPerformanceCache)[] = ['group', 'languages', 'name', 'status', 'visibility', 'welcomeMessage', 'defaultTopics', 'avatar_url'];
         const changed: mls.msg.RequestUpdateThread = {
             action: 'updateThread',
             threadId: original.threadId,
