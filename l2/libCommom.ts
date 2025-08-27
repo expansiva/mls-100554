@@ -561,13 +561,19 @@ export async function getInstanceByFile(file: mls.stor.IFileInfo): Promise<Objec
 
 }
 
-export async function openElementInDetails(el: HTMLElement) {
+export async function openElementInServiceDetails(el: HTMLElement) {
     const serviceDetails: ServiceDetail100554 = mls.services['100554_serviceDetail_right'];
     if (!serviceDetails) return;
     serviceDetails.openMe();
     serviceDetails.updateContentPluginWithElement(el);
-
 }
+
+export async function clearServiceDetails() {
+    const serviceDetails: ServiceDetail100554 = mls.services['100554_serviceDetail_right'];
+    if (!serviceDetails) return;
+    serviceDetails.clear();
+}
+
 
 export type OpenedFile = string | OpenedFileL2;
 export type UserOpenedFiles = Record<number, OpenedFile>;

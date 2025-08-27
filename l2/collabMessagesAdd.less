@@ -13,10 +13,11 @@ collab-messages-add-100554 {
         margin-bottom: .4rem;
     }
 
-    input,select {         
+    input,
+    select {
         height: 33px;
     }
-    
+
     input,
     select,
     textarea {
@@ -34,7 +35,17 @@ collab-messages-add-100554 {
     }
 
     input:invalid {
-        border-color: red;
+        border-color: @error-color;
+    }
+
+    input:invalid+.field-thread-name-error {
+        display: block;
+        color: @error-color;
+        font-size: 0.9em;
+    }
+
+    .field-thread-name-error {
+        display: none;
     }
 
     button {
@@ -58,10 +69,28 @@ collab-messages-add-100554 {
             background-color: @info-color-hover;
         }
     }
-    .section-add-thread, .section-thread-details{
+
+    .section-add-thread {
         padding: 1rem;
+
+        .section-thread-details {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        details>summary {
+            cursor: pointer;
+        }
+
+        details>div {
+            padding: .5rem;
+            margin-left: 1rem;
+        }
     }
-    .actions{
+
+    .actions {
         margin-top: 1rem;
         display: flex;
         gap: 1rem;

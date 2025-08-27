@@ -135,6 +135,20 @@ collab-messages-thread-details-100554 {
             }
         }
 
+        input:invalid {
+            border-color: @error-color;
+        }
+
+        input:invalid+.field-thread-name-error {
+            display: block;
+            color: @error-color;
+            font-size: 0.9em;
+        }
+
+        .field-thread-name-error {
+            display: none;
+        }
+
         textarea {
             width: 100%;
             display: block;

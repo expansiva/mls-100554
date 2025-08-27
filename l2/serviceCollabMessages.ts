@@ -6,6 +6,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import { listThreads, addThread, listUsers, updateUsers, getThread } from './_100554_msgDBController';
 import { saveLastTab, loadLastTab, saveUserId } from "./_100554_collabMessageHelper";
 import { openService } from "./_100554_libCommom";
+import { checkIfNotificationUnread } from './_100554_collabMessagesSyncNotifications';
 
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { ICollabMessageEvent } from './_100554_collabMessageHelper';
@@ -114,13 +115,18 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-        
+
     }
 
-    connectedCallback() {
+    async connectedCallback() {
         super.connectedCallback();
         this.dataLocal.lastTab = loadLastTab() as ITabType;
         this.setEvents();
+        const hasPendingMessages = await checkIfNotificationUnread();
+        if (hasPendingMessages) {
+            setFavicon(true);
+            mls.services['100554_serviceCollabMessages_left']?.toogleBadge(true, '_100554_serviceCollabMessages');
+        }
     }
 
     disconnectedCallback() {

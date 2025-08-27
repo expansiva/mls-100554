@@ -38,11 +38,22 @@ export class WidgetAiTask100554 extends StateLitElement {
     @property() taskid: string = '';
     @property() messageid: string = '';
     @property() lastChanged: string = '';
-    @property() title: string = '';
     @property() status: string = '';
 
     @state() task: mls.msg.TaskData | undefined;
     @state() context: mls.msg.ExecutionContext | undefined;
+    @state() private secondsPassed: number = 0;
+    @state() private lastStep: number | undefined;
+    private timerId: number | undefined;
+
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        if (this.timerId) {
+            clearInterval(this.timerId);
+            this.timerId = undefined;
+        }
+    }
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
@@ -50,8 +61,19 @@ export class WidgetAiTask100554 extends StateLitElement {
         if (changedProperties.has('lastChanged')) {
             if (this.context && this.context.task) {
                 this.task = this.context.task;
+                const nextStep = getNextPendentStep(this.task);
+                if (!nextStep || nextStep.status === 'pending') {
+                    this.resetTimer();
+                    this.lastStep = undefined;
+                } else {
+                    if (this.lastStep !== nextStep.stepId) {
+                        this.resetTimer();
+                        this.lastStep = nextStep.stepId
+                    }
+                }
             }
         }
+
 
         if (changedProperties.has('taskid') && changedProperties.get('taskid') !== '') {
             this.getTaskLocal(this.taskid);
@@ -60,9 +82,12 @@ export class WidgetAiTask100554 extends StateLitElement {
 
     render() {
 
+        const isOverMinute = this.secondsPassed >= 60;
+        const timeClass = isOverMinute ? 'card-time over-minute' : 'card-time';
+
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        if (!this.task && !this.title && !this.status) {
+        if (!this.task && !this.status) {
             return html`<div @click=${this.onCardClick} class="card no-details"> 
             <div class="card-header">
                 <span class="card-title">Task</span>
@@ -72,15 +97,17 @@ export class WidgetAiTask100554 extends StateLitElement {
         }
 
         const price = this.task ? getTotalCost(this.task) || '0.00' : '';
-        const title =  this.task?.title || this.title || '';
+        const title = this.task?.title || '';
+        const timeDisplay = this.formatTime(this.secondsPassed);
 
         return html`<div @click=${this.onCardClick} class="card"> 
-            <div class="card-header">
-                ${this.renderIconTask()}
-                    <span class="card-title"> ${title}</span>
-                    <span class="card-price"> ${price ? collab_money : ''}${price}</span>
-            </div>
-         </div>`;
+        <div class="card-header">
+            ${this.renderIconTask()}
+            <span class="card-title"> ${title}</span>
+            <span class="card-price"> ${price ? collab_money : ''}${price}</span>
+            ${this.lastStep ? html`<span class="${timeClass}">${timeDisplay}</span>`: ''}
+        </div>
+     </div>`;
     }
 
     renderIconTask() {
@@ -108,6 +135,23 @@ export class WidgetAiTask100554 extends StateLitElement {
         if (!status) return html`<spanclass="task-icon in progress ">${collab_clock}</span>`;
         return html`<span class="task-icon ${status.split(' ').join('-')} ">${taskObj[status]}</span>`;
 
+    }
+
+    private resetTimer() {
+        this.secondsPassed = 0;
+        if (this.timerId) {
+            clearInterval(this.timerId);
+        }
+        this.timerId = window.setInterval(() => {
+            this.secondsPassed++;
+            this.requestUpdate();
+        }, 1000);
+    }
+
+    private formatTime(seconds: number) {
+        const min = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const sec = (seconds % 60).toString().padStart(2, '0');
+        return `${min}:${sec}`;
     }
 
     private async getTaskLocal(taskId: string) {
