@@ -6,7 +6,7 @@ import { collab_chevron_left, collab_gear, collab_translate, collab_circle_excla
 import { collabImport } from './_100554_collabImport';
 import { removeThreadFromSync, getThreadUpdateInBackground, checkIfNotificationUnread } from './_100554_collabMessagesSyncNotifications';
 import { openElementInServiceDetails, clearServiceDetails } from './_100554_libCommom';
-import { listUsers, deleteAllMessagesFromThread } from './_100554_msgDBController';
+import { listUsers, cleanupThreads } from './_100554_msgDBController';
 import { setFavicon } from './_100554_collabInit';
 
 import {
@@ -1101,7 +1101,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             }
 
             if (['deleted'].includes(threadByServer.thread.status)) {
-                this.checkForDeleteMessagesInDB(threadByServer.thread, threadByServer.thread.threadId);
+                await cleanupThreads([threadByServer.thread.threadId]);
                 notifyThreadChange(threadByServer.thread)
             }
 
@@ -1517,7 +1517,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         const threadUpdated = this.userThreads[this.group].find((th) => th.thread.threadId === thread.threadId);
 
         if (['deleted'].includes(thread.status)) {
-            this.checkForDeleteMessagesInDB(thread, thread.threadId);
+            await cleanupThreads([thread.threadId]);
         }
 
         if (threadUpdated) threadUpdated.thread = { ...threadUpdated.thread, ...thread };
@@ -1560,16 +1560,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.updateMessage2(false, true, { ...message, footers: [] }, message, outputs);
     };
 
-    private async checkForDeleteMessagesInDB(thread: mls.msg.ThreadPerformanceCache, threadId: string) {
-        await deleteAllMessagesFromThread(threadId);
-        await updateThread(
-            threadId,
-            thread,
-            '',
-            '',
-            0
-        );
-    }
 }
 
 interface IThreadInfo {

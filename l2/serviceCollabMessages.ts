@@ -3,7 +3,7 @@
 import { addCoachMark, ICoachMarks } from './_100554_coachMarks';
 import { html, css, LitElement } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { listThreads, addThread, listUsers, updateUsers, getThread } from './_100554_msgDBController';
+import { listThreads, addThread, listUsers, updateUsers, getThread, cleanupThreads } from './_100554_msgDBController';
 import { saveLastTab, loadLastTab, saveUserId } from "./_100554_collabMessageHelper";
 import { openService } from "./_100554_libCommom";
 import { checkIfNotificationUnread } from './_100554_collabMessagesSyncNotifications';
@@ -146,20 +146,21 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
-
     }
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
         if (changedProperties.has('activeTab') && ['CRM', 'TASK', 'DOCS', 'CONNECT', 'APPS'].includes(this.activeTab)) {
-            if (!this.userPerfil) this.userPerfil = await this.getUser();
+            if (!this.userPerfil) {
+                this.userPerfil = await this.getUser();
+                cleanupThreads(this.userPerfil.threads)
+            }
             saveUserId(this.userPerfil.userId);
             await this.getThreadFromLocalDB();
             this.updateThreads();
         }
 
         if (changedProperties.has('dataLocal')) {
-
             if (this.menu.setTabActive && this.activeTab !== 'Loading') this.menu.setTabActive(ETabs[this.dataLocal.lastTab])
         }
     }
