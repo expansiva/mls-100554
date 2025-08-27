@@ -63,6 +63,11 @@ export class ServiceDetail100554 extends ServiceBase {
         this._updateContentPluginWithElement(element);
     }
 
+    public clear() {
+        if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
+        Array.from(this.contentPlugin.children).forEach((i) => (i as HTMLElement).style.display = "none");
+    }
+
     private showAboutThis(): boolean {
 
         const div = document.createElement('div');
@@ -266,12 +271,14 @@ export class ServiceDetail100554 extends ServiceBase {
     private _updateContentPluginWithElement(element: HTMLElement) {
 
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
+        Array.from(this.contentPlugin.children).forEach((i) => (i as HTMLElement).style.display = "none");
+
         let el = this.contentPlugin.querySelector('#' + element.tagName.toLowerCase()) as HTMLElement;
         if (!el) {
             el = document.createElement('div');
             el.id = element.tagName.toLowerCase();
         }
-
+        el.style.display = 'block';
         this.setContentElement(el, element);
 
     }
@@ -298,7 +305,6 @@ export class ServiceDetail100554 extends ServiceBase {
     private setContentinEl(el: HTMLElement, content: string, args: any) {
 
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
-
 
         const allWcs = getAllWebComponentsInSource(content);
         el.innerHTML = content;
