@@ -151,11 +151,13 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
         if (changedProperties.has('activeTab') && ['CRM', 'TASK', 'DOCS', 'CONNECT', 'APPS'].includes(this.activeTab)) {
+            
             if (!this.userPerfil) {
                 this.userPerfil = await this.getUser();
-                cleanupThreads(this.userPerfil.threads)
+                saveUserId(this.userPerfil.userId);
+                await cleanupThreads(this.userPerfil.threads);
             }
-            saveUserId(this.userPerfil.userId);
+
             await this.getThreadFromLocalDB();
             this.updateThreads();
         }

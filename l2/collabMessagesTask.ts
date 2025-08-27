@@ -87,7 +87,7 @@ export class WidgetAiTask100554 extends StateLitElement {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        if (!this.task && !this.status) {
+        if (!this.task) {
             return html`<div @click=${this.onCardClick} class="card no-details"> 
             <div class="card-header">
                 <span class="card-title">Task</span>
