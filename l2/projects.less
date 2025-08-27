@@ -4,45 +4,117 @@ projects-100554 {
 
     display: block;
     padding: 2rem;
-    color: #fff;
+    font-family: "Inter", sans-serif;
+
+    &.inFilter .section-header{
+        display: none!important;
+    }
 
     .header {
         display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 20px;
+        border-radius: 8px;
+        gap: 10px;
+    }
+
+    .header h2 {
+        font-size: 20px;
+        font-weight: 600;
+        color: @text-primary-color;
+        margin: 0;
+    }
+
+    .search-input {
+        flex: 1;
+        max-width: calc(100% - 500px);
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+    }
+
+    .header button {
+        padding: 8px 16px;
+        background: #007bff;
+        border: none;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .header button:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+    }
+
+    .header button:active {
+        transform: translateY(0);
+    }
+
+    /* Section */
+    .section {
+        margin-top: 2rem;
+    }
+
+    .section-header {
+        display: flex;
         justify-content: space-between;
         align-items: center;
-        flex-wrap: wrap;
-        margin-bottom: 2rem;
-
+        margin-bottom: 1rem;
     }
 
     .filters {
         display: flex;
         gap: 0.5rem;
-        flex-wrap: wrap;
-
     }
 
     .filter-button {
-        background: #333;
+        background: #1e1e1e;
         border: none;
+        color: #ccc;
         padding: 0.5rem 1rem;
-        border-radius: 1rem;
-        color: #fff;
+        border-radius: 6px;
         cursor: pointer;
+        transition: background 0.2s, color 0.2s;
     }
 
+    .filter-button:hover,
+    .filter-button.active {
+        background: #007bff;
+        color: #fff;
+    }
+
+    /* Grid */
     .projects-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        //grid-template-columns: repeat(auto-fill, minmax(310px, 310px));
+        gap: 1rem;
     }
 
+    /* Cards */
     .project-card {
+        width: 310px;
         background: #1e1e1e;
         border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
         transition: transform 0.2s;
+        display: flex;
+        flex-direction: column;
     }
 
     .project-card:hover {
@@ -51,51 +123,50 @@ projects-100554 {
 
     .thumbnail {
         width: 100%;
-        height: 180px;
+        height: 140px;
         object-fit: cover;
-        background: #444;
     }
 
     .card-content {
         padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
 
     .project-title {
         font-size: 1.1rem;
-        margin: 0 0 0.5rem;
+        font-weight: 600;
         color: #fff;
     }
 
     .project-meta {
         display: flex;
-        justify-content: end;
-        font-size: 0.9rem;
-        color: #aaa;
+        justify-content: space-between;
+        align-items: center;
     }
 
-    .tag {
-        background: #555;
-        padding: 0.2rem 0.5rem;
-        border-radius: 0.5rem;
-        font-size: 0.75rem;
+    .badge {
+        background: #007bff;
         color: #fff;
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
     }
 
+    /* Actions */
     .actions {
         display: flex;
-        justify-content: space-between;
         gap: 0.5rem;
-        margin-top: 1rem;
     }
 
     .actions a {
-        flex: 1;
-        text-align: center;
         text-decoration: none;
-        background: #2a2a2a;
-        color: white;
-        padding: 0.5rem;
+        font-size: 0.9rem;
+        padding: 0.3rem 0.6rem;
         border-radius: 6px;
+        background: #2a2a2a;
+        color: #fff;
         transition: background 0.2s;
     }
 
@@ -103,7 +174,22 @@ projects-100554 {
         background: #444;
     }
 
+    /* Selected project */
+    .selected-project {
+        margin-bottom: 2rem;
+    }
+
+    .selected-project h3 {
+        margin-bottom: 1rem;
+        color: #ccc;
+    }
+
+    .project-card.selected {
+        border: 2px solid #007bff;
+    }
+
     .project-details {
+        width: 310px;
         padding: 2rem;
         margin: 2rem auto;
         color: #000;

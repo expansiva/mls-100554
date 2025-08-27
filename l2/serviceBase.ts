@@ -12,7 +12,7 @@ export abstract class ServiceBase extends StateLitElement {
     @property({ type: String, reflect: true })
     public position: 'left' | 'right' = 'left';
 
-    @property({ type: String })
+    @property({ type: String, noAccessor: true })
     visible = 'false';
 
     @property({ type: String, noAccessor: true }) msize = '';

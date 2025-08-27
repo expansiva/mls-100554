@@ -33,7 +33,7 @@ export class ServiceProject100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
 
-    @property() activeTab: IScenery = 'Explore';
+    @property() activeTab: IScenery =  'Explore';
 
     @property({ type: Array }) explories: mls.plugin.MenuAction[] = [];
 
@@ -44,7 +44,7 @@ export class ServiceProject100554 extends ServiceBase {
     @queryAll('.plugin-container') allContainers: HTMLDivElement[] | undefined;
 
     private lastActiveTabByLevel: Record<number, number> = {
-        5: ETabs.Explore,
+        5: ETabsL5.ShowCase,
         4: ETabs.Explore,
         3: ETabs.Explore,
         2: ETabs.Explore,
@@ -67,7 +67,12 @@ export class ServiceProject100554 extends ServiceBase {
     }
 
     public onClickTabs(index: number): void {
-        this.activeTab = ETabs[index] as IScenery;
+
+        if (mls.actualLevel === 5) {
+            this.activeTab = ETabsL5[index] as IScenery;
+        }else {
+            this.activeTab = ETabs[index] as IScenery;
+        }
     }
 
     private getMenuTabsByLevel(): IOptions[] {
@@ -80,7 +85,6 @@ export class ServiceProject100554 extends ServiceBase {
 
         if (this.level === 5) {
             return [
-                { text: 'Explore', icon: 'e521' },
                 { text: 'ShowCase', icon: 'f5da' },
                 { text: 'Admin', icon: 'f508' },
                 { text: 'Plugins', icon: 'f1e6' },
@@ -124,10 +128,12 @@ export class ServiceProject100554 extends ServiceBase {
     }
 
     async updated(changedProperties: Map<string | number | symbol, unknown>) {
+
         super.updated(changedProperties);
         if (changedProperties.has('activeTab') && !!changedProperties.get('activeTab')) {
 
-            if (this.menu.setTabActive) this.menu.setTabActive(ETabs[this.activeTab]);
+            if (this.menu.setTabActive && mls.actualLevel === 5) this.menu.setTabActive(ETabsL5[this.activeTab]);
+            else if (this.menu.setTabActive) this.menu.setTabActive(ETabs[this.activeTab]);
             if (this.activeTab === 'Explore') {
                 await this.updateComplete;
                 if (this.firstDetails) this.firstDetails.click();
@@ -140,12 +146,12 @@ export class ServiceProject100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        if (this.visible && this.level !== this.lastLevel) {
+        if (visible && this.level !== this.lastLevel) {
             this.lastLevel = this.level;
             this.updateIconsByLevel();
         }
 
-        if (this.visible) {
+        if (visible) {
             this.refreshPlugins();
         }
     }
@@ -178,6 +184,7 @@ export class ServiceProject100554 extends ServiceBase {
     }
 
     private renderContent() {
+
         switch (this.activeTab) {
             case 'Explore':
                 return this.renderExplore();
@@ -371,7 +378,6 @@ export class ServiceProject100554 extends ServiceBase {
             const content = await storFile.getContent();
             if (this.projectDiv && typeof content === 'string') {
                 const allWcs = getAllWebComponentsInSource(content);
-                console.info(allWcs);
 
                 allWcs.forEach((wc) => {
                     const info = convertTagToFileName(wc);
@@ -417,6 +423,15 @@ enum ETabs {
     'Plugins' = 3,
 
 }
+
+enum ETabsL5 {
+    'ShowCase' = 0,
+    'Admin' = 1,
+    'Plugins' = 2,
+    'Explore' = 3,
+
+}
+
 type IScenery = 'Explore' | 'ShowCase' | 'Admin' | 'Plugins'
 
 interface Plugin {
