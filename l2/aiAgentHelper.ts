@@ -381,13 +381,11 @@ export function dispatchDetailsTaskClose(): void {
 
 
 export function getTotalCost(task: mls.msg.TaskData): string {
-
   let tot = 0;
   const nextSteps = task.iaCompressed?.nextSteps;
-  if (!nextSteps || nextSteps.length === 0) return tot.toFixed(4);
+  if (!nextSteps || nextSteps.length === 0) return "$ 0.01"; // garante saída mínima
 
   const sumCosts = (payload: mls.msg.AIPayload[]) => {
-
     payload.forEach((pay) => {
       const { interaction, nextSteps } = pay;
 
@@ -397,20 +395,17 @@ export function getTotalCost(task: mls.msg.TaskData): string {
       }
 
       if (nextSteps) {
-        nextSteps.forEach((next) => {
-          sumCosts([next])
-        });
+        nextSteps.forEach((next) => sumCosts([next]));
       }
-
     });
   };
 
-  nextSteps.forEach((step) => {
-    sumCosts([step]);
-  })
+  nextSteps.forEach((step) => sumCosts([step]));
 
-  return tot.toFixed(4);
+  const rounded = Math.ceil(tot * 100) / 100;
+  return `$ ${rounded.toFixed(2)}`;
 }
+
 
 export function getNextStepIdAvaliable(task: mls.msg.TaskData): number {
 

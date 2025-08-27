@@ -48,7 +48,9 @@ const message_pt = {
     errorRemoveUser: 'Erro ao remover usuário',
     successAddParticipant: 'Usuário adicionado com sucesso',
     threadDetails: 'Detalhes da sala',
-    changeAvatar: 'Alterar avatar'
+    changeAvatar: 'Alterar avatar',
+    errorSaveThreadDeletStatus: 'A thread não pode ser alterada enquanto status "deleting"',
+    threadNameInvalid: 'The name must start with #',
 }
 
 const message_en = {
@@ -86,7 +88,9 @@ const message_en = {
     errorRemoveUser: 'Error on remove user',
     successAddParticipant: 'User added sucessfully',
     threadDetails: 'Thread details',
-    changeAvatar: 'Change avatar'
+    changeAvatar: 'Change avatar',
+    errorSaveThreadDeletStatus: 'The thread cannot be changed when status is "deleting"',
+    threadNameInvalid: 'O nome deve começar com #',
 
 }
 
@@ -115,6 +119,10 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
     @state() private isLoading: boolean = false;
     @state() private editedThreadDetails?: IThreadDetails;
+
+    @state() private isDirectMessage?: boolean = false;
+    @state() private isChannel?: boolean = false;
+    @state() private isFileChannel?: boolean = false;
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
@@ -150,45 +158,53 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        const isDm = this.threadDetails?.thread?.name?.startsWith('@');
-        const avatarUrl = this.threadDetails?.thread.avatar_url;
+        this.isDirectMessage = this.threadDetails?.thread?.name?.startsWith('@');
+        this.isChannel = this.threadDetails?.thread?.name?.startsWith('#');
+        this.isFileChannel = this.threadDetails?.thread?.name?.startsWith('_');
+
 
         return html`
-      <div class="content">
-        <div class="details">
-            <h3>${this.msg.details}: ${this.threadDetails?.thread.threadId}</h3>
+        <div class="content">
+            <div class="details">
+                <h3>${this.msg.details}: ${this.threadDetails?.thread.threadId}</h3>
 
-            ${!isDm ? html`
-                <collab-messages-change-avatar-100554
-                    userId=${this.userId}
-                    threadId=${this.threadDetails?.thread.threadId}
-                    value=${ifDefined(this.threadDetails?.thread.avatar_url)}
-                    @value-changed=${(e: CustomEvent<string>) => {
-                        if (this.editedThreadDetails) {
+                ${this.isChannel ? html`
+                    <collab-messages-change-avatar-100554
+                        ?disabled
+                        userId=${this.userId}
+                        threadId=${this.threadDetails?.thread.threadId}
+                        value=${ifDefined(this.threadDetails?.thread.avatar_url)}
+                        @value-changed=${(e: CustomEvent<string>) => {
+                    if (this.editedThreadDetails) {
                         this.editedThreadDetails.thread.avatar_url = e.detail;
-                        }
-                    }}
-                >
-                </collab-messages-change-avatar-100554>
-            `: ''}
+                    }
+                }}
+                    ></collab-messages-change-avatar-100554>
+                `: ''}
+
             
             <label>${this.msg.threadName}
-                <input type="text" name="name" required
+                <input type="text" required
                     .value=${this.editedThreadDetails?.thread.name}
-                    ?disabled=${isDm}
-                    @input=${(e: Event) => { if (this.editedThreadDetails && !isDm) this.editedThreadDetails.thread.name = (e.target as HTMLInputElement).value }}>
+                    pattern=${ifDefined(this.isChannel ? "^#.*" : undefined)}
+                    ?disabled=${this.isDirectMessage || this.isFileChannel}
+                    @input=${(e: Event) => { if (this.editedThreadDetails && !this.isChannel) this.editedThreadDetails.thread.name = (e.target as HTMLInputElement).value }}
+                >
+                <span class="field-thread-name-error">${this.msg.threadNameInvalid}</span>
+
             </label>
-            <label> ${this.msg.status}
+
+            <label>${this.msg.status}
                 <select 
                     name="status" 
                     required
-                    .disabled=${this.editedThreadDetails?.thread.status === 'deleting'}
+                    .disabled=${['deleting'].includes(this.editedThreadDetails?.thread.status || '')}
                     .value=${this.editedThreadDetails?.thread.status}
                     @change=${(e: Event) => {
-                if (this.editedThreadDetails) {
-                    this.editedThreadDetails.thread.status =
-                        (e.target as HTMLSelectElement).value as mls.msg.ThreadStatus;
-                }
+                    if (this.editedThreadDetails) {
+                        this.editedThreadDetails.thread.status =
+                            (e.target as HTMLSelectElement).value as mls.msg.ThreadStatus;
+                    }
             }}
                 >
                     <option value="active">${this.msg.statusActive}</option>
@@ -206,9 +222,9 @@ export class CollabMessagesThreadDetails extends StateLitElement {
 
              <label> ${this.msg.visibility}
                 <select name="visibility" required
-                    ?disabled=${isDm}
+                    ?disabled=${this.isDirectMessage || this.isFileChannel}
                     .value=${this.editedThreadDetails?.thread.visibility}
-                    @change=${(e: Event) => { if (this.editedThreadDetails && !isDm) this.editedThreadDetails.thread.visibility = (e.target as HTMLInputElement).value as mls.msg.ThreadVisibility }}>
+                    @change=${(e: Event) => { if (this.editedThreadDetails && this.isChannel) this.editedThreadDetails.thread.visibility = (e.target as HTMLInputElement).value as mls.msg.ThreadVisibility }}>
                     <option value="public">${this.msg.visibilityPublic}</option>
                     <option value="private">${this.msg.visibilityPrivate}</option>
                     <option value="company">${this.msg.visibilityCompany}</option>
@@ -229,16 +245,16 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                 id="topicsInput"
             ></collab-input-tag-100554>
 
-            ${!isDm ? html`
+            ${this.isChannel ? html`
                 <label> ${this.msg.welcomeMessage}</label>
                 <textarea 
                     name="welcomemessage"
                     rows="5" 
                     .value=${this.editedThreadDetails?.thread?.wellcomeMessage || ''}
-                    @input=${(e: Event) => { if (this.editedThreadDetails && !isDm) this.editedThreadDetails.thread.wellcomeMessage = (e.target as HTMLInputElement).value }}
-                ></textarea>                
-            ` : ``}
-            
+                    @input=${(e: Event) => { if (this.editedThreadDetails && this.isChannel) this.editedThreadDetails.thread.wellcomeMessage = (e.target as HTMLInputElement).value }}
+                ></textarea>  
+            ` : ''}
+                
             <label> ${this.msg.languages}</label>
             <collab-input-tag-100554 
                 pattern="^[a-z]{2}$|^[a-z]{2}-[A-Z]{2}$"
@@ -349,6 +365,12 @@ export class CollabMessagesThreadDetails extends StateLitElement {
     private async removeUser(e: MouseEvent, userId: string) {
         this.labelErrorRemoveUser = '';
         if (!this.threadDetails || !this.userId || !this.editedThreadDetails) return;
+
+        if (['deleting'].includes(this.editedThreadDetails?.thread.status || '')) {
+            this.labelErrorRemoveUser = this.msg.errorSaveThreadDeletStatus;
+            return;
+        }
+
         const button = (e.target as HTMLElement).closest('button');
         try {
             button?.classList.add('loading');
@@ -369,6 +391,11 @@ export class CollabMessagesThreadDetails extends StateLitElement {
     private async removeBot(e: MouseEvent, botName: string) {
         this.labelErrorRemoveBoot = '';
         if (!this.threadDetails || !this.userId || !this.editedThreadDetails) return;
+        if (['deleting'].includes(this.editedThreadDetails?.thread.status || '')) {
+            this.labelErrorRemoveBoot = this.msg.errorSaveThreadDeletStatus;
+            return;
+        }
+
         const button = (e.target as HTMLElement).closest('button');
         try {
             button?.classList.add('loading');
@@ -449,6 +476,11 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         this.labelError = '';
         this.labelOk = '';
         if (!this.editedThreadDetails || !this.userId) return;
+
+        if (['deleting'].includes(this.editedThreadDetails?.thread.status || '')) {
+            this.labelError = this.msg.errorSaveThreadDeletStatus;
+            return;
+        }
 
         const changes = this.getChangedFields();
         if (!changes) return;

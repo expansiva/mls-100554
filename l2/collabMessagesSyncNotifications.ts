@@ -12,11 +12,7 @@ export function removeThreadFromSync(threadId: string) {
     threadSyncMap.delete(threadId);
 }
 
-const notificationSound = new Audio('./l3/_100529_/audio/collabNotification.mp3');
-notificationSound.preload = 'auto';
-notificationSound.volume = 1;
-
-export async function checkIfNotificationUnread(): Promise<boolean>{
+export async function checkIfNotificationUnread(): Promise<boolean> {
 
     const threads = await getAllThreads();
     let hasPendingMessages: boolean = false;
@@ -31,18 +27,33 @@ export async function checkIfNotificationUnread(): Promise<boolean>{
 
 export async function listenToThreadEvents() {
 
+    const notificationSound = new Audio('./l3/_100529_/audio/collabNotification.mp3');
+    notificationSound.preload = 'auto';
+    notificationSound.volume = 1;
+
     navigator.serviceWorker.addEventListener('message', async (event) => {
         if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] Received`)
         if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] Data`, event?.data)
         const id = event.data.id;
         enqueueThreadForSync(event.data?.data?.threadId);
 
-        setFavicon(true);
-        mls.services['100554_serviceCollabMessages_left']?.toogleBadge(true, '_100554_serviceCollabMessages');
-        const audioEnabled = loadNotificationPreferencesAudio();
-        if (audioEnabled) {
-            notificationSound.currentTime = 0;
-            notificationSound.play().catch(err => console.warn('Erro on play notification audio:', err));
+        let isThreadOpened: boolean = false;
+        if (mls.services['100554_serviceCollabMessages_left']) {
+            const chat = mls.services['100554_serviceCollabMessages_left'].querySelector('collab-messages-chat-100554');
+            const actualThreadId = chat?.actualThread?.thread?.threadId;
+            if (actualThreadId === event.data?.data?.threadId) {
+                isThreadOpened = true;
+            }
+        }
+
+        if (!isThreadOpened) {
+            setFavicon(true);
+            mls.services['100554_serviceCollabMessages_left']?.toogleBadge(true, '_100554_serviceCollabMessages');
+            const audioEnabled = loadNotificationPreferencesAudio();
+            if (audioEnabled) {
+                notificationSound.currentTime = 0;
+                notificationSound.play().catch(err => console.warn('Erro on play notification audio:', err));
+            }
         }
 
         if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] : sendACK id: ${id}`);
@@ -111,7 +122,7 @@ export async function getThreadUpdateInBackground(threadId: string): Promise<voi
 
         const thread = await updateThread(
             threadId,
-            threadDB,
+            response.thread,
             lastMessage.content,
             lastMessage.createAt,
             response.messages.length + lastUnreadCount

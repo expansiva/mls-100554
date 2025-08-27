@@ -32,7 +32,7 @@ const message_pt = {
     successSaving: 'Alterações salvas com sucesso!',
     dmValidationError: "Usuário inválido",
     channelValidationError: "O nome do canal deve começar com '#'.",
-    selectAgent: 'Escolha um AgentBot',
+    selectAgent: 'Escolha um AgentBot (opcional)',
     noneAgent: 'Nenhum – Sem agente automático',
     initialMessage: 'Mensagem inicial (opcional)',
     placeholderMessage: 'Escreva aqui uma mensagem de abertura...',
@@ -44,7 +44,12 @@ const message_pt = {
     save: 'Salvar Detalhes',
     threadDmAlreadyExist: 'Já existe uma conversa direta com este usuário.',
     placeholderMessageAvatar: 'Digite aqui sua descrição..',
-    avatarUrl: 'Gerar avatar com IA'
+    avatarUrl: 'Gerar avatar com IA (opcional)',
+    detailsBot: 'Instalar bot ',
+    detailsInitialMessage: 'Configurar mensagem inicial',
+    detailsIcon: 'Configurar ícone',
+    threadNameInvalid: 'O nome deve começar com #',
+    selectUser: 'Selecione um usuário',
 }
 
 const message_en = {
@@ -68,9 +73,7 @@ const message_en = {
     successSaving: 'Saved successfully!',
     dmValidationError: "Invalid user",
     channelValidationError: "Channel name must start with '#'.",
-
-    // Novas chaves para taskDetails
-    selectAgent: 'Select an AgentBot',
+    selectAgent: 'Select an AgentBot (opcional)',
     noneAgent: 'None – No automatic agent',
     initialMessage: 'Initial message (optional)',
     placeholderMessage: 'Write an opening message here...',
@@ -82,7 +85,12 @@ const message_en = {
     save: 'Save Details',
     threadDmAlreadyExist: 'A direct message thread with this user already exists.',
     placeholderMessageAvatar: "Type your description here...",
-    avatarUrl: 'Generate avatar with AI'
+    avatarUrl: 'Generate avatar with AI (opcional)',
+    detailsBot: 'Install bot',
+    detailsInitialMessage: 'Set up initial message',
+    detailsIcon: 'Set up icon',
+    threadNameInvalid: 'The name must start with #',
+    selectUser: 'Select a user',
 }
 
 type MessageType = typeof message_en;
@@ -113,10 +121,6 @@ export class CollabMessagesAdd100554 extends StateLitElement {
     @state() _agentConfig: string = '';
     @state() _promptToAvatar: string = '';
 
-
-
-    @state() private view: 'add' | 'templates' = 'add';
-
     @property() labelOk: string = '';
     @property() labelError: string = '';
     @property() userId: string | undefined;
@@ -133,11 +137,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
     }
 
     render() {
-        if (this.view === 'add') {
-            return this._renderAdd();
-        } else {
-            return this._renderAdvanced();
-        }
+        return this._renderAdd();
     }
 
     private async loadUsersAvaliables() {
@@ -206,15 +206,17 @@ export class CollabMessagesAdd100554 extends StateLitElement {
 
 
             ${this.threadType === 'dm' ? html`
-                <label>${this.msg.dmUser}
-                    <input type="text" placeholder="@usuario" 
+                <label>
+                    ${this.msg.dmUser}
+                    <select
                         .value=${this.dmUser}
-                        list="user-suggestions"
-                        @input=${(e: Event) => this.dmUser = (e.target as HTMLInputElement).value}>
+                        @change=${(e: Event) => this.dmUser = (e.target as HTMLSelectElement).value}>
+                        <option value="" disabled selected>${this.msg.selectUser}</option>
+                        ${this.users.map(user => html`
+                            <option value="${user.userId}">@${user.name}</option>
+                        `)}
+                    </select>
                 </label>
-                 <datalist id="user-suggestions">
-                    ${this.users.map(user => html`<option value="${user.userId}">@${user.name}</option>`)}
-                </datalist>
             ` : ''}
 
             ${this.threadType === 'channel' ? html`
@@ -222,7 +224,9 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                     <input type="text" placeholder="#nome-do-canal"
                         .value=${this.threadName}
                          pattern="^#.*"
-                        @input=${(e: Event) => this.threadName = (e.target as HTMLInputElement).value}>
+                        @input=${(e: Event) => this.threadName = (e.target as HTMLInputElement).value}
+                    >
+                    <span class="field-thread-name-error">${this.msg.threadNameInvalid}</span>
                 </label>
             ` : ''}
 
@@ -255,17 +259,20 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                 <collab-input-tag-100554 
                     pattern="^[a-z]{2}$|^[a-z]{2}-[A-Z]{2}$"
                     .value=${this.languages.join(',')}
-                    placeholder="+topic"
                     .onValueChanged=${(value: string) => this.languages = value.split(',')}
                     id="languageInput"
                 ></collab-input-tag-100554>
                 <small> ${this.msg.languagesHint}</small>
             </label>
 
+        
             ${this.threadType === 'channel' ? html`
-                <a href="#" @click=${this.openTemplateScenario}>
-                    ${this.msg.advanced}
-                </a>
+                <div class="section-thread-details">
+                    ${this.renderBotsConfig()}
+                    ${this.renderInitialMessageConfig()}
+                    ${this.renderIconConfig()}
+
+                </div>
                 <br>
                 <br>
             ` : ''}
@@ -282,73 +289,67 @@ export class CollabMessagesAdd100554 extends StateLitElement {
         </div>`;
     }
 
-    private _renderAdvanced() {
-
+    private renderBotsConfig() {
         return html`
-        <div class="section-thread-details">
-            
-            <label>${this.msg.selectAgent}</label>
-            <select @change=${(e: Event) => this._selectedAgent = (e.target as HTMLSelectElement).value}>
-                ${this.agentsBots.map(agent => html`
-                    <option 
-                        value=${agent.id} 
-                        ?selected=${this._selectedAgent === agent.id}>
-                        ${agent.name}${agent.description ? ` - ${agent.description}` : ''}
-                    </option>
-                `)}
-            </select>
-
-            <label>${this.msg.initialMessage}</label>
-            <textarea 
-                rows="5" 
-                .value=${this._initialMessage}
-                placeholder=${this.msg.placeholderMessage}
-                @input=${(e: Event) => this._initialMessage = (e.target as HTMLTextAreaElement).value}
-            ></textarea>
-
-            <label>${this.msg.topics}</label>
-            <collab-input-tag-100554
-                .value=${this._topics.join(',')}
-                .onValueChanged=${(value: string) => this._topics = value.split(',')}
-            ></collab-input-tag-100554>
-
-            ${this._selectedAgent && this._selectedAgent !== 'none' ? html`
-                <label>${this.msg.agentConfig}</label>
-                <textarea 
-                    rows="5" 
-                    .value=${this._agentConfig}
-                    placeholder=${this.msg.placeholderConfig}
-                    @input=${(e: Event) => this._agentConfig = (e.target as HTMLTextAreaElement).value}
-                ></textarea>
-            ` : ''}
-
-
-            <label>${this.msg.avatarUrl}</label>
-            <textarea 
-                rows="5" 
-                .value=${this._promptToAvatar}
-                placeholder=${this.msg.placeholderMessageAvatar}
-                @input=${(e: Event) => this._promptToAvatar = (e.target as HTMLTextAreaElement).value}
-            ></textarea>
-
-            <div class="actions">
-                <button @click=${this._backToAdd}>${this.msg.back}</button>
-                <button @click=${this._saveTaskDetails}>${this.msg.save}</button>
-            </div>
-        </div>
-    `;
-    }
-    private _backToAdd() {
-        this.view = 'add';
+            <details>
+                <summary>${this.msg.detailsBot}</summary>
+                <div>
+                    <label>${this.msg.selectAgent}</label>
+                    <select @change=${(e: Event) => this._selectedAgent = (e.target as HTMLSelectElement).value}>
+                        ${this.agentsBots.map(agent => html`
+                            <option 
+                                value=${agent.id} 
+                                ?selected=${this._selectedAgent === agent.id}>
+                                ${agent.name}${agent.description ? ` - ${agent.description}` : ''}
+                            </option>
+                        `)}
+                    </select>
+                    ${this._selectedAgent && this._selectedAgent !== 'none' ? html`
+                        <label>${this.msg.agentConfig}</label>
+                        <textarea 
+                            rows="5" 
+                            .value=${this._agentConfig}
+                            placeholder=${this.msg.placeholderConfig}
+                            @input=${(e: Event) => this._agentConfig = (e.target as HTMLTextAreaElement).value}
+                        ></textarea>
+                ` : ''}
+                </div>
+            </details>
+        `
     }
 
-    private _saveTaskDetails() {
-        this.view = 'add';
+    private renderInitialMessageConfig() {
+        return html`
+            <details>
+                <summary>${this.msg.detailsInitialMessage}</summary>
+                <div>
+                    <label>${this.msg.initialMessage}</label>
+                    <textarea 
+                        rows="5" 
+                        .value=${this._initialMessage}
+                        placeholder=${this.msg.placeholderMessage}
+                        @input=${(e: Event) => this._initialMessage = (e.target as HTMLTextAreaElement).value}
+                    ></textarea>
+                </div>
+            </details>            
+        `
     }
 
-    private openTemplateScenario(e: MouseEvent) {
-        e.preventDefault();
-        this.view = 'templates';
+    private renderIconConfig() {
+        return html`
+            <details>
+                <summary>${this.msg.detailsIcon}</summary>
+                <div>
+                    <label>${this.msg.avatarUrl}</label>
+                    <textarea 
+                        rows="5" 
+                        .value=${this._promptToAvatar}
+                        placeholder=${this.msg.placeholderMessageAvatar}
+                        @input=${(e: Event) => this._promptToAvatar = (e.target as HTMLTextAreaElement).value}
+                    ></textarea>
+                </div>
+            </details>            
+        `
     }
 
     private validateForm(): boolean {

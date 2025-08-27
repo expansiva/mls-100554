@@ -5,8 +5,8 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation, collab_plus } from './_100554_collabIcons';
 import { collabImport } from './_100554_collabImport';
 import { removeThreadFromSync, getThreadUpdateInBackground, checkIfNotificationUnread } from './_100554_collabMessagesSyncNotifications';
-import { openElementInDetails } from './_100554_libCommom';
-import { listUsers } from './_100554_msgDBController';
+import { openElementInServiceDetails, clearServiceDetails } from './_100554_libCommom';
+import { listUsers, deleteAllMessagesFromThread } from './_100554_msgDBController';
 import { setFavicon } from './_100554_collabInit';
 
 import {
@@ -58,7 +58,7 @@ const message_pt = {
     noThreads: 'Nenhuma sala disponível no momento.',
     placeholderSearch: 'Digite para filtrar',
     threadArchived: 'A thread foi arquivada por [user] em [date]',
-    threadDeleting: 'A thread está sendo deletada em [date]',
+    threadDeleting: 'A thread foi deletada em [date]',
     archived: 'Arquivado',
     deleting: 'Deletando',
     btnNext: 'Continuar',
@@ -73,7 +73,7 @@ const message_en = {
     noThreads: 'No threads available at the moment.',
     placeholderSearch: 'Type to filter',
     threadArchived: 'Thread is archived by [user] in [date]',
-    threadDeleting: 'Thread is being deleted in [date]',
+    threadDeleting: 'Thread was deleted in [date]',
     archived: 'Archived',
     deleting: 'Deleting',
     btnNext: 'Next',
@@ -221,9 +221,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 return html`
                     <div class="header">
                         <span @click=${this.onTitleClick}>${collab_chevron_left} Thread: ${this.getThreadName(this.actualThread)}</span>
-                        <div class="header-actions">
-                            <span @click=${this.onThreadDetailsClick}>${collab_gear}</span>
-                        </div>
+                        ${this.actualThread?.thread.status !== 'deleted' ? html`
+                            <div class="header-actions">
+                                <span @click=${this.onThreadDetailsClick}>${collab_gear}</span>
+                            </div>
+                        `: ''}                        
                     </div>`;
             case 'list':
                 return html`<div class="header">
@@ -266,14 +268,15 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private renderChatMessages() {
         if (!this.actualThread) return html``;
-        if (this.welcomeMessage) {
+        if (this.welcomeMessage && !['deleting', 'deleted', 'archived'].includes(this.actualThread?.thread.status)) {
             return this.renderWelcomeMessage();
         }
 
-        if (this.actualThread.thread.status === 'deleting') {
+
+
+        if (this.actualThread.thread.status === 'deleting' || this.actualThread.thread.status === 'deleted') {
             const formatedTimestamp = formatTimestamp(this.actualThread.thread.deletedAt || '');
             const deletedAt = this.parseLocalDate(formatedTimestamp?.dateFull || '');
-
             return html`
                 <div>${this.msg.threadDeleting.replace('[date]', deletedAt.datafull)}</div>
             `
@@ -287,6 +290,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 <div>${this.msg.threadArchived.replace('[user]', archivedBy?.name || '').replace('[date]', archivedAt.datafull)}</div>
             `
         }
+
         this.userPreferenceChat = loadChatPreferences();
         const sortedEntries = Object.entries(this.actualMessagesParsed)
             .map(([date, value]) => [date.trim(), value])
@@ -355,6 +359,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private renderWelcomeMessage() {
+
         return html`
             <div class="welcome-message">
                 <p>${this.welcomeMessage}</p>
@@ -695,7 +700,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private renderDeletingThreads() {
-        if (this.filteredThreads.archived.length === 0) return html``;
+        if (this.filteredThreads.deleting.length === 0) return html``;
         return html`        
             ${this.filteredThreads.deleting.map((item) => {
 
@@ -1067,7 +1072,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.hasMoreMessagesLocalDB = true;
         this.hasMoreMessagesBefore = false;
         this.actualThread = threadInfo;
-        this.checkNotificationsUnreadMessages();
         const messagesInDb = await getMessagesByThreadId(this.actualThread.thread.threadId, this.messagesLimit, 0);
         this.actualMessages = messagesInDb;
         this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
@@ -1082,22 +1086,30 @@ export class CollabMessagesChat100554 extends StateLitElement {
             const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId, threadInfo.thread.lastMessageTime || new Date('2000-01-01').toISOString());
 
             await updateThread(threadByServer.thread.threadId, threadByServer.thread);
-            threadInfo = await this.updateMessagesOnDb(threadInfo, threadByServer.messages);
 
-            if (threadByServer.threadsPending) {
-                for await (let threadsPending of threadByServer.threadsPending) {
-                    if (threadsPending !== threadInfo.thread.threadId) {
-                        removeThreadFromSync(threadsPending);
-                        getThreadUpdateInBackground(threadsPending);
-                    }
-                }
-            }
+            threadInfo = await this.updateMessagesOnDb(threadByServer, threadByServer.messages);
 
             await updateUsers(threadByServer.users);
             this.allUsersInThread = threadByServer.users;
             this.actualThread = { ...threadByServer };
             if (threadByServer.hasMore) await this.loadAllMessages(threadInfo);
             this.checkForRegisterNotification();
+
+            if (threadByServer.threadsPending) {
+                for await (let threadsPending of threadByServer.threadsPending) {
+                    if (threadsPending !== threadInfo.thread.threadId) {
+                        removeThreadFromSync(threadsPending);
+                        await getThreadUpdateInBackground(threadsPending);
+                    }
+                }
+            }
+
+            if (['deleted'].includes(threadByServer.thread.status)) {
+                this.checkForDeleteMessagesInDB(threadByServer.thread, threadByServer.thread.threadId);
+            }
+
+            this.checkNotificationsUnreadMessages();
+
 
         } catch (err: any) {
             this.isThreadError = true;
@@ -1437,7 +1449,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (this.actualTask && this.actualTask.PK) el.setAttribute('taskId', this.actualTask.PK);
         (el as any)['task'] = this.actualTask;
         (el as any)['message'] = this.actualMessage;
-        openElementInDetails(el);
+        openElementInServiceDetails(el);
         // this.activeScenerie = 'task';
     }
 
@@ -1511,7 +1523,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
     };
 
     private onTaskDetailsClose = async (_e: Event) => {
-        this.onTitleClick();
+        // this.onTitleClick();
+        clearServiceDetails();
     };
 
     private onThreadChange = async (e: Event) => {
@@ -1521,10 +1534,15 @@ export class CollabMessagesChat100554 extends StateLitElement {
         const thread = customEvent.detail as mls.msg.Thread;
         const threadUpdated = this.userThreads[this.group].find((th) => th.thread.threadId === thread.threadId);
 
+        if (['deleted'].includes(thread.status)) {
+            this.checkForDeleteMessagesInDB(thread, thread.threadId);
+        }
+
         if (threadUpdated) threadUpdated.thread = { ...threadUpdated.thread, ...thread };
         else if (thread.group === this.group) {
             this.userThreads[this.group] = [...this.userThreads[this.group], { thread, hasMore: false, users: [] }];
         }
+
         if (threadUpdated?.thread.threadId === this.actualThread?.thread.threadId) {
             this.actualThread = threadUpdated;
             if (this.actualThread && this.actualThread.thread.unreadCount && this.actualThread.thread.unreadCount > 0) {
@@ -1539,6 +1557,15 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 await this.updateLastMessage(this.actualThread);
             }
         }
+
+        if (this.activeScenerie === 'threadDetails' && (
+            thread.status === 'deleted' ||
+            thread.status === 'deleting' ||
+            thread.status === 'archived'
+        )) {
+            this.activeScenerie = 'list';
+        }
+
         this.requestUpdate();
     };
 
@@ -1550,6 +1577,17 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (!this.actualThread || !thId || thId !== this.actualThread.thread.threadId) return;
         this.updateMessage2(false, true, { ...message, footers: [] }, message, outputs);
     };
+
+    private async checkForDeleteMessagesInDB(thread: mls.msg.ThreadPerformanceCache, threadId: string) {
+        await deleteAllMessagesFromThread(threadId);
+        await updateThread(
+            threadId,
+            thread,
+            '',
+            '',
+            0
+        );
+    }
 }
 
 interface IThreadInfo {
