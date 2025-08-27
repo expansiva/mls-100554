@@ -465,6 +465,35 @@ export async function getAllThreads(): Promise<mls.msg.ThreadPerformanceCache[]>
     });
 }
 
+export async function cleanupThreads(validThreadIds: string[]): Promise<void> {
+    const db = await openDB();
+
+    const existingThreads = await getAllThreads();
+    const threadsToDelete = existingThreads.filter(
+        (t) => !validThreadIds.includes(t.threadId)
+    );
+
+    if (threadsToDelete.length === 0) return; 
+
+    for (const thread of threadsToDelete) {
+        try {
+    
+            await deleteAllMessagesFromThread(thread.threadId);
+            await new Promise<void>((resolve, reject) => {
+                const tx = db.transaction("threads", "readwrite");
+                const store = tx.objectStore("threads");
+                const request = store.delete(thread.threadId);
+
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject("Erro ao deletar thread");
+                tx.onabort = () => reject("Transação abortada ao deletar thread");
+            });
+        } catch (err) {
+            console.warn(`Falha ao remover thread ${thread.threadId}:`, err);
+        }
+    }
+}
+
 export async function listUsers(): Promise<mls.msg.User[]> {
     const db = await openDB();
     const tx = db.transaction("users", "readonly");
