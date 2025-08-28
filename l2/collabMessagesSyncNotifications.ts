@@ -1,7 +1,7 @@
 /// <mls shortName="collabMessagesSyncNotifications" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
 
 import { getUserId, loadNotificationDeviceId, loadNotificationPreferencesAudio } from "./_100554_collabMessageHelper";
-import { getThread, updateThread, getMessage, addMessages, getAllThreads } from './_100554_msgDBController';
+import { getThread, updateThread, getMessage, addMessages, getAllThreads, addThread } from './_100554_msgDBController';
 import { notifyThreadChange } from './_100554_aiAgentHelper';
 import { setFavicon } from './_100554_collabInit';
 
@@ -96,9 +96,8 @@ export async function getThreadUpdateInBackground(threadId: string): Promise<voi
     const userId = getUserId();
     const deviceId = loadNotificationDeviceId();
     if (!userId) throw new Error('Invalid user id');
-    const threadDB = await getThread(threadId);
-    if (!threadDB) return;
-    const lastOrderAt = threadDB?.lastMessageTime || '';
+    let threadDB = await getThread(threadId);
+    const lastOrderAt = threadDB?.lastMessageTime || new Date('2000-01-01').toISOString();
 
     try {
         const response = await mls.api.msgGetThreadUpdate({
@@ -116,10 +115,22 @@ export async function getThreadUpdateInBackground(threadId: string): Promise<voi
             }
         }
 
-        if (!response.messages || response.messages.length === 0) return;
+        if (!response.messages || response.messages.length === 0) {
+            const thread = await updateThread(
+                threadId,
+                response.thread,
+                undefined,
+                undefined,
+                1
+            );
+            notifyThreadChange(thread);
+            return;
+        }
+
         const lastMessage = response.messages[response.messages.length - 1];
         const lastUnreadCount = threadDB && threadDB.unreadCount ? threadDB.unreadCount : 0;
 
+        if (!threadDB) threadDB = await addThread(response.thread);
         const thread = await updateThread(
             threadId,
             response.thread,

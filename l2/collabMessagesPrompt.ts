@@ -6,6 +6,7 @@ import { collab_arrow_up_long } from './_100554_collabIcons';
 import { getThread, listUsers } from './_100554_msgDBController';
 import { IAgent } from './_100554_aiAgentBase'
 import './_100554_collabMessagesAvatar';
+
 @customElement('collab-messages-prompt-100554')
 export class CollabMessagesPrompt100554 extends StateLitElement {
     @query('textarea') textArea: HTMLTextAreaElement | undefined;
@@ -57,12 +58,12 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         const thread = await getThread(this.threadId.trim());
         if (!thread) return;
         const users: mls.msg.User[] = await listUsers();
-        const threadUsers: mls.msg.User[] = [];
-        thread.users.forEach((user) => {
-            const userDB = users.find((us) => us.userId === user.userId);
-            if (userDB) threadUsers.push(userDB);
-        });
-        this.allUsers = threadUsers;
+        // const threadUsers: mls.msg.User[] = [];
+        // thread.users.forEach((user) => {
+        //     const userDB = users.find((us) => us.userId === user.userId);
+        //     if (userDB) threadUsers.push(userDB);
+        // });
+        this.allUsers = users;
     }
 
     private async getAgents() {

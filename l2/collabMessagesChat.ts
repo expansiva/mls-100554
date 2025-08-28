@@ -100,11 +100,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @state() userPreferenceChat?: IChatPreferences;
     @state() isLoadingThread: boolean = false;
     @state() filteredThreads: IFilteredThreadsByStatus = { active: [], archived: [], deleted: [], deleting: [] };
-    @state() allUsersInThread: mls.msg.User[] = [];
+    // @state() allUsersInThread: mls.msg.User[] = [];
     @state() isThreadError: boolean = false;
     @state() threadErrorMsg: string = '';
     @state() lastTopicFilter: string = '';
     @state() welcomeMessage: string = '';
+    @state() usersAvaliables: mls.msg.User[] = [];
 
     @property() group: 'CONNECT' | 'APPS' | 'DOCS' | 'CRM' = 'CONNECT';
     @property() userId: string | undefined;
@@ -121,7 +122,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @property({ attribute: false }) userThreads: IThread = {};
     @property({ attribute: false }) allThreads: mls.msg.Thread[] = []
 
-    private usersAvaliables: mls.msg.User[] = [];
     private isSystemChangeScroll: boolean = false;
     private savedScrollTop = 0;
     private hasMoreMessagesLocalDB = true;
@@ -303,8 +303,16 @@ export class CollabMessagesChat100554 extends StateLitElement {
                     <div class="message-time">${messageTime.date}</div>
                     ${threadMessages.map((message) => {
                 const dateFormated = formatTimestamp(message.createAt);
-                const userName = this.actualThread?.users.find((user) => user.userId === message.senderId)?.name || message.senderId;
-                const userAvatar = this.actualThread?.users.find((user) => user.userId === message.senderId)?.avatar_url || '';
+                const userToFind = [
+                    ...this.usersAvaliables,
+                    ...(this.actualThread?.users || [])
+                ].filter(
+                    (user, index, self) =>
+                        index === self.findIndex(u => u.userId === user.userId)
+                );
+
+                const userName = userToFind.find((user) => user.userId === message.senderId)?.name || message.senderId;
+                const userAvatar = userToFind.find((user) => user.userId === message.senderId)?.avatar_url || '';
                 const cls = message.senderId === this.userId ? 'user' : 'system';
                 const isSame = message.isSame;
                 const titleTranslated = this.getTitleMessageTranslated(message)
@@ -387,7 +395,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return html`
         <collab-messages-rich-preview-100554 
             @mention-hover=${this.onMentionHover}
-            .allUsers=${this.allUsersInThread} 
+            .allUsers=${this.usersAvaliables} 
             .allThreads=${this.allThreads}
             text="${text}"
         ></collab-messages-rich-preview-100554>`
@@ -423,7 +431,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
         this.removeAllUserModal();
         if (!ev.detail || !ev.detail.value || !ev.detail.element) return;
-        const actualUserModal = this.allUsersInThread.find((user) => user.name === ev.detail.value);
+        const actualUserModal = this.usersAvaliables.find((user) => user.name === ev.detail.value);
 
         const rects = (ev.detail.element as HTMLElement).getBoundingClientRect();
         const modal = document.createElement('collab-messages-user-modal-100554');
@@ -1086,7 +1094,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             threadInfo = await this.updateMessagesOnDb(threadByServer, threadByServer.messages);
 
             await updateUsers(threadByServer.users);
-            this.allUsersInThread = threadByServer.users;
+            // this.allUsersInThread = threadByServer.users;
             this.actualThread = { ...threadByServer };
             if (threadByServer.hasMore) await this.loadAllMessages(threadInfo);
             this.checkForRegisterNotification();

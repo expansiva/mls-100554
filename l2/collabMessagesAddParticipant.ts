@@ -1,9 +1,9 @@
 /// <mls shortName="collabMessagesAddParticipant" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
-import { updateThread, listUsers } from './_100554_msgDBController';
+import { updateThread, updateUsers, listUsers } from './_100554_msgDBController';
 import { notifyThreadChange } from './_100554_aiAgentHelper';
 
 /// **collab_i18n_start** 
@@ -46,14 +46,18 @@ export class CollabMessagesAddParticipant100554 extends StateLitElement {
     @property() auth: mls.msg.UserAuth = 'write';
     @property() isAddParticipant: boolean = false;
     @property() actualThread: IThreadActual | undefined;
+
     @property() highlightedIndex: number = -1;
-    @property() suggestions: string[] = [];
-    @property() allUsers: string[] = [];
+    @state() suggestions: string[] = [];
+    @state() allUsers: string[] = [];
+    @state() private users: {
+        userId: string;
+        name: string;
+    }[] = [];
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
-        const users = await listUsers();
-        this.allUsers = users.map((usr) => usr.name);
+        await this.loadUsersAvaliables();
     }
 
     render() {
@@ -209,13 +213,20 @@ export class CollabMessagesAddParticipant100554 extends StateLitElement {
 
             if (response.thread) {
                 const thr = await updateThread(response.thread.threadId, response.thread);
-                notifyThreadChange(thr);
+                const thrUpdt = await mls.api.msgGetThreadUpdate({
+                    threadId: response.thread.threadId,
+                    userId: this.userId,
+                    lastOrderAt: thr.lastMessageTime || new Date('2000-01-01').toISOString(),
+                });
+                if (thrUpdt && thrUpdt.users) await updateUsers(thrUpdt.users);
+                notifyThreadChange(thrUpdt.thread);
+
                 this.dispatchEvent(new CustomEvent('add-participant', {
                     detail: {
                         thread: thr,
                     },
-                    bubbles: true,  
-                    composed: true 
+                    bubbles: true,
+                    composed: true
                 }));
             }
 
@@ -234,6 +245,15 @@ export class CollabMessagesAddParticipant100554 extends StateLitElement {
             this.isAddParticipant = false;
         }
     }
+
+    private async loadUsersAvaliables() {
+        if (!this.userId) return;
+        const res = await mls.api.msgGetUsers({ status: "active", prefixName: "", userId: this.userId });
+        if (res.statusCode !== 200) return;
+        this.users = res.users;
+        this.allUsers = this.users.map((usr) => usr.name);
+    }
+
 }
 
 interface IThreadActual {

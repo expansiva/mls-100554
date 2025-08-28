@@ -265,6 +265,7 @@ export async function checkThreadAlreadyExist(threadName: string) {
 }
 
 export async function getDmThreadByUsers(userId1: string, userId2: string): Promise<mls.msg.ThreadPerformanceCache | undefined> {
+
     const allThreads = await listThreads();
 
     return allThreads.find(thread => {
