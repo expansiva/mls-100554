@@ -4,8 +4,8 @@ import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from './_100554_libCommom';
-import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles } from './_100554_collabLibStor';
-import { createAllModels, readProjectTypescriptAndCompile } from './_100554_collabLibModel';
+import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, IReqCreateStorFile, createStorFile } from './_100554_collabLibStor';
+import { createAllModels, createModel, readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 import { ServiceBase } from './_100554_serviceBase';
 import './_100554_serviceListFilesAdd';
 import './_100554_pluginExploreListAddL3';
@@ -297,11 +297,11 @@ export class PluginExploreList extends PluginBaseModule {
                 <div class="toolbar__center">
                     <div class="toolbar__radio-group">
                         <label @click="${this.clickRadioProjectActual}" title="project">
-                            <input type="radio" name="${this.position + mls.actualLevel}project" value="${this.projectLabel}" ?checked=${ this.filterProject !== 0} />
+                            <input type="radio" name="${this.position + mls.actualLevel}project" value="${this.projectLabel}" ?checked=${this.filterProject !== 0} />
                             <span class="${this.filterProject !== 0 ? 'checked' : ''}">${this.projectLabel}</span>
                         </label>
                         <label @click="${this.clickRadioProject0}" title="all project">
-                            <input type="radio" name="${this.position + mls.actualLevel}project" value="0" ?checked=${ this.filterProject === 0} />
+                            <input type="radio" name="${this.position + mls.actualLevel}project" value="0" ?checked=${this.filterProject === 0} />
                             <span class="${this.filterProject === 0 ? 'checked' : ''}">${this.msg.localProject}</span>
                         </label>
                     </div>
@@ -767,7 +767,11 @@ export class PluginExploreList extends PluginBaseModule {
             this.showLoading(true);
             const params = {} as mls.events.IFileAction;
 
-            const files = await createAllModels(file, true);
+            //const files = await createAllModels(file, true);
+            
+            await this.createModel(file, '.less');
+            await this.createModel(file, '.ts');
+            await this.createModel(file, '.html');
 
             (params.action as any) = action;
             params.level = file.level;
@@ -811,6 +815,46 @@ export class PluginExploreList extends PluginBaseModule {
             this.showError('false');
             this.showError(err.message || '[fireEvents]: erro open');
             this.showLoading(false);
+        }
+
+
+    }
+
+    private async createModel(base: mls.stor.IFileInfo, ext: string) {
+
+        if (ext === '.ts') {
+            return await createModel(base, true, false);
+        }
+
+        const { project, shortName, folder, level } = base;
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, ext);
+        let stor = mls.stor.files[key];
+
+        if (!stor) {
+
+            const param: IReqCreateStorFile = {
+                project,
+                shortName,
+                folder,
+                level,
+                extension: '.ts' ,
+                source: '',
+                status: 'new'
+            }
+
+            if (ext === '.less') {
+                const templateLess = getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
+                return createStorFile({ ...param, extension: '.less', source: templateLess }, true, false)
+            }
+
+            if (ext === '.html') {
+                const templateHTML = getBaseTemplate({ folder, shortName, project, extension: '.html' });
+                return createStorFile({ ...param, extension: '.html', source: templateHTML }, true, false)
+            }
+
+
+        } else {
+            await createModel(stor, true, false);
         }
 
 
@@ -1139,10 +1183,10 @@ export class PluginExploreList extends PluginBaseModule {
             }
 
 
-            const htmlLocal = htmlFile && htmlFile.inLocalStorage && await this.isDifBaseTemplate(htmlFile);
-            const styleLocal = styleFile && styleFile.inLocalStorage && await this.isDifBaseTemplate(styleFile);
-            const testLocal = testFile && testFile.inLocalStorage && await this.isDifBaseTemplate(testFile);
-            const defsLocal = defsFile && defsFile.inLocalStorage && await this.isDifBaseTemplate(defsFile);
+            const htmlLocal = htmlFile && htmlFile.inLocalStorage; //&& await this.isDifBaseTemplate(htmlFile);
+            const styleLocal = styleFile && styleFile.inLocalStorage; //&& await this.isDifBaseTemplate(styleFile);
+            const testLocal = testFile && testFile.inLocalStorage; //&& await this.isDifBaseTemplate(testFile);
+            const defsLocal = defsFile && defsFile.inLocalStorage; //&& await this.isDifBaseTemplate(defsFile);
 
             const htmlError = htmlFile && htmlFile.hasError;
             const styleError = styleFile && styleFile.hasError

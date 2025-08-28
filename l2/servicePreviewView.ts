@@ -2,9 +2,11 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getDependenciesByHtml, getDependenciesByHtmlFile, getTokens, IJSONDependence } from './_100554_libCompile';
+import { getDependenciesByHtml,  getDependenciesByHtmlFile, getTokens, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import { createAllModels } from './_100554_collabLibModel';
+import { createAllModels, createModel } from './_100554_collabLibModel';
+import { getBaseTemplate} from './_100554_libCommom';
+import { createStorFile, IReqCreateStorFile } from './_100554_collabLibStor';
 
 import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
 import { StateLitElement } from './_100554_stateLitElement';
@@ -413,12 +415,56 @@ export class ServicePreviewView extends StateLitElement {
         if (!mls.stor.files[key]) throw new Error(this.msg.notFoundStorfile + ': ' + key);
 
         if (!mls.editor.models[mkey] && mls.actualLevel !== 7) {
-            await createAllModels(file);
+            //await createAllModels(file);
+            await this.createModel(file, '.less');
+            await this.createModel(file, '.ts');
+            await this.createModel(file, '.html');
         }
 
         if (!mls.editor.models[mkey] && mls.actualLevel !== 7) throw new Error(this.msg.notFoundStorfile + ': ' + mkey);
         this.file = mls.stor.files[key];
         this.models = mls.editor.models[mkey];
+    }
+
+
+    private async createModel(base: mls.stor.IFileInfo, ext: string) {
+
+        if (ext === '.ts') {
+            return await createModel(base, true, false);
+        }
+
+        const { project, shortName, folder, level } = base;
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, ext);
+        let stor = mls.stor.files[key];
+
+        if (!stor) {
+
+            const param: IReqCreateStorFile = {
+                project,
+                shortName,
+                folder,
+                level,
+                extension: '.ts' ,
+                source: '',
+                status: 'new'
+            }
+
+            if (ext === '.less') {
+                const templateLess = getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
+                return createStorFile({ ...param, extension: '.less', source: templateLess }, true, false)
+            }
+
+            if (ext === '.html') {
+                const templateHTML = getBaseTemplate({ folder, shortName, project, extension: '.html' });
+                return createStorFile({ ...param, extension: '.html', source: templateHTML }, true, false)
+            }
+
+
+        } else {
+            await createModel(stor, true, false);
+        }
+
+
     }
 
     private lastHTML: string = '';

@@ -9,7 +9,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
         return [
             {
                 category: 'Services',
-                scope: ['l7ServicesRight', 'l6ServicesRight', 'l5ServicesRight', 'l4ServicesRight', 'l3ServicesRight', 'l2ServicesRight'],
+                scope: ['l7ServicesRight', 'l4ServicesRight', 'l3ServicesRight', 'l2ServicesRight'],
                 priority: 1,
                 auth: ['*'],
                 widget: '_100554_servicePreview'

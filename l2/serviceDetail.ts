@@ -5,8 +5,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { getAllWebComponentsInSource } from './_100554_libCompile';
 import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
-import './_100554_projects';
-import './_100554_modules';
 
 @customElement('service-detail-100554')
 export class ServiceDetail100554 extends ServiceBase {
@@ -14,7 +12,7 @@ export class ServiceDetail100554 extends ServiceBase {
     @property({ type: String }) msize = '';
     @property({ type: String }) widget = '';
 
-    @state() typeRender: 'l6' | 'l5' | 'default' = 'default';
+    @state() typeRender: 'default' = 'default';
 
     @query('#contentPlugin') contentPlugin: HTMLDivElement | undefined;
 
@@ -154,28 +152,14 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     render() {
-        switch (this.typeRender) {
-            case ('l5'): return this.renderL5();
-            case ('l6'): return this.renderL6();
-            default: return this.renderDefault();
-        }
+        return this.renderDefault();
+        
     } 
 
     renderDefault() {
         return html`<div style="overflow:auto;height: calc(100% - 2rem);padding:1rem" id="contentPlugin"></div>`;
     }
 
-    renderL5() {
-        return html`<div style="overflow:auto;height: calc(100% - 2rem);padding:1rem" id="contentPlugin">
-            <modules-100554></modules-100554>
-        </div>`;
-    }
-
-    renderL6() {
-        return html`<div style="overflow:auto;height: calc(100% - 2rem);padding:1rem" id="contentPlugin">
-            <projects-100554></projects-100554>
-        </div>`;
-    }
 
     //----------IMPLEMENTS-------------------
 
@@ -183,23 +167,6 @@ export class ServiceDetail100554 extends ServiceBase {
         mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['PluginDetails'], (ev) => this.onPluginDetails(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
-        mls.events.addEventListener([1, 2, 3, 4, 5, 6, 7], ['ToolBarSelected'], (ev) => this.onlevelChange(ev));
-    }
-
-    private onlevelChange(ev: mls.events.IEvent) {
-
-        switch (mls.actualLevel) {
-            case (5):
-                this.openMe();
-                this.typeRender = 'l5';
-                break;
-            case (6):
-                this.openMe();
-                this.typeRender = 'l6';
-                break;
-            default: this.typeRender = 'default';
-        }
-        
     }
 
     private onMonacoEvents(ev: mls.events.IEvent): void {

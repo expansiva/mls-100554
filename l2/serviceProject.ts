@@ -23,7 +23,7 @@ type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
-}
+} 
 /// **collab_i18n_end**
 
 @customElement('service-project-100554')
@@ -153,6 +153,7 @@ export class ServiceProject100554 extends ServiceBase {
 
         if (visible) {
             this.refreshPlugins();
+            this.requestUpdate();
         }
     }
 
@@ -251,7 +252,7 @@ export class ServiceProject100554 extends ServiceBase {
     }
 
     private renderShowCase() {
-        this.fireEventClose('In development: Details showcase');
+        this.fireEventClose('<modules-100554></modules-100554>');
 
         const project = mls.actualProject;
         if (!project) return '<div>No project selected</div<';
