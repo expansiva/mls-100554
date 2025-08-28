@@ -5,6 +5,8 @@ import { customElement, property, state } from "lit/decorators.js";
 import { StateLitElement } from './_100554_stateLitElement';
 import { IAgent } from './_100554_aiAgentBase';
 import { getTemporaryContext } from './_100554_aiAgentHelper';
+import { defaultThreadImage } from './_100554_collabMessageHelper';
+
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -46,8 +48,6 @@ export class CollabChangeAvatar extends StateLitElement {
 
   private msg: MessageType = messages['en'];
 
-  private defaultImage = `https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`;
-
   @property({ type: String }) value?: string;
   @property({ type: String }) userId: string = "20250417120841.1000";
   @property({ type: String }) threadId: string = "20250825143728.1000";
@@ -61,7 +61,7 @@ export class CollabChangeAvatar extends StateLitElement {
 
   firstUpdated(_changedProperties: Map<PropertyKey, unknown>) {
     super.firstUpdated(_changedProperties)
-    this.preview = this.value || this.defaultImage;
+    this.preview = this.value || defaultThreadImage;
   }
 
   render() {

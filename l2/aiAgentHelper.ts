@@ -403,7 +403,7 @@ export function getTotalCost(task: mls.msg.TaskData): string {
   nextSteps.forEach((step) => sumCosts([step]));
 
   const rounded = Math.ceil(tot * 100) / 100;
-  return `$ ${rounded.toFixed(2)}`;
+  return `${rounded.toFixed(2)}`;
 }
 
 
