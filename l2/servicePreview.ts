@@ -1247,7 +1247,8 @@ export class ServicePreview100554 extends ServiceBase {
     private async setThemeByModule() {
         if (!this.actualFile) return;
         const theme = await this.getFileModuleName();
-        if (!this.actualTheme) {
+
+        if (!this.actualTheme || this.actualTheme != theme) {
             this.actualTheme = theme;
             if (this.menu.tools.theme) {
                 const index = this.menu.tools.theme.options.findIndex((item) => item.text === theme);
@@ -1258,7 +1259,9 @@ export class ServicePreview100554 extends ServiceBase {
             }
             this.onStyleChanged();
         } else if (this.actualTheme && this.actualThemeIndex) {
+            this.actualTheme = theme;
             this.menu.tools.theme.selected = this.actualThemeIndex;
+            this.onStyleChanged();
         }
 
     }
