@@ -67,7 +67,9 @@ export class ServiceDetail100554 extends ServiceBase {
 
     public clear() {
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
-        Array.from(this.contentPlugin.children).forEach((i) => (i as HTMLElement).style.display = "none");
+        Array.from(this.contentPlugin.children).forEach((i) => {
+            if((i as any).level !== mls.actualLevel)(i as HTMLElement).style.display = "none";
+        });
     }
 
     private showAboutThis(): boolean {
@@ -121,6 +123,8 @@ export class ServiceDetail100554 extends ServiceBase {
             if (child.tagName.startsWith('PLUGIN-')) {
                 child.setAttribute('msize', this.msize);
             }
+
+            (child as HTMLElement).style.display = 'none';
         });
 
     }
@@ -167,6 +171,7 @@ export class ServiceDetail100554 extends ServiceBase {
         mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['PluginDetails'], (ev) => this.onPluginDetails(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
+        
     }
 
     private onMonacoEvents(ev: mls.events.IEvent): void {
@@ -256,10 +261,11 @@ export class ServiceDetail100554 extends ServiceBase {
 
         Array.from(this.contentPlugin.children).forEach((i) => (i as HTMLElement).style.display = "none");
 
-        let el = this.contentPlugin.querySelector('#' + ori) as HTMLElement;
+        let el = this.contentPlugin.querySelector('#' + ori + mls.actualLevel) as HTMLElement;
+
         if (!el) {
             el = document.createElement('div');
-            el.id = ori;
+            el.id = ori + mls.actualLevel;
             this.setContentinEl(el, content, args);
             return;
         }

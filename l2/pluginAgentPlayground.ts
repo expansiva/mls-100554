@@ -3,9 +3,10 @@
 import { html, repeat } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
-import { loadChatPreferences, IChatPreferences, saveChatPreferences, getUserId } from './_100554_collabMessageHelper';
+import { loadChatPreferences, IChatPreferences, saveChatPreferences, getUserId, createThread } from './_100554_collabMessageHelper';
+import { getThreadByName } from './_100554_msgDBController';
 import { IAgent } from './_100554_aiAgentBase';
-import {  getTemporaryContext } from './_100554_aiAgentHelper';
+import { getTemporaryContext } from './_100554_aiAgentHelper';
 import { listThreads } from './_100554_msgDBController';
 import { updateHTML } from './_100554_collabDOMSync';
 import { collab_trash } from './_100554_collabIcons';
@@ -171,7 +172,7 @@ draggable="true"
 </div>
 `
     }
-    
+
     renderSelect(prompt: Iprompts) {
         return html`
 <select .value=${prompt.type.trim()} @change=${(e: Event) => this.updateSelect(e, prompt)}>
@@ -271,7 +272,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
             {
                 type,
                 content: '',
-                openDetail:false
+                openDetail: false
             }
         ];
     }
@@ -306,7 +307,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
 
     private async handlePlay() {
         this.loading = true;
-        
+
         if (this.inEdit) {
             setTimeout(async () => {
                 this.handlePlay();
@@ -368,14 +369,30 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
     }
 
     private async _callAgent(agentName: string, message: string): Promise<string> {
-        if (!this.chatPreferences.threadMaintenance) {
+        /*if (!this.chatPreferences.threadMaintenance) {
             return `Agent "${agentName}" error:
 Please configure your maintenance thread at: CollabMessage > Settings > Chat Preferences`;
+        }*/
+
+        let pageName = mls.actual[mls.actualLevel].getFullName();
+        if (mls.actualLevel === 2) {
+            const info = mls.actual[2].left;
+            if(!info) return `Agent "${agentName}" error: Not found file`;
+            pageName = info.folder ? `_${info.project}_${info.folder}/${info.shortName}` : `${info.project}_${info.shortName}`;
         }
+
+        let thread = await getThreadByName(pageName);
+        if (!thread) {
+            thread = await createThread(pageName, [], 'company');
+        }
+
+        if (!thread) return `Agent "${agentName}" error: Not found thread: ${pageName}`;
+        
         const userId = getUserId();
-        const threadId = this.chatPreferences.threadMaintenance;
+        //const threadId = this.chatPreferences.threadMaintenance;
+        const threadId = thread.threadId;
         if (!userId) return `Agent "${agentName}" error: Not found userID`;
-        let context; 
+        let context;
         try {
             const moduleAgent = await import(`./${agentName}`);
             if (!moduleAgent) return 'Not found agent:' + agentName;
@@ -482,7 +499,7 @@ Please configure your maintenance thread at: CollabMessage > Settings > Chat Pre
     private handlePaste(e: ClipboardEvent) {
         e.preventDefault();
         const text = (e.clipboardData || (window as any).clipboardData).getData('text');
-        
+
         const selection = window.getSelection();
         if (!selection?.rangeCount) return;
         selection.deleteFromDocument();

@@ -115,7 +115,8 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     renderExplore() {
-        this.firedetail('<projects-100554></projects-100554>');
+        console.info('passou')
+        if (this.visible === 'true') this.firedetail('<projects-100554></projects-100554>');
         return html`<h3 style="padding:2rem">Explore others projects , in development</h3>`
     }
 

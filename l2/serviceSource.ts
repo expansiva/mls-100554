@@ -12,10 +12,11 @@ import { propertyDataSource } from './_100554_collabDecorators';
 import { collab_html, collab_typescript, collab_less, collab_fileTest, collab_file_code } from './_100554_collabIcons';
 import { createAgent } from './_100554_agentFix';
 import { getTemporaryContext } from './_100554_aiAgentHelper';
-import { loadChatPreferences, getUserId } from './_100554_collabMessageHelper';
+import { loadChatPreferences, getUserId, createThread } from './_100554_collabMessageHelper';
 import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate } from './_100554_libCommom';
 import { createAllModels, readProjectTypescriptAndCompile, createModel } from './_100554_collabLibModel';
 import { IReqCreateStorFile, createStorFile } from './_100554_collabLibStor';
+import { getThreadByName } from './_100554_msgDBController';
 
 import { CollabSpliterVerticalVarFixed100554 } from './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterVerticalVarFixed';
@@ -1080,7 +1081,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         const page = this.getActualL2File();
         if (!page) return;
-        const pref = loadChatPreferences();
+        //const pref = loadChatPreferences();
 
         const modeBy = {
             'icTs': 'typescript',
@@ -1091,13 +1092,21 @@ export class ServiceSource100554 extends ServiceBase {
         }
 
         const data = { page, prompt: 'Fix errors in files', position: this.position, mode: modeBy[this.mode] }
-        if (!pref.threadMaintenance) {
+        /*if (!pref.threadMaintenance) {
             this.setError('Please configure your maintenance thread at: CollabMessage > Settings > Chat Preferences');
             return;
+        }*/
+
+        let thread = await getThreadByName(page);
+        if (!thread) {
+            thread = await createThread(page, [], 'company');
         }
 
+        if (!thread) return `Error: Not found thread: ${page}`;
+
         const userId = getUserId();
-        const threadId = pref.threadMaintenance;
+        //const threadId = pref.threadMaintenance;
+        const threadId = thread.threadId;
         if (!userId) return;
         this.lockEditorForFile(page);
         this.toogleOverlayLoading(true, 'Executing agent Fix...');
