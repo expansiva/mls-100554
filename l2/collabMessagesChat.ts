@@ -23,7 +23,8 @@ import {
     updateThread,
     updateUsers,
     getMessage,
-    getMessagesByThreadId
+    getMessagesByThreadId,
+    getTask
 } from './_100554_msgDBController';
 
 import {
@@ -31,7 +32,8 @@ import {
     getBotsContext,
     registerToken,
     loadNotificationPreferences,
-    loadNotificationDeviceId
+    loadNotificationDeviceId,
+    defaultThreadImage
 } from './_100554_collabMessageHelper';
 
 import './_100554_collabMessagesTaskInfo';
@@ -100,7 +102,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @state() userPreferenceChat?: IChatPreferences;
     @state() isLoadingThread: boolean = false;
     @state() filteredThreads: IFilteredThreadsByStatus = { active: [], archived: [], deleted: [], deleting: [] };
-    // @state() allUsersInThread: mls.msg.User[] = [];
     @state() isThreadError: boolean = false;
     @state() threadErrorMsg: string = '';
     @state() lastTopicFilter: string = '';
@@ -131,11 +132,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private isLoadingMoreMessages = false;
     private isChangeTopics = false;
     private wasMessagesAtBottom: boolean = true;
-
-
-    private imageUrls = [
-        "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ];
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
@@ -338,6 +334,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
                                                 .context= ${message.context}
                                                 lastChanged= ${message.lastChanged}
                                                 taskId=${message.taskId}
+                                                threadId=${this.actualThread?.thread.threadId}
+                                                userId=${this.userId}
                                                 title=${titleTranslated}
                                                 status=${message.taskStatus}
                                                 @taskclick=${() => this.onTaskClick(message?.taskId || '', message.createAt, message.threadId, message)}
@@ -587,7 +585,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private getThreadAvatar(item: IFilteredThreads) {
-        let threadAvatar = this.imageUrls[Math.floor(Math.random() * this.imageUrls.length)];
+        let threadAvatar = defaultThreadImage;
         if (item.thread.name.startsWith('@') && item.thread.users.length === 2) {
             const user = item.users.find((user) => user.userId !== this.userId);
             if (user && user.avatar_url) threadAvatar = user.avatar_url;
@@ -632,7 +630,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
                 lastMessage = lastMessage.replace(/\[@([^\]]+)\]\(([^)]+)\)/g, (_m, name, userId) => {
                     const user = sortedUsers.find(u => u.userId === userId);
-                    if (!user) return `[@${name}]`;
+                    if (!user) return `@${name}`;
                     return `@${user.name}`;
                 });
             }
@@ -1115,7 +1113,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
             this.checkNotificationsUnreadMessages();
 
-
         } catch (err: any) {
             this.isThreadError = true;
             this.threadErrorMsg = err.message || 'Error on read thread';
@@ -1567,6 +1564,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (!this.actualThread || !thId || thId !== this.actualThread.thread.threadId) return;
         this.updateMessage2(false, true, { ...message, footers: [] }, message, outputs);
     };
+
 
 }
 

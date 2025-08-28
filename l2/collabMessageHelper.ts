@@ -10,6 +10,8 @@ const LOCAL_STORAGE_KEY = '_100554_serviceCollabMessages';
 export const AGENTDEFAULT = 'agentPlanner1';
 export const PROJECTAGENTDEFAULT = 100554;
 
+export const defaultThreadImage = "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+
 export async function registerToken() {
 
     const token = await mls.events.getFCMTokenForBackend();

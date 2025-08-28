@@ -263,7 +263,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         }
     }
     private selectMention(suggestion: IMentions) {
-        if (!this.textArea) return;
+        if (!this.textArea || !suggestion) return;
         const cursorPos = this.textArea.selectionStart;
         const beforeCursor = this.text.slice(0, cursorPos);
         const afterCursor = this.text.slice(cursorPos);

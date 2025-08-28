@@ -38,7 +38,6 @@ const message_pt = {
     chatPref: 'Preferências do chat',
     translate: 'Tradução',
     preferLanguage: 'Idioma preferido',
-    threadMaintenance: 'Thread para manutenção',
     userTitle: 'Usuário',
     prefNotification: 'Preferências de notificação',
     infoNotification: 'Avisamos quando houver mudanças e novas mensagens, sem pop-ups, só sincronismo, mais velocidade para você',
@@ -61,7 +60,6 @@ const message_en = {
     chatPref: 'Chat Preferences',
     translate: 'Translate',
     preferLanguage: 'Preferred language',
-    threadMaintenance: 'Thread for maintenance',
     userTitle: 'User',
     prefNotification: 'Notification Preferences',
     infoNotification: 'We\'ll notify you when there are changes and new messages — no pop-ups, just seamless syncing for faster performance.',
@@ -226,10 +224,6 @@ export class CollabMessagesSettings100554 extends StateLitElement {
                     type="text"
                 />
             </div>
-            <div class="chat-config-item">
-                <label>${this.msg.threadMaintenance}:</label>
-                ${this.renderListThread()}
-            </div>
             <div class="chat-config-item action">
                 <button
                     @click=${this.handleSaveChatPref}
@@ -244,16 +238,6 @@ export class CollabMessagesSettings100554 extends StateLitElement {
     </div>`;
     }
 
-    renderListThread() {
-        return html`
-            <select id="selectThread" @change=${this.handleThreadChange}>
-                <option value=""></option>
-                ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((item: mls.msg.ThreadPerformanceCache) => {
-            return html`<option value="${item.threadId}">${item.group}/ ${item.name}</option>`
-        }) as any)}
-            </select>
-        `
-    }
 
     private renderPreferencesNotifications() {
         this.notificationPreferences = this.getNotificationStatus();
@@ -445,14 +429,6 @@ export class CollabMessagesSettings100554 extends StateLitElement {
         this.chatPreferences = {
             ...this.chatPreferences,
             language: target.value
-        };
-    }
-
-    private handleThreadChange(e: Event) {
-        const target = e.target as HTMLInputElement;
-        this.chatPreferences = {
-            ...this.chatPreferences,
-            threadMaintenance: target.value
         };
     }
 

@@ -3,8 +3,10 @@
 import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
-import { getTask } from './_100554_msgDBController';
+import { getTask, getMessage } from './_100554_msgDBController';
 import { getNextPendentStep, getTotalCost } from './_100554_aiAgentHelper';
+import { executeNextStep } from "./_100554_aiAgentOrchestration";
+
 import {
     collab_money,
     collab_pause,
@@ -12,7 +14,8 @@ import {
     collab_chevron_right,
     collab_clock,
     collab_check,
-    collab_bug
+    collab_bug,
+    collab_play
 } from './_100554_collabIcons';
 
 /// **collab_i18n_start** 
@@ -36,6 +39,8 @@ export class WidgetAiTask100554 extends StateLitElement {
     private msg: MessageType = messages['en'];
 
     @property() taskid: string = '';
+    @property() threadId: string = '';
+    @property() userId: string = '';
     @property() messageid: string = '';
     @property() lastChanged: string = '';
     @property() status: string = '';
@@ -44,6 +49,7 @@ export class WidgetAiTask100554 extends StateLitElement {
     @state() context: mls.msg.ExecutionContext | undefined;
     @state() private secondsPassed: number = 0;
     @state() private lastStep: number | undefined;
+    @state() continueEnabled: boolean = false;
     private timerId: number | undefined;
 
 
@@ -111,6 +117,11 @@ export class WidgetAiTask100554 extends StateLitElement {
     }
 
     renderIconTask() {
+
+        if (this.continueEnabled) {
+            return html`<span @click=${this.onContinueClick} class="task-icon">${collab_play}</span>`;
+        }
+
         const taskObj: any = {
             '': html``,
             'pending': collab_clock,
@@ -132,12 +143,22 @@ export class WidgetAiTask100554 extends StateLitElement {
             if (nextStepPending?.type === 'clarification') status = 'waitingforuser'
         }
 
-        if (!status) return html`<spanclass="task-icon in progress ">${collab_clock}</span>`;
+        if (!status) return html`<span class="task-icon in progress ">${collab_clock}</span>`;
         return html`<span class="task-icon ${status.split(' ').join('-')} ">${taskObj[status]}</span>`;
 
     }
 
+    private onContinueClick(e: MouseEvent) {
+        e.stopPropagation();
+        if (this.context) {
+            executeNextStep(this.context);
+            this.continueEnabled = false;
+            this.resetTimer();
+        }
+    }
+
     private resetTimer() {
+        if (this.continueEnabled) return;
         this.secondsPassed = 0;
         if (this.timerId) {
             clearInterval(this.timerId);
@@ -156,7 +177,35 @@ export class WidgetAiTask100554 extends StateLitElement {
 
     private async getTaskLocal(taskId: string) {
         const task = await getTask(taskId);
-        if (task) this.task = task;
+        if (task) {
+            this.task = task;
+
+            if (task.status === 'in progress' && task.owner === this.userId && !this.context) {
+                const messageId = `${this.threadId}/${this.messageid}`
+
+                const response = await mls.api.msgGetTaskUpdate({
+                    messageId,
+                    taskId,
+                    userId: this.userId
+                });
+
+                const message = await getMessage(messageId);
+                if (!message) return;
+                if (!response || response.statusCode !== 200) return;
+
+                this.context = {
+                    task: response.task,
+                    message
+                }
+
+                this.lastChanged = new Date().getTime().toString();
+                const nextPendent = getNextPendentStep(response.task);
+                if (nextPendent && nextPendent.type !== 'clarification') {
+                    this.continueEnabled = true;
+                }
+            }
+
+        }
     }
 
     private onCardClick() {
