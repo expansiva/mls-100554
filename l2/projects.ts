@@ -64,7 +64,7 @@ export class Projects102009 extends StateLitElement {
         <div class="project-card selected">
           <img class="thumbnail" src=${this.selectedProject.thumbnail} alt=${this.selectedProject.title} />
           <div class="card-content">
-            <div class="project-title">${this.selectedProject.title}(${this.selectedProject.project})</div>
+            <div class="project-title">${this.selectedProject.title} (${this.selectedProject.project})</div>
             <div class="project-meta">
               <span class="badge">${this.selectedProject.type}</span>
               <div class="actions">
@@ -91,7 +91,7 @@ export class Projects102009 extends StateLitElement {
                 <div class="project-card" .filter=${project.title+project.project}>
                   <img class="thumbnail" src=${project.thumbnail} alt=${project.title} />
                   <div class="card-content">
-                    <div class="project-title">${project.title}(${project.project})</div>
+                    <div class="project-title">${project.title} (${project.project})</div>
                     <div class="project-meta">
                       <span class="badge">${project.type}</span>
                       <div class="actions">
