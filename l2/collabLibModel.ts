@@ -50,7 +50,7 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
 
 }
 
-export async function createAllModels(storFileBase: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile:boolean = false): Promise<mls.editor.IModels | undefined> {
+export async function createAllModels(storFileBase: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile:boolean = false, createStorIfNeed:boolean = true): Promise<mls.editor.IModels | undefined> {
 
     const storFiles = await mls.stor.getFiles({ project: storFileBase.project, shortName: storFileBase.shortName, folder: storFileBase.folder, loadContent: true, });
 
@@ -58,7 +58,7 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
 
     if (storFiles.less && (!fileModels || !fileModels.style)) {
         await createModel(storFiles.less, needCompile, awaitCompile);
-    } else if (!storFiles.less && (!fileModels || !fileModels.style)) {
+    } else if (createStorIfNeed && !storFiles.less && (!fileModels || !fileModels.style)) {
         storFiles.less = await createStorFiles(storFiles.ts, '.less');
         await createModel(storFiles.less, needCompile, awaitCompile);
     }
@@ -69,21 +69,21 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
 
     if (storFiles.html && (!fileModels || !fileModels.html)) {
         await createModel(storFiles.html, needCompile, awaitCompile);
-    } else if (!storFiles.html && (!fileModels || !fileModels.html)) {
+    } else if (createStorIfNeed && !storFiles.html && (!fileModels || !fileModels.html)) {
         storFiles.html = await createStorFiles(storFiles.ts, '.html');
         await createModel(storFiles.html, needCompile, awaitCompile);
     }
 
     if (storFiles.test && (!fileModels || !fileModels.test)) {
         await createModel(storFiles.test, needCompile, awaitCompile);
-    } else if (!storFiles.test && (!fileModels || !fileModels.test)) {
+    } else if (createStorIfNeed && !storFiles.test && (!fileModels || !fileModels.test)) {
         storFiles.test = await createStorFiles(storFiles.ts, '.test.ts');
         await createModel(storFiles.test, needCompile, awaitCompile);
     }
 
     if (storFiles.defs && (!fileModels || !fileModels.defs)) {
         await createModel(storFiles.defs, needCompile, awaitCompile);
-    } else if (!storFiles.defs && (!fileModels || !fileModels.defs)) {
+    } else if (createStorIfNeed && !storFiles.defs && (!fileModels || !fileModels.defs)) {
         storFiles.defs = await createStorFiles(storFiles.ts, '.defs.ts');
         await createModel(storFiles.defs, needCompile, awaitCompile);
     }

@@ -32,7 +32,7 @@ export function convertTagToFileName(tag: string): {
 } | undefined {
     const parts = tag.split('--');
     const namePart = parts.pop() || '';
-    const folder = parts.join('/');
+    const folder = parts.join('/').replace(/-(.)/g, (_, letter) => letter.toUpperCase());
 
     const regex = /(.+)-(\d+)$/;
     const match = namePart.match(regex);
@@ -58,7 +58,7 @@ export function convertFileNameToTag(info: {
 
     const kebabName = shortName.replace(/([A-Z])/g, '-$1').toLowerCase();
     const baseName = `${kebabName}-${project}`;
-    const folderPrefix = folder ? folder.replace(/\//g, '--') + '--' : '';
+    const folderPrefix = folder ? folder.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/\//g, '--') + '--' : '';
 
     return `${folderPrefix}${baseName}`;
 }

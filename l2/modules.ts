@@ -9,7 +9,7 @@ import { StateLitElement } from './_100554_stateLitElement';
 export class Modules100554 extends StateLitElement {
 
 
-  @state() currentView: 'list' | 'details' | 'error' = 'list';
+  @state() currentView: 'list' | 'details' | 'error' | 'add' = 'list';
   @state() error = '';
   @state() archiveConfirmationText = '';
   @state() selectedModule: any = null;
@@ -29,6 +29,7 @@ export class Modules100554 extends StateLitElement {
       case ('list'): return this.renderModuleList();
       case ('details'): return this.renderModuleDetails();
       case ('error'): return this.renderError();
+      case ('add'): return this.renderAdd();
 
     }
 
@@ -39,6 +40,7 @@ export class Modules100554 extends StateLitElement {
       <div class="header">
         <h2>Select a Module</h2>
         <input type="text" autocomplete="off" placeholder="Filter modules..." id="module-filter" @input="${this.filterLiChange}">
+        <button style="margin:0px; width:150px;" @click=${()=>{this.goTo('add')}}><svg style="width:12px; fill:#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"/></svg></button>
       </div> 
     `
   }
@@ -49,6 +51,16 @@ export class Modules100554 extends StateLitElement {
         <h2>Select a Module</h2>
       </div> 
       <h3 style="color:red">${this.error}</h3> 
+      `
+  }
+
+  renderAdd() {
+    return html`
+      <button style="margin:0px; width:150px;" @click=${()=>{this.goTo('list')}}>cancel</button>
+      <div class="header">
+        <h2>In developed</h2>
+      </div> 
+       
       `
   }
 
@@ -152,6 +164,10 @@ export class Modules100554 extends StateLitElement {
     this.currentView = 'list';
     this.selectedModule = null;
     this.archiveConfirmationText = '';
+  }
+
+  private goTo(scenary:string) {
+    this.currentView = scenary as any;
   }
 
   private async setMyModules() {

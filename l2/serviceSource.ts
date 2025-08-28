@@ -13,8 +13,9 @@ import { collab_html, collab_typescript, collab_less, collab_fileTest, collab_fi
 import { createAgent } from './_100554_agentFix';
 import { getTemporaryContext } from './_100554_aiAgentHelper';
 import { loadChatPreferences, getUserId } from './_100554_collabMessageHelper';
-import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2 } from './_100554_libCommom';
-import { createAllModels, readProjectTypescriptAndCompile } from './_100554_collabLibModel';
+import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate } from './_100554_libCommom';
+import { createAllModels, readProjectTypescriptAndCompile, createModel } from './_100554_collabLibModel';
+import { IReqCreateStorFile, createStorFile } from './_100554_collabLibStor';
 
 import { CollabSpliterVerticalVarFixed100554 } from './_100554_collabSpliterVerticalVarFixed';
 import './_100554_collabSpliterVerticalVarFixed';
@@ -124,16 +125,72 @@ export class ServiceSource100554 extends ServiceBase {
         }
 
         if (op === EToolsSource.icTest) {
-            if (!this.activeModels || !this.activeModels.test || !this.activeModels.test.storFile) return;
+            if (!this.activeModels || !this.activeModels.test || !this.activeModels.test.storFile) {
+                this.createModelIfNeed('.test.ts', op);
+                return;
+            }
             this.showThisModel(this.activeModels?.test);
             this.updateActionBasedOnError('test', this.activeModels?.test?.model.id);
         }
 
         if (op === EToolsSource.icDefs) {
-            if (!this.activeModels || !this.activeModels.defs || !this.activeModels.defs.storFile) return;
+            if (!this.activeModels || !this.activeModels.defs || !this.activeModels.defs.storFile) {
+                this.createModelIfNeed('.defs.ts', op);
+                return;
+            }
             this.showThisModel(this.activeModels?.defs);
             this.updateActionBasedOnError('defs', this.activeModels?.defs?.model.id);
         }
+    }
+
+    private async createModelIfNeed(ext: string, op: number) {
+
+        try {
+            if (!this.activeModels || !this.activeModels.ts) return;
+
+            const { project, shortName, folder, level } = this.activeModels.ts.storFile;
+
+            const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, ext);
+            let stor = mls.stor.files[key];
+
+            if (!stor) {
+
+                let template = getBaseTemplate({ folder, shortName, project, extension: ext });
+
+                const param: IReqCreateStorFile = {
+                    project,
+                    shortName,
+                    folder,
+                    level,
+                    extension: ext,
+                    source: template,
+                    status: 'new'
+                }
+
+                await createStorFile(param, true, false);
+
+            } else {
+                await createModel(stor, true, false);
+            }
+
+            this.activeModels = mls.editor.getModels(project, shortName, folder);
+
+            if (op === EToolsSource.icTest) {
+                if (!this.activeModels || !this.activeModels.test || !this.activeModels.test.storFile) return;
+                this.showThisModel(this.activeModels?.test);
+                this.updateActionBasedOnError('test', this.activeModels?.test?.model.id);
+            }
+
+            if (op === EToolsSource.icDefs) {
+                if (!this.activeModels || !this.activeModels.defs || !this.activeModels.defs.storFile) return;
+                this.showThisModel(this.activeModels?.defs);
+                this.updateActionBasedOnError('defs', this.activeModels?.defs?.model.id);
+            }
+
+        } catch (e) {
+
+        }
+
     }
 
     public onClickTitle = () => {
@@ -684,7 +741,7 @@ export class ServiceSource100554 extends ServiceBase {
         } catch (e) {
 
             console.info(e);
-            
+
         }
 
 
