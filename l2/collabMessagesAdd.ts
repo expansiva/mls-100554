@@ -145,7 +145,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
         if (!userId) return;
         const res = await mls.api.msgGetUsers({ status: "active", prefixName: "", userId });
         if (res.statusCode !== 200) return;
-        this.users = res.users;
+        this.users = res.users.filter((user) => user.userId !== userId);
     }
 
     private async loadAgentsBotsAvaliables() {
@@ -390,20 +390,15 @@ export class CollabMessagesAdd100554 extends StateLitElement {
             return;
         }
 
+        this.isLoading = true;
         let avatar_url = '';
+        const threadName = this.threadType === 'dm' ? `@${this.users.find((user) => user.userId === this.dmUser)?.name}` : this.threadName;
 
-        if (this.threadType === 'channel' && this._selectedAgent !== 'none') {
-            const botSelected = this.agentsBots.find((item) => item.id === this._selectedAgent);
-            avatar_url = botSelected?.avatar_url || ''
-        } else {
+        if (this.threadType === 'dm') {
+
             this._topics = [];
             this._initialMessage = '';
             this._selectedAgent = '';
-        }
-
-        this.isLoading = true;
-
-        if (this.threadType === 'dm') {
 
             const alreadyExistThread = await getDmThreadByUsers(this.userId, this.dmUser);
             if (alreadyExistThread) {
@@ -411,11 +406,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                 this.isLoading = false;
                 return;
             }
-        }
 
-        const threadName = this.threadType === 'dm' ? `@${this.users.find((user) => user.userId === this.dmUser)?.name}` : this.threadName;
-
-        if (this.threadType === 'dm') {
             try {
                 const thread = await createThreadDM(threadName, this.dmUser, this.group);
                 if (this.onAddSuccess) this.onAddSuccess();
@@ -425,10 +416,15 @@ export class CollabMessagesAdd100554 extends StateLitElement {
             } finally {
                 this.isLoading = false;
             }
-
         }
 
+
         if (this.threadType === 'channel') {
+
+            if (this._selectedAgent !== 'none') {
+                const botSelected = this.agentsBots.find((item) => item.id === this._selectedAgent);
+                avatar_url = botSelected?.avatar_url || ''
+            }
 
             const params: mls.msg.RequestAddThread = {
                 action: 'addThread',
