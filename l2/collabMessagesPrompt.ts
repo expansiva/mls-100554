@@ -1,10 +1,12 @@
 /// <mls shortName="collabMessagesPrompt" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-import { html , ifDefined} from 'lit';
+import { html, ifDefined } from 'lit';
 import { customElement, property, state, query, } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
 import { collab_arrow_up_long } from './_100554_collabIcons';
 import { getThread, listUsers } from './_100554_msgDBController';
 import { IAgent } from './_100554_aiAgentBase'
+import { emojiList } from './_100554_collabMessagesEmojis'
+
 import './_100554_collabMessagesAvatar';
 
 @customElement('collab-messages-prompt-100554')
@@ -58,11 +60,6 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         const thread = await getThread(this.threadId.trim());
         if (!thread) return;
         const users: mls.msg.User[] = await listUsers();
-        // const threadUsers: mls.msg.User[] = [];
-        // thread.users.forEach((user) => {
-        //     const userDB = users.find((us) => us.userId === user.userId);
-        //     if (userDB) threadUsers.push(userDB);
-        // });
         this.allUsers = users;
     }
 
@@ -167,9 +164,22 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
                                     title=${s.description}
                                     @click=${() => this.selectMention(s)}
                                 >
-                                    ${s.avatar_url ? html`<collab-messages-avatar-100554 width="20px" height="20px" avatar=${s.avatar_url}></collab-messages-avatar-100554>` : ''}
-                                    ${s.text}
-                                </li>`)}
+                                    ${s.type === 'emoji' ? html`
+                                    <span class="emoji-suggestion">${s.text}</span>
+                                    <span class="emoji-code">:${s.value}:</span>
+                                    ` : s.type === 'agent' ? html`
+                                    ${s.avatar_url
+                    ? html`<collab-messages-avatar-100554 width="20px" height="20px" avatar=${s.avatar_url}></collab-messages-avatar-100554>`
+                    : ''}
+                                    <span class="agent-suggestion">${s.text}</span>
+                                    ` : s.type === 'user' ? html`
+                                    ${s.avatar_url
+                    ? html`<collab-messages-avatar-100554 width="20px" height="20px" avatar=${s.avatar_url}></collab-messages-avatar-100554>`
+                    : ''}
+                                    <span class="user-suggestion">${s.text}</span>
+                                    ` : ''}
+                                </li>
+                                `)}
                         </ul>
                 ` : ''}
         </div>`
@@ -183,59 +193,89 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             this.getAgents();
         }
     }
+
     async handleInput(e: MouseEvent) {
         if (!e.target) return;
         const target = e.target as HTMLTextAreaElement;
-        const value = target.value;
-        this.text = value;
+        this.text = target.value;
         this.adjustTextAreaHeight();
+
         const cursorPos = target.selectionStart;
-        const beforeCursor = value.slice(0, cursorPos);
-        const match = beforeCursor.match(/(?:^|\s)(@{1,2})([a-zA-Z]*)$/);
-        if (match) {
-            const atSymbol = match[1];
-            const query = match[2];
-            if (atSymbol === '@@' && this.acceptAutoCompleteAgents) {
-                this.mentionActive = true;
-                this.mentionQuery = query;
-                this.mentionSuggestions = (this.allAgents.map(agent => {
-                    if (agent.name.toLowerCase().startsWith(query.toLowerCase()) || agent.alias.toLowerCase().startsWith(query.toLowerCase()))
-                        return {
-                            text: agent.alias,
-                            value: agent.name,
-                            description: agent.description,
-                            avatar_url: agent.avatar_url,
-                            type: 'agent'
-                        }
-                }).filter((item) => item !== undefined)) as IMentions[]
-                await this.updateComplete;
-                this.calculatePosition();
-            } else if (atSymbol === '@' && this.acceptAutoCompleteUser) {
-                this.mentionActive = true;
-                this.mentionQuery = query;
-                this.mentionSuggestions = (this.allUsers.map(user => {
-                    if (user.name.toLowerCase().startsWith(query.toLowerCase()))
-                        return {
-                            avatar_url: user.avatar_url,
-                            text: user.name,
-                            value: user.name,
-                            description: user.name,
-                            type: 'user'
-                        }
-                }).filter((item) => item !== undefined)) as IMentions[];
-                await this.updateComplete;
-                this.calculatePosition();
-            } else {
-                this.mentionActive = false;
-                this.mentionSuggestions = [];
-                this.mentionQuery = '';
-            }
+        const beforeCursor = this.text.slice(0, cursorPos);
+
+        let suggestions: IMentions[] = [];
+        let query = '';
+
+        const matchUser = beforeCursor.match(/(?:^|\s)@([a-zA-Z]*)$/);
+        if (matchUser && this.acceptAutoCompleteUser) {
+            query = matchUser[1];
+            suggestions = this.getUserSuggestions(query);
+        }
+
+        const matchAgent = beforeCursor.match(/(?:^|\s)@@([a-zA-Z]*)$/);
+        if (matchAgent && this.acceptAutoCompleteAgents) {
+            query = matchAgent[1];
+            suggestions = this.getAgentSuggestions(query);
+        }
+
+        const matchEmoji = beforeCursor.match(/::(\w*)$/);
+        if (matchEmoji) {
+            query = matchEmoji[1];
+            suggestions = this.getEmojiSuggestions(query).slice(0, 10);
+        }
+
+        if (suggestions.length > 0) {
+            this.mentionActive = true;
+            this.mentionQuery = query;
+            this.mentionSuggestions = suggestions;
+            await this.updateComplete;
+            this.calculatePosition();
         } else {
             this.mentionActive = false;
             this.mentionSuggestions = [];
             this.mentionQuery = '';
         }
     }
+
+    private getUserSuggestions(query: string): IMentions[] {
+        return this.allUsers
+            .filter(user => user.name.toLowerCase().startsWith(query.toLowerCase()))
+            .map(user => ({
+                avatar_url: user.avatar_url,
+                text: user.name,
+                value: user.name,
+                description: user.name,
+                type: 'user'
+            }));
+    }
+
+    private getAgentSuggestions(query: string): IMentions[] {
+        return this.allAgents
+            .filter(agent =>
+                agent.name.toLowerCase().startsWith(query.toLowerCase()) ||
+                agent.alias.toLowerCase().startsWith(query.toLowerCase())
+            )
+            .map(agent => ({
+                text: agent.alias,
+                value: agent.name,
+                description: agent.description,
+                avatar_url: agent.avatar_url,
+                type: 'agent'
+            }));
+    }
+
+    private getEmojiSuggestions(query: string): IMentions[] {
+        return emojiList
+            .filter(e => e.value.startsWith(query.toLowerCase()))
+            .map(e => ({
+                text: e.text,
+                value: e.value,
+                description: e.description,
+                type: 'emoji'
+            }));
+            
+    }
+
     private async handleKeyDown(e: KeyboardEvent) {
         if (e.key === "Enter" && e.ctrlKey && !e.shiftKey) {
             e.preventDefault();
@@ -262,28 +302,45 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             }
         }
     }
+
     private selectMention(suggestion: IMentions) {
         if (!this.textArea || !suggestion) return;
+
         const cursorPos = this.textArea.selectionStart;
         const beforeCursor = this.text.slice(0, cursorPos);
         const afterCursor = this.text.slice(cursorPos);
-        const prefix = suggestion.type === 'agent' ? '@@' : '@';
-        const newText = beforeCursor.replace(/@{1,2}[a-zA-Z]*$/, `${prefix}${suggestion.text} `) + afterCursor;
+
+        let newText = '';
+
+        switch (suggestion.type) {
+            case 'emoji':
+                newText = beforeCursor.replace(/::\w*$/, `${suggestion.text} `) + afterCursor;
+                break;
+            case 'agent':
+                newText = beforeCursor.replace(/@{2}[a-zA-Z]*$/, `@@${suggestion.text} `) + afterCursor;
+                break;
+            case 'user':
+                newText = beforeCursor.replace(/@{1}[a-zA-Z]*$/, `@${suggestion.text} `) + afterCursor;
+                break;
+        }
+
         this.text = newText;
         this.mentionActive = false;
         this.mentionSuggestions = [];
         this.mentionQuery = '';
         this.mentionIndex = 0;
         this.actualMention = suggestion;
+
         setTimeout(() => {
             if (!this.textArea) return;
-            const newCursorPos = beforeCursor.replace(/@{1,2}[a-zA-Z]*$/, `${prefix}${suggestion.text} `).length;
+            const newCursorPos = newText.length - afterCursor.length;
             this.textArea.selectionStart = this.textArea.selectionEnd = newCursorPos;
             this.textArea.focus();
         });
     }
+
+
     private extractAgentName(text: string): string | undefined {
-        //const match = text.match(/@@(\w+)/);
         const match = text.match(/^@@(\w+)/);
         if (!match) return undefined;
         let value = match[1];
@@ -293,6 +350,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         }
         return value;
     }
+
     async handleSend() {
         if (!this.text) return;
         let finalText = this.text.trim();
@@ -311,6 +369,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             isSpecialMention = true;
             agentName = this.extractAgentName(finalText.trim());
         }
+
         if (this.onSend && typeof this.onSend === 'function') {
             this.onSend(finalText, { isSpecialMention, agentName });
         }
@@ -318,6 +377,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         this.adjustTextAreaHeight();
     }
 }
+
 interface IMentionAgent {
     name: string,
     description: string,
@@ -329,5 +389,7 @@ interface IMentions {
     value: string,
     description: string,
     avatar_url?: string | undefined,
-    type: 'user' | 'agent'
+    type: 'user' | 'agent' | 'emoji'
 }
+
+

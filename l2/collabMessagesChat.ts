@@ -1083,16 +1083,14 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.threadErrorMsg = '';
         this.checkWelcomeMessage(this.actualThread.thread, messagesInDb);
 
+
         try {
             if (!this.userId) return;
-            const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId, threadInfo.thread.lastMessageTime || new Date('2000-01-01').toISOString());
-
+            const threadByServer = await this.getThreadInfo(this.actualThread.thread.threadId, this.userId, threadInfo.thread.lastSync || new Date('2000-01-01').toISOString());
             await updateThread(threadByServer.thread.threadId, threadByServer.thread);
-
             threadInfo = await this.updateMessagesOnDb(threadByServer, threadByServer.messages);
 
             await updateUsers(threadByServer.users);
-            // this.allUsersInThread = threadByServer.users;
             this.actualThread = { ...threadByServer };
             if (threadByServer.hasMore) await this.loadAllMessages(threadInfo);
             this.checkForRegisterNotification();
@@ -1145,7 +1143,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private async loadAllMessages(threadInfo: IThreadInfo): Promise<void> {
-        const response = await this.getMessagesAfter(threadInfo.thread, threadInfo.thread.lastMessageTime || '');
+        const response = await this.getMessagesAfter(threadInfo.thread, threadInfo.thread.lastSync || '');
         if (!response || !response.data || response.data.length === 0 || !this.actualThread || !this.userId) {
             return;
         }
@@ -1181,7 +1179,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 threadInfo.thread,
                 lastMessage.content,
                 lastMessage.createAt,
-                0
+                0,
+                lastMessage.createAt,
             );
             threadInfo.thread = thread;
             notifyThreadChange(thread);
@@ -1312,7 +1311,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 footers: []
             }
             if (updateThreadDB && this.actualThread) {
-                const thread = await updateThread(threadId, this.actualThread.thread, content, createAt, 0);
+                const thread = await updateThread(threadId, this.actualThread.thread, content, createAt, 0, createAt);
                 if (this.actualThread) this.actualThread.thread = thread;
             }
             if (taskId) newMessage.taskId = taskId;
@@ -1377,16 +1376,18 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return newMessage;
     }
 
-    private async updateMessage2(updateCreateAtThreadDB: boolean, updateLastMessageThreadDB: boolean, oldMessage: IMessage, newMessage: mls.msg.Message, outputs: mls.msg.BotOutput[] | undefined) {
+    private async updateMessage2(updateLastSyncThreadDB: boolean, updateLastMessageThreadDB: boolean, oldMessage: IMessage, newMessage: mls.msg.Message, outputs: mls.msg.BotOutput[] | undefined) {
 
-        if (this.actualThread && (updateCreateAtThreadDB || updateLastMessageThreadDB)) {
+        if (this.actualThread && (updateLastSyncThreadDB || updateLastMessageThreadDB)) {
 
             const thread = await updateThread(
                 newMessage.threadId,
                 this.actualThread.thread,
                 updateLastMessageThreadDB ? newMessage.content : undefined,
-                updateCreateAtThreadDB ? newMessage.createAt : undefined,
-                0);
+                updateLastMessageThreadDB ? newMessage.createAt : undefined,
+                0,
+                updateLastSyncThreadDB ? newMessage.createAt : undefined,
+            );
             if (this.actualThread) this.actualThread.thread = thread;
             notifyThreadChange(this.actualThread.thread);
         }

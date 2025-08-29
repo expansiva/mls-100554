@@ -216,7 +216,7 @@ export class CollabMessagesAddParticipant100554 extends StateLitElement {
                 const thrUpdt = await mls.api.msgGetThreadUpdate({
                     threadId: response.thread.threadId,
                     userId: this.userId,
-                    lastOrderAt: thr.lastMessageTime || new Date('2000-01-01').toISOString(),
+                    lastOrderAt: thr.lastSync || new Date('2000-01-01').toISOString(),
                 });
                 if (thrUpdt && thrUpdt.users) await updateUsers(thrUpdt.users);
                 notifyThreadChange(thrUpdt.thread);
