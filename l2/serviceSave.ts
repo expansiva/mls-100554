@@ -8,6 +8,7 @@ import { undoFile } from './_100554_collabLibStor';
 import { initServiceSaveaddBranch } from './_100554_saveAddBranch';
 import { getMyKeysBranch, calculateTotalStringSize } from './_100554_libCommom';
 import { getConfigProject, updateConfigProject } from './_100554_libProjectConfig';
+import { readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 
 initServiceSaveaddBranch();
 
@@ -90,6 +91,7 @@ export class ServiceSave extends ServiceBase {
 
     constructor() {
         super();
+        readProjectTypescriptAndCompile(mls.actualProject as number, '', true);
         this.setEvents();
     }
 

@@ -146,7 +146,7 @@ async function addFile(context: mls.msg.ExecutionContext) {
     let aux = '';
     const m = mls.editor.getModels(prj, content.pageName, '');
     if (m && m.ts && m.ts.compilerResults && m.ts.compilerResults.errors.length > 0) {
-        aux = ', com ' + m.ts.compilerResults.errors.length + ' erros, favor verificar'
+        //aux = ', com ' + m.ts.compilerResults.errors.length + ' erros, favor verificar'
 
     }
 
