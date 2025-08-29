@@ -29,39 +29,48 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
     @property() allUsers: mls.msg.User[] = [{ "threads": ["20250417135645.1000", "20250417180232.1000", "20250425212707.1000", "20250521143841.1000", "20250521144214.1000", "20250521144240.1000", "20250507201344.1000", "20250622191652.1000", "20250622191728.1000", "20250622191744.1000", "20250622191802.1000", "20250630112715.1000"], "name": "Wagner", "userId": "20250417004803.1000", "status": "active", "avatar_url": "https://lh6.googleusercontent.com/-Gup9IkqANhQ/AAAAAAAAAAI/AAAAAAAAIFc/38cLYfRcRbg/s96-c/photo.jpg", "notifications": [{ "deviceId": "b00b9875-3cd8-4aff-9336-a7bcc7da60a1", "notificationToken": "fGeAAnHGThySJKRl7PMQZc:APA91bExBHHQ_tKWCUnoqXS1jKCu2Sy91wATIyEvyXjAgCmMC218hXUTtJFJR_UppD_DpEu7-2Pg6mZeWR7K6D5hH_zVOYSza-cHPRVdvCOuoxs_eQDvTFM" }] }, { "avatar_url": "https://lh3.googleusercontent.com/a-/AOh14Gh-DIRLsowx8ItOQ7slQNzEN7geu3YrsG09SFD1=s96-c", "threads": ["20250422203048.1000", "20250521144240.1000", "20250521225840.1000", "20250622191802.1000", "20250622191728.1000", "20250622191744.1000", "20250622191652.1000", "20250630112715.1000"], "name": "Lucas", "userId": "20250521175345.1000", "status": "active", "notifications": [{ "deviceId": "dae7ed77-dc3f-4dd4-b708-3ed8f4f6e451", "notificationToken": "eq-H-0XQXWV_-4REnAdaYz:APA91bGrg1whcXFexHHOVEbQs6knePjlB1YLEGUD0n7sIWctetxHiUHf77Sa6qKw-RO_ynK5TfjAG7B529lS5s3eaX-khmrcCdn4Qt0gNdY5cdyCO9-BWEY" }] }, { "threads": ["20250417135645.1000", "20250417180232.1000", "20250417133813.1000", "20250422203048.1000", "20250425212707.1000", "20250507201344.1000", "20250423205309.1000", "20250521144240.1000", "20250521223250.1000", "20250521225039.1000", "20250521225730.1000", "20250521225840.1000", "20250523200654.1000", "20250622191802.1000", "20250622191728.1000", "20250622191744.1000", "20250622191652.1000", "20250630112715.1000"], "name": "Guilherme Pereira", "userId": "20250417120841.1000", "status": "active", "avatar_url": "https://lh3.googleusercontent.com/a-/AOh14GjhEPN7UazL97l6qFIRIYUoLY-PNNPC93Zw4EVT=s96-c", "notifications": [{ "deviceId": "0f4e5cfe-135b-4cf6-935a-ce6b2e569445", "notificationToken": "cJlbF3VudPLd1VmScOUgFM:APA91bHIWpJQEtUbFqkM1OPao4tN3JIK4kp7MbdlxA_4yZgyxAPlrk6ryAfyIdhIqYELH5xcucGcgRg_HUrF8UHK0V0FdbtWde-OpT3bQo9yMQeN6QAZ5Bc" }] }, { "threads": ["20250417133813.1000", "20250417180232.1000", "20250423205309.1000", "20250425212707.1000", "20250521144240.1000", "20250521225840.1000", "20250622191802.1000", "20250622191728.1000", "20250622191744.1000", "20250622191652.1000", "20250630112715.1000"], "name": "Santiago", "userId": "20250417120844.1000", "status": "active", "avatar_url": "https://lh5.googleusercontent.com/-RcrSZBlS8sM/AAAAAAAAAAI/AAAAAAAAAAc/DQDUXj8XpEo/s96-c/photo.jpg", "notifications": [{ "deviceId": "e97ea0f1-393b-43cc-96bd-00dab1e363bc", "notificationToken": "dsaF5kgcld41tSsB1KTgR4:APA91bFDUCi2R62fkvf56XiW4uZhUsV-_7vlwME62JEGjm1mwAT_ic6RwLRIpvWOTRtErZJFWecOabpnUvP6t326TgTVbT5j73b42_AJ1NhE3KkGuLbeAlE" }] }]
 
     /**
-    * Helper function to extract and protect code blocks (```...```).
-    * Now uses <widget-text-code-100554> for rendering code blocks.
-    */
+     * Helper function to extract and protect code blocks (```...```).
+     * Now uses <widget-text-code-100554> for rendering code blocks.
+     */
     private extractCodeBlocks(input: string): { input: string, codeBlocks: string[] } {
         const codeBlocks: string[] = [];
-        // Replace code blocks with placeholders and store the HTML using WidgetTextCode
-        input = input.replace(/```([a-zA-Z0-9]*)\n([\s\S]*?)```/g, (_m, lang, code) => {
+
+        // Regex atualizado para permitir espaços e código na mesma linha
+        input = input.replace(/``` *([a-zA-Z0-9]*)\s*([\s\S]*?)```/g, (_m, lang, code) => {
             const key = `__CODE_BLOCK_${codeBlocks.length}__`;
-            // Escape HTML special chars inside code block for attribute safety
-            const safeCode = code.replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-            // Create a unique id for the code block for copy button
+
+            // Escape HTML especial dentro do código
+            const safeCode = code.replace(/&/g, '&amp;')
+                .replace(/'/g, '&#39;')
+                .replace(/"/g, '&quot;');
+
+            // ID único para o botão de copiar
             const codeId = `cb_${Math.random().toString(36).substr(2, 9)}`;
-            // Language label (default to 'bash' if not specified)
+
+            // Linguagem padrão 'bash' se não especificada
             const language = lang ? lang : 'bash';
-            // Use the WidgetTextCode component
+
+            // Adiciona o bloco de código com widget
             codeBlocks.push(`
-<div class="collab-md-codeblock-card">
-  <div class="collab-md-codeblock-header">
-    <span class="collab-md-codeblock-lang">${language}</span>
-    <button class="collab-md-codeblock-copy" data-code-id="${codeId}" title="Copiar código" onclick="(function(e){
-      const code = document.getElementById('${codeId}').innerText;
-      if (navigator && navigator.clipboard) { navigator.clipboard.writeText(code); } else { const t=document.createElement('textarea'); t.value=code; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); }
-      e.target.innerText='Copiado!'; setTimeout(()=>{e.target.innerText='Copiar';},1200);
-    })(event)">Copiar</button>
-  </div>
-  <widget-text-code-100554 class="github"  id="${codeId}" language="${language}" text='${safeCode.replace(/\n/g, "&#10;")}'></widget-text-code-100554>  
-</div>            
-            `
-            );
+                <div class="collab-md-codeblock-card">
+                <div class="collab-md-codeblock-header">
+                    <span class="collab-md-codeblock-lang">${language}</span>
+                    <button class="collab-md-codeblock-copy" data-code-id="${codeId}" title="Copiar código" onclick="(function(e){
+                    const code = document.getElementById('${codeId}').innerText;
+                    if (navigator && navigator.clipboard) { navigator.clipboard.writeText(code); } else { const t=document.createElement('textarea'); t.value=code; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); }
+                    e.target.innerText='Copiado!'; setTimeout(()=>{e.target.innerText='Copiar';},1200);
+                    })(event)">Copiar</button>
+                </div>
+                <widget-text-code-100554 class="github" id="${codeId}" language="${language}" text='${safeCode.replace(/\n/g, "&#10;")}'></widget-text-code-100554>  
+                </div>            
+        `);
+
             return key;
         });
+
         return { input, codeBlocks };
     }
+
     /**
     * Helper function to extract and protect inline code (`...`).
     * Now uses <widget-text-code-100554> for rendering inline code.

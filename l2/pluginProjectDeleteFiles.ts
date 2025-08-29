@@ -3,7 +3,7 @@
 import { html, svg, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { getListNewFilesToDeleteByGroup, deleteAllFiles } from './_100554_libCommom';
+import { getListNewFilesToDeleteByGroup, deleteAllFilesLocal } from './_100554_libCommom';
 import { removeModule } from './_100554_projectAST';
 import { removeTokensTheme } from './_100554_designSystemBase';
 
@@ -168,10 +168,11 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
             this.logs.push('No project selected');
             return;
         }
-        for await (const log of deleteAllFiles(files)) {
+        for await (const log of deleteAllFilesLocal(files)) {
             this.logs.push(log);
             this.requestUpdate();
         }
+        
 
         await this.removeThemeFromDesignSystem(this.groupName, project);
         await this.removeModuleFromProjectFile(this.groupName, project);
@@ -198,17 +199,8 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
     }
 
     private async removeModuleFromProjectFile(moduleName: string, project: number) {
-
-        const shortName = 'project';
-        const folder = '';
-        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
-        const keyModels = mls.editor.getKeyModel(project, shortName, folder)
-        const storFile = mls.stor.files[key];
-        const models = mls.editor.models[keyModels];
-        if (!storFile || !models || !models.ts) return;
-        await removeModule(models.ts.model, moduleName);
+        await removeModule(project, moduleName);
         this.logs.push('Modules removed from modules.ts');
-
     }
 
 

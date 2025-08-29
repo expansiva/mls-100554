@@ -218,10 +218,10 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             suggestions = this.getAgentSuggestions(query);
         }
 
-        const matchEmoji = beforeCursor.match(/::(\w*)$/);
+        const matchEmoji = beforeCursor.match(/::(\w+)$/);
         if (matchEmoji) {
             query = matchEmoji[1];
-            suggestions = this.getEmojiSuggestions(query).slice(0, 10);
+            suggestions  = this.getEmojiSuggestions(query).slice(0, 10);
         }
 
         if (suggestions.length > 0) {
@@ -265,16 +265,24 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
     }
 
     private getEmojiSuggestions(query: string): IMentions[] {
+        // Remove :: caso o usuário tenha digitado junto e converte para lowercase
+        const q = query.replace(/^::/, '').toLowerCase().trim();
+        if (!q) return []; // se estiver vazio, retorna nada
+
         return emojiList
-            .filter(e => e.value.startsWith(query.toLowerCase()))
+            .filter(e =>
+                e.value.toLowerCase().startsWith(q) ||  // busca pelo value
+                (Array.isArray(e.alias) && e.alias.some(a => a.toLowerCase().includes(q))) // busca pelos aliases
+            )
             .map(e => ({
                 text: e.text,
                 value: e.value,
                 description: e.description,
                 type: 'emoji'
             }));
-            
     }
+
+
 
     private async handleKeyDown(e: KeyboardEvent) {
         if (e.key === "Enter" && e.ctrlKey && !e.shiftKey) {
@@ -287,10 +295,12 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 this.mentionIndex = (this.mentionIndex + 1) % this.mentionSuggestions.length;
+                this.scrollToActiveMention();
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 this.mentionIndex =
                     (this.mentionIndex - 1 + this.mentionSuggestions.length) % this.mentionSuggestions.length;
+                this.scrollToActiveMention();
             } else if (e.key === 'Tab') {
                 e.preventDefault();
                 this.selectMention(mention);
@@ -300,6 +310,26 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
                     this.selectMention(mention);
                 }
             }
+        }
+    }
+
+    private async scrollToActiveMention() {
+        if (!this.mentionSuggestionsElement) return;
+        await this.updateComplete;
+
+        const activeItem = this.mentionSuggestionsElement.querySelector('li.active') as HTMLElement;
+        if (!activeItem) return;
+
+        const containerTop = this.mentionSuggestionsElement.scrollTop;
+        const containerBottom = containerTop + this.mentionSuggestionsElement.clientHeight;
+
+        const itemTop = activeItem.offsetTop;
+        const itemBottom = itemTop + activeItem.offsetHeight;
+
+        if (itemBottom > containerBottom) {
+            this.mentionSuggestionsElement.scrollTop += itemBottom - containerBottom;
+        } else if (itemTop < containerTop) {
+            this.mentionSuggestionsElement.scrollTop -= containerTop - itemTop;
         }
     }
 

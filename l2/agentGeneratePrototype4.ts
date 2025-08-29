@@ -9,7 +9,6 @@ import { createNewFile } from "./_100554_pluginNewFileBase";
 import { formatHtml } from './_100554_collabDOMSync';
 import { addNewTokensTheme } from './_100554_designSystemBase';
 import { addModule } from './_100554_projectAST';
-import { createModel } from './_100554_collabLibModel';
 
 import {
   getNextPendingStepByAgentName,
@@ -355,8 +354,7 @@ export const modules = [{ name: '${moduleName}' }];
     await createNewFile({ project, shortName, folder, position: 'right', enhancement, sourceTS: ts.trim(), sourceHTML: '', sourceLess: '', sourceDefs: '', openPreview: false });
   } else {
 
-    const modelTS = await createModel(storFile);
-    addModule(modelTS?.model, moduleName);
+    await addModule(project, moduleName, true);
 
   }
 

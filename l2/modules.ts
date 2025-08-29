@@ -3,7 +3,11 @@
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { getInstanceByFile, openService, saveOpenedFile } from './_100554_libCommom';
+import { collabImport } from './_100554_collabImport';
+
 import { StateLitElement } from './_100554_stateLitElement';
+
+import '/_100554_pluginDeleteModule';
 
 @customElement('modules-100554')
 export class Modules100554 extends StateLitElement {
@@ -12,7 +16,7 @@ export class Modules100554 extends StateLitElement {
   @state() currentView: 'list' | 'details' | 'error' | 'add' = 'list';
   @state() error = '';
   @state() archiveConfirmationText = '';
-  @state() selectedModule: any = null;
+  @state() selectedModule?: IMyModule;
   @state() myModules: IMyModule[] = [];
 
 
@@ -40,7 +44,7 @@ export class Modules100554 extends StateLitElement {
       <div class="header">
         <h2>Select a Module</h2>
         <input type="text" autocomplete="off" placeholder="Filter modules..." id="module-filter" @input="${this.filterLiChange}">
-        <button style="margin:0px; width:150px;" @click=${()=>{this.goTo('add')}}><svg style="width:12px; fill:#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"/></svg></button>
+        <button style="margin:0px; width:150px;" @click=${() => { this.goTo('add') }}><svg style="width:12px; fill:#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"/></svg></button>
       </div> 
     `
   }
@@ -56,7 +60,7 @@ export class Modules100554 extends StateLitElement {
 
   renderAdd() {
     return html`
-      <button style="margin:0px; width:150px;" @click=${()=>{this.goTo('list')}}>cancel</button>
+      <button style="margin:0px; width:150px;" @click=${() => { this.goTo('list') }}>cancel</button>
       <div class="header">
         <h2>In developed</h2>
       </div> 
@@ -101,7 +105,9 @@ export class Modules100554 extends StateLitElement {
     return html`
         <div class="module-details">
         <button class="back-button" @click=${this.goBack}>← Back</button>
-        <div>In development</div>
+        <div>
+          <plugin-delete-module-100554 moduleName=${this.selectedModule?.name} project=${mls.actualProject}></plugin-delete-module-100554>
+        </div>
       </div>
     `;
   }
@@ -138,7 +144,7 @@ export class Modules100554 extends StateLitElement {
       console.info(e);
     }
 
-  } 
+  }
 
   private getLocal(): string {
     try {
@@ -153,7 +159,7 @@ export class Modules100554 extends StateLitElement {
 
   }
 
-  private openDetails(ev: MouseEvent, mm: any) {
+  private openDetails(ev: MouseEvent, mm: IMyModule) {
     ev.preventDefault();
     this.selectedModule = mm;
     this.currentView = 'details';
@@ -162,11 +168,12 @@ export class Modules100554 extends StateLitElement {
 
   private goBack() {
     this.currentView = 'list';
-    this.selectedModule = null;
+    this.setMyModules();
+    this.selectedModule = undefined;
     this.archiveConfirmationText = '';
   }
 
-  private goTo(scenary:string) {
+  private goTo(scenary: string) {
     this.currentView = scenary as any;
   }
 
@@ -178,7 +185,8 @@ export class Modules100554 extends StateLitElement {
       const f = mls.stor.files[key];
       if (!f) throw new Error('[setMyModules] Not found storfile');
 
-      const mm = await getInstanceByFile(f) as any;
+      const { folder, shortName, project } = f;
+      const mm = await collabImport({ folder, project, shortName }) as any;
       if (!mm || !mm.modules) throw new Error('[setMyModules] Not found modules')
 
       const ar: IMyModule[] = [];
@@ -262,11 +270,11 @@ export class Modules100554 extends StateLitElement {
           const project = mls.actualProject || 0;
           const shortName = mm.moduleConfig.initialPage;
           const fullName = folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`;
-          
+
           mls.actual[4].setFullName(fullName);
           mls.actual[7].setFullName(fullName);
 
-          
+
 
           saveOpenedFile(project, 4, fullName);
           saveOpenedFile(project, 7, fullName);
