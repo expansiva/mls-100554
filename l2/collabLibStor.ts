@@ -98,7 +98,8 @@ export async function deleteFile(storFile: mls.stor.IFileInfo): Promise<void> {
     if (storFile.getValueInfo) {
         let valueInfo = mls.editor.models[keyToModel] ? await storFile.getValueInfo() : {} as mls.stor.IFileInfoValue;
         if (!valueInfo.content) {
-            const src = await storFile.getContent() as string;
+            // const src = await storFile.getContent() as string;
+            const src = 'File deleted';
             valueInfo = {
                 content: src,
                 contentType: 'string',

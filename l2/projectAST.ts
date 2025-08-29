@@ -1,9 +1,13 @@
 /// <mls shortName="projectAST" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
 
-// Adds a new module with the given name to the modules array in the editor content.
-export function addModule(model: monaco.editor.ITextModel | undefined, moduleName: string) {
+import { createModel } from './_100554_collabLibModel';
 
-    if (!model) return { ok: false, message: "No model found in editor" };
+// Adds a new module with the given name to the modules array in the editor content.
+export async function addModule(project: number, moduleName: string, forceCreateModel: boolean = false) {
+
+    const modelTS = await getModel(project, forceCreateModel);
+    if (!modelTS) return { ok: false, message: "No models found" };
+    const model = modelTS.model;
 
     const code = model.getValue();
     const modules = parseModulesArray(code);
@@ -42,8 +46,11 @@ export function addModule(model: monaco.editor.ITextModel | undefined, moduleNam
     return { ok: true };
 }
 
-export function removeModule(model: monaco.editor.ITextModel | undefined, moduleName: string) {
-    if (!model) return { ok: false, message: "No model found in editor" };
+export async function removeModule(project: number, moduleName: string, forceCreateModel: boolean = false) {
+
+    const modelTS = await getModel(project, forceCreateModel);
+    if (!modelTS) return { ok: false, message: "No models found" };
+    const model = modelTS.model;
 
     const code = model.getValue();
     const modules = parseModulesArray(code);
@@ -95,5 +102,20 @@ function parseModulesArray(code: string): any[] | null {
     } catch {
         return null;
     }
+}
+
+async function getModel(project: number, forceCreateModel: boolean = false): Promise<mls.editor.IModelTS  | undefined> {
+    const shortName = 'project';
+    const folder = '';
+    const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
+    const keyModels = mls.editor.getKeyModel(project, shortName, folder)
+    const storFile = mls.stor.files[key];
+    if (!storFile) return;
+    let models = mls.editor.models[keyModels];
+    if (!models || !models.ts && forceCreateModel) {
+        const modelTS = await createModel(storFile);
+        return modelTS;
+    };
+    return models.ts;
 }
 
