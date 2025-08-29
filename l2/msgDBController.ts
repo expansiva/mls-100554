@@ -346,7 +346,7 @@ export async function addThread(thread: mls.msg.Thread): Promise<mls.msg.ThreadP
         lastMessage: '',
         lastMessageTime: '',
         unreadCount: 0,
-        lastSync: getCompactUTC()
+        lastSync: ''
     }
 
     return new Promise((resolve, reject) => {
@@ -364,7 +364,8 @@ export async function updateThread(
     thread: mls.msg.Thread,
     lastMessage?: string,
     lastMessageTime?: string,
-    unreadCount?: number
+    unreadCount?: number,
+    lastSync?: string,
 ): Promise<mls.msg.ThreadPerformanceCache> {
     const db = await openDB();
 
@@ -385,7 +386,7 @@ export async function updateThread(
             if (lastMessage !== undefined) threadDb.lastMessage = lastMessage;
             if (lastMessageTime !== undefined) threadDb.lastMessageTime = lastMessageTime;
             if (unreadCount !== undefined) threadDb.unreadCount = unreadCount;
-            threadDb.lastSync = getCompactUTC(); // atualiza o timestamp de sync também
+            if (lastSync !== undefined) threadDb.lastSync = lastSync;
             const updateRequest = store.put(threadDb);
             updateRequest.onsuccess = () => resolve(threadDb);
             updateRequest.onerror = () => reject("Erro ao atualizar a thread");
@@ -410,7 +411,7 @@ export async function updateThreads(threadsFromServer: mls.msg.Thread[]): Promis
                     lastMessage: '',
                     lastMessageTime: '',
                     unreadCount: 0,
-                    lastSync: getCompactUTC()
+                    lastSync: ''
                 }
 
                 store.put(threadCache);

@@ -97,7 +97,7 @@ export async function getThreadUpdateInBackground(threadId: string): Promise<voi
     const deviceId = loadNotificationDeviceId();
     if (!userId) throw new Error('Invalid user id');
     let threadDB = await getThread(threadId);
-    const lastOrderAt = threadDB?.lastMessageTime || new Date('2000-01-01').toISOString();
+    const lastOrderAt = threadDB?.lastSync || new Date('2000-01-01').toISOString();
 
     try {
         const response = await mls.api.msgGetThreadUpdate({
@@ -115,18 +115,8 @@ export async function getThreadUpdateInBackground(threadId: string): Promise<voi
             }
         }
 
-        if (!response.messages || response.messages.length === 0) {
-            const thread = await updateThread(
-                threadId,
-                response.thread,
-                undefined,
-                undefined,
-                1
-            );
-            notifyThreadChange(thread);
-            return;
-        }
-
+        if (!response.messages || response.messages.length === 0) return;
+        
         const lastMessage = response.messages[response.messages.length - 1];
         const lastUnreadCount = threadDB && threadDB.unreadCount ? threadDB.unreadCount : 0;
 
@@ -136,7 +126,9 @@ export async function getThreadUpdateInBackground(threadId: string): Promise<voi
             response.thread,
             lastMessage.content,
             lastMessage.createAt,
-            response.messages.length + lastUnreadCount
+            response.messages.length + lastUnreadCount,
+            lastMessage.createAt,
+
         );
 
         const newMessages: mls.msg.MessagePerformanceCache[] = [];

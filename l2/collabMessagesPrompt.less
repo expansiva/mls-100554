@@ -104,18 +104,33 @@ collab-messages-prompt-100554 {
         font-weight: bold;
     }
 
+    .emoji-suggestion {
+        font-size: 20px;
+        line-height: 1;
+    }
+
+    .emoji-code {
+        color: #888;
+        font-size: 12px;
+    }
+
+    .agent-suggestion {
+        font-weight: 600;
+        color: @active-color;
+    }
+
+    .user-suggestion {
+        font-weight: 500;
+        color: #333;
+    }
+
     .formatted-text {
         white-space: pre-wrap;
-        /* Manter formatação de nova linha */
-        word-wrap: break-word;
-        /* Quebrar palavras longas */
         position: absolute;
         top: 0;
         left: 0;
         pointer-events: none;
-        /* Não interfere no campo de texto */
         z-index: -1;
-        /* Fica abaixo do textarea */
         font-family: 'Arial', sans-serif;
         padding: 8px;
         min-height: 40px;

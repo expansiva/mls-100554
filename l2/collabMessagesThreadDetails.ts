@@ -422,7 +422,6 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                 config: undefined
             });
             if (rc.statusCode === 200) {
-                await updateThread(threadId, rc.thread);
                 this.threadDetails = JSON.parse(JSON.stringify(this.editedThreadDetails));
                 const threadCache = await updateThread(threadId, rc.thread);
                 notifyThreadChange(threadCache);
@@ -516,7 +515,8 @@ export class CollabMessagesThreadDetails extends StateLitElement {
                         newThread,
                         '',
                         '',
-                        0
+                        0,
+                        ''
                     );
                 } else {
                     threadCache = await updateThread(newThread.threadId, newThread);
@@ -554,7 +554,7 @@ export class CollabMessagesThreadDetails extends StateLitElement {
         try {
             const response = await mls.api.msgGetThreadUpdate({
                 threadId,
-                userId
+                userId,
             });
             return response;
         } catch (err: any) {
