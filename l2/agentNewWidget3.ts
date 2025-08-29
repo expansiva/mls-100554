@@ -16,7 +16,8 @@ import {
 import {
     executeNextStep,
     startNewInteractionInAiTask,
-    startNewAiTask
+    startNewAiTask,
+    addNewStep
 } from "./_100554_aiAgentOrchestration";
 
 const agentName = "agentNewWidget3";
@@ -104,10 +105,10 @@ async function updateFile(context: mls.msg.ExecutionContext) {
 
     const m = mls.editor.getModels(project, pageName, '');
     if (m && m.html) m.html.model.setValue(fileHTML)
-    else if(file) {
+    else if (file) {
 
         const oldFileInfo = file.getValueInfo ? await file.getValueInfo() : {} as mls.stor.IFileInfoValue;
-        
+
         const fileInfo: mls.stor.IFileInfoValue = {
             ...oldFileInfo,
             content: fileHTML,
@@ -118,12 +119,85 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     }
 
     let aux = '';
-    if (m && m.ts && m.ts.compilerResults && m.ts.compilerResults.errors.length > 0) {
+    /*if (m && m.ts && m.ts.compilerResults && m.ts.compilerResults.errors.length > 0) {
         aux = ', com ' + m.ts.compilerResults.errors.length + ' erros, favor verificar'
 
-    }
+    }*/
 
     context.task = await updateTaskTitle(context.task, "Widget created" + aux);
+    if (m) await verifyNeedCallFix(m, context, step.stepId);
+
+}
+
+async function verifyNeedCallFix(models: mls.editor.IModels, context: mls.msg.ExecutionContext, stepId: number) {
+
+    let hasErrorLess: boolean = false;
+    let hasErrorTypescript: boolean = false;
+
+    if (models.ts) {
+        const ok = await mls.l2.typescript.compileAndPostProcess(models.ts, true, false);
+        hasErrorTypescript = ok === false;
+    }
+    if (models.style) {
+        const ok = await mls.l2.less.compileStyle(models.style);
+        hasErrorLess = ok === false;
+    }
+
+    if (!hasErrorLess && !hasErrorTypescript) return;
+    if (!models.ts) return;
+    const { project, folder, shortName } = models.ts.storFile;
+    const res = await fireAgentFix(context, hasErrorLess, hasErrorTypescript, project, folder, shortName, stepId);
+    if (res) context = res;
+
+}
+
+async function fireAgentFix(
+    context: mls.msg.ExecutionContext,
+    hasErrorLess: boolean,
+    hasErrorTypescript: boolean,
+    project: number,
+    folder: string | undefined,
+    shortName: string,
+    stepId: number
+) {
+
+    const page = folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`
+
+    const nextStepsFix = [];
+    let nextStepId = stepId + 1;
+    if (hasErrorLess) {
+        const data = { page, prompt: 'Fix errors in files', position: 'left', mode: 'less' }
+        const newStep: mls.msg.AIPayload = {
+            agentName: 'agentFix',
+            prompt: JSON.stringify(data),
+            status: 'pending',
+            stepId: nextStepId,
+            interaction: null,
+            nextSteps: null,
+            rags: null,
+            type: 'agent'
+        };
+
+        nextStepId = nextStepId + 1;
+        nextStepsFix.push(newStep);
+    }
+
+    if (hasErrorTypescript) {
+        const data = { page, prompt: 'Fix errors in files', position: 'left', mode: 'typescript' }
+        const newStep: mls.msg.AIPayload = {
+            agentName: 'agentFix',
+            prompt: JSON.stringify(data),
+            status: 'pending',
+            stepId: nextStepId,
+            interaction: null,
+            nextSteps: null,
+            rags: null,
+            type: 'agent'
+        };
+        nextStepsFix.push(newStep);
+    }
+
+    return await addNewStep(context, stepId, nextStepsFix);
 
 }
 

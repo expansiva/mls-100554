@@ -469,7 +469,7 @@ async function getDefinitonsByImports(imports: string[], position: 'left' | 'rig
         const keyToStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, iPath.folder, '.ts');
         const storFile = mls.stor.files[keyToStorFile];
         if (!storFile) continue;
-        await createAllModels(storFile);
+        await createAllModels(storFile, true, false, false);
         const models = mls.editor.models[fullPath];
         if (!models || !models.ts) continue;
         await mls.l2.typescript.compileAndPostProcess(models.ts, false, false);
