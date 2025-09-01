@@ -267,7 +267,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icTs);
         this.updatedMSizeEditor();
 
-        //if (!this.activeModels) this.openLastFile(this.level, this.position);
+        if (!this.activeModels) this.openLastFile(this.level, this.position);
 
         if (this.editorEl) {
             const bgEl = this.editorEl.querySelector('.monaco-editor-background');
