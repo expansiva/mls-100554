@@ -841,7 +841,6 @@ export class ServiceSource100554 extends ServiceBase {
     private async initModelStyle(uri: monaco.Uri, model: monaco.editor.ITextModel) {
 
         if (!this._ed1) return;
-        console.info('initModelStyle', this.position);
         this.lessCSS = new LessCSS(uri.toString(), this._ed1, this.position);
         this.lessCSS.setEditor(this._ed1);
         const actualLine = this._ed1.getPosition();
@@ -1609,9 +1608,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         let models = mls.editor.getModels(project, shortName, folder);
         if (!models || !models.ts) models = await createAllModels(storFile);        
         if (!models) return;
-
-        console.info(models);
-
         this.activeModels = models;
         await readProjectTypescriptAndCompile(actualProject, '', true)
         if (models && models.ts) mls.editor.forceModelUpdate(models.ts.model);
