@@ -72,7 +72,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
   const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
   if (!step) {
-    throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
+    throw new Error(`[${agentName}](beforePrompt) No pending step found for this agent.`);
   }
   const organismAlreadyDeclared = getOrganismsAlreadyCreated(context);
   let payload3: PayLoad3 | undefined;
@@ -95,13 +95,13 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
   if (!context || !context.message || !context.task) throw new Error("Invalid context");
   const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-  if (!step) throw new Error(`[${agentName}] afterPrompt: No in progress interaction found.`);
+  if (!step) throw new Error(`[${agentName}](afterPrompt) No in progress interaction found.`);
 
   context = await updateStepStatus(context, step.stepId, "completed", "no more agents");
   notifyTaskChange(context);
   await createPage(context);
 
-  if (!context.task) throw new Error("Invalid context task");
+  if (!context.task) throw new Error(`[${agentName}](afterPrompt) Invalid context task`);
   const nextPage = context.task?.iaCompressed?.longMemory['next_page'] ? +(context.task?.iaCompressed?.longMemory['next_page']) : -1;
   const totalPagesIndex = context.task?.iaCompressed?.longMemory['total_pages'] ? +(context.task?.iaCompressed?.longMemory['total_pages']) : undefined;
 
@@ -113,7 +113,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
   context.task = await updateTaskTitle(context.task, "Ok, page created");
   const stepPendent = getNextPendentStep(context.task);
-  if (!stepPendent) throw new Error(`[${agentName}] afterPrompt: Invalid next stepPendent`);
+  if (!stepPendent) throw new Error(`[${agentName}](afterPrompt) Invalid next stepPendent`);
 
   const newStep: mls.msg.AIPayload = {
     agentName: 'agentGeneratePrototype4',
@@ -153,15 +153,17 @@ function replaceByPriority(source: string, key: string, value: string): string {
 
 async function createPage(context: mls.msg.ExecutionContext) {
 
-  if (!context || !context.task) throw new Error(`[${agentName}] [createPage] Not found context to createPage`);
+  if (!context || !context.task) throw new Error(`[${agentName}](createPage) Not found context to createPage`);
   const step = getNextPendentStep(context.task);
-  if (!step || step.type !== 'flexible') throw new Error(`[${agentName}] [createPage] Invalid step in createPage`);
+  if (!step || step.type !== 'flexible') throw new Error(`[${agentName}](createPage) Invalid step in createPage`);
   const payload4: PayLoad4 = step.result;
-  if (!payload4 || !payload4.pageHtml) throw new Error(`[${agentName}] [createPage] Not found "pageHtml" in payload`);
+  if (!payload4 || !payload4.pageHtml) throw new Error(`[${agentName}](createPage) Not found "pageHtml" in payload`);
 
   let payload3: PayLoad3 | undefined;
   if (context.modeSingleStep) payload3 = getPayload3Mock(); // only for dev test on preview
   else payload3 = getPayload3(context);
+
+  consistPayload3(payload3)
 
   const resolvedImages = await getAllImages(payload4.images);
 
@@ -173,7 +175,7 @@ async function createPage(context: mls.msg.ExecutionContext) {
 
   const actualTaskIndex = context.task?.iaCompressed?.longMemory['next_page'] ? +(context.task?.iaCompressed?.longMemory['next_page']) : 0;
   const folder = context.task?.iaCompressed?.longMemory['module_name'];
-  if (!folder) throw new Error(`[${agentName}] [createPage] Invalid module name`)
+  if (!folder) throw new Error(`[${agentName}](createPage) Invalid module name`)
 
   const groupName = folder;
   const pageData = payload3.pages[actualTaskIndex];
@@ -233,6 +235,14 @@ async function updateLongMemory(context: mls.msg.ExecutionContext, newOrganism: 
   return task;
 }
 
+function consistPayload3(payload3: PayLoad3): PayLoad3 {
+  if (!payload3) throw new Error(`[${agentName}](consistPayload3) No find payload`);
+  if (!payload3.organism) throw new Error(`[${agentName}](consistPayload3) No find payload organism`);
+  if (!payload3.pages) throw new Error(`[${agentName}](consistPayload3) No find payload pages`);
+  if (!payload3.tokens) throw new Error(`[${agentName}](consistPayload3) No find payload tokens`);
+  return payload3;
+}
+
 function getOrganismsAlreadyCreated(context: mls.msg.ExecutionContext): string[] {
   const byLongMemory = context.task?.iaCompressed?.longMemory['organism_created'];
   return (byLongMemory ? JSON.parse(byLongMemory) : []) as string[]
@@ -286,9 +296,9 @@ async function getAllImages(
 }
 
 export function getPayload4(context: mls.msg.ExecutionContext): PayLoad4 {
-  if (!context || !context.task) throw new Error(`[${agentName}] [getPayload] Invalid context`);
+  if (!context || !context.task) throw new Error(`[${agentName}](getPayload) Invalid context`);
   const agentStep = getAgentStepByAgentName(context.task, agentName); // Only one agent execution must exist in this task
-  if (!agentStep) throw new Error(`[${agentName}] [getPayload] no agent found`);
+  if (!agentStep) throw new Error(`[${agentName}](getPayload) no agent found`);
 
   // get result
   const resultStep = agentStep.interaction?.payload?.[0];
@@ -332,7 +342,7 @@ async function generateFiles(
     return `page created: ${folder}/${shortName}`
 
   } catch (err: any) {
-    return `// Error: ${err.message}`;
+    return `[${agentName}](generateFiles) ${err.message}`;
   }
 }
 
@@ -656,7 +666,7 @@ function generateHtmlOrganism(
     return htmlResult;
 
   } catch (err: any) {
-    return `// Error: ${err.message}`;
+    throw new Error(`[${agentName}](generateHtmlOrganism) ${err.message}`);
   }
 }
 
@@ -679,7 +689,7 @@ function generateLessOrganism(
     return lessResult;
 
   } catch (err: any) {
-    return `// Error: ${err.message}`;
+    throw new Error(`[${agentName}](generateLessOrganism) ${err.message}`);
   }
 }
 

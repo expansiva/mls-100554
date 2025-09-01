@@ -36,12 +36,13 @@ export class PluginDeleteModule extends CollabLitElement {
 
   private msg: MessageType = messages['en'];
 
-  @property() moduleName: string = '';
-  @property() project: string = '';
+  @property() moduleName: string = 'travel';
+  @property() project: string = '102009';
 
   @state() filesToDelete: mls.stor.IFileInfo[] = [];
   @state() confirmInput: string = '';
   @state() isDeleting: boolean = false;
+  @state() isDeleted: boolean = false;
   @state() feedbackMsg: string = '';
 
   async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
@@ -54,6 +55,10 @@ export class PluginDeleteModule extends CollabLitElement {
     this.msg = messages[lang];
 
     const isValid = this.confirmInput.trim() === this.moduleName;
+
+    if (this.isDeleted) {
+      return html`  <div class="plugin-delete-module-container">${this.feedbackMsg ? html`<div class="feedback-msg">${this.feedbackMsg}</div>` : ''}</div>`
+    }
 
     return html`
       <div class="plugin-delete-module-container">
@@ -86,6 +91,7 @@ export class PluginDeleteModule extends CollabLitElement {
 
         ${this.feedbackMsg ? html`<div class="feedback-msg">${this.feedbackMsg}</div>` : ''}
         <button 
+          style="${this.isDeleted ? 'display:none': 'display:block'}"
           ?disabled=${!isValid || this.isDeleting}
           @click=${this.handleDelete}>
           ${this.isDeleting ? '...' : this.msg.btnDelete}
@@ -113,14 +119,15 @@ export class PluginDeleteModule extends CollabLitElement {
     this.isDeleting = true;
     this.feedbackMsg = '';
     try {
-
+      await this.removeTokensIfNeeded(+this.project, this.moduleName);
       await this.deleteAllFiles(this.filesToDelete);
       await removeModule(+this.project, this.moduleName, true);
-      await this.removeTokensIfNeeded(+this.project, this.moduleName);
+
       this.filesToDelete = [];
       this.confirmInput = '';
-
       this.feedbackMsg = this.msg.deletedFeedback;
+      this.isDeleted = true;
+      
     } catch (err) {
       console.error('Error deleting module:', err);
     } finally {
