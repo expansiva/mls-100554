@@ -8,6 +8,7 @@ import { getTokensCss } from './_100554_designSystemBase';
 import { getProjectDetails, setProjectDetails, getLastOpenedFiles, findStorFileInProjectsOrDeps, getInstanceByFile, saveOpenedFile } from './_100554_libCommom';
 import { loadNotificationPreferences } from './_100554_collabMessageHelper';
 import { listenToThreadEvents } from './_100554_collabMessagesSyncNotifications';
+import { openService } from './_100554_libCommom';
 
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
@@ -96,9 +97,40 @@ export class CollabInit extends CollabLitElement {
         this.initNotificationIfEnabled();
         const services = await this.getServices();
         this.checkURLParams();
+        this.setEvents();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
 
     }
+
+    private setEvents() {
+        mls.events.addEventListener(
+            [0, 1, 2, 3, 4, 5, 6, 7],
+            ['LevelChanged'] as any,
+            this.onLevelChanged.bind(this)
+        );
+    }
+
+    private onLevelChanged(ev: mls.events.IEvent) {
+        if (!ev.desc) return;
+        const data: { to: number, from: number } = JSON.parse(ev.desc);
+
+        const handler = this.levelHandlers[data.to];
+        if (handler) handler(data);
+    }
+
+    private firstAccessLevels: Record<number, boolean> =
+        Object.fromEntries(Array.from({ length: 8 }, (_, i) => [i, true]));
+
+    private levelHandlers: Record<number, (data: { to: number, from: number }) => void> = {
+        2: this.onLevelChangedToL2.bind(this),
+    };
+
+    private onLevelChangedToL2(data: { to: number, from: number }) {
+        if (!this.firstAccessLevels[2]) return;
+        this.firstAccessLevels[2] = false;
+        openService('_100554_serviceSource', 'left', 2);
+    }
+
 
     /**
      * Loads and sets up collaboration drivers asynchronously.
@@ -316,6 +348,7 @@ export class CollabInit extends CollabLitElement {
         if (window.traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
         if (this.actualProject) await mls.stor.server.loadProjectInfoIfNeeded(this.actualProject);
     }
+
     private setLastOpenedFiles() {
 
         if (!this.actualProject) return;

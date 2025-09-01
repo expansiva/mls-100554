@@ -216,7 +216,7 @@ export class ServiceSource100554 extends ServiceBase {
     public menu: IServiceMenu = {
         title: {
             icon: '&#xf053',
-            text: 'L2 - widget1'
+            text: 'L2 - Loading...'
         },
         main: {
             opTheme: 'Editor - Themes',
@@ -259,12 +259,15 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private async _onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+
         if (!visible) {
             this.saveViewState();
             return;
         }
+
         await this.initMonaco();
         if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icTs);
+        await this.updateComplete;
         this.updatedMSizeEditor();
 
         if (!this.activeModels) this.openLastFile(this.level, this.position);
@@ -993,11 +996,7 @@ export class ServiceSource100554 extends ServiceBase {
         mls.editor.instances[this.confE] = this._ed1;
         mls.editor.InitEditor(this._ed1);
         addEventsEditor();
-
-        //this.createModelTS_loading();
-        await this.createModelConf('// loading ...'); // model 
-        // global routines dont need this._ed1
-        //await this.createModelTS_testFile();
+        await this.createModelConf('// loading ...');
     }
 
     private actionAgentFix: monaco.IDisposable | undefined;
@@ -1590,6 +1589,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     private async openLastFile(level: number, position: 'left' | 'right') {
+
         this.loading = true;
         const actualProject = mls.actualProject;
         if (!actualProject) return;
@@ -1607,16 +1607,18 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const storFile = mls.stor.files[keyStorFile];
         if (!storFile) return;
         let models = mls.editor.getModels(project, shortName, folder);
-        if (!models) {
-            models = await createAllModels(storFile)
-        }
+        if (!models || !models.ts) models = await createAllModels(storFile);        
         if (!models) return;
+
+        console.info(models);
 
         this.activeModels = models;
         await readProjectTypescriptAndCompile(actualProject, '', true)
         if (models && models.ts) mls.editor.forceModelUpdate(models.ts.model);
         this.loading = false;
-        this.showActiveModel();
+        setTimeout(() => {
+            this.showActiveModel();
+        }, 500);
 
     }
 
