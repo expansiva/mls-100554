@@ -681,8 +681,6 @@ export class PluginPreviewInsights100554 extends StateLitElement {
 
   private async setInfos() {
 
-    debugger;
-
     if (!this.page) throw new Error(`Page not found: ${this.page}`);
 
     const { project, folder, shortName } = mls.l2.getPath(this.page);

@@ -50,6 +50,10 @@ export class ServiceUnit extends ServiceBase {
         1: ETabs.Explore,
     }
 
+    private myData: { [key: string]: mls.plugin.MenuAction[] } = {};
+
+    //---------SERVICE-------------
+
     public details: IService = {
         icon: '&#xf5da',
         state: 'foreground',
@@ -61,8 +65,9 @@ export class ServiceUnit extends ServiceBase {
     }
 
     public onClickMain(op: string) {
+        if (op === 'opAboutThis') this.showAboutThis();
+        else if (this.menu.setMode) this.menu.setMode('initial');
 
-        if (this.menu.setMode) this.menu.setMode('initial');
     }
 
     public onClickTabs(index: number): void {
@@ -72,20 +77,66 @@ export class ServiceUnit extends ServiceBase {
 
     public menu: IServiceMenu = {
         title: '',
-        main: {},
+        main: {
+            opAboutThis: 'About this content',
+        },
         tabs: {
             group: 'Mode',
             type: 'onlyicon',
             selected: 0,
-            options: [ { text: 'Explore', icon: 'e521' } ]
+            options: [{ text: 'Explore', icon: 'e521' }]
         },
         tools: {},
         onClickMain: this.onClickMain.bind(this),
         onClickTabs: this.onClickTabs.bind(this),
     }
 
+    private lastLevel: number = 0;
 
-    private myData: { [key: string]: mls.plugin.MenuAction[] } = {};
+    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+
+        if (this.visible && this.level !== this.lastLevel) {
+            this.lastLevel = this.level;
+        }
+
+        if (this.visible) {
+            this.refreshPlugins();
+        }
+    }
+
+    private showAboutThis(): boolean {
+
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+
+        let name = 'nothing selected';
+
+        switch (this.activeTab) {
+            case 'Explore':
+                name = 'plugin-explore-list-100554';
+                break;
+            default:
+                name = 'nothing selected';
+        }
+
+        div.innerHTML = `
+        
+            <h3>About this content</h3>
+            <ul>
+                <li>Reference: ${name}</li>
+                <li>Level: ${this.level}</li>
+                <li>Position: ${this.position}</li>
+            </ul>
+		
+
+        `;
+
+        if (this.menu.setMode) this.menu.setMode('page', div);
+        return true;
+
+    }
+
+    //-------COMPONENT-----------
 
     async firstUpdated() {
         this.setMyData();
@@ -109,34 +160,12 @@ export class ServiceUnit extends ServiceBase {
         }
     }
 
-    private lastLevel: number = 0;
-
-    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
-        if (this.visible && this.level !== this.lastLevel) {
-            this.lastLevel = this.level;
-        }
-
-        if (this.visible) {
-            this.refreshPlugins();
-        }
-    }
-
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         return html`
             ${this.renderContent()}
         `;
-    }
-
-    private refreshPlugins() {
-        this.allContainers?.forEach((item) => {
-            const plg = item.children[0];
-            if (plg) {
-                plg.setAttribute('mode', 'list');
-            }
-        });
     }
 
     private renderContent() {
@@ -146,6 +175,44 @@ export class ServiceUnit extends ServiceBase {
             default:
                 return html``;
         }
+    }
+
+    private renderExplore() {
+
+        return html`<div>
+                ${this.explories.map((explorie, index) => {
+            return html`
+                <details ?open=${index === 0} .data=${explorie} @click=${this.handleDetailExplorieClick}>
+                    <summary>${explorie.category}</summary>
+                    <div class="plugin-container"></div>
+                </details>
+            `
+        })
+            }</div>`;
+    }
+
+    private renderShowCase() {
+        this.fireEventClose('In development: Details showcase');
+
+        const project = mls.actualProject;
+        if (!project) return '<div>No project selected</div<';
+        const keyToFile = mls.stor.getKeyToFiles(project, 2, 'project', '', '.html');
+        const file = mls.stor.files[keyToFile]
+        if (!file) return html`<div>File 'project.html' dont's exist in selected project</div>`;
+        this.loadHelpPage('project' || '', project || 0);
+        return html`<div style="overflow:auto;height:100%;" id="projectDiv"></div>`
+    }
+
+
+    //----------IMPLEMENTATION----------
+
+    private refreshPlugins() {
+        this.allContainers?.forEach((item) => {
+            const plg = item.children[0];
+            if (plg) {
+                plg.setAttribute('mode', 'list');
+            }
+        });
     }
 
     private fireEventClose(msg: string) {
@@ -160,20 +227,6 @@ export class ServiceUnit extends ServiceBase {
             ),
             0
         );
-    }
-
-    private renderExplore() {
-
-        return html`<div>
-                ${this.explories.map((explorie, index) => {
-            return html`
-                        <details ?open=${index === 0} .data=${explorie} @click=${this.handleDetailExplorieClick}>
-                            <summary>${explorie.category}</summary>
-                            <div class="plugin-container"></div>
-                        </details>
-                    `
-        })
-            }</div>`;
     }
 
     private async handleDetailExplorieClick(e: MouseEvent) {
@@ -198,19 +251,6 @@ export class ServiceUnit extends ServiceBase {
         this.explories = await loadPluginProject(project || 0, 'l5Explore');
 
     }
-
-    private renderShowCase() {
-        this.fireEventClose('In development: Details showcase');
-
-        const project = mls.actualProject;
-        if (!project) return '<div>No project selected</div<';
-        const keyToFile = mls.stor.getKeyToFiles(project, 2, 'project', '', '.html');
-        const file = mls.stor.files[keyToFile]
-        if (!file) return html`<div>File 'project.html' dont's exist in selected project</div>`;
-        this.loadHelpPage('project' || '', project || 0);
-        return html`<div style="overflow:auto;height:100%;" id="projectDiv"></div>`
-    }
-
 
     private async loadHelpPage(shortName: string, project: number) {
         const keyFile = mls.stor.getKeyToFiles(project, 2, shortName, '', '.html');
@@ -261,9 +301,9 @@ export class ServiceUnit extends ServiceBase {
 enum ETabs {
     'Explore' = 0,
     'ShowCase' = 1,
-    
+
 }
-type IScenery = 'Explore' | 'ShowCase' 
+type IScenery = 'Explore' | 'ShowCase'
 
 interface Plugin {
     prjID: number; // unique

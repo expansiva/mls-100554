@@ -84,7 +84,9 @@ export class ServiceOrganism100554 extends ServiceBase {
 
 
     public onClickMain(op: string) {
-        if (this.menu.setMode) this.menu.setMode('initial');
+        if (op === 'opAboutThis') this.showAboutThis();
+        else if (this.menu.setMode) this.menu.setMode('initial');
+        
     }
 
     public onClickTabs(index: number) {
@@ -93,7 +95,9 @@ export class ServiceOrganism100554 extends ServiceBase {
 
     public menu: IServiceMenu = {
         title: '',
-        main: {},
+        main: {
+            opAboutThis: 'About this content',
+        },
         tabs: {
             group: 'Mode',
             type: 'onlyicon',
@@ -111,6 +115,47 @@ export class ServiceOrganism100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+
+    }
+
+    private showAboutThis(): boolean {
+
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+
+        let name = 'nothing selected';
+
+        switch (this.activeTab) {
+            case 'icExplorer':
+                name = 'plugin-explore-list-100554';
+                break;
+            case 'icNavigation':
+                name = 'plugin-navigation-render-organism-100554';
+                break;
+            case 'icStyle':
+                name = 'plugin-edit-style-l3-100554';
+                break;
+            case 'icImprove':
+                name = 'plugin-prototype-improve-100554';
+                break;
+            default:
+                name = 'nothing selected';
+        }
+
+        div.innerHTML = `
+        
+            <h3>About this content</h3>
+            <ul>
+                <li>Reference: ${name}</li>
+                <li>Level: ${this.level}</li>
+                <li>Position: ${this.position}</li>
+            </ul>
+		
+
+        `;
+
+        if (this.menu.setMode) this.menu.setMode('page', div);
+        return true;
 
     }
 
@@ -185,7 +230,7 @@ export class ServiceOrganism100554 extends ServiceBase {
             await import(`./_${project}_${shortName}`);
             this.pluginNav = convertFileNameToTag({ project, shortName, folder });
         }
-        
+
         if (plgStlpName) {
             const { folder, project, shortName } = mls.l2.getPath(plgStlpName);
             await import(`./_${project}_${shortName}`);
@@ -244,7 +289,7 @@ export interface IWCDParams {
     op: ITabType,
 }
 
-export type ITabType = 'icExplorer' | 'icNavigation' |  'icStyle' | 'icImprove';
+export type ITabType = 'icExplorer' | 'icNavigation' | 'icStyle' | 'icImprove';
 
 enum ESceneries {
     'icExplorer' = 0,

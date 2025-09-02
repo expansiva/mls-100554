@@ -259,7 +259,7 @@ export class ServicePreviewView extends StateLitElement {
 
     private async addStyles() {
 
-        if (!this.file || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow) return;
+        if (!this.file || !window.preview.iframe || !window.preview.iframe.contentDocument || !window.preview.iframe.contentWindow || !window.preview.iframe.contentDocument.head) return;
         const { project, shortName, folder } = this.file;
         const id = convertFileNameToTag({ project, shortName, folder });
         const oldStyle = window.preview.iframe.contentDocument.head.querySelector(`style[id=${id}]`);
@@ -268,7 +268,7 @@ export class ServicePreviewView extends StateLitElement {
         if (newLess) {
             newStyle.id = id;
             newStyle.textContent = newLess;
-            window.preview.iframe.contentDocument.head.appendChild(newStyle);
+            if(window.preview.iframe.contentDocument !== null) window.preview.iframe.contentDocument.head.appendChild(newStyle);
             if (oldStyle) oldStyle.remove();
         }
         const tokens = await getTokens({ project, shortName, folder }, this.actualtheme)

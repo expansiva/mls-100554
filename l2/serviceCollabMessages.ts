@@ -82,9 +82,11 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
     public onClickMain(op: string) {
+        if (op === 'opAboutThis') this.showAboutThis();
         if (op === 'opReset') this.resetOnBoarding();
         if (op === 'opSettings') this.openSettings();
         if (op === 'opFindTask') this.openFindTask();
+        
 
     }
 
@@ -94,6 +96,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             opReset: { text: 'Reset onboarding', icon: 'f2ea' },
             opSettings: { text: 'Settings', icon: 'f085' },
             opFindTask: { text: 'Find Task', icon: 'f002' },
+            opAboutThis: 'About this content',
         },
         tools: {
         },
@@ -116,6 +119,47 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
+    }
+
+    private showAboutThis(): boolean {
+
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+
+        let name = 'nothing selected';
+
+        switch (this.activeTab) {
+            case 'CRM':
+                name = 'collab-messages-chat-100554';
+                break;
+            case 'TASK':
+                name = 'collab-tasks-100554';
+                break;
+            case 'DOCS':
+                name = 'collab-messages-chat-100554';
+                break;
+            case 'CONNECT':
+                name = 'collab-messages-chat-100554';
+                break;
+            default:
+                name = 'nothing selected';
+        }
+
+        div.innerHTML = `
+        
+            <h3>About this content</h3>
+            <ul>
+                <li>Reference: ${name}</li>
+                <li>Level: ${this.level}</li>
+                <li>Position: ${this.position}</li>
+            </ul>
+		
+
+        `;
+
+        if (this.menu.setMode) this.menu.setMode('page', div);
+        return true;
+        
     }
 
     async connectedCallback() {
