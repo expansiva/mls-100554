@@ -27,7 +27,9 @@ export class ServiceWorkspace100554 extends ServiceBase {
     }
 
     public onClickMain(op: string) {
-        if (this.menu.setMode) this.menu.setMode('initial');
+        if (op === 'opAboutThis') this.showAboutThis();
+        else if (this.menu.setMode) this.menu.setMode('initial');
+        
     }
 
     public onClickTabs(index: number) {
@@ -40,7 +42,9 @@ export class ServiceWorkspace100554 extends ServiceBase {
 
     public menu: IServiceMenu = {
         title: '',
-        main: {},
+        main: {
+            opAboutThis: 'About this content',
+        },
         tabs: {
             group: 'Mode',
             type: 'onlyicon',
@@ -53,6 +57,38 @@ export class ServiceWorkspace100554 extends ServiceBase {
         onClickMain: this.onClickMain.bind(this),
         onClickTabs: this.onClickTabs.bind(this),
 
+    }
+
+    private showAboutThis(): boolean {
+
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+
+        let name = 'nothing selected';
+
+        switch (this.activeTab) {
+            case 'IMindMap':
+                name = 'widget-mind-map-l4-100554';
+                break;
+            default:
+                name = 'nothing selected';
+        }
+
+        div.innerHTML = `
+        
+            <h3>About this content</h3>
+            <ul>
+                <li>Reference: ${name}</li>
+                <li>Level: ${this.level}</li>
+                <li>Position: ${this.position}</li>
+            </ul>
+		
+
+        `;
+
+        if (this.menu.setMode) this.menu.setMode('page', div);
+        return true;
+        
     }
 
     //------------COMPONENT-----------------

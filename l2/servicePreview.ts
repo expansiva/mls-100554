@@ -146,10 +146,11 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     public onClickMain(op: string) {
-        if (op === 'opAboutWCD') this.opAboutWCD();
-        else if (op === 'opResultHTML') this.showEditorHTML();
+        
+        if (op === 'opResultHTML') this.showEditorHTML();
         else if (op === 'opResultJS') this.showResultJS();
         else if (op === 'opResultTSTest') this.showResultTestJS();
+        else if (op === 'opAboutThis') this.showAboutThis();
     }
 
     public onClickTabs(index: number) {
@@ -186,10 +187,10 @@ export class ServicePreview100554 extends ServiceBase {
     public menu: IServiceMenu = {
         title: '',
         main: {
-            opAboutWCD: 'About this WCD',
             opResultHTML: 'Result HTML',
             opResultJS: 'Result Typescript',
             opResultTSTest: 'Result Typescript Test',
+            opAboutThis: 'About this content',
         },
         tabs: {
             group: 'Mode',
@@ -269,6 +270,55 @@ export class ServicePreview100554 extends ServiceBase {
         onClickTools: this.onClickTools.bind(this),
         onClickTitle: this.onClickTitle.bind(this),
 
+    }
+
+    private showAboutThis(): boolean {
+
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+
+        let mode = '';
+        switch ((mls as any).modePreview) {
+            case 'minimum':
+                mode = 'Minimum( _100554_previewModeMinimum)';
+                break;
+            case 'singlePage':
+                mode = 'SinglePage( _100554_previewModeSinglePage)';
+                break;
+            default: mode = 'SinglePage( _100554_previewModeSinglePage)';
+        }
+
+        if (this.menu?.tabs?.selected === EPreview.icPreviewI) {
+            div.innerHTML = `
+        
+            <h3>About this content</h3>
+            <ul>
+                <li>Reference: plugin-preview-insights-100554</li>
+                <li>Level: ${this.level}</li>
+                <li>Position: ${this.position}</li>
+            </ul>
+		
+
+        `;
+        } else {
+            div.innerHTML = `
+        
+            <h3>About this content</h3>
+            <ul>
+                <li>Reference: service-preview-view-100554</li>
+                <li>Mode compilation: ${mode}</li>
+                <li>Level: ${this.level}</li>
+                <li>Position: ${this.position}</li>
+            </ul>
+		
+
+        `;
+        }
+        
+
+        if (this.menu.setMode) this.menu.setMode('page', div);
+        return true;
+        
     }
 
     public onServiceClick(visible: boolean, reinit: boolean) {

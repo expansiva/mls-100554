@@ -30,7 +30,9 @@ export class ServiceDashboard100554 extends ServiceBase {
     }
 
     public onClickMain(op: string) {
-        if (this.menu.setMode) this.menu.setMode('initial');
+        if (op === 'opAboutThis') this.showAboutThis();
+        else if (this.menu.setMode) this.menu.setMode('initial');
+         
     }
 
     public onClickTabs(index: number) {
@@ -39,7 +41,9 @@ export class ServiceDashboard100554 extends ServiceBase {
 
     public menu: IServiceMenu = {
         title: '',
-        main: {},
+        main: {
+            opAboutThis: 'About this content',
+        },
         tabs: {
             group: 'Mode',
             type: 'onlyicon',
@@ -68,6 +72,30 @@ export class ServiceDashboard100554 extends ServiceBase {
 
 
         }
+    }
+
+    private showAboutThis(): boolean {
+
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+
+        let name = 'collab-tiles-100554';
+        
+        div.innerHTML = `
+        
+            <h3>About this content</h3>
+            <ul>
+                <li>Reference: ${name}</li>
+                <li>Level: ${this.level}</li>
+                <li>Position: ${this.position}</li>
+            </ul>
+		
+
+        `;
+
+        if (this.menu.setMode) this.menu.setMode('page', div);
+        return true;
+        
     }
 
     //---------COMPONENT-------------

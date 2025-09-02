@@ -58,7 +58,9 @@ export class ServicePage100554 extends ServiceBase {
 
 
     public onClickMain(op: string) {
-        if (this.menu.setMode) this.menu.setMode('initial');
+        if (op === 'opAboutThis') this.showAboutThis();
+        else if (this.menu.setMode) this.menu.setMode('initial');
+        
     }
 
     public onClickTabs(index: number) {
@@ -67,7 +69,9 @@ export class ServicePage100554 extends ServiceBase {
 
     public menu: IServiceMenu = {
         title: '',
-        main: {},
+        main: {
+            opAboutThis: 'About this content',
+        },
         tabs: {
             group: 'Mode',
             type: 'onlyicon',
@@ -84,6 +88,44 @@ export class ServicePage100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+
+    }
+
+    private showAboutThis(): boolean {
+
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+
+        let name = 'nothing selected';
+
+        switch (this.activeTab) {
+            case 'icExplorer':
+                name = 'plugin-explore-list-100554';
+                break;
+            case 'icNavigation':
+                name = 'plugin-page-navigation-100554';
+                break;
+            case 'icImprove':
+                name = 'plugin-prototype-improve-100554';
+                break;
+            default:
+                name = 'nothing selected';
+        }
+
+        div.innerHTML = `
+        
+            <h3>About this content</h3>
+            <ul>
+                <li>Reference: ${name}</li>
+                <li>Level: ${this.level}</li>
+                <li>Position: ${this.position}</li>
+            </ul>
+		
+
+        `;
+
+        if (this.menu.setMode) this.menu.setMode('page', div);
+        return true;
 
     }
 

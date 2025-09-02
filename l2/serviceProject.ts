@@ -23,7 +23,7 @@ type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
-} 
+}
 /// **collab_i18n_end**
 
 @customElement('service-project-100554')
@@ -33,7 +33,7 @@ export class ServiceProject100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
 
-    @property() activeTab: IScenery =  'Explore';
+    @property() activeTab: IScenery = 'Explore';
 
     @property({ type: Array }) explories: mls.plugin.MenuAction[] = [];
 
@@ -42,6 +42,10 @@ export class ServiceProject100554 extends ServiceBase {
     @query('details') firstDetails: HTMLDetailsExplore | undefined;
 
     @queryAll('.plugin-container') allContainers: HTMLDivElement[] | undefined;
+
+    private myData: { [key: string]: mls.plugin.MenuAction[] } = {};
+
+    //--------SERVICE---------
 
     private lastActiveTabByLevel: Record<number, number> = {
         5: ETabsL5.ShowCase,
@@ -62,15 +66,16 @@ export class ServiceProject100554 extends ServiceBase {
     }
 
     public onClickMain(op: string) {
+        if (op === 'opAboutThis') this.showAboutThis();
+        else if (this.menu.setMode) this.menu.setMode('initial');
 
-        if (this.menu.setMode) this.menu.setMode('initial');
     }
 
     public onClickTabs(index: number): void {
 
         if (mls.actualLevel === 5) {
             this.activeTab = ETabsL5[index] as IScenery;
-        }else {
+        } else {
             this.activeTab = ETabs[index] as IScenery;
         }
     }
@@ -103,7 +108,9 @@ export class ServiceProject100554 extends ServiceBase {
 
     public menu: IServiceMenu = {
         title: '',
-        main: {},
+        main: {
+            opAboutThis: 'About this content',
+        },
         tabs: {
             group: 'Mode',
             type: 'onlyicon',
@@ -115,9 +122,63 @@ export class ServiceProject100554 extends ServiceBase {
         onClickTabs: this.onClickTabs.bind(this),
     }
 
+    private lastLevel: number = 0;
 
-    private myData: { [key: string]: mls.plugin.MenuAction[] } = {};
+    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
+        if (visible && this.level !== this.lastLevel) {
+            this.lastLevel = this.level;
+            this.updateIconsByLevel();
+        }
+
+        if (visible) {
+            this.refreshPlugins();
+            this.requestUpdate();
+        }
+    }
+
+    private showAboutThis(): boolean {
+
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+
+        let name = 'nothing selected';
+
+        switch (this.activeTab) {
+            case 'Explore':
+                name = 'service-project-100554';
+                break;
+            case 'ShowCase':
+                name = 'project.html';
+                break;
+            case 'Admin':
+                name = 'collab-panel-100554';
+                break;
+            case 'Plugins':
+                name = 'service-project-100554';
+                break;
+            default:
+                name = `nothing selected`;
+        }
+
+        div.innerHTML = `
+        
+            <h3>About this content</h3>
+            <ul>
+                <li>Reference: ${name}</li>
+                <li>Level: ${this.level}</li>
+                <li>Position: ${this.position}</li>
+            </ul>
+		
+
+        `;
+
+        if (this.menu.setMode) this.menu.setMode('page', div);
+        return true;
+
+    }
+
+    //----------COMPONENT-----------
     async firstUpdated() {
         this.setMyData();
         await this.getExploreData();
@@ -142,46 +203,12 @@ export class ServiceProject100554 extends ServiceBase {
         }
     }
 
-    private lastLevel: number = 0;
-
-    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
-        if (visible && this.level !== this.lastLevel) {
-            this.lastLevel = this.level;
-            this.updateIconsByLevel();
-        }
-
-        if (visible) {
-            this.refreshPlugins();
-            this.requestUpdate();
-        }
-    }
-
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         return html`
             ${this.renderContent()}
         `;
-    }
-
-    private refreshPlugins() {
-        this.allContainers?.forEach((item) => {
-            const plg = item.children[0];
-            if (plg) {
-                plg.setAttribute('mode', 'list');
-            }
-        });
-    }
-
-    private updateIconsByLevel() {
-        if (!this.menu || !this.menu.refresh || !this.menu.tabs || !this.menu.setTabActive) return;
-        const menu = this.getMenuTabsByLevel();
-        this.menu.tabs.options = menu;
-        this.menu.refresh();
-        if (this.menu.setTabActive) {
-            this.menu.setTabActive(this.lastActiveTabByLevel[this.level]);
-        }
     }
 
     private renderContent() {
@@ -200,20 +227,6 @@ export class ServiceProject100554 extends ServiceBase {
         }
     }
 
-    private fireEventClose(msg: string) {
-        mls.events.fire(
-            5,
-            'PluginDetails' as any,
-            JSON.stringify(
-                {
-                    htmlText: `<div>${msg}</div>`
-
-                }
-            ),
-            0
-        );
-    }
-
     private renderExplore() {
 
         return html`<div>
@@ -226,29 +239,6 @@ export class ServiceProject100554 extends ServiceBase {
                     `
         })
             }</div>`;
-    }
-
-    private async handleDetailExplorieClick(e: MouseEvent) {
-        const target = e.target as HTMLElement;
-        const details = target.closest('details') as HTMLDetailsExplore;
-        if (!details) return;
-        const div = details.querySelector('div');
-        if (!div || div.childElementCount > 0) return;
-        const { folder, project, shortName } = mls.l2.getPath(details.data.widget);
-        await import(`./_${project}_${shortName}`);
-        const pluginTag = convertFileNameToTag({ project, shortName, folder });
-        const pluginEl = document.createElement(pluginTag);
-        pluginEl.setAttribute('autoprepare', '');
-        pluginEl.setAttribute('level', this.level.toString());
-        pluginEl.setAttribute('position', this.position.toString());
-        (pluginEl as any).service = this;
-        div.appendChild(pluginEl);
-    }
-
-    private async getExploreData() {
-        let project = mls.actualProject;
-        this.explories = await loadPluginProject(project || 0, 'l5Explore');
-
     }
 
     private renderShowCase() {
@@ -281,12 +271,6 @@ export class ServiceProject100554 extends ServiceBase {
         </div>
         `
 
-    }
-
-    private renderPanel(key: string, index: number) {
-        return html`
-            <collab-panel-100554 .myData=${this.myData[key]}></collab-panel-100554>
-        `
     }
 
     private renderPlugin() {
@@ -338,12 +322,74 @@ export class ServiceProject100554 extends ServiceBase {
     `;
     }
 
-    private handleAddNewPlugin() {
-        alert('In Develpoment');
+    private renderPanel(key: string, index: number) {
+        return html`
+            <collab-panel-100554 .myData=${this.myData[key]}></collab-panel-100554>
+        `
+    }
+
+    //-------IMPLEMENTATION-----------
+
+    private refreshPlugins() {
+        this.allContainers?.forEach((item) => {
+            const plg = item.children[0];
+            if (plg) {
+                plg.setAttribute('mode', 'list');
+            }
+        });
+    }
+
+    private updateIconsByLevel() {
+        if (!this.menu || !this.menu.refresh || !this.menu.tabs || !this.menu.setTabActive) return;
+        const menu = this.getMenuTabsByLevel();
+        this.menu.tabs.options = menu;
+        this.menu.refresh();
+        if (this.menu.setTabActive) {
+            this.menu.setTabActive(this.lastActiveTabByLevel[this.level]);
+        }
+    }
+
+    private fireEventClose(msg: string) {
+        mls.events.fire(
+            5,
+            'PluginDetails' as any,
+            JSON.stringify(
+                {
+                    htmlText: `<div>${msg}</div>`
+
+                }
+            ),
+            0
+        );
+    }
+
+    private async handleDetailExplorieClick(e: MouseEvent) {
+        const target = e.target as HTMLElement;
+        const details = target.closest('details') as HTMLDetailsExplore;
+        if (!details) return;
+        const div = details.querySelector('div');
+        if (!div || div.childElementCount > 0) return;
+        const { folder, project, shortName } = mls.l2.getPath(details.data.widget);
+        await import(`./_${project}_${shortName}`);
+        const pluginTag = convertFileNameToTag({ project, shortName, folder });
+        const pluginEl = document.createElement(pluginTag);
+        pluginEl.setAttribute('autoprepare', '');
+        pluginEl.setAttribute('level', this.level.toString());
+        pluginEl.setAttribute('position', this.position.toString());
+        (pluginEl as any).service = this;
+        div.appendChild(pluginEl);
+    }
+
+    private async getExploreData() {
+        let project = mls.actualProject;
+        this.explories = await loadPluginProject(project || 0, 'l5Explore');
+
     }
 
 
-
+    private handleAddNewPlugin() {
+        alert('In Develpoment');
+    }
 
     private pluginsList: Plugin[] = [
         { prjID: 1, name: "SEO Optimizer", description: "Melhore o posicionamento do seu site nos mecanismos de busca, ajustando as práticas recomendadas de SEO de forma automatizada e eficaz.", category: "SEO", status: "active" },
@@ -362,6 +408,7 @@ export class ServiceProject100554 extends ServiceBase {
         { prjID: 28, name: "Theme Customizer", description: "Personalize facilmente a aparência do seu site com este plugin, que oferece uma interface simples para ajustar cores, fontes e layout.", category: "Design", status: "inactive" },
         { prjID: 30, name: "Video Embedder", description: "Incorpore vídeos diretamente nas suas postagens sem complicações, permitindo que você adicione conteúdo multimídia de maneira rápida e eficaz.", category: "Media", status: "inactive" },
     ];
+
     private groupPluginsByCategory(plugins: Plugin[]): { [category: string]: Plugin[] } {
         return plugins.reduce((acc, plugin) => {
             if (!acc[plugin.category]) {
