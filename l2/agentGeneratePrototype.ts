@@ -32,6 +32,7 @@ export function createAgent(): IAgent {
         avatar_url: svg_agent,
         agentDescription: "Agent for create a new Module",
         visibility: "public",
+        scope: ["l2_preview","l3_preview", "l4_preview", "l7_preview"],
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _beforePrompt(context);
         },
@@ -49,7 +50,7 @@ export function createAgent(): IAgent {
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
     const taskTitle = "Planning...";
-    if (!context || !context.message) throw new Error("Invalid context");
+    if (!context || !context.message) throw new Error(`[${agentName}](_beforePrompt) Invalid context`);
 
     if (!context.task) {
         const inputs: any = await getPrompts(context.message.content || getPromptMock());
@@ -58,17 +59,17 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         return;
     }
     const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
+    if (!step) throw new Error(`[${agentName}](beforePrompt) No pending step found for this agent.`);
 
-    if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
+    if (!step.prompt) throw new Error(`[${agentName}](beforePrompt) No prompt found in step for this agent.`);
     const inputs = await getPrompts(step.prompt);
     await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
 }
 
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-    if (!context || !context.message || !context.task) throw new Error("Invalid context");
+    if (!context || !context.message || !context.task) throw new Error(`[${agentName}](afterPrompt) Invalid context`);
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] afterPrompt: No in progress interaction found.`);
+    if (!step) throw new Error(`[${agentName}](afterPrompt) No in progress interaction found.`);
     context = await updateStepStatus(context, step.stepId, "completed");
     if(context.task) context.task = await updateTaskTitle(context.task, "Waiting for user");
     notifyTaskChange(context);
@@ -88,8 +89,8 @@ const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: n
 
 const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: number, clarification: ClarificationValue): Promise<void> => {
     // only execute after button 'continue'
-    if (!context || !context.message || !context.task) throw new Error(`[${agentName}] [afterClarification] Invalid context`);
-    if (!clarification) throw new Error(`[${agentName}] [afterClarification] Invalid json after clarification`);
+    if (!context || !context.message || !context.task) throw new Error(`[${agentName}](afterClarification) Invalid context`);
+    if (!clarification) throw new Error(`[${agentName}](afterClarification) Invalid json after clarification`);
 
     const newStep: mls.msg.AIPayload = {
         type: 'agent',
@@ -106,7 +107,7 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
 }
 
 async function getPrompts(userPrompt: string): Promise<mls.msg.IAMessageInputType[]> {
-    if (!userPrompt) throw new Error(`Erro [${agentName}] getPrompts: invalid userPrompt`);
+    if (!userPrompt) throw new Error(`Erro [${agentName}](getPrompts) invalid userPrompt`);
     const dataForReplace = {
         userPrompt
     }
@@ -119,9 +120,9 @@ function getPromptMock(): string {
 }
 
 export function getPayload1(context: mls.msg.ExecutionContext): PayLoad1 {
-    if (!context || !context.task) throw new Error(`[${agentName}] [getPayload] Invalid context`);
+    if (!context || !context.task) throw new Error(`[${agentName}](getPayload1) Invalid context`);
     const agentStep = getAgentStepByAgentName(context.task, agentName); // Only one agent execution must exist in this task
-    if (!agentStep) throw new Error(`[${agentName}] [getPayload] no agent found`);
+    if (!agentStep) throw new Error(`[${agentName}](getPayload1) no agent found`);
 
     // get result
     const resultStep = agentStep.interaction?.payload?.[0];
