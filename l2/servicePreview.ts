@@ -1,9 +1,8 @@
 /// <mls shortName="servicePreview" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css } from 'lit';
+import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_serviceBase';
-import { StateLitElement } from './_100554_stateLitElement';
 import { getTokens } from './_100554_designSystemBase';
 import { getConfigProject } from './_100554_libProjectConfig';
 import { createPath } from './_100554_libCommom';
@@ -12,12 +11,13 @@ import { createThread } from './_100554_collabMessageHelper';
 import { getThreadByName } from './_100554_msgDBController';
 
 import { globalState, setState, initState, getState } from './_100554_collabState';
-import { convertTagToFileName } from './_100554_utilsLit';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test, collab_xmark } from './_100554_collabIcons';
 import { CollabState } from './_100554_collabState';
 import { TsTestAst } from './_100554_tsTestAST';
 import { getUserId } from './_100554_collabMessageHelper';
 import { getTemporaryContext } from './_100554_aiAgentHelper';
+import { createModel } from './_100554_collabLibModel';
+
 import { PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
 import { IAgent } from './_100554_aiAgentBase';
 
@@ -48,7 +48,6 @@ const message_pt = {
     testEdit: 'Editar',
     runAllTest: 'Todos os testes',
     promptPlaceholder: 'Digite aqui @@ para agentes'
-
 }
 
 const message_en = {
@@ -69,8 +68,6 @@ const message_en = {
     testEdit: 'Edit',
     runAllTest: 'All testes',
     promptPlaceholder: 'Type here @@ for agents'
-
-
 }
 
 type MessageType = typeof message_en;
@@ -102,7 +99,9 @@ export class ServicePreview100554 extends ServiceBase {
 
     private tasksInProgress: Map<string, Set<mls.msg.ExecutionContext>> = new Map();
 
-    private lastMode: number = EPreview.icPreviewD;
+    private themesByModule: Map<string, string> = new Map();
+
+    private lastMode: number = EPreview?.icPreviewD || 0;
 
     private lastModePreview: string = 'desktop';
 
@@ -113,7 +112,6 @@ export class ServicePreview100554 extends ServiceBase {
     private themes: string[] = ['Default'];
 
     private actualTheme = '';
-    private actualThemeIndex = -1;
 
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
 
@@ -146,7 +144,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     public onClickMain(op: string) {
-        
+
         if (op === 'opResultHTML') this.showEditorHTML();
         else if (op === 'opResultJS') this.showResultJS();
         else if (op === 'opResultTSTest') this.showResultTestJS();
@@ -272,55 +270,6 @@ export class ServicePreview100554 extends ServiceBase {
 
     }
 
-    private showAboutThis(): boolean {
-
-        const div = document.createElement('div');
-        div.style.padding = '1rem';
-
-        let mode = '';
-        switch ((mls as any).modePreview) {
-            case 'minimum':
-                mode = 'Minimum( _100554_previewModeMinimum)';
-                break;
-            case 'singlePage':
-                mode = 'SinglePage( _100554_previewModeSinglePage)';
-                break;
-            default: mode = 'SinglePage( _100554_previewModeSinglePage)';
-        }
-
-        if (this.menu?.tabs?.selected === EPreview.icPreviewI) {
-            div.innerHTML = `
-        
-            <h3>About this content</h3>
-            <ul>
-                <li>Reference: plugin-preview-insights-100554</li>
-                <li>Level: ${this.level}</li>
-                <li>Position: ${this.position}</li>
-            </ul>
-		
-
-        `;
-        } else {
-            div.innerHTML = `
-        
-            <h3>About this content</h3>
-            <ul>
-                <li>Reference: service-preview-view-100554</li>
-                <li>Mode compilation: ${mode}</li>
-                <li>Level: ${this.level}</li>
-                <li>Position: ${this.position}</li>
-            </ul>
-		
-
-        `;
-        }
-        
-
-        if (this.menu.setMode) this.menu.setMode('page', div);
-        return true;
-        
-    }
-
     public onServiceClick(visible: boolean, reinit: boolean) {
 
         if (!visible) return;
@@ -397,7 +346,6 @@ export class ServicePreview100554 extends ServiceBase {
 
     private setEvents() {
 
-        mls.events.addEventListener([2, 3, 4, 5, 6, 7], ['ModelHTMLCreated'] as any, (ev: mls.events.IEvent) => { this.onModelHTMLCreated(ev); });
         mls.events.addEventListener([2, 3, 4, 7], ['FileAction'], this.onMLSFileAction.bind(this));
         mls.events.addEventListener([2, 3], ['styleChanged' as any], this.onStyleChanged.bind(this));
         //mls.events.addListener(2, 'tsTestChanged' as any, this.onTsTestChanged.bind(this));
@@ -459,26 +407,9 @@ export class ServicePreview100554 extends ServiceBase {
     private onReloader(): void {
         clearTimeout(this.timeEvent);
         this.timeEvent = setTimeout(async () => {
-
             this.preview(this.lastModePreview);
             mls.events.fire((+(this.level as any)) as any, 'L3EditEvents' as any, `{"action":"navigation", "position":"right"}`, 500);
         }, 500);
-    }
-
-    private onModelHTMLCreated(ev: mls.events.IEvent): void {
-        try {
-            if (!ev.desc) return;
-            if (ev.level !== this.level) return;
-            const iPath: mls.cbe.IPath = JSON.parse(ev.desc);
-            if (!iPath || !iPath.project || !iPath.shortName) return;
-            const keyStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, '', '.html');
-            const storFile = mls.stor.files[keyStorFile];
-            if (!storFile) throw new Error('Invalid stor file for path:' + keyStorFile);
-
-            if ((iPath as any).position && (iPath as any).position === 'left') this.setModel(storFile);
-        } catch (err: any) {
-            throw new Error(err);
-        }
     }
 
     private lastStatusHasError: boolean = false;
@@ -552,9 +483,6 @@ export class ServicePreview100554 extends ServiceBase {
                 !eventsValid.includes(fileAction.action)
             ) return;
 
-            const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.html');
-            const storFileHTML = mls.stor.files[keyToFileInfo];
-
             if (fileAction.action === 'editorChanged' && fileAction.extension === '.test.ts') {
                 this.onTsTestChanged();
                 return;
@@ -567,16 +495,10 @@ export class ServicePreview100554 extends ServiceBase {
 
             if (fileAction.action === 'open' || (fileAction.action as any) === 'openBackground') {
                 setState('preview.pausePreview', false);
-                this.setModel(storFileHTML);
-                this.actualFile = storFileHTML;
-                this.setThemeByModule();
-                if (!this.watch && this.menu.selectTool) {
-                    this.menu.selectTool('watchPreview');
-                }
+                if (!this.watch && this.menu.selectTool) this.menu.selectTool('watchPreview');
             }
 
             if (mls.istrace) console.info('is preview repaint:' + this.watch);
-
 
             if (fileAction.action as any === 'openBackground') {
                 this.elPreview = undefined;
@@ -606,50 +528,11 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private async onOpenLink(fileAction: mls.events.IFileAction) {
-
-        const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.html');
-        const storFileHTML = mls.stor.files[keyToFileInfo];
-        //await createAllModels(storFileHTML);
-        this.setModel(storFileHTML);
-        this.actualFile = storFileHTML;
-        this.setThemeByModule();
-
         this.elPreview = undefined;
         this.updateLoadingToFalseIfNoTasksRunning();
         let fullName = `_${fileAction.project}_${fileAction.shortName}`;
         if (fileAction.folder) fullName = `_${fileAction.project}_${fileAction.folder}/${fileAction.shortName}`;
-
         this.createPreview(this.lastModePreview, fullName);
-    }
-
-
-    // -------------- COMPONENT ---------------
-
-    render() {
-
-        const lang = this.getMessageKey(messages);
-        this.msg = messages[lang];
-        return html`
-        <collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="var(--bg-primary-color)">
-
-                <collab-spliter-horizontal-var-fixed-100554
-                    slot="top"
-                    complementcolor="var(--bg-primary-color);"
-                    fixedwidth="30%"
-                    fixedvisible= "closed" 
-                >
-                    <div slot="left" style="height:100%;" id="preview-container"></div>
-                    <div slot="right" style="height:100%;" id="preview-details"></div>
-                </collab-spliter-horizontal-var-fixed-100554>
-                <div slot="bottom">
-                    <collab-messages-prompt-100554
-                    acceptAutoCompleteAgents="true"
-                    scope="l${this.level}_preview"  
-                    placeholder="${this.msg.promptPlaceholder}"
-                    .onSend=${this.handleSend.bind(this)}
-                    ></collab-messages-prompt-100554>
-                </div>
-            </collab-spliter-vertical-var-fixed-100554>`;
     }
 
     async handleSend(value: string, opt: { isSpecialMention: boolean, agentName: string }) {
@@ -682,6 +565,10 @@ export class ServicePreview100554 extends ServiceBase {
                 this.setError('Error on send message:' + err.message);
             })
             return;
+        }
+
+        if (opt.agentName === 'agentGeneratePrototype') {
+            return this.fireCollab(opt.agentName, value);
         }
 
         try {
@@ -717,8 +604,6 @@ export class ServicePreview100554 extends ServiceBase {
             item.message.threadId === threadId
         );
 
-
-
         if (!task && contextChanged || (contextChanged && task && (task.status === 'failed' || task.status === 'done'))) {
             tasks.delete(contextChanged);
             if (tasks.size === 0) this.tasksInProgress.delete(this.page);
@@ -730,7 +615,6 @@ export class ServicePreview100554 extends ServiceBase {
         }
 
     };
-
 
     private updateLoadingToFalseIfNoTasksRunning() {
         if (this.tasksInProgress.size === 0) this.loading = false;
@@ -755,7 +639,6 @@ export class ServicePreview100554 extends ServiceBase {
         }
 
         const thread = await threadPromise;
-
         const userId = getUserId();
         if (!userId) return;
 
@@ -780,42 +663,6 @@ export class ServicePreview100554 extends ServiceBase {
         await agent.beforePrompt(context);
     }
 
-    async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
-        super.firstUpdated(changedProperties);
-        this.createEditor();
-        const darkOrLight = this.getDarkLight();
-        if (darkOrLight === 'dark' && this.menu.selectTool) this.menu.selectTool('darkLight');
-        this.setLanguages();
-        this.setTheme();
-        this.setTest();
-        this.configureButtonsRight(false);
-        window.addEventListener('task-change', this.onTaskChange);
-
-    }
-
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        window.removeEventListener('task-change', this.onTaskChange);
-    }
-
-    updated(changedProperties: Map<string | number | symbol, unknown>): void {
-        super.updated(changedProperties);
-        const hasMsize = changedProperties.has('msize');
-        if (hasMsize) {
-            const msize = changedProperties.get('msize');
-            if (!msize || typeof msize !== 'string' || !this.monacoeditor) return;
-            this.monacoeditor.setAttribute('msize', msize);
-            if (this.pluginResultJS) this.pluginResultJS.setAttribute('msize', msize);
-            if (this.pluginResultTestJS) this.pluginResultTestJS.setAttribute('msize', msize);
-            const pageOverlay = window.preview.iframe?.contentDocument?.body.querySelector('*[modeoverlay]');
-            if (!pageOverlay) return;
-            const pageOverlayName = pageOverlay.getAttribute('modeoverlay');
-            if (!pageOverlayName) return;
-            const wcdOverlay = pageOverlay.querySelector(pageOverlayName);
-            if (wcdOverlay) wcdOverlay.setAttribute('msize', msize);
-
-        }
-    }
 
     // -------------- IMPLEMENTS-----------------
 
@@ -826,66 +673,19 @@ export class ServicePreview100554 extends ServiceBase {
         buttonsR.style.pointerEvents = enabled ? 'all' : 'none';
     }
 
-    private opAboutWCD() {
-
-        if (!this.menu.setMode) return;
-        const el = document.createElement("div") as HTMLElement;
-        el.style.padding = '1rem';
-
-        if (!window['preview'] || !window['preview'].iframe || !window['preview'].iframe.contentWindow || !(window['preview'].iframe.contentWindow as any).wcdState) {
-            el.innerHTML = `<h3>Not found any information about this page</h3>`;
-            this.menu.setMode('page', el);
-            return;
-        };
-
-        const info = (window['preview'].iframe.contentWindow as any).wcdState;
-        const elOverlay = window['preview'].iframe.contentDocument?.body.querySelector('*[modeoverlay]');
-
-        let txt = '<h3>About this page</h3><ul>';
-
-        if (elOverlay && elOverlay.getAttribute('modeoverlay')) {
-            const n = elOverlay.getAttribute('modeoverlay') as string;
-            txt += `<li><b>Overlay:</b> ${convertTagToFileName(n)}</li>`;
-        }
-
-        if (info.elICA) {
-            txt += `<li><b>Select:</b> ${convertTagToFileName(info.elICA.tagName.toLowerCase())}</li>`;
-        }
-
-        if (info.elMain) {
-            txt += `<li><b>Element render:</b> ${convertTagToFileName(info.elMain.tagName.toLowerCase())}</li>`;
-        }
-
-        if (info.myParent) {
-            txt += `<li><b>Main wcd:</b> ${convertTagToFileName(info.myParent.tagName.toLowerCase())}</li>`;
-        }
-
-        if (info.wcdItens && info.wcdItens.length > 0) {
-            txt += `<li><b>Wcd itens:</b>`;
-            info.wcdItens.forEach((it: any) => {
-                txt += `<br/>${convertTagToFileName(it.tagName.toLowerCase())}`;
-            })
-            txt += `</li>`;
-        }
-
-        txt += `</ul>`;
-
-        el.innerHTML = txt;
-
-        this.menu.setMode('page', el);
-        return;
-
+    private showEditorHTML() {
+        this.showEditorHTML2();
+        return true;
     }
 
-    private showEditorHTML() {
+    private async showEditorHTML2() {
         if (this.menu.setMode) {
             this.menu.setMode('page', this.monacoeditor);
+            // await this.updateComplete;
             this._ed1?.updateOptions({ readOnly: true });
-            this._ed1?.layout();
             this.monacoeditor?.setAttribute('msize', this.msize);
-
+            // this._ed1?.layout();
         }
-        return true;
     }
 
     private pluginResultJS: HTMLElement | undefined;
@@ -912,6 +712,47 @@ export class ServicePreview100554 extends ServiceBase {
             if (this.menu.updateTitle) this.menu.updateTitle();
         }
         return true;
+    }
+
+    private showAboutThis(): boolean {
+
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+        let mode = '';
+        switch ((mls as any).modePreview) {
+            case 'minimum':
+                mode = 'Minimum( _100554_previewModeMinimum)';
+                break;
+            case 'singlePage':
+                mode = 'SinglePage( _100554_previewModeSinglePage)';
+                break;
+            default: mode = 'SinglePage( _100554_previewModeSinglePage)';
+        }
+
+        if (this.menu?.tabs?.selected === EPreview.icPreviewI) {
+            div.innerHTML = `
+            <h3>About this content</h3>
+            <ul>
+                <li>Reference: plugin-preview-insights-100554</li>
+                <li>Level: ${this.level}</li>
+                <li>Position: ${this.position}</li>
+            </ul>
+        `;
+        } else {
+            div.innerHTML = `
+            <h3>About this content</h3>
+            <ul>
+                <li>Reference: service-preview-view-100554</li>
+                <li>Mode compilation: ${mode}</li>
+                <li>Level: ${this.level}</li>
+                <li>Position: ${this.position}</li>
+            </ul>
+        `;
+        }
+
+        if (this.menu.setMode) this.menu.setMode('page', div);
+        return true;
+
     }
 
     private getIframePreviewHTML(): HTMLHtmlElement | undefined {
@@ -1061,7 +902,6 @@ export class ServicePreview100554 extends ServiceBase {
         }
     }
 
-
     private async onBtTestListClick() {
 
         if (!mls.actual[2].left) return;
@@ -1139,13 +979,11 @@ export class ServicePreview100554 extends ServiceBase {
         globalState.globalVariation = !isNaN(variation) ? variation : 0;
         if (window.top) (window.top.window as any).globalVariation = !isNaN(variation) ? variation : 0;
 
-        if (this.level === 7) this.requestUpdateAllIcaComponentsInPage();
-        else this.onReloader();
+        this.onReloader();
         return true;
     }
 
     private onBtDarkLightClick() {
-
         this.light = !this.light;
         if (!mls.actual[2].left || !this.watch) return this.light;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
@@ -1160,8 +998,9 @@ export class ServicePreview100554 extends ServiceBase {
     private onBtThemeClick() {
         if (this.menu.tools.theme.selected === undefined) return;
         const opMenu = this.menu.tools.theme.options[this.menu.tools.theme.selected as number].text;
+        const moduleNameByFile = this.getModuleNameByFile();
+        if (moduleNameByFile) this.themesByModule.set(moduleNameByFile, opMenu);
         this.actualTheme = opMenu;
-        this.actualThemeIndex = this.menu.tools.theme.selected as number;
         this.onStyleChanged();
         return true;
     }
@@ -1205,9 +1044,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (!this.monacoeditor) {
             this.monacoeditor = document.createElement('mls-editor-100529');
             this.monacoeditor.setAttribute('ismls2', 'true');
-            const [width, height] = this.msize.split(',');
-            this.monacoeditor.style.width = width + 'px';
-            this.monacoeditor.style.height = height + 'px';
+    
         }
         if (this._ed1) return;
 
@@ -1220,26 +1057,21 @@ export class ServicePreview100554 extends ServiceBase {
         window.preview.editor = this._ed1;
     }
 
-    private async createModelIfNeeded(storFile: mls.stor.IFileInfo): Promise<monaco.editor.ITextModel | null> {
-        if (!storFile) {
-            //throw new Error('Invalid storFile');
-            return null;
+    private async createModelIfNeeded(storFile: mls.stor.IFileInfo): Promise<monaco.editor.ITextModel | undefined> {
+
+        const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
+        const models = mls.editor.models[keyModel];
+        if (!models?.html) {
+            const model = await createModel(storFile, true, true);
+            return model?.model;
         }
-        const uri = this.getUri(`_${storFile.project}_${storFile.shortName}`, '.html');
-        let model = monaco.editor.getModel(uri);
-        if (model) return model;
-        if (![7, 2].includes(this.level)) mls.events.fire(2, ['CreateModelHTML'] as any, JSON.stringify(storFile));
-        return model;
+        return models.html.model;
     }
 
     private async setModel(storFile: mls.stor.IFileInfo) {
         const model = await this.createModelIfNeeded(storFile);
         if (!this._ed1 || !model) return;
         this._ed1.setModel(model);
-    }
-
-    private getUri(shortFN: string, ftype: '.ts' | '.d.ts' | '.html'): monaco.Uri {
-        return monaco.Uri.parse(`file://server/${shortFN}${ftype}`);
     }
 
     private getDarkLight() {
@@ -1283,7 +1115,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (this.menu.refresh) this.menu.refresh();
     }
 
-    private async getFileModuleName(): Promise<string> {
+    private async getFileModuleThemeName(): Promise<string> {
         if (!this.actualFile || !this.actualFile.folder) return 'Default';
         const { project, folder } = this.actualFile;
         const keyToModuleFile = mls.stor.getKeyToFiles(project, 2, 'module', folder, '.ts');
@@ -1294,30 +1126,44 @@ export class ServicePreview100554 extends ServiceBase {
         return mModule.moduleConfig.theme
     }
 
-    private async setThemeByModule() {
-        if (!this.actualFile) return;
-        const theme = await this.getFileModuleName();
+    private getModuleNameByFile(): string {
+        if (!this.actualFile || !this.actualFile.folder) return '';
+        const { folder } = this.actualFile;
+        return folder;
+    }
 
-        if (!this.actualTheme || this.actualTheme != theme) {
-            this.actualTheme = theme;
-            if (this.menu.tools.theme) {
-                const index = this.menu.tools.theme.options.findIndex((item) => item.text === theme);
-                if (this.menu.tools.theme) {
-                    this.menu.tools.theme.selected = index;
-                    this.actualThemeIndex = index;
-                }
+
+    private async setThemeByModule() {
+
+        if (!this.actualFile) return;
+        const moduleNameByFile = this.getModuleNameByFile();
+        if (!moduleNameByFile) return;
+        if (!this.menu.tools.theme) return;
+        await this.updateComplete;
+
+        const userThemeByModule = this.themesByModule.get(moduleNameByFile);
+
+        if (!userThemeByModule) {
+            const themeToSelect = await this.getFileModuleThemeName();
+            this.themesByModule.set(moduleNameByFile, themeToSelect);
+            const index = this.menu.tools.theme.options.findIndex((item) => item.text === themeToSelect);
+            if (index > -1) {
+                this.menu.tools.theme.selected = index;
+                this.actualTheme = themeToSelect;
             }
-            this.onStyleChanged();
-        } else if (this.actualTheme && this.actualThemeIndex) {
-            this.actualTheme = theme;
-            this.menu.tools.theme.selected = this.actualThemeIndex;
-            this.onStyleChanged();
+        } else {
+            const index = this.menu.tools.theme.options.findIndex((item) => item.text === userThemeByModule);
+            if (index > -1) {
+                this.menu.tools.theme.selected = index;
+                this.actualTheme = userThemeByModule;
+            }
         }
+        this.onStyleChanged();
+
 
     }
 
     private async setTheme() {
-
         const project = mls.actualProject;
         if (!project) return;
         const tokens = await getTokens(project)
@@ -1358,55 +1204,7 @@ export class ServicePreview100554 extends ServiceBase {
         return;
     }
 
-    private requestUpdateAllIcaComponentsInPage() {
-        if (!window.preview.iframe) throw new Error('Preview no created yet');
-        const body = window.preview.iframe
-            ?.contentDocument
-            ?.querySelector('body');
-
-        if (!body) return;
-        const elements = this.findAllElementsIca(body)
-        if (!elements) return;
-
-        elements.forEach((el) => {
-            if (el.tagName.split('-').length > 1 && (el as StateLitElement).globalVariation !== undefined) {
-                (el as StateLitElement).globalVariation = globalState.globalVariation;
-            }
-        });
-    }
-
-    private findAllElementsIca(el: HTMLElement): HTMLElement[] {
-        let elements: HTMLElement[] = [];
-        let elToSearch: Element | ShadowRoot = el;
-
-        function traverseShadowRoot(element: HTMLElement) {
-
-            if (element.tagName.toLowerCase().startsWith('ica')) {
-                elements.push(element);
-                return;
-            }
-            if (element.shadowRoot) {
-                element.shadowRoot.querySelectorAll('*').forEach((item) => {
-                    traverseShadowRoot(item as HTMLElement);
-                });
-            } else {
-                const children = Array.from(element.children);
-                if (children.length > 0) {
-                    children.forEach(child => traverseShadowRoot(child as HTMLElement));
-                }
-            }
-        }
-
-        if (el.shadowRoot) elToSearch = el.shadowRoot;
-        elToSearch.querySelectorAll('*').forEach((item) => {
-            traverseShadowRoot(item as HTMLElement);
-        });
-
-        return elements;
-    }
-
-
-    getScriptTest(ica: CollabState): { func: string, exe: any } | undefined {
+    private getScriptTest(ica: CollabState): { func: string, exe: any } | undefined {
 
         const stateHistories = ica.getHistory();
         if (stateHistories.length <= 0) return undefined;
@@ -1517,7 +1315,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     }
 
-    getParam(params: any, key: string) {
+    private getParam(params: any, key: string) {
         const keys = Object.keys(params);
         let ret = '';
         keys.forEach((i) => {
@@ -1527,15 +1325,12 @@ export class ServicePreview100554 extends ServiceBase {
         return ret;
     }
 
-    processValue(vl: any): string | number {
+    private processValue(vl: any): string | number {
         if (typeof vl === "string" || typeof vl === "number") {
             return vl;
         }
         return JSON.stringify(vl);
     }
-
-
-    // Title changes
 
     private async preview(mode: string) {
         await this.updateComplete;
@@ -1561,18 +1356,20 @@ export class ServicePreview100554 extends ServiceBase {
                 break;
 
         }
-
     }
-
 
     private previewL2(mode: string) {
         if (!mls.actual[2].left) {
             this.clearPreview();
             return;
         }
+
         const { project, shortName, folder } = mls.actual[2].left;
         const fullname = createPath(project, shortName, folder);
-        this.actualFile = mls.actual[2].left;
+        const keyToFileHtml = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.html');
+        const storFileHtml = mls.stor.files[keyToFileHtml];
+        this.actualFile = storFileHtml;
+        this.setModel(this.actualFile);
         this.setThemeByModule();
         this.createPreview(mode, fullname);
     }
@@ -1597,10 +1394,11 @@ export class ServicePreview100554 extends ServiceBase {
         }
 
         const { folder, shortName } = getFolderAndName(path)
-        const keyStorFile = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
+        const keyStorFile = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.html');
         const storFile = mls.stor.files[keyStorFile];
         const fullname = `_${project}_${path}`;
         this.actualFile = storFile;
+        this.setModel(this.actualFile);
         this.setThemeByModule();
         this.createPreview(mode, fullname);
     }
@@ -1610,7 +1408,6 @@ export class ServicePreview100554 extends ServiceBase {
             this.previewContent.innerHTML = ''
             return;
         }
-
     }
 
     private async createPreview(mode: string, fullName: string) {
@@ -1728,6 +1525,65 @@ export class ServicePreview100554 extends ServiceBase {
         if (this.menu.updateTitle) this.menu.updateTitle();
     }
 
+    // -------------- COMPONENT ---------------
+
+
+    async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
+        super.firstUpdated(changedProperties);
+        this.createEditor();
+        const darkOrLight = this.getDarkLight();
+        if (darkOrLight === 'dark' && this.menu.selectTool) this.menu.selectTool('darkLight');
+        this.setLanguages();
+        this.setTheme();
+        this.setTest();
+        this.configureButtonsRight(false);
+        window.addEventListener('task-change', this.onTaskChange);
+
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener('task-change', this.onTaskChange);
+    }
+
+    updated(changedProperties: Map<string | number | symbol, unknown>): void {
+        super.updated(changedProperties);
+        const hasMsize = changedProperties.has('msize');
+        if (hasMsize) {
+            const msize = changedProperties.get('msize');
+            if (!msize || typeof msize !== 'string' || !this.monacoeditor) return;
+            this.monacoeditor.setAttribute('msize', msize);
+            if (this.pluginResultJS) this.pluginResultJS.setAttribute('msize', msize);
+            if (this.pluginResultTestJS) this.pluginResultTestJS.setAttribute('msize', msize);
+        }
+    }
+
+    render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+        return html`
+        <collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="var(--bg-primary-color)">
+
+                <collab-spliter-horizontal-var-fixed-100554
+                    slot="top"
+                    complementcolor="var(--bg-primary-color);"
+                    fixedwidth="30%"
+                    fixedvisible= "closed" 
+                >
+                    <div slot="left" style="height:100%;" id="preview-container"></div>
+                    <div slot="right" style="height:100%;" id="preview-details"></div>
+                </collab-spliter-horizontal-var-fixed-100554>
+                <div slot="bottom">
+                    <collab-messages-prompt-100554
+                    acceptAutoCompleteAgents="true"
+                    scope="l${this.level}_preview"  
+                    placeholder="${this.msg.promptPlaceholder}"
+                    .onSend=${this.handleSend.bind(this)}
+                    ></collab-messages-prompt-100554>
+                </div>
+            </collab-spliter-vertical-var-fixed-100554>`;
+    }
 
 }
 
