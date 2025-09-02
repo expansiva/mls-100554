@@ -44,7 +44,7 @@ export function createAgent(): IAgent {
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
     const taskTitle = "Planning 3...";
-    if (!context || !context.message) throw new Error("Invalid context");
+    if (!context || !context.message) throw new Error(`[${agentName}](_beforePrompt) Invalid context`);
 
     if (!context.task) {
         // use mock
@@ -55,24 +55,24 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
     if (!step) {
-        throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
+        throw new Error(`[${agentName}](beforePrompt) No pending step found for this agent.`);
     }
     const inputs = await getPrompts(getPayload2(context));
     await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
 }
 
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-    if (!context || !context.message || !context.task) throw new Error("Invalid context");
+    if (!context || !context.message || !context.task) throw new Error(`[${agentName}](afterPrompt) Invalid context`);
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] afterPrompt: No in progress interaction found.`);
+    if (!step) throw new Error(`[${agentName}](afterPrompt) No in progress interaction found.`);
     context = await updateStepStatus(context, step.stepId, "completed", "no more agents");
     notifyTaskChange(context);
     // await createFiles(context);
-    if (!context.task) throw new Error("Invalid context task");
+    if (!context.task) throw new Error(`[${agentName}](afterPrompt) Invalid context task`);
     context.task = await updateTaskTitle(context.task, "Ok, see mind map");
 
     const stepPendent = getNextPendentStep(context.task);
-    if (!stepPendent) throw new Error(`[${agentName}] afterPrompt: Invalid next stepPendent`);
+    if (!stepPendent) throw new Error(`[${agentName}](afterPrompt) Invalid next stepPendent`);
 
     const newStep: mls.msg.AIPayload = {
         agentName: 'agentGeneratePrototype4',

@@ -23,6 +23,8 @@ import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getUserId } from "./_100554_collabMessageHelper";
 import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
 
+const agentName = 'aiAgentOrchestration';
+
 export async function startNewAiTask(
     agentName: string,
     taskTitle: string,
@@ -49,8 +51,8 @@ export async function startNewAiTask(
         };
 
         const value = await mls.api.msgAddMessageAI(args);
-        if (!value) throw new Error("Error on return addMessageAI, no return");
-        if (value.statusCode !== 200) throw new Error("Error on addMessageAI: " + (value.msg || ''));
+        if (!value) throw new Error(`[${agentName}](startNewAiTask) Error on return addMessageAI`);
+        if (value.statusCode !== 200) throw new Error(`[${agentName}](startNewAiTask) Error on addMessageAI: ${value.msg || ''})`);
 
         const ret = value as mls.msg.ResponseAddMessageAI;
         context.task = ret.task;
@@ -66,7 +68,7 @@ export async function startNewAiTask(
 
     } catch (error: any) {
         onError(context, 1, error.message, oldContextCreateAt);
-        throw new Error(`[startNewAiTask] ${error.message || error}`);
+        throw new Error(`[${agentName}](startNewAiTask) ${ error.message || error }`);
     }
 }
 
@@ -74,9 +76,9 @@ type AfterPrompt = (context: mls.msg.ExecutionContext) => Promise<void>;
 
 export async function startNewInteractionInAiTask(agentName: string, taskTitle: string, inputAI: mls.msg.IAMessageInputType[], context: mls.msg.ExecutionContext, afterPrompt: AfterPrompt, stepFather: number): Promise<void> {
     try {
-        if (!context || !context.message || !context.task) throw new Error("Invalid context");
-        if (!agentName) throw new Error("addNewInteractionInAiTask: agentName is null");
-        if (!context.task.messageid_created) throw new Error("addNewInteractionInAiTask: context.task.messageid_created is null");
+        if (!context || !context.message || !context.task) throw new Error(`[${agentName}(startNewInteractionInAiTask) Invalid context`);
+        if (!agentName) throw new Error(`[${agentName}(startNewInteractionInAiTask) agentName is null`);
+        if (!context.task.messageid_created) throw new Error(`[${agentName}(startNewInteractionInAiTask)context.task.messageid_created is null`); 
         const args: mls.msg.RequestAddTaskAIInteraction = {
             action: "addTaskAIInteraction",
             userId: getUserId() || context.task.owner,
@@ -88,8 +90,8 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
 
         const value = await mls.api.msgAddTaskAIInteraction(args);
 
-        if (!value) throw new Error("Error on return addTaskAIInteraction, no return");
-        if (value.statusCode !== 200) throw new Error("Error on addTaskAIInteraction: " + (value.msg || ''));
+        if (!value) throw new Error(`[${agentName}](startNewInteractionInAiTask) Error on return addTaskAIInteraction, no return`);
+        if (value.statusCode !== 200) throw new Error(`[${agentName}](startNewInteractionInAiTask) Error on addTaskAIInteraction: ${value.msg || ''})`);
 
         const ret = value as mls.msg.ResponseAddTaskAIInteraction
         context.task = ret.task;
@@ -102,16 +104,16 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
         await afterPrompt(context);
     }
     catch (error: any) {
-        const msg = 'Error: ' + error.message || 'startNewInteractionInAiTask ';
+        const msg = `${ error.message || '' }`;
         onError(context, stepFather, msg);
-        console.error(`[startNewInteractionInAiTask] ${error.message || error}`);
+        console.error(msg);
     }
 }
 
 export async function addNewStep(context: mls.msg.ExecutionContext, parentStepId: number, steps: mls.msg.AIPayload[], newTaskTitle = "Pending"): Promise<mls.msg.ExecutionContext | undefined> {
 
-    if (!context || !context.message || !context.task) throw new Error("Invalid context");
-    if (!context.task.messageid_created) throw new Error("addNewInteractionInAiTask: context.task.messageid_created is null");
+    if (!context || !context.message || !context.task) throw new Error(`[${agentName}(addNewStep) Invalid context`);
+    if (!context.task.messageid_created) throw new Error(`[${agentName}(addNewStep) context.task.messageid_created is null`);
 
     try {
 
@@ -133,9 +135,9 @@ export async function addNewStep(context: mls.msg.ExecutionContext, parentStepId
         return context;
 
     } catch (error: any) {
-        const msg = 'Error: ' + error.message || 'addNewStep ';
+        const msg = `${ error.message || '' }`;
         onError(context, parentStepId, msg);
-        console.error(`[startNewInteractionInAiTask] ${error.message || error}`);
+        console.error(msg);
     }
 
 }
@@ -157,15 +159,17 @@ export async function executeNextStep(context: mls.msg.ExecutionContext): Promis
     }
 
     const { totalCost, totalSteps } = calculateStepsStatistics(context.task.iaCompressed.nextSteps, false);
+
     if (totalCost > maxCostByTask) {
         notifyTaskChange(context);
         console.error("max cost reached");
-        return;
+        throw new Error(`[${agentName}(executeNextStep) max cost reached`);
     }
+
     if (totalSteps > maxStepsByTask) {
         notifyTaskChange(context);
         console.error("max steps reached");
-        return;
+        throw new Error(`[${agentName}(executeNextStep) max steps reached`);
     }
 
     switch (step.type) {
@@ -204,23 +208,22 @@ async function executeNextTool(context: mls.msg.ExecutionContext, step: mls.msg.
     const rc: IExecuteToolReturn = await executeTool(step.toolName, step.args);
 
     if (rc.status !== true) {
-        const traceMsg = `Error executing tool ${step.toolName}: ${rc.error}`;
+        const traceMsg = `Error executing tool ${ step.toolName }: ${ rc.error } `;
         console.error(traceMsg);
         context = await updateStepStatus(context, step.stepId, "failed", traceMsg);
-
         if ((mls as any).istraceAgent) console.log(JSON.stringify(context.task, null, 2));
         return;
     }
 
-    if (typeof rc.result !== "string") throw new Error(`Tool ${step.toolName} did not return a string`);
+    if (typeof rc.result !== "string") throw new Error(`Tool ${ step.toolName } did not return a string`);
     const existResults = rc.result.length > 0;
     if (existResults) {
 
         const interactionStepId = getInteractionStepId(context.task, step.stepId);
-        if (!interactionStepId) throw new Error(`[executeNextTool] Interaction step not found for stepId ${step.stepId}`);
+        if (!interactionStepId) throw new Error(`[executeNextTool] Interaction step not found for stepId ${ step.stepId }`);
 
         const stepdIdToChangeStatus = step.stepId;
-        if (!interactionStepId) throw new Error(`[executeNextTool] Interaction step not found for stepId ${step.stepId}`);
+        if (!interactionStepId) throw new Error(`[executeNextTool] Interaction step not found for stepId ${ step.stepId }`);
         const stepInteraction = getStepById(context.task, interactionStepId);
         if (!stepInteraction || stepInteraction.type !== 'agent') throw new Error('Interaction must be type: agent');
         const oldPrompt = stepInteraction.interaction?.input.find((item) => item.type === 'human');
@@ -228,7 +231,7 @@ async function executeNextTool(context: mls.msg.ExecutionContext, step: mls.msg.
         const newStep: mls.msg.AIPayload = {
             type: 'agent',
             agentName: stepInteraction.agentName,
-            prompt: `${oldPrompt?.content} \n\n Response from tool ${step.toolName}: ${rc.result}`,
+            prompt: `${ oldPrompt?.content } \n\n Response from tool ${ step.toolName }: ${ rc.result } `,
             status: 'pending',
             stepId: getNextStepIdAvaliable(context.task),
             interaction: null,
@@ -269,28 +272,27 @@ export async function executeTool(toolName: string, args: string): Promise<IExec
         }
         rc.status = true;
     } catch (error: any) {
-        console.error(`[executeTool] ${error.message || error}`);
+        console.error(`[executeTool] ${ error.message || error } `);
         rc.error = error.message || error;
     }
     return rc;
 }
 
 async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep) {
-    if (!context || !context.task) throw new Error("Invalid context");
-    if (!step.agentName) throw new Error("Agent name is missing");
+    if (!context || !context.task) throw new Error(`[${agentName}](executeNextAgent) Invalid context`);
+    if (!step.agentName) throw new Error(`[${agentName}](executeNextAgent) Agent name is missing`);
 
     try {
 
-        const info = mls.l2.getPath(`_${mls.actualProject}_${step.agentName}`); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
+        const info = mls.l2.getPath(`_${ mls.actualProject }_${ step.agentName } `); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
         const agent = await loadAgent(info.shortName, info.folder);
-        if (!agent) throw new Error(`createAgent function not found in ${mls.actualProject} ${step.agentName}`);
+        if (!agent) throw new Error(`[${agentName}](executeNextAgent) createAgent function not found in ${ mls.actualProject } ${ step.agentName } `);
         await agent.beforePrompt(context);
 
     } catch (error: any) {
-
-        const msg = 'Error: ' + error.message || 'beforePrompt ' + step.agentName;
+        const msg = `${ error.message || '' }`;
         onError(context, step.stepId, msg);
-        console.error(`[executeNextAgent] ${error.message || error}`);
+        console.error(msg);
 
     }
 }
@@ -300,15 +302,14 @@ export async function loadAgent(shortName: string, folder: string = ''): Promise
     try {
 
         const module = await loadModuleFromProjectOrDependency(shortName, folder, '.ts');
-        if (typeof module.createAgent !== "function") throw new Error(`createAgent function not found in ${shortName}`);
+        if (typeof module.createAgent !== "function") throw new Error(`(loadAgent) createAgent function not found in ${ shortName }`);
         const agent = module.createAgent();
-        if (typeof agent.beforePrompt !== "function") throw new Error(`beforePrompt function not found in ${shortName}`);
-        if (typeof agent.afterPrompt !== "function") throw new Error(`afterPrompt function not found in ${shortName}`);
+        if (typeof agent.beforePrompt !== "function") throw new Error(`(loadAgent) beforePrompt function not found in ${ shortName }`); 
+        if (typeof agent.afterPrompt !== "function") throw new Error(`(loadAgent) afterPrompt function not found in ${ shortName }`); 
         return agent;
 
     } catch (error: any) {
-
-        console.error(`[loadAgent] ${error.message || error}`);
+        console.error(`[loadAgent] ${ error.message || error } `);
         return undefined;
 
     }
@@ -319,33 +320,33 @@ export async function loadTool(shortName: string): Promise<any | undefined> {
 
     try {
         const module = await loadModuleFromProjectOrDependency(shortName, '', '.ts');
-        if (typeof module.createTool !== "function") throw new Error(`createTool function not found in ${shortName}`);
+        if (typeof module.createTool !== "function") throw new Error(`createTool function not found in ${ shortName } `);
         const tool = module.createTool();
         return tool;
     } catch (error: any) {
-        console.error(`[loadTool] ${error.message || error}`);
+        console.error(`[loadTool] ${ error.message || error } `);
         return undefined;
     }
 
 }
 
 async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep, functionName: string, stepId: number, args?: object): Promise<any> {
-    if (!context || !context.task) throw new Error("[executeAgentFunction] Invalid context");
-    if (!step.agentName) throw new Error("[executeAgentFunction] Agent name is missing");
+    if (!context || !context.task) throw new Error(`[${agentName}](executeAgentFunction) Invalid context`);
+    if (!step.agentName) throw new Error(`[${agentName}](executeAgentFunction) Agent name is missing`);
 
     try {
-        const info = mls.l2.getPath(`_${mls.actualProject}_${step.agentName}`); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
+        const info = mls.l2.getPath(`_${ mls.actualProject }_${ step.agentName } `); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
         const agent = await loadAgent(info.shortName, info.folder) as any;
-        if (typeof agent[functionName] !== "function") throw new Error(`[executeAgentFunction] ${functionName} function not found in ${step.agentName}`);
+        if (typeof agent[functionName] !== "function") throw new Error(`[${agentName}](executeAgentFunction) ${ functionName } function not found in ${ step.agentName } `);
         return await agent[functionName](context, stepId, args);
     } catch (error: any) {
-        console.error(`[executeAgentFunction] ${error.message || error}`);
+        console.error(`[${agentName}](executeAgentFunction)  ${ error.message || error } `);
     }
 
 }
 
 async function executeNextResult(context: mls.msg.ExecutionContext, step: mls.msg.AIResultStep) {
-    if (!context || !context.task) throw new Error("Invalid context");
+    if (!context || !context.task) throw new Error(`[${agentName}](executeNextResult) Invalid context`);
     if ((mls as any).istraceAgent) console.log("result:", step.result);
     context = await updateStepStatus(context, step.stepId, "completed");
     notifyTaskChange(context);
@@ -354,18 +355,16 @@ async function executeNextResult(context: mls.msg.ExecutionContext, step: mls.ms
 }
 
 async function executeNextFlexible(context: mls.msg.ExecutionContext, step: mls.msg.AIFlexibleResultStep) {
-    if (!context || !context.task) throw new Error("Invalid context");
-
+    if (!context || !context.task) throw new Error(`[${agentName}](executeNextFlexible) Invalid context`);
     if ((mls as any).istraceAgent) console.log("Flexible:", step.result);
     context = await updateStepStatus(context, step.stepId, "completed");
-
     notifyTaskChange(context);
     return executeNextStep(context);
 
 }
 
 async function executeNextClarification(context: mls.msg.ExecutionContext, step: mls.msg.AIClarificationStep) {
-    if (!context || !context.task) throw new Error("Invalid context");
+    if (!context || !context.task) throw new Error(`[${agentName}](executeNextClarification) Invalid context`);
     // if (!step.clarificationMessage) throw new Error("clarification message is missing");
     // notifyTaskChange(context);
     // if ((mls as any).istraceAgent) console.log("clarification:", step.clarificationMessage);
@@ -379,7 +378,7 @@ export async function getAgentContext(taskId: string): Promise<{
     step: mls.msg.AIPayload
 }> {
     const task: mls.msg.TaskData | undefined = await getTask(taskId);
-    if (!task || !task.messageid_created) throw new Error("[getAgentContext] Invalid taskId" + taskId);
+    if (!task || !task.messageid_created) throw new Error(`[${agentName}](getAgentContext) Invalid taskId ${taskId}`);
     const step = getNextPendentStep(task);
     if (!step) throw new Error("[getAgentContext] No pending step")
     if (step.type !== "clarification" && step.type !== "tool") throw new Error("[getAgentContext] No pending clarification or tool step");
@@ -387,13 +386,11 @@ export async function getAgentContext(taskId: string): Promise<{
     if (!interactionId) throw new Error("[getAgentContext] Not found interactionId in pending step")
     const interaction: mls.msg.AIPayload | null = getStepById(task, interactionId);
     if (!interaction || interaction.type !== "agent") throw new Error("[getAgentContext] Clarification or tool step not bellow a agent");
-    //const messageId: string = task.messageid_created.split("/")[1].trim();
-    // const parts = task.messageid_created.split("/");
-    // const messageId: string = `${parts[1].trim()}[${parts[0].trim()}]`;
+
     const messageId: string = task.messageid_created;
 
     const message: mls.msg.Message | undefined = await getMessage(messageId);
-    if (!message) throw new Error("[getAgentContext] Message not found:" + messageId)
+    if (!message) throw new Error(`[${agentName}](getAgentContext) Message not found: ${messageId}`)
     const context: mls.msg.ExecutionContext = {
         message,
         task,
@@ -404,7 +401,7 @@ export async function getAgentContext(taskId: string): Promise<{
 
 export async function getClarification(taskId: string): Promise<HTMLDivElement | null> {
     const ret = await getAgentContext(taskId);
-    if (ret.step.type !== "clarification") throw new Error("[getClarification] Clarification step not not found");
+    if (ret.step.type !== "clarification") throw new Error(`[${agentName}](getClarification) Clarification step not not found`);
     return await executeAgentFunction(ret.context, ret.interaction, "beforeClarification", ret.step.stepId);
 }
 
@@ -428,13 +425,13 @@ export async function postBackClarification(
     }
 
     const taskId: string | null = findTaskId(clarification);
-    if (!taskId) throw new Error("[postBackClarification] Invalid call arguments, no taskId");
+    if (!taskId) throw new Error(`[${agentName}](postBackClarification) Invalid call arguments, no taskId`);
     const ret = await getAgentContext(taskId);
 
     if (action === "cancel") {
 
         const messageId: string | undefined = ret.context.task?.messageid_created;
-        if (!messageId) throw new Error("[postBackClarification] Invalid messageId");
+        if (!messageId) throw new Error(`[${agentName}](postBackClarification) Invalid messageId`); 
 
         const resp = await mls.api.msgUpdateStepStatus({
             messageId,
@@ -451,7 +448,7 @@ export async function postBackClarification(
         dispatchDetailsTaskClose();
         return;
     }
-    if (ret.step.type !== "clarification") throw new Error("[getClarification] Clarification step not not found");
+    if (ret.step.type !== "clarification") throw new Error(`[${agentName}](postBackClarification) Clarification step not not found`);
     dispatchDetailsTaskClose();
     return await executeAgentFunction(ret.context, ret.interaction, "afterClarification", ret.step.stepId, clarification);
 
@@ -460,10 +457,10 @@ export async function postBackClarification(
 export async function startClarification(context: mls.msg.ExecutionContext, stepId: number, modeReadOnly?: boolean): Promise<HTMLDivElement | null> {
     // called after agent . beforeClarification
 
-    if (!context.task) throw new Error("[startClarification] Invalid context.task");
+    if (!context.task) throw new Error(`[${agentName}](startClarification) Invalid context.task`);
 
     const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
-    if (!step || step.type !== "clarification") throw new Error(`[startClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
+    if (!step || step.type !== "clarification") throw new Error(`[${agentName}](startClarification) Invalid step: ${ stepId } on task: ${ context.task.PK }`);
     let clarification: ClarificationValue;
     try {
         let ret: any = step.json;
@@ -479,7 +476,7 @@ export async function startClarification(context: mls.msg.ExecutionContext, step
     }
     catch (e) {
         console.error(e);
-        throw new Error(`[startClarification] Invalid step: ${stepId} on task: ${context.task.PK}, json clarification invalid`);
+        throw new Error(`[${agentName}](startClarification) Invalid step: ${ stepId } on task: ${ context.task.PK }, json clarification invalid`);
     }
 
     const div: HTMLDivElement = document.createElement('div');
@@ -495,9 +492,9 @@ export async function endClarification(clarification: ClarificationValue, action
     // call agent afterClarification
 
     const taskId: string | null = clarification.taskId || '';
-    if (!taskId) throw new Error("[startClarification] Invalid call arguments, no taskId");
+    if (!taskId) throw new Error(`[${agentName}](endClarification) Invalid call arguments, no taskId`); 
     const ret = await getAgentContext(taskId);
-    if (ret.step.type !== "clarification") throw new Error("[getClarification] Clarification step not not found");
+    if (ret.step.type !== "clarification") throw new Error(`[${agentName}](endClarification)  Clarification step not not found`);  
 
     dispatchDetailsTaskClose();
     if (action === "continue") {
@@ -507,7 +504,7 @@ export async function endClarification(clarification: ClarificationValue, action
 
     // cancel the task
     const messageId: string | undefined = ret.context.task?.messageid_created;
-    if (!messageId) throw new Error("[postBackClarification] Invalid messageId");
+    if (!messageId) throw new Error(`[${agentName}](endClarification) Invalid messageId`);
     const resp = await mls.api.msgUpdateStepStatus({
         messageId,
         status: "failed",
@@ -541,7 +538,7 @@ export function toLLMClarification(value: ClarificationValue) {
 }
 
 async function setFailedStatus(context: mls.msg.ExecutionContext, step: number) {
-    if (!context.task) throw new Error("[setFailedStatus] Invalid context task");
+    if (!context.task) throw new Error(`[${agentName}](setFailedStatus) Invalid context task`);
     context = await updateStepStatus(context, step, "failed");
     notifyTaskChange(context);
 }

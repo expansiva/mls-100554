@@ -59,7 +59,7 @@ interface DataForPrompt {
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
     const taskTitle = "Planning 2...";
-    if (!context || !context.message) throw new Error("Invalid context");
+    if (!context || !context.message) throw new Error(`[${agentName}](_beforePrompt) Invalid context`);
 
     if (!context.task) {
         // use mock
@@ -70,7 +70,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
     if (!step) {
-        throw new Error(`[${agentName}] [beforePrompt]: No pending step found for this agent.`);
+        throw new Error(`[${agentName}](beforePrompt) No pending step found for this agent.`);
     }
     // context.task = await updateStepStatus(context.task, step.stepId, "in_progress");
     // don't need updateStepStatus, addInteractionAiTask put this task in 'in_process'
@@ -79,9 +79,9 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 }
 
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-    if (!context || !context.message || !context.task) throw new Error("Invalid context");
+    if (!context || !context.message || !context.task) throw new Error(`[${agentName}](_afterPrompt) Invalid context`);
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] afterPrompt: No in progress interaction found.`);
+    if (!step) throw new Error(`[${agentName}](afterPrompt) No in progress interaction found.`);
     context = await updateStepStatus(context, step.stepId, "completed");
     if (context.task) context.task = await updateTaskTitle(context.task, "Waiting for user");
 
@@ -104,12 +104,12 @@ const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: n
 }
 
 const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: number, clarification: ClarificationValue): Promise<void> => {
-    if (!context || !context.message || !context.task) throw new Error(`[${agentName}] [afterClarification] Invalid context`);
-    if (!clarification) throw new Error(`[${agentName}] [afterClarification] Invalid json after clarification`);
+    if (!context || !context.message || !context.task) throw new Error(`[${agentName}](afterClarification) Invalid context`);
+    if (!clarification) throw new Error(`[${agentName}](afterClarification) Invalid json after clarification`);
 
     const step: mls.msg.AIPayload | null = getStepById(context.task, stepId);
     if (!step || step.type !== "clarification") {
-        throw new Error(`[${agentName}] [afterClarification] No found step: ${stepId} for this agent.`);
+        throw new Error(`[${agentName}](afterClarification) No found step: ${stepId} for this agent.`);
     }
 
     const newStep: mls.msg.AIPayload = {
@@ -127,7 +127,7 @@ const _afterClarification = async (context: mls.msg.ExecutionContext, stepId: nu
 }
 
 async function getPrompts(payload1: PayLoad1): Promise<mls.msg.IAMessageInputType[]> {
-    if (!payload1 || !payload1.title || !payload1.userPrompt) throw new Error(`Erro [${agentName}] getPrompts: invalid payload1`);
+    if (!payload1 || !payload1.title || !payload1.userPrompt) throw new Error(`Erro [${agentName}](getPrompts) invalid payload1`);
     const data: Record<string, string> = {
         userPrompt: payload1.userPrompt,
         resumeClarification: JSON.stringify({
