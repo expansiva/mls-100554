@@ -4,6 +4,7 @@ import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getPromptByHtml } from './_100554_aiPrompts';
 import {
     getNextInProgressStepByAgentName,
+    getAgentStepByAgentName,
     updateStepStatus,
     updateTaskTitle,
     getNextStepIdAvaliable
@@ -85,5 +86,20 @@ async function getPrompts(data: string): Promise<mls.msg.IAMessageInputType[]> {
     };
     const rc = await getPromptByHtml({ folder: '', project: 100554, shortName: agentName, data: dataPrompt });
     return rc;
+}
+
+export interface PayLoad1 {
+    prompt: string;
+}
+
+export function getPayload1(context: mls.msg.ExecutionContext): PayLoad1 {
+    if (!context || !context.task) throw new Error(`[${agentName}] [getPayload] Invalid context`);
+    const agentStep = getAgentStepByAgentName(context.task, agentName); // Only one agent execution must exist in this task
+    if (!agentStep) throw new Error(`[${agentName}] [getPayload] no agent found`);
+
+    // get result
+    const resultStep = agentStep.interaction?.payload?.[0];
+    if (!resultStep || resultStep.type !== "flexible" || !resultStep.result) throw new Error(`[${agentName}] [getPayload] No step flexible found for this agent.`);
+    return { prompt: resultStep.result || "" };
 }
 
