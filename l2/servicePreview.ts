@@ -334,13 +334,13 @@ export class ServicePreview100554 extends ServiceBase {
         this.elEditL3 = document.createElement('collab-l3-edit-text-100554');
         body.appendChild(this.elEditL3);
 
-        if (!body.querySelector('#_100554_collabL3EditText')) {
+        /*if (!body.querySelector('#_100554_collabL3EditText')) {
             const script = document.createElement('script') as HTMLScriptElement;
             script.type = 'module';
             script.id = '_100554_collabL3EditText';
             script.src = '/_100554_collabL3EditText';
             body.appendChild(script);
-        }
+        }*/
 
     }
 
@@ -665,6 +665,13 @@ export class ServicePreview100554 extends ServiceBase {
 
 
     // -------------- IMPLEMENTS-----------------
+
+    private cancelEditL3() {
+
+        if (!this.menu.tools.editTextL3 || !this.menu.selectTool ||this.menu.tools.editTextL3.selected === 0) return;
+        this.menu.selectTool('editTextL3');
+        
+    }
 
     private configureButtonsRight(enabled: boolean) {
         const buttonsR = this.nav3Service?.querySelector('collab-nav-3-menu .tools') as HTMLElement;
@@ -1333,6 +1340,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private async preview(mode: string) {
+        this.cancelEditL3();
         await this.updateComplete;
         const actual = mls.actual[mls.actualLevel];
         switch (actual.level) {

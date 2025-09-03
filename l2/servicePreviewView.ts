@@ -2,10 +2,10 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getDependenciesByHtml,  getDependenciesByHtmlFile, getTokens, IJSONDependence } from './_100554_libCompile';
+import { getDependenciesByHtml, getDependenciesByHtmlFile, getTokens, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { createAllModels, createModel } from './_100554_collabLibModel';
-import { getBaseTemplate} from './_100554_libCommom';
+import { getBaseTemplate } from './_100554_libCommom';
 import { createStorFile, IReqCreateStorFile } from './_100554_collabLibStor';
 
 import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
@@ -268,7 +268,7 @@ export class ServicePreviewView extends StateLitElement {
         if (newLess) {
             newStyle.id = id;
             newStyle.textContent = newLess;
-            if(window.preview.iframe.contentDocument !== null) window.preview.iframe.contentDocument.head.appendChild(newStyle);
+            if (window.preview.iframe.contentDocument !== null) window.preview.iframe.contentDocument.head.appendChild(newStyle);
             if (oldStyle) oldStyle.remove();
         }
         const tokens = await getTokens({ project, shortName, folder }, this.actualtheme)
@@ -444,7 +444,7 @@ export class ServicePreviewView extends StateLitElement {
                 shortName,
                 folder,
                 level,
-                extension: '.ts' ,
+                extension: '.ts',
                 source: '',
                 status: 'new'
             }
@@ -490,7 +490,7 @@ export class ServicePreviewView extends StateLitElement {
 
         let ret;
 
-        
+
         //ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
         ret = await getDependenciesByHtmlFile(this.file, txt, this.actualtheme, true);
 
@@ -508,9 +508,9 @@ export class ServicePreviewView extends StateLitElement {
         if (!(mls as any).modePreview) (mls as any).modePreview = 'singlePage';
 
         switch ((mls as any).modePreview) {
-            case 'minimum': this.modeMinimum(ret, iframe); break;
-            case 'singlePage': this.modeSinglePage(ret, iframe); break;
-            default: this.modeMinimum(ret, iframe); break;
+            case 'minimum': await this.modeMinimum(ret, iframe); break;
+            case 'singlePage': await this.modeSinglePage(ret, iframe); break;
+            default: await this.modeMinimum(ret, iframe); break;
         }
 
         iframe.contentDocument.body.innerHTML = domVirtual.innerHTML;
@@ -524,13 +524,13 @@ export class ServicePreviewView extends StateLitElement {
 
     }
 
-    private async setHtmlByLevel():Promise<string> {
+    private async setHtmlByLevel(): Promise<string> {
 
         let txt = await this.getFileContent();
         if (this.level === '3') txt = '<collab-preview-l3-100554>' + txt + '</collab-preview-l3-100554>';
         if (this.level === '4') txt = '<collab-preview-l4-100554>' + txt + '</collab-preview-l4-100554>';
         return txt;
-        
+
     }
 
     private async getFileContent(): Promise<string> {
