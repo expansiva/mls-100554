@@ -6,9 +6,13 @@ import {
     getNextInProgressStepByAgentName,
     updateStepStatus,
     updateTaskTitle,
+    getNextPendingStepByAgentName,
+    getAgentStepByAgentName    
 } from "./_100554_aiAgentHelper";
 
-import { startNewAiTask, executeNextStep } from "./_100554_aiAgentOrchestration";
+import { getPayload1 } from './l2/agentDesignRef2Image';
+
+import { startNewAiTask, executeNextStep, startNewInteractionInAiTask } from "./_100554_aiAgentOrchestration";
 
 const agentName = "agentDesignRef2Image2";
 
@@ -46,7 +50,15 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         ).catch((err) => {
             throw new Error(err.message)
         });
+        return;
     }
+
+    const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
+    if (!step) {
+        throw new Error(`[${agentName}](beforePrompt) No pending step found for this agent.`);
+    }
+    const inputs = await getPrompts(getPayload1(context).prompt);
+    await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
 }
 
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
@@ -59,7 +71,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
     const stepIdPayLoad = step.interaction?.payload?.[0]?.stepId || -1;
     if (stepIdPayLoad > 0) {
-      context = await updateStepStatus(context, stepIdPayLoad, "completed");
+        context = await updateStepStatus(context, stepIdPayLoad, "completed");
     }
     await executeNextStep(context);
 }
@@ -72,3 +84,17 @@ async function getPrompts(data: string): Promise<mls.msg.IAMessageInputType[]> {
     return rc;
 }
 
+export interface PayLoad2 {
+    dataUrl: string;
+}
+
+export function getPayload2(context: mls.msg.ExecutionContext): PayLoad2 {
+    if (!context || !context.task) throw new Error(`[${agentName}] [getPayload] Invalid context`);
+    const agentStep = getAgentStepByAgentName(context.task, agentName); // Only one agent execution must exist in this task
+    if (!agentStep) throw new Error(`[${agentName}] [getPayload] no agent found`);
+
+    // get result
+    const resultStep = agentStep.interaction?.payload?.[0];
+    if (!resultStep || resultStep.type !== "flexible" || !resultStep.result) throw new Error(`[${agentName}] [getPayload] No step flexible found for this agent.`);
+    return { dataUrl: resultStep.result?.dataUrl || "" };
+}
