@@ -118,10 +118,7 @@ export class [className] extends CollabPageElement {
             this.service.setError(msg.error);
             return;
         };
-        if (!this.shortName.startsWith('page')) {
-            this.service.setError(msg.errorPageName);
-            return;
-        }
+
         this.loading = true;
         try {
             await createNewFile({

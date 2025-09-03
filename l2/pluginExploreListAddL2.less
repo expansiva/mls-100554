@@ -1,7 +1,6 @@
-/// <mls shortName="serviceListFilesAdd" project="100554" enhancement="enhancementStyle" />
+/// <mls shortName="pluginExploreListAddL2" project="100554" enhancement="enhancementStyle" folder="" />
 
-service-list-files-add-100554 {
-
+plugin-explore-list-add-l2-100554 {
 
     overflow-y: auto;
     font-family: @font-family-primary;
@@ -10,6 +9,62 @@ service-list-files-add-100554 {
     line-height: 1.5;
     color: @text-primary-color;
     background-color: @bg-primary-color;
+
+    .headerNav {
+        height: 40px;
+        background: @bg-primary-color-darker-hover;
+        border-bottom: 1px solid @bg-primary-color-lighter;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: 0 1px 3px @bg-primary-color-lighter;
+    }
+
+    .headerNav h1 {
+        font-size: 16px;
+        font-weight: 500;
+        color: @text-primary-color;
+        margin: 0;
+        pointer-events: none;
+        /* evita clique no texto */
+    }
+
+    .headerNav .btn-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background-color: @grey-color-darker;
+        color: @text-primary-color;
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .headerNav.left .btn-nav {
+        left: 10px;
+    }
+
+    .headerNav.right .btn-nav {
+        right: 10px;
+    }
+
+    .headerNav .btn-nav:hover {
+        opacity: .5;
+    }
+
+    .headerNav .btn-nav svg {
+        width: 14px;
+        height: 14px;
+        fill: #fff;
+    }
+
 
     button {
         background-color: @bg-secondary-color-lighter;
@@ -126,6 +181,7 @@ service-list-files-add-100554 {
     textarea {
         outline: none;
     }
+
 
 }
 

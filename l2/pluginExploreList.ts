@@ -7,7 +7,8 @@ import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, 
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, IReqCreateStorFile, createStorFile } from './_100554_collabLibStor';
 import { createAllModels, createModel, readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 import { ServiceBase } from './_100554_serviceBase';
-import './_100554_serviceListFilesAdd';
+
+import './_100554_pluginExploreListAddL2'
 import './_100554_pluginExploreListAddL3';
 import './_100554_pluginExploreListAddL4';
 
@@ -109,8 +110,6 @@ export class PluginExploreList extends PluginBaseModule {
     @property({ type: Array }) history: mls.stor.IFileInfo[] = [];
 
     @queryAll('li') lis: HTMLElement[] | undefined;
-
-
 
     constructor() {
         super();
@@ -243,7 +242,7 @@ export class PluginExploreList extends PluginBaseModule {
             case ('list'):
                 return this.renderModeList();
             case ('addL2'):
-                return this.renderAdd();
+                return this.renderAddL2();
             case ('addL3'):
                 return this.renderAddL3();
             case ('addL4'):
@@ -516,8 +515,8 @@ export class PluginExploreList extends PluginBaseModule {
 
     }
 
-    renderAdd() {
-        return html`<service-list-files-add-100554 level="${this.levelFiles}" position="${this.position}" .father="${this}"></service-list-files-add-100554>`
+    renderAddL2() {
+        return html`<plugin-explore-list-add-l2-100554 level="${this.levelFiles}" position="${this.position}" .father="${this}"></plugin-explore-list-add-l2-100554>`
     }
 
     renderAddL3() {
@@ -768,7 +767,7 @@ export class PluginExploreList extends PluginBaseModule {
             const params = {} as mls.events.IFileAction;
 
             //const files = await createAllModels(file, true);
-            
+
             await this.createModel(file, '.less');
             await this.createModel(file, '.ts');
             await this.createModel(file, '.html');
@@ -837,7 +836,7 @@ export class PluginExploreList extends PluginBaseModule {
                 shortName,
                 folder,
                 level,
-                extension: '.ts' ,
+                extension: '.ts',
                 source: '',
                 status: 'new'
             }
