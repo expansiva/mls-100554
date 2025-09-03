@@ -96,8 +96,6 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    console.info({ step });
-
     context = await updateFile(context);
     context = await updateStepStatus(context, step.stepId, "completed");
 

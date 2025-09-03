@@ -668,9 +668,9 @@ export class ServicePreview100554 extends ServiceBase {
 
     private cancelEditL3() {
 
-        if (!this.menu.tools.editTextL3 || !this.menu.selectTool ||this.menu.tools.editTextL3.selected === 0) return;
+        if (!this.menu.tools.editTextL3 || !this.menu.selectTool || this.menu.tools.editTextL3.selected === 0) return;
         this.menu.selectTool('editTextL3');
-        
+
     }
 
     private configureButtonsRight(enabled: boolean) {
@@ -1051,7 +1051,7 @@ export class ServicePreview100554 extends ServiceBase {
         if (!this.monacoeditor) {
             this.monacoeditor = document.createElement('mls-editor-100529');
             this.monacoeditor.setAttribute('ismls2', 'true');
-    
+
         }
         if (this._ed1) return;
 
@@ -1140,16 +1140,22 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
 
+
     private async setThemeByModule() {
 
         if (!this.actualFile) return;
-        const moduleNameByFile = this.getModuleNameByFile();
-        if (!moduleNameByFile) return;
         if (!this.menu.tools.theme) return;
-        await this.updateComplete;
+
+        const moduleNameByFile = this.getModuleNameByFile();
+        if (!moduleNameByFile) {
+            if (!this.actualTheme) {
+                this.actualTheme = this.menu.tools?.theme?.options[0]?.text;
+                this.onStyleChanged();
+            }
+            return;
+        }
 
         const userThemeByModule = this.themesByModule.get(moduleNameByFile);
-
         if (!userThemeByModule) {
             const themeToSelect = await this.getFileModuleThemeName();
             this.themesByModule.set(moduleNameByFile, themeToSelect);
