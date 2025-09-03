@@ -2,11 +2,11 @@
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getPromptByHtml } from './_100554_aiPrompts';
-import { convertTagToFileName } from './_100554_utilsLit';
 import { createAllModels } from './_100554_collabLibModel';
 import { getImages } from './_100554_libUnsplash';
 import { getTokensLess } from './_100554_designSystemBase';
 import { removeTokensFromSource } from './_100554_enhancementStyle';
+import { forceServiceInstance } from './_100554_libCommom';
 
 import {
     getNextPendingStepByAgentName,
@@ -48,8 +48,6 @@ export function createAgent(): IAgent {
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
     if (!context || !context.message) throw new Error("Invalid context");
-
-
     if (!context.task) {
 
         let messageReplace = context.message.content
@@ -198,7 +196,7 @@ async function fireAgentFix(
     shortName: string,
     stepId: number
 ) {
-
+    await forceServiceInstance(2, '_100554_serviceSource');
     const page = folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`
 
     const nextStepsFix = [];
