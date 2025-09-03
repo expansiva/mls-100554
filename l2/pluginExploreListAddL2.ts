@@ -1,6 +1,6 @@
-/// <mls shortName="serviceListFilesAdd" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="pluginExploreListAddL2" project="100554" enhancement="_100554_enhancementLit" />
 
-import { html, css } from 'lit';
+import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { ServiceBase } from './_100554_serviceBase';
@@ -15,9 +15,8 @@ const message_pt = {
     labelProject: "Projeto",
     labelShortName: "Nome",
     invalidName: "Nome invalido",
-    labelType: "Por favor, selecione um modelo abaixo ou clique",
+    labelType: "Por favor, selecione um modelo abaixo",
     btnAdd: "Adicionar",
-    btnCancel: "Cancelar",
     please: "Por facor selecione um projeto primeiro!",
     msgInitial: "Por favor, selecione um modelo",
 
@@ -27,9 +26,8 @@ const message_en = {
     labelProject: "Project",
     labelShortName: "Shortname",
     invalidName: "Invalid shortName",
-    labelType: "Please select a template below or click",
+    labelType: "Please select a template below",
     btnAdd: "Add",
-    btnCancel: "cancel",
     please: "Please select a project first!",
     msgInitial: "Please select a template",
 
@@ -43,7 +41,7 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
-@customElement('service-list-files-add-100554')
+@customElement('plugin-explore-list-add-l2-100554')
 export class ServiceListFilesAdd100554 extends CollabLitElement {
 
     private baseProject = 100554;
@@ -61,7 +59,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
 
     async connectedCallback() {
         super.connectedCallback();
-        initState('l2.addFile', { shortName: '', project: 0, folder:'' });
+        initState('l2.addFile', { shortName: '', project: 0, folder: '' });
         setState('l2.addFile.shortName', '');
         setState('l2.addFile.folder', '');
         await this.init();
@@ -83,23 +81,33 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
         mls.events.fire(2, 'PluginDetails', JSON.stringify(options), 0);
     }
 
-    createRenderRoot() {
-        return this;
-    }
+
 
     render() {
 
         const lang = this.father?.getMessageKey(messages);
         this.msg = lang ? messages[lang] : message_en;
-
-        const  project  = mls.actualProject || 0;
+        const project = mls.actualProject || 0;
         setState('l2.addFile.project', project);
 
         return html`
+            ${this.renderHeader()}
             ${project !== undefined ? this.renderAdd(project)
                 : html`${this.msg.please}`
             }
         `;
+    }
+
+    renderHeader() {
+
+        return html`
+            <div class="headerNav left">
+                <h1>Add</h1>
+                <button class="btn-nav" title="add organism" @click="${() => this.clickCancel()}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg>
+                </button>            
+            </div>
+        `
     }
 
     renderAdd(project: number) {
@@ -120,7 +128,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
                 <hr>
                 <div class="row-form">
                     <div>
-                        <label>${this.msg.labelType}</label> <button class="btn-cancel" @click="${this.clickCancel}">${this.msg.btnCancel}</button>
+                        <label>${this.msg.labelType}</label>
                          ${this.renderTemplates()}
                     </div>
                 </div>
@@ -159,6 +167,11 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
 
     }
 
+    private goBack() {
+        if (!this.father) return;
+        (this.father as any).mode = 'list'
+    }
+
     private handleInputInput(e: KeyboardEvent) {
         const target = e.target as HTMLInputElement;
         if (!target) return;
@@ -179,7 +192,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
 
     private handleClickTemplate(plugin: IPlugins) {
         const { project, shortName, folder } = mls.l2.getPath(plugin.widget);
-        const tag = convertFileNameToTag({project, shortName, folder});
+        const tag = convertFileNameToTag({ project, shortName, folder });
         const options = {
             shortName,
             project,
@@ -204,6 +217,11 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
 
     private getNewNameAndValid(prj: number, name: string): boolean {
         if (name === '' || !name || name === null) return false;
+
+        if (/\s/.test(name)) return false;
+        if (/^\d+$/.test(name)) return false;
+        if (/^\d/.test(name)) return false;
+
         const split = name.split('/');
         const isValidName = this.isValidNewName({
             shortName: split.pop() || name,
@@ -216,7 +234,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
         return true;
     }
 
-    private hasInvalidCharacter(name:string) {
+    private hasInvalidCharacter(name: string) {
         const invalidCharacters = /[_\{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
         if (invalidCharacters.test(name) || name.indexOf("\\") >= 0) return true;
         return false
@@ -238,6 +256,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
         return !mls.stor.files[key] && !find;
 
     }
+
     private async getPlugins(): Promise<mls.plugin.MenuAction[]> {
         let project = mls.actualProject;
         return await loadPluginProject(project || 0, 'l2NewFile');
@@ -267,32 +286,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
 
 }
 
-interface IEnhancementModules {
-    [key: string]: IEnhancementModule
-}
-
-interface IEnhancementModule {
-    storFile: mls.stor.IFileInfo,
-    instance: mls.l2.enhancement.IEnhancementInstance
-}
-
-interface IEnhancementDetails {
-    key: string,
-    value: string
-}
-
-interface ITemplateDetails {
-    title: string,
-    description: string,
-    tags: string[],
-    example: string,
-    aimActionSuggest: string,
-    enhancementKey?: string,
-}
-
 interface IPlugins extends IDetails {
     widget: string,
     category: string | null
 }
-
-

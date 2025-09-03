@@ -19,7 +19,8 @@ const message_pt = {
     header: "Criar um service",
     btnCreate: 'Criar arquivo',
     loading: 'Criando arquivo...',
-    error: 'Nome do arquivo em branco ou invalido'
+    error: 'Nome do arquivo em branco ou invalido',
+    errorServiceName: 'Nome do arquivo deve começar com "service"',
 }
 
 const message_en = {
@@ -30,7 +31,9 @@ const message_en = {
     header: "Create a service in Lit",
     btnCreate: 'Create file',
     loading: 'Creating File...',
-    error: 'Blank or invalid file name'
+    error: 'Blank or invalid file name',
+    errorServiceName: 'File name must start with "service"',
+
 }
 
 type MessageType = typeof message_en;
@@ -56,7 +59,7 @@ export class PluginNewFileService extends StateLitElement {
 
     @propertyDataSource() shortName: string | undefined;
 
-    @propertyDataSource({ attribute: true }) project: number | undefined ;
+    @propertyDataSource({ attribute: true }) project: number | undefined;
 
     @propertyDataSource({ attribute: true }) folder: string | undefined;
 
@@ -69,7 +72,7 @@ export class PluginNewFileService extends StateLitElement {
     private template: string = `
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '${getTemplateImport(100554,'serviceBase', '')}';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '${getTemplateImport(100554, 'serviceBase', '')}';
 
 @customElement('[tagName]')
 export class [className] extends ServiceBase {
@@ -118,15 +121,15 @@ export class [className] extends ServiceBase {
         let newExample = this.template;
         if (this.shortName && this.project && this.shortName) {
 
-            const name = this.folder ? this.folder+'/'+this.shortName : this.shortName
-            newExample = changeTagName(newExample, convertFileNameToTag({project: this.project, shortName: this.shortName, folder: this.folder}));
+            const name = this.folder ? this.folder + '/' + this.shortName : this.shortName
+            newExample = changeTagName(newExample, convertFileNameToTag({ project: this.project, shortName: this.shortName, folder: this.folder }));
             newExample = changeClassName(newExample, this.project, this.shortName);
             newExample = changeWidget(newExample, this.project, name);
         }
 
         const group = this.groupName && this.groupName != 'other' ? ` groupName="${this.groupName}"` : '';
         const folder = this.folder ? ` folder="${this.folder}"` : '';
-        const enhancement =  this.enhancement ? this.enhancement : '_blank';
+        const enhancement = this.enhancement ? this.enhancement : '_blank';
 
         return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${enhancement}"${group}${folder} />\n${newExample}\n`;;
     }
@@ -136,16 +139,21 @@ export class [className] extends ServiceBase {
             this.service.setError(msg.error)
             return;
         };
+        if (!this.shortName.startsWith('service')) {
+            this.service.setError(msg.errorServiceName);
+            return;
+        }
+
         this.loading = true;
         try {
             await createNewFile({
-                project:this.project,
-                position:this.position,
+                project: this.project,
+                position: this.position,
                 shortName: this.shortName,
-                folder:this.folder,
-                enhancement:this.enhancement,
+                folder: this.folder,
+                enhancement: this.enhancement,
                 sourceTS: this.getTemplate(),
-                openPreview:true
+                openPreview: true
             });
         } catch (e: any) {
             this.loading = false;
