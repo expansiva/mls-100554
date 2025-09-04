@@ -39,6 +39,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         converter: (value: string | null) => value === 'true'
     }) acceptAutoCompleteAgents?: boolean = false;
 
+
     firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
         this.adjustTextAreaHeight();
@@ -86,17 +87,49 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         this.allAgents = agentsPublic as IMentionAgent[];
     }
 
+    private getCaretCoordinates(): { x: number, y: number } | null {
+        if (!this.textArea) return null;
+
+        const div = document.createElement("div");
+        const style = getComputedStyle(this.textArea);
+
+        // Copia as propriedades relevantes
+        for (const prop of style) {
+            div.style.setProperty(prop, style.getPropertyValue(prop));
+        }
+
+        div.style.position = "absolute";
+        div.style.visibility = "hidden";
+        div.style.whiteSpace = "pre-wrap";
+        div.style.wordWrap = "break-word";
+        div.style.overflow = "hidden";
+
+        const text = this.textArea.value.substring(0, this.textArea.selectionStart);
+        const span = document.createElement("span");
+        span.textContent = "\u200b"; // marcador invisível
+
+        div.textContent = text;
+        div.appendChild(span);
+
+        this.appendChild(div);
+        const rect = span.getBoundingClientRect();
+        const coords = { x: rect.left, y: rect.bottom };
+        this.removeChild(div);
+
+        return coords;
+    }
+
     private calculatePosition() {
         if (!this.mentionSuggestionsElement || !this.wrapper) return;
+        const coords = this.getCaretCoordinates();
         const bound1 = this.wrapper.getBoundingClientRect();
         const bound2 = this.mentionSuggestionsElement.getBoundingClientRect();
-        let calc = 0
-        if (bound1.top < bound1.height) {
-            calc = bound1.top;
-        } else {
-            calc = bound1.top - bound1.height - bound2.height;
-        }
-        this.mentionSuggestionsElement.style.top = `${calc}px`;
+        if (!coords) return;
+
+        const suggestionsHeight = this.mentionSuggestionsElement.offsetHeight || 150; // altura estimada
+        this.mentionSuggestionsElement.style.position = "fixed";
+        this.mentionSuggestionsElement.style.left = `${coords.x}px`;
+        this.mentionSuggestionsElement.style.top = `${coords.y - bound1.height - bound2.height - 4}px`; // 4px de margem
     }
 
     private adjustTextAreaHeight() {
@@ -120,6 +153,9 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
                     composed: true
                 }));
             }
+
+            this.calculatePosition();
+
         }
     }
 
@@ -221,7 +257,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         const matchEmoji = beforeCursor.match(/::(\w+)$/);
         if (matchEmoji) {
             query = matchEmoji[1];
-            suggestions  = this.getEmojiSuggestions(query).slice(0, 10);
+            suggestions = this.getEmojiSuggestions(query).slice(0, 10);
         }
 
         if (suggestions.length > 0) {
