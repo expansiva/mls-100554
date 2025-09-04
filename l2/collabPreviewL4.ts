@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { convertTagToFileName } from './_100554_utilsLit';
-import { openService,selectLevel } from './_100554_libCommom';
+import { openService, selectLevel } from './_100554_libCommom';
 import './_100554_collabL3EditText';
 
 @customElement('collab-preview-l4-100554')
@@ -183,8 +183,8 @@ export class CollabPreviewL4 extends CollabLitElement {
 
         const rect = el.getBoundingClientRect();
         this.elOverlaySelected.style.display = 'block';
-        this.elOverlaySelected.style.top = `${rect.top + window.document.body.scrollTop }px`;
-        this.elOverlaySelected.style.left = `${rect.left + window.document.body.scrollLeft }px`;
+        this.elOverlaySelected.style.top = `${rect.top + window.document.body.scrollTop}px`;
+        this.elOverlaySelected.style.left = `${rect.left + window.document.body.scrollLeft}px`;
         this.elOverlaySelected.style.width = `${rect.width}px`;
         this.elOverlaySelected.style.height = `${rect.height}px`;
         this.elOverlaySelected.style.setProperty("--id-name", `'${el.tagName.toLocaleLowerCase()}'`);
@@ -193,7 +193,7 @@ export class CollabPreviewL4 extends CollabLitElement {
         if (this.elMenuOverlay) {
 
             const menuHeight = 31;
-              
+
             this.elMenuOverlay.style.display = "flex";
             this.elMenuOverlay.style.top = (rect.top + window.document.body.scrollTop - 1) + "px";
             this.elMenuOverlay.style.left = (rect.left + + window.document.body.scrollLeft + 4) + "px";
@@ -219,15 +219,26 @@ export class CollabPreviewL4 extends CollabLitElement {
     }
 
     private editEl(e: MouseEvent) {
-
         if (!this.elOverlaySelected || !(this.elOverlaySelected as any).el) return;
         const fileInfo = convertTagToFileName((this.elOverlaySelected as any).el.tagName.toLowerCase());
         if (!fileInfo) return;
         const { folder, project, shortName } = fileInfo;
 
-        mls.actual[3].setFullName(folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`);
+        const param = {
+            'position': 'right',
+            'action': 'openL3',
+            folder,
+            project,
+            shortName
+        }
+        mls.events.fire(4, 'L4EditEvents' as any, JSON.stringify(param));
+
+        /*mls.actual[3].setFullName(folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`);
         selectLevel(3);
-        openService('_100554_serviceOrganism', 'left', 3, {"tab":"navigation"});
+        setTimeout(() => {
+            console.info('time')
+            openService('_100554_serviceOrganism', 'left', 3, { "tab": "navigation" });
+        }, 100)*/
 
 
     }

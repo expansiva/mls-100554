@@ -86,7 +86,7 @@ export class ServiceOrganism100554 extends ServiceBase {
     public onClickMain(op: string) {
         if (op === 'opAboutThis') this.showAboutThis();
         else if (this.menu.setMode) this.menu.setMode('initial');
-        
+
     }
 
     public onClickTabs(index: number) {
@@ -181,7 +181,12 @@ export class ServiceOrganism100554 extends ServiceBase {
     }
 
     renderContent() {
-
+        const tab = this.getAttribute('tab');
+        if (tab && tab === 'navigation' && this.menu && this.menu.setTabActive && this.menu.onClickTabs) {
+            this.removeAttribute('tab');
+            this.menu.onClickTabs(1);
+            this.menu.setTabActive(1);
+        }
         switch (this.activeTab) {
             case 'icExplorer':
                 return this.renderExplorer();
