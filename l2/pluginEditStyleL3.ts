@@ -1,6 +1,6 @@
 /// <mls shortName="pluginEditStyleL3" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, repeat } from 'lit'; 
+import { html, repeat } from 'lit';
 import { customElement, query, property, state } from 'lit/decorators.js';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
@@ -31,7 +31,8 @@ export class PluginEditStyleL3 extends PluginBaseModule {
     @state() error = '';
 
     //--------VARIABLES-----------
-    private inEdit = false;
+    private static inEdit = false;
+    private static inSetValue = false;
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
     private _ed2: monaco.editor.IStandaloneCodeEditor | undefined;
     private initalSelectors: string[] = [];
@@ -181,24 +182,25 @@ export class PluginEditStyleL3 extends PluginBaseModule {
 
         this.modelBase = modelBase;
 
-        this.setContentDest();
-        this.setContent(scope, iframeDoc);
-
+        PluginEditStyleL3.inSetValue = true;
+        await this.setContentDest();
+        await this.setContent(scope, iframeDoc);
         this.updatedMSizeEditor();
+        PluginEditStyleL3.inSetValue = false;
 
     }
 
-    private setContentDest() {
+    private async setContentDest() {
 
 
         if (!this.modelDest || !this.modelBase || !this.modelBase.style) return;
 
         this.modelDest.setValue(this.modelBase.style.model.getValue());
-        this._ed2?.getAction('editor.action.formatDocument')?.run();
+        await this._ed2?.getAction('editor.action.formatDocument')?.run();
 
     }
 
-    private setContent(scope: HTMLElement, iframeDoc: Window) {
+    private async setContent(scope: HTMLElement, iframeDoc: Window) {
 
         const active = scope.querySelector('*[clb_mode]') as HTMLElement;
         if (!active) {
@@ -220,7 +222,7 @@ export class PluginEditStyleL3 extends PluginBaseModule {
 
         if (!cssText) {
 
-            const { project, path} = mls.actual[3];
+            const { project, path } = mls.actual[3];
             const info = mls.l2.getPath(`_${project}_${path}`);
             const nameTag = convertFileNameToTag(info);
             cssText += `
@@ -230,11 +232,11 @@ export class PluginEditStyleL3 extends PluginBaseModule {
                 }
             }
     
-            `    
+            `
         }
 
         this.model?.setValue(cssText);
-        this._ed1?.getAction('editor.action.formatDocument')?.run();
+        await this._ed1?.getAction('editor.action.formatDocument')?.run();
 
     }
 
@@ -259,7 +261,7 @@ export class PluginEditStyleL3 extends PluginBaseModule {
 
     private _onModelChange(e: monaco.editor.IModelContentChangedEvent, mode: 'ori' | 'dest'): void {
 
-        if (this.inEdit) return;
+        if (PluginEditStyleL3.inEdit) return;
 
         if (mode === 'ori' && this.model) {
 
@@ -270,7 +272,7 @@ export class PluginEditStyleL3 extends PluginBaseModule {
 
                 this.initalSelectors = [...this.lessAst.blocks.keys()].filter((i) => i.indexOf(' ') >= 0);
 
-            } else this.changeLessOrigin();
+            } else if (!PluginEditStyleL3.inSetValue) this.changeLessOrigin();
 
         } else if (mode === 'dest' && this.modelDest) {
             this.lessAstDest = new LessAST(this.modelDest);
@@ -290,7 +292,7 @@ export class PluginEditStyleL3 extends PluginBaseModule {
 
         if (!this.lessAst || !this.lessAstDest) return;
 
-        this.inEdit = true;
+        PluginEditStyleL3.inEdit = true;
         const keys = [...this.lessAst.blocks.keys()].filter((i) => i.indexOf(' ') >= 0);
         keys.forEach((myKey) => {
 
@@ -323,13 +325,13 @@ export class PluginEditStyleL3 extends PluginBaseModule {
 
         const newLess = this.modelDest?.getValue() || '';
         if (this.modelBase && this.modelBase.style && this.modelDest) this.modelBase.style.model.setValue(newLess);
- 
-        this.inEdit = false;
+
+        PluginEditStyleL3.inEdit = false;
         setTimeout(() => {
             this.modelDest?.setValue(newLess);
             if (this.modelBase && this.modelBase.ts && this.modelBase.style) {
                 //mls.events.fireFileAction('editorChanged', this.modelBase.style.storFile, 'left', 0);
-                mls.events.fire([3], ['styleChanged'] as any, JSON.stringify({ position:'left', storFile:this.modelBase.style.storFile }));
+                mls.events.fire([3], ['styleChanged'] as any, JSON.stringify({ position: 'left', storFile: this.modelBase.style.storFile }));
             }
         }, 500)
 

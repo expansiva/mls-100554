@@ -490,12 +490,12 @@ export class ServicePreviewView extends StateLitElement {
 
         let ret;
 
-
         //ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
         ret = await getDependenciesByHtmlFile(this.file, txt, this.actualtheme, true);
 
         const domVirtual = document.createElement('div');
         domVirtual.innerHTML = txt;
+
         //const els = iframe.contentDocument.body.querySelectorAll('*');
         const els = domVirtual.querySelectorAll('*');
         els.forEach((el) => el.setAttribute('mls_origin', 'true'));
@@ -505,6 +505,10 @@ export class ServicePreviewView extends StateLitElement {
             console.log('Errors in compile:', JSON.stringify(ret.errors));
         }
 
+        //iframe.contentDocument.body.innerHTML = domVirtual.innerHTML;
+
+        iframe.contentDocument.body.innerHTML = '';
+
         if (!(mls as any).modePreview) (mls as any).modePreview = 'singlePage';
 
         switch ((mls as any).modePreview) {
@@ -513,7 +517,9 @@ export class ServicePreviewView extends StateLitElement {
             default: await this.modeMinimum(ret, iframe); break;
         }
 
-        iframe.contentDocument.body.innerHTML = domVirtual.innerHTML;
+        Array.from(domVirtual.children).forEach((i) => {
+            iframe.contentDocument?.body.appendChild(i);
+        })
 
         mls.events.fire(
             mls.actualLevel as any,

@@ -56,7 +56,7 @@ export class CollabPreviewL3 extends CollabLitElement {
         const div = document.createElement("collab-aux-overlay");
         div.style.outlineOffset = '-2px';
         div.style.zIndex = '99999';
-        div.style.display = 'block';
+        div.style.display = 'none';
         this.appendChild(div);
         this.elOverlayHover = div;
 
@@ -67,7 +67,7 @@ export class CollabPreviewL3 extends CollabLitElement {
         if (this.elOverlaySelected && this.elOverlaySelected.isConnected) return;
         const div = document.createElement("collab-selected-overlay");
         div.style.outlineOffset = '-2px';
-        div.style.display = 'block';
+        div.style.display = 'none';
         this.appendChild(div);
         this.elOverlaySelected = div;
 
@@ -116,10 +116,10 @@ export class CollabPreviewL3 extends CollabLitElement {
 
         const rect = el.getBoundingClientRect();
         this.elOverlaySelected.style.display = 'block';
-        this.elOverlaySelected.style.top = `${rect.top + window.scrollY - 2}px`;
-        this.elOverlaySelected.style.left = `${rect.left + window.scrollX - 2}px`;
-        this.elOverlaySelected.style.width = `${rect.width + 4}px`;
-        this.elOverlaySelected.style.height = `${rect.height + 4}px`;
+        this.elOverlaySelected.style.top = `${rect.top + window.scrollY}px`;
+        this.elOverlaySelected.style.left = `${rect.left + window.scrollX}px`;
+        this.elOverlaySelected.style.width = `${rect.width }px`;
+        this.elOverlaySelected.style.height = `${rect.height}px`;
         this.elOverlaySelected.style.setProperty("--id-name", `'${el.id}'`);
         
         el.setAttribute('clb_mode', 'edit');

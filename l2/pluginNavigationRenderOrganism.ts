@@ -2,8 +2,10 @@
 
 import { html, repeat, TemplateResult, LitElement } from 'lit';
 import { customElement, state, property, query } from 'lit/decorators.js';
-import { convertFileNameToTag } from './_100554_utilsLit';
+import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { executeAgentByFile } from './_100554_aiAgentHelper'
+import { collab_trash, collab_pencil, collab_bars } from './_100554_collabIcons';
+import { selectLevel, openService } from './_100554_libCommom';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { CollabPreviewL3 } from './_100554_collabPreviewL3';
 import { ServiceBase } from './_100554_serviceBase';
@@ -48,7 +50,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         super();
         this.setEvents();
     }
-
+ 
     private setEvents(): void {
         mls.events.addEventListener([1, 2, 3, 4, 5, 6, 7], ['ToolBarSelected'], (ev) => this.onlevelChange(ev));
 
@@ -81,7 +83,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     private async fineshPreview(ev: mls.events.IEvent) {
 
         if (ev.level !== 3) return;
-        this.forceUpdate();
+        setTimeout(() => this.forceUpdate(), 500);
 
     }
 
@@ -106,7 +108,6 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     //-------COMPONENT----------
 
     @state() activeId = '';
-    private tryRender = 0;
 
     createRenderRoot() {
         return this;
@@ -138,7 +139,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
         return html`
             <div class="headerNav ${pos}">
-                <h1>${txt}</h1>
+                <h1 style="display:none">${txt}</h1>
                 ${btn}               
             </div>
         `
@@ -249,14 +250,25 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     renderItemTree(item: IInfoElChildren, idx: string) {
 
-        const cls = item.el.id === this.activeId || item.el.hasAttribute('clb_mode') ? 'activeBranch' : '';
+        const cls = item.el.id === this.activeId ? 'activeBranch' : '';
 
         let mySymbol = 'fa-cubes'
         if ((item.el as any).mySymbol) mySymbol = (item.el as any).mySymbol;
 
-        //const name = item.el.tagName.length > 30 ? item.el.tagName.toLocaleLowerCase().substring(0, 29) + '...' : item.el.tagName.toLocaleLowerCase();
-
         const name = item.el.tagName.toLocaleLowerCase();
+
+        let aux:any = '';
+
+        if (item.isFather) {
+            aux = html`
+                <span 
+                    class="mls-gpbtnslider-item"
+                    @click="${(e: MouseEvent) => this.goToL2(e, item)}" 
+                    title="edit"
+                >
+                ${collab_pencil}</span>
+            `;
+        }
 
         return html`
             <li>
@@ -271,15 +283,15 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
                     <info-item .info=${item}>
                         <span class="fa ${mySymbol}" style="margin-right:.5rem"></span>
                         ${name}
-                        <small>(${item.el.id})</small>
+                        <small class="showId">(${item.el.id})</small>
                     </info-item>
                     <div class="groupHiddenList" .info=${item}  @click="${this.clickGroupHidden}" >
-                        
+                        ${aux}
                         <span class="mls-gpbtnslider-item" @click="${() => this.goToScenary('details')}" title="details">
                             <svg xmlns="http://www.w3.org/2000/svg" width="7px" viewBox="0 0 192 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M48 80a48 48 0 1 1 96 0A48 48 0 1 1 48 80zM0 224c0-17.7 14.3-32 32-32l64 0c17.7 0 32 14.3 32 32l0 224 32 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 512c-17.7 0-32-14.3-32-32s14.3-32 32-32l32 0 0-192-32 0c-17.7 0-32-14.3-32-32z"/></svg>
                         </span>
                         <span class="mls-gpbtnslider-item" @click="${this.delEl}" title="remove">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13px" viewBox="0 0 448 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg>
+                            ${collab_trash}
                         </span>
                         <span class="mls-gpbtnslider-item" @click="${() => this.goToScenary('prop')}" title="properties">
                             <svg xmlns="http://www.w3.org/2000/svg" width="15px" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128 0a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM320 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm32-80c-32.8 0-61 19.7-73.3 48L32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l246.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48l54.7 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-54.7 0c-12.3-28.3-40.5-48-73.3-48zM192 128a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm73.3-64C253 35.7 224.8 16 192 16s-61 19.7-73.3 48L32 64C14.3 64 0 78.3 0 96s14.3 32 32 32l86.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 128c17.7 0 32-14.3 32-32s-14.3-32-32-32L265.3 64z"/></svg>
@@ -308,14 +320,6 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         this.scenary = scenary;
     }
 
-    private tryRenderAgain() {
-
-        if (this.tryRender === 10) return;
-        this.tryRender++;
-        setTimeout(() => this.forceUpdate(), 800);
-
-    }
-
     private setElPreview() {
         const scope = window.preview?.iframe?.contentDocument?.body;
         if (!scope) return;
@@ -334,36 +338,28 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         const root = scope.querySelector(tag) as LitElement;
         if (root) await root.updateComplete;
 
-        const reentrance = (array: IInfoElChildren[], element: HTMLElement) => {
+        const reentrance = async(array: IInfoElChildren[], element: HTMLElement) => {
 
             let info: IInfoElChildren | undefined;
             if (element.getAttribute(this.atributeBase) && !lessTags.includes(element.tagName.toLocaleLowerCase())) {
-                info = { el: element as HTMLElement, id: element.id, children: [] as any };
+                info = { el: element as HTMLElement, id: element.id, children: [] as any, isFather: false };
                 array.push(info);
             } else if (tag === element.tagName.toLocaleLowerCase()) {
-                info = { el: element as HTMLElement, id: element.id, children: [] as any };
+                await (element as any).updateComplete;
+                info = { el: element as HTMLElement, id: element.id, children: [] as any, isFather: true };
                 array.push(info);
             }
 
-            if (element.shadowRoot) {
-                const children = Array.from(element.shadowRoot.children);
+            const children = element.shadowRoot ? Array.from(element.shadowRoot.children) : Array.from(element.children);
 
-                for (let i = 0; i < children.length; i++) {
-                    const child = children[i] as HTMLElement;
-                    reentrance(info ? info.children : array, child as HTMLElement)
-                }
-
-            } else {
-                const children = Array.from(element.children);
-                for (let i = 0; i < children.length; i++) {
-                    const child = children[i] as HTMLElement;
-                    reentrance(info ? info.children : array, child as HTMLElement)
-                }
+            for (let i = 0; i < children.length; i++) {
+                const child = children[i] as HTMLElement;
+                await reentrance(info ? info.children : array, child as HTMLElement)
             }
 
         }
 
-        reentrance(ret, scope);
+        await reentrance(ret, scope);
 
         return ret;
 
@@ -379,14 +375,12 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
         if (!target) return;
 
-        const active = this.querySelector('.activeBranch') as HTMLElement;
-        if (active && active === target) {
-            return;
-        }
+        const els = this.querySelectorAll('.activeBranch');
+        els.forEach((el) => el.classList.remove('activeBranch'));
 
-        if (active) active.classList.remove('activeBranch');
         target.classList.add('activeBranch')
 
+        this.activeId = item.id;
         if (this.elPreviewL3) this.elPreviewL3.selectElement(item.el);
 
     }
@@ -497,6 +491,22 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         this.service.setError(msg);
     }
 
+    private goToL2(e: MouseEvent, item: IInfoElChildren) {
+        const fileInfo = convertTagToFileName(item.el.tagName.toLowerCase());
+        if (!fileInfo) return;
+        const { folder, project, shortName } = fileInfo;
+
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
+        const f = mls.stor.files[key];
+        if (!f) return;
+
+        mls.actual[2].setFullName(folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`);
+
+        mls.actual[2].left = f;
+
+        openService('_100554_serviceSource', 'left', 2);
+    }
+
 
 }
 
@@ -505,5 +515,6 @@ type TScenary = 'prop' | 'list' | 'details' | 'add';
 interface IInfoElChildren {
     el: HTMLElement,
     id: string,
-    children: IInfoElChildren[]
+    children: IInfoElChildren[],
+    isFather: boolean
 }

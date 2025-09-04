@@ -150,10 +150,11 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
                     @mouseover="${() => this.onMouseover(item)}"
                     @mouseout="${() => this.onMouseout(item)}"   
                 >
-                    <span class="move-icon" title="Mover">
-                        ${collab_bars}
-                    </span>
+                    
                     <info-item .info=${item}>
+                        <span class="move-icon" title="Mover">
+                            ${collab_bars}
+                        </span>
                         <span class="fa ${mySymbol}" style="margin-right:.5rem"></span>
                         ${this.slugToTitle(item.tagName)}
                     </info-item>
