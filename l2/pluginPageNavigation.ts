@@ -366,11 +366,15 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     }
 
     private onTouchStart(e: TouchEvent, item: IInfoElChildren, parentArray: IInfoElChildren[]) {
+        e.stopPropagation();
         this.dragItem = item;
         this.dragParentArray = parentArray;
     }
 
     private onTouchEnd(e: TouchEvent, targetItem: IInfoElChildren, parentArray: IInfoElChildren[]) {
+
+        e.preventDefault();
+        e.stopPropagation();
 
         if (!this.dragItem || !this.dragParentArray || !this.domNavigator) return;
         if (this.dragItem === targetItem || this.isDescendant(this.dragItem, targetItem)) {
@@ -417,17 +421,59 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     }
 
     private onTouchMove(e: TouchEvent) {
-        e.preventDefault();
+        e.preventDefault(); 
+        if (!this.dragItem) return; 
+
         const touch = e.touches[0];
         const elemUnderFinger = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (!elemUnderFinger) return;
-        const target = elemUnderFinger.closest('li.nav-item') as any;
-        if (!target) return;
-        const item = target.item;
 
-        const rect = target.getBoundingClientRect();
+        if (!elemUnderFinger) return;
+
+        const liTarget = elemUnderFinger.closest("li.nav-item") as HTMLElement | null;
+        if (!liTarget) return;
+
+        const info: IInfoElChildren | undefined = (liTarget.querySelector(".header") as any)?.info;
+        if (!info) return;
+
+        const rect = liTarget.getBoundingClientRect();
         const y = touch.clientY - rect.top;
-        this.configOverEvent(target, item, y);
+
+        const third = rect.height / 3;
+        let position: 'before' | 'after' | 'inside' | 'invalid';
+
+        if (y < third) position = 'before';
+        else if (y > rect.height - third) position = 'after';
+        else position = 'inside';
+
+        if (position === 'inside' && info.isOrganism) {
+            position = 'after';
+        }
+
+        if (this.isDescendant(this.dragItem, info)) {
+            position = 'invalid';
+        }
+
+        this.dropPosition = position;
+        this.dragOverTarget = liTarget;
+
+        const borderTarget = liTarget.querySelector('.header') as HTMLElement;
+        if (!borderTarget) return;
+        borderTarget.style.borderTop = '';
+        borderTarget.style.borderBottom = '';
+        borderTarget.style.border = '';
+
+        liTarget.style.cursor = 'grab';
+
+        if (position === 'before') {
+            borderTarget.style.borderTop = '1px solid blue';
+        } else if (position === 'after') {
+            borderTarget.style.borderBottom = '1px solid blue';
+        } else if (position === 'inside') {
+            borderTarget.style.border = '1px solid blue';
+        } else if (position === 'invalid') {
+            borderTarget.style.border = '1px solid red';
+            liTarget.style.cursor = 'not-allowed';
+        }
 
     }
 
@@ -444,9 +490,9 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     }
 
     private configOverEvent(liTarget: HTMLElement, targetItem: IInfoElChildren, y: number, e?: DragEvent) {
-        
+
         const rect = liTarget.getBoundingClientRect();
-        
+
         const third = rect.height / 3;
         let position: 'before' | 'after' | 'inside' | 'invalid';
 
@@ -480,7 +526,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
             borderTarget.style.border = '1px solid blue';
         } else if (position === 'invalid') {
             borderTarget.style.border = '1px solid red';
-            if(e) e.dataTransfer!.dropEffect = 'none';
+            if (e) e.dataTransfer!.dropEffect = 'none';
             liTarget.style.cursor = 'not-allowed';
         }
     }
