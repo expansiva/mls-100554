@@ -100,7 +100,6 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         const div = document.createElement("div");
         const style = getComputedStyle(this.textArea);
 
-        // Copia as propriedades relevantes
         for (const prop of style) {
             div.style.setProperty(prop, style.getPropertyValue(prop));
         }
@@ -113,8 +112,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
 
         const text = this.textArea.value.substring(0, this.textArea.selectionStart);
         const span = document.createElement("span");
-        span.textContent = "\u200b"; // marcador invisível
-
+        span.textContent = "\u200b"; 
         div.textContent = text;
         div.appendChild(span);
 
@@ -132,9 +130,20 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         const bound1 = this.wrapper.getBoundingClientRect();
         const bound2 = this.mentionSuggestionsElement.getBoundingClientRect();
         if (!coords) return;
+
+        const viewport = window.visualViewport;
+
+        let x = coords.x;
+        let y = coords.y;
+
+        if (viewport) {
+            x = coords.x - viewport.offsetLeft;
+            y = coords.y - viewport.offsetTop;
+        }
+
         this.mentionSuggestionsElement.style.position = "fixed";
-        this.mentionSuggestionsElement.style.left = `${coords.x}px`;
-        this.mentionSuggestionsElement.style.top = `${coords.y - bound1.height - bound2.height - 4}px`; // 4px de margem
+        this.mentionSuggestionsElement.style.left = `${x}px`;
+        this.mentionSuggestionsElement.style.top = `${y - bound1.height - bound2.height - 4}px`;
     }
 
     private adjustTextAreaHeight() {
