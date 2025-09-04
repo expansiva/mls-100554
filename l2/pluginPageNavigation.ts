@@ -63,10 +63,8 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
             case ('navigation'):
                 this.onNavigation(info);
                 break;
-            case ('openL3'):
-                this.onOpenL3(info);
-                break;
-            
+
+
         }
 
     }
@@ -77,14 +75,6 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         const els = this.querySelectorAll('.activeBranch');
         els.forEach((el) => el.classList.remove('activeBranch'));
         this.activeId = info.id;
-    }
-
-    private onOpenL3(info: any) {
-        if ( !info.folder || !info.project || !info.shortName) return;
-        
-        const { folder, project, shortName } = info;
-        mls.actual[3].setFullName(folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`);
-        openService('_100554_serviceOrganism', 'left', 3);
     }
 
     private onNavigation(info: any) {
@@ -146,7 +136,8 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
                     .info=${item}
                     id="${item.tagName + idx}"                      
                     class="header ${cls}" 
-                    @click="${(e: MouseEvent) => this.selectItem(e, item)}" 
+                    @dblclick="${(e: MouseEvent) => this.editEl(e, item)}"
+                    @click="${(e: MouseEvent) => this.selectItem(e, item)}"  
                     @mouseover="${() => this.onMouseover(item)}"
                     @mouseout="${() => this.onMouseout(item)}"   
                 >
@@ -192,12 +183,17 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
             return html`
                 <li 
                     class="nav-item"
+                    .item=${item}
                     draggable=${draggable} 
                     @dragstart=${(e: DragEvent) => this.onDragStart(e, item, parentArray)}
                     @dragover=${(e: DragEvent) => this.onDragOver(e, item)}
                     @dragleave=${(e: DragEvent) => this.onDragLeave(e)}
                     @drop=${(e: DragEvent) => this.onDrop(e, item, parentArray)}
                     @dragend=${() => this.onDragEnd()}
+
+                    @touchstart=${(e: TouchEvent) => this.onTouchStart(e, item, parentArray)}
+                    @touchmove=${(e: TouchEvent) => this.onTouchMove(e)}
+                    @touchend=${(e: TouchEvent) => this.onTouchEnd(e, item, parentArray)}
                 >
                     ${renderHeader()} 
             </li>`;
@@ -298,7 +294,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         if (!this.elPreviewL4 || !this.elPreviewL4.selectElement || !item.el) return;
 
         this.elPreviewL4.selectElement(item.id);
- 
+
     }
 
     private clickGroupHidden(e: MouseEvent) {
@@ -318,13 +314,14 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         if (!fileInfo) return;
         const { folder, project, shortName } = fileInfo;
         mls.actual[3].setFullName(folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`);
-        openService('_100554_serviceOrganism', 'left', 3);
+        selectLevel(3);
+        setTimeout(() => { openService('_100554_serviceOrganism', 'left', 3, { "tab": "navigation" }); }, 500)
     }
 
 
     private onMouseover(item: IInfoElChildren) {
 
-        if (!this.elPreviewL4 || !this.elPreviewL4.setHover|| !this.elPreviewL4.isConnected) this.setElPreview();
+        if (!this.elPreviewL4 || !this.elPreviewL4.setHover || !this.elPreviewL4.isConnected) this.setElPreview();
 
         if (!this.elPreviewL4 || !this.elPreviewL4.setHover || !item.el) return;
 
@@ -368,6 +365,72 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         e.dataTransfer!.setDragImage(new Image(), 0, 0);
     }
 
+    private onTouchStart(e: TouchEvent, item: IInfoElChildren, parentArray: IInfoElChildren[]) {
+        this.dragItem = item;
+        this.dragParentArray = parentArray;
+    }
+
+    private onTouchEnd(e: TouchEvent, targetItem: IInfoElChildren, parentArray: IInfoElChildren[]) {
+
+        if (!this.dragItem || !this.dragParentArray || !this.domNavigator) return;
+        if (this.dragItem === targetItem || this.isDescendant(this.dragItem, targetItem)) {
+            console.warn('Não é permitido mover um pai para dentro do filho');
+            this.onDragEnd();
+            return;
+        }
+
+        const fromIndex = this.dragParentArray.indexOf(this.dragItem);
+        if (fromIndex > -1) {
+            this.dragParentArray.splice(fromIndex, 1);
+        }
+
+        const domDragEl = this.dragItem.elDomNavigator;
+        const domTargetEl = targetItem.elDomNavigator;
+
+        if (this.dropPosition === 'inside') {
+            targetItem.children.push(this.dragItem);
+
+            if (domDragEl && domTargetEl) {
+                domTargetEl.appendChild(domDragEl);
+            }
+        } else {
+            let toIndex = parentArray.indexOf(targetItem);
+            if (this.dropPosition === 'after') {
+                toIndex++;
+            }
+            parentArray.splice(toIndex, 0, this.dragItem);
+
+            if (domDragEl && domTargetEl && domDragEl !== domTargetEl) {
+                const parentDom = domTargetEl.parentElement;
+                if (parentDom) {
+                    if (this.dropPosition === 'before') {
+                        parentDom.insertBefore(domDragEl, domTargetEl);
+                    } else {
+                        parentDom.insertBefore(domDragEl, domTargetEl.nextSibling);
+                    }
+                }
+            }
+        }
+
+        this.prepareHTMLAndSync();
+        this.onDragEnd();
+    }
+
+    private onTouchMove(e: TouchEvent) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const elemUnderFinger = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (!elemUnderFinger) return;
+        const target = elemUnderFinger.closest('li.nav-item') as any;
+        if (!target) return;
+        const item = target.item;
+
+        const rect = target.getBoundingClientRect();
+        const y = touch.clientY - rect.top;
+        this.configOverEvent(target, item, y);
+
+    }
+
     private onDragOver(e: DragEvent, targetItem: IInfoElChildren) {
         e.preventDefault();
         e.stopPropagation();
@@ -376,7 +439,14 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         const liTarget = e.currentTarget as HTMLElement;
         const rect = liTarget.getBoundingClientRect();
         const y = e.clientY - rect.top;
+        this.configOverEvent(liTarget, targetItem, y);
 
+    }
+
+    private configOverEvent(liTarget: HTMLElement, targetItem: IInfoElChildren, y: number, e?: DragEvent) {
+        
+        const rect = liTarget.getBoundingClientRect();
+        
         const third = rect.height / 3;
         let position: 'before' | 'after' | 'inside' | 'invalid';
 
@@ -410,11 +480,9 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
             borderTarget.style.border = '1px solid blue';
         } else if (position === 'invalid') {
             borderTarget.style.border = '1px solid red';
-            e.dataTransfer!.dropEffect = 'none';
+            if(e) e.dataTransfer!.dropEffect = 'none';
             liTarget.style.cursor = 'not-allowed';
         }
-
-
     }
 
 
@@ -502,7 +570,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         if (!rootEl) return;
         const newHtml = formatHtml(rootEl.outerHTML);
         const actualInfo = this.getActualFileL4();
-        
+
         if (actualInfo && actualInfo.models && actualInfo.models.html) {
             actualInfo.models.html.model.setValue(newHtml);
             setValueInModeKeepingUndo(actualInfo.models && actualInfo.models.html.model, newHtml);

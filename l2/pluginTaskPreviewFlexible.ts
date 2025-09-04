@@ -120,6 +120,27 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
             </div>
         `;
 
+        if (typeof this.step.result === 'object') {
+
+            if (this.step.result.dataUrl) {
+                return html`
+                <div style="max-width:520px; margin:0 auto; text-align:center;">
+                    <figure style="margin:0;">
+                        <img
+                        src="${this.step.result.dataUrl}"
+                        alt="${this.step.result.dataUrl}"
+                        style="width:100%; height:auto; display:block; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.12);" />
+                        <figcaption style="margin-top:10px; font-size:14px; color:#555; line-height:1.4;" >
+                            ${this.step.result.dataUrl}
+                        </figcaption>
+                    </figure>
+                </div>
+                `
+            }
+
+                
+        }
+
         return html`<pre>${JSON.stringify(this.step.result, null, 2)}</pre>`
 
     }

@@ -3,6 +3,7 @@
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
+import { selectLevel, openService } from './_100554_libCommom';
 
 import "./_100554_pluginPrototypeImprove";
 import "./_100554_pluginExploreList";
@@ -37,6 +38,7 @@ export class ServicePage100554 extends ServiceBase {
     constructor() {
         super();
         mls.events.addListener(4, 'FileAction', this.onFileAction.bind(this));
+        mls.events.addListener(4, 'L4EditEvents' as any, this.onL4EditEvents.bind(this));
     }
 
     private msg: MessageType = messages['en'];
@@ -48,7 +50,7 @@ export class ServicePage100554 extends ServiceBase {
 
     public details: IService = {
         icon: '&#xf15b',
-        state: 'foreground',
+        state: 'background',
         position: 'right',
         tooltip: 'Page',
         visible: true,
@@ -60,7 +62,7 @@ export class ServicePage100554 extends ServiceBase {
     public onClickMain(op: string) {
         if (op === 'opAboutThis') this.showAboutThis();
         else if (this.menu.setMode) this.menu.setMode('initial');
-        
+
     }
 
     public onClickTabs(index: number) {
@@ -179,6 +181,32 @@ export class ServicePage100554 extends ServiceBase {
     private onFileAction(ev: mls.events.IEvent) {
         if (ev.level !== 4 || (ev.type !== 'FileAction')) return;
         if (this.menu && this.menu.setTabActive) this.menu.setTabActive(ESceneries.icNavigation);
+    }
+
+    private onL4EditEvents(ev: mls.events.IEvent) {
+
+        if (!ev.desc || ev.level !== 4) return;
+
+        const info = JSON.parse(ev.desc);
+
+        if (!info || !info.action || !info.position || info.position === 'left') return;
+
+        switch (info.action) {
+            case ('openL3'):
+                this.onOpenL3(info);
+                break;
+            default: '';
+
+        }
+
+    }
+
+    private onOpenL3( info: any) {
+        if (!info.folder || !info.project || !info.shortName) return;
+        const { folder, project, shortName } = info;
+        mls.actual[3].setFullName(folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`);
+        selectLevel(3);
+        setTimeout(() => { openService('_100554_serviceOrganism', 'left', 3, { "tab": "navigation" }); }, 500)
     }
 
 
