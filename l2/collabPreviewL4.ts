@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { convertTagToFileName } from './_100554_utilsLit';
-import { openService } from './_100554_libCommom';
+import { openService,selectLevel } from './_100554_libCommom';
 import './_100554_collabL3EditText';
 
 @customElement('collab-preview-l4-100554')
@@ -226,16 +226,10 @@ export class CollabPreviewL4 extends CollabLitElement {
         const { folder, project, shortName } = fileInfo;
 
         mls.actual[3].setFullName(folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`);
-        openService('_100554_serviceOrganism', 'left', 3);
+        selectLevel(3);
+        openService('_100554_serviceOrganism', 'left', 3, {"tab":"navigation"});
 
-        /*const param = {
-            'position': 'right',
-            'action': 'openL3',
-            folder,
-            project,
-            shortName
-        }
-        mls.events.fire(4, 'L4EditEvents' as any, JSON.stringify(param));*/
+
     }
 
 
