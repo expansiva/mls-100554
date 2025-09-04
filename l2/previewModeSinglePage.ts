@@ -6,7 +6,7 @@ import * as util from './_100554_previewModeUtil';
 
 export class PreviewModeSinglePage {
 
-    private level: string | undefined; 
+    private level: string | undefined;
     private json: IJSONDependence | undefined;
     private ifr: HTMLIFrameElement | undefined;
     private isService: boolean = false;
@@ -44,6 +44,27 @@ export class PreviewModeSinglePage {
 
                 build.onResolve({ filter: /.*/ }, (args: any) => {
 
+                    const transforPathInitId = (input: string) => {
+
+                        let [idPart, ...restParts] = input.split('/');
+                        if (input.startsWith('./')) {
+                            idPart = restParts[0];
+                            restParts.shift();
+                        }
+                        
+                        const rest = restParts.join('/');
+
+                        const lastSlashIndex = rest.lastIndexOf('/');
+                        const path = rest.substring(0, lastSlashIndex);
+                        const file = rest.substring(lastSlashIndex + 1);
+
+                        return `/${path}/${idPart}${file}`;
+                    }
+
+                    const isValidStart = (path: string) => {
+                        return !path.startsWith("./l2/") && !path.startsWith("_") && !(path.startsWith("./_") && path.indexOf("/l2/") >= 0 )
+                    }
+
                     if (valids.includes(args.path)) {
                         return {
                             path: args.path,
@@ -52,7 +73,7 @@ export class PreviewModeSinglePage {
                     }
 
                     if (args.path.startsWith("./") &&
-                        !args.importer.startsWith("https://") && !args.path.startsWith("./l2/")) {
+                        !args.importer.startsWith("https://") && isValidStart(args.path)) {
                         return {
                             path: args.path.replace('./', '/'),
                             namespace: 'virtual',
@@ -63,7 +84,7 @@ export class PreviewModeSinglePage {
                         args.path.startsWith("./") ||
                         args.path.startsWith("../") ||
                         args.path.startsWith("/")) &&
-                        myMap[args.importer] && !args.path.startsWith("./l2/")) {
+                        myMap[args.importer] && isValidStart(args.path)) {
 
                         const url = new URL(args.path, myMap[args.importer]);
                         return { path: url.href, namespace: 'virtual' };
@@ -74,7 +95,7 @@ export class PreviewModeSinglePage {
                         args.path.startsWith("./") ||
                         args.path.startsWith("../") ||
                         args.path.startsWith("/")) &&
-                        args.importer.startsWith("https://") && !args.path.startsWith("./l2/")) {
+                        args.importer.startsWith("https://") && isValidStart(args.path)) {
 
                         const url = new URL(args.path, args.importer);
                         return { path: url.href, namespace: 'virtual' };
@@ -83,6 +104,14 @@ export class PreviewModeSinglePage {
 
                     if (args.path.startsWith("http")) {
                         return { path: args.path, namespace: 'virtual' };
+                    }
+
+                    if ((args.path.startsWith("_") || args.path.startsWith("./_")) &&
+                        !args.importer.startsWith("https://") && !args.path.startsWith("./l2/")) {
+                        return {
+                            path: transforPathInitId(args.path),
+                            namespace: 'virtual',
+                        };
                     }
 
                     if (args.path.indexOf("/l2/") &&
