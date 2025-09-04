@@ -90,7 +90,10 @@ export class ServicePage100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
+        if (visible && this.activeTab === 'icNavigation') {
+            const el = this.querySelector('plugin-page-navigation-100554') as any;
+            if(el && el.firstUpdated) el.firstUpdated();
+        }
     }
 
     private showAboutThis(): boolean {
