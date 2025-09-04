@@ -52,7 +52,7 @@ export class PreviewModeSinglePage {
                     }
 
                     if (args.path.startsWith("./") &&
-                        !args.importer.startsWith("https://")) {
+                        !args.importer.startsWith("https://") && !args.path.startsWith("./l2/")) {
                         return {
                             path: args.path.replace('./', '/'),
                             namespace: 'virtual',
@@ -63,7 +63,7 @@ export class PreviewModeSinglePage {
                         args.path.startsWith("./") ||
                         args.path.startsWith("../") ||
                         args.path.startsWith("/")) &&
-                        myMap[args.importer]) {
+                        myMap[args.importer] && !args.path.startsWith("./l2/")) {
 
                         const url = new URL(args.path, myMap[args.importer]);
                         return { path: url.href, namespace: 'virtual' };
@@ -74,7 +74,7 @@ export class PreviewModeSinglePage {
                         args.path.startsWith("./") ||
                         args.path.startsWith("../") ||
                         args.path.startsWith("/")) &&
-                        args.importer.startsWith("https://")) {
+                        args.importer.startsWith("https://") && !args.path.startsWith("./l2/")) {
 
                         const url = new URL(args.path, args.importer);
                         return { path: url.href, namespace: 'virtual' };
@@ -88,7 +88,7 @@ export class PreviewModeSinglePage {
                     if (args.path.indexOf("/l2/") &&
                         !args.importer.startsWith("https://")) {
                         return {
-                            path: '/'+args.path.replace('/l2/', ''),
+                            path: args.path.replace('./l2/', `/_${mls.actualProject}_`),
                             namespace: 'virtual',
                         };
                     }

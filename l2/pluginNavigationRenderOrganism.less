@@ -119,13 +119,16 @@ plugin-navigation-render-organism-100554 {
     width: 100%;
     overflow: hidden;
     /* "overflow" value must be different from "visible" */
-
     text-overflow: ellipsis;
+    transition: width 2s;
   }
 
-  .activegpbtnslider info-item {
-    visibility: hidden !important;
-    height: 0px;
+  .showId{
+    display: none;
+  }
+
+  .activeBranch .showId {
+    display: contents;
   }
 
   .activegpbtnslider .groupHiddenList {

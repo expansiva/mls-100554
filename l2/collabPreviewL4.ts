@@ -183,10 +183,10 @@ export class CollabPreviewL4 extends CollabLitElement {
 
         const rect = el.getBoundingClientRect();
         this.elOverlaySelected.style.display = 'block';
-        this.elOverlaySelected.style.top = `${rect.top + window.document.body.scrollTop - 2}px`;
-        this.elOverlaySelected.style.left = `${rect.left + window.document.body.scrollLeft - 2}px`;
-        this.elOverlaySelected.style.width = `${rect.width + 4}px`;
-        this.elOverlaySelected.style.height = `${rect.height + 4}px`;
+        this.elOverlaySelected.style.top = `${rect.top + window.document.body.scrollTop }px`;
+        this.elOverlaySelected.style.left = `${rect.left + window.document.body.scrollLeft }px`;
+        this.elOverlaySelected.style.width = `${rect.width}px`;
+        this.elOverlaySelected.style.height = `${rect.height}px`;
         this.elOverlaySelected.style.setProperty("--id-name", `'${el.tagName.toLocaleLowerCase()}'`);
         (this.elOverlaySelected as any).el = el;
 
@@ -195,7 +195,7 @@ export class CollabPreviewL4 extends CollabLitElement {
             const menuHeight = 31;
               
             this.elMenuOverlay.style.display = "flex";
-            this.elMenuOverlay.style.top = (rect.top + window.document.body.scrollTop - 4) + "px";
+            this.elMenuOverlay.style.top = (rect.top + window.document.body.scrollTop - 1) + "px";
             this.elMenuOverlay.style.left = (rect.left + + window.document.body.scrollLeft + 4) + "px";
 
             if (rect.top < menuHeight) {

@@ -4,6 +4,7 @@ import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { initState } from './_100554_collabState';
+import { createModel } from './_100554_collabLibModel';
 import './_100554_collabL3PreviewText';
 import './_100554_collabL3PreviewTextAttr';
 import './_100554_collabL3PreviewTextI18n';
@@ -256,56 +257,75 @@ export class CollabL3EditText extends CollabLitElement {
 
     public async save() {
 
-        if (!this.json) return;
-        const { project, path } = mls.actual[mls.actualLevel];
-        const info = mls.l2.getPath(`_${project}_${path}`)
-        if (!info) return;
+        try {
 
-        const models = mls.editor.getModels(info.project, info.shortName, info.folder);
-        if (!models || !models.ts) return;
+            if (!this.json) return;
+            const { project, path } = mls.actual[mls.actualLevel];
+            const info = mls.l2.getPath(`_${project}_${path}`)
+            if (!info) return;
 
-        let edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
+            let models = mls.editor.getModels(info.project, info.shortName, info.folder);
+            if (!models || !models.ts) {
 
-        const inners = Object.keys(this.json.inner);
-        for await (const key of inners) {
-            const inner = this.json?.inner[key];
+                const keySF = mls.stor.getKeyToFiles(info.project, 2, info.shortName, info.folder, '.ts');
+                const st = mls.stor.files[keySF];
+                if (!st) throw new Error(`[CollabL3EditText save]Not found stor: _${project}_${path}`);
+                await createModel(st, true, false);
+                models = mls.editor.getModels(info.project, info.shortName, info.folder);
 
-            if (!inner || (inner && inner.old_v === inner.new_v)) continue;
+            }
 
-            const edt = await this.replaceValueAfterKeyWithUndo(models.ts.model, inner.ori, inner.old_v, inner.new_v);
+            if (!models || !models.ts) throw new Error(`[CollabL3EditText save]Not found model ts: _${project}_${path}`)
 
-            edits = [...edits, ...edt];
+
+            let edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
+
+            const inners = Object.keys(this.json.inner);
+            for await (const key of inners) {
+                const inner = this.json?.inner[key];
+
+                if (!inner || (inner && inner.old_v === inner.new_v)) continue;
+
+                const edt = await this.replaceValueAfterKeyWithUndo(models.ts.model, inner.ori, inner.old_v, inner.new_v);
+
+                edits = [...edits, ...edt];
+            }
+
+            const attrs = Object.keys(this.json.attr);
+            for await (const key of attrs) {
+                const attr = this.json?.attr[key];
+
+                if (!attr || (attr && attr.old_v === attr.new_v)) continue;
+
+                const edt = await this.replaceAttributeValueWithUndo(models.ts.model, attr.ori, attr.old_v, attr.new_v);
+
+                edits = [...edits, ...edt];
+            }
+
+            const i18ns = Object.keys(this.json.i18n);
+            for await (const key of i18ns) {
+                const i18n = this.json?.i18n[key];
+
+                if (!i18n || (i18n && i18n.old_v === i18n.new_v)) continue;
+
+                const edt = await this.replaceI18nValueWithUndo(models.ts.model, i18n.key, i18n.old_v, i18n.new_v);
+
+                edits = [...edits, ...edt];
+            }
+
+
+            if (edits.length > 0) {
+                models.ts.model.pushEditOperations([], edits, () => null);
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (e) {
+            console.info(e);
         }
 
-        const attrs = Object.keys(this.json.attr);
-        for await (const key of attrs) {
-            const attr = this.json?.attr[key];
 
-            if (!attr || (attr && attr.old_v === attr.new_v)) continue;
-
-            const edt = await this.replaceAttributeValueWithUndo(models.ts.model, attr.ori, attr.old_v, attr.new_v);
-
-            edits = [...edits, ...edt];
-        }
-
-        const i18ns = Object.keys(this.json.i18n);
-        for await (const key of i18ns) {
-            const i18n = this.json?.i18n[key];
-
-            if (!i18n || (i18n && i18n.old_v === i18n.new_v)) continue;
-
-            const edt = await this.replaceI18nValueWithUndo(models.ts.model, i18n.key, i18n.old_v, i18n.new_v);
-
-            edits = [...edits, ...edt];
-        }
-
-
-        if (edits.length > 0) {
-            models.ts.model.pushEditOperations([], edits, () => null);
-            return true;
-        } else {
-            return false;
-        }
     }
 
     private async replaceValueAfterKeyWithUndo(
