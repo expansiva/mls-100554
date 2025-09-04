@@ -39,6 +39,13 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         converter: (value: string | null) => value === 'true'
     }) acceptAutoCompleteAgents?: boolean = false;
 
+    connectedCallback() {
+        super.connectedCallback();
+        window.visualViewport?.addEventListener("resize", () => {
+            this.calculatePosition();
+        });
+    }
+
 
     firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
@@ -125,8 +132,6 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         const bound1 = this.wrapper.getBoundingClientRect();
         const bound2 = this.mentionSuggestionsElement.getBoundingClientRect();
         if (!coords) return;
-
-        const suggestionsHeight = this.mentionSuggestionsElement.offsetHeight || 150; // altura estimada
         this.mentionSuggestionsElement.style.position = "fixed";
         this.mentionSuggestionsElement.style.left = `${coords.x}px`;
         this.mentionSuggestionsElement.style.top = `${coords.y - bound1.height - bound2.height - 4}px`; // 4px de margem
