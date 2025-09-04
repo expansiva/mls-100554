@@ -1493,6 +1493,8 @@ export class ServicePreview100554 extends ServiceBase {
                 break;
             case 4:
                 this.selectLevel(5);
+                setTimeout(() => { this.openService('_100554_serviceProject', 'left', 5); }, 500)
+
                 break;
             case 5:
                 this.selectLevel(6);
