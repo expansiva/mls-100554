@@ -142,7 +142,7 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
     private async addModeL2() {
-        await import('./_100554_serviceListFilesAdd');
+        //await import('./_100554_serviceListFilesAdd');
         this.inFilter = false;
         this.mode = 'addL2';
     }
