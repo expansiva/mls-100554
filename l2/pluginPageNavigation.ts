@@ -193,7 +193,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
                     @touchstart=${(e: TouchEvent) => this.onTouchStart(e, item, parentArray)}
                     @touchmove=${(e: TouchEvent) => this.onTouchMove(e)}
-                    @touchend=${(e: TouchEvent) => this.onTouchEnd(e, item, parentArray)}
+                    @touchend=${(e: TouchEvent) => this.onTouchEnd(e)}
                 >
                     ${renderHeader()} 
             </li>`;
@@ -371,58 +371,49 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         this.dragParentArray = parentArray;
     }
 
-    private onTouchEnd(e: TouchEvent, targetItem: IInfoElChildren, parentArray: IInfoElChildren[]) {
-
+    private onTouchEnd(e: TouchEvent) {
         e.preventDefault();
-        e.stopPropagation();
 
-        if (!this.dragItem || !this.dragParentArray || !this.domNavigator) return;
-        if (this.dragItem === targetItem || this.isDescendant(this.dragItem, targetItem)) {
-            console.warn('Não é permitido mover um pai para dentro do filho');
+        if (!this.dragItem || !this.dragParentArray || !this.dragOverTarget) {
             this.onDragEnd();
             return;
         }
 
-        const fromIndex = this.dragParentArray.indexOf(this.dragItem);
-        if (fromIndex > -1) {
-            this.dragParentArray.splice(fromIndex, 1);
+        // Recupera o alvo do último onTouchMove
+        const info: IInfoElChildren | undefined = (this.dragOverTarget.querySelector(".header") as any)?.info;
+        if (!info) {
+            this.onDragEnd();
+            return;
         }
 
-        const domDragEl = this.dragItem.elDomNavigator;
-        const domTargetEl = targetItem.elDomNavigator;
-
-        if (this.dropPosition === 'inside') {
-            targetItem.children.push(this.dragItem);
-
-            if (domDragEl && domTargetEl) {
-                domTargetEl.appendChild(domDragEl);
-            }
-        } else {
-            let toIndex = parentArray.indexOf(targetItem);
-            if (this.dropPosition === 'after') {
-                toIndex++;
-            }
-            parentArray.splice(toIndex, 0, this.dragItem);
-
-            if (domDragEl && domTargetEl && domDragEl !== domTargetEl) {
-                const parentDom = domTargetEl.parentElement;
-                if (parentDom) {
-                    if (this.dropPosition === 'before') {
-                        parentDom.insertBefore(domDragEl, domTargetEl);
-                    } else {
-                        parentDom.insertBefore(domDragEl, domTargetEl.nextSibling);
-                    }
-                }
-            }
+        const parentArray = this.findParentArray(info, this.nodes);
+        if (!parentArray) {
+            this.onDragEnd();
+            return;
         }
 
-        this.prepareHTMLAndSync();
-        this.onDragEnd();
+        const fakeEvent = {
+            preventDefault() { },
+            stopPropagation() { }
+        } as unknown as DragEvent;
+
+        this.onDrop(fakeEvent, info, parentArray);
+
+        this.onDragEnd(); // limpa bordas e estado
+    }
+
+    private findParentArray(target: IInfoElChildren, array: IInfoElChildren[]): IInfoElChildren[] | null {
+        for (const item of array) {
+            if (item === target) return array;
+            const found = this.findParentArray(target, item.children);
+            if (found) return found;
+        }
+        return null;
     }
 
     private onTouchMove(e: TouchEvent) {
-        e.preventDefault(); 
-        if (!this.dragItem) return; 
+        e.preventDefault();
+        if (!this.dragItem) return;
 
         const touch = e.touches[0];
         const elemUnderFinger = document.elementFromPoint(touch.clientX, touch.clientY);
