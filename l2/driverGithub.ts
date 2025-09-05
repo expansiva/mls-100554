@@ -460,7 +460,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				arr.push(
 					{
-						ShortPath: obj2.path.startsWith('l') ? obj2.path : 'l0/' + obj2.path,
+						shortPath: obj2.path.startsWith('l') ? obj2.path : 'l0/' + obj2.path,
 						versionRef: obj2.oid,
 						Length: obj2.size,
 					}
