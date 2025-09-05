@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { getInstanceByFile, openService, saveOpenedFile } from './_100554_libCommom';
+import { getInstanceByFile, openService, saveOpenedFile, getLastModule, setLastModule } from './_100554_libCommom';
 import { collabImport } from './_100554_collabImport';
 
 import { StateLitElement } from './_100554_stateLitElement';
@@ -130,33 +130,14 @@ export class Modules100554 extends StateLitElement {
   }
 
   private setLocal(mm: string) {
-    try {
-      let info: any = localStorage.getItem(this.KeyItem);
-      if (!info) info = '{}';
-
-      info = JSON.parse(info);
-
-      info[mls.actualProject || 0] = mm;
-
-      localStorage.setItem(this.KeyItem, JSON.stringify(info));
-
-    } catch (e) {
-      console.info(e);
-    }
-
+    if (!mls.actualProject) return;
+    setLastModule(mls.actualProject, mm);
   }
 
   private getLocal(): string {
-    try {
-      let info: any = localStorage.getItem(this.KeyItem);
-      if (!info) return '';
-      info = JSON.parse(info);
-      return info[mls.actualProject || 0] as string || '';
-
-    } catch (e) {
-      return '';
-    }
-
+    const modulesLS = getLastModule();
+    if (!modulesLS || !mls.actualProject) return '';
+    return modulesLS[mls.actualProject];
   }
 
   private openDetails(ev: MouseEvent, mm: IMyModule) {

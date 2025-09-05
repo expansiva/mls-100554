@@ -469,7 +469,6 @@ export function findStorFileInProjectsOrDeps(
 
 
 const STORAGE_KEY = '_100554_serviceInit';
-
 export function saveOpenedFile(project: number, level: number, file: OpenedFile): void {
 
     if (level < 0 || level > 7) {
@@ -509,6 +508,31 @@ export function getLastOpenedFiles(project: number): UserOpenedFiles {
 function getAllUserOpenedFiles(): Record<string, UserOpenedFiles> {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : {};
+}
+
+const STORAGE_KEY_MODULES = '_100554_modules';
+
+export function getLastModule() {
+    const dataStr = localStorage.getItem(STORAGE_KEY_MODULES);
+    if (!dataStr) return;
+    try {
+        const modules: Record<string, string> = JSON.parse(dataStr);
+        return modules;
+    } catch (err) {
+        return;
+    }
+}
+
+export function setLastModule(project: number, moduleName:string) {
+    try {
+        let info: any = localStorage.getItem(STORAGE_KEY_MODULES);
+        if (!info) info = '{}';
+        info = JSON.parse(info);
+        info[project] = moduleName;
+        localStorage.setItem(STORAGE_KEY_MODULES, JSON.stringify(info));
+    } catch (e) {
+        console.info(e);
+    }
 }
 
 export function getBaseTemplate(file: IInfoFile, enhancement: string = '_blank'): string {
@@ -584,16 +608,6 @@ interface ICalculateTotalStringSize {
     totalsize: number, // em bytes
     exceededLimit: boolean,
     sizeFormatted: string
-}
-
-interface IRetProjectDetails {
-    project: number,
-    dependencies: number[]
-}
-
-interface IRetProjectDetails {
-    project: number,
-    dependencies: number[]
 }
 
 interface IInfoFile {

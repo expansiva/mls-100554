@@ -8,7 +8,7 @@ import { getTokensCss } from './_100554_designSystemBase';
 import { getProjectDetails, setProjectDetails, getLastOpenedFiles, findStorFileInProjectsOrDeps, getInstanceByFile, saveOpenedFile } from './_100554_libCommom';
 import { loadNotificationPreferences } from './_100554_collabMessageHelper';
 import { listenToThreadEvents } from './_100554_collabMessagesSyncNotifications';
-import { openService } from './_100554_libCommom';
+import { openService, getLastModule } from './_100554_libCommom';
 
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
@@ -93,6 +93,7 @@ export class CollabInit extends CollabLitElement {
         await this.loadLastProject();
         await this.setLastOpenedFiles();
         await this.setDefaultFiles();
+        await this.setLastModule();
         this.showMessagesIfNeeded();
         this.initNotificationIfEnabled();
         const services = await this.getServices();
@@ -118,8 +119,7 @@ export class CollabInit extends CollabLitElement {
         if (handler) handler(data);
     }
 
-    private firstAccessLevels: Record<number, boolean> =
-        Object.fromEntries(Array.from({ length: 8 }, (_, i) => [i, true]));
+    private firstAccessLevels: Record<number, boolean> = Object.fromEntries(Array.from({ length: 8 }, (_, i) => [i, true]));
 
     private levelHandlers: Record<number, (data: { to: number, from: number }) => void> = {
         2: this.onLevelChangedToL2.bind(this),
@@ -130,7 +130,6 @@ export class CollabInit extends CollabLitElement {
         this.firstAccessLevels[2] = false;
         openService('_100554_serviceSource', 'left', 2);
     }
-
 
     /**
      * Loads and sets up collaboration drivers asynchronously.
@@ -152,6 +151,9 @@ export class CollabInit extends CollabLitElement {
         if (!driverInstanceGitHub) mls.stor.others.addDriver(instanceGitHub, 'github');
     }
 
+    /**
+     * Instantiates and registers the GitLab collaboration driver asynchronously.
+     */
     private async instanceDriverGitLab(): Promise<void> {
         if (window.traceLifeCycle) console.info('loading: driver gitlab');
         const { DriverGitLab } = await import('./_100554_driverGitlab');
@@ -296,9 +298,6 @@ export class CollabInit extends CollabLitElement {
         const info = getProjectDetails();
         const lastPrj = info ? info.project : this.baseProject;
         setProjectDetails(lastPrj);
-        //const lhLastPrj = localStorage.getItem('l5-last-project') || this.baseProject.toString();
-        //localStorage.setItem('l5-last-project', lhLastPrj);
-        //const lastPrj = lhLastPrj ? Number.parseInt(lhLastPrj, 10) : undefined;
         return lastPrj;
     }
 
@@ -309,8 +308,7 @@ export class CollabInit extends CollabLitElement {
     private setProjectActual(): number | undefined {
         if (window.traceLifeCycle) console.info('setProjectActual');
         const project = this.getLastProjectSelected();
-        mls.setActualProject(project || 0);
-        // mls.actual[5].project = project || 0;
+        mls.setActualProject(project || 100554);
         return project;
     }
 
@@ -417,6 +415,12 @@ export class CollabInit extends CollabLitElement {
         actual[side] = file;
     }
 
+    private setLastModule() {
+        if (!this.actualProject) return;
+        const modules = getLastModule();
+        if (!modules || !modules[+this.actualProject]) return;
+        mls.setActualModule(modules[+this.actualProject]);
+    }
 
     /**
      * Checks for the presence of a `<collab-sticky-notification>` element on the page.

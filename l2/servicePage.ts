@@ -3,8 +3,7 @@
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { selectLevel, openService } from './_100554_libCommom';
-
+import { selectLevel, openService, saveOpenedFile } from './_100554_libCommom';
 import "./_100554_pluginPrototypeImprove";
 import "./_100554_pluginExploreList";
 import "./_100554_pluginPageNavigation";
@@ -92,7 +91,7 @@ export class ServicePage100554 extends ServiceBase {
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         if (visible && this.activeTab === 'icNavigation') {
             const el = this.querySelector('plugin-page-navigation-100554') as any;
-            if(el && el.firstUpdated) el.firstUpdated();
+            if (el && el.firstUpdated) el.firstUpdated();
         }
     }
 
@@ -202,12 +201,16 @@ export class ServicePage100554 extends ServiceBase {
 
         }
 
+        const a = mls.l2.getPath
+
     }
 
-    private onOpenL3( info: any) {
+    private onOpenL3(info: mls.cbe.IPath) {
         if (!info.folder || !info.project || !info.shortName) return;
         const { folder, project, shortName } = info;
-        mls.actual[3].setFullName(folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`);
+        const fullName = folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`;
+        mls.actual[3].setFullName(fullName);
+        saveOpenedFile(project, 3, fullName);
         selectLevel(3);
         setTimeout(() => { openService('_100554_serviceOrganism', 'left', 3, { "tab": "navigation" }); }, 500)
     }
