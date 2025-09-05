@@ -523,7 +523,7 @@ export function getLastModule() {
     }
 }
 
-export function setLastModule(project: number, moduleName:string) {
+export function setLastModule(project: number, moduleName: string) {
     try {
         let info: any = localStorage.getItem(STORAGE_KEY_MODULES);
         if (!info) info = '{}';
@@ -583,6 +583,57 @@ export async function getInstanceByFile(file: mls.stor.IFileInfo): Promise<Objec
         return undefined;
     }
 
+}
+
+export function isNameValid(project: number, shortName: string, folder: string, level: number, extension: string): boolean {
+
+    let isValid = false;
+
+    if (project === 0 || !project || project === null) return isValid;
+    if (shortName === '' || !shortName || shortName === null) return isValid;
+
+
+    if (shortName.length === 0 || shortName.length > 255) return isValid;
+
+    const invalidCharactersShortName = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
+
+    if (invalidCharactersShortName.test(shortName)) return isValid;
+
+    const key = mls.stor.getKeyToFiles(project, level, shortName, folder, extension);
+
+    let find = false;
+    const keys = Object.keys(mls.stor.files);
+    for (const k of keys) {
+        if (key.toLocaleLowerCase() === k.toLocaleLowerCase()) find = true;
+    }
+
+    if (mls.stor.files[key] || find) return isValid;
+
+    if (folder) {
+        const invalidsFolder = ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'collab', 'widget'];
+
+        let isValidFolder = true;
+
+        if (folder.startsWith('_')) return isValid;
+        
+        for (const inv of invalidsFolder) {
+
+            if (folder.indexOf(inv) >= 0) isValidFolder = false;
+                
+        }
+
+        if (!isValidFolder) return isValid;
+        if (hasInvalidCharacter(`${folder}/${shortName}`)) return isValid;
+    }
+
+    return true;
+
+}
+
+function hasInvalidCharacter(name: string): boolean {
+    const invalidCharacters = /[_\{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
+    if (invalidCharacters.test(name) || name.indexOf("\\") >= 0) return true;
+    return false
 }
 
 export async function openElementInServiceDetails(el: HTMLElement) {

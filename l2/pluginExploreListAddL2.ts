@@ -8,7 +8,7 @@ import { CollabLitElement } from './_100554_collabLitElement';
 import { IDetails } from "./_100554_pluginNewFileBase";
 import { propertyDataSource } from './_100554_collabDecorators';
 import { getState, setState, initState } from './_100554_collabState';
-import { loadPluginProject } from './_100554_libCommom';
+import { loadPluginProject, isNameValid } from './_100554_libCommom';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -223,7 +223,8 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
         if (/^\d/.test(name)) return false;
 
         const split = name.split('/');
-        const isValidName = this.isValidNewName({
+        return isNameValid(prj, split.pop() || name, split.length > 0 ? split.join('/') : '', +this.level, '.ts');
+        /*const isValidName = this.isValidNewName({
             shortName: split.pop() || name,
             project: prj,
             level: +this.level,
@@ -231,7 +232,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
             extension: '.ts'
         });
         if (!isValidName || this.hasInvalidCharacter(name)) return false;
-        return true;
+        return true;*/
     }
 
     private hasInvalidCharacter(name: string) {
