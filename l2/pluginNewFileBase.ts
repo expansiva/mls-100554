@@ -1,5 +1,5 @@
 /// <mls shortName="pluginNewFileBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-import { openService } from './_100554_libCommom'
+import { openService, isNameValid } from './_100554_libCommom'
 import { createAllFiles, IReqCreateAllFiles } from './_100554_collabLibStor';
 
 export interface IDetails {
@@ -68,6 +68,8 @@ export async function createNewFile(args: IRequestNewFile) {
         tsSource: args.sourceTS
 
     } as IReqCreateAllFiles;
+
+    if (!isNameValid(args.project, args.shortName, args.folder || '', 2, '.ts')) throw new Error(`[createNewFile] Invalid name: _${args.project}_${args.folder ? args.folder + '/' + args.shortName : args.shortName}`);
 
     if (args.sourceHTML) param.htmlSource = args.sourceHTML;
     if (args.sourceLess) param.lessSource = args.sourceLess;

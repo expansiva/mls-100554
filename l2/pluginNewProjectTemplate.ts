@@ -165,6 +165,15 @@ jobs:
     `
 }
 
+export const template_l2Project = {
+    ext: '.ts',
+    template: `
+/// <mls shortName="project" project="[project]" enhancement="_100554_enhancementLit" groupName="other" />
+
+export const modules = [];
+    `
+}
+
 export const template_coreIndex = {
     ext: '.ts',
     template: `

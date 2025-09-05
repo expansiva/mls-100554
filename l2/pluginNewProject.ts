@@ -9,7 +9,8 @@ import {
     template_tsconfig,
     template_ds,
     template_l5Project,
-    template_coreIndex
+    template_coreIndex,
+    template_l2Project
 } from './_100554_pluginNewProjectTemplate';
 
 import {
@@ -62,6 +63,7 @@ const message_pt = {
     log_14: "Setando permissão ao action",
     log_15: "Setando variavel no action",
     log_16: "Criando arquivo inicial pluginCollabCoreIndex.ts file",
+    log_17: "Criando arquivo project.ts file",
     log_error_03: "Por favor espere, outro usuário esta utilizando o repositório.",
     log_error_04: "Existe um repositório, mas não foi possível validar o usuário",
 }
@@ -107,6 +109,7 @@ const message_en = {
     log_14: "Setting permission to action",
     log_15: "Setting variable in action",
     log_16: "Creating initial pluginCollabCoreIndex.ts file",
+    log_17: "Creating initial project.ts file",
     log_error_03: "Please wait, another user is creating; ",
     log_error_04: " There is a repository, but I was unable to validate the user",
 }
@@ -485,7 +488,7 @@ export class CollabNewProject extends CollabLitElement {
         }
 
         try {
-            let percent = 7.15;
+            let percent = 6.25;
             let newPercent = 0;
             this.setProgressError(false);
             this.setProgressFinished(false);
@@ -494,7 +497,7 @@ export class CollabNewProject extends CollabLitElement {
 
             const rc = await this.tryItem(async () => await this.instanceDriver?.verifyRepositoryNew(this.login, this.NEWREPONAME, userNameCollab), `${this.msg.log_0} ${this.NEWREPONAME}`);
 
-            if (rc === 'reuse') percent = 12, 5;
+            if (rc === 'reuse') percent = 12.5;
             newPercent += percent;
             this.setProgress(newPercent);
 
@@ -581,6 +584,11 @@ export class CollabNewProject extends CollabLitElement {
             this.setProgress(newPercent);
 
             await this.sleep(200);*/
+            await this.tryItem(async () => await this.createInitialProject(newProjectId), this.msg.log_17);
+            newPercent += percent;
+            this.setProgress(newPercent);
+
+            await this.sleep(200);
 
             await this.tryItem(async () => await this.createInitialPackageFile(newProjectId), this.msg.log_9);
             newPercent += percent;
@@ -691,6 +699,12 @@ export class CollabNewProject extends CollabLitElement {
     private async createInitialCoreIndex(project: number) {
         const fileName = 'l2/pluginCollabCoreIndex.ts';
         const content = template_coreIndex.template.trim().replace(/\[project\]/g, project.toString());
+        await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
+    }
+
+    private async createInitialProject(project: number) {
+        const fileName = 'l2/project.ts';
+        const content = template_l2Project.template.trim().replace(/\[project\]/g, project.toString());
         await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
     }
 
