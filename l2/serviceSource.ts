@@ -270,7 +270,7 @@ export class ServiceSource100554 extends ServiceBase {
         await this.updateComplete;
         this.updatedMSizeEditor();
 
-        if (!this.activeModels) this.openLastFile(this.level, this.position);
+        if (!this.activeModels && this.position === 'left') this.openLastFile(this.level, this.position);
 
         if (this.editorEl) {
             const bgEl = this.editorEl.querySelector('.monaco-editor-background');
