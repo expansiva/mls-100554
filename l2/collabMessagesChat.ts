@@ -1407,6 +1407,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             item.senderId === oldMessage.senderId &&
             item.createAt === oldMessage.createAt &&
             item.threadId === oldMessage.threadId);
+
         if (alreadyExist) {
             this.actualMessages = this.actualMessages.map(item => {
                 if (
@@ -1421,7 +1422,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 return item;
             });
         } else this.actualMessages.unshift({ ...newMessage, footers: footerData });
-        this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
 
         const m = newMessage as IMessage;
         delete m.isLoading;
@@ -1429,7 +1429,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
         delete m.isFailedError;
         delete m.isSame;
         if (outputs) m.footers = footerData;
-        addMessage(m);
+        
+        await addMessage(m);
+        const messagesInDb = await getMessagesByThreadId(m.threadId, this.messagesLimit, 0);
+        this.actualMessages = messagesInDb;
+        this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
         this.requestUpdate();
     }
 
