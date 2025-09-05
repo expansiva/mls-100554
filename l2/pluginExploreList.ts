@@ -768,8 +768,8 @@ export class PluginExploreList extends PluginBaseModule {
 
             //const files = await createAllModels(file, true);
 
-            await this.createModel(file, '.less');
             await this.createModel(file, '.ts');
+            await this.createModel(file, '.less');
             await this.createModel(file, '.html');
 
             (params.action as any) = action;
