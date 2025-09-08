@@ -5,7 +5,8 @@ import { customElement, state, property, query } from 'lit/decorators.js';
 import { createAllFiles, IReqCreateAllFiles } from './_100554_collabLibStor';
 import { convertFileNameToTag } from './_100554_utilsLit'
 import { getTemplateImport } from './_100554_pluginNewFileBase';
-import { getInstanceByFile } from './_100554_libCommom';
+import { getInstanceByFile, isNameValid } from './_100554_libCommom';
+import { executeAgentByFile } from './_100554_aiAgentHelper'
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { ServiceBase } from './_100554_serviceBase';  
 
@@ -92,7 +93,7 @@ export class PluginExploreListAddL3 extends PluginBaseModule {
                 <textarea id="iptPrompt" placeholder="Escreva seu prompt..."></textarea>
                 </div>
 
-                <button class="btn-save" @click=${this.createFile}>Save</button>
+                <button class="btn-save" @click=${this.createFile}>Execute</button>
             </div>
         `
     }
@@ -141,16 +142,17 @@ export class PluginExploreListAddL3 extends PluginBaseModule {
 
             this.showLoad(true);
 
-            if (!this.iptModule || !this.iptOrganism || !this.iptOrganism.value) {
-                throw new Error('Enter the name of the organization');
+            if (!this.iptModule || !this.iptOrganism || !this.iptOrganism.value || !this.iptPrompt || !this.iptPrompt.value) {
+                throw new Error('Enter the name of the organization and prompt');
             }
 
             const project = mls.actualProject || 0;
             const folder = this.iptModule.value || '';
             const name = this.iptOrganism.value;
-            const fullName = folder && folder !== '' ? `${folder}/${name}` : name;
 
-            if (!this.getNewNameAndValid(project, fullName)) {
+            if (!name.startsWith('organism')) throw new Error('The name must start with organism');
+            
+            if (!this.getNewNameAndValid(project, name, folder)) {
                 throw new Error('Invalid Name');
             }
 
@@ -217,7 +219,20 @@ export class PluginExploreListAddL3 extends PluginBaseModule {
             }
 
             const files = await createAllFiles(param, true, true);
-            if (files.ts && !(files.ts instanceof Error) ) this.setHistory(files.ts);
+            if (files.ts && !(files.ts instanceof Error)) {
+
+                this.setHistory(files.ts); 
+
+                const prompt = JSON.stringify({
+                    project:project.toString(),
+                    shortName: name,
+                    folder,
+                    userPrompt: this.iptPrompt.value
+                    
+                }) 
+                await executeAgentByFile('agentCreateNewPrototypeOrganism', prompt, files.ts);
+            }
+            
 
             this.showLoad(false);
             this.goBack();
@@ -262,18 +277,9 @@ export class PluginExploreListAddL3 extends PluginBaseModule {
 
     }
 
-    private getNewNameAndValid(prj: number, name: string): boolean {
+    private getNewNameAndValid(prj: number, name: string, folder:string): boolean {
         if (name === '' || !name || name === null) return false;
-        const split = name.split('/');
-        const isValidName = this.isValidNewName({
-            shortName: split.pop() || name,
-            project: prj,
-            level: 2,
-            folder: split.length > 0 ? split.join('/') : '',
-            extension: '.ts'
-        });
-        if (!isValidName || this.hasInvalidCharacter(name)) return false;
-        return true;
+        return isNameValid(prj, name, folder, 2, '.ts');
     }
 
     private hasInvalidCharacter(name: string) {
