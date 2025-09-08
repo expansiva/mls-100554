@@ -24,6 +24,10 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
     }
     @propertyDataSource({ type: Boolean }) editable?: boolean;
 
+    @property() allHelpers: string[] = ['?help'];
+
+    @property() allCommands: string[] = ['/blockcode'];
+
     @property() allThreads: mls.msg.Thread[] = [];
 
     @property() allUsers: mls.msg.User[] = [{ "threads": ["20250417135645.1000", "20250417180232.1000", "20250425212707.1000", "20250521143841.1000", "20250521144214.1000", "20250521144240.1000", "20250507201344.1000", "20250622191652.1000", "20250622191728.1000", "20250622191744.1000", "20250622191802.1000", "20250630112715.1000"], "name": "Wagner", "userId": "20250417004803.1000", "status": "active", "avatar_url": "https://lh6.googleusercontent.com/-Gup9IkqANhQ/AAAAAAAAAAI/AAAAAAAAIFc/38cLYfRcRbg/s96-c/photo.jpg", "notifications": [{ "deviceId": "b00b9875-3cd8-4aff-9336-a7bcc7da60a1", "notificationToken": "fGeAAnHGThySJKRl7PMQZc:APA91bExBHHQ_tKWCUnoqXS1jKCu2Sy91wATIyEvyXjAgCmMC218hXUTtJFJR_UppD_DpEu7-2Pg6mZeWR7K6D5hH_zVOYSza-cHPRVdvCOuoxs_eQDvTFM" }] }, { "avatar_url": "https://lh3.googleusercontent.com/a-/AOh14Gh-DIRLsowx8ItOQ7slQNzEN7geu3YrsG09SFD1=s96-c", "threads": ["20250422203048.1000", "20250521144240.1000", "20250521225840.1000", "20250622191802.1000", "20250622191728.1000", "20250622191744.1000", "20250622191652.1000", "20250630112715.1000"], "name": "Lucas", "userId": "20250521175345.1000", "status": "active", "notifications": [{ "deviceId": "dae7ed77-dc3f-4dd4-b708-3ed8f4f6e451", "notificationToken": "eq-H-0XQXWV_-4REnAdaYz:APA91bGrg1whcXFexHHOVEbQs6knePjlB1YLEGUD0n7sIWctetxHiUHf77Sa6qKw-RO_ynK5TfjAG7B529lS5s3eaX-khmrcCdn4Qt0gNdY5cdyCO9-BWEY" }] }, { "threads": ["20250417135645.1000", "20250417180232.1000", "20250417133813.1000", "20250422203048.1000", "20250425212707.1000", "20250507201344.1000", "20250423205309.1000", "20250521144240.1000", "20250521223250.1000", "20250521225039.1000", "20250521225730.1000", "20250521225840.1000", "20250523200654.1000", "20250622191802.1000", "20250622191728.1000", "20250622191744.1000", "20250622191652.1000", "20250630112715.1000"], "name": "Guilherme Pereira", "userId": "20250417120841.1000", "status": "active", "avatar_url": "https://lh3.googleusercontent.com/a-/AOh14GjhEPN7UazL97l6qFIRIYUoLY-PNNPC93Zw4EVT=s96-c", "notifications": [{ "deviceId": "0f4e5cfe-135b-4cf6-935a-ce6b2e569445", "notificationToken": "cJlbF3VudPLd1VmScOUgFM:APA91bHIWpJQEtUbFqkM1OPao4tN3JIK4kp7MbdlxA_4yZgyxAPlrk6ryAfyIdhIqYELH5xcucGcgRg_HUrF8UHK0V0FdbtWde-OpT3bQo9yMQeN6QAZ5Bc" }] }, { "threads": ["20250417133813.1000", "20250417180232.1000", "20250423205309.1000", "20250425212707.1000", "20250521144240.1000", "20250521225840.1000", "20250622191802.1000", "20250622191728.1000", "20250622191744.1000", "20250622191652.1000", "20250630112715.1000"], "name": "Santiago", "userId": "20250417120844.1000", "status": "active", "avatar_url": "https://lh5.googleusercontent.com/-RcrSZBlS8sM/AAAAAAAAAAI/AAAAAAAAAAc/DQDUXj8XpEo/s96-c/photo.jpg", "notifications": [{ "deviceId": "e97ea0f1-393b-43cc-96bd-00dab1e363bc", "notificationToken": "dsaF5kgcld41tSsB1KTgR4:APA91bFDUCi2R62fkvf56XiW4uZhUsV-_7vlwME62JEGjm1mwAT_ic6RwLRIpvWOTRtErZJFWecOabpnUvP6t326TgTVbT5j73b42_AJ1NhE3KkGuLbeAlE" }] }]
@@ -130,9 +134,12 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
     }
 
     private parseCommands(input: string): string {
-        // /command
-        return input.replace(/(^|\s)\/(\w+)/g, (_m, pre, cmd) => {
-            return `${pre}<span class="command">/${cmd}</span>`;
+        return input.replace(/(^|\s)\/(\w+)(?!\/)/g, (match, pre, cmd) => {
+            const fullCmd = `/${cmd}`;
+            if (this.allCommands.includes(fullCmd)) {
+                return `${pre}<span class="command">${fullCmd}</span>`;
+            }
+            return match;
         });
     }
 
@@ -143,11 +150,28 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
         });
     }
 
+
     private parseHelpRefs(input: string): string {
         // ?ajuda → <span class="help-ref">?ajuda</span>
-        return input.replace(/\?([a-zA-Z0-9_]+)/g, (_m, help) => {
-            return `<span class="help-ref">?${help}</span>`;
+        return input.replace(/(^|\s)\?([a-zA-Z0-9_]+)(?!=)/g, (match, before, help) => {
+            const fullHelp = `?${help}`;
+            if (this.allHelpers.includes(fullHelp)) {
+                return `${before}<span class="help-ref">${fullHelp}</span>`;
+            }
+            return match; 
         });
+    }
+
+    private parseRawLinks(input: string): string {
+
+        // www.meusite.com/teste http://meusite.com
+        return input.replace(
+            /\b((https?:\/\/|www\.)[^\s<]+)/gi,
+            (_m, url) => {
+                const href = url.startsWith("http") ? url : `https://${url}`;
+                return `<a href="${href}" target="_blank" rel="noopener">${url}</a>`;
+            }
+        );
     }
 
     private parseMarkdownLinks(input: string): string {
@@ -251,6 +275,8 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
         input = this.parseHelpRefs(input);
         input = this.parseMentionLinks(input);
         input = this.parseMarkdownLinks(input);
+        input = this.parseRawLinks(input);
+
         // 🚫 Do NOT escape <, >, & here — this would break the generated HTML
         // Convert line breaks
         input = input.replace(/\n/g, '<br>');
