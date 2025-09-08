@@ -1,7 +1,7 @@
 /// <mls shortName="serviceOrganism" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, unsafeHTML, repeat } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { loadPluginProject, forceServiceInstance } from './_100554_libCommom';
 import { convertFileNameToTag } from './_100554_utilsLit';
@@ -9,6 +9,7 @@ import { readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 import "./_100554_wcdToolboxItemActionEditAttrOut";
 import "./_100554_pluginExploreList";
 import "./_100554_pluginPrototypeImprove";
+import "./_100554_collabTabSlider";
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -43,6 +44,7 @@ export class ServiceOrganism100554 extends ServiceBase {
     @property() activeTab: ITabType = 'icExplorer';
     @property() pluginNav: string = '';
     @property() pluginStyle: string = '';
+    @state() previousTabIndex: number = 1;
 
 
     constructor() {
@@ -91,6 +93,7 @@ export class ServiceOrganism100554 extends ServiceBase {
 
     public onClickTabs(index: number) {
         this.activeTab = ESceneries[index] as ITabType;
+        this.previousTabIndex = index;
     }
 
     public menu: IServiceMenu = {
@@ -181,25 +184,33 @@ export class ServiceOrganism100554 extends ServiceBase {
     }
 
     renderContent() {
+        // Se existir atributo "tab=navigation", já dispara o tab correto
         const tab = this.getAttribute('tab');
         if (tab && tab === 'navigation' && this.menu && this.menu.setTabActive && this.menu.onClickTabs) {
             this.removeAttribute('tab');
-            this.menu.onClickTabs(1);
-            this.menu.setTabActive(1);
+            this.menu.onClickTabs(1);       // ativa o tab no menu
+            this.menu.setTabActive(1);      // marca como ativo visualmente
+            this.previousTabIndex = 1;
         }
-        switch (this.activeTab) {
-            case 'icExplorer':
-                return this.renderExplorer();
-            case 'icNavigation':
-                return this.renderNavigation();
-            case 'icStyle':
-                return this.renderStyle();
-            case 'icImprove':
-                return this.renderImprove();
-            default:
-                return html``;
-        }
+
+        return html`
+            <collab-tab-slider-100554 activeIndex=${this.previousTabIndex} animationTimer=${1000}>
+                <div class="tab-content tab-index-${ESceneries.icExplorer}">
+                    ${this.renderExplorer()}
+                </div>
+                <div class="tab-content tab-index-${ESceneries.icNavigation}">
+                    ${this.renderNavigation()}
+                </div>
+                <div class="tab-content tab-index-${ESceneries.icStyle}">
+                    ${this.renderStyle()}
+                </div>
+                <div class="tab-content tab-index-${ESceneries.icImprove}">
+                    ${this.renderImprove()}
+                </div>
+            </collab-tab-slider-100554>
+    `;
     }
+
 
     renderExplorer() {
         return html`<plugin-explore-list-100554 .service=${this} autoprepare="true"></plugin-explore-list-100554>`;
