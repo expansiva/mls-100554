@@ -55,7 +55,7 @@ export class Projects102009 extends StateLitElement {
   renderCurrentProject() {
 
     if (!this.selectedProject) return html``;
-
+ 
     return html`
     <div class="section">
         <div class="section-header">

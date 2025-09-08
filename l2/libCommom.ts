@@ -588,12 +588,21 @@ export async function getInstanceByFile(file: mls.stor.IFileInfo): Promise<Objec
 export function isNameValid(project: number, shortName: string, folder: string, level: number, extension: string): boolean {
 
     let isValid = false;
-
+    
     if (project === 0 || !project || project === null) return isValid;
     if (shortName === '' || !shortName || shortName === null) return isValid;
 
 
     if (shortName.length === 0 || shortName.length > 255) return isValid;
+
+    if (/\s/.test(shortName)) return false;
+    if (/^\d+$/.test(shortName)) return false;
+    if (/^\d/.test(shortName)) return false;
+
+    if (folder && /\s/.test(folder)) return false;
+    if (folder && /^\d+$/.test(folder)) return false;
+    if (folder && /^\d/.test(folder)) return false;
+
 
     const invalidCharactersShortName = /[_\/{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
 
