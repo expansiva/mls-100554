@@ -1,0 +1,53 @@
+/// <mls shortName="collabTabSlider" project="100554" enhancement="enhancementStyle" folder="" />
+
+collab-tab-slider-100554 {
+
+    display: block;
+    overflow: hidden;
+
+    .tab-content {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        transition: transform var(--animation-timer, 800ms) ease, opacity var(--animation-timer, 800ms) ease;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(0);
+    }
+
+
+    .tab-active {
+        opacity: 1;
+        pointer-events: auto;
+        z-index: 2;
+    }
+
+    /* Saindo */
+    .tab-exit-left {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    .tab-exit-right {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    /* Entrando */
+    .tab-enter-left {
+        transform: translateX(-100%);
+        opacity: 1;
+        z-index: 2;
+    }
+
+    .tab-enter-right {
+        transform: translateX(100%);
+        opacity: 1;
+        z-index: 2;
+    }
+
+}
+
+
