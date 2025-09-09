@@ -3,7 +3,7 @@
 import { addCoachMark, ICoachMarks } from './_100554_coachMarks';
 import { html, css, LitElement } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { listThreads, addThread, listUsers, updateUsers, getThread, cleanupThreads } from './_100554_msgDBController';
+import { listThreads, addThread, listUsers, updateUsers, getThread, cleanupThreads, getTask } from './_100554_msgDBController';
 import {
     saveLastTab,
     loadLastTab,
@@ -69,6 +69,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     @state() showNotificationAlert: boolean = false;
 
     @state() threadToOpen: string = '';
+    @state() taskToOpen: string = '';
+
     groupSelected: ITabType = 'CRM';
 
     public details: IService = {
@@ -83,6 +85,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     public onClickTabs(index: number) {
         this.threadToOpen = '';
+        this.taskToOpen = '';
+
         if (this.activeTab === ETabs[index]) {
             this.activeTab = 'Loading';
             setTimeout(() => {
@@ -136,7 +140,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
 
     private checkNotificationPermission() {
-    
+
         if (typeof Notification === "undefined" || Notification.permission !== "denied") {
             return;
         }
@@ -344,6 +348,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
             }}
             .allThreads=${Object.keys(this.userThreads).map((key) => this.userThreads[key].thread)}
             threadToOpen=${this.threadToOpen}
+            taskToOpen=${this.taskToOpen}
+
             userId=${this.userPerfil?.userId} 
         ></collab-messages-chat-100554>`
     }
@@ -488,6 +494,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
         if (!ev.desc) return;
         this.threadToOpen = '';
+        this.taskToOpen = '';
 
         try {
             const data: ICollabMessageEvent = JSON.parse(ev.desc);
@@ -495,6 +502,8 @@ export class ServiceCollabMessages100554 extends ServiceBase {
                 if (!data.threadId) return;
                 const thread = await getThread(data.threadId);
                 if (!thread) return;
+                if (data.taskId) this.taskToOpen = data.taskId;
+
                 openService('_100554_serviceCollabMessages', 'left', ev.level);
                 const group = thread.group;
                 this.threadToOpen = thread.threadId;

@@ -390,6 +390,8 @@ export interface CollabMessagesLS {
 export interface ICollabMessageEvent {
     type: 'thread-open',
     threadId?: string,
+    taskId?: string,
+
 }
 
 

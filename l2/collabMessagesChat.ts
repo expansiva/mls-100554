@@ -111,6 +111,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     @property() group: 'CONNECT' | 'APPS' | 'DOCS' | 'CRM' = 'CONNECT';
     @property() userId: string | undefined;
     @property() threadToOpen: string | undefined;
+    @property() taskToOpen: string | undefined;
     @property() userDeviceId: string | undefined;
     @property() activeScenerie: IScenery = 'list';
     @property() actualThread: IThreadInfo | undefined;
@@ -1111,6 +1112,15 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
             this.checkNotificationsUnreadMessages();
 
+
+            if (this.taskToOpen) {
+                await this.updateComplete;
+                this.openTask();
+
+            }
+
+
+
         } catch (err: any) {
             this.isThreadError = true;
             this.threadErrorMsg = err.message || 'Error on read thread';
@@ -1118,6 +1128,25 @@ export class CollabMessagesChat100554 extends StateLitElement {
         } finally {
             this.isLoadingMessages = false;
         }
+    }
+
+    private openTask() {
+        let taskEl: Element | null = null;
+        if (this.taskToOpen === 'last') {
+            const tasks = this.querySelectorAll('collab-messages-task-100554');
+            taskEl = tasks[tasks.length - 1] || null;
+        } else {
+            taskEl = this.querySelector(`collab-messages-task-100554[taskid="${this.taskToOpen}"]`);
+        }
+
+        if (taskEl) {
+            taskEl.dispatchEvent(new CustomEvent('taskclick', {
+                bubbles: true,
+                composed: true
+            }));
+
+        }
+        this.taskToOpen = '';
     }
 
     private checkWelcomeMessage(thread: mls.msg.ThreadPerformanceCache, messagesInDb: mls.msg.MessagePerformanceCache[]) {
@@ -1429,7 +1458,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         delete m.isFailedError;
         delete m.isSame;
         if (outputs) m.footers = footerData;
-        
+
         await addMessage(m);
         const messagesInDb = await getMessagesByThreadId(m.threadId, this.messagesLimit, 0);
         this.actualMessages = messagesInDb;
