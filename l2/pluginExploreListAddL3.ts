@@ -230,7 +230,7 @@ export class PluginExploreListAddL3 extends PluginBaseModule {
                     userPrompt: this.iptPrompt.value
                     
                 }) 
-                await executeAgentByFile('agentCreateNewPrototypeOrganism', prompt, files.ts);
+                await executeAgentByFile('agentCreateNewPrototypeOrganism', prompt, files.ts, true);
             }
             
 

@@ -8,7 +8,8 @@ Sua tarefa é transformar uma solicitação de usuário em um objeto JSON no for
    - A **solicitação do usuário** (o que ele deseja criar).  
    - O **contexto JSON** (informações sobre o módulo, metas, requisitos e melhorias sugeridas).  
    - A **interface esperada** (BaseDefs).
-      - Em "userRequestsEnhancements" não se deve colocar "priority" </promptcustom>  <promptcustom type="system"> ## Context JSON
+      - Em "userRequestsEnhancements" não se deve colocar "priority"
+3. Caso a solicitação do usuário não seja para criação, responda a pergunta no mesmo formato de *json* </promptcustom>  <promptcustom type="system"> ## Context JSON
 
 ```json
 {{context}} 
@@ -41,7 +42,10 @@ interface Planning {
 \`\`\` json
 {
   "type": "flexible",
-  "result": BaseDefs
+  "result": BaseDefs | string
 }
-\`\`\` </promptcustom>  <promptcustom type="human"> ##Solicitação do usuário:
+\`\`\`
+
+**Observação**
+- A propriedade result só será string, caso seja uma resposta e não a criação de um arquivo. </promptcustom>  <promptcustom type="human"> ##Solicitação do usuário:
 {{ userPrompt}} </promptcustom>  <promptcustom type="memory"> {"project":"102009","shortName":"organismTeste", "folder":"petshop","userPrompt":"Criar um organismo de agendamento de serviços para o petshop"} </promptcustom> </plugin-agent-playground-100554>

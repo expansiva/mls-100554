@@ -130,6 +130,8 @@ async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[]> {
 async function updateDefs(context: mls.msg.ExecutionContext, step: mls.msg.AIPayload | null) {
     if (!step || step.type !== 'flexible' || !step.result) throw new Error('Invalid step in update defs, type: "' + step?.type + '"');
 
+    if (typeof step.result === 'string') return; 
+
     const pageMemory = context.task?.iaCompressed?.longMemory as any;
 
     if (!pageMemory.project || !pageMemory.shortName || !pageMemory.folder || !step.result) throw new Error(`[${agentName}]Invalid step in update defs, type: ${step?.type} `);
@@ -190,9 +192,13 @@ export const defs: mls.l4.BaseDefs = ${JSON.stringify(defs, null, 2)}
 
     if (!find) {
 
+        const splitTag = tag.split('--');
+        const tagProject = splitTag.pop();
+        const tagMM = tagProject ? tagProject.replace('-' + project, '').trim() : tag;
+        
         mm.payload3.organism.push({
             organismSequential: mm.payload3.organism.length,
-            organismTag: tag,
+            organismTag: tagMM,
             planning: result.planning
         })
 

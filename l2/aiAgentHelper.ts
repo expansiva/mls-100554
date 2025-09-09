@@ -438,7 +438,7 @@ export function getNextStepIdAvaliable(task: mls.msg.TaskData): number {
 }
 
 
-export async function executeAgentByFile(agentName: string, prompt: string, file: mls.stor.IFileInfo) {
+export async function executeAgentByFile(agentName: string, prompt: string, file: mls.stor.IFileInfo, openMsg:boolean = false) {
 
   const pageName = file.folder ? `_${file.project}_${file.folder}/${file.shortName}` : `${file.project}_${file.shortName}`;
 
@@ -457,7 +457,14 @@ export async function executeAgentByFile(agentName: string, prompt: string, file
   if (!agent) throw new Error('[executeAgentByFile] Invalid Agent' + agentName);
 
   const context = getTemporaryContext(threadId, userId, prompt);
-  await agent.beforePrompt(context);
+
+  if (openMsg) {
+    agent.beforePrompt(context);
+    mls.events.fire([mls.actualLevel], 'collabMessages' as any, JSON.stringify({ threadId: threadId, type: 'thread-open'}));
+  } else {
+    await agent.beforePrompt(context);
+  }
+  
 
 }
 
