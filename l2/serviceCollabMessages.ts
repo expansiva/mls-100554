@@ -4,13 +4,20 @@ import { addCoachMark, ICoachMarks } from './_100554_coachMarks';
 import { html, css, LitElement } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { listThreads, addThread, listUsers, updateUsers, getThread, cleanupThreads } from './_100554_msgDBController';
-import { saveLastTab, loadLastTab, saveUserId } from "./_100554_collabMessageHelper";
+import {
+    saveLastTab,
+    loadLastTab,
+    saveUserId,
+    saveLastAlertTime,
+    loadLastAlertTime
+} from "./_100554_collabMessageHelper";
 import { openService } from "./_100554_libCommom";
 import { checkIfNotificationUnread } from './_100554_collabMessagesSyncNotifications';
 
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { ICollabMessageEvent } from './_100554_collabMessageHelper';
 import { setFavicon } from './_100554_collabInit';
+import { collab_bell_slash, collab_xmark } from './_100554_collabIcons';
 
 import './_100554_collabMessagesAdd';
 import './_100554_collabMessagesChat';
@@ -25,6 +32,9 @@ const message_pt = {
     tasks: 'Tasks',
     docs: 'Docs',
     connect: 'Conectar',
+    alertMsgTitle: 'Ative as notificações',
+    alertMsgBody: 'Para não perder mensagens importantes, permita notificações no navegador.',
+
 }
 
 const message_en = {
@@ -33,6 +43,8 @@ const message_en = {
     tasks: 'Tasks',
     docs: 'Docs',
     connect: 'Connect',
+    alertMsgTitle: 'Enable notifications',
+    alertMsgBody: 'To avoid missing important messages, allow notifications in your browser.',
 }
 
 type MessageType = typeof message_en;
@@ -54,6 +66,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     @state() isLoadingThread: boolean = false;
     @state() userPerfil: mls.msg.User | undefined;
     @state() userThreads: IThreadData = {}
+    @state() showNotificationAlert: boolean = false;
 
     @state() threadToOpen: string = '';
     groupSelected: ITabType = 'CRM';
@@ -86,8 +99,6 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         if (op === 'opReset') this.resetOnBoarding();
         if (op === 'opSettings') this.openSettings();
         if (op === 'opFindTask') this.openFindTask();
-        
-
     }
 
     public menu: IServiceMenu = {
@@ -118,8 +129,27 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
+        if (visible) {
+            this.checkNotificationPermission();
+        }
     }
+
+
+    private checkNotificationPermission() {
+    
+        if (typeof Notification === "undefined" || Notification.permission !== "denied") {
+            return;
+        }
+        const lastShown = Number(loadLastAlertTime() || 0);
+        const now = Date.now();
+        const oneWeek = 7 * 24 * 60 * 60 * 1000;
+
+        if (!lastShown || (now - lastShown) > oneWeek) {
+            this.showNotificationAlert = true;
+            saveLastAlertTime(now);
+        }
+    }
+
 
     private showAboutThis(): boolean {
 
@@ -153,13 +183,11 @@ export class ServiceCollabMessages100554 extends ServiceBase {
                 <li>Level: ${this.level}</li>
                 <li>Position: ${this.position}</li>
             </ul>
-		
-
         `;
 
         if (this.menu.setMode) this.menu.setMode('page', div);
         return true;
-        
+
     }
 
     async connectedCallback() {
@@ -190,12 +218,13 @@ export class ServiceCollabMessages100554 extends ServiceBase {
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
         super.firstUpdated(changedProperties);
+
     }
 
     async updated(changedProperties: Map<PropertyKey, unknown>) {
         super.updated(changedProperties);
         if (changedProperties.has('activeTab') && ['CRM', 'TASK', 'DOCS', 'CONNECT', 'APPS'].includes(this.activeTab)) {
-            
+
             if (!this.userPerfil) {
                 this.userPerfil = await this.getUser();
                 saveUserId(this.userPerfil.userId);
@@ -236,10 +265,31 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         }
     }
 
+    renderAlert() {
+        if (!this.showNotificationAlert) return html``
+        return html`  
+            <div class="alert-notification">
+                ${collab_bell_slash}
+                <div>
+                    <strong>${this.msg.alertMsgTitle}</strong><br>
+                    ${this.msg.alertMsgBody}
+                <div>
+                
+                <button @click=${this.onAlertClose}>${collab_xmark}</button>
+            </div>
+        `
+    }
+
+    private onAlertClose() {
+        this.showNotificationAlert = false;
+    }
+
     renderCRM() {
         this.groupSelected = 'CRM';
         this.execCoachMarks('CRM');
-        return html`<collab-messages-chat-100554 
+        return html`
+        ${this.renderAlert()}
+        <collab-messages-chat-100554 
             .isLoadingThread= ${this.isLoadingThread}
             group="CRM"
             .userThreads=${{
@@ -278,9 +328,12 @@ export class ServiceCollabMessages100554 extends ServiceBase {
     }
 
     renderConnect() {
+
         this.groupSelected = 'CONNECT';
         this.execCoachMarks('Connect');
-        return html`<collab-messages-chat-100554 
+        return html`
+        ${this.renderAlert()}
+        <collab-messages-chat-100554 
             
             .isLoadingThread= ${this.isLoadingThread}
             group="CONNECT"

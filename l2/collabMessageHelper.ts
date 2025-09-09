@@ -161,6 +161,19 @@ export function loadNotificationPreferencesAudio(): boolean {
     return true;
 }
 
+export function saveLastAlertTime(time: number) {
+    let dataLocal: CollabMessagesLS | undefined = loadLocalStorage();
+    if (!dataLocal) dataLocal = { lastNotificationAlertTime: time }
+    else dataLocal.lastNotificationAlertTime = time;
+    saveLocalStorage(dataLocal);
+}
+
+export function loadLastAlertTime(): number | undefined {
+    const lsData = loadLocalStorage();
+    if (lsData && lsData.lastNotificationAlertTime) return lsData.lastNotificationAlertTime;
+    return undefined;
+}
+
 export function saveLastTab(lastTab: string) {
     let dataLocal: CollabMessagesLS | undefined = loadLocalStorage();
     if (!dataLocal) dataLocal = { lastTab }
@@ -369,7 +382,8 @@ export interface CollabMessagesLS {
     tokenFCM?: string,
     deviceId?: string,
     notificationPreference?: NotificationPermission
-    notificationAudio?: boolean
+    notificationAudio?: boolean,
+    lastNotificationAlertTime?: number
 
 }
 
