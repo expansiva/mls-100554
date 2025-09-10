@@ -16,7 +16,7 @@ export async function initCompileMonaco(project: number): Promise<boolean> {
     try {
         await mls.editor.InitMonaco();
         const prjModel = mls.editor.getModels(project, '', '');
-        if (!prjModel || !prjModel.ts) {
+        if ((!prjModel || !prjModel.ts) && project !== mls.stor.LOCALPROJECTNUMBER) {
             const info = await mls.stor.localDB.readPrjInfo(project);
             mls.editor.createModelProjectDefinition(project, info.indexModules);
         }
@@ -55,7 +55,6 @@ export class CollabInit extends CollabLitElement {
         return this.getAttribute('avatarUrl') || '';
     }
 
-
     /**
      * Retrieves the base Project from the `baseProject` attribute.
      * @returns The URL of the avatar, or an empty string if not defined.
@@ -76,6 +75,8 @@ export class CollabInit extends CollabLitElement {
     render() {
         return html``;
     }
+
+    private defaultLocalProject = 100000;
 
     /**
      * Initializes the system life cycle.
@@ -308,7 +309,8 @@ export class CollabInit extends CollabLitElement {
     private setProjectActual(): number | undefined {
         if (window.traceLifeCycle) console.info('setProjectActual');
         const project = this.getLastProjectSelected();
-        mls.setActualProject(project || 100554);
+
+        mls.setActualProject(project === undefined || project < 0 ? 100554 : project);
         return project;
     }
 
@@ -344,7 +346,7 @@ export class CollabInit extends CollabLitElement {
      */
     private async loadLastProject() {
         if (window.traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
-        if (this.actualProject) await mls.stor.server.loadProjectInfoIfNeeded(this.actualProject);
+        if (this.actualProject && this.actualProject !== this.defaultLocalProject ) await mls.stor.server.loadProjectInfoIfNeeded(this.actualProject);
     }
 
     private setLastOpenedFiles() {

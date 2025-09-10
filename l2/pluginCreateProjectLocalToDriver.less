@@ -1,0 +1,366 @@
+/// <mls shortName="pluginCreateProjectLocalToDriver" project="100554" enhancement="enhancementStyle" folder="" />
+
+plugin-create-project-local-to-driver-100554 {
+
+    display: block;
+    font-family: @font-family-primary;
+    color: @text-primary-color;
+    font-size: @font-size-16;
+
+    .error-msg {
+        color: @error-color;
+        font-size: 0.9em;
+    }
+
+    input[type="text"],
+    textarea {
+        &.invalid {
+            border-color: @error-color;
+        }
+    }
+
+    .container-select {
+        padding: 16px;
+        font-family: @font-family-primary;
+
+
+        .banner {
+            background: @bg-secondary-color-lighter;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .providers {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .provider {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: @bg-primary-color;
+            border: 1px solid @grey-color;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+        }
+
+        .connected {
+            color: @success-color;
+            margin-left: 6px;
+            font-size: 0.9em;
+        }
+
+        .connect-btn {
+            margin-left: 8px;
+            font-size: @font-size-12;
+            padding: 4px 10px;
+            border: 1px solid @text-secondary-color;
+            border-radius: 6px;
+            background: transparent;
+            color: @text-secondary-color;
+            cursor: pointer;
+            transition: background-color @transition-normal, color @transition-normal, border-color @transition-normal;
+
+            &:hover {
+                background-color: @bg-secondary-color-lighter-hover;
+                border-color: @text-secondary-color-hover;
+                color: @text-secondary-color-hover;
+            }
+
+            &:focus {
+                outline: none;
+                border-color: @text-secondary-color-focus;
+                color: @text-secondary-color-focus;
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                border-color: @text-secondary-color-disabled;
+                color: @text-secondary-color-disabled;
+            }
+        }
+
+
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+    }
+
+    .actions {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ccc;
+            border-top: 2px solid #333;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        .cancel {
+            background: @bg-secondary-color;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .continue {
+            background: @active-color;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .continue:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    }
+
+    .container-create {
+        padding: 16px;
+        font-family: @font-family-primary;
+
+        input,
+        select {
+            width: 100%;
+        }
+
+        label {
+            font-size: @font-size-12;
+        }
+
+        input {
+            display: block;
+            width: 100%;
+            padding: .375rem .75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        select {
+            display: block;
+            padding: .375rem 2.25rem .375rem .75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            background-color: #fff;
+            background-position: right .75rem center;
+            background-size: 16px 12px;
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+            box-sizing: border-box;
+            text-transform: none;
+            margin: 0;
+            word-wrap: normal;
+        }
+
+        .form-disabled {
+            pointer-events: none;
+            opacity: .5;
+        }
+
+        .orgs-select {
+            display: flex;
+            gap: 1rem;
+        }
+
+
+    }
+
+    .container-logs {
+
+        margin-top: 1rem;
+
+        .progress {
+            display: flex;
+            height: 1rem;
+            overflow: hidden;
+            font-size: .75rem;
+            background-color: @grey-color-light;
+            border-radius: .25rem;
+            transition: width .6s ease;
+            margin-bottom: 1rem;
+
+            >div {
+                background-color: @success-color;
+
+                &:not(&.finished) {
+                    animation: progress-bar-stripes 1s linear infinite;
+                    background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+                    background-size: 1rem 1rem;
+                }
+
+                &.error {
+                    background-color: @error-color;
+                    opacity: .7;
+                }
+            }
+
+            @keyframes progress-bar-stripes {
+                0% {
+                    background-position: 1rem 0;
+                }
+
+                100% {
+                    background-position: 0 0;
+                }
+            }
+        }
+
+        .logs-container {
+            min-height: 200px;
+            margin-top: 2rem;
+            background: #fcfcfc;
+            padding: 2rem;
+            border-radius: 20px;
+        }
+    }
+
+    .container-success {
+        padding: 1rem;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        color: @text-primary-color;
+
+        >div {
+            text-align: center;
+        }
+
+        .success-icon {
+
+            display: inline-block;
+            width: 8em;
+            height: 8em;
+            font-size: 20px;
+            border-radius: 50%;
+            border: 4px solid lighten(@success-color, 20%);
+            background-color: @bg-primary-color;
+            position: relative;
+            overflow: hidden;
+            transform-origin: center;
+            animation: showSuccess 180ms ease-in-out;
+            transform: scale(1);
+        }
+
+        // Elements
+        .success-icon {
+
+            &__tip,
+            &__long {
+                display: block;
+                position: absolute;
+                height: 4px;
+                background-color: lighten(@success-color, 20%);
+                border-radius: 10px;
+            }
+
+            &__tip {
+                width: 2.4em;
+                top: 4.3em;
+                left: 1.4em;
+                transform: rotate(45deg);
+                animation: tipInPlace 300ms ease-in-out;
+                animation-fill-mode: forwards;
+                animation-delay: 180ms;
+                visibility: hidden;
+            }
+
+            &__long {
+                width: 4em;
+                transform: rotate(-45deg);
+                top: 3.70em;
+                left: 2.75em;
+                animation: longInPlace 140ms ease-in-out;
+                animation-fill-mode: forwards;
+                visibility: hidden;
+                animation-delay: 400ms + 140ms;
+            }
+        }
+
+        @keyframes showSuccess {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes tipInPlace {
+            from {
+                width: 0em;
+                top: 0em;
+                left: -1.6em;
+            }
+
+            to {
+                width: 2.4em;
+                top: 4.3em;
+                left: 1.4em;
+                visibility: visible;
+            }
+        }
+
+        @keyframes longInPlace {
+            from {
+                width: 0em;
+                top: 5.1em;
+                left: 3.2em;
+            }
+
+            to {
+                width: 4em;
+                top: 3.70em;
+                left: 2.75em;
+                visibility: visible;
+            }
+        }
+
+    }
+
+}
+
+

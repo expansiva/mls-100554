@@ -1,0 +1,131 @@
+/// <mls shortName="pluginCreateProject" project="100554" enhancement="enhancementStyle" folder="" />
+
+plugin-create-project-100554 {
+    
+    display: block;
+    font-family: @font-family-primary;
+    color: @text-primary-color;
+    padding: @space-24;
+
+    h2 {
+        font-size: @font-size-24;
+        margin-bottom: @space-16;
+    }
+
+    p {
+        font-size: @font-size-16;
+        margin-bottom: @space-24;
+        color: @text-primary-color-lighter;
+    }
+
+    label {
+        display: block;
+        margin-bottom: @space-8;
+        font-weight: @font-weight-bold;
+
+        input[type="text"] {
+            width: 100%;
+            padding: @space-8;
+            margin-top: @space-8;
+            border: 1px solid @grey-color;
+            border-radius: 4px;
+            font-size: @font-size-16;
+        }
+    }
+
+    input[type="text"],
+    textarea {
+        &.invalid {
+            border-color: @error-color;
+        }
+    }
+
+    .error {
+        font-size: @font-size-12;
+        color: @error-color;
+        margin-bottom: @space-16;
+    }
+
+    .options {
+        margin-bottom: @space-16;
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: @space-8;
+            margin-bottom: @space-8;
+            font-weight: @font-weight-normal;
+        }
+    }
+
+    textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: @space-8;
+        border: 1px solid @grey-color;
+        border-radius: 4px;
+        margin-bottom: @space-24;
+        font-size: @font-size-16;
+        resize: vertical;
+    }
+
+    .banner {
+        background-color: @bg-secondary-color-lighter;
+        border: 1px solid @grey-color;
+        padding: @space-16;
+        margin-bottom: @space-16;
+        border-radius: 4px;
+        font-size: @font-size-16;
+        white-space: pre-wrap;
+
+        pre {
+            white-space: break-spaces;
+        }
+    }
+
+    .actions {
+        display: flex;
+        gap: @space-16;
+
+        button {
+            padding: @space-8 @space-16;
+            border-radius: 4px;
+            border: 1px solid @grey-color;
+            font-size: @font-size-16;
+            cursor: pointer;
+            transition: background @transition-normal;
+
+            &:hover {
+                background: @bg-primary-color-hover;
+            }
+
+            &.primary {
+                background: @active-color;
+                color: white;
+                border: none;
+
+                &:hover {
+                    background: @active-color-hover;
+                }
+            }
+
+            .loader {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                border: 2px solid #ccc;
+                border-top: 2px solid #333;
+                border-radius: 50%;
+                animation: spin 0.6s linear infinite;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+        }
+    }
+}
+
+

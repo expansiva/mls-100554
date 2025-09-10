@@ -27,7 +27,7 @@ const messages: { [key: string]: MessageType } = {
 export class PluginPullrequest extends PluginBaseModule {
 
     private msg = messages['en'];
-    private itens:mls.stor.others.IPullRequest[] = [];
+    private itens: mls.stor.others.IPullRequest[] = [];
     private owner = '';
     private repo = '';
     private branch = '';
@@ -59,7 +59,7 @@ export class PluginPullrequest extends PluginBaseModule {
             `;
         }
         if (this.itens.length <= 0)
-            return this.renderNoIntes();
+            return this.renderNoItens();
         return this.renderListPull();
     }
 
@@ -69,7 +69,7 @@ export class PluginPullrequest extends PluginBaseModule {
         `;
     }
 
-    renderNoIntes() {
+    renderNoItens() {
         return html`
             ${this.renderHeader()}
             <h4>${this.msg.noItens}</h4>
@@ -81,14 +81,13 @@ export class PluginPullrequest extends PluginBaseModule {
             ${this.renderHeader()}
             <ul style="list-style: decimal;">
                 ${repeat(this.itens, (
-                    (key: mls.stor.others.IPullRequest) => key.id) as any,
-                    ((k: mls.stor.others.IPullRequest, index:number) =>
-                    { return this.renderItemListPull(k, index); })as any) }
+            (key: mls.stor.others.IPullRequest) => key.id) as any,
+            ((k: mls.stor.others.IPullRequest, index: number) => { return this.renderItemListPull(k, index); }) as any)}
             </ul>
         `;
     }
 
-    renderItemListPull(i:mls.stor.others.IPullRequest, index:number) {
+    renderItemListPull(i: mls.stor.others.IPullRequest, index: number) {
         return html`
         <li>
             <a href="${i.url}" style="text-decoration: underline; cursor: pointer;" target="_blank">${i.title} (${i.author.login})</a>
@@ -101,8 +100,10 @@ export class PluginPullrequest extends PluginBaseModule {
     }
 
     async loadListPullRequest() {
+
         try {
             const prj = mls.actualProject;
+            if (prj === mls.stor.LOCALPROJECTNUMBER) return;
             if (!prj)
                 throw new Error('Not found project actual');
             const driver = mls.stor.others.getDefaultDriver(prj);
@@ -112,7 +113,7 @@ export class PluginPullrequest extends PluginBaseModule {
             this.requestUpdate();
             //this.showLoader(false);
         }
-        catch (err:any) {
+        catch (err: any) {
             this.error = err.message;
             this.requestUpdate();
             //this.showLoader(false);
@@ -121,7 +122,7 @@ export class PluginPullrequest extends PluginBaseModule {
 
     async initInfoProject() {
         const prj = mls.actualProject;
-        if (!prj)
+        if (!prj || prj === mls.stor.LOCALPROJECTNUMBER)
             return;
         const info = getMyKeysBranch(prj);
         if (!info)

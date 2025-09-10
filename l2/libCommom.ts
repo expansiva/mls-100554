@@ -109,7 +109,6 @@ export function generateCompactTimestamp() {
     return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
 }
 
-
 export function getDateFormated(dt: string): string {
 
     let lastUpdated: string;
@@ -165,6 +164,27 @@ export function getDateFormated(dt: string): string {
 
 }
 
+export function checkIfHasLocalProject() {
+    const hasFilePrjLocal = Object.values(mls.stor.files).find((item) => item.project === mls.stor.LOCALPROJECTNUMBER);
+    return !!hasFilePrjLocal;
+}
+
+const keyLocalProject = 'projectLocalName';
+export function getLocalProjectName() {
+    return localStorage.getItem(keyLocalProject) || '';
+}
+
+export function setLocalProjectName(prjName: string) {
+    if (!prjName) localStorage.removeItem(keyLocalProject);
+    localStorage.setItem(keyLocalProject, prjName)
+}
+
+export function isValidProjectName(name: string): boolean {
+    if (!name || name.length <= 3) return false;
+    const projectNameRegex = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+    return projectNameRegex.test(name);
+}
+  
 export function escapeHTML(str: string) {
     return str
         .replace(/&/g, "&amp;")
@@ -429,15 +449,17 @@ export async function loadModuleFromProjectOrDependency(name: string, folder: st
     if (mls.stor.files[key]) return await await collabImport({ project: prj, shortName: name, folder: folder });
 
     const info = mls.l5.getProjectDetails(prj);
-    if (!info) throw new Error('Not found project details from actual project!');
+    if (!info && prj !== mls.stor.LOCALPROJECTNUMBER) throw new Error('Not found project details from actual project!');
+    let deps: number[] = [];
+
+    if (info) deps = info.prj_dependencies;
+    else deps = [100554]
 
     let prjDep = 0;
-    info.prj_dependencies.forEach((dep) => {
-
+    deps.forEach((dep) => {
         if (mls.stor.files[key]) return;
         prjDep = dep;
         key = mls.stor.getKeyToFiles(dep, 2, name, folder, ext);
-
     });
 
     if (!mls.stor.files[key]) throw new Error('File not found in any dependency!');
@@ -588,7 +610,7 @@ export async function getInstanceByFile(file: mls.stor.IFileInfo): Promise<Objec
 export function isNameValid(project: number, shortName: string, folder: string, level: number, extension: string): boolean {
 
     let isValid = false;
-    
+
     if (project === 0 || !project || project === null) return isValid;
     if (shortName === '' || !shortName || shortName === null) return isValid;
 
@@ -624,11 +646,11 @@ export function isNameValid(project: number, shortName: string, folder: string, 
         let isValidFolder = true;
 
         if (folder.startsWith('_')) return isValid;
-        
+
         for (const inv of invalidsFolder) {
 
             if (folder.indexOf(inv) >= 0) isValidFolder = false;
-                
+
         }
 
         if (!isValidFolder) return isValid;

@@ -30,14 +30,14 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
             promises.push(createAllModels(storFile, false, false));
         }
     }
-
+    
     const info = await mls.stor.localDB.readPrjInfo(baseProject);
     if (info && info.indexModules && info.indexModules !== '') {
         promises.push(_createProjectModel(baseProject, info.indexModules));
     }
 
     const prj = mls.actualProject;
-    if (prj && prj !== baseProject) {
+    if (prj && prj !== baseProject && prj !== mls.stor.LOCALPROJECTNUMBER) {
         const actual = await mls.stor.localDB.readPrjInfo(prj);
         if (actual && actual.indexModules && actual.indexModules !== '') {
             promises.push(_createProjectModel(prj, actual.indexModules));

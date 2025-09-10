@@ -3,8 +3,8 @@
 import { html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
-import { setProjectDetails } from './_100554_libCommom';
-import './_100554_pluginCreateNewProject'
+import { setProjectDetails, checkIfHasLocalProject, getLocalProjectName } from './_100554_libCommom';
+import './_100554_pluginCreateProject'
 
 @customElement('projects-100554')
 export class Projects102009 extends StateLitElement {
@@ -55,7 +55,7 @@ export class Projects102009 extends StateLitElement {
   renderCurrentProject() {
 
     if (!this.selectedProject) return html``;
- 
+
     return html`
     <div class="section">
         <div class="section-header">
@@ -88,14 +88,14 @@ export class Projects102009 extends StateLitElement {
         <div class="projects-grid">
         ${this.myProjects.map(
       (project) => html`
-                <div class="project-card" .filter=${project.title+project.project}>
+                <div class="project-card" .filter=${project.title + project.project}>
                   <img class="thumbnail" src=${project.thumbnail} alt=${project.title} />
                   <div class="card-content">
                     <div class="project-title">${project.title} (${project.project})</div>
                     <div class="project-meta">
                       <span class="badge">${project.type}</span>
                       <div class="actions">
-                        <a href="#" @click=${(e: MouseEvent) =>{ e.preventDefault(); this.onProjectClick(project)}}> Select </a>
+                        <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.onProjectClick(project) }}> Select </a>
                         <a href="#" @click=${(e: MouseEvent) => this.openDetails(e, project)}>⋯</a>
                       </div>
                     </div>
@@ -117,7 +117,7 @@ export class Projects102009 extends StateLitElement {
         <div class="projects-grid">
         ${this.mockProjects.map(
       (project) => html`
-                <div class="project-card" .filter=${project.title+project.project}>
+                <div class="project-card" .filter=${project.title + project.project}>
                   <img class="thumbnail" src=${project.thumbnail} alt=${project.title} />
                   <div class="card-content">
                     <div class="project-title">${project.title}</div>
@@ -166,8 +166,8 @@ export class Projects102009 extends StateLitElement {
   renderAdd() {
     return html`
         <div @click="${this.backScenaryList}" style="padding-left: 1rem; padding-top: .5rem; cursor: pointer;">< Back</div>
-        <plugin-create-new-project-100554>
-        </plugin-create-new-project-100554>
+        <plugin-create-project-100554>
+        </plugin-create-project-100554>
     `
 
   }
@@ -260,7 +260,24 @@ export class Projects102009 extends StateLitElement {
 
     });
 
+    if (checkIfHasLocalProject()) {
+      const item = this.createPrjLocalItem();
+      if (item.project === mls.actualProject) this.selectedProject = item;
+      arr.unshift(item);
+    }
+
     this.myProjects = arr;
+  }
+
+  private createPrjLocalItem() {
+    const item = {
+      project: mls.stor.LOCALPROJECTNUMBER,
+      title: getLocalProjectName(),
+      type: 'user',
+      remixes: 0,
+      thumbnail: 'https://img.freepik.com/premium-vector/ai-robot-with-chip-processor-website-landing-page_683014-600.jpg',
+    }
+    return item;
   }
 
   private openDetails(ev: MouseEvent, project: any) {
