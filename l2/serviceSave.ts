@@ -9,6 +9,7 @@ import { initServiceSaveaddBranch } from './_100554_saveAddBranch';
 import { getMyKeysBranch, calculateTotalStringSize } from './_100554_libCommom';
 import { getConfigProject, updateConfigProject } from './_100554_libProjectConfig';
 import { readProjectTypescriptAndCompile } from './_100554_collabLibModel';
+import './_100554_pluginCreateProjectLocalToDriver';
 
 initServiceSaveaddBranch();
 
@@ -159,14 +160,14 @@ export class ServiceSave extends ServiceBase {
         if (v.tsFree === false) {
             this.setError(this.myMessage.errorVerify);
             return;
-        }else if(v.tsFree){
+        } else if (v.tsFree) {
             this.freeToSave.ts = true;
         }
 
         if (v.lessFree === false) {
             this.setError(this.myMessage.errorVerify);
             return;
-        } else if(v.lessFree) {
+        } else if (v.lessFree) {
             this.freeToSave.less = true;
         }
 
@@ -200,7 +201,17 @@ export class ServiceSave extends ServiceBase {
 
     render() {
         const lang = this.getMessageKey(messages);
-        this.myMessage = messages[lang]
+        this.myMessage = messages[lang];
+
+
+        if (mls.actualProject === mls.stor.LOCALPROJECTNUMBER) {
+            return html`<plugin-create-project-local-to-driver-100554
+            
+            @project-local-created=${() => { this.init(); }}
+            ></plugin-create-project-local-to-driver-100554>`
+        }
+
+
         if (this.error !== '') {
             setTimeout(() => this.error = '', 3000);
             return html`${unsafeHTML(this.error)}`;
@@ -235,7 +246,7 @@ export class ServiceSave extends ServiceBase {
         return html`
             <h4 style="margin-top:1rem; text-align:center">${this.myMessage.msgBlock}</h4>
             <div class="block-scenery">
-                <button @click="${this.createFork}">
+                <button class="btn-service-save" @click="${this.createFork}">
                     <svg width="16" height="16" fill="#fff" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"></path></svg>
                     Fork
                 </button>
@@ -259,7 +270,7 @@ export class ServiceSave extends ServiceBase {
                     <span>${this.branch}</span>
                 </div>
 
-                <button style=" display: none; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " @click="${() => { if (this.menu.setMenuActive) this.menu.setMenuActive('opBranch') }}">
+                <button class="btn-service-save" style=" display: none; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " @click="${() => { if (this.menu.setMenuActive) this.menu.setMenuActive('opBranch') }}">
                     ${collab_branch} Change
                 </button>
             </div>
@@ -306,7 +317,7 @@ export class ServiceSave extends ServiceBase {
                         <h4 class="mt-3">${this.myMessage.comments}:</h4>
                         <div style="display:flex; gap:1rem; align-items:center;">
                             <textarea id="commitMessage" class="form-control" style="max-width:600px;" maxlength="50"></textarea>
-                            <button id="btn_save" ?disabled=${!this.isFreeToSave} class="btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
+                            <button id="btn_save" ?disabled=${!this.isFreeToSave} class="btn-service-save btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
                         </div>
                         <small style="font-size:12px;font-weight:bold">*${this.myMessage.obsVerify}</small>
                     </div>
@@ -390,10 +401,10 @@ export class ServiceSave extends ServiceBase {
     }
 
 
-    renderItem(item: Iitem, indexP: number, indexL: number, indexM: number, index: number, forceError:boolean) {
+    renderItem(item: Iitem, indexP: number, indexL: number, indexM: number, index: number, forceError: boolean) {
 
         return html`
-            <li style="padding-left: 1.1rem;" class="${item.errorLocal  ? 'errorLocal' : ''}">
+            <li style="padding-left: 1.1rem;" class="${item.errorLocal ? 'errorLocal' : ''}">
                 <div style="align-items: center;">
                     ${item.disabled || item.onlyFather || item.errorLocal || forceError
                 ? html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
@@ -489,7 +500,7 @@ export class ServiceSave extends ServiceBase {
 
     private async initInfoProject() {
         const prj = mls.actualProject;
-        if (!prj) return;
+        if (!prj || prj === mls.stor.LOCALPROJECTNUMBER) return;
         const info = getMyKeysBranch(prj);
         if (!info) return;
         this.branch = info.branch;
@@ -562,7 +573,7 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
-    private setProjectLevelShortName(obj: any, prj: number, level: number, folder:string, shortname: string): any[] {
+    private setProjectLevelShortName(obj: any, prj: number, level: number, folder: string, shortname: string): any[] {
 
         if (!obj[prj]) obj[prj] = { [level]: {} };
         const pj = obj[prj];
@@ -778,7 +789,7 @@ export class ServiceSave extends ServiceBase {
                 return;
             }
 
-            
+
             const father = el.closest('sectionsave') as HTMLDivElement;
             if (!father) return;
 
@@ -854,13 +865,13 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
-    private verifyNeedSelectDS(array:mls.stor.IFileInfo[]) {
+    private verifyNeedSelectDS(array: mls.stor.IFileInfo[]) {
 
         if (!this.freeToSave.hasDS) return;
-        const has = array.filter((a) => a.project === mls.actualProject  && a.shortName === 'designSystem' && a.extension === '.ts' && a.folder === '' ).length > 0;
+        const has = array.filter((a) => a.project === mls.actualProject && a.shortName === 'designSystem' && a.extension === '.ts' && a.folder === '').length > 0;
 
         if (!has) throw new Error('Design system needs to be saved along with upcoming changes!');
-        
+
     }
 
     private async afterSave(fileInfos: mls.stor.IFileInfo[]) {
@@ -1067,7 +1078,7 @@ export class ServiceSave extends ServiceBase {
 
     private async veriFyPermission(): Promise<IPermission> {
         try {
-            const prj =mls.actualProject;
+            const prj = mls.actualProject;
             if (!prj) throw new Error('Not found project actual');
             const info = this.getLocalHIstoryCurrentInfoDriver();
             const driver = mls.stor.others.getDefaultDriver(prj)
@@ -1256,7 +1267,7 @@ export class ServiceSave extends ServiceBase {
         const key = mls.stor.getKeyToFiles(mls.actualProject as number, 2, 'designSystem', '', '.ts');
         const file = mls.stor.files[key];
         let aux = '';
-        if (file && file.inLocalStorage) { 
+        if (file && file.inLocalStorage) {
             this.freeToSave.hasDS = true;
             aux = '<plugin-verify-error-design-system-100554 autoPrepare="true"></plugin-verify-error-design-system-100554>'
         }

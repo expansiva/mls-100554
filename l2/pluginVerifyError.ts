@@ -122,8 +122,8 @@ export class PluginVerifyError extends PluginBaseModule {
     //------IMPLEMENTS--------
     async prepare() {
         try {
-            this.isLoad = true;
 
+            this.isLoad = true;
             this.continueVerify = true;
 
             const prj = mls.actualProject;
