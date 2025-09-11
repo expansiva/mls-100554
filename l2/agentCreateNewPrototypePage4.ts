@@ -12,6 +12,7 @@ import {
 } from "./_100554_aiAgentOrchestration";
 
 import {
+    getNextFlexiblePendingStep,
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
     updateStepStatus,
@@ -91,13 +92,14 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     context = await updateStepStatus(context, step.stepId, "completed");
 
     if (!context.task) throw new Error("Invalid context 2");
-    const payload = getNextPendentStep(context.task) as mls.msg.AIPayload | null;
+    const payload = getNextFlexiblePendingStep(context.task) as mls.msg.AIPayload | null;
 
     await updateFiles(context, payload);
+    if(payload) context = await updateStepStatus(context, payload.stepId, "completed");
     if (!context.task) throw new Error("Invalid context task");
-    context.task = await updateTaskTitle(context.task, "Defs completed");
+    context.task = await updateTaskTitle(context.task, "Updating links");
     //await verifyNeedNewStep(context, payload);
-    //await executeNextStep(context);
+    await executeNextStep(context);
 
 }
 

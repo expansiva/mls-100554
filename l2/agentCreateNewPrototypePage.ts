@@ -96,7 +96,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
     await updateDefs(context, payload);
     if (!context.task) throw new Error("Invalid context task");
-    context.task = await updateTaskTitle(context.task, "Defs completed");
+    context.task = await updateTaskTitle(context.task, "Gathering page requirements");
     //await executeNextStep(context);
 
 }

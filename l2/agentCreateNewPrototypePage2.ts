@@ -101,6 +101,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
     await createPage(context);
     if (!context.task) throw new Error("Invalid context task");
+
     
     const pageMemory = context.task?.iaCompressed?.longMemory as any;
     const newStep: mls.msg.AIPayload = {
@@ -113,10 +114,9 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
         rags: null,
         type: 'agent'
     }
-    console.info('passou uma vez');
     await addNewStep(context, step.stepId, [newStep]);
 
-    context.task = await updateTaskTitle(context.task, "Defs completed");
+    context.task = await updateTaskTitle(context.task, "Creating page");
     //await executeNextStep(context);
 
 }
@@ -155,11 +155,16 @@ function replaceByPriority(source: string, key: string, value: string): string {
 
 async function createPage(context: mls.msg.ExecutionContext) {
 
+    
     if (!context || !context.task) throw new Error(`[${agentName}](createPage) Not found context to createPage`);
     const step = getNextPendentStep(context.task);
     if (!step || step.type !== 'flexible') throw new Error(`[${agentName}](createPage) Invalid step in createPage`);
     const payload4: PayLoad4 = step.result;
     if (!payload4 || !payload4.pageHtml) throw new Error(`[${agentName}](createPage) Not found "pageHtml" in payload`);
+
+    context = await updateStepStatus(context, step.stepId, "completed");
+
+    if (!context || !context.task) throw new Error(`[${agentName}](createPage) Not found context to createPage`);    
 
     const pageMemory = context.task?.iaCompressed?.longMemory as any;
 
