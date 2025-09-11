@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from './_100554_collabLitElement';
 import { gitHubLogin, gitLabLogin, isProviderConnected, gitlabIcon, githubIcon } from './_100554_libProviders';
-import { renameFile } from './_100554_collabLibStor';
+import { replaceTripleslashAndTag, createStorFile, IReqCreateStorFile } from './_100554_collabLibStor';
 import { getLocalProjectName, isValidProjectName, setProjectDetails } from './_100554_libCommom';
 
 import {
@@ -22,7 +22,6 @@ import './_100554_pluginNewProjectLog';
 
 /// **collab_i18n_start**
 const message_pt = {
-  createProjectTitle: 'Criar projeto',
 
   github: 'GitHub',
   gitlab: 'GitLab',
@@ -76,7 +75,6 @@ const message_pt = {
 };
 
 const message_en = {
-  createProjectTitle: 'Create project',
   github: 'GitHub',
   gitlab: 'GitLab',
   connect: 'Connect',
@@ -162,7 +160,7 @@ export class PluginCreateProject extends CollabLitElement {
   private orgName: string = '';
   private projectLocalNumber: number = mls.stor.LOCALPROJECTNUMBER;
   private newProjectName: string = getLocalProjectName() || `project${Date.now()}`;
-  private newProjectNumber: number = 102013;
+  private newProjectNumber: number = 0;
   private newProjectTeam: string = 'admin';
   private newProjectVisibility: string = 'public';
 
@@ -409,19 +407,224 @@ export class PluginCreateProject extends CollabLitElement {
     await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
   }
 
-  private async renameLocalFiles(oldProject: number, newProject: number) {
+  private async createPrjInfo(project: number) {
 
-    await mls.stor.server.loadProjectInfoIfNeeded(newProject);
-    const keys = Object.keys(mls.stor.files).filter((key) => key.startsWith(`${oldProject}_`));
-    for (let key of keys) {
-      const storFile = mls.stor.files[key];
-      const newStorFile = await renameFile(storFile, newProject, storFile.shortName, storFile.folder);
-      const content = await newStorFile.getContent();
-      if (typeof content === 'string') {
-        const newContent = await this.replaceSpecificProjectId(content, newProject.toString(), oldProject.toString());
-        await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: newContent });
+    const now = new Date().toISOString();
+
+    this.addTempObject(project, {
+      fileInfo: [],
+      importsMap: '',
+      indexModules: '',
+      repository_lastModified: now
+    });
+
+    const dt = mls.l5.getProjectSettings(project);
+    if (!dt) return;
+    mls.stor.projects[project] = {
+      project,
+      projectDependencies: [100554],
+      projectDriver: dt.projectDriver,
+      projectURL: dt.projectURL
+    };
+
+  }
+
+  private addTempObject(projectId: number, data: {
+    fileInfo?: any[],
+    importsMap?: string,
+    indexModules?: string,
+    repository_lastModified?: string,
+  }) {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open("mlsDB", 1);
+
+      request.onupgradeneeded = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        if (!db.objectStoreNames.contains("tempObjects")) {
+          db.createObjectStore("tempObjects");
+        }
+      };
+
+      request.onsuccess = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        const tx = db.transaction("tempObjects", "readwrite");
+        const store = tx.objectStore("tempObjects");
+
+        const key = `Prj_${projectId}`;
+        const obj = {
+          fileInfo: data.fileInfo ?? [],
+          importsMap: data.importsMap ?? "",
+          indexModules: data.indexModules ?? "",
+          key,
+          project: projectId,
+          repository_lastModified: data.repository_lastModified ?? new Date().toISOString(),
+        };
+
+        const putReq = store.put(obj);
+
+        putReq.onsuccess = () => {
+          resolve(obj);
+        };
+
+        putReq.onerror = (e) => {
+          reject((e.target as IDBRequest).error);
+        };
+      };
+
+      request.onerror = (e) => {
+        reject((e.target as IDBRequest).error);
+      };
+    });
+  }
+
+  private addFileInfoItem(projectId: number, newItem: any) {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open("mlsDB", 1);
+
+      request.onsuccess = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        const tx = db.transaction("tempObjects", "readwrite");
+        const store = tx.objectStore("tempObjects");
+
+        const key = `Prj_${projectId}`;
+        const getReq = store.get(key);
+
+        getReq.onsuccess = () => {
+          let obj = getReq.result;
+
+          if (!obj) {
+            obj = {
+              fileInfo: [],
+              importsMap: "",
+              indexModules: "",
+              key,
+              project: projectId,
+              repository_lastModified: new Date().toISOString(),
+            };
+          }
+
+          obj.fileInfo = obj.fileInfo || [];
+          obj.fileInfo.push(newItem);
+          obj.repository_lastModified = new Date().toISOString(); // Atualiza timestamp
+
+          const putReq = store.put(obj);
+
+          putReq.onsuccess = () => resolve(obj);
+          putReq.onerror = (e) => reject((e.target as IDBRequest).error);
+        };
+
+        getReq.onerror = (e) => reject((e.target as IDBRequest).error);
+      };
+
+      request.onerror = (e) => reject((e.target as IDBRequest).error);
+    });
+  }
+
+  private async migrateAllFiles(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder: string, needCompile: boolean = true): Promise<Record<string, mls.stor.IFileInfo>> {
+
+    const ret: Record<string, mls.stor.IFileInfo> = {};
+    for await (let ext of ['.ts', '.html', '.less', '.test.ts', '.defs.ts', '.json']) {
+      const key = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, ext);
+      if (!mls.stor.files[key]) continue;
+      ret[key] = await this.migrateFile(mls.stor.files[key], newProject, newShortName, newFolder, needCompile);
+    }
+    return ret;
+  }
+
+  private async migrateFile(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder: string, needCompile: boolean = true): Promise<mls.stor.IFileInfo> {
+
+    let source = await storFile.getContent() as string;
+    if (!source) throw new Error('[migrateFile] Impossible rename this file:' + storFile.shortName);
+    if (!newFolder) newFolder = storFile.folder;
+
+    if (storFile.level === 2) {
+      source = replaceTripleslashAndTag(storFile, newProject, newShortName, newFolder, source);
+    }
+
+    const param: IReqCreateStorFile = {
+      shortName: newShortName,
+      project: newProject,
+      folder: newFolder,
+      level: storFile.level,
+      source: source,
+      extension: storFile.extension,
+      status: storFile.status === 'new' ? 'new' : 'renamed',
+      fileInfo: {
+        originalFolder: storFile.folder,
+        originalProject: storFile.project,
+        originalShortName: storFile.shortName
       }
     }
+
+    const needCreateModels = param.level === 2;
+    const file = await createStorFile(param, needCreateModels, needCompile);
+
+    if (file.level !== 2) {
+      file.inLocalStorage = true;
+    }
+    return file;
+  }
+
+
+  private async deleteOldFiles() {
+
+    const keys = Object.keys(mls.stor.files).filter((key) => key.startsWith(`${mls.stor.LOCALPROJECTNUMBER}_`));
+    for (let key of keys) {
+      const storFile = mls.stor.files[key];
+      mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true);
+      await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+      delete mls.stor.files[key];
+    }
+  }
+
+  private async migrateLocalFiles(oldProject: number, newProject: number) {
+
+    await this.createPrjInfo(newProject);
+    const keys = Object.keys(mls.stor.files).filter((key) => key.startsWith(`${oldProject}_`));
+
+    const keyOldDesignSystem = `${oldProject}_2_designSystem`
+    const keysFiltered = keys.filter(file => file.startsWith(`${oldProject}_5_`) || /\.ts$/.test(file) && !/\.defs\.ts$/.test(file) && !/\.test\.ts$/.test(file));
+    const keyDs = keysFiltered.find((key) => key.startsWith(keyOldDesignSystem));
+    if (!keyDs) throw new Error('Project must be design system file');
+    const storFileDs = mls.stor.files[keyDs];
+    if (!storFileDs) throw new Error('Project must be design system file');
+
+    const keysOrdened = keysFiltered
+      .filter(file => file.trim().startsWith(`${oldProject}_2_`) && file.trim().endsWith(".ts") || !file.trim().startsWith(`${oldProject}_2_`))
+      .sort((a, b) => {
+        if (a === `${oldProject}_2_designSystem`) return -1;
+        if (b === `${oldProject}_2_designSystem`) return 1;
+        return a.localeCompare(b);
+      });
+
+
+    for (let key of keysOrdened) {
+      const storFile = mls.stor.files[key];
+      const newStorFiles = await this.migrateAllFiles(storFile, newProject, storFile.shortName, storFile.folder, true);
+      for (let mode of Object.keys(newStorFiles)) {
+        // await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+        const obj = newStorFiles[mode];
+        if (obj && !(obj instanceof Error)) {
+          const content = await obj.getContent();
+          if (typeof content === 'string') {
+            let newContent = '';
+            if (obj.level === 5 && obj.shortName === 'project' && obj.extension === '.json') {
+              newContent = content.replace(/\[org\]/g, this.orgName);
+              await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: newContent });
+
+            } else {
+              newContent = await this.replaceSpecificProjectId(content, newProject.toString(), oldProject.toString());
+              await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: newContent });
+
+            }
+          }
+        }
+      }
+    }
+
+    await this.deleteOldFiles();
+
+
   }
 
   private replaceSpecificProjectId(code: string, oldProjectId: string, newProjectId: string): string {
@@ -463,7 +666,6 @@ export class PluginCreateProject extends CollabLitElement {
 
     try {
       const res = await mls.api.cbeSaveNewPrj(param);
-      console.info({ res });
       return res;
     } catch (err: any) {
       throw new Error('Error on create project in collab' + err.message)
@@ -609,7 +811,7 @@ export class PluginCreateProject extends CollabLitElement {
       this.setProgress(newPercent);
 
       // renomeando arquivos locais
-      await this.tryItem(async () => await this.renameLocalFiles(this.projectLocalNumber, this.newProjectNumber), this.msg.log_16);
+      await this.tryItem(async () => await this.migrateLocalFiles(this.projectLocalNumber, this.newProjectNumber), this.msg.log_16);
       newPercent += percent;
       this.setProgress(newPercent);
 
@@ -617,7 +819,16 @@ export class PluginCreateProject extends CollabLitElement {
       this.addLog({ pre: this.msg.log_ok, log: this.msg.log_7, status: "finish" });
       this.setProgressFinished(true);
 
-      this.activeScenerie = 'success';
+      this.setProjectActual(this.newProjectNumber);
+      this.setOrgActual(this.newProjectNumber);
+
+      this.dispatchEvent(
+        new CustomEvent('project-local-created', {
+          bubbles: true,
+          composed: true
+        })
+      );
+
 
     } catch (err: any) {
       this.toogleForm(false);
@@ -642,15 +853,14 @@ export class PluginCreateProject extends CollabLitElement {
     }
 
     try {
-      let percent = 8.33;
+      let percent = 7.69;
       let newPercent = 0;
       this.setProgressError(false);
       this.setProgressFinished(false);
       this.setProgress(newPercent);
 
-
       const rc: "error" | "reuse" | "wait" | "free" = await this.tryItem(async () => await this.instanceDriver?.verifyRepositoryNew(this.login, this.NEWREPONAME, userNameCollab), `${this.msg.log_0} ${this.NEWREPONAME}`);
-      if (rc === 'reuse') percent = 10;
+      if (rc === 'reuse') percent = 9.09;
 
       newPercent += percent;
       this.setProgress(newPercent);
@@ -736,9 +946,20 @@ export class PluginCreateProject extends CollabLitElement {
       this.setProgress(newPercent);
 
       await this.sleep(200);
-      await this.tryItem(async () => await this.renameLocalFiles(this.projectLocalNumber, this.newProjectNumber), this.msg.log_16);
+      await this.tryItem(async () => await this.migrateLocalFiles(this.projectLocalNumber, this.newProjectNumber), this.msg.log_16);
       newPercent += percent;
       this.setProgress(newPercent);
+
+
+      this.setProjectActual(this.newProjectNumber);
+      this.setOrgActual(this.newProjectNumber);
+
+      this.dispatchEvent(
+        new CustomEvent('project-local-created', {
+          bubbles: true,
+          composed: true
+        })
+      );
 
 
     } catch (err: any) {
@@ -749,7 +970,6 @@ export class PluginCreateProject extends CollabLitElement {
     this.addLog({ pre: this.msg.log_ok, log: this.msg.log_7, status: "finish" });
     this.setProgressFinished(true);
 
-
   }
 
   private setProjectActual(project: number) {
@@ -757,21 +977,15 @@ export class PluginCreateProject extends CollabLitElement {
     setProjectDetails(project);
   }
 
-
-  private onContinueSuccessClick() {
-    this.setProjectActual(100554);
-    this.dispatchEvent(
-      new CustomEvent('project-local-created', {
-        bubbles: true,
-        composed: true
-      })
-    );
+  private setOrgActual(project: number | undefined): void {
+    if (!project) return;
+    const orgIndex = mls.l5.getProjectOrgIndex(project);
+    mls.l5.setActualOrg(orgIndex);
   }
 
   private renderSelectProvider() {
     return html`
       <section class="container-select">
-        <h2>${this.msg.createProjectTitle}</h2>
         <p class="banner">${this.msg.step1Msg}</p>
 
         <div class="providers">
@@ -833,7 +1047,6 @@ export class PluginCreateProject extends CollabLitElement {
   private renderCreateProject() {
     return html`
       <section class="container-create">
-        <h2>${this.msg.createProjectTitle}</h2>
         <form>
         <div>
             <label>${this.msg.projectNameLabel}</label>
@@ -887,7 +1100,7 @@ export class PluginCreateProject extends CollabLitElement {
             <button
               type="button"
               class="continue"
-              @click=${this.onCreateProjectClickTest}
+              @click=${this.onCreateProjectClick}
             >
             ${this.msg.btnContinue}
             </button>
@@ -914,30 +1127,6 @@ export class PluginCreateProject extends CollabLitElement {
         `;
   }
 
-  private renderProjectCreatedOk() {
-    return html`
-      <div class="container-success">
-            <div class="text-center">
-                <div class="success-icon">
-                    <div class="success-icon__tip"></div>
-                    <div class="success-icon__long"></div>
-                </div>
-                <h1>${this.msg.projectOk1.replace('{project}', this.newProjectNumber.toString())}</h1>
-                <h5 class="text-muted">${this.msg.projectOk2}</h5>
-            </div>
-            <div class="actions">
-                <button
-                  type="button"
-                  class="continue"
-                  @click=${this.onContinueSuccessClick}
-                >${this.msg.btnContinue}</button>
-            </div>
-        </div>
-    
-    `
-  }
-
-
   render() {
     const lang = this.getMessageKey(messages);
     this.msg = messages[lang];
@@ -950,8 +1139,6 @@ export class PluginCreateProject extends CollabLitElement {
         return this.renderSelectProvider();
       case 'form':
         return this.renderCreateProject();
-      case 'success':
-        return this.renderProjectCreatedOk();
       default:
         return html``;
     }
@@ -960,10 +1147,11 @@ export class PluginCreateProject extends CollabLitElement {
 
 }
 
+
 interface ILogs {
   pre: string,
   log: string,
   status: string
 }
 
-type IScenerie = 'select' | 'form' | 'success'
+type IScenerie = 'select' | 'form' 

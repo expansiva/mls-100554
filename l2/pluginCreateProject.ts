@@ -33,7 +33,11 @@ Quando estiver pronto, poderá salvar o projeto no GitHub, GitLab ou em outro re
   errorPrjNameBlank: 'O nome do projeto deve ser preenchido',
   errorPrjNameInvalid: 'O nome do projeto só pode conter letras, números e _ , e deve começar com uma letra',
   errorPrjPrompt: 'O prompt deve ser preenchido',
-  alreadyHasProjectLocal: 'Um projeto de teste já existe, não é possível criar outro.'
+  alreadyHasProjectLocal: 'Um projeto de teste já existe, não é possível criar outro.',
+  projectOk1: 'Projeto local criado com sucesso',
+  projectOk2: 'Agora você pode começar a alterar seu novo projeto',
+  btnContinue: 'Continuar',
+
 };
 
 const message_en = {
@@ -52,7 +56,10 @@ When you're ready, you can save the project to GitHub, GitLab, or another reposi
   errorPrjNameBlank: 'Project name must be filled in',
   errorPrjNameInvalid: 'The project name can only contain letters, numbers and _, and must start with a letter',
   errorPrjPrompt: 'Prompt must be filled in',
-  alreadyHasProjectLocal: 'A test project already exists, you cannot create another one.'
+  alreadyHasProjectLocal: 'A test project already exists, you cannot create another one.',
+  projectOk1: 'Local project created successfully',
+  projectOk2: 'Now you can start editing your new project',
+  btnContinue: 'Continue',
 
 };
 
@@ -76,10 +83,10 @@ export class PluginCreateProject extends CollabLitElement {
   @state() errorPrompt: string = '';
   @state() alreadyHasProjectLocal: boolean = false;
   @state() isLoading: boolean = false;
+  @state() projectCreatedSucessfully: boolean = false;
 
   private projectNumber = mls.stor.LOCALPROJECTNUMBER;
   private agentName = 'agentGeneratePrototype';
-
 
   firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
     super.firstUpdated(changedProperties);
@@ -110,6 +117,12 @@ export class PluginCreateProject extends CollabLitElement {
         <div>
             ${this.msg.alreadyHasProjectLocal}
         </div>
+      `
+    }
+
+    if (this.projectCreatedSucessfully) {
+      return html`
+        ${this.renderProjectCreatedOk()}
       `
     }
     return html`
@@ -180,6 +193,29 @@ export class PluginCreateProject extends CollabLitElement {
     `;
   }
 
+  private renderProjectCreatedOk() {
+    return html`
+      <div class="container-success">
+            <div class="text-center">
+                <div class="success-icon">
+                    <div class="success-icon__tip"></div>
+                    <div class="success-icon__long"></div>
+                </div>
+                <h1>${this.msg.projectOk1}</h1>
+                <h5 class="text-muted">${this.msg.projectOk2}</h5>
+            </div>
+            <div class="actions">
+                <button
+                  type="button"
+                  class="continue"
+                  @click=${() => { window.location.reload() }}
+                >${this.msg.btnContinue}</button>
+            </div>
+        </div>
+    
+    `
+  }
+
   private handleCancel() {
     console.log("Cancel clicked");
   }
@@ -212,15 +248,9 @@ export class PluginCreateProject extends CollabLitElement {
   private async handleCreate() {
 
     if (!this.validateForm()) {
-      console.warn("Form inválido");
+      console.warn("Form invalid");
       return;
     }
-
-    console.log("Create clicked", {
-      name: this.projectName,
-      type: this.projectType,
-      prompt: this.projectPrompt
-    });
 
     this.isLoading = true;
     try {
@@ -242,7 +272,7 @@ export class PluginCreateProject extends CollabLitElement {
     await this.createInitialProject(this.projectNumber);
     await this.createInitialDSFile(this.projectNumber);
     await this.createInitialConfigL5File(this.projectNumber);
-    
+
     this.setProjectActual(this.projectNumber);
     setLocalProjectName(this.projectName);
 
@@ -259,6 +289,8 @@ export class PluginCreateProject extends CollabLitElement {
       await addMessage(thread.threadId, messageForAgent);
       mls.events.fire([mls.actualLevel], 'collabMessages' as any, JSON.stringify({ threadId: thread.threadId, taskId: 'last', type: 'thread-open' }))
     }
+
+    this.projectCreatedSucessfully = true;
   }
 
   private async createInitialProject(project: number) {

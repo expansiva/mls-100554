@@ -31,7 +31,7 @@ export async function getConfigProject(project: number, ignoreLocalChanges = fal
     if (!projectConfig[project] /*|| (projectConfig[project].versionRef !== configFile.versionRef)*/ || ignoreLocalChanges) {
 
         const lastStatus = configFile.inLocalStorage;
-        if (ignoreLocalChanges) {
+        if (ignoreLocalChanges && configFile.status !== 'new') {
             configFile.inLocalStorage = false;
         }
         const content = await configFile.getContent();
@@ -93,7 +93,7 @@ export async function createConfigFile(project: number): Promise<mls.l5_common.P
 
 async function _createConfigFile(project: number) {
     const newConfig: mls.l5_common.ProjectConfig = {
-        orgName: '',
+        orgName: '[org]',
         designSystems: [
             {
                 dsIndex: "0",

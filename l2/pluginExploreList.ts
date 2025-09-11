@@ -843,12 +843,12 @@ export class PluginExploreList extends PluginBaseModule {
 
             if (ext === '.less') {
                 const templateLess = getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
-                return createStorFile({ ...param, extension: '.less', source: templateLess }, true, false)
+                return createStorFile({ ...param, extension: '.less', source: templateLess }, true, true, false)
             }
 
             if (ext === '.html') {
                 const templateHTML = getBaseTemplate({ folder, shortName, project, extension: '.html' });
-                return createStorFile({ ...param, extension: '.html', source: templateHTML }, true, false)
+                return createStorFile({ ...param, extension: '.html', source: templateHTML }, true, true, false)
             }
 
 

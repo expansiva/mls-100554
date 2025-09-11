@@ -107,7 +107,7 @@ export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boo
     }
 
     const promise = (async () => {
-        if (storFile.project > 1) {
+        if (storFile.project > 1 && storFile.project !== mls.stor.LOCALPROJECTNUMBER && storFile.project !== 102013) {
             await mls.stor.server.loadProjectInfoIfNeeded(storFile.project);
         }
 
