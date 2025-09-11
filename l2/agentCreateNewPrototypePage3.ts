@@ -93,9 +93,9 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     const payload = getNextPendentStep(context.task) as mls.msg.AIPayload | null;
 
     await updateFiles(context, payload);
+    if(payload) context = await updateStepStatus(context, payload.stepId, "completed");
     if (!context.task) throw new Error("Invalid context task");
     context.task = await updateTaskTitle(context.task, "Checking links");
-    
     //await executeNextStep(context);
 
 }
@@ -147,7 +147,7 @@ async function updateFiles(context: mls.msg.ExecutionContext, step: mls.msg.AIPa
     const result = step.result;
 
     if (!result.organismsToUpdate) return;
-
+    
     //const organism = [];
     let nextStep = step.stepId;
     for await (const org of result.organismsToUpdate) {

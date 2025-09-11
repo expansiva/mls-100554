@@ -287,17 +287,16 @@ export const defs: mls.l4.BaseDefs = {
         if (invalidCharacters.test(obj.shortName)) return false;
 
         const key = mls.stor.getKeyToFiles(obj.project, obj.level, obj.shortName, obj.folder, obj.extension);
-        let find = false;
+        let find = false; 
         const keys = Object.keys(mls.stor.files);
         for (const k of keys) {
             if (key.toLocaleLowerCase() === k.toLocaleLowerCase()) find = true;
         }
-        return !mls.stor.files[key] && !find;
+        return !mls.stor.files[key] && !find; 
 
     }
 
     private showLoad(active: boolean) {
-        console.info(this.service, active);
         setTimeout(() => {
             if (!this.service) return;
             this.service.loading = active
