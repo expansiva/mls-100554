@@ -460,7 +460,7 @@ export async function executeAgentByFile(agentName: string, prompt: string, file
 
   if (openMsg) {
     agent.beforePrompt(context);
-    mls.events.fire([mls.actualLevel], 'collabMessages' as any, JSON.stringify({ threadId: threadId, type: 'thread-open'}));
+    mls.events.fire([mls.actualLevel], 'collabMessages' as any, JSON.stringify({ threadId: threadId, taskId: 'last', type: 'thread-open'}));
   } else {
     await agent.beforePrompt(context);
   }

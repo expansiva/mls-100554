@@ -5,7 +5,8 @@ import { customElement, state, property, query } from 'lit/decorators.js';
 import { createAllFiles, IReqCreateAllFiles } from './_100554_collabLibStor';
 import { getTemplateImport } from './_100554_pluginNewFileBase';
 import { convertFileNameToTag } from './_100554_utilsLit'
-import { getInstanceByFile } from './_100554_libCommom';
+import { getInstanceByFile, isNameValid } from './_100554_libCommom';
+import { executeAgentByFile } from './_100554_aiAgentHelper'
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { ServiceBase } from './_100554_serviceBase';
 
@@ -88,7 +89,7 @@ export class PluginExploreListAddL4 extends PluginBaseModule {
                 <textarea id="iptPrompt" placeholder="Write your prompt..."></textarea>
                 </div>
 
-                <button class="btn-save" @click=${this.createFile}>Save</button>
+                <button class="btn-save" @click=${this.createFile}>Execute</button>
             </div>
         `
     }
@@ -137,16 +138,15 @@ export class PluginExploreListAddL4 extends PluginBaseModule {
 
             this.showLoad(true);
 
-            if (!this.iptModule || !this.iptPage || !this.iptPage.value) {
-                throw new Error('Enter the name of the organization');
+            if (!this.iptModule || !this.iptPage || !this.iptPage.value || !this.iptPrompt || !this.iptPrompt.value) {
+                throw new Error('Enter the name of the page and prompt');
             }
 
             const project = mls.actualProject || 0;
             const folder = this.iptModule.value || '';
             const name = this.iptPage.value;
-            const fullName = folder && folder !== '' ? `${folder}/${name}` : name;
 
-            if (!this.getNewNameAndValid(project, fullName)) {
+            if (!this.getNewNameAndValid(project, name, folder)) {
                 throw new Error('Invalid Name');
             }
 
@@ -213,7 +213,17 @@ export const defs: mls.l4.BaseDefs = {
             }
 
             const files = await createAllFiles(param, true, true);
-            if (files.ts && !(files.ts instanceof Error)) this.setHistory(files.ts);
+            if (files.ts && !(files.ts instanceof Error)) {
+                this.setHistory(files.ts);
+                const prompt = JSON.stringify({
+                    project:project.toString(),
+                    shortName: name,
+                    folder,
+                    userPrompt: this.iptPrompt.value
+                    
+                })
+                await executeAgentByFile('agentCreateNewPrototypePage', prompt, files.ts, true);
+            }
 
             this.showLoad(false);
             this.goBack();
@@ -258,18 +268,9 @@ export const defs: mls.l4.BaseDefs = {
 
     }
 
-    private getNewNameAndValid(prj: number, name: string): boolean {
+    private getNewNameAndValid(prj: number, name: string, folder:string): boolean {
         if (name === '' || !name || name === null) return false;
-        const split = name.split('/');
-        const isValidName = this.isValidNewName({
-            shortName: split.pop() || name,
-            project: prj,
-            level: 2,
-            folder: split.length > 0 ? split.join('/') : '',
-            extension: '.ts'
-        });
-        if (!isValidName || this.hasInvalidCharacter(name)) return false;
-        return true;
+        return isNameValid(prj, name, folder, 2, '.ts');
     }
 
     private hasInvalidCharacter(name: string) {
