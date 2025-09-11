@@ -160,7 +160,7 @@ export class PluginCreateProject extends CollabLitElement {
   private orgName: string = '';
   private projectLocalNumber: number = mls.stor.LOCALPROJECTNUMBER;
   private newProjectName: string = getLocalProjectName() || `project${Date.now()}`;
-  private newProjectNumber: number = 0;
+  private newProjectNumber: number = 102014;
   private newProjectTeam: string = 'admin';
   private newProjectVisibility: string = 'public';
 
@@ -526,7 +526,7 @@ export class PluginCreateProject extends CollabLitElement {
     for await (let ext of ['.ts', '.html', '.less', '.test.ts', '.defs.ts', '.json']) {
       const key = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, ext);
       if (!mls.stor.files[key]) continue;
-      ret[key] = await this.migrateFile(mls.stor.files[key], newProject, newShortName, newFolder, needCompile);
+      ret[key] = await this.migrateFile(mls.stor.files[key], newProject, newShortName, newFolder, false);
     }
     return ret;
   }
@@ -556,8 +556,8 @@ export class PluginCreateProject extends CollabLitElement {
       }
     }
 
-    const needCreateModels = param.level === 2;
-    const file = await createStorFile(param, needCreateModels, needCompile);
+    const aux = param.level === 2 && param.shortName === 'designSystem';
+    const file = await createStorFile(param, aux, aux, aux);
 
     if (file.level !== 2) {
       file.inLocalStorage = true;
@@ -602,7 +602,6 @@ export class PluginCreateProject extends CollabLitElement {
       const storFile = mls.stor.files[key];
       const newStorFiles = await this.migrateAllFiles(storFile, newProject, storFile.shortName, storFile.folder, true);
       for (let mode of Object.keys(newStorFiles)) {
-        // await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
         const obj = newStorFiles[mode];
         if (obj && !(obj instanceof Error)) {
           const content = await obj.getContent();
@@ -835,7 +834,7 @@ export class PluginCreateProject extends CollabLitElement {
     }
 
   }
-
+  
   private async onCreateProjectClick(e: MouseEvent) {
 
     e.preventDefault();
