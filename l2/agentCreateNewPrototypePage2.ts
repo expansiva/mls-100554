@@ -68,7 +68,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         const payload3 = await getPayload3(data);
         const organism: string[] = getOrganismsAlreadyCreated(payload3, +data.project, data.folder);
         const inputs: any = await getPrompts(payload3, organism, pageIndex);
-        
+
         await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt, { project: data.project, shortName: data.shortName, folder: data.folder, pageIndex: pageIndex.toString() });
         return;
     }
@@ -80,7 +80,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
 
-    const data = JSON.parse(step.prompt) ;
+    const data = JSON.parse(step.prompt);
     let payload3 = await getPayload3(data);
 
     const organismAlreadyDeclared = getOrganismsAlreadyCreated(payload3, +data.project, data.folder);
@@ -99,11 +99,25 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}](afterPrompt) No in progress interaction found.`);
 
-    context = await updateStepStatus(context, step.stepId, "completed", "no more agents");
-    notifyTaskChange(context);
     await createPage(context);
-    await executeNextStep(context);
-    return;
+    if (!context.task) throw new Error("Invalid context task");
+    
+    const pageMemory = context.task?.iaCompressed?.longMemory as any;
+    const newStep: mls.msg.AIPayload = {
+        agentName: 'agentCreateNewPrototypePage3',
+        prompt: JSON.stringify({ project: pageMemory.project, shortName:pageMemory.shortName, folder: pageMemory.folder }),
+        status: 'pending',
+        stepId: step.stepId + 1,
+        interaction: null,
+        nextSteps: null,
+        rags: null,
+        type: 'agent'
+    }
+    console.info('passou uma vez');
+    await addNewStep(context, step.stepId, [newStep]);
+
+    context.task = await updateTaskTitle(context.task, "Defs completed");
+    //await executeNextStep(context);
 
 }
 
@@ -168,18 +182,21 @@ async function createPage(context: mls.msg.ExecutionContext) {
 
     const organismUsed = extractOrganismTags(finalSource);
     await generateFiles(step, context.task, payload4, payload3, finalSource, organismUsed, +pageMemory.project, pageMemory.folder, groupName, shortName, pageMemory.pageIndex);
-    return context;
+
+    context.task = await updateTaskTitle(context.task, "Page create");
+
+
 }
 
 const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> => {
     throw new Error("[replayForSupport] not implemented");
 }
 
-async function getPrompts(payload3:any, organismDeclared: string[], pageIndex: number): Promise<mls.msg.IAMessageInputType[]> {
+async function getPrompts(payload3: any, organismDeclared: string[], pageIndex: number): Promise<mls.msg.IAMessageInputType[]> {
 
     const actualProject = projectToSave;
     const organismNames = extractOrganismNames(payload3.pagesWireframe[pageIndex].pageHtml);
-    const organismsUsed = payload3.organism.filter((item:any) => organismNames.includes(item.organismTag));
+    const organismsUsed = payload3.organism.filter((item: any) => organismNames.includes(item.organismTag));
     const tagName = convertFileNameToTag({ project: actualProject, shortName: payload3.pages[pageIndex].pageName });
 
     const data: Record<string, string> = {
@@ -206,9 +223,9 @@ function consistPayload3(payload3: any): any {
 }
 
 function getOrganismsAlreadyCreated(payload3: any, project: number, folder: string): string[] {
-    const ret:string[] = [];
+    const ret: string[] = [];
     if (!payload3 || !payload3.organism) return [];
-    payload3.organism.forEach((i:any) => {
+    payload3.organism.forEach((i: any) => {
         const name = toCamelCase(i.organismTag);
         const key = mls.stor.getKeyToFiles(project, 2, name, folder, '.ts');
         if (mls.stor.files[key]) ret.push(i.organismTag);
@@ -217,14 +234,14 @@ function getOrganismsAlreadyCreated(payload3: any, project: number, folder: stri
 }
 
 function toCamelCase(input: string): string {
-  return input
-    .split('-')
-    .map((word, index) =>
-      index === 0
-        ? word.toLowerCase()
-        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    )
-    .join('');
+    return input
+        .split('-')
+        .map((word, index) =>
+            index === 0
+                ? word.toLowerCase()
+                : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join('');
 }
 
 function extractOrganismTags(htmlString: string): string[] {
@@ -321,10 +338,10 @@ async function generateFiles(
 
             models.ts?.model.setValue(sourceTS);
             models.html?.model.setValue(sourceHTML);
-            if(sourceLess) models.style?.model.setValue(sourceLess);
+            if (sourceLess) models.style?.model.setValue(sourceLess);
             models.defs?.model.setValue(sourceDefs);
 
-            
+
         }
 
         return `page created: ${folder}/${shortName}`
@@ -350,7 +367,7 @@ async function generateOrganisms(payload3: any, organisms: string[], htmlString:
         const organismEl = doc.querySelector(organism);
         if (!organismEl) continue;
         const styleData = resultStyles.find((result) => result.name === organism);
-        const organismData = payload3.organism.find((org:any) => org.organismTag === organism);
+        const organismData = payload3.organism.find((org: any) => org.organismTag === organism);
         if (!organismData) return;
 
         let shortName1 = sanitizeMeta(organismData.organismTag, project, folder);
@@ -500,7 +517,7 @@ function generateDefsPage(
 ): string {
 
     const page = payload.pages[index];
-    const wireframe = payload.pagesWireframe.find((p:any) => p.pageSequential === page.pageSequential);
+    const wireframe = payload.pagesWireframe.find((p: any) => p.pageSequential === page.pageSequential);
     const widgets = wireframe ? extractOrganismTagsFromHtml(wireframe.pageHtml) : [];
 
     const defs: mls.l4.BaseDefs = {
@@ -527,7 +544,7 @@ function generateDefsPage(
             userStories: [
                 {
                     story: `Como visitante, quero acessar a página "${page.pageName}" para ${page.pageGoal.toLowerCase()}`,
-                    derivedRequirements: page.pageRequirements.map((desc:any) => ({ description: desc }))
+                    derivedRequirements: page.pageRequirements.map((desc: any) => ({ description: desc }))
                 }
             ],
             userRequestsEnhancements: [],
@@ -647,7 +664,7 @@ function generateDefsOrganism(
     organismTag: string,
 ): string {
 
-    const organism = payload.organism.find((org:any) => org.organismTag === organismTag);
+    const organism = payload.organism.find((org: any) => org.organismTag === organismTag);
     if (!organism) return '';
 
     const defs: mls.l4.BaseDefs = {
