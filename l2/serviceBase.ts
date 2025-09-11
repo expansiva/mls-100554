@@ -285,6 +285,8 @@ export type ITitleClickCallBack = (title: string) => void | undefined;
 export type IMainClickCallBack = (value: string) => void | undefined;
 export type IToolsClickCallBack = (value: string) => void | undefined;
 export type ITabsClickCallBack = (index: number) => void | undefined;
+export type ITabsNavigationClickCallBack = (index: number, oldTab: HTMLElement, newTab: HTMLElement) => void | undefined;
+
 export type TSetMode = (mode: TMode | null, page?: HTMLElement) => void;
 export type TGetLastMode = () => TMode;
 export type TMode =
@@ -313,10 +315,13 @@ export interface IMain {
     [key: string]: IOptions | string
 }
 
-export interface ITabs {
-    type: 'full' | 'onlyicon'
+interface ITabs {
+    type: 'full' | 'onlyicon',
+    effect?: 'slide' | 'none',
+    mode?: 'normal' | 'compact'
     group: string,
     selected?: number,
+    previous?: number,
     options: IOptions[]
 }
 
@@ -352,9 +357,12 @@ export interface IServiceMenu {
     onClickMain?: IMainClickCallBack,
     onClickTools?: IToolsClickCallBack,
     onClickTabs?: ITabsClickCallBack,
-
+    onClickTabsNavigation?: ITabsNavigationClickCallBack,
+    
     setMenuActive?: (op: string) => void
     setTabActive?: (index: number) => void,
+    tabNavigate?: (index: number, oldTab: HTMLElement | undefined, newTab: HTMLElement) => void,
+    tabBack?: () => void,
     toggleErrorTab?: (index: number, show: boolean) => void
     selectTool?: (op: string) => void,
 
