@@ -152,9 +152,6 @@ async function updateDefs(context: mls.msg.ExecutionContext, step: mls.msg.AIPay
 
     if (!mm || !mm.payload3 || !mm.moduleConfig) throw new Error(`Erro [${agentName}] updateDefs: invalid module`);
 
-    /*const models = mls.editor.getModels(project, shortName, folder);
-    if (!models || !models.defs) throw new Error(`[${agentName}]updateDefs not found models`)*/
-
     let modelsMM = mls.editor.getModels(project, 'module', folder);
     if (!modelsMM || !modelsMM.ts) {
         const key = mls.stor.getKeyToFiles(project, 2, 'module', folder, '.ts');
@@ -166,41 +163,13 @@ async function updateDefs(context: mls.msg.ExecutionContext, step: mls.msg.AIPay
 
     if (!modelsMM || !modelsMM.ts) throw new Error(`[${agentName}]updateDefs not found models module`);
 
-    /*const defs: mls.l4.BaseDefs = {
-        meta: {
-            projectId: +project,
-            folder: folder,
-            shortName: shortName,
-            type: "organism",
-            devFidelity: "scaffold",
-            group: folder,
-            tags: [
-                "lit",
-                "organism"
-            ]
-        },
-        references: {
-            widgets: [],
-            plugins: [],
-            statesRO: [],
-            statesRW: [],
-            statesWO: [],
-            imports: []
-        },
-        planning: result.planning
-    }
-
-    const oldText = models.defs.model.getValue().split('/>');
-    const newText = `${oldText[0]}/>
-export const defs: mls.l4.BaseDefs = ${JSON.stringify(defs, null, 2)}
-    `;
-    models.defs.model.setValue(newText);*/
-
     const totPage = mm.payload3.pages.length;
     let totOrg = mm.payload3.organism.length - 1;
 
     result.pageConfig.pageSequential = totPage;
+    result.pageConfig.pageName = pageMemory.shortName;
     result.pageStructure.pageSequential = totPage;
+    result.pageStructure.pageName = pageMemory.shortName;
 
     mm.payload3.pages.push(result.pageConfig);
     mm.payload3.pagesWireframe.push(result.pageStructure);
@@ -219,11 +188,9 @@ export const payload3 = ${JSON.stringify(mm.payload3, null, 2)}
     modelsMM.ts.model.setValue(newTextModule);
 
 
-
-
-    /*const newStep: mls.msg.AIPayload = {
-        agentName: 'agentCreateNewPrototypeOrganism2',
-        prompt: JSON.stringify({project, shortName, folder, tag}),
+    const newStep: mls.msg.AIPayload = {
+        agentName: 'agentCreateNewPrototypePage2',
+        prompt: JSON.stringify({project, shortName, folder, pageIndex:totPage}),
         status: 'pending',
         stepId: step.stepId + 1,
         interaction: null,
@@ -232,6 +199,6 @@ export const payload3 = ${JSON.stringify(mm.payload3, null, 2)}
         type: 'agent'
     }
 
-    await addNewStep(context, step.stepId, [newStep]);*/
+    await addNewStep(context, step.stepId, [newStep]);
 
 }
