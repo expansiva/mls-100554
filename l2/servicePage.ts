@@ -1,13 +1,12 @@
 /// <mls shortName="servicePage" project="100554" enhancement="_100554_enhancementLitService" groupName="other" />
 
 import { html, css, unsafeHTML, repeat } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, state, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { selectLevel, openService, saveOpenedFile } from './_100554_libCommom';
 import "./_100554_pluginPrototypeImprove";
 import "./_100554_pluginExploreList";
 import "./_100554_pluginPageNavigation";
-import "./_100554_collabTabSlider";
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -44,8 +43,7 @@ export class ServicePage100554 extends ServiceBase {
 
     @property() activeTab: ITabType = 'icNavigation';
     @state() previousTabIndex: number = 1;
-    @state() path: string = ''
-
+    @state() path: string = '';
 
     //-------SERVICE---------------
 
@@ -65,14 +63,24 @@ export class ServicePage100554 extends ServiceBase {
         else if (this.menu.setMode) this.menu.setMode('initial');
     }
 
-    public onClickTabs(index: number) {
-        this.activeTab = ESceneries[index] as ITabType;
-        this.previousTabIndex = index;
-
-        if (this.activeTab === 'icNavigation') {
+    public onClickTabsNavigation(index: number, oldEl: HTMLElement, newEl: HTMLElement) {
+            if (this.activeTab === 'icNavigation') {
             const el = this.querySelector('plugin-page-navigation-100554') as any;
             if (el && el.firstUpdated) el.firstUpdated();
         }
+    }
+
+    public onClickTabs(index: number) {
+
+        if (this.menu && this.menu.tabNavigate && this.menu.tabs?.selected !== undefined) {
+            this.activeTab = ESceneries[index] as ITabType;
+            const previousIndex = this.menu.tabs.previous !== undefined ? this.menu.tabs.previous : this.menu.tabs.selected;
+            const oldTab = this.querySelector(`.tab-index-${previousIndex}`) as HTMLElement;
+            const newTab = this.querySelector(`.tab-index-${index}`) as HTMLElement;
+            this.previousTabIndex = index;
+            this.menu.tabNavigate(index, oldTab, newTab);
+        }
+
     }
 
     public menu: IServiceMenu = {
@@ -83,7 +91,9 @@ export class ServicePage100554 extends ServiceBase {
         tabs: {
             group: 'Mode',
             type: 'onlyicon',
-            selected: 0,
+            selected: -1,
+            mode: 'compact',
+            effect: 'slide',
             options: [
                 { text: 'Explore', icon: 'e521' },
                 { text: 'Navigation', icon: 'f041' },
@@ -93,6 +103,8 @@ export class ServicePage100554 extends ServiceBase {
         tools: {},
         onClickMain: this.onClickMain.bind(this),
         onClickTabs: this.onClickTabs.bind(this),
+        onClickTabsNavigation: this.onClickTabsNavigation.bind(this),
+
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
@@ -145,7 +157,9 @@ export class ServicePage100554 extends ServiceBase {
 
 
     async firstUpdated() {
-        if (this.menu.setTabActive) this.menu.setTabActive(ESceneries[this.activeTab]);
+        if (this.menu.setTabActive) this.menu.setTabActive(ESceneries.icExplorer);
+        setTimeout(() => { if (this.menu.setTabActive) this.menu.setTabActive(ESceneries.icNavigation); }, 50)
+
     }
 
     render() {
@@ -161,22 +175,22 @@ export class ServicePage100554 extends ServiceBase {
 
     renderContent() {
         return html`
-            <collab-tab-slider-100554 activeIndex=${this.previousTabIndex} animationTimer=${1000}>
-                <div class="tab-content tab-index-${ESceneries.icExplorer}">
+            <div>
+                <div class="tab-content tab-index-${ESceneries.icExplorer}" style="display:none" >
                     ${this.renderExplorer()}
                 </div>
-                <div class="tab-content tab-index-${ESceneries.icNavigation}">
+                <div class="tab-content tab-index-${ESceneries.icNavigation}" style="display:none">
                     ${this.renderNavigation()}
                 </div>
-                <div class="tab-content tab-index-${ESceneries.icImprove}">
+                <div class="tab-content tab-index-${ESceneries.icImprove}" style="display:none">
                     ${this.renderImprove()}
                 </div>
-            </collab-tab-slider-100554>
+            </div>
   `;
     }
 
     renderNavigation() {
-        return html`<plugin-page-navigation-100554></plugin-page-navigation-100554>`;
+        return html`<plugin-page-navigation-100554 @item-selected=${this.onSelectItemNavigation}></plugin-page-navigation-100554>`;
     }
 
     renderExplorer() {
@@ -190,7 +204,19 @@ export class ServicePage100554 extends ServiceBase {
 
     private onFileAction(ev: mls.events.IEvent) {
         if (ev.level !== 4 || (ev.type !== 'FileAction')) return;
-        if (this.menu && this.menu.setTabActive) this.menu.setTabActive(ESceneries.icNavigation);
+        if (this.menu && this.menu.tabNavigate) {
+            const oldTab = this.querySelector(`.tab-index-${this.menu.tabs?.selected}`) as HTMLElement;
+            const newTab = this.querySelector(`.tab-index-${ESceneries.icNavigation}`) as HTMLElement;
+            this.menu.tabNavigate(ESceneries.icNavigation, oldTab, newTab);
+        }
+    }
+
+    private onSelectItemNavigation() {
+        if (this.menu && this.menu.tabNavigate) {
+            const oldTab = this.querySelector(`.tab-index-${this.menu.tabs?.selected}`) as HTMLElement;
+            const newTab = this.querySelector(`.tab-index-${ESceneries.icImprove}`) as HTMLElement;
+            this.menu.tabNavigate(ESceneries.icImprove, oldTab, newTab);
+        }
     }
 
     private onL4EditEvents(ev: mls.events.IEvent) {
@@ -208,8 +234,6 @@ export class ServicePage100554 extends ServiceBase {
             default: '';
 
         }
-
-        const a = mls.l2.getPath
 
     }
 

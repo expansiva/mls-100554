@@ -294,6 +294,13 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         if (!this.elPreviewL4 || !this.elPreviewL4.selectElement || !item.el) return;
 
         this.elPreviewL4.selectElement(item.id);
+        
+        this.dispatchEvent(
+            new CustomEvent('item-selected', {
+                bubbles: true,
+                composed: true
+            })
+        );
 
     }
 
