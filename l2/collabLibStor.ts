@@ -1,14 +1,14 @@
 /// <mls shortName="collabLibStor" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { convertFileNameToTag } from './_100554_utilsLit'
-import { createModel, createAllModels } from './_100554_collabLibModel' 
-import { getBaseTemplate, verifyNeedAddTripleslach } from './_100554_libCommom'; 
+import { createModel, createAllModels } from './_100554_collabLibModel'
+import { getBaseTemplate, verifyNeedAddTripleslach } from './_100554_libCommom';
 
-export async function createStorFile(req: IReqCreateStorFile, needCreateModel:boolean, awaitCompile:boolean = false): Promise<mls.stor.IFileInfo> {
+export async function createStorFile(req: IReqCreateStorFile, needCreateModel: boolean, needCompile: boolean = true, awaitCompile: boolean = false): Promise<mls.stor.IFileInfo> {
 
     const params = {
         project: req.project,
-        level: req.level, 
+        level: req.level,
         shortName: req.shortName,
         extension: req.extension,
         versionRef: '0',
@@ -20,7 +20,10 @@ export async function createStorFile(req: IReqCreateStorFile, needCreateModel:bo
 
     file.status = req.status ?? 'new';
 
-    let source = verifyNeedAddTripleslach(params,req.source, req.extension)
+    let source = req.source;
+    if (req.level === 2) {
+        verifyNeedAddTripleslach(params, req.source, req.extension)
+    }
     const fileInfo: mls.stor.IFileInfoValue = {
         content: source,
         contentType: 'string'
@@ -34,13 +37,13 @@ export async function createStorFile(req: IReqCreateStorFile, needCreateModel:bo
 
     await mls.stor.localStor.setContent(file, fileInfo);
 
-    if (needCreateModel) await createModel(file, true, awaitCompile);
+    if (needCreateModel) await createModel(file, needCompile, awaitCompile);
 
     return file;
 
 }
 
-export async function createAllFiles(req: IReqCreateAllFiles, needCreateModel:boolean = true, awaitCompile:boolean = false): Promise<IRetAllFiles> {
+export async function createAllFiles(req: IReqCreateAllFiles, needCreateModel: boolean = true, awaitCompile: boolean = false): Promise<IRetAllFiles> {
 
     const { folder, shortName, project } = req;
 
@@ -126,10 +129,12 @@ export async function deleteAllFiles(storFile: mls.stor.IFileInfo): Promise<void
 
 }
 
-export async function renameFile(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder:string): Promise<mls.stor.IFileInfo> {
+export async function renameFile(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder: string, needCompile: boolean = true): Promise<mls.stor.IFileInfo> {
 
     let source = await storFile.getContent() as string;
     if (!source) throw new Error('[renameFile] Impossible rename this file:' + storFile.shortName);
+
+    if (storFile.extension === '.json') debugger;
 
     if (!newFolder) newFolder = storFile.folder;
 
@@ -150,25 +155,25 @@ export async function renameFile(storFile: mls.stor.IFileInfo, newProject: numbe
         }
     }
 
-    const file = await createStorFile(param, true);
-
+    const needCreateModels = param.level === 2;
+    const file = await createStorFile(param, needCreateModels, needCompile);
     await deleteFileSystem(storFile);
 
     return file;
 }
 
-export async function renameAllFiles(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder:string): Promise<IRetAllFiles> {
+export async function renameAllFiles(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder: string, needCompile: boolean = true): Promise<IRetAllFiles> {
 
     const ret: IRetAllFiles = {};
 
-    for await (let ext of ['.ts', '.html', '.less', '.test.ts', '.defs.ts']) {
+    for await (let ext of ['.ts', '.html', '.less', '.test.ts', '.defs.ts', '.json']) {
 
         const key = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, ext);
 
         if (!mls.stor.files[key]) continue;
 
         const prop = mapExt[ext];
-        ret[prop] = await safeRename(mls.stor.files[key], newProject, newShortName, newFolder);
+        ret[prop] = await safeRename(mls.stor.files[key], newProject, newShortName, newFolder, needCompile);
 
     }
 
@@ -220,7 +225,7 @@ export async function cloneAllFiles(storFile: mls.stor.IFileInfo, newProject: nu
 export async function undoFile(storFile: mls.stor.IFileInfo, removeProject: boolean = true): Promise<void> {
 
     storFile.getValueInfo = undefined;
-    
+
     if (storFile.status === 'nochange' && !storFile.inLocalStorage) {
         return;
     }
@@ -307,7 +312,7 @@ const mapExtUndo: Record<string, keyof typeof mls.editor.models[string]> = {
     '.defs.ts': 'defs'
 };
 
-function replaceTripleslashAndTag(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder: string, src: string) {
+export function replaceTripleslashAndTag(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder: string, src: string) {
 
     const { folder, project, shortName } = storFile;
 
@@ -322,13 +327,14 @@ function replaceTripleslashAndTag(storFile: mls.stor.IFileInfo, newProject: numb
 
 async function deleteFileSystem(storFile: mls.stor.IFileInfo) {
 
-    await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
     mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true);
     const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
+    await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
     delete mls.stor.files[keyFiles];
+
 }
 
-async function safeCreate(param: IReqCreateStorFile, createMdl:boolean): Promise<mls.stor.IFileInfo | Error> {
+async function safeCreate(param: IReqCreateStorFile, createMdl: boolean): Promise<mls.stor.IFileInfo | Error> {
     try {
         return await createStorFile(param, createMdl);
     } catch (err) {
@@ -336,9 +342,9 @@ async function safeCreate(param: IReqCreateStorFile, createMdl:boolean): Promise
     }
 }
 
-async function safeRename(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder:string): Promise<mls.stor.IFileInfo | Error> {
+async function safeRename(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder: string, needCompile: boolean = true): Promise<mls.stor.IFileInfo | Error> {
     try {
-        return await renameFile(storFile, newProject, newShortName, newFolder);
+        return await renameFile(storFile, newProject, newShortName, newFolder, needCompile);
     } catch (err) {
         return err instanceof Error ? err : new Error(String(err));
     }

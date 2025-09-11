@@ -168,7 +168,7 @@ export class ServiceSource100554 extends ServiceBase {
                     status: 'new'
                 }
 
-                await createStorFile(param, true, false);
+                await createStorFile(param, true, true, false);
 
             } else {
                 await createModel(stor, true, false);
