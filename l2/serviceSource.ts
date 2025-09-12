@@ -1595,16 +1595,22 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         const lastOpenedFile = getLastOpenedFiles(actualProject);
         const lastL2 = lastOpenedFile[2] as OpenedFileL2;
         if (!lastL2) {
-            this.openService('_100554_serviceUnit', position, this.level)
+            this.openService('_100554_serviceUnit', position, this.level);
             return;
         }
         const lastL2ByPosition = lastL2[position];
+        if (!lastL2ByPosition) {
+            this.openService('_100554_serviceUnit', position, this.level);
+            return;
+        }
 
-        if (!lastL2ByPosition) return;
         const { project, shortName, folder } = mls.l2.getPath(lastL2ByPosition);
         const keyStorFile = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
         const storFile = mls.stor.files[keyStorFile];
-        if (!storFile) return;
+        if (!storFile) {
+            this.openService('_100554_serviceUnit', position, this.level);
+            return;
+        }
         let models = mls.editor.getModels(project, shortName, folder);
         if (!models || !models.ts) models = await createAllModels(storFile);        
         if (!models) return;
