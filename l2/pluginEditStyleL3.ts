@@ -62,23 +62,16 @@ export class PluginEditStyleL3 extends PluginBaseModule {
 
     private setEvents(): void {
         mls.events.addEventListener([1, 2, 3, 4, 5, 6, 7], ['ToolBarSelected'], (ev) => this.onlevelChange(ev));
-
         mls.events.addListener(3, 'L3EditEvents' as any, this.onL3EditEvents.bind(this));
-
     }
 
     private onL3EditEvents(ev: mls.events.IEvent) {
-
         if (!ev.desc || ev.level !== 3) return;
-
         const info = JSON.parse(ev.desc);
-
         if (!info || !info.action || !info.position || info.position === 'left') return;
-
     }
 
     private onlevelChange(ev: mls.events.IEvent) {
-
         if (!ev.desc) return;
         const j = JSON.parse(ev.desc);
         if (j.level === 3) {
@@ -95,7 +88,7 @@ export class PluginEditStyleL3 extends PluginBaseModule {
     }
 
     firstUpdated() {
-        this.initMonaco();
+        this.init();
     }
 
     updated(changedProperties: any) {
@@ -107,25 +100,27 @@ export class PluginEditStyleL3 extends PluginBaseModule {
 
     render() {
         this.style.display = 'block';
-        if (this.error) return html`<h3 style="color:red">${this.error}</h3>`
         return html`
-            <mls-editor-100529 slot="left"></mls-editor-100529>
+            ${this.error ? html`<h3 style="color:red">${this.error}</h3>` : ''}
+            <mls-editor-100529 style="${this.error ? 'display:none' : 'display: ""'}" slot="left"></mls-editor-100529>
         `
     }
 
 
-
     //-------- IMPLEMENTATION --------------
 
-    public forceUpdate(): void {
-        this.requestUpdate();
+    public async forceUpdate() {
+        debugger;
+        this.error = '';
+        await this.updateComplete;
+        this.init();
     }
 
-    private async initMonaco() {
+
+    private async init() {
         if (!this._ed1) {
             await this.initMonaco_Editor();
         }
-
         this.openFile();
     }
 
