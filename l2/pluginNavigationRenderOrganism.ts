@@ -4,11 +4,12 @@ import { html, repeat, TemplateResult, LitElement } from 'lit';
 import { customElement, state, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { executeAgentByFile } from './_100554_aiAgentHelper'
-import { collab_trash, collab_pencil, collab_bars } from './_100554_collabIcons';
+import { collab_trash, collab_pencil, collab_bars, collab_info } from './_100554_collabIcons';
 import { selectLevel, openService } from './_100554_libCommom';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { CollabPreviewL3 } from './_100554_collabPreviewL3';
 import { ServiceBase } from './_100554_serviceBase';
+
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -50,22 +51,17 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         super();
         this.setEvents();
     }
- 
+
     private setEvents(): void {
         mls.events.addEventListener([1, 2, 3, 4, 5, 6, 7], ['ToolBarSelected'], (ev) => this.onlevelChange(ev));
-
         mls.events.addListener(3, 'L3EditEvents' as any, this.onL3EditEvents.bind(this));
-
         mls.events.addListener(3, 'FineshPreview' as any, this.fineshPreview.bind(this));
-
     }
 
     private onL3EditEvents(ev: mls.events.IEvent) {
 
         if (!ev.desc || ev.level !== 3) return;
-
         const info = JSON.parse(ev.desc);
-
         if (!info || !info.action || !info.position || info.position === 'left') return;
 
         switch (info.action) {
@@ -75,16 +71,13 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
             case ('navigation'):
                 this.onNavigation(info);
                 break;
-
         }
 
     }
 
     private async fineshPreview(ev: mls.events.IEvent) {
-
         if (ev.level !== 3) return;
         setTimeout(() => this.forceUpdate(), 500);
-
     }
 
     private onSelect(info: any) {
@@ -125,12 +118,8 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         switch (this.scenary) {
             case ('list'):
                 return this.renderNav();
-            case ('prop'):
-                return this.renderProperties();
             case ('details'):
                 return this.renderDetails();
-            case ('add'):
-                return this.renderAdd();
         }
 
     }
@@ -141,62 +130,6 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
             <div class="headerNav ${pos}">
                 <h1 style="display:none">${txt}</h1>
                 ${btn}               
-            </div>
-        `
-    }
-
-    renderProperties() {
-        let btn = html`
-            <button class="btn-nav" title="add organism" @click="${() => this.goToScenary('list')}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg>
-            </button>
-        `;
-        return html`
-            ${this.renderHeader('Properties', btn, 'left')}
-            <h3>In developed</h3>
-        `
-    }
-
-    renderAdd() {
-        let btn = html`
-            <button class="btn-nav" title="add organism" @click="${() => this.goToScenary('list')}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg>
-            </button>
-        `;
-
-        const { project, path } = mls.actual[3];
-        const info = mls.l2.getPath(`_${project}_${path}`);
-
-        return html`
-            ${this.renderHeader('Add', btn, 'left')}
-        
-            <div class="form-container">
-
-                <div class="form-group">
-                    <label for="project">Projetc</label>
-                    <input type="text" disabled .value="${mls.actualProject}"/>
-                </div>
-
-                <div class="form-group">
-                    <label for="module">Module</label>
-                    <input type="text" disabled .value="${info.folder}"/>
-                </div>
-
-                <div class="form-group">
-                    <label for="organism">Organism</label>
-                    <input type="text" disabled .value="${info.shortName}"/>
-                </div>
-
-                <div class="form-group">
-                    <label for="prompt">Prompt</label>
-                    <textarea id="iptPrompt" placeholder="Write your prompt..."></textarea>
-                    <div style=" display: flex ; flex-direction: column;">
-                        <small>${this.msg.msg1}</small>
-                        <small>${this.msg.msg2}</small>
-                    </div>
-                </div>
-
-                <button class="btn-save" @click=${this.createFile}>Save</button>
             </div>
         `
     }
@@ -214,9 +147,8 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     }
 
     renderNav() {
-
         let btn = html`
-            <button class="btn-nav" title="add organism" @click="${() => this.goToScenary('add')}">
+            <button class="btn-nav" title="add organism" @click="${() => this.dispatchEventAdd()}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"/></svg>
             </button>
         `;
@@ -257,7 +189,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
         const name = item.el.tagName.toLocaleLowerCase();
 
-        let aux:any = '';
+        let aux: any = '';
 
         if (item.isFather) {
             aux = html`
@@ -288,12 +220,13 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
                     <div class="groupHiddenList" .info=${item}  @click="${this.clickGroupHidden}" >
                         ${aux}
                         <span class="mls-gpbtnslider-item" @click="${() => this.goToScenary('details')}" title="details">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="7px" viewBox="0 0 192 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M48 80a48 48 0 1 1 96 0A48 48 0 1 1 48 80zM0 224c0-17.7 14.3-32 32-32l64 0c17.7 0 32 14.3 32 32l0 224 32 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 512c-17.7 0-32-14.3-32-32s14.3-32 32-32l32 0 0-192-32 0c-17.7 0-32-14.3-32-32z"/></svg>
+                            ${collab_info}
+                    
                         </span>
                         <span class="mls-gpbtnslider-item" @click="${this.delEl}" title="remove">
                             ${collab_trash}
                         </span>
-                        <span class="mls-gpbtnslider-item" @click="${() => this.goToScenary('prop')}" title="properties">
+                        <span class="mls-gpbtnslider-item" @click="${() => this.dispatchEventProperty()}" title="properties">
                             <svg xmlns="http://www.w3.org/2000/svg" width="15px" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128 0a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM320 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm32-80c-32.8 0-61 19.7-73.3 48L32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l246.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48l54.7 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-54.7 0c-12.3-28.3-40.5-48-73.3-48zM192 128a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm73.3-64C253 35.7 224.8 16 192 16s-61 19.7-73.3 48L32 64C14.3 64 0 78.3 0 96s14.3 32 32 32l86.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 128c17.7 0 32-14.3 32-32s-14.3-32-32-32L265.3 64z"/></svg>
                         </span>
                     </div>
@@ -320,6 +253,33 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         this.scenary = scenary;
     }
 
+    private dispatchEventAdd() {
+        this.dispatchEvent(
+            new CustomEvent('on-add-click', {
+                bubbles: true,
+                composed: true
+            })
+        );
+    }
+
+    private dispatchEventProperty() {
+        this.dispatchEvent(
+            new CustomEvent('on-property-click', {
+                bubbles: true,
+                composed: true
+            })
+        );
+    }
+
+    private dispatchEventStyle() {
+        this.dispatchEvent(
+            new CustomEvent('on-style-click', {
+                bubbles: true,
+                composed: true
+            })
+        );
+    }
+
     private setElPreview() {
         const scope = window.preview?.iframe?.contentDocument?.body;
         if (!scope) return;
@@ -338,7 +298,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         const root = scope.querySelector(tag) as LitElement;
         if (root) await root.updateComplete;
 
-        const reentrance = async(array: IInfoElChildren[], element: HTMLElement) => {
+        const reentrance = async (array: IInfoElChildren[], element: HTMLElement) => {
 
             let info: IInfoElChildren | undefined;
             if (element.getAttribute(this.atributeBase) && !lessTags.includes(element.tagName.toLocaleLowerCase())) {
@@ -374,14 +334,15 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         }
 
         if (!target) return;
+        if (this.elPreviewL3) this.elPreviewL3.selectElement(item.el);
+        this.activeId = item.id;
+        if (target.classList.contains('activeBranch')) {
+            this.dispatchEventStyle();
+        }
 
         const els = this.querySelectorAll('.activeBranch');
         els.forEach((el) => el.classList.remove('activeBranch'));
-
-        target.classList.add('activeBranch')
-
-        this.activeId = item.id;
-        if (this.elPreviewL3) this.elPreviewL3.selectElement(item.el);
+        target.classList.add('activeBranch');
 
     }
 
@@ -440,57 +401,6 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         this.elPreviewL3.setHover(el, false);
     }
 
-    private async createFile() {
-
-        try {
-
-            this.showLoad(true);
-
-            if (!this.iptPrompt || !this.iptPrompt.value) {
-                throw new Error('Enter the prompt');
-            }
-
-            const path = mls.actual[3].getFullName();
-            if (!path) throw new Error('Not found path');
-            const info = mls.l2.getPath(path);
-
-            const key = mls.stor.getKeyToFiles(info.project, 2, info.shortName, info.folder, '.ts');
-            if (!mls.stor.files[key]) throw new Error('Not found storFile');
-
-            const pp = { page: path, prompt: this.iptPrompt.value, position: 'left' };
-
-            await this.fireImprove(mls.stor.files[key], JSON.stringify(pp));
-            mls.events.fireFileAction('statusOrErrorChanged', mls.stor.files[key], 'left', 0);
-            this.scenary = 'list';
-            this.iptPrompt.value = '';
-            this.showLoad(false);
-
-        } catch (e: any) {
-
-            this.showError('[createFile]' + e.message);
-            this.showLoad(false);
-        }
-
-    }
-
-    private async fireImprove(file: mls.stor.IFileInfo, prompt: string) {
-        await executeAgentByFile('agentImprovePrototypeOrganism', prompt, file);
-
-    }
-
-    private showLoad(active: boolean) {
-
-        setTimeout(() => {
-            if (!this.service) return;
-            this.service.loading = active
-        }, 500);
-    }
-
-    private showError(msg: string) {
-        if (!this.service) return;
-        this.service.setError(msg);
-    }
-
     private goToL2(e: MouseEvent, item: IInfoElChildren) {
         const fileInfo = convertTagToFileName(item.el.tagName.toLowerCase());
         if (!fileInfo) return;
@@ -510,7 +420,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
 }
 
-type TScenary = 'prop' | 'list' | 'details' | 'add';
+type TScenary = 'list' | 'details'
 
 interface IInfoElChildren {
     el: HTMLElement,

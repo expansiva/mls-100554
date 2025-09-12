@@ -6,10 +6,13 @@ import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_
 import { loadPluginProject, forceServiceInstance } from './_100554_libCommom';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import { readProjectTypescriptAndCompile } from './_100554_collabLibModel';
-import "./_100554_wcdToolboxItemActionEditAttrOut";
+
+import { PluginEditStyleL3 } from './_100554_pluginEditStyleL3';
+
 import "./_100554_pluginExploreList";
 import "./_100554_pluginPrototypeImprove";
-import "./_100554_collabTabSlider";
+import './_100554_pluginOrganismAdd';
+import './_100554_pluginOrganismProperty';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -50,7 +53,6 @@ export class ServiceOrganism100554 extends ServiceBase {
     constructor() {
         super();
         this.init();
-
     }
 
     private async init() {
@@ -91,9 +93,23 @@ export class ServiceOrganism100554 extends ServiceBase {
 
     }
 
+    public onClickTabsNavigation(index: number, oldEl: HTMLElement, newEl: HTMLElement) {
+        if (this.activeTab === 'icStyle') {
+            const el = this.querySelector('plugin-edit-style-l3-100554') as PluginEditStyleL3;
+            if (el && el.forceUpdate) el.forceUpdate();
+        }
+    }
+
     public onClickTabs(index: number) {
-        this.activeTab = ESceneries[index] as ITabType;
-        this.previousTabIndex = index;
+
+        if (this.menu && this.menu.tabNavigate && this.menu.tabs?.selected !== undefined) {
+            this.activeTab = ESceneries[index] as ITabType;
+            const previousIndex = this.menu.tabs.previous !== undefined ? this.menu.tabs.previous : this.menu.tabs.selected;
+            const oldTab = this.querySelector(`.tab-index-${previousIndex}`) as HTMLElement;
+            const newTab = this.querySelector(`.tab-index-${index}`) as HTMLElement;
+            this.previousTabIndex = index;
+            this.menu.tabNavigate(index, oldTab, newTab);
+        }
     }
 
     public menu: IServiceMenu = {
@@ -104,17 +120,23 @@ export class ServiceOrganism100554 extends ServiceBase {
         tabs: {
             group: 'Mode',
             type: 'onlyicon',
-            selected: 0,
+            selected: -1,
+            mode: 'compact',
+            effect: 'slide',
             options: [
                 { text: 'Explore', icon: 'e521' },
                 { text: 'Navigation', icon: 'f041' },
                 { text: 'Style', icon: 'f53f' },
                 { text: 'Improve', icon: 'f5dc' },
+                { text: 'Add', icon: '2b' },
+                { text: 'Property', icon: '2b' },
             ]
         },
         tools: {},
         onClickMain: this.onClickMain.bind(this),
         onClickTabs: this.onClickTabs.bind(this),
+        onClickTabsNavigation: this.onClickTabsNavigation.bind(this),
+
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
@@ -125,9 +147,7 @@ export class ServiceOrganism100554 extends ServiceBase {
 
         const div = document.createElement('div');
         div.style.padding = '1rem';
-
         let name = 'nothing selected';
-
         switch (this.activeTab) {
             case 'icExplorer':
                 name = 'plugin-explore-list-100554';
@@ -140,6 +160,12 @@ export class ServiceOrganism100554 extends ServiceBase {
                 break;
             case 'icImprove':
                 name = 'plugin-prototype-improve-100554';
+                break;
+            case 'icAdd':
+                name = 'plugin-organism-add-100554';
+                break;
+            case 'icProperty':
+                name = 'plugin-organism-property-100554';
                 break;
             default:
                 name = 'nothing selected';
@@ -184,52 +210,86 @@ export class ServiceOrganism100554 extends ServiceBase {
     }
 
     renderContent() {
-        // Se existir atributo "tab=navigation", já dispara o tab correto
         const tab = this.getAttribute('tab');
         if (tab && tab === 'navigation' && this.menu && this.menu.setTabActive && this.menu.onClickTabs) {
             this.removeAttribute('tab');
-            this.menu.onClickTabs(1);       // ativa o tab no menu
-            this.menu.setTabActive(1);      // marca como ativo visualmente
+            this.menu.onClickTabs(1);
+            this.menu.setTabActive(1);
             this.previousTabIndex = 1;
         }
 
         return html`
-            <collab-tab-slider-100554 activeIndex=${this.previousTabIndex} animationTimer=${1000}>
-                <div class="tab-content tab-index-${ESceneries.icExplorer}">
+            <div>
+                <div class="tab-content tab-index-${ESceneries.icExplorer}" style="display:none;">
                     ${this.renderExplorer()}
                 </div>
-                <div class="tab-content tab-index-${ESceneries.icNavigation}">
+                <div class="tab-content tab-index-${ESceneries.icNavigation}" style="display:none;">
                     ${this.renderNavigation()}
                 </div>
-                <div class="tab-content tab-index-${ESceneries.icStyle}">
+                <div class="tab-content tab-index-${ESceneries.icStyle}" style="display:none;">
                     ${this.renderStyle()}
                 </div>
-                <div class="tab-content tab-index-${ESceneries.icImprove}">
+                <div class="tab-content tab-index-${ESceneries.icImprove}" style="display:none;">
                     ${this.renderImprove()}
                 </div>
-            </collab-tab-slider-100554>
+                <div class="tab-content tab-index-${ESceneries.icAdd}" style="display:none;">
+                    ${this.renderAddOrganism()}
+                </div>
+                <div class="tab-content tab-index-${ESceneries.icProperty}" style="display:none;">
+                    ${this.renderPropertyOrganism()}
+                </div>
+            </div>
     `;
     }
 
 
-    renderExplorer() {
+    private renderExplorer() {
         return html`<plugin-explore-list-100554 .service=${this} autoprepare="true"></plugin-explore-list-100554>`;
     }
 
-    renderNavigation() {
-        return html`<plugin-navigation-render-organism-100554 .service=${this} autoprepare="true"></plugin-navigation-render-organism-100554`;
+    private renderNavigation() {
+        return html`<plugin-navigation-render-organism-100554
+            @on-add-click=${this.onNavigationOrganismAddClick.bind(this)}
+            @on-property-click=${this.onNavigationOrganismPropertyClick.bind(this)}
+            @on-style-click=${this.onNavigationOrganismStyleClick.bind(this)}
+            .service=${this} 
+            autoprepare="true"
+         ></plugin-navigation-render-organism-100554`;
     }
 
-    renderStyle() {
-
+    private renderStyle() {
         return html`<plugin-edit-style-l3-100554 .service=${this} msize="${this.msize}"></plugin-edit-style-l3-100554>`;
     }
 
-    renderImprove() {
+    private renderImprove() {
         return html`<plugin-prototype-improve-100554 scope="organism" ></plugin-prototype-improve-100554>`;
     }
 
+    private renderAddOrganism() {
+        return html`<plugin-organism-add-100554 @improve-completed=${this.onImproveCompleted.bind(this)} .service=${this}></plugin-organism-add-100554>`;
+    }
+
+    private renderPropertyOrganism() {
+        return html`<plugin-organism-property-100554 .service=${this}></plugin-organism-property-100554>`;
+    }
+
     //---------IMPLEMENTATION------------
+
+    private onImproveCompleted() {
+    
+    }
+
+    private onNavigationOrganismAddClick() {
+        if (this.menu && this.menu.setTabActive) this.menu.setTabActive(ESceneries.icAdd);
+    }
+
+    private onNavigationOrganismPropertyClick() {
+        if (this.menu && this.menu.setTabActive) this.menu.setTabActive(ESceneries.icProperty);
+    }
+
+    private onNavigationOrganismStyleClick() {
+        if (this.menu && this.menu.setTabActive) this.menu.setTabActive(ESceneries.icStyle);
+    }
 
     private async loadPlugins() {
 
@@ -305,12 +365,16 @@ export interface IWCDParams {
     op: ITabType,
 }
 
-export type ITabType = 'icExplorer' | 'icNavigation' | 'icStyle' | 'icImprove';
+export type ITabType = 'icExplorer' | 'icNavigation' | 'icStyle' | 'icImprove' | 'icAdd' | 'icProperty';
 
 enum ESceneries {
     'icExplorer' = 0,
     'icNavigation' = 1,
     'icStyle' = 2,
     'icImprove' = 3,
+    'icAdd' = 4,
+    'icProperty' = 5,
+
+
 
 } 

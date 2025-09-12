@@ -1,0 +1,77 @@
+/// <mls shortName="pluginOrganismAdd" project="100554" enhancement="enhancementStyle" folder="" />
+
+plugin-organism-add-100554 {
+
+    display: block;
+    padding: @space-16;
+    font-size: @font-size-16;
+
+    form-container {
+        background: @bg-primary-color;
+        color: @text-primary-color;
+        padding: 20px 24px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 14px;
+    }
+
+    .form-group label {
+        font-size: @font-size-16;
+        margin-bottom: 6px;
+    }
+
+    .form-group small {
+        font-size:  @font-size-12;
+        color: @text-primary-color-disabled;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 8px 10px;
+        border: 1px solid @grey-color;
+        border-radius: 6px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:disabled {
+        color: @text-primary-color;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        border-color: @active-color-focus;
+        box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 60px;
+    }
+
+    .btn-save {
+        width: 100%;
+        padding: 10px;
+        background: @active-color;;
+        color: #fff;
+        font-size: @font-size-16;
+        font-weight: 500;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-save:hover {
+        background: @active-color-hover;
+    }
+
+}
+
+
