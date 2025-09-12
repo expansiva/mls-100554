@@ -505,7 +505,6 @@ export class PluginCreateProject extends CollabLitElement {
 
           obj.fileInfo = obj.fileInfo || [];
           obj.fileInfo.push(newItem);
-          obj.repository_lastModified = new Date().toISOString(); // Atualiza timestamp
 
           const putReq = store.put(obj);
 
@@ -562,19 +561,50 @@ export class PluginCreateProject extends CollabLitElement {
     if (file.level !== 2) {
       file.inLocalStorage = true;
     }
+    await this.prepareToAddFileInfo(source.length, file);
+
     return file;
+  }
+
+  private async prepareToAddFileInfo(length: number, file: mls.stor.IFileInfo) {
+
+    const shortPath = `l${file.level}/${file.folder ? file.folder + '/' : ''}${file.shortName}${file.extension}`;
+    const data = {
+      Length: length,
+      shortPath,
+      versionRef: file.versionRef
+    };
+
+    await this.addFileInfoItem(file.project, data);
   }
 
 
   private async deleteOldFiles() {
 
+    const filesToDeleteCache: Set<string> = new Set();
     const keys = Object.keys(mls.stor.files).filter((key) => key.startsWith(`${mls.stor.LOCALPROJECTNUMBER}_`));
     for (let key of keys) {
       const storFile = mls.stor.files[key];
       mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true);
       await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
+      const ext = storFile.extension.replace('.ts', '.js');
+      let targetKey = `https://collab.codes/local/_${storFile.project}_${storFile.shortName}${ext}?v=`;
+      if (storFile.folder) targetKey = `https://collab.codes/local/_${storFile.project}_${storFile.folder}/${storFile.shortName}${ext}?v=`;
+      filesToDeleteCache.add(targetKey);
       delete mls.stor.files[key];
     }
+
+    const cacheName = 'mls-v2';
+    const cache = await caches.open(cacheName);
+    const keysCache = await cache.keys();
+    for (const request of keysCache) {
+      for (const targetKey of filesToDeleteCache) {
+        if (request.url.includes(targetKey)) {
+          await cache.delete(request);
+        }
+      }
+    }
+
   }
 
   private async migrateLocalFiles(oldProject: number, newProject: number) {
@@ -834,7 +864,7 @@ export class PluginCreateProject extends CollabLitElement {
     }
 
   }
-  
+
   private async onCreateProjectClick(e: MouseEvent) {
 
     e.preventDefault();
