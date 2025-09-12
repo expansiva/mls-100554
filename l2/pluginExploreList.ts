@@ -290,7 +290,7 @@ export class PluginExploreList extends PluginBaseModule {
         <div class="groupHeader">
             <header class="toolbar">
                 <div class="toolbar__left">
-                    <input name="projectFilter" class="toolbar__search" type="text" placeholder="Filter" @input="${this.filterLiChange}">
+                    <input name="projectFilter" class="toolbar__search" type="text" placeholder="Filter" autocomplete="off" @input="${this.filterLiChange}">
                 </div>
 
                 <div class="toolbar__center">
