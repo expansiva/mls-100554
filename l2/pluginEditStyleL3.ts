@@ -110,7 +110,6 @@ export class PluginEditStyleL3 extends PluginBaseModule {
     //-------- IMPLEMENTATION --------------
 
     public async forceUpdate() {
-        debugger;
         this.error = '';
         await this.updateComplete;
         this.init();
