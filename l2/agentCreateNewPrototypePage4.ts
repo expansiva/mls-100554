@@ -151,6 +151,8 @@ async function updateFiles(context: mls.msg.ExecutionContext, step: mls.msg.AIPa
     const shortName = obj.shift();*/
 
     const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
+    const keyless = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.less');
+    const keyhtml = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.html');
 
     if (!mls.stor.files[key]) throw new Error(`Erro [${agentName}] updateFiles: not found stor `);
 
@@ -160,7 +162,12 @@ async function updateFiles(context: mls.msg.ExecutionContext, step: mls.msg.AIPa
     let models = mls.editor.getModels(project, shortName, folder);
     if (!models || !models.ts) {
 
+        if (mls.stor.files[keyless]) await createModel(mls.stor.files[keyless], true, false);
+
         await createModel(mls.stor.files[key], true, false);
+
+        if (mls.stor.files[keyhtml]) await createModel(mls.stor.files[keyhtml], true, false);
+        
         models = mls.editor.getModels(project, shortName, folder);
 
     }
