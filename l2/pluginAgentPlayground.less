@@ -11,6 +11,106 @@ plugin-agent-playground-100554 {
     height: calc(100% - 40px);
     position: relative;
 
+    .compare-wrap {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        height: 100%;
+        gap: 0;
+        /* colunas encostadas com divisor */
+        overflow-x: auto;
+        /* permite slide horizontal */
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #fafafa;
+
+
+        .pane {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #ddd;
+            background: white;
+        }
+
+        .pane:last-child {
+            border-right: none;
+        }
+
+        .pane-header {
+            padding: 0.5rem;
+            font-weight: bold;
+            font-size: 0.9rem;
+            background: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .pane-content {
+            flex: 1 1 auto;
+            padding: 0.75rem;
+            overflow-y: auto;
+            /* scroll interno se o texto for muito grande */
+            white-space: pre-wrap;
+            /* preserva quebras de linha */
+            word-break: break-word;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+    }
+
+    .group-list {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+
+        select {
+            padding: 0.4rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+    }
+
+    .group {
+        background: #fafafa;
+        display: flex;
+        flex-direction: row;
+        gap: .5rem;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+
+        select {
+            width: 65%;
+            padding: 0.4rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    }
+
     textarea {
         width: calc(100% - 1rem);
         height: calc(100% - 1rem);
@@ -303,20 +403,20 @@ plugin-agent-playground-100554 {
                 align-items: center;
                 justify-content: center;
                 fill: #737373;
-                cursor: grab;                
+                cursor: grab;
                 width: 30px;
                 position: absolute;
                 left: -28px;
                 z-index: 9999;
             }
 
-            &[open] .moveelement{
-                display:none!important;
+            &[open] .moveelement {
+                display: none !important;
             }
 
             summary {
 
-                &:hover .moveelement{
+                &:hover .moveelement {
                     display: flex;
                 }
 
