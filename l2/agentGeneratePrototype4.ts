@@ -99,8 +99,8 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
   if (!step) throw new Error(`[${agentName}](afterPrompt) No in progress interaction found.`);
 
   context = await updateStepStatus(context, step.stepId, "completed", "no more agents");
+  context = await createPage(context);
   notifyTaskChange(context);
-  await createPage(context);
 
   if (!context.task) throw new Error(`[${agentName}](afterPrompt) Invalid context task`);
   const nextPage = context.task?.iaCompressed?.longMemory['next_page'] ? +(context.task?.iaCompressed?.longMemory['next_page']) : -1;
@@ -192,7 +192,7 @@ async function createPage(context: mls.msg.ExecutionContext) {
   }
 
   const organismUsed = extractOrganismTags(finalSource);
-  await updateLongMemory(context, organismUsed, actualTaskIndex);
+  context.task = await updateLongMemory(context, organismUsed, actualTaskIndex, shortName1, step.stepId );
   await generateFiles(step, context.task, payload4, payload3, finalSource, organismUsed, projectToSave, folder, groupName, shortName1, actualTaskIndex);
   return context;
 }
@@ -223,15 +223,27 @@ async function getPrompts(payload3: PayLoad3, organismDeclared: string[], pageIn
   return prompts;
 }
 
-async function updateLongMemory(context: mls.msg.ExecutionContext, newOrganism: string[], actualTaskIndex: number) {
+async function updateLongMemory(context: mls.msg.ExecutionContext, newOrganism: string[], actualTaskIndex: number, pageName:string, stepId: number) {
   const byLongMemory = context.task?.iaCompressed?.longMemory['organism_created'];
+  const pagesCreated = context.task?.iaCompressed?.longMemory['pages_created'];
+
   const data = (byLongMemory ? JSON.parse(byLongMemory) : []) as string[]
+  const dataPagesCreated = (pagesCreated ? JSON.parse(pagesCreated) : {}) as Record<number, string>
+
   const newOrganismData: string[] = [...data].concat(newOrganism);
   const newOrganismArr = Array.from(new Set(newOrganismData))
   if (actualTaskIndex !== undefined && actualTaskIndex > -1) {
     actualTaskIndex = actualTaskIndex + 1;
   }
-  const task = await appendLongTermMemory(context, { 'organism_created': JSON.stringify(newOrganismArr), 'next_page': actualTaskIndex.toString() });
+
+  if (!dataPagesCreated[stepId]) dataPagesCreated[stepId] = pageName;
+  
+  const task = await appendLongTermMemory(context, {
+    'organism_created': JSON.stringify(newOrganismArr),
+    'next_page': actualTaskIndex.toString(),
+    'pages_created': JSON.stringify(dataPagesCreated),
+  });
+
   context.task = task;
   return task;
 }
@@ -296,9 +308,9 @@ async function getAllImages(
   return resolved;
 }
 
-export function getPayload4(context: mls.msg.ExecutionContext): PayLoad4 {
-  if (!context || !context.task) throw new Error(`[${agentName}](getPayload) Invalid context`);
-  const agentStep = getAgentStepByAgentName(context.task, agentName); // Only one agent execution must exist in this task
+export function getPayload4(task: mls.msg.TaskData, stepId: number): PayLoad4 {
+  if (!task) throw new Error(`[${agentName}](getPayload) Invalid task`);
+  const agentStep = getStepById(task, stepId); // Only one agent execution must exist in this task
   if (!agentStep) throw new Error(`[${agentName}](getPayload) no agent found`);
 
   // get result
@@ -1690,6 +1702,7 @@ function getPayload3Mock(): PayLoad3 {
 
 export interface PayLoad4 {
   pageHtml: string,
+  organismToImplement: string[],
   images: Images[]
 }
 

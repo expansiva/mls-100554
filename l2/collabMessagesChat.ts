@@ -1545,7 +1545,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
 
     private onTaskDetailsClose = async (_e: Event) => {
+        const taskId = (_e as CustomEvent).detail;
         clearServiceDetails();
+        if (taskId) {
+            this.taskToOpen = taskId;
+            this.openTask();
+        }
     };
 
     private onThreadChange = async (e: Event) => {

@@ -1,0 +1,67 @@
+/// <mls shortName="agentGeneratePrototypeFeedback" project="100554" enhancement="enhancementStyle" folder="" />
+
+agent-generate-prototype-feedback-100554 {
+    display: block;
+    padding: 1rem;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+
+    .feedback-section {
+
+        h3 {
+            margin: 0;
+
+        }
+
+        a{
+            color: @active-color;
+            &:hover{
+                color: @active-color-hover;
+            }
+        }
+
+        ul {
+            list-style: none;
+            margin-block-start: .5em;
+
+            li {
+                padding: .2rem;
+            }
+        }
+
+
+        .loader {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border: 2px solid #ccc;
+            border-top: 2px solid #333;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    }
+
+
+
+
+    .feedback-wrapper {
+        padding: 1rem;
+        font-size: 13px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .feedback-wrapper .feedback-natural ul {
+        list-style: none;
+    }
+
+    .feedback-wrapper .feedback-natural ul li {}
+
+}
+
+

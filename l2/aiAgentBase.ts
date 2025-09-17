@@ -1,5 +1,7 @@
 /// <mls shortName="aiAgentBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
+import {  TemplateResult } from 'lit'; 
+
 export interface IAgent {
   visibility: 'public' | 'private';
   agentName: string;
@@ -14,6 +16,8 @@ export interface IAgent {
   installBot?(context: mls.msg.ExecutionContext): Promise<boolean>;
   beforeBot?(context: mls.msg.ExecutionContext, msg: string, toolsBeforeSendMessage: mls.bots.ToolsBeforeSendMessage[]): Promise<Record<string, any>>;
   replayForSupport?(task: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void>;
+  
+  getFeedBack?(task: mls.msg.TaskData): Promise<TemplateResult>;
 }
 
 export interface ITool {
