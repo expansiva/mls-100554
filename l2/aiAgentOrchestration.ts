@@ -68,7 +68,7 @@ export async function startNewAiTask(
 
     } catch (error: any) {
         onError(context, 1, error.message, oldContextCreateAt);
-        throw new Error(`[${agentName}](startNewAiTask) ${ error.message || error }`);
+        throw new Error(`[${agentName}](startNewAiTask) ${error.message || error}`);
     }
 }
 
@@ -78,7 +78,7 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
     try {
         if (!context || !context.message || !context.task) throw new Error(`[${agentName}(startNewInteractionInAiTask) Invalid context`);
         if (!agentName) throw new Error(`[${agentName}(startNewInteractionInAiTask) agentName is null`);
-        if (!context.task.messageid_created) throw new Error(`[${agentName}(startNewInteractionInAiTask)context.task.messageid_created is null`); 
+        if (!context.task.messageid_created) throw new Error(`[${agentName}(startNewInteractionInAiTask)context.task.messageid_created is null`);
         const args: mls.msg.RequestAddTaskAIInteraction = {
             action: "addTaskAIInteraction",
             userId: getUserId() || context.task.owner,
@@ -104,7 +104,7 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
         await afterPrompt(context);
     }
     catch (error: any) {
-        const msg = `${ error.message || '' }`;
+        const msg = `${error.message || ''}`;
         onError(context, stepFather, msg);
         console.error(msg);
     }
@@ -135,7 +135,7 @@ export async function addNewStep(context: mls.msg.ExecutionContext, parentStepId
         return context;
 
     } catch (error: any) {
-        const msg = `${ error.message || '' }`;
+        const msg = `${error.message || ''}`;
         onError(context, parentStepId, msg);
         console.error(msg);
     }
@@ -208,22 +208,22 @@ async function executeNextTool(context: mls.msg.ExecutionContext, step: mls.msg.
     const rc: IExecuteToolReturn = await executeTool(step.toolName, step.args);
 
     if (rc.status !== true) {
-        const traceMsg = `Error executing tool ${ step.toolName }: ${ rc.error } `;
+        const traceMsg = `Error executing tool ${step.toolName}: ${rc.error} `;
         console.error(traceMsg);
         context = await updateStepStatus(context, step.stepId, "failed", traceMsg);
         if ((mls as any).istraceAgent) console.log(JSON.stringify(context.task, null, 2));
         return;
     }
 
-    if (typeof rc.result !== "string") throw new Error(`Tool ${ step.toolName } did not return a string`);
+    if (typeof rc.result !== "string") throw new Error(`Tool ${step.toolName} did not return a string`);
     const existResults = rc.result.length > 0;
     if (existResults) {
 
         const interactionStepId = getInteractionStepId(context.task, step.stepId);
-        if (!interactionStepId) throw new Error(`[executeNextTool] Interaction step not found for stepId ${ step.stepId }`);
+        if (!interactionStepId) throw new Error(`[executeNextTool] Interaction step not found for stepId ${step.stepId}`);
 
         const stepdIdToChangeStatus = step.stepId;
-        if (!interactionStepId) throw new Error(`[executeNextTool] Interaction step not found for stepId ${ step.stepId }`);
+        if (!interactionStepId) throw new Error(`[executeNextTool] Interaction step not found for stepId ${step.stepId}`);
         const stepInteraction = getStepById(context.task, interactionStepId);
         if (!stepInteraction || stepInteraction.type !== 'agent') throw new Error('Interaction must be type: agent');
         const oldPrompt = stepInteraction.interaction?.input.find((item) => item.type === 'human');
@@ -231,7 +231,7 @@ async function executeNextTool(context: mls.msg.ExecutionContext, step: mls.msg.
         const newStep: mls.msg.AIPayload = {
             type: 'agent',
             agentName: stepInteraction.agentName,
-            prompt: `${ oldPrompt?.content } \n\n Response from tool ${ step.toolName }: ${ rc.result } `,
+            prompt: `${oldPrompt?.content} \n\n Response from tool ${step.toolName}: ${rc.result} `,
             status: 'pending',
             stepId: getNextStepIdAvaliable(context.task),
             interaction: null,
@@ -272,7 +272,7 @@ export async function executeTool(toolName: string, args: string): Promise<IExec
         }
         rc.status = true;
     } catch (error: any) {
-        console.error(`[executeTool] ${ error.message || error } `);
+        console.error(`[executeTool] ${error.message || error} `);
         rc.error = error.message || error;
     }
     return rc;
@@ -284,13 +284,13 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
 
     try {
 
-        const info = mls.l2.getPath(`_${ mls.actualProject }_${ step.agentName } `); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
+        const info = mls.l2.getPath(`_${mls.actualProject}_${step.agentName} `); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
         const agent = await loadAgent(info.shortName, info.folder);
-        if (!agent) throw new Error(`[${agentName}](executeNextAgent) createAgent function not found in ${ mls.actualProject } ${ step.agentName } `);
+        if (!agent) throw new Error(`[${agentName}](executeNextAgent) createAgent function not found in ${mls.actualProject} ${step.agentName} `);
         await agent.beforePrompt(context);
 
     } catch (error: any) {
-        const msg = `${ error.message || '' }`;
+        const msg = `${error.message || ''}`;
         onError(context, step.stepId, msg);
         console.error(msg);
 
@@ -302,14 +302,14 @@ export async function loadAgent(shortName: string, folder: string = ''): Promise
     try {
 
         const module = await loadModuleFromProjectOrDependency(shortName, folder, '.ts');
-        if (typeof module.createAgent !== "function") throw new Error(`(loadAgent) createAgent function not found in ${ shortName }`);
+        if (typeof module.createAgent !== "function") throw new Error(`(loadAgent) createAgent function not found in ${shortName}`);
         const agent = module.createAgent();
-        if (typeof agent.beforePrompt !== "function") throw new Error(`(loadAgent) beforePrompt function not found in ${ shortName }`); 
-        if (typeof agent.afterPrompt !== "function") throw new Error(`(loadAgent) afterPrompt function not found in ${ shortName }`); 
+        if (typeof agent.beforePrompt !== "function") throw new Error(`(loadAgent) beforePrompt function not found in ${shortName}`);
+        if (typeof agent.afterPrompt !== "function") throw new Error(`(loadAgent) afterPrompt function not found in ${shortName}`);
         return agent;
 
     } catch (error: any) {
-        console.error(`[loadAgent] ${ error.message || error } `);
+        console.error(`[loadAgent] ${error.message || error} `);
         return undefined;
 
     }
@@ -320,11 +320,11 @@ export async function loadTool(shortName: string): Promise<any | undefined> {
 
     try {
         const module = await loadModuleFromProjectOrDependency(shortName, '', '.ts');
-        if (typeof module.createTool !== "function") throw new Error(`createTool function not found in ${ shortName } `);
+        if (typeof module.createTool !== "function") throw new Error(`createTool function not found in ${shortName} `);
         const tool = module.createTool();
         return tool;
     } catch (error: any) {
-        console.error(`[loadTool] ${ error.message || error } `);
+        console.error(`[loadTool] ${error.message || error} `);
         return undefined;
     }
 
@@ -335,12 +335,12 @@ async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls
     if (!step.agentName) throw new Error(`[${agentName}](executeAgentFunction) Agent name is missing`);
 
     try {
-        const info = mls.l2.getPath(`_${ mls.actualProject }_${ step.agentName } `); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
+        const info = mls.l2.getPath(`_${mls.actualProject}_${step.agentName} `); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
         const agent = await loadAgent(info.shortName, info.folder) as any;
-        if (typeof agent[functionName] !== "function") throw new Error(`[${agentName}](executeAgentFunction) ${ functionName } function not found in ${ step.agentName } `);
+        if (typeof agent[functionName] !== "function") throw new Error(`[${agentName}](executeAgentFunction) ${functionName} function not found in ${step.agentName} `);
         return await agent[functionName](context, stepId, args);
     } catch (error: any) {
-        console.error(`[${agentName}](executeAgentFunction)  ${ error.message || error } `);
+        console.error(`[${agentName}](executeAgentFunction)  ${error.message || error} `);
     }
 
 }
@@ -431,7 +431,7 @@ export async function postBackClarification(
     if (action === "cancel") {
 
         const messageId: string | undefined = ret.context.task?.messageid_created;
-        if (!messageId) throw new Error(`[${agentName}](postBackClarification) Invalid messageId`); 
+        if (!messageId) throw new Error(`[${agentName}](postBackClarification) Invalid messageId`);
 
         const resp = await mls.api.msgUpdateStepStatus({
             messageId,
@@ -445,11 +445,11 @@ export async function postBackClarification(
         ret.context.task = resp.task;
         await notifyTaskChange(ret.context);
 
-        dispatchDetailsTaskClose();
+        dispatchDetailsTaskClose(taskId);
         return;
     }
     if (ret.step.type !== "clarification") throw new Error(`[${agentName}](postBackClarification) Clarification step not not found`);
-    dispatchDetailsTaskClose();
+    dispatchDetailsTaskClose(taskId);
     return await executeAgentFunction(ret.context, ret.interaction, "afterClarification", ret.step.stepId, clarification);
 
 }
@@ -460,7 +460,7 @@ export async function startClarification(context: mls.msg.ExecutionContext, step
     if (!context.task) throw new Error(`[${agentName}](startClarification) Invalid context.task`);
 
     const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
-    if (!step || step.type !== "clarification") throw new Error(`[${agentName}](startClarification) Invalid step: ${ stepId } on task: ${ context.task.PK }`);
+    if (!step || step.type !== "clarification") throw new Error(`[${agentName}](startClarification) Invalid step: ${stepId} on task: ${context.task.PK}`);
     let clarification: ClarificationValue;
     try {
         let ret: any = step.json;
@@ -476,7 +476,7 @@ export async function startClarification(context: mls.msg.ExecutionContext, step
     }
     catch (e) {
         console.error(e);
-        throw new Error(`[${agentName}](startClarification) Invalid step: ${ stepId } on task: ${ context.task.PK }, json clarification invalid`);
+        throw new Error(`[${agentName}](startClarification) Invalid step: ${stepId} on task: ${context.task.PK}, json clarification invalid`);
     }
 
     const div: HTMLDivElement = document.createElement('div');
@@ -492,13 +492,13 @@ export async function endClarification(clarification: ClarificationValue, action
     // call agent afterClarification
 
     const taskId: string | null = clarification.taskId || '';
-    if (!taskId) throw new Error(`[${agentName}](endClarification) Invalid call arguments, no taskId`); 
+    if (!taskId) throw new Error(`[${agentName}](endClarification) Invalid call arguments, no taskId`);
     const ret = await getAgentContext(taskId);
-    if (ret.step.type !== "clarification") throw new Error(`[${agentName}](endClarification)  Clarification step not not found`);  
+    if (ret.step.type !== "clarification") throw new Error(`[${agentName}](endClarification)  Clarification step not not found`);
 
-    dispatchDetailsTaskClose();
     if (action === "continue") {
         await executeAgentFunction(ret.context, ret.interaction, "afterClarification", clarification.stepId, clarification);
+        dispatchDetailsTaskClose(taskId);
         return;
     }
 
@@ -517,6 +517,8 @@ export async function endClarification(clarification: ClarificationValue, action
     });
     ret.context.task = resp.task;
     notifyTaskChange(ret.context);
+    dispatchDetailsTaskClose(taskId);
+
 }
 
 export function toLLMClarification(value: ClarificationValue) {

@@ -1,5 +1,5 @@
 /// <mls shortName="collabMessagesTaskInfo" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
- 
+
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
@@ -9,13 +9,14 @@ import { getNextPendentStep, getNextClarificationStep, getInteractionStepId, get
 import './_100554_collabMessagesTaskDetails';
 import './_100554_pluginTaskPreview';
 import './_100554_pluginTaskLogPreview';
+
 @customElement('collab-messages-task-info-100554')
 export class WidgetAiInteraction100554 extends StateLitElement {
 
     private elParent: HTMLElement | undefined;
     private forceViewRaw = false;
     private isClarificationPending = false;
-    private hasTodo = false;
+    private hasTodo = true;
 
     @property() task: mls.msg.TaskData | undefined = undefined;
     @property() message: mls.msg.Message | undefined = undefined;
@@ -32,7 +33,7 @@ export class WidgetAiInteraction100554 extends StateLitElement {
         super.connectedCallback();
         this.elParent = this.closest('collab-messages-chat-100554') as HTMLElement;
         if (this.elParent) this.elParent.style.width = '100%';
-        
+
     }
 
     disconnectedCallback() {
@@ -45,11 +46,8 @@ export class WidgetAiInteraction100554 extends StateLitElement {
         if (this.interactionClarification) {
             this.setClarification();
         }
-
         if (this.task && this.task.status === 'in progress' && this.activeTab !== 'todo') {
             this.activeTab = 'todo';
-            this.hasTodo = true;
-
         }
     }
 
@@ -65,21 +63,21 @@ export class WidgetAiInteraction100554 extends StateLitElement {
 
         if (this.isClarificationPending && !this.forceViewRaw) return this.renderDirectClarification();
 
-        
+
 
         return this.renderTab();
     }
 
     renderTab() {
 
-        let aux:any = '';
+        let aux: any = '';
 
         if (this.hasTodo) {
             aux = html`
             <div class="tab ${this.activeTab === 'todo' ? 'active' : ''}" @click=${() => this.setTab('todo')} >Todo</div>`;
         }
         return html`
-            ${this.isClarificationPending ? html`<button class="viewraw" @click=${()=>this.clickForceViewRaw(false)}>Clarification</button>` : ''}
+            ${this.isClarificationPending ? html`<button class="viewraw" @click=${() => this.clickForceViewRaw(false)}>Clarification</button>` : ''}
             <div style="height: calc(100% - 3rem);">
                 <div class="tabs">
                     ${aux}
@@ -103,7 +101,7 @@ export class WidgetAiInteraction100554 extends StateLitElement {
             </div>
         `;
 
-        
+
     }
 
     renderTabContent() {
@@ -133,7 +131,7 @@ export class WidgetAiInteraction100554 extends StateLitElement {
         const payload = getNextClarificationStep(this.task);
         if (!payload) return html``;
         return html`
-        <button class="viewraw" @click=${()=>this.clickForceViewRaw(true)}>View raw</button>
+        <button class="viewraw" @click=${() => this.clickForceViewRaw(true)}>View raw</button>
         <div class="direct-clarification">${this.renderClarification(payload)}
         </div>`
     }

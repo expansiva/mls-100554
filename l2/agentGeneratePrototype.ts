@@ -1,14 +1,18 @@
-/// <mls shortName="agentGeneratePrototype" project="100554" enhancement="_blank" />
+/// <mls shortName="agentGeneratePrototype" project="100554" enhancement="_100554_enhancementLit" />
 
+import { html, TemplateResult, unsafeHTML } from 'lit';
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getPromptByHtml } from './_100554_aiPrompts';
 import './_100554_widgetQuestionsForClarification';
+import './_100554_agentGeneratePrototypeFeedback';
 
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
     getAgentStepByAgentName,
     getNextStepIdAvaliable,
+    getInteractionStepId,
+    getStepById,
     notifyTaskChange,
     updateStepStatus,
     updateTaskTitle
@@ -32,7 +36,7 @@ export function createAgent(): IAgent {
         avatar_url: svg_agent,
         agentDescription: "Agent for create a new Module",
         visibility: "public",
-        scope: ["l2_preview","l3_preview", "l4_preview", "l7_preview"],
+        scope: ["l2_preview", "l3_preview", "l4_preview", "l7_preview"],
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _beforePrompt(context);
         },
@@ -44,7 +48,11 @@ export function createAgent(): IAgent {
         },
         async afterClarification(context: mls.msg.ExecutionContext, stepId: number, clarification: ClarificationValue): Promise<void> {
             return _afterClarification(context, stepId, clarification);
+        },
+        async getFeedBack(task: mls.msg.TaskData): Promise<TemplateResult> {
+            return _getFeedBack(task);
         }
+
     };
 }
 
@@ -71,11 +79,16 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
     if (!step) throw new Error(`[${agentName}](afterPrompt) No in progress interaction found.`);
     context = await updateStepStatus(context, step.stepId, "completed");
-    if(context.task) context.task = await updateTaskTitle(context.task, "Waiting for user");
+    if (context.task) context.task = await updateTaskTitle(context.task, "Waiting for user");
     notifyTaskChange(context);
     await executeNextStep(context);
 }
 
+const _getFeedBack = async (task: mls.msg.TaskData): Promise<TemplateResult> => {
+    if (!task) throw new Error(`[${agentName}](getFeedBack) Invalid task`);
+    // await import('./_100554_agentGeneratePrototypeFeedback');
+    return html`<agent-generate-prototype-feedback-100554 .task=${task}></agent-generate-prototype-feedback-100554>`
+}
 
 const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number, readOnly: boolean): Promise<HTMLDivElement | null> => {
     const projectStart = context.task?.iaCompressed?.longMemory['project'];

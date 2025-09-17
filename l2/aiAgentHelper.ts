@@ -5,8 +5,6 @@ import { getUserId, createThread } from "./_100554_collabMessageHelper";
 import { getThreadByName } from './_100554_msgDBController';
 import { loadAgent } from './_100554_aiAgentOrchestration';
 
-
-
 /**
  * Helper function to collect all steps from a task in a flat array
  */
@@ -89,6 +87,13 @@ export const getNextInProgressStepByAgentName = (task: mls.msg.TaskData, agentNa
   const agentSteps = allSteps.filter((step): step is mls.msg.AIAgentStep => step.type === 'agent');
   return agentSteps.find(step => step.status === 'in_progress' && step.agentName === agentName) || null;
 }
+
+export const getRootAgent = (task: mls.msg.TaskData): mls.msg.AIAgentStep | null => {
+  const allSteps = getAllSteps(task.iaCompressed?.nextSteps);
+  const agentSteps = allSteps.filter((step): step is mls.msg.AIAgentStep => step.type === 'agent');
+  return agentSteps[0] || null;
+}
+
 
 export const getInteractionStepId = (task: mls.msg.TaskData, stepId: number): number | null => {
   // nextSteps []
@@ -370,9 +375,10 @@ export function notifyThreadCreate(thread: mls.msg.Thread): void {
   scopeWindow.dispatchEvent(event);
 }
 
-export function dispatchDetailsTaskClose(): void {
+export function dispatchDetailsTaskClose(taskId: string): void {
   const scopeWindow = window?.top ? window.top : window;
   const event = new CustomEvent('task-details-close', {
+    detail: taskId,
     bubbles: true,
     composed: true
   });
@@ -438,7 +444,7 @@ export function getNextStepIdAvaliable(task: mls.msg.TaskData): number {
 }
 
 
-export async function executeAgentByFile(agentName: string, prompt: string, file: mls.stor.IFileInfo, openMsg:boolean = false) {
+export async function executeAgentByFile(agentName: string, prompt: string, file: mls.stor.IFileInfo, openMsg: boolean = false) {
 
   const pageName = file.folder ? `_${file.project}_${file.folder}/${file.shortName}` : `${file.project}_${file.shortName}`;
 
@@ -460,11 +466,11 @@ export async function executeAgentByFile(agentName: string, prompt: string, file
 
   if (openMsg) {
     agent.beforePrompt(context);
-    mls.events.fire([mls.actualLevel], 'collabMessages' as any, JSON.stringify({ threadId: threadId, taskId: 'last', type: 'thread-open'}));
+    mls.events.fire([mls.actualLevel], 'collabMessages' as any, JSON.stringify({ threadId: threadId, taskId: 'last', type: 'thread-open' }));
   } else {
     await agent.beforePrompt(context);
   }
-  
+
 
 }
 
