@@ -168,8 +168,8 @@ export async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageIn
     }
 }
 
-export async function getPromptByHtml(dt: { project: number, shortName: string, folder: string, data?: any }): Promise<mls.msg.IAMessageInputType[]> {
-
+export async function getPromptByHtml(dt: { project: number, shortName: string, folder: string, data?: any, group?:string }): Promise<mls.msg.IAMessageInputType[]> {
+    
 
     if (!dt.project || !dt.shortName) throw new Error(`[getPromptByHtml]: incomplete parameters.`);
     const keyFile = mls.stor.getKeyToFiles(dt.project, 2, dt.shortName, dt.folder, '.html');
@@ -184,11 +184,18 @@ export async function getPromptByHtml(dt: { project: number, shortName: string, 
     const itens = el.querySelectorAll('promptcustom');
     const ret: mls.msg.IAMessageInputType[] = [];
 
+    let hasGroup = false;
+    itens.forEach((item) => {
+        const itemGroup = item.getAttribute('group') as any;
+        if (itemGroup) hasGroup = true;
+    });
+
     itens.forEach((item) => {
         let cont = item.innerHTML;
         const tp = item.getAttribute('type') as any;
+        const itemGroup = item.getAttribute('group') as any;
 
-        if (tp === 'memory' || tp === 'prompt') return;
+        if (tp === 'memory' || tp === 'prompt' || (dt.group && dt.group !== itemGroup) || (!dt.group && hasGroup && itemGroup !== 'A')) return;
         cont = escape(cont);
 
         if (dt.data) {
