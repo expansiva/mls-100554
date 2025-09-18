@@ -254,9 +254,6 @@ export class Modules100554 extends StateLitElement {
 
           mls.actual[4].setFullName(fullName);
           mls.actual[7].setFullName(fullName);
-
-
-
           saveOpenedFile(project, 4, fullName);
           saveOpenedFile(project, 7, fullName);
 
@@ -264,7 +261,7 @@ export class Modules100554 extends StateLitElement {
 
       }
 
-      openService('_100554_servicePage', 'left', 4);
+      openService('_100554_servicePage', 'left', 4, { 'tab': 'navigation' });
 
     } catch (e) {
       openService('_100554_servicePage', 'left', 4);
