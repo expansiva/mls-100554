@@ -194,16 +194,20 @@ export function escapeHTML(str: string) {
         .replace(/>/g, "&gt;");
 }
 
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-export function openService(service: string, position: 'left' | 'right', level: number, args?: Record<string, string>) {
+export async function openService(service: string, position: 'left' | 'right', level: number, args?: Record<string, string>) {
+
     let page = top?.document.querySelector('collab-page');
     if (!page) return;
     const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
     if (!toolbar) return;
     if (mls.actualLevel !== level) {
-        (toolbar as any).state[level][position] = service;
+        (toolbar as any).state[level][position] = '';
         selectLevel(level);
-        return;
+        await delay(100);
     }
     const item = toolbar.querySelector(`collab-nav-2-item[data-service="${service}"]`) as HTMLElement;
     const itemNav3Content = page.querySelector(`collab-nav-3-service[data-service="${service}"]`) as HTMLElement;

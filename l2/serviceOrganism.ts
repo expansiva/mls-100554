@@ -47,8 +47,6 @@ export class ServiceOrganism100554 extends ServiceBase {
     @property() activeTab: ITabType = 'icExplorer';
     @property() pluginNav: string = '';
     @property() pluginStyle: string = '';
-    @state() previousTabIndex: number = 1;
-
 
     constructor() {
         super();
@@ -94,9 +92,11 @@ export class ServiceOrganism100554 extends ServiceBase {
     }
 
     public onClickTabsNavigation(index: number, oldEl: HTMLElement, newEl: HTMLElement) {
+        this.activeTab = ESceneries[index] as ITabType;
         if (this.activeTab === 'icStyle') {
             const el = this.querySelector('plugin-edit-style-l3-100554') as PluginEditStyleL3;
             if (el && el.forceUpdate) el.forceUpdate();
+
         }
     }
 
@@ -107,7 +107,6 @@ export class ServiceOrganism100554 extends ServiceBase {
             const previousIndex = this.menu.tabs.previous !== undefined ? this.menu.tabs.previous : this.menu.tabs.selected;
             const oldTab = this.querySelector(`.tab-index-${previousIndex}`) as HTMLElement;
             const newTab = this.querySelector(`.tab-index-${index}`) as HTMLElement;
-            this.previousTabIndex = index;
             this.menu.tabNavigate(index, oldTab, newTab);
         }
     }
@@ -139,7 +138,24 @@ export class ServiceOrganism100554 extends ServiceBase {
 
     }
 
-    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+    async onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+
+        if (!visible) return;
+        const tab = this.getAttribute('tab');
+        await this.updateComplete;
+        if (tab &&
+            tab === 'navigation' &&
+            this.activeTab !== 'icNavigation' &&
+            this.menu &&
+            this.menu.setTabActive &&
+            this.menu.onClickTabs &&
+            this.menu.tabBack
+        ) {
+            this.removeAttribute('tab');
+            if (ESceneries[this.activeTab] > ESceneries.icNavigation) {
+                this.menu.tabBack();
+            } else this.menu.setTabActive(ESceneries.icNavigation);
+        }
 
     }
 
@@ -210,13 +226,6 @@ export class ServiceOrganism100554 extends ServiceBase {
     }
 
     renderContent() {
-        const tab = this.getAttribute('tab');
-        if (tab && tab === 'navigation' && this.menu && this.menu.setTabActive && this.menu.onClickTabs) {
-            this.removeAttribute('tab');
-            this.menu.onClickTabs(1);
-            this.menu.setTabActive(1);
-            this.previousTabIndex = 1;
-        }
 
         return html`
             <div>
@@ -276,7 +285,7 @@ export class ServiceOrganism100554 extends ServiceBase {
     //---------IMPLEMENTATION------------
 
     private onImproveCompleted() {
-    
+
     }
 
     private onNavigationOrganismAddClick() {

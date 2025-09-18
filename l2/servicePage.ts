@@ -64,6 +64,7 @@ export class ServicePage100554 extends ServiceBase {
     }
 
     public onClickTabsNavigation(index: number, oldEl: HTMLElement, newEl: HTMLElement) {
+        this.activeTab = ESceneries[index] as ITabType;
         if (this.activeTab === 'icNavigation') {
             const el = this.querySelector('plugin-page-navigation-100554') as any;
             if (el && el.firstUpdated) el.firstUpdated();
@@ -112,6 +113,20 @@ export class ServicePage100554 extends ServiceBase {
         if (this.activeTab === 'icNavigation') {
             const el = this.querySelector('plugin-page-navigation-100554') as any;
             if (el && el.firstUpdated) el.firstUpdated();
+        }
+        const tab = this.getAttribute('tab');
+        if (tab &&
+            tab === 'navigation' &&
+            this.activeTab !== 'icNavigation' &&
+            this.menu &&
+            this.menu.setTabActive &&
+            this.menu.onClickTabs &&
+            this.menu.tabBack
+        ) {
+            this.removeAttribute('tab');
+            if (ESceneries[this.activeTab] > ESceneries.icNavigation) {
+                this.menu.tabBack();
+            } else this.menu.setTabActive(ESceneries.icNavigation);
         }
     }
 
@@ -226,9 +241,7 @@ export class ServicePage100554 extends ServiceBase {
     private onL4EditEvents(ev: mls.events.IEvent) {
 
         if (!ev.desc || ev.level !== 4) return;
-
         const info = JSON.parse(ev.desc);
-
         if (!info || !info.action || !info.position || info.position === 'left') return;
 
         switch (info.action) {
@@ -247,8 +260,8 @@ export class ServicePage100554 extends ServiceBase {
         const fullName = folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`;
         mls.actual[3].setFullName(fullName);
         saveOpenedFile(project, 3, fullName);
-        selectLevel(3);
-        setTimeout(() => { openService('_100554_serviceOrganism', 'left', 3, { "tab": "navigation" }); }, 500)
+        // selectLevel(3);
+        setTimeout(() => { openService('_100554_serviceOrganism', 'left', 3, { "tab": "navigation" }); }, 500);
     }
 
 
