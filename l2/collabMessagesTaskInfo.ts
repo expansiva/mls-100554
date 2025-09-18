@@ -27,7 +27,7 @@ export class WidgetAiInteraction100554 extends StateLitElement {
     @query('.direct-clarification') directClarification: HTMLElement | undefined;
     @query('.direct-clarification .content') directClarificationContent: HTMLElement | undefined;
 
-    @state() private activeTab: 'workflow' | 'step' | 'raw' | 'todo' = 'step';
+    @state() private activeTab: 'workflow' | 'step' | 'raw' | 'todo' = 'todo';
 
     connectedCallback() {
         super.connectedCallback();
@@ -45,9 +45,6 @@ export class WidgetAiInteraction100554 extends StateLitElement {
         super.firstUpdated(changedProperties);
         if (this.interactionClarification) {
             this.setClarification();
-        }
-        if (this.task && this.task.status === 'in progress' && this.activeTab !== 'todo') {
-            this.activeTab = 'todo';
         }
     }
 

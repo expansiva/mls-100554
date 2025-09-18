@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { StateLitElement } from './l2/stateLitElement';
+import { StateLitElement } from './_100554_stateLitElement';
 import { getPayload3 } from './_100554_agentGeneratePrototype3';
 import { getPayload4, PayLoad4 } from './_100554_agentGeneratePrototype4';
 import { selectLevel, openService } from './_100554_libCommom';
@@ -16,22 +16,22 @@ import {
 /// **collab_i18n_start** 
 const message_pt = {
     loading: 'Carregando...',
-    agent1Title: 'Agente 1',
+    agent1Title: 'Agente (1/4)',
     agent1PromptAnalysis: 'Análise do prompt',
     agent1Clarification: 'Clarificação prompt (humano)',
 
-    agent2Title: 'Agente 2',
+    agent2Title: 'Agente (2/4)',
     agent2RequirementAnalysis: 'Análise de requisitos',
     agent2SecurityAnalysis: 'Análise de segurança',
     agent2Clarification: 'Clarificação prompt (humano)',
 
-    agent3Title: 'Agente 3',
+    agent3Title: 'Agente (3/4)',
     agent3ModulePlanning: 'Planejamento do módulo',
     agent3InterfacePlanning: 'Planejamento de interface',
     agent3PagePlanning: 'Planejamento de páginas',
     agent3DesignSystem: 'Definição do design system',
 
-    agent4Title: 'Agente 4',
+    agent4Title: 'Agente (4/4)',
     agent4CreatePages: 'Criação das páginas',
     agent4SeePage: 'Ver página',
 
@@ -41,22 +41,22 @@ const message_pt = {
 
 const message_en = {
     loading: 'Loading...',
-    agent1Title: 'Agent 1',
+    agent1Title: 'Agent (1/4)',
     agent1PromptAnalysis: 'Prompt analysis',
     agent1Clarification: 'Prompt clarification (human)',
 
-    agent2Title: 'Agent 2',
+    agent2Title: 'Agent (2/4)',
     agent2RequirementAnalysis: 'Requirements analysis',
     agent2SecurityAnalysis: 'Security analysis',
     agent2Clarification: 'Prompt clarification (human)',
 
-    agent3Title: 'Agent 3',
+    agent3Title: 'Agent (3/4)',
     agent3ModulePlanning: 'Module planning',
     agent3InterfacePlanning: 'Interface planning',
     agent3PagePlanning: 'Page planning',
     agent3DesignSystem: 'Design system definition',
 
-    agent4Title: 'Agent 4',
+    agent4Title: 'Agent (4/4)',
     agent4CreatePages: 'Page creation',
     agent4SeePage: 'See page',
 
@@ -114,20 +114,20 @@ export class AgentGeneratePrototypeFeedback100554 extends StateLitElement {
 
         return html`
         <section class="feedback-section">
-            <h3>## ${this.msg.agent1Title} ${this.agent1Running ? html`<span class="loader"></span>` : ''}</h3>
+            <h3>${this.msg.agent1Title} ${this.agent1Running ? html`<span class="loader"></span>` : ''}</h3>
             <ul>
                 <li>[ ${this.agent1Complete ? 'x' : ''} ] ${this.msg.agent1PromptAnalysis}</li>
                 <li>[ ${this.agent1ClarificationComplete ? 'x' : ''} ] ${this.msg.agent1Clarification}</li>
             </ul>
 
-            <h3>## ${this.msg.agent2Title} ${this.agent2Running ? html`<span class="loader"></span>` : ''}</h3>
+            <h3>${this.msg.agent2Title} ${this.agent2Running ? html`<span class="loader"></span>` : ''}</h3>
             <ul>
                 <li>[ ${this.agent2Complete ? 'x' : ''} ] ${this.msg.agent2RequirementAnalysis}</li>
                 <li>[ ${this.agent2Complete ? 'x' : ''} ] ${this.msg.agent2SecurityAnalysis}</li>
                 <li>[ ${this.agent2ClarificationComplete ? 'x' : ''} ] ${this.msg.agent2Clarification}</li>
             </ul>
 
-            <h3>## ${this.msg.agent3Title} ${this.agent3Running ? html`<span class="loader"></span>` : ''}</h3>
+            <h3>${this.msg.agent3Title} ${this.agent3Running ? html`<span class="loader"></span>` : ''}</h3>
             <ul>
                 <li>[ ${this.agent3Complete ? 'x' : ''} ] ${this.msg.agent3ModulePlanning}</li>
                 <li>[ ${this.agent3Complete ? 'x' : ''} ] ${this.msg.agent3InterfacePlanning}</li>
@@ -135,7 +135,7 @@ export class AgentGeneratePrototypeFeedback100554 extends StateLitElement {
                 <li>[ ${this.agent3Complete ? 'x' : ''} ] ${this.msg.agent3DesignSystem}</li>
             </ul>
 
-            <h3>## ${this.msg.agent4Title} ${this.agent4Running ? html`<span class="loader"></span>` : ''}</h3>
+            <h3>${this.msg.agent4Title} ${this.agent4Running ? html`<span class="loader"></span>` : ''}</h3>
             <ul>
                 <li>[ ${this.agent4Complete ? 'x' : ''} ] ${this.msg.agent4CreatePages}</li>
                 <ul>
@@ -169,10 +169,10 @@ export class AgentGeneratePrototypeFeedback100554 extends StateLitElement {
                 </ul>
             </ul>
 
-            ${this.task?.status === 'done' ? html`
-                <h3>## ${this.msg.nextStepsTitle}</h3>
-                <span>${this.msg.nextStepsMessage}</span>
-            ` : ''}
+    
+            <h3> ${this.msg.nextStepsTitle}</h3>
+            <span>${this.msg.nextStepsMessage}</span>
+        
         </section>
     `;
     }
