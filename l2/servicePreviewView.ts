@@ -451,7 +451,7 @@ export class ServicePreviewView extends StateLitElement {
 
             if (ext === '.less') {
                 const templateLess = getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
-                return createStorFile({ ...param, extension: '.less', source: templateLess }, true, true,false)
+                return createStorFile({ ...param, extension: '.less', source: templateLess }, true, true, false)
             }
 
             if (ext === '.html') {
@@ -490,13 +490,11 @@ export class ServicePreviewView extends StateLitElement {
 
         let ret;
 
-        //ret = await getDependenciesByHtml(this.models, txt, this.actualtheme, true);
         ret = await getDependenciesByHtmlFile(this.file, txt, this.actualtheme, true);
 
         const domVirtual = document.createElement('div');
         domVirtual.innerHTML = txt;
 
-        //const els = iframe.contentDocument.body.querySelectorAll('*');
         const els = domVirtual.querySelectorAll('*');
         els.forEach((el) => el.setAttribute('mls_origin', 'true'));
 
@@ -505,9 +503,7 @@ export class ServicePreviewView extends StateLitElement {
             console.log('Errors in compile:', JSON.stringify(ret.errors));
         }
 
-        //iframe.contentDocument.body.innerHTML = domVirtual.innerHTML;
-
-        iframe.contentDocument.body.innerHTML = '';
+        iframe.contentDocument.body.innerHTML = domVirtual.innerHTML;
 
         if (!(mls as any).modePreview) (mls as any).modePreview = 'singlePage';
 
@@ -517,9 +513,9 @@ export class ServicePreviewView extends StateLitElement {
             default: await this.modeMinimum(ret, iframe); break;
         }
 
-        Array.from(domVirtual.children).forEach((i) => {
+        /*Array.from(domVirtual.children).forEach((i) => {
             iframe.contentDocument?.body.appendChild(i);
-        })
+        })*/
 
         mls.events.fire(
             mls.actualLevel as any,

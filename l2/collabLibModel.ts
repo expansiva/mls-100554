@@ -30,7 +30,7 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
             promises.push(createAllModels(storFile, false, false));
         }
     }
-    
+
     const info = await mls.stor.localDB.readPrjInfo(baseProject);
     if (info && info.indexModules && info.indexModules !== '') {
         promises.push(_createProjectModel(baseProject, info.indexModules));
@@ -50,7 +50,7 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
 
 }
 
-export async function createAllModels(storFileBase: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile:boolean = false, createStorIfNeed:boolean = true): Promise<mls.editor.IModels | undefined> {
+export async function createAllModels(storFileBase: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile: boolean = false, createStorIfNeed: boolean = true): Promise<mls.editor.IModels | undefined> {
 
     const storFiles = await mls.stor.getFiles({ project: storFileBase.project, shortName: storFileBase.shortName, folder: storFileBase.folder, loadContent: true, });
 
@@ -94,7 +94,7 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
 
 }
 
-export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile:boolean = false): Promise<mls.editor.IModelBase | undefined> {
+export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile: boolean = false): Promise<mls.editor.IModelBase | undefined> {
 
     let fileModels = mls.editor.getModels(storFile.project, storFile.shortName, storFile.folder);
     const prop = mapExt[storFile.extension];
@@ -123,12 +123,24 @@ export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boo
             const modelTs = modelBase as mls.editor.IModelTS;
             if (modelTs && modelTs.compilerResults) modelTs.compilerResults.modelNeedCompile = true;
             if (!awaitCompile) mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
-            else await mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
+            else {
+                await mls.l2.typescript.compileAndPostProcess(modelBase, true, true);
+                const mts = (modelBase as mls.editor.IModelTS);
+                if (mts.compilerResults && mts.compilerResults.errors.length <= 0) {
+                    modelBase.storFile.hasError = false;
+                }
+            }
         }
 
         if (needCompile && modelBase.storFile.extension.endsWith('.less')) {
             if (!awaitCompile) mls.l2.less.compileStyle(modelBase);
-            else await mls.l2.less.compileStyle(modelBase);
+            else {
+                await mls.l2.less.compileStyle(modelBase);
+                const mts = (modelBase as mls.editor.IModelStyle);
+                if (mts.styleResults && mts.styleResults.errors.length <= 0) {
+                    modelBase.storFile.hasError = false;
+                }
+            }
         }
 
         return modelBase;
@@ -360,6 +372,8 @@ async function _updateModelStatusLess(modelBase: mls.editor.IModelStyle, changed
 
     const position: 'left' | 'right' | 'all' = _getPosition(modelBase.model.id, mapExt[modelBase.storFile.extension]);
 
+    const lastStatus = modelBase.styleResults ? modelBase.styleResults.errors.length > 0 : modelBase.storFile.hasError;
+
     modelBase.storFile.hasError = false;
 
     let modelValue = modelBase.model.getValue();
@@ -386,7 +400,7 @@ async function _updateModelStatusLess(modelBase: mls.editor.IModelStyle, changed
     await _checkSameContent(modelBase, modelBase.storFile);
     _dispatchEventChangedLess(position, modelBase.storFile)
     _dispatchEventEditorEvents(position, modelBase.storFile);
-    //_dispatchEventStatusOrErrorChanged(position, modelBase.storFile);
+    if (lastStatus) _dispatchEventStatusOrErrorChanged(position, modelBase.storFile);
 
 }
 
