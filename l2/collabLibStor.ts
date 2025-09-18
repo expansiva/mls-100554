@@ -22,7 +22,7 @@ export async function createStorFile(req: IReqCreateStorFile, needCreateModel: b
 
     let source = req.source;
     if (req.level === 2) {
-        verifyNeedAddTripleslach(params, req.source, req.extension)
+        source =  verifyNeedAddTripleslach(params, req.source, req.extension)
     }
     const fileInfo: mls.stor.IFileInfoValue = {
         content: source,

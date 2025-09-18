@@ -85,7 +85,7 @@ export async function validateStyle(modelStyle: mls.editor.IModelStyle) {
         }
     }
 
-    if (markers.length > 0) storFileLess.hasError = true;
+    if (markers.length > 0 || ( modelStyle.styleResults && modelStyle.styleResults.errors.length > 0)) storFileLess.hasError = true;
     setErrorOnEditor(markers, model, tagName);
 }
 
