@@ -6,6 +6,7 @@ import { notifyThreadChange } from './_100554_aiAgentHelper';
 import { setFavicon } from './_100554_collabInit';
 
 export const threadSyncMap = new Map<string, boolean>();
+let hasNotificationMessages: boolean = false;
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 
 export function removeThreadFromSync(threadId: string) {
@@ -32,10 +33,11 @@ export async function listenToThreadEvents() {
     notificationSound.volume = 1;
 
     navigator.serviceWorker.addEventListener('message', async (event) => {
+        console.info(event);
         if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] Received`)
         if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] Data`, event?.data)
         const id = event.data.id;
-        enqueueThreadForSync(event.data?.data?.threadId);
+        await enqueueThreadForSync(event.data?.data?.threadId);
 
         let isThreadOpened: boolean = false;
         if (mls.services['100554_serviceCollabMessages_left']) {
@@ -46,7 +48,8 @@ export async function listenToThreadEvents() {
             }
         }
 
-        if (!isThreadOpened) {
+        if (!isThreadOpened || (isThreadOpened && document.visibilityState === 'hidden') && hasNotificationMessages) {
+            hasNotificationMessages = false;
             setFavicon(true);
             mls.services['100554_serviceCollabMessages_left']?.toogleBadge(true, '_100554_serviceCollabMessages');
             const audioEnabled = loadNotificationPreferencesAudio();
@@ -68,7 +71,7 @@ export async function listenToThreadEvents() {
 
 function enqueueThreadForSync(threadId: string) {
     threadSyncMap.set(threadId, true);
-    scheduleNextSync();
+    return scheduleNextSync();
 }
 
 async function scheduleNextSync() {
@@ -88,7 +91,7 @@ async function scheduleNextSync() {
             console.error(`Erro ao sincronizar thread ${threadId}`, err);
         }
 
-        scheduleNextSync();
+        return scheduleNextSync();
     }, 500);
 }
 
@@ -140,6 +143,8 @@ export async function getThreadUpdateInBackground(threadId: string): Promise<voi
         }
         await addMessages(newMessages);
         notifyThreadChange(thread);
+        hasNotificationMessages = true;
+
 
     } catch (err: any) {
         throw new Error(err.message)

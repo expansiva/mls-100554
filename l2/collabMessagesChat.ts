@@ -44,6 +44,8 @@ import './_100554_collabMessagesAvatar';
 import './_100554_collabMessagesThreadDetails';
 import './_100554_collabMessagesRichPreview';
 import './_100554_collabMessagesUserModal';
+import './_100554_collabMessagesThreadModal';
+
 import './_100554_collabMessagesAdd';
 
 import { IChatPreferences, AGENTDEFAULT, PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
@@ -184,6 +186,8 @@ export class CollabMessagesChat100554 extends StateLitElement {
         window.removeEventListener('task-details-close', this.onTaskDetailsClose);
         window.removeEventListener('thread-change', this.onThreadChange);
         window.removeEventListener('message-send', this.onMessageSend);
+        document.removeEventListener("visibilitychange", this.onVisibilityChange.bind(this));
+
     }
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
@@ -192,6 +196,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         window.addEventListener('task-details-close', this.onTaskDetailsClose);
         window.addEventListener('thread-change', this.onThreadChange);
         window.addEventListener('message-send', this.onMessageSend);
+        document.addEventListener("visibilitychange", this.onVisibilityChange.bind(this));
     }
 
     render() {
@@ -292,7 +297,10 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
         return html`
         ${this.renderTopics()}
-        <div @scroll=${this.onChatScroll} class="chat-container">
+        <div
+        @scroll=${this.onChatScroll} class="chat-container"
+        @copy=${this.onCopyChat}
+        >
             ${Object.keys(sortedObj).map((key) => {
             const threadMessages = sortedObj[key];
             const messageTime = this.parseLocalDate(key);
@@ -394,6 +402,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         return html`
         <collab-messages-rich-preview-100554 
             @mention-hover=${this.onMentionHover}
+            @channel-hover=${this.onChannelHover}
             .allUsers=${this.usersAvaliables} 
             .allThreads=${this.allThreads}
             text="${text}"
@@ -444,10 +453,32 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     }
 
+    private async onChannelHover(ev: CustomEvent) {
+
+        this.removeAllUserModal();
+        if (!ev.detail || !ev.detail.value || !ev.detail.element) return;
+        const actualThreadModal = this.allThreads.find((thread) => thread.name === `#${ev.detail.value}`);
+        const rects = (ev.detail.element as HTMLElement).getBoundingClientRect();
+        const modal = document.createElement('collab-messages-thread-modal-100554');
+        (modal as any).thread = actualThreadModal;
+        this.appendChild(modal);
+        await (modal as LitElement).updateComplete;
+        const rectsModal = modal.getBoundingClientRect();
+        modal.style.top = (rects.top - rectsModal.height - rects.height - 70) + 'px';
+        modal.style.left = '20px';
+
+    }
+
     private removeAllUserModal() {
         const all = this.querySelectorAll('collab-messages-user-modal-100554');
         all.forEach((item) => item.remove());
     }
+
+    private removeAllChannelModal() {
+        const all = this.querySelectorAll('collab-messages-thread-modal-100554');
+        all.forEach((item) => item.remove());
+    }
+
 
     private renderMessageResultByLanguage(message: mls.msg.Message) {
 
@@ -791,6 +822,49 @@ export class CollabMessagesChat100554 extends StateLitElement {
         const newMessages = response?.data;
         this.hasMoreMessagesBefore = response?.hasMore || false;
         return newMessages;
+    }
+
+    private onCopyChat(ev: ClipboardEvent) {
+        ev.preventDefault();
+
+        const selection = window.getSelection();
+        if (!selection) return;
+        let container = document.createElement("div");
+        for (let i = 0; i < selection.rangeCount; i++) {
+            container.appendChild(selection.getRangeAt(i).cloneContents());
+        }
+
+        const items = container.querySelectorAll(".message-time, .message-card");
+        let result: string[] = [];
+        let lastAuthor = "";
+        let currentDate = "";
+
+        items.forEach(el => {
+            if (el.classList.contains("message-time")) {
+                currentDate = el.textContent?.trim() || '';
+                result.push(`--- ${currentDate} ---`);
+            } else {
+
+                const titleEl = el.querySelector(".message-title");
+                const timeEl = el.querySelector(".message-footer");
+                const contentEl = el.querySelector(".collab-md-message") as HTMLElement;
+
+                let author = titleEl?.textContent?.trim();
+                const content = contentEl?.innerText?.trim() || "";
+                const time = timeEl?.textContent?.trim() || "";
+
+                if (!author) author = lastAuthor;
+                else lastAuthor = author;
+
+                if (content) {
+                    result.push(`${time ? time : ''} ${author ? author : ''} ${content}`);
+                }
+            }
+        });
+
+        if (result.length > 0) {
+            ev.clipboardData?.setData("text/plain", result.join("\n"));
+        }
     }
 
     private async onChatScroll(e: Event) {
@@ -1604,6 +1678,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.updateMessage2(false, true, { ...message, footers: [] }, message, outputs);
     };
 
+    private onVisibilityChange() {
+        if (this.activeScenerie === 'details') {
+            this.checkNotificationsUnreadMessages();
+        }
+    }
 
 }
 
