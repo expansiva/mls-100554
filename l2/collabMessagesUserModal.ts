@@ -6,17 +6,37 @@ import { StateLitElement } from './_100554_stateLitElement';
 import { collab_message } from './_100554_collabIcons';
 import { createThreadDM, getDmThreadByUsers, addMessage } from './_100554_collabMessageHelper';
 
+/// **collab_i18n_start**
+const message_pt = {
+    loading: 'Carregando...',
+    message: 'Mensagem',
+}
+
+const message_en = {
+    loading: 'Loading...',
+    message: 'Message',
+
+}
+
+type MessageType = typeof message_en;
+const messages: { [key: string]: MessageType } = {
+    'en': message_en,
+    'pt': message_pt
+}
+/// **collab_i18n_end**
 
 @customElement('collab-messages-user-modal-100554')
 export class CollabMessagesUserModal100554 extends StateLitElement {
+
+    private msg: MessageType = messages['en'];
 
     @property({ type: Boolean }) open = true;
     @property() user?: mls.msg.User;
     @property() actualUserId?: string;
 
     @state() private isLoading: boolean = false;
-    @state() private errorMessage: string = ''; 
-    
+    @state() private errorMessage: string = '';
+
     private close() {
         this.open = false;
     }
@@ -42,6 +62,10 @@ export class CollabMessagesUserModal100554 extends StateLitElement {
     }
 
     render() {
+
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         if (!this.open) return null;
 
         return html`
@@ -68,7 +92,7 @@ export class CollabMessagesUserModal100554 extends StateLitElement {
                         class="collab-messages-user-modal-message-btn"
                         ?disabled=${this.isLoading}
                     >
-                        ${this.isLoading ? html`<span class="loader"></span>` : html`${collab_message} Message`}
+                        ${this.isLoading ? html`<span class="loader"></span>` : html`${collab_message} ${this.msg.message}`}
                     </button>
                 </div>`: ''
             }
@@ -90,7 +114,7 @@ export class CollabMessagesUserModal100554 extends StateLitElement {
             }
             this.destroy();
             await mls.events.fire([mls.actualLevel], 'collabMessages' as any, JSON.stringify({ threadId: thread?.threadId, type: 'thread-open' }));
-        } catch (err:any) {
+        } catch (err: any) {
             this.errorMessage = err.message;
         } finally {
             this.isLoading = false;
