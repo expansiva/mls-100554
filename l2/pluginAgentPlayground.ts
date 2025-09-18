@@ -22,6 +22,7 @@ export class AgentTester extends CollabLitElement {
     @query('#selCompare') selCompare: HTMLSelectElement | undefined;
 
     @state() private activeJudge: boolean = false;
+    @state() private msgSelectGroup: boolean = false;
     @state() private activeGroup: boolean = false;
     @state() private combinations: string[] = [];
     @state() private groups: string[] = [];
@@ -98,7 +99,7 @@ ${this.renderMode()}
 <strong>Agent:</strong> ${this._agent}
 <label style=" margin-left: 1rem; margin-top: 5px; display: flex; align-items: center; justify-content: center; font-weight: 600;">
     <input type="checkbox" .checked=${this.activeGroup}  @change=${this._onCheckboxChange} />
-    Active groups
+    Active compare
 </label>
 </div>
 
@@ -159,17 +160,22 @@ ${this.renderButonAdd()}
         if (!this.activeGroup) return html``;
         return html`
       <div class="group-list">
+        
         <label style="display: flex; align-items: center; justify-content: center; font-weight: 600;">
             <input type="checkbox" .checked=${this.activeJudge}  @change=${this._onCheckboxChangeJudge} />
             LLM judge
         </label>
-        <select id="selCompare">
-          <option value="">-- Select to compare --</option>
-          ${repeat(this.combinations, ((key: string) => key + 'comp') as any, ((g: string) => {
-            return html`<option value=${g} ?selected=${this.actualGrup === g}>${g.replace(';', ' x ')}</option>`
-        }) as any)}
-          
-        </select>
+            
+        <div style="position:relative">
+            <select id="selCompare" @change=${()=> this.msgSelectGroup = false}>
+            <option value="">-- Select to compare --</option>
+            ${repeat(this.combinations, ((key: string) => key + 'comp') as any, ((g: string) => {
+                return html`<option value=${g} ?selected=${this.actualGrup === g}>${g.replace(';', ' x ')}</option>`
+            }) as any)}
+            
+            </select>
+            <small style="color:red; position: absolute; top: 29px; left: 0;${this.msgSelectGroup ? '' : 'display:none'}">Select a comparison mode</small>
+        </div>
       </div>
     `;
     }
@@ -379,7 +385,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
 
     private async handlePlay() {
         this.loading = true;
-
+        this.msgSelectGroup = false;
         if (this.inEdit) {
             setTimeout(async () => {
                 this.handlePlay();
@@ -389,6 +395,11 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         try {
 
             const selectedGroups = this.selCompare && this.selCompare.value ? this.selCompare.value.split(';') : [];
+
+            if (selectedGroups.length <= 0 && this.activeGroup) {
+                this.msgSelectGroup = true;
+                return;
+            }
 
             if (selectedGroups.length <= 0 && !this.actualGrup) {
 
