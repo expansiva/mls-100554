@@ -826,7 +826,6 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
     private onCopyChat(ev: ClipboardEvent) {
         ev.preventDefault();
-
         const selection = window.getSelection();
         if (!selection) return;
         let container = document.createElement("div");
@@ -835,6 +834,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
         }
 
         const items = container.querySelectorAll(".message-time, .message-card");
+
+        if (items.length === 0) {
+            ev.clipboardData?.setData("text/plain", selection.toString());
+            return;
+        }
+
         let result: string[] = [];
         let lastAuthor = "";
         let currentDate = "";
@@ -848,16 +853,19 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 const titleEl = el.querySelector(".message-title");
                 const timeEl = el.querySelector(".message-footer");
                 const contentEl = el.querySelector(".collab-md-message") as HTMLElement;
+                const taskEl = el.querySelector('collab-messages-task-100554') as HTMLElement;
 
                 let author = titleEl?.textContent?.trim();
                 const content = contentEl?.innerText?.trim() || "";
                 const time = timeEl?.textContent?.trim() || "";
+                const task = taskEl?.getAttribute('taskid');
+
 
                 if (!author) author = lastAuthor;
                 else lastAuthor = author;
 
                 if (content) {
-                    result.push(`${time ? time : ''} ${author ? author : ''} ${content}`);
+                    result.push(`${time ? time : ''} ${author ? author : ''} ${content} ${task ? `(Task:${task})` : ''}`);
                 }
             }
         });
