@@ -825,6 +825,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private onCopyChat(ev: ClipboardEvent) {
+
         ev.preventDefault();
         const selection = window.getSelection();
         if (!selection) return;
@@ -833,9 +834,30 @@ export class CollabMessagesChat100554 extends StateLitElement {
             container.appendChild(selection.getRangeAt(i).cloneContents());
         }
 
-        const items = container.querySelectorAll(".message-time, .message-card");
+        const extractMessage = (el: HTMLElement) => {
+            const titleEl = el.querySelector(".message-title");
+            const timeEl = el.querySelector(".message-footer");
+            const contentEl = el.querySelector(".collab-md-message") as HTMLElement;
+            const taskEl = el.querySelector('collab-messages-task-100554') as HTMLElement;
+            let author = titleEl?.textContent?.trim();
+            const content = contentEl?.innerText?.trim() || "";
+            const time = timeEl?.textContent?.trim() || "";
+            const task = taskEl?.getAttribute('taskid');
+            return {
+                author,
+                content,
+                time,
+                task
+            }
+        }
 
+        const items = container.querySelectorAll(".message-time, .message-card");
         if (items.length === 0) {
+            const { author, content, task, time } = extractMessage(container);
+            if (content) {
+                const msg = `${time ? time : ''} ${author ? author : ''} ${content} ${task ? `(Task:${task})` : ''}`;
+                return ev.clipboardData?.setData("text/plain", msg);
+            }
             ev.clipboardData?.setData("text/plain", selection.toString());
             return;
         }
@@ -844,26 +866,15 @@ export class CollabMessagesChat100554 extends StateLitElement {
         let lastAuthor = "";
         let currentDate = "";
 
+
         items.forEach(el => {
             if (el.classList.contains("message-time")) {
                 currentDate = el.textContent?.trim() || '';
                 result.push(`--- ${currentDate} ---`);
             } else {
-
-                const titleEl = el.querySelector(".message-title");
-                const timeEl = el.querySelector(".message-footer");
-                const contentEl = el.querySelector(".collab-md-message") as HTMLElement;
-                const taskEl = el.querySelector('collab-messages-task-100554') as HTMLElement;
-
-                let author = titleEl?.textContent?.trim();
-                const content = contentEl?.innerText?.trim() || "";
-                const time = timeEl?.textContent?.trim() || "";
-                const task = taskEl?.getAttribute('taskid');
-
-
+                let { author, content, task, time } = extractMessage(el as HTMLElement);
                 if (!author) author = lastAuthor;
                 else lastAuthor = author;
-
                 if (content) {
                     result.push(`${time ? time : ''} ${author ? author : ''} ${content} ${task ? `(Task:${task})` : ''}`);
                 }
