@@ -33,10 +33,11 @@ export async function listenToThreadEvents() {
     notificationSound.volume = 1;
 
     navigator.serviceWorker.addEventListener('message', async (event) => {
-        console.info(event);
         if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] Received`)
         if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] Data`, event?.data)
         const id = event.data.id;
+        if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] : sendACK id: ${id}`);
+        await mls.stor.cache.sendACK(id);
         await enqueueThreadForSync(event.data?.data?.threadId);
 
         let isThreadOpened: boolean = false;
@@ -49,7 +50,6 @@ export async function listenToThreadEvents() {
         }
 
         if (!isThreadOpened || (isThreadOpened && document.visibilityState === 'hidden') && hasNotificationMessages) {
-            hasNotificationMessages = false;
             setFavicon(true);
             mls.services['100554_serviceCollabMessages_left']?.toogleBadge(true, '_100554_serviceCollabMessages');
             const audioEnabled = loadNotificationPreferencesAudio();
@@ -59,8 +59,8 @@ export async function listenToThreadEvents() {
             }
         }
 
-        if ((mls as any).isTraceNotification) console.info(`[NOTIFICATION] : sendACK id: ${id}`);
-        await mls.stor.cache.sendACK(id);
+        hasNotificationMessages = false;
+
 
     });
 
@@ -114,12 +114,12 @@ export async function getThreadUpdateInBackground(threadId: string): Promise<voi
 
         if (response.threadsPending) {
             for (let threadsPending of response.threadsPending) {
-                enqueueThreadForSync(threadsPending);
+                await enqueueThreadForSync(threadsPending);
             }
         }
 
         if (!response.messages || response.messages.length === 0) return;
-        
+
         const lastMessage = response.messages[response.messages.length - 1];
         const lastUnreadCount = threadDB && threadDB.unreadCount ? threadDB.unreadCount : 0;
 
