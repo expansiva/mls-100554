@@ -48,10 +48,10 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!context || !context.message) throw new Error("Invalid context");
     if (!context.task) {
 
-        
+
 
         let data = {};
-        const inputs = await getPrompts((context as any).group, data);
+        const inputs = await getPrompts(data);
 
         await startNewAiTask(
             agentName,
@@ -73,8 +73,8 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
     if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
 
-    const data = {};    
-    const inputs = await getPrompts((context as any).group, data); 
+    const data = {};
+    const inputs = await getPrompts(data);
     await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
 
 }
@@ -89,7 +89,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!context.task) throw new Error("Invalid context 2");
     const payload = getNextFlexiblePendingStep(context.task) as mls.msg.AIPayload | null;
 
-    if(payload) context = await updateStepStatus(context, payload.stepId, "completed");
+    if (payload) context = await updateStepStatus(context, payload.stepId, "completed");
     if (!context.task) throw new Error("Invalid context task");
     context.task = await updateTaskTitle(context.task, "Updating links");
 
@@ -102,14 +102,14 @@ const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls
     if (!step || step.type !== 'flexible') throw new Error('Invalid step for replay');
 }
 
-
-export async function getPrompts(group:string, info: any): Promise<mls.msg.IAMessageInputType[]> {
+async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[]> {
 
     if (!info) throw new Error(`Erro [${agentName}] getPrompts: invalid info`);
 
     const data = {};
 
-    const prompts = await getPromptByHtml({ project: 100554, shortName: agentName, folder: '', data, group })
+
+    const prompts = await getPromptByHtml({ project: 100554, shortName: agentName, folder: '', data })
     return prompts;
 }
 

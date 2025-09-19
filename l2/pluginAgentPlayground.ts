@@ -12,6 +12,7 @@ import { updateHTML } from './_100554_collabDOMSync';
 import { collab_trash } from './_100554_collabIcons';
 import { setState } from './_100554_collabState';
 @customElement('plugin-agent-playground-100554')
+
 export class AgentTester extends CollabLitElement {
 
     private _agent = '';
@@ -99,7 +100,7 @@ ${this.renderMode()}
 <strong>Agent:</strong> ${this._agent}
 <label style=" margin-left: 1rem; margin-top: 5px; display: flex; align-items: center; justify-content: center; font-weight: 600;">
     <input type="checkbox" .checked=${this.activeGroup}  @change=${this._onCheckboxChange} />
-    Active compare
+    Compare mode
 </label>
 </div>
 
@@ -502,7 +503,6 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         this.getPar(this.groups);
         if (!this.actualGrup && this.groups.length > 0) {
             this.actualGrup = 'A';
-            this.activeGroup = true;
         }
         return ret;
     }
@@ -543,8 +543,9 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
             const agt = moduleAgent.createAgent() as IAgent;
             context = getTemporaryContext(threadId, userId, '@@' + agt.agentName + ' ' + message);
             context.modeSingleStep = true;
-            (context as any).group = group;
+            setState('playgroundAgent.modeCompare', group);
             await agt.beforePrompt(context);
+            setState('playgroundAgent.modeCompare', undefined);
             return `Agent "${agentName}" responded:\n${JSON.stringify(context, null, 2)}`;
         } catch (e: any) {
             this.inError = true;

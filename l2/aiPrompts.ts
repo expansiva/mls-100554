@@ -3,7 +3,7 @@
 import { ITool, IAgent } from './_100554_aiAgentBase'
 import { descriptionForPrompt } from './_100554_icaBaseDescription'
 import { getTokensLess } from './_100554_designSystemBase';
-import { getState } from './_100554_collabState';
+import { getState, setState } from './_100554_collabState';
 
 export function systemAgentsAvailable(): mls.msg.IAMessageInputType {
     return {
@@ -168,15 +168,25 @@ export async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageIn
     }
 }
 
-export async function getPromptByHtml(dt: { project: number, shortName: string, folder: string, data?: any, group?:string }): Promise<mls.msg.IAMessageInputType[]> {
-    
+export async function getPromptByHtml(dt: { project: number, shortName: string, folder: string, data?: any }): Promise<mls.msg.IAMessageInputType[]> {
 
-    if (!dt.project || !dt.shortName) throw new Error(`[getPromptByHtml]: incomplete parameters.`);
+    const groupMode = getState('playgroundAgent.modeCompare');
+
+    if (!dt.project || !dt.shortName) {
+        setState('playgroundAgent.modeCompare', undefined);
+        throw new Error(`[getPromptByHtml]: incomplete parameters.`);
+    }
     const keyFile = mls.stor.getKeyToFiles(dt.project, 2, dt.shortName, dt.folder, '.html');
-    if (!mls.stor.files[keyFile]) throw new Error(`[getPromptByHtml]: not found stor.file ${keyFile}.`);
+    if (!mls.stor.files[keyFile]) {
+        setState('playgroundAgent.modeCompare', undefined);
+        throw new Error(`[getPromptByHtml]: not found stor.file ${keyFile}.`);
+    }
 
     const content = await mls.stor.files[keyFile].getContent() as string;
-    if (!content) return [];
+    if (!content) {
+        setState('playgroundAgent.modeCompare', undefined);
+        return [];
+    }
 
     const el = document.createElement('div');
     el.innerHTML = content;
@@ -195,7 +205,7 @@ export async function getPromptByHtml(dt: { project: number, shortName: string, 
         const tp = item.getAttribute('type') as any;
         const itemGroup = item.getAttribute('group') as any;
 
-        if (tp === 'memory' || tp === 'prompt' || (dt.group && dt.group !== itemGroup) || (!dt.group && hasGroup && itemGroup !== 'A')) return;
+        if (tp === 'memory' || tp === 'prompt' || (groupMode && groupMode !== itemGroup) || (!groupMode && hasGroup && itemGroup !== 'A')) return;
         cont = escape(cont);
 
         if (dt.data) {
@@ -217,6 +227,7 @@ export async function getPromptByHtml(dt: { project: number, shortName: string, 
 
     });
 
+    setState('playgroundAgent.modeCompare', undefined);
     return ret;
 
 }
