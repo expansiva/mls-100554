@@ -532,7 +532,16 @@ export class ServicePreview100554 extends ServiceBase {
         this.updateLoadingToFalseIfNoTasksRunning();
         let fullName = `_${fileAction.project}_${fileAction.shortName}`;
         if (fileAction.folder) fullName = `_${fileAction.project}_${fileAction.folder}/${fileAction.shortName}`;
-        this.createPreview(this.lastModePreview, fullName);
+        mls.actual[4].setFullName(fullName);
+
+        let updTitle = true;
+        if (this.menu && this.menu.updateTitle) {
+
+            this.menu.title = fileAction.folder ? `${fileAction.folder}/${fileAction.shortName} >>` : `${fileAction.shortName} >>`;
+            this.menu.updateTitle();
+            updTitle = false;
+        }
+        this.createPreview(this.lastModePreview, fullName, updTitle);
     }
 
     async handleSend(value: string, opt: { isSpecialMention: boolean, agentName: string }) {
@@ -1424,12 +1433,11 @@ export class ServicePreview100554 extends ServiceBase {
         }
     }
 
-    private async createPreview(mode: string, fullName: string) {
+    private async createPreview(mode: string, fullName: string, updTitle:boolean = true) {
 
         if (!fullName || !this.watch) return;
-        this.setTitleByLevel();
-
-        if (this.menu.updateTitle) this.menu.updateTitle();
+        if(updTitle) this.setTitleByLevel();
+        if (this.menu.updateTitle && updTitle) this.menu.updateTitle();
         await this.fireWcdChanges();
 
         this.lastModePreview = mode;
