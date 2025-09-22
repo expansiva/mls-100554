@@ -92,11 +92,12 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     if (!context.task) throw new Error("Invalid context 2");
     const payload = getNextPendentStep(context.task) as mls.msg.AIPayload | null;
 
-    await updateFiles(context, payload);
+    const addNextStep = await updateFiles(context, payload);
     if(payload) context = await updateStepStatus(context, payload.stepId, "completed");
     if (!context.task) throw new Error("Invalid context task");
-    context.task = await updateTaskTitle(context.task, "Checking links");
-    //await executeNextStep(context);
+    
+    if (!addNextStep) await executeNextStep(context);
+    else context.task = await updateTaskTitle(context.task, "Checking links");
 
 }
 
@@ -133,11 +134,11 @@ async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[]> {
     return prompts;
 }
 
-async function updateFiles(context: mls.msg.ExecutionContext, step: mls.msg.AIPayload | null) {
+async function updateFiles(context: mls.msg.ExecutionContext, step: mls.msg.AIPayload | null):Promise<boolean> {
 
     if (!step || step.type !== 'flexible' || !step.result) throw new Error('Invalid step in update defs, type: "' + step?.type + '"');
 
-    if (typeof step.result === 'string') return;
+    if (typeof step.result === 'string') return false;
 
     const pageMemory = context.task?.iaCompressed?.longMemory as any;
 
@@ -146,9 +147,10 @@ async function updateFiles(context: mls.msg.ExecutionContext, step: mls.msg.AIPa
     const { project, shortName, folder } = pageMemory;
     const result = step.result;
 
-    if (!result.organismsToUpdate) return;
+    if (!result.organismsToUpdate) return false;
     
     //const organism = [];
+    let addNextStep = false;
     let nextStep = step.stepId;
     for await (const org of result.organismsToUpdate) {
 
@@ -165,22 +167,13 @@ async function updateFiles(context: mls.msg.ExecutionContext, step: mls.msg.AIPa
             type: 'agent'
         }
 
+        addNextStep = true;
         await addNewStep(context, step.stepId, [newStep]);
 
     }
 
-    /*const newStep: mls.msg.AIPayload = {
-        agentName: 'agentCreateNewPrototypePage4',
-        prompt: JSON.stringify({project, shortName, folder, organism, link:shortName}),
-        status: 'pending',
-        stepId: step.stepId + 1,
-        interaction: null,
-        nextSteps: null,
-        rags: null,
-        type: 'agent'
-    }
+    return addNextStep;
 
-    await addNewStep(context, step.stepId, [newStep]);*/
 
 }
 
