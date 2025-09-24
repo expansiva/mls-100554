@@ -2,7 +2,7 @@
 
 // import { getDSInstance } from './_100554_libDesignSystem'
 
-import { getTokensCss } from './_100554_designSystemBase';
+import { getTokensCss, getGlobalCss } from './_100554_designSystemBase';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 
 export const getDependenciesByHtmlFile = (file: mls.stor.IFileInfo, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
@@ -116,12 +116,14 @@ async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, h
     );
 
     let tokens: string | undefined = await getTokens({ project, shortName, folder }, theme);
+    let globalCss: string | undefined = await getGlobalCss(project, theme);
+
     return {
         file: filename,
         wcComponents: tags,
         importsMap: myImportsMap,
         importsJs: myImports,
-        globalCss: '',
+        globalCss,
         tokens,
         errors: myErrors
     }
@@ -219,7 +221,7 @@ async function loadMyNeedsToCompile(
         if (!myModules[enhacementName]) {
 
             const info = mls.l2.getPath(enhacementName)
-            const ipathenhacement = { project: info.project , shortName: info.shortName, folder: info.folder };
+            const ipathenhacement = { project: info.project, shortName: info.shortName, folder: info.folder };
             const mModule = await mls.l2.enhancement.getEnhancementModule(ipathenhacement);
 
             myModules[enhacementName] = {
@@ -254,7 +256,7 @@ async function loadMyNeedsToCompile(
 
 }
 
-async function getEnhancementFromFetch(file: { project: number, shortName: string, folder:string }) {
+async function getEnhancementFromFetch(file: { project: number, shortName: string, folder: string }) {
 
     const url = getImportUrl(file);
     const response = await fetch(url);
@@ -278,7 +280,7 @@ async function getEnhancementFromFetch(file: { project: number, shortName: strin
 
 }
 
-function getImportUrl(info: mls.cbe.IPath): string{
+function getImportUrl(info: mls.cbe.IPath): string {
     let url = `/_${info.project}_${info.shortName}`;
     if (info.folder) {
         url = `/_${info.project}_${info.folder}/${info.shortName}`
@@ -340,5 +342,6 @@ export interface IJSONDependence {
     importsMap: string[],
     importsJs: string[],
     tokens: string | undefined,
+    globalCss: string,
     errors: { tag: string, error: string }[]
 }

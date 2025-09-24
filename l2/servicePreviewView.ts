@@ -2,9 +2,9 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getDependenciesByHtml, getDependenciesByHtmlFile, getTokens, IJSONDependence } from './_100554_libCompile';
+import { getDependenciesByHtmlFile, getTokens, IJSONDependence } from './_100554_libCompile';
 import { convertFileNameToTag } from './_100554_utilsLit';
-import { createAllModels, createModel } from './_100554_collabLibModel';
+import { createModel } from './_100554_collabLibModel';
 import { getBaseTemplate } from './_100554_libCommom';
 import { createStorFile, IReqCreateStorFile } from './_100554_collabLibStor';
 
@@ -488,10 +488,7 @@ export class ServicePreviewView extends StateLitElement {
 
         (iframe.contentDocument.body as any)['service'] = this.father;
 
-        let ret;
-
-        ret = await getDependenciesByHtmlFile(this.file, txt, this.actualtheme, true);
-
+        let ret = await getDependenciesByHtmlFile(this.file, txt, this.actualtheme, true);
         const domVirtual = document.createElement('div');
         domVirtual.innerHTML = txt;
 
@@ -512,6 +509,8 @@ export class ServicePreviewView extends StateLitElement {
             case 'singlePage': await this.modeSinglePage(ret, iframe); break;
             default: await this.modeMinimum(ret, iframe); break;
         }
+
+        this.addGlobalCss(ret.globalCss);
 
         /*Array.from(domVirtual.children).forEach((i) => {
             iframe.contentDocument?.body.appendChild(i);
@@ -555,6 +554,23 @@ export class ServicePreviewView extends StateLitElement {
         if (!this.file) return;
         const c = new PreviewModeMinimum(json, iframe, this.level, this.isService, this.file, this.models);
         await c.init();
+    }
+
+    private addGlobalCss(globalCss: string) {
+        if(!globalCss) return
+        try {
+            const iframe = window.preview.iframe;
+            if (!iframe || !iframe.contentDocument) return;
+            const oldStyle = iframe.contentDocument.querySelector('style#global_css');
+            if (oldStyle) oldStyle.remove();
+            const style = document.createElement('style');
+            style.textContent = globalCss;
+            style.id = 'global_css';
+            iframe.contentDocument.head.appendChild(style);
+
+        } catch (e: any) {
+            console.info('Error mountTokens: ' + e.message);
+        }
     }
 
     private mountTokens(tokens: string): void {

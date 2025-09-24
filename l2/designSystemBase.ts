@@ -181,8 +181,8 @@ async function serializeTokens(project: number, tokens: IDesignSystemTokens[]) {
 }
 
 export function replaceTokensBlock(code: string, newContent: string): string {
-  const regex = /export\s+const\s+tokens\s*:\s*IDesignSystemTokens\[\]\s*=\s*\[[\s\S]*?\];?/g;
-  return code.replace(regex, `export const tokens: IDesignSystemTokens[] = [\n${newContent}\n]`);
+    const regex = /export\s+const\s+tokens\s*:\s*IDesignSystemTokens\[\]\s*=\s*\[[\s\S]*?\];?/g;
+    return code.replace(regex, `export const tokens: IDesignSystemTokens[] = [\n${newContent}\n]`);
 }
 
 export async function getTokensLess(project: number, theme: string): Promise<string> {
@@ -215,6 +215,28 @@ export async function getTokensCss(project: number, theme: string): Promise<stri
     } catch (err: any) {
         throw new Error(`Error on compile tokens Less: ${err.message}`);
     }
+}
+
+export async function getGlobalCss(project: number, theme: string): Promise<string> {
+
+    let less = await getGlobalLess(project, theme);
+    less = less.replace(/project-\d+\s*{([\s\S]*)}$/m, "$1");
+    const compiled = await preCompileLess(project, less, theme);
+    return compiled;
+
+}
+
+export async function getGlobalLess(project: number, theme: string): Promise<string> {
+
+    const shortName = 'project';
+    const folder = '';
+    const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.less');
+    const storFile = mls.stor.files[key];
+    if (!storFile) return '';
+    let less = await storFile.getContent();
+    if (!less || typeof less !== 'string') return '';
+    return less;
+
 }
 
 export async function compileLess(str: string): Promise<string> {
