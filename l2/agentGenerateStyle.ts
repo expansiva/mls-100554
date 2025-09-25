@@ -29,8 +29,8 @@ export function createAgent(): IAgent {
         agentName,
         avatar_url: svg_agent,
         agentDescription: "Agent for optimize style",
-        visibility: "private",
-        scope: [],
+        visibility: "public",
+        scope: ['l2_preview'],
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _beforePrompt(context);
         },
@@ -43,7 +43,6 @@ export function createAgent(): IAgent {
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
 
     const taskTitle = "Planning Style....";
-
     if (!context || !context.message) throw new Error("Invalid context");
     if (!context.task) {
         let data: IDataPrompt | undefined;
@@ -53,7 +52,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
             .replace(`@@GenerateStyle`, '');
 
         data = mls.common.safeParseArgs(pp) as IDataPrompt;
-        if (!('fileName' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure`);
+        if (!('page' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure`);
         let inputs = await getPrompts(data);
 
         await startNewAiTask(
@@ -65,7 +64,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
             inputs,
             context,
             _afterPrompt,
-            { 'fileName': data.fileName }
+            { 'fileName': data.page }
 
         ).catch((err) => {
             throw new Error(err.message)
@@ -80,8 +79,8 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
 
     const data: IDataPrompt = mls.common.safeParseArgs(step.prompt) as IDataPrompt;
-    if (!('fileName' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure`);
-    await appendLongTermMemory(context, { 'fileName': data.fileName });
+    if (!('page' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure`);
+    await appendLongTermMemory(context, { 'fileName': data.page });
 
     const inputs = await getPrompts(data);
     await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
@@ -100,7 +99,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
 async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType[]> {
 
-    const info = mls.l2.getPath(data.fileName);
+    const info = mls.l2.getPath(data.page);
     const typescript = data.mode === 'organism' ? await getContentByExtension(info, 'ts') : '';
     const html = data.mode === 'page' ? await getContentByExtension(info, 'html') : '';
     let less = await getContentByExtension(info, 'style');
@@ -122,6 +121,8 @@ async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType
         promptUser: data.prompt || ""
     }
 
+    console.info(dataForReplace)
+
     const prompts = await getPromptByHtml({ project, shortName: agentName, folder: '', data: dataForReplace })
     return prompts;
 }
@@ -138,7 +139,7 @@ async function getContentByExtension(info: mls.cbe.IPath, modelType: 'html' | 't
             if (!stotFile) throw new Error(`[${agentName}][getContentByExtension]: Invalid storFile`);
             models = await createAllModels(stotFile);
         }
-
+    
         if (!models) throw new Error(`[${agentName}][getContentByExtension]:Not found models for file:` + info.shortName);
         if (!models[modelType]) return '';
         return models[modelType]?.model.getValue();
@@ -164,7 +165,8 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     const fileName = context.task?.iaCompressed?.longMemory['fileName'];
     if (!fileName) throw new Error(`[${agentName}] updateFile: Invalid task memory arguments`);
 
-    const { logs, resultHtmlComponent, resultLessComponent, resultLessGlobal, resultTypescriptComponent } = result;
+    const { logs,  resultHtmlComponent, resultLessComponent, resultLessGlobal, resultTypescriptComponent } = result;
+
     const { folder, project, shortName } = mls.l2.getPath(fileName);
 
     const models = getModel({ folder, project, shortName });
@@ -227,7 +229,7 @@ async function prepareGlobalCss(css: string, projectId: number, theme: string) {
 }
 
 interface IDataPrompt {
-    fileName: string,
+    page: string,
     prompt: string,
     mode: 'page' | 'organism' | 'widget'
 }
@@ -237,5 +239,5 @@ interface IDataResult {
     resultLessComponent: string,
     resultHtmlComponent: string,
     resultTypescriptComponent: string,
-    logs: string[]
+    logs: string[],
 }
