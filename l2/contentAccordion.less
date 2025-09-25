@@ -1,0 +1,61 @@
+/// <mls shortName="contentAccordion" project="100554" enhancement="enhancementStyle" folder="" />
+
+content-accordion-100554 {
+
+    .accordion {
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+      background: white;
+    }
+
+    .header {
+      cursor: pointer;
+      padding: 14px 16px;
+      background: #f9f9f9;
+      border-bottom: 1px solid #e0e0e0;
+      transition: background 0.25s ease;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #333;
+    }
+
+    .header:hover {
+      background: #f1f1f1;
+    }
+
+    .header[selected] {
+      background: #e8eaf6;
+      color: #3f51b5;
+      font-weight: 600;
+    }
+
+    .content {
+      display: none;
+      padding: 14px 16px;
+      color: #444;
+      line-height: 1.5;
+      background: #fff;
+    }
+
+    .content[open] {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+}
+
+
