@@ -219,14 +219,14 @@ export async function getTokensCss(project: number, theme: string): Promise<stri
 
 export async function getGlobalCss(project: number, theme: string): Promise<string> {
 
-    let less = await getGlobalLess(project, theme);
+    let less = await getGlobalLess(project);
     less = less.replace(/project-\d+\s*{([\s\S]*)}$/m, "$1");
     const compiled = await preCompileLess(project, less, theme);
     return compiled;
 
 }
 
-export async function getGlobalLess(project: number, theme: string): Promise<string> {
+export async function getGlobalLess(project: number): Promise<string> {
 
     const shortName = 'project';
     const folder = '';
