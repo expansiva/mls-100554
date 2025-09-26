@@ -264,13 +264,15 @@ export class ServiceSource100554 extends ServiceBase {
             this.saveViewState();
             return;
         }
-
+        
         await this.initMonaco();
         if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icTs);
         await this.updateComplete;
         this.updatedMSizeEditor();
 
-        if (!this.activeModels && this.position === 'left') this.openLastFile(this.level, this.position);
+        if ( mls.actual[2][this.position]) {
+            this.openActualL2(this.position);
+        }else if (!this.activeModels && this.position === 'left') this.openLastFile(this.level, this.position);
 
         if (this.editorEl) {
             const bgEl = this.editorEl.querySelector('.monaco-editor-background');
@@ -282,6 +284,28 @@ export class ServiceSource100554 extends ServiceBase {
                 }
             }
         }
+    }
+
+
+    private async openActualL2( position: 'left' | 'right') {
+
+        this.loading = true;
+        const storFile = mls.actual[2][position];
+        if (!storFile) {
+            return;
+        }
+        const { project, shortName, folder } = storFile;
+        let models = mls.editor.getModels(project, shortName, folder);
+        if (!models || !models.ts) models = await createAllModels(storFile);        
+        if (!models) return;
+        this.activeModels = models;
+        await readProjectTypescriptAndCompile(project, '', true)
+        if (models && models.ts) mls.editor.forceModelUpdate(models.ts.model);
+        this.loading = false;
+        setTimeout(() => {
+            this.showActiveModel();
+        }, 500);
+
     }
 
     public inCreate: Record<string, Promise<void> | undefined> = {};
