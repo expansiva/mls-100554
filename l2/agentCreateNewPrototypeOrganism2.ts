@@ -112,7 +112,7 @@ async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[]> {
 
     let tokens = await getTokensLess(info.project, info.folder);
     const tag = convertFileNameToTag({ project: info.project, shortName: info.shortName, folder: info.folder, });
-    const globalCss = await getGlobalLess(info.project, info.folder);
+    const globalCss = await getGlobalLess(info.project);
 
     const data = {
         project: info.project,

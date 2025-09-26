@@ -111,7 +111,7 @@ async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType
         theme = themeModule.moduleConfig.theme;
     }
     const tokens = await getTokensLess(info.project, theme);
-    const globalCss = await getGlobalLess(info.project, theme);
+    const globalCss = await getGlobalLess(info.project);
     const dataForReplace = {
         html,
         typescript,
