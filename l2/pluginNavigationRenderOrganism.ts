@@ -3,12 +3,13 @@
 import { html, repeat, TemplateResult, LitElement } from 'lit';
 import { customElement, state, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
-import { executeAgentByFile } from './_100554_aiAgentHelper'
 import { collab_trash, collab_pencil, collab_bars, collab_info } from './_100554_collabIcons';
-import { selectLevel, openService } from './_100554_libCommom';
+import { openService } from './_100554_libCommom';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { CollabPreviewL3 } from './_100554_collabPreviewL3';
 import { ServiceBase } from './_100554_serviceBase';
+import { setState } from './_100554_collabState';
+
 
 
 /// **collab_i18n_start** 
@@ -198,7 +199,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
                     @click="${(e: MouseEvent) => this.goToL2(e, item)}" 
                     title="edit"
                 >
-                ${collab_pencil}</span>
+                Edit ${collab_pencil}</span>
             `;
         }
 
@@ -214,20 +215,35 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
                 >
                     <info-item .info=${item}>
                         <span class="fa ${mySymbol}" style="margin-right:.5rem"></span>
-                        ${name}
-                        <small class="showId">(${item.el.id})</small>
+                        <span class="infoname">
+                            ${name}
+                            <small class="showId">(${item.el.id})</small>
+                        </span>
+                        <span class="groupHiddenListIcon" .info=${item}  @click="${this.clickGroupHidden}">
+                        </span>
                     </info-item>
-                    <div class="groupHiddenList" .info=${item}  @click="${this.clickGroupHidden}" >
+                    <div class="groupHiddenList" >
                         ${aux}
                         <span class="mls-gpbtnslider-item" @click="${() => this.goToScenary('details')}" title="details">
-                            ${collab_info}
+                            Details ${collab_info}
                     
                         </span>
-                        <span class="mls-gpbtnslider-item" @click="${this.delEl}" title="remove">
-                            ${collab_trash}
+                        <span class="mls-gpbtnslider-item" @click="${() => this.dispatchEventStyle()}" title="style">
+                            Style <svg width="15px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M512 256c0 .9 0 1.8 0 2.7c-.4 36.5-33.6 61.3-70.1 61.3L344 320c-26.5 0-48 21.5-48 48c0 3.4 .4 6.7 1 9.9c2.1 10.2 6.5 20 10.8 29.9c6.1 13.8 12.1 27.5 12.1 42c0 31.8-21.6 60.7-53.4 62c-3.5 .1-7 .2-10.6 .2C114.6 512 0 397.4 0 256S114.6 0 256 0S512 114.6 512 256zM128 288a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm0-96a32 32 0 1 0 0-64 32 32 0 1 0 0 64zM288 96a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm96 96a32 32 0 1 0 0-64 32 32 0 1 0 0 64z"/></svg>
+                    
                         </span>
+
+                        <span class="mls-gpbtnslider-item" @click="${() => this.dispatchEventGlobalStyle()}" title="style">
+                            Global Style <svg width="15px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M352 256c0 22.2-1.2 43.6-3.3 64l-185.3 0c-2.2-20.4-3.3-41.8-3.3-64s1.2-43.6 3.3-64l185.3 0c2.2 20.4 3.3 41.8 3.3 64zm28.8-64l123.1 0c5.3 20.5 8.1 41.9 8.1 64s-2.8 43.5-8.1 64l-123.1 0c2.1-20.6 3.2-42 3.2-64s-1.1-43.4-3.2-64zm112.6-32l-116.7 0c-10-63.9-29.8-117.4-55.3-151.6c78.3 20.7 142 77.5 171.9 151.6zm-149.1 0l-176.6 0c6.1-36.4 15.5-68.6 27-94.7c10.5-23.6 22.2-40.7 33.5-51.5C239.4 3.2 248.7 0 256 0s16.6 3.2 27.8 13.8c11.3 10.8 23 27.9 33.5 51.5c11.6 26 20.9 58.2 27 94.7zm-209 0L18.6 160C48.6 85.9 112.2 29.1 190.6 8.4C165.1 42.6 145.3 96.1 135.3 160zM8.1 192l123.1 0c-2.1 20.6-3.2 42-3.2 64s1.1 43.4 3.2 64L8.1 320C2.8 299.5 0 278.1 0 256s2.8-43.5 8.1-64zM194.7 446.6c-11.6-26-20.9-58.2-27-94.6l176.6 0c-6.1 36.4-15.5 68.6-27 94.6c-10.5 23.6-22.2 40.7-33.5 51.5C272.6 508.8 263.3 512 256 512s-16.6-3.2-27.8-13.8c-11.3-10.8-23-27.9-33.5-51.5zM135.3 352c10 63.9 29.8 117.4 55.3 151.6C112.2 482.9 48.6 426.1 18.6 352l116.7 0zm358.1 0c-30 74.1-93.6 130.9-171.9 151.6c25.5-34.2 45.2-87.7 55.3-151.6l116.7 0z"/></svg>
+                    
+                        </span>
+                        
+                        
                         <span class="mls-gpbtnslider-item" @click="${() => this.dispatchEventProperty()}" title="properties">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15px" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128 0a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM320 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm32-80c-32.8 0-61 19.7-73.3 48L32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l246.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48l54.7 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-54.7 0c-12.3-28.3-40.5-48-73.3-48zM192 128a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm73.3-64C253 35.7 224.8 16 192 16s-61 19.7-73.3 48L32 64C14.3 64 0 78.3 0 96s14.3 32 32 32l86.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 128c17.7 0 32-14.3 32-32s-14.3-32-32-32L265.3 64z"/></svg>
+                            Properties <svg xmlns="http://www.w3.org/2000/svg" width="15px" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128 0a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM320 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm32-80c-32.8 0-61 19.7-73.3 48L32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l246.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48l54.7 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-54.7 0c-12.3-28.3-40.5-48-73.3-48zM192 128a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm73.3-64C253 35.7 224.8 16 192 16s-61 19.7-73.3 48L32 64C14.3 64 0 78.3 0 96s14.3 32 32 32l86.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 128c17.7 0 32-14.3 32-32s-14.3-32-32-32L265.3 64z"/></svg>
+                        </span>
+                        <span class="mls-gpbtnslider-item" @click="${this.delEl}" title="remove">
+                            Delete ${collab_trash}
                         </span>
                     </div>
                 </div>
@@ -269,6 +285,16 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
                 composed: true
             })
         );
+    }
+
+    private dispatchEventGlobalStyle() {
+        const key = mls.stor.getKeyToFiles(mls.actualProject || 0, 2, 'project', '', '.ts');
+
+        const f = mls.stor.files[key];
+        if (!f) return;
+        mls.actual[2].left = f;
+        mls.actual[2].setFullName(`_${mls.actualProject}_project`);
+        openService('_100554_serviceSource', 'left', 2);
     }
 
     private dispatchEventStyle() {
@@ -321,8 +347,28 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
         await reentrance(ret, scope);
 
-        return ret;
 
+
+        return ret;
+        //return this.mockup();
+
+    }
+
+    private mockup(): IInfoElChildren[] {
+
+        const array: IInfoElChildren[] = [];
+
+        for (let i = 0; i < 4; i++) {
+
+            const d = document.createElement('div');
+            d.id = 'el_' + i;
+
+            const info = { el: d as HTMLElement, id: d.id, children: [] as any, isFather: false };
+            array.push(info);
+
+        }
+
+        return array;
     }
 
     private selectItem(e: MouseEvent, item: IInfoElChildren): void {
@@ -336,9 +382,9 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         if (!target) return;
         if (this.elPreviewL3) this.elPreviewL3.selectElement(item.el);
         this.activeId = item.id;
-        if (target.classList.contains('activeBranch')) {
+        /*if (target.classList.contains('activeBranch')) {
             this.dispatchEventStyle();
-        }
+        }*/
 
         const els = this.querySelectorAll('.activeBranch');
         els.forEach((el) => el.classList.remove('activeBranch'));
@@ -416,6 +462,9 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
         openService('_100554_serviceSource', 'left', 2);
     }
+
+
+    
 
 
 }

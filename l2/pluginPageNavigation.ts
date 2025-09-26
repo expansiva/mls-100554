@@ -131,12 +131,13 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         const draggable = item.tagName !== info?.tagName;
 
         const renderHeader = () => {
+            //@dblclick="${(e: MouseEvent) => this.editEl(e, item)}"
             return html`
                 <div 
                     .info=${item}
                     id="${item.tagName + idx}"                      
                     class="header ${cls}" 
-                    @dblclick="${(e: MouseEvent) => this.editEl(e, item)}"
+                    
                     @click="${(e: MouseEvent) => this.selectItem(e, item)}"  
                     @mouseover="${() => this.onMouseover(item)}"
                     @mouseout="${() => this.onMouseout(item)}"   
@@ -147,26 +148,44 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
                             ${collab_bars}
                         </span>
                         <span class="fa ${mySymbol}" style="margin-right:.5rem"></span>
-                        ${this.slugToTitle(item.tagName)}
+                        <span class="infoname">${this.slugToTitle(item.tagName)}</span>
+                        <span class="groupHiddenListIcon" .info=${item}  @click="${this.clickGroupHidden}">
+                        </span>
                     </info-item>
 
-                    <div class="groupHiddenList" .info=${item}  @click="${this.clickGroupHidden}">
+                    <div class="groupHiddenList" .info=${item}>
                         ${item.isOrganism ? html`
                             <span 
                                 class="mls-gpbtnslider-item"
                                 @click="${(e: MouseEvent) => this.editEl(e, item)}" 
                                 title="edit"
                             >
-                            ${collab_pencil}</span>
+                            Edit ${collab_pencil}</span>
                         
                         `
-                    : ''}
+                : ''}
                     
+                        <span class="mls-gpbtnslider-item"  title="style" @click="${(e: MouseEvent) => this.goToL2(e, item)}">
+                            Style <svg width="15px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M512 256c0 .9 0 1.8 0 2.7c-.4 36.5-33.6 61.3-70.1 61.3L344 320c-26.5 0-48 21.5-48 48c0 3.4 .4 6.7 1 9.9c2.1 10.2 6.5 20 10.8 29.9c6.1 13.8 12.1 27.5 12.1 42c0 31.8-21.6 60.7-53.4 62c-3.5 .1-7 .2-10.6 .2C114.6 512 0 397.4 0 256S114.6 0 256 0S512 114.6 512 256zM128 288a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm0-96a32 32 0 1 0 0-64 32 32 0 1 0 0 64zM288 96a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm96 96a32 32 0 1 0 0-64 32 32 0 1 0 0 64z"/></svg>
+                    
+                        </span>
+
+                        <span class="mls-gpbtnslider-item" @click="${() => this.dispatchEventGlobalStyle()}"  title="style">
+                            Global Style <svg width="15px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M352 256c0 22.2-1.2 43.6-3.3 64l-185.3 0c-2.2-20.4-3.3-41.8-3.3-64s1.2-43.6 3.3-64l185.3 0c2.2 20.4 3.3 41.8 3.3 64zm28.8-64l123.1 0c5.3 20.5 8.1 41.9 8.1 64s-2.8 43.5-8.1 64l-123.1 0c2.1-20.6 3.2-42 3.2-64s-1.1-43.4-3.2-64zm112.6-32l-116.7 0c-10-63.9-29.8-117.4-55.3-151.6c78.3 20.7 142 77.5 171.9 151.6zm-149.1 0l-176.6 0c6.1-36.4 15.5-68.6 27-94.7c10.5-23.6 22.2-40.7 33.5-51.5C239.4 3.2 248.7 0 256 0s16.6 3.2 27.8 13.8c11.3 10.8 23 27.9 33.5 51.5c11.6 26 20.9 58.2 27 94.7zm-209 0L18.6 160C48.6 85.9 112.2 29.1 190.6 8.4C165.1 42.6 145.3 96.1 135.3 160zM8.1 192l123.1 0c-2.1 20.6-3.2 42-3.2 64s1.1 43.4 3.2 64L8.1 320C2.8 299.5 0 278.1 0 256s2.8-43.5 8.1-64zM194.7 446.6c-11.6-26-20.9-58.2-27-94.6l176.6 0c-6.1 36.4-15.5 68.6-27 94.6c-10.5 23.6-22.2 40.7-33.5 51.5C272.6 508.8 263.3 512 256 512s-16.6-3.2-27.8-13.8c-11.3-10.8-23-27.9-33.5-51.5zM135.3 352c10 63.9 29.8 117.4 55.3 151.6C112.2 482.9 48.6 426.1 18.6 352l116.7 0zm358.1 0c-30 74.1-93.6 130.9-171.9 151.6c25.5-34.2 45.2-87.7 55.3-151.6l116.7 0z"/></svg>
+                    
+                        </span>
+                    
+                        <span
+                            class="mls-gpbtnslider-item"
+                            @click="${this.goToImprove}" 
+                            title="remove"
+                        >Improve <svg width="15px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 0c17.7 0 32 14.3 32 32l0 64 120 0c39.8 0 72 32.2 72 72l0 272c0 39.8-32.2 72-72 72l-304 0c-39.8 0-72-32.2-72-72l0-272c0-39.8 32.2-72 72-72l120 0 0-64c0-17.7 14.3-32 32-32zM208 384c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0zM264 256a40 40 0 1 0 -80 0 40 40 0 1 0 80 0zm152 40a40 40 0 1 0 0-80 40 40 0 1 0 0 80zM48 224l16 0 0 192-16 0c-26.5 0-48-21.5-48-48l0-96c0-26.5 21.5-48 48-48zm544 0c26.5 0 48 21.5 48 48l0 96c0 26.5-21.5 48-48 48l-16 0 0-192 16 0z"/></svg>
+                        </span>
                         <span
                             class="mls-gpbtnslider-item"
                             @click="${this.delEl}" 
                             title="remove"
-                        >${collab_trash}</span>
+                        >Delete ${collab_trash}</span>
                     </div>
                 </div>
                 <ul>
@@ -278,12 +297,6 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
         const active = this.querySelector('.activeBranch') as HTMLElement;
         if (active && active === target) {
-            this.dispatchEvent(
-                new CustomEvent('item-selected', {
-                    bubbles: true,
-                    composed: true
-                })
-            );
             return;
         }
 
@@ -309,12 +322,37 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         e.stopPropagation();
         const el = e.target as HTMLElement;
         if (!el) return;
-        el.classList.toggle('activegpbtnslider');
+
+        const father = el.closest('.header');
+        if (!father) return;
+
+        father.classList.toggle('activegpbtnslider');
     }
 
     private delEl(e: MouseEvent) {
         e.stopPropagation();
         //setTimeout(() => { this.requestUpdate(); }, 100);
+    }
+
+    private goToImprove(e: MouseEvent) {
+        e.stopPropagation();
+        this.dispatchEvent(
+            new CustomEvent('item-selected', {
+                bubbles: true,
+                composed: true
+            })
+        );
+        return;
+    }
+
+    private dispatchEventGlobalStyle() {
+        const key = mls.stor.getKeyToFiles(mls.actualProject || 0, 2, 'project', '', '.ts');
+
+        const f = mls.stor.files[key];
+        if (!f) return;
+        mls.actual[2].left = f;
+        mls.actual[2].setFullName(`_${mls.actualProject}_project`);
+        openService('_100554_serviceSource', 'left', 2);
     }
 
     private editEl(e: MouseEvent, item: IInfoElChildren) {
@@ -622,6 +660,23 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
             mls.events.fireFileAction('editorChanged', actualInfo.models.html.storFile, 'left', 0);
         }
 
+    }
+
+    private goToL2(e: MouseEvent, item: IInfoElChildren) {
+        if (!item.el) return;
+        const fileInfo = convertTagToFileName(item.el.tagName.toLowerCase());
+        if (!fileInfo) return;
+        const { folder, project, shortName } = fileInfo;
+
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
+        const f = mls.stor.files[key];
+        if (!f) return;
+
+        mls.actual[2].setFullName(folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`);
+
+        mls.actual[2].left = f;
+
+        openService('_100554_serviceSource', 'left', 2);
     }
 
 }
