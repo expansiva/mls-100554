@@ -507,8 +507,9 @@ export class PluginExploreList extends PluginBaseModule {
                         <span class="mls-gpbtnslider-item fa fa-trash" title="${this.msg.delete}" @click="${this.clickOptDel}"></span>
                         <span class="mls-gpbtnslider-item fa-solid fa-shield-halved" title="${this.msg.security}" @click="${this.clickOptOpenSecurity}"></span> 
                     </div>
-                    <span class="spanFileName ${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
                     <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion + auxHtml}"></div>
+
+                    <span class="spanFileName ${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
                 </div>
             </li>
         `;
