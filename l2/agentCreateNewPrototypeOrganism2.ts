@@ -1,22 +1,23 @@
 /// <mls shortName="agentCreateNewPrototypeOrganism2" project="100554" enhancement="_blank" />
 
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
-import { getTokensLess } from './_100554_designSystemBase';
-import { createAllModels } from './_100554_collabLibModel';
+import { getPromptByHtml } from './_100554_aiPrompts';;
 import { convertFileNameToTag } from './_100554_utilsLit';
+import { forceServiceInstance } from './_100554_libCommom';
+import { getTokensLess, getGlobalLess } from './_100554_designSystemBase';
 
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
     executeNextStep,
+    addNewStep
 
 } from "./_100554_aiAgentOrchestration";
 
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
+    getNextFlexiblePendingStep,
     updateStepStatus,
     updateTaskTitle,
     getNextPendentStep,
@@ -46,7 +47,6 @@ export function createAgent(): IAgent {
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
     const taskTitle = "Planning";
-
 
     if (!context || !context.message) throw new Error("Invalid context");
     if (!context.task) {
@@ -86,40 +86,33 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
 }
 
+
 const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
 
     if (!context || !context.message || !context.task) throw new Error("Invalid context");
-    const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    context = await updateStepStatus(context, step.stepId, "completed");
-
-    if (!context.task) throw new Error("Invalid context 2");
-    const payload = getNextPendentStep(context.task) as mls.msg.AIPayload | null;
-
-    await updateFiles(context, payload);
+    const stepInProgress: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
+    if (!stepInProgress) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
+    const rc = await updateFiles(context);
+    if (rc) context = rc;
+    context = await updateStepStatus(context, stepInProgress.stepId, "completed");
     if (!context.task) throw new Error("Invalid context task");
-    context.task = await updateTaskTitle(context.task, "Defs completed");
-    await executeNextStep(context);
+    context.task = await updateTaskTitle(context.task, "Organism created sucessfully");
 
 }
 
 const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> => {
-    const step = payload[0] as mls.msg.AIPayload;
-    if (!step || step.type !== 'flexible') throw new Error('Invalid step for replay');
-    await updateFiles(context, step);
-}
 
+}
 
 async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[]> {
 
     if (!info || !info.project || !info.shortName || !info.folder) throw new Error(`Erro [${agentName}] getPrompts: invalid info`);
-
     const models = mls.editor.getModels(info.project, info.shortName, info.folder);
-
     if (!models || !models.ts || !models.style || !models.defs) throw new Error(`Erro [${agentName}] getPrompts: not found models`)
 
     let tokens = await getTokensLess(info.project, info.folder);
     const tag = convertFileNameToTag({ project: info.project, shortName: info.shortName, folder: info.folder, });
+    const globalCss = await getGlobalLess(info.project, info.folder);
 
     const data = {
         project: info.project,
@@ -127,6 +120,7 @@ async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[]> {
         folder: info.folder,
         tag: tag,
         defs: models.defs.model.getValue(),
+        globalCss,
         tokens
     };
 
@@ -134,8 +128,12 @@ async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[]> {
     return prompts;
 }
 
-async function updateFiles(context: mls.msg.ExecutionContext, step: mls.msg.AIPayload | null) {
-    if (!step || step.type !== 'flexible' || !step.result) throw new Error('Invalid step in update files, type: "' + step?.type + '"');
+async function updateFiles(context: mls.msg.ExecutionContext) {
+
+    if (!context || !context.task) throw new Error(`[${agentName}] updateFile: Not found context`);
+
+    const step = getNextFlexiblePendingStep(context.task);
+    if (!step || step.type !== 'flexible') throw new Error(`[${agentName}] updateFile: Invalid step in updateFile`);
 
     const pageMemory = context.task?.iaCompressed?.longMemory as any;
 
@@ -144,7 +142,6 @@ async function updateFiles(context: mls.msg.ExecutionContext, step: mls.msg.AIPa
     const { project, shortName, folder } = pageMemory;
     const result = step.result;
     const tag = convertFileNameToTag({ project, shortName, folder });
-
     const models = mls.editor.getModels(project, shortName, folder);
 
     if (!models || !models.ts || !models.style || !models.defs || !models.html) throw new Error(`Erro [${agentName}] updateFiles: not found models`)
@@ -170,5 +167,47 @@ async function updateFiles(context: mls.msg.ExecutionContext, step: mls.msg.AIPa
     }
 
     models.html.model.setValue(`<${tag}></${tag}>`);
+    context = await updateStepStatus(context, step.stepId, "completed");
+    const res = await fireAgenteImproveStyle(context, step);
+
+
+    if (models.ts) mls.l2.typescript.compileAndPostProcess(models.ts, true, true);
+    if (models.html) mls.editor.forceModelUpdate(models.html.model);
+
+    return res;
 
 }
+
+
+async function fireAgenteImproveStyle(
+    context: mls.msg.ExecutionContext,
+    step: mls.msg.AIFlexibleResultStep
+) {
+    await forceServiceInstance(2, '_100554_serviceSource');
+    const pageMemory = context.task?.iaCompressed?.longMemory as any;
+
+    if (!pageMemory.project || !pageMemory.shortName || !pageMemory.folder) throw new Error(`[${agentName}]Invalid argument in fireAgenteImproveStyle`);
+    const { project, shortName, folder } = pageMemory;
+    const page = folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`
+
+    const nextSteps = [];
+    let nextStepId = step.stepId + 1;
+
+    const data = { page, prompt: 'Improve style', mode: 'organism' }
+    const newStep: mls.msg.AIPayload = {
+        agentName: 'agentGenerateStyle',
+        prompt: JSON.stringify(data),
+        status: 'pending',
+        stepId: nextStepId,
+        interaction: null,
+        nextSteps: null,
+        rags: null,
+        type: 'agent'
+    };
+
+    nextSteps.push(newStep);
+
+    return await addNewStep(context, step.stepId, nextSteps);
+
+}
+

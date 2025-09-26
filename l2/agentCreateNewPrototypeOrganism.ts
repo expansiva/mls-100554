@@ -1,15 +1,16 @@
 /// <mls shortName="agentCreateNewPrototypeOrganism" project="100554" enhancement="_blank" />
 
+import { html, TemplateResult } from 'lit';
 import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getPromptByHtml } from './_100554_aiPrompts';
 import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
 import { createAllModels } from './_100554_collabLibModel';
 import { convertFileNameToTag } from './_100554_utilsLit';
+import './_100554_agentCreateNewPrototypeOrganismFeedback';
 
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
-    executeNextStep,
     addNewStep
 } from "./_100554_aiAgentOrchestration";
 
@@ -29,8 +30,8 @@ export function createAgent(): IAgent {
         agentName,
         avatar_url: svg_agent,
         agentDescription: "Responsavel por fazer o arquivo defs de um novo organismo",
-        visibility: "public",
-        scope: ['l2_preview'],
+        visibility: "private",
+        scope: [],
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _beforePrompt(context);
         },
@@ -39,6 +40,9 @@ export function createAgent(): IAgent {
         },
         async replayForSupport(context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> {
             return _replayForSupport(context, payload);
+        },
+        async getFeedBack(task: mls.msg.TaskData): Promise<TemplateResult> {
+            return _getFeedBack(task);
         }
     }
 };
@@ -97,7 +101,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     await updateDefs(context, payload);
     if (!context.task) throw new Error("Invalid context task");
     context.task = await updateTaskTitle(context.task, "Defs completed");
-    await executeNextStep(context);
+    // await executeNextStep(context);
 
 }
 
@@ -107,17 +111,18 @@ const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls
     await updateDefs(context, step);
 }
 
+const _getFeedBack = async (task: mls.msg.TaskData): Promise<TemplateResult> => {
+    if (!task) throw new Error(`[${agentName}](getFeedBack) Invalid task`);
+    return html`<agent-create-new-prototype-organism-feedback-100554 .task=${task}></agent-create-new-prototype-organism-feedback-100554>`
+}
 
 async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[]> {
 
     if (!info || !info.project || !info.shortName || !info.folder) throw new Error(`Erro [${agentName}] getPrompts: invalid info`);
-
     const mm = await loadModuleFromProjectOrDependency('module', info.folder, '.ts');
 
     if (!mm || !mm.payload3) throw new Error(`Erro [${agentName}] getPrompts: invalid module`);
-
     const context = JSON.stringify(mm.payload3.finalModuleDetails);
-
     const data = {
         context,
         userPrompt: info.userPrompt
@@ -129,20 +134,17 @@ async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[]> {
 
 async function updateDefs(context: mls.msg.ExecutionContext, step: mls.msg.AIPayload | null) {
     if (!step || step.type !== 'flexible' || !step.result) throw new Error('Invalid step in update defs, type: "' + step?.type + '"');
-
-    if (typeof step.result === 'string') return; 
+    if (typeof step.result === 'string') return;
 
     const pageMemory = context.task?.iaCompressed?.longMemory as any;
 
-    if (!pageMemory.project || !pageMemory.shortName || !pageMemory.folder || !step.result) throw new Error(`[${agentName}]Invalid step in update defs, type: ${step?.type} `);
+    if (!pageMemory.project ||
+        !pageMemory.shortName ||
+        !pageMemory.folder ||
+        !step.result) throw new Error(`[${agentName}]Invalid step in update defs, type: ${step?.type} `);
 
     const { project, shortName, folder } = pageMemory;
     const result = step.result;
-
-    const mm = await loadModuleFromProjectOrDependency('module', folder, '.ts');
-
-    if (!mm || !mm.payload3 || !mm.moduleConfig) throw new Error(`Erro [${agentName}] updateDefs: invalid module`);
-
     const models = mls.editor.getModels(project, shortName, folder);
     if (!models || !models.defs) throw new Error(`[${agentName}]updateDefs not found models`)
 
@@ -188,33 +190,9 @@ export const defs: mls.l4.BaseDefs = ${JSON.stringify(defs, null, 2)}
     models.defs.model.setValue(newText);
 
     const tag = convertFileNameToTag({ project, shortName, folder });
-    let find = mm.payload3.organism.find((i: any) => i.organismTag === tag);
-
-    if (!find) {
-
-        const splitTag = tag.split('--');
-        const tagProject = splitTag.pop();
-        const tagMM = tagProject ? tagProject.replace('-' + project, '').trim() : tag;
-        
-        mm.payload3.organism.push({
-            organismSequential: mm.payload3.organism.length,
-            organismTag: tagMM,
-            planning: result.planning
-        })
-
-        const oldTextModule = modelsMM.ts.model.getValue().split('/>');
-        const newTextModule = `${oldTextModule[0]}/>
-export const moduleConfig = ${JSON.stringify(mm.moduleConfig, null, 2)}
-export const payload3 = ${JSON.stringify(mm.payload3, null, 2)}
-    `;
-        modelsMM.ts.model.setValue(newTextModule);
-
-    }
-
-
     const newStep: mls.msg.AIPayload = {
         agentName: 'agentCreateNewPrototypeOrganism2',
-        prompt: JSON.stringify({project, shortName, folder, tag}),
+        prompt: JSON.stringify({ project, shortName, folder, tag }),
         status: 'pending',
         stepId: step.stepId + 1,
         interaction: null,
