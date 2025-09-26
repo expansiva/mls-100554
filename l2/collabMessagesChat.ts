@@ -215,12 +215,12 @@ export class CollabMessagesChat100554 extends StateLitElement {
             case 'task':
                 return html`
                     <div class="header">
-                        <span @click=${this.onTitleClick}>${collab_chevron_left} Task: ${this.actualTask?.PK || ''}</span>
+                        <span @click=${this.onTitleClick}>${collab_chevron_left} <span class="header-title">Task: ${this.actualTask?.PK || ''}</span></span>
                     </div>`;
             case 'details':
                 return html`
                     <div class="header">
-                        <span @click=${this.onTitleClick}>${collab_chevron_left} Thread: ${this.getThreadName(this.actualThread)}</span>
+                        <span @click=${this.onTitleClick}>${collab_chevron_left} <span class="header-title">Thread: ${this.getThreadName(this.actualThread)}</span></span>
                         ${this.actualThread?.thread.status !== 'deleted' ? html`
                             <div class="header-actions">
                                 <span @click=${this.onThreadDetailsClick}>${collab_gear}</span>
