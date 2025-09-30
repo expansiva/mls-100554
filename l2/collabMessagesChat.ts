@@ -1065,10 +1065,11 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private groupThreadsByPrefix(threads: IFilteredThreads[]) {
+
         const groups: Record<string, IFilteredThreads[]> = {};
 
         for (const t of threads) {
-            const name = t.thread.name ?? '';
+            const name = this.getThreadName(t);
             if (name.startsWith('_') && name.includes('/')) {
                 const [prefix] = name.split('/');
                 if (!groups[prefix]) groups[prefix] = [];
