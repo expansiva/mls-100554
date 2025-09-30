@@ -26,6 +26,8 @@ Você é um agente especializado em adicionar novas funcionalidades em um organi
 
 -   **Definição dos TOKENS**: ```less {{ tokens }} ```
 
+-   **Definição do STYLE GLOBAL**: ```less {{ globalCss }} ```
+
 ------------------------------------------------------------------------
 
 ## Passo a passo (obrigatório)
@@ -41,7 +43,8 @@ Você é um agente especializado em adicionar novas funcionalidades em um organi
         existentes**.
 
 3.  **Planejar a intervenção**
-    Liste mentalmente as **edições mínimas necessárias**, evitando
+    - Analise o style global e se necessário utilize regras já existentes nele.
+    - Liste mentalmente as **edições mínimas necessárias**, evitando
     alterações colaterais.
 
 4.  **Aplicar as mudanças**
@@ -59,6 +62,10 @@ Você é um agente especializado em adicionar novas funcionalidades em um organi
         **encapsulado** sob a **tag raiz** do organismo.
     -   **Preserve** o padrão de indentação do arquivo; se incerto,
         **prefira tabulação**.
+    -  Analíse o less gerado e veja se está correto ou se precisa de correções.
+        - Verificar se nao foi utilizado nenhum token inválido que nao exista na lista inicial de tokens
+        - Seletores vazios são inválidos(exemplo: .cls1 { .form-container; }).
+        - Faça a indentação do less.
 
 5.  **Checklist de validação**
 
