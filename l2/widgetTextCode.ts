@@ -2,12 +2,12 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import {  IcaApresentationTextCodeBase } from './_100554_icaApresentationTextCodeBase';
+import { IcaApresentationTextCodeBase } from './_100554_icaApresentationTextCodeBase';
 
 @customElement('widget-text-code-100554')
 export class WidgetTextCode extends IcaApresentationTextCodeBase {
-  
-  @property({ type: String }) config: string|undefined;
+
+  @property({ type: String }) config: string | undefined;
 
   @property({ type: String, reflect: true, attribute: true }) language = 'typescript';
 
@@ -62,6 +62,27 @@ export class WidgetTextCode extends IcaApresentationTextCodeBase {
     checkVariable();
   }
 
+  private unescapeHtml(str: string): string {
+    const map: Record<string, string> = {
+      '&lt;': '<',
+      '&gt;': '>',
+      '&quot;': '"',
+      '&#039;': "'",
+      '&amp;': '&',
+    };
+
+    let result = str;
+    let changed = true;
+    while (changed) {
+      changed = false;
+      result = result.replace(/&(lt|gt|quot|#039|amp);/g, (match) => {
+        changed = true;
+        return map[match] ?? match;
+      });
+    }
+
+    return result;
+  }
 
   setCode() {
 
@@ -74,7 +95,7 @@ export class WidgetTextCode extends IcaApresentationTextCodeBase {
       if (!that.codeBlock) return;
       (window as any).hljs.configure({ ignoreUnescapedHTML: true });
       if (!that.languages || that.languages.length === 0) that.languages = (window as any).hljs.listLanguages();
-      const res = (window as any).hljs.highlight(this.text, { language: that.language });
+      const res = (window as any).hljs.highlight(this.unescapeHtml(this.text), { language: that.language });
       that.codeBlock.removeAttribute("data-highlighted");
       (window as any).hljs.highlightElement(that.codeBlock, { language: that.language });
       that.codeBlock.innerHTML = res.value;
