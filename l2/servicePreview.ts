@@ -532,6 +532,8 @@ export class ServicePreview100554 extends ServiceBase {
         this.updateLoadingToFalseIfNoTasksRunning();
         let fullName = `_${fileAction.project}_${fileAction.shortName}`;
         if (fileAction.folder) fullName = `_${fileAction.project}_${fileAction.folder}/${fileAction.shortName}`;
+        
+        mls.actual[7].setFullName(fullName);
         mls.actual[4].setFullName(fullName);
 
         let updTitle = true;

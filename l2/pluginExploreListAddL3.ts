@@ -128,6 +128,10 @@ export class PluginExploreListAddL3 extends PluginBaseModule {
         m.modules.forEach((i: any) => md.push(i.name));
 
         this.modules = md;
+        setTimeout(() => { 
+            const sel = this.querySelector('#iptModule') as HTMLSelectElement;
+            if (sel && mls.actualModule) sel.value = mls.actualModule;
+        }, 100);
 
     }
 
