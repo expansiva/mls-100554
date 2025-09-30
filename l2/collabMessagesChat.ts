@@ -154,8 +154,18 @@ export class CollabMessagesChat100554 extends StateLitElement {
                     this.activeScenerie = 'list';
                     await this.updateComplete;
                 }
-                const threadElement = this.querySelector(`[threadId="${this.threadToOpen}"]`) as IHTMLLiThreadItem;
+
+                const threadElement = this.querySelector(
+                    `[threadId="${this.threadToOpen}"]`
+                ) as IHTMLLiThreadItem;
+
                 if (!threadElement) return;
+                const detailsParent = threadElement.closest('details');
+                if (detailsParent && !detailsParent.open) {
+                    detailsParent.open = true;
+                    await this.updateComplete;
+                }
+
                 this.onThreadClick(threadElement.item);
             }
         }
@@ -611,7 +621,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.filteredThreads = this.getFilteredThreads(ordenedThreads);
 
         return html`
-            ${this.renderThreadsByStatus()}
+            ${this.renderThreadsByStatus2()}
             ${this.isLoadingThread ? html`<div>${this.msg.loading}</div>` : ''}
         `;
     }
@@ -636,6 +646,113 @@ export class CollabMessagesChat100554 extends StateLitElement {
         }
         return item.thread.name || item.thread.threadId;
     }
+
+    private renderThreadsByStatus2() {
+        const groups = this.groupThreadsByPrefix(this.filteredThreads.active);
+
+        return html`
+        <ul class="thread-list">
+            ${Object.entries(groups).map(([prefix, items]) => {
+            if (items.length === 1) {
+                return this.renderThreadItemLi(items[0]);
+            } else {
+                const lastItem = items[0];
+                let threadAvatar = this.getThreadAvatar(lastItem);
+                const now = new Date();
+                const isToday =
+                    lastItem._lastMessageDate.dateObject.getFullYear() === now.getFullYear() &&
+                    lastItem._lastMessageDate.dateObject.getMonth() === now.getMonth() &&
+                    lastItem._lastMessageDate.dateObject.getDate() === now.getDate();
+
+                const displayDate = isToday
+                    ? lastItem._lastMessageDate.time
+                    : lastItem._lastMessageDate.date;
+
+                return html`
+                        <li class="thread-group">
+                            <details>
+                                <summary class="group-title">
+                                    <div class="thread-group-avatar">
+                                        ${threadAvatar.startsWith('<') && threadAvatar.endsWith('>') ?
+                        html`${unsafeHTML(threadAvatar)}` :
+                        html`<img src="${threadAvatar}"></img>`
+                    }
+                                    </div>
+                                    <div class="thread-group-content">
+                                        <div class="thread-group-item-header">
+                                            <span class="thread-group-name">${prefix}</span>
+                                            <span class="last-group-update">${displayDate}</span>
+                                        </div>
+                                        <div class="thread-group-summary">
+                                            <span class="last-group-message">${items.length} Threads </span>
+                                        </div>
+                                    </div>                                
+                                </summary>
+                                <ul class="group-items">
+                                    ${items.map(item => this.renderThreadItemLi(item, prefix ))}
+                                </ul>
+                            </details>
+                        </li>
+                    `;
+            }
+        })}
+            ${this.renderArchivedThreads()}
+            ${this.renderDeletingThreads()}
+        </ul>
+    `;
+    }
+
+
+    private renderThreadItemLi(item: IFilteredThreads, prefix?: string) {
+        let threadAvatar = this.getThreadAvatar(item);
+        let threadName = this.getThreadName(item);
+        if (prefix) threadName = threadName.replace(prefix  + '/', '');
+        let lastMessage: string = item.thread.lastMessage || '';
+        const unreadCount = item.thread.unreadCount || 0;
+        const now = new Date();
+        const isToday =
+            item._lastMessageDate.dateObject.getFullYear() === now.getFullYear() &&
+            item._lastMessageDate.dateObject.getMonth() === now.getMonth() &&
+            item._lastMessageDate.dateObject.getDate() === now.getDate();
+
+        const displayDate = isToday
+            ? item._lastMessageDate.time
+            : item._lastMessageDate.date;
+
+        if (item.users.length > 0) {
+            const sortedUsers = [...item.users].sort((a, b) => b.name.length - a.name.length);
+
+            lastMessage = lastMessage.replace(/\[@([^\]]+)\]\(([^)]+)\)/g, (_m, name, userId) => {
+                const user = sortedUsers.find(u => u.userId === userId);
+                if (!user) return `@${name}`;
+                return `@${user.name}`;
+            });
+        }
+
+        return html`
+        <li .item=${item} threadId=${item.thread.threadId} 
+            @click=${() => this.onThreadClick(item)} 
+            class="thread-item">
+            <div class="thread-item-avatar">
+                ${threadAvatar.startsWith('<') && threadAvatar.endsWith('>') ?
+                html`${unsafeHTML(threadAvatar)}` :
+                html`<img src="${threadAvatar}"></img>`
+            }
+            </div>
+            <div class="thread-content">
+                <div class="thread-item-header">
+                    <span class="thread-name">${threadName}</span>
+                    <span class="last-update">${displayDate}</span>
+                </div>
+                <div class="thread-summary">
+                    <span class="last-message">${lastMessage || ''}</span>
+                    ${unreadCount > 0 ? html`<span class="unread-count">${unreadCount}</span>` : ''}
+                </div>
+            </div>
+        </li>
+    `;
+    }
+
 
     private renderThreadsByStatus() {
 
@@ -945,6 +1062,23 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
             this.isLoadingMoreMessages = false;
         }
+    }
+
+    private groupThreadsByPrefix(threads: IFilteredThreads[]) {
+        const groups: Record<string, IFilteredThreads[]> = {};
+
+        for (const t of threads) {
+            const name = t.thread.name ?? '';
+            if (name.startsWith('_') && name.includes('/')) {
+                const [prefix] = name.split('/');
+                if (!groups[prefix]) groups[prefix] = [];
+                groups[prefix].push(t);
+            } else {
+                groups[name] = [t];
+            }
+        }
+
+        return groups;
     }
 
     private getOrdenedThreadsByStatus(): IFilteredThreadsByStatus {
