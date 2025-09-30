@@ -4,15 +4,16 @@ import { IAgent, svg_agent } from './_100554_aiAgentBase';
 import { getPromptByHtml } from './_100554_aiPrompts';
 import { createAllModels } from './_100554_collabLibModel';
 import { getImages } from './_100554_libUnsplash';
-import { getTokensLess } from './_100554_designSystemBase';
+import { getTokensLess, getGlobalLess } from './_100554_designSystemBase';
 import { removeTokensFromSource } from './_100554_enhancementStyle';
 import { forceServiceInstance } from './_100554_libCommom';
+import { getState } from './_100554_collabState';
+import { ServiceSource100554 } from './_100554_serviceSource';
 
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
     getNextFlexiblePendingStep,
-    getNextPendentStep,
     appendLongTermMemory,
     updateTaskTitle,
     updateStepStatus
@@ -22,9 +23,7 @@ import {
     startNewInteractionInAiTask,
     startNewAiTask,
     executeNextStep,
-    addNewStep,
-    ClarificationValue,
-    startClarification
+    addNewStep
 } from "./_100554_aiAgentOrchestration";
 
 const agentName = "agentImprovePrototypeOrganism";
@@ -157,14 +156,22 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     let hasErrorLess: boolean = false;
     let hasErrorTypescript: boolean = false;
 
-    if (contentHTML && models.html) models.html.model.setValue(contentHTML);
+    const serviceSource: ServiceSource100554 = getState(`serviceSource.left.service`);
+    if (!serviceSource) throw new Error('Not found service source instance');
+
+    if (contentHTML && models.html) serviceSource.setValueInModeKeepingUndo(models.html.model, contentHTML, false);
+    // models.html.model.setValue(contentHTML);
     if (contentTS && models.ts) {
-        models.ts.model.setValue(contentTS);
+        //models.ts.model.setValue(contentTS);
+        serviceSource.setValueInModeKeepingUndo(models.ts.model, contentTS, false);
         const ok = await mls.l2.typescript.compileAndPostProcess(models.ts, true, false);
         hasErrorTypescript = ok === false;
     }
     if (contentLess && models.style) {
-        models.style.model.setValue(contentLess);
+
+        const resultLessComponent2 = await prepareComponentCss(contentLess, +projectMemory, folderMemory || '');
+        serviceSource.setValueInModeKeepingUndo(models.style.model, resultLessComponent2, false);
+        // models.style.model.setValue(resultLessComponent2);
         const ok = await mls.l2.less.compileStyle(models.style);
         hasErrorLess = ok === false;
     }
@@ -249,11 +256,15 @@ async function getPrompts(data: IDataMessage, info: mls.cbe.IPath): Promise<mls.
     if (themeModule && themeModule.moduleConfig && themeModule.moduleConfig.theme && typeof themeModule.moduleConfig.theme === 'string') {
         theme = themeModule.moduleConfig.theme;
     }
+
     const tokens = await getTokensLess(info.project, theme);
+    const globalCss = await getGlobalLess(info.project);
+
     const dataForReplace = {
         typescript,
         tokens,
         less,
+        globalCss,
         promptUser: data.prompt
     }
 
@@ -330,6 +341,13 @@ function replaceByPriority(source: string, key: string, value: string): string {
     }
 
     return source;
+}
+
+async function prepareComponentCss(css: string, projectId: number, theme: string) {
+    const tokens = await getTokensLess(projectId, theme)
+    const resultCss = removeTokensFromSource(css);
+    const tokensCss = `\n\n//Start Less Tokens\n${tokens}\n//End Less Tokens`;
+    return `${resultCss}\n${tokensCss}`;
 }
 
 
