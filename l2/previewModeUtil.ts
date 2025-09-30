@@ -173,6 +173,7 @@ export function waitForComponents(context: Window, componentNames: string[]) {
     return Promise.all(promises);
 }
 
+var originalPath: mls.cbe.IPath | undefined;
 function functionReplaceAnchor(e:MouseEvent) {
 
     e.stopPropagation();
@@ -183,11 +184,14 @@ function functionReplaceAnchor(e:MouseEvent) {
     if (!acutalName) return;
     const info = mls.l2.getPath(acutalName);
     if (!info) return;
+    if (!originalPath) originalPath = info; // guarda 1 pagina do module
 
     const href = (e.target as HTMLAnchorElement).href;
 
-    let name = href ? href.replace('https://collab.codes/', '') : info.shortName;
-    if (name === '') name = info.shortName;
+    let name = href ? href.replace('https://collab.codes/', '') : '';
+    if (name === '') {
+        name = originalPath ? originalPath.shortName : info.shortName;
+    }
     
     const key = mls.stor.getKeyToFiles(info.project, 2, name, info.folder, '.ts');
 
