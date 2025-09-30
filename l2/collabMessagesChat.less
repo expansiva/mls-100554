@@ -1,7 +1,7 @@
 /// <mls shortName="collabMessagesChat" project="100554" enhancement="enhancementStyle" />
 
 collab-messages-chat-100554 {
-
+    
     position: relative;
     display: flex;
     flex-direction: column;
@@ -122,8 +122,82 @@ collab-messages-chat-100554 {
             background: @grey-color-lighter;
             text-align: center;
             text-transform: uppercase;
-            font-size: @font-size-16
+            font-size: @font-size-16;
         }
+
+        .thread-group summary {
+            cursor: pointer;
+            list-style: none;
+            height: 70px;
+            transition: background-color 0.5s;
+            display: flex;
+            align-items: center;
+            padding: 0.1rem 0.3rem;
+            position: relative;
+            width: 100%;
+            border-bottom: 1px solid var(--grey-color);
+
+            .thread-group-item-header {
+                display: flex;
+                justify-content: space-between;
+
+                .thread-group-name {
+                    font-size: 1rem;
+                    font-weight: bold;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    color: @text-primary-color;
+                }
+
+                .last-group-update {
+                    font-size: 0.875rem;
+                    color: @grey-color-dark;
+                    white-space: nowrap;
+                }
+            }
+
+            .thread-group-content {
+                flex: 1;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                padding: 0.9rem;
+            }
+
+
+            .thread-group-avatar {
+                width: 50px;
+                height: 50px;
+
+                img {
+                    border-radius: 15px;
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+
+            .thread-group-summary {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                .last-group-message {
+                    font-size: 0.875rem;
+                    color: @grey-color-darker;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    flex: 1;
+                }
+            }
+
+        }
+
+        .thread-group summary::-webkit-details-marker {
+            display: none;
+        }
+
     }
 
     .thread-item:hover {
