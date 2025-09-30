@@ -54,6 +54,8 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
             // Linguagem padrão 'bash' se não especificada
             const language = lang ? lang : 'bash';
 
+
+
             // Adiciona o bloco de código com widget
             codeBlocks.push(`
                 <div class="collab-md-codeblock-card">
@@ -158,7 +160,7 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
             if (this.allHelpers.includes(fullHelp)) {
                 return `${before}<span class="help-ref">${fullHelp}</span>`;
             }
-            return match; 
+            return match;
         });
     }
 
@@ -180,6 +182,16 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
             return `<a href="${url}" target="_blank" rel="noopener">${text}</a>`;
         });
     }
+
+    private escapeHtml(str: string): string {
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
     /**
     * Parse Slack-style markdown to safe HTML.
     * Order of replacements is important to avoid nested/overlapping tags.
@@ -191,6 +203,7 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
     */
     private parseSlackMarkdown(input: string): string {
         if (!input) return '';
+        input = input.replace(/<[^>]+>/g, (match) => this.escapeHtml(match));
         // 🔐 Protect code blocks so they are not affected by other markdown replacements
         const codeBlockResult = this.extractCodeBlocks(input);
         input = codeBlockResult.input;
