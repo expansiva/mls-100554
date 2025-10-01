@@ -5,7 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_serviceBase';
 import { getTokens } from './_100554_designSystemBase';
 import { getConfigProject } from './_100554_libProjectConfig';
-import { createPath } from './_100554_libCommom';
+import { createPath, getLastOpenedFiles, OpenedFileL2 } from './_100554_libCommom';
 import { collabImport } from './_100554_collabImport';
 import { createThread } from './_100554_collabMessageHelper';
 import { getThreadByName } from './_100554_msgDBController';
@@ -532,7 +532,7 @@ export class ServicePreview100554 extends ServiceBase {
         this.updateLoadingToFalseIfNoTasksRunning();
         let fullName = `_${fileAction.project}_${fileAction.shortName}`;
         if (fileAction.folder) fullName = `_${fileAction.project}_${fileAction.folder}/${fileAction.shortName}`;
-        
+
         mls.actual[7].setFullName(fullName);
         mls.actual[4].setFullName(fullName);
 
@@ -1087,9 +1087,14 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private async setModel(storFile: mls.stor.IFileInfo) {
-        const model = await this.createModelIfNeeded(storFile);
-        if (!this._ed1 || !model) return;
-        this._ed1.setModel(model);
+        try {
+            const model = await this.createModelIfNeeded(storFile);
+            if (!this._ed1 || !model) return;
+            this._ed1.setModel(model);
+        } catch (e:any) {
+            this.error = '[setModel] Error:' + (e.message ? e.message : 'Not found model');
+        }
+
     }
 
     private getDarkLight() {
@@ -1384,9 +1389,27 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private previewL2(mode: string) {
+        
         if (!mls.actual[2].left) {
-            this.clearPreview();
-            return;
+
+            const last = getLastOpenedFiles(mls.actualProject || 0);
+            const lp = (last['2'] as OpenedFileL2).left;
+            if (!lp) {
+                this.clearPreview();
+                return;
+            }
+
+            mls.actual[2].setFullName(lp);
+            const infoLast = mls.l2.getPath(lp);
+            const key = mls.stor.getKeyToFiles(infoLast.project, 2, infoLast.shortName, infoLast.folder, '.ts');
+
+            if (!mls.stor.files[key]) {
+                this.clearPreview();
+                return;
+            }
+
+            mls.actual[2].left = mls.stor.files[key];
+
         }
 
         const { project, shortName, folder } = mls.actual[2].left;
@@ -1435,10 +1458,10 @@ export class ServicePreview100554 extends ServiceBase {
         }
     }
 
-    private async createPreview(mode: string, fullName: string, updTitle:boolean = true) {
+    private async createPreview(mode: string, fullName: string, updTitle: boolean = true) {
 
         if (!fullName || !this.watch) return;
-        if(updTitle) this.setTitleByLevel();
+        if (updTitle) this.setTitleByLevel();
         if (this.menu.updateTitle && updTitle) this.menu.updateTitle();
         await this.fireWcdChanges();
 

@@ -500,16 +500,20 @@ export class PluginExploreList extends PluginBaseModule {
         return html`
             <li @click="${this.clickOptOpen}" class="${file.shortName === actualL2 && file.folder === actualL2Folder ? 'selected' : ''}" style="${style}${auxValidProject}" .myFile=${file} .nameFilter="${nameFilter}" ?disabled=${!validProject}>
                 <div class="elContent">
-                    <div class="groupHiddenList" @click="${this.clickGroupHidden}">
-                        <span class="mls-gpbtnslider-item fa fa-undo" title="${this.msg.undo}" @click="${this.clickOptUndo}"></span>
-                        <span class="mls-gpbtnslider-item fa fa-clone" title="${this.msg.clone}" @click="${this.clickOptClone}"></span>
-                        <span class="mls-gpbtnslider-item fa fa-file-pen" title="${this.msg.rename}" @click="${this.clickOptRename}"></span>
-                        <span class="mls-gpbtnslider-item fa fa-trash" title="${this.msg.delete}" @click="${this.clickOptDel}"></span>
-                        <span class="mls-gpbtnslider-item fa-solid fa-shield-halved" title="${this.msg.security}" @click="${this.clickOptOpenSecurity}"></span> 
+                    <info-item>
+                        <span class="groupHiddenListIcon" @click="${this.clickGroupHidden}">
+                        </span>
+                        <span class="spanFileName ${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
+                        <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion + auxHtml}"></div>
+                    </info-item>
+                    <div class="groupHiddenList">
+                        <span class="mls-gpbtnslider-item" title="${this.msg.undo}" @click="${this.clickOptUndo}"><span class="fa fa-undo"></span> Undo</span>
+                        <span class="mls-gpbtnslider-item" title="${this.msg.clone}" @click="${this.clickOptClone}"><span class=" fa fa-clone"></span> Clone</span>
+                        <span class="mls-gpbtnslider-item" title="${this.msg.rename}" @click="${this.clickOptRename}"><span class=" fa fa-file-pen"></span> Rename</span>
+                        <span class="mls-gpbtnslider-item" title="${this.msg.delete}" @click="${this.clickOptDel}"><span class=" fa fa-trash"></span> Delete</span>
+                        <span class="mls-gpbtnslider-item" title="${this.msg.security}" @click="${this.clickOptOpenSecurity}"><span class=" fa-solid fa-shield-halved"></span> Security</span> 
                     </div>
-                    <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion + auxHtml}"></div>
-
-                    <span class="spanFileName ${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
+                    
                 </div>
             </li>
         `;
@@ -930,13 +934,23 @@ export class PluginExploreList extends PluginBaseModule {
 
         e.stopPropagation();
         const el = e.target as HTMLElement;
+        const father = el.closest('li');
+        if (!father)
+            return;
+        const target = father.querySelector('.groupHiddenList');
+        if (!target)
+            return;
+        target.classList.toggle('activegpbtnslider');
+
+        /*e.stopPropagation();
+        const el = e.target as HTMLElement;
         if (!el) return;
         if (el.classList.contains('activegpbtnslider')) {
             const li = el.closest('li') as HTMLElement;
             const elContentAux = li.querySelector('.elContentAux') as HTMLElement;
             if (elContentAux) elContentAux.style.display = 'none';
         }
-        el.classList.toggle('activegpbtnslider');
+        el.classList.toggle('activegpbtnslider');*/
 
     }
 

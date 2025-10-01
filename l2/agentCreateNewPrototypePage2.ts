@@ -346,6 +346,9 @@ async function generateFiles(
             if (sourceLess) models.style?.model.setValue(sourceLess);
             models.defs?.model.setValue(sourceDefs);
 
+            if (models.ts) mls.l2.typescript.compileAndPostProcess(models.ts, true, true);
+            if (models.html) mls.editor.forceModelUpdate(models.html.model);
+
 
         }
 
