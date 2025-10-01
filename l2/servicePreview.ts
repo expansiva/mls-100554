@@ -1393,6 +1393,11 @@ export class ServicePreview100554 extends ServiceBase {
         if (!mls.actual[2].left) {
 
             const last = getLastOpenedFiles(mls.actualProject || 0);
+            if(!last || !last['2']){
+                this.clearPreview();
+                return;
+            }
+            
             const lp = (last['2'] as OpenedFileL2).left;
             if (!lp) {
                 this.clearPreview();
