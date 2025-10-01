@@ -164,11 +164,21 @@ export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {
         });
     }
 
-    private parseRawLinks(input: string): string {
+    private parseRawLinks2(input: string): string {
 
         // www.meusite.com/teste http://meusite.com
         return input.replace(
             /\b((https?:\/\/|www\.)[^\s<]+)/gi,
+            (_m, url) => {
+                const href = url.startsWith("http") ? url : `https://${url}`;
+                return `<a href="${href}" target="_blank" rel="noopener">${url}</a>`;
+            }
+        );
+    }
+
+    private parseRawLinks(input: string): string {
+        return input.replace(
+            /\b((?:https?:\/\/|www\.)?[a-z0-9.-]+\.[a-z]{2,}(?:\/[^\s<]*)?)/gi,
             (_m, url) => {
                 const href = url.startsWith("http") ? url : `https://${url}`;
                 return `<a href="${href}" target="_blank" rel="noopener">${url}</a>`;
