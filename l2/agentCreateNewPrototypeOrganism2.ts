@@ -9,7 +9,6 @@ import { getTokensLess, getGlobalLess } from './_100554_designSystemBase';
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
-    executeNextStep,
     addNewStep
 
 } from "./_100554_aiAgentOrchestration";
@@ -20,7 +19,6 @@ import {
     getNextFlexiblePendingStep,
     updateStepStatus,
     updateTaskTitle,
-    getNextPendentStep,
     appendLongTermMemory
 } from "./_100554_aiAgentHelper";
 
@@ -170,8 +168,10 @@ async function updateFiles(context: mls.msg.ExecutionContext) {
     context = await updateStepStatus(context, step.stepId, "completed");
     const res = await fireAgenteImproveStyle(context, step);
 
-
-    if (models.ts) mls.l2.typescript.compileAndPostProcess(models.ts, true, true);
+    if (models.ts) {
+        //mls.l2.typescript.compileAndPostProcess(models.ts, true, true);
+        mls.editor.forceModelUpdate(models.ts.model);
+    }
     if (models.html) mls.editor.forceModelUpdate(models.html.model);
 
     return res;
