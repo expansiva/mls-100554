@@ -122,6 +122,7 @@ export class [className] extends CollabPageElement {
         this.loading = true;
         try {
             await createNewFile({
+                folder:this.folder,
                 project: this.project,
                 position: this.position,
                 shortName: this.shortName,
