@@ -4,6 +4,7 @@ import { updateMessage, getMessage } from "./_100554_msgDBController";
 import { getUserId, createThread } from "./_100554_collabMessageHelper";
 import { getThreadByName } from './_100554_msgDBController';
 import { loadAgent } from './_100554_aiAgentOrchestration';
+import { openService } from './_100554_libCommom';
 
 /**
  * Helper function to collect all steps from a task in a flat array
@@ -471,6 +472,28 @@ export async function executeAgentByFile(agentName: string, prompt: string, file
     await agent.beforePrompt(context);
   }
 
+
+}
+
+export async function openCollabMessage(file: mls.stor.IFileInfo) {
+
+  const pageName = file.folder ? `_${file.project}_${file.folder}/${file.shortName}` : `${file.project}_${file.shortName}`;
+
+  let thread = await getThreadByName(pageName);
+  if (!thread) {
+    openService('_100554_serviceCollabMessages', 'left', mls.actualLevel);
+    return;
+  }
+
+  const threadId = thread?.threadId;
+  if (!threadId) {
+    openService('_100554_serviceCollabMessages', 'left', mls.actualLevel);
+    return;
+  }
+
+  
+  mls.events.fire([mls.actualLevel], 'collabMessages' as any, JSON.stringify({ threadId: threadId, type: 'thread-open' }));
+  
 
 }
 
