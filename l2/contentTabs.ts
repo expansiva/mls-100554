@@ -33,10 +33,10 @@ export class ContentTabs extends CollabLitElement {
         if (this.navItems.length === 0) return '';
 
         return html`
-        <nav>
+        <nav class="content-tabs-100554-nav">
             ${this.navItems.map(
             (item, i) => html`
-                <nav-item class="tab" ?selected=${this.selectedIndex === i} @click=${() => this.handleSelect(i)} >
+                <nav-item class="content-tabs-100554-tab" ?selected=${this.selectedIndex === i} @click=${() => this.handleSelect(i)} >
                     ${item.innerHTML}
                 </nav-item>
             `
@@ -51,10 +51,10 @@ export class ContentTabs extends CollabLitElement {
         if (this.contentItems.length === 0) return '';
 
         return html`
-        <section>
+        <section class="content-tabs-100554-section">
         ${this.contentItems.map(
             (content, i) => html`
-            <content-item class="content" ?active=${this.selectedIndex === i}>
+            <content-item class="content-tabs-100554-content" ?active=${this.selectedIndex === i}>
               ${unsafeHTML(content.innerHTML)}
             </content-item>
           `
