@@ -507,7 +507,9 @@ export class TsTestAst {
 
         const fcName = testFind.functionName;
         const params = testFind.params[paramsIndex];
-        const fileName = `./_${this.modelTest.storFile.project}_${this.modelTest.storFile.shortName}.test.js?cacheBuster=${Date.now()}`
+        const suffix = `.test.js?cacheBuster=${Date.now()}`
+        const { folder, project, shortName } = this.modelTest.storFile;
+        const fileName = folder ? `./_${project}_${folder}_${shortName}${suffix}` : `./_${project}_${shortName}${suffix}`
         let module;
 
         try {

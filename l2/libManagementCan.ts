@@ -1,30 +1,14 @@
 /// <mls shortName="libManagementCan" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { CollabState, GlobalState } from './_100554_collabState';
+import { CollabState, GlobalState, globalState } from './_100554_collabState';
 
-const watchedStates = new Map<string, any>();
-const waitingPromises: Map<string, { value: any, resolve: () => void, reject: (err: Error) => void }> = new Map();
-
+/** Guarda watchers ativos */
+const activeWatchers = new Map<string, number>();
 
 /**
- * Initializes or updates a global state at a specified path.
- *
- * This function clears the watched states, retrieves the current global state,
- * and ensures the provided path exists within the global state object. If the
- * path does not exist, it is created. If it already exists and the value is an
- * object, it merges the existing state with the new value.
- *
- * Additionally, it recursively sets nested properties using `stateManager.setState`
- * to ensure that each nested key is properly initialized or updated.
- *
- * @param {string} [path] - The dot-separated path to the state property (e.g., "user.profile.name").
- * @param {string | object | unknown[]} [value] - The value to assign at the specified path.
+ * Inicializa ou atualiza o estado global em um caminho específico.
  */
 export function initState(path?: string, value?: string | object | unknown[]) {
-
-    watchedStates.clear();
-    waitingPromises.clear();
-
     let globalState: GlobalState = getState();
     const stateManager = getStateManager();
 
@@ -61,17 +45,10 @@ export function initState(path?: string, value?: string | object | unknown[]) {
     }
 
     setNestedState(path, value);
-
 }
 
-
 /**
- * Updates the state at a given path and validates watched states.
- * 
- * @param {string} path - The state path to update.
- * @param {any} value - The new value to set.
- * @returns {boolean} - Returns true if the state was successfully updated.
- * @throws {Error} - Throws an error if the update fails.
+ * Atualiza o estado em um caminho.
  */
 export function setState(path: string, value: any): boolean {
     const stateManager = getStateManager();
@@ -80,182 +57,136 @@ export function setState(path: string, value: any): boolean {
 }
 
 /**
- * Verifies if the current state at a given path matches the expected value.
- * Optionally retries the verification within a specified time frame.
- * Also validates all watched states.
- * 
- * @param {string} path - The state path to verify.
- * @param {any} value - The expected value.
- * @param {IVerifyOptions} [options] - Optional settings for retry attempts.
- * @returns {boolean} - Returns true if the state matches the expected value.
- * @throws {Error} - Throws an error if the state does not match within the given time frame.
+ * Espera até que o estado em `path` seja igual a `value`.
+ * Se `timeout` for 0 ou undefined, espera indefinidamente.
  */
-export function verifyState(path: string, value: any, options?: IVerifyOptions): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        const stateManager = getStateManager();
-        let newValue = typeof value === 'object' ? JSON.stringify(value) : value;
-        let startTime = Date.now();
-
-        const checkState = () => {
-            let oldValue = stateManager.getState(path);
-            if (typeof oldValue === 'object') oldValue = JSON.stringify(oldValue);
-
-            if (oldValue === newValue) {
-                resolve(true);
-                return;
-            }
-
-            if (Date.now() - startTime >= (options?.timeout ?? 0)) {
-                reject(new Error(`Test failed: expected: "${newValue}", got: "${oldValue}"`));
-                return;
-            }
-
-            setTimeout(checkState, options?.retryInterval ?? 100);
-        };
-
-        checkState();
-    });
-}
-
-/**
- * Registers a function to wait until the state at a given path reaches the specified value.
- *
- * @param {string} path - The path of the state to wait for.
- * @param {any} value - The expected value of the state.
- * @returns {Promise<void>} - A promise that resolves once the state value matches the expected value.
- */
-export function waitingState(path: string, value: any): Promise<void> {
-    return new Promise((resolve, reject) => {
-        waitingPromises.set(path, { value, resolve, reject });
-    });
-}
-
-/**
- * Validates whether the current state matches the expected value for any registered waiting state.
- * If the state does not match the expected value, the function stops observing and throws an error.
- *
- * @param {CollabState} stateManager - The state manager that holds the global state.
- * @throws {Error} - Throws an error if the state at a given path does not match the expected value.
- */
-function validateWaitingStates(stateManager: CollabState): void {
-    for (const [path, { value, resolve, reject }] of waitingPromises.entries()) {
-        const currentValue = stateManager.getState(path);
-
-        // Check if the current value matches the expected value
-        if (JSON.stringify(currentValue) === JSON.stringify(value)) {
-            resolve(); // Resolve the promise once the value matches
-            waitingPromises.delete(path); // Remove the waiting function
-        } else {
-            // If the value does not match, stop observing and throw an error
-            waitingPromises.delete(path);
-            const msg = `Waiting state validation failed: path "${path}" has value "${currentValue}", expected: "${value}"`
-            reject(new Error(msg));
-        }
-    }
-}
-
-/**
- * Registers or unregisters a state to be watched.
- * If the value is `null`, the state is removed from observation.
- * 
- * @param {string} path - The state path to watch.
- * @param {any} value - The expected value for this state. If null, the state is removed from observation.
- */
-export function watchState(path: string, value: any): void {
-
-    if (value === null) {
-        watchedStates.delete(path);
-    } else {
-        watchedStates.set(path, value);
-    }
-}
-
-/**
- * Validates all watched states, checking if their current values match the expected ones.
- * If a mismatch is found, an error is thrown.
- * 
- * @throws {Error} - Throws an error if any watched state has changed unexpectedly.
- */
-function validateWatchedStates(): void {
+export async function waitingState(
+    path: string,
+    value: any,
+    options?: IVerifyOptions
+): Promise<void> {
     const stateManager = getStateManager();
+    const expected = normalizeValue(value);
+    const timeout = options?.timeout ?? 0; // 0 = infinito
+    const retryInterval = options?.retryInterval ?? 100;
+    const startTime = Date.now();
+    const initialValue = stateManager.getState(path);
 
-    for (const [path, expectedValue] of watchedStates.entries()) {
+    while (true) {
+        const current = normalizeValue(stateManager.getState(path));
 
-        let currentValue = stateManager.getState(path);
-        let expected = expectedValue;
-        if (typeof expected === 'object') expected = JSON.stringify(expected);
-        if (typeof currentValue === 'object') currentValue = JSON.stringify(currentValue);
-
-        if (currentValue !== expected) {
-            throw new Error(`Test failed: path "${path}" changed. Expected: "${expected}" got: "${currentValue}"`);
+        if (current === expected) {
+            return;
         }
+
+        if (initialValue !== current) {
+            throw new Error(
+                `Value for state invalid: path "${path}", expected "${expected}", got "${current}"`
+            );
+        }
+
+        if (timeout > 0 && Date.now() - startTime >= timeout) {
+            throw new Error(
+                `Timeout waiting for state: path "${path}", expected "${expected}", got "${current}"`
+            );
+        }
+
+        await delay(retryInterval);
     }
 }
 
 /**
- * Retrieves the global state manager from the preview iframe.
- * 
- * @returns {any} - The global state manager.
- * @throws {Error} - Throws an error if the preview iframe or state manager is not available.
+ * Vigia continuamente um estado. Se ele mudar de valor, lança erro.
+ * Fica rodando até chamar `unwatchState` ou `clearWatchers`.
  */
+export function watchState(
+    path: string,
+    expectedValue: any,
+    options?: IVerifyOptions
+): void {
+    const stateManager = getStateManager();
+    const expected = normalizeValue(expectedValue);
+    const retryInterval = options?.retryInterval ?? 100;
+
+    // Se já existe watcher para esse path, limpa
+    if (activeWatchers.has(path)) {
+        clearInterval(activeWatchers.get(path)!);
+        activeWatchers.delete(path);
+    }
+
+    const interval = setInterval(() => {
+        const current = normalizeValue(stateManager.getState(path));
+        if (current !== expected) {
+            clearInterval(interval);
+            activeWatchers.delete(path);
+            throw new Error(
+                `Watch failed: path "${path}" changed. Expected "${expected}", got "${current}"`
+            );
+        }
+    }, retryInterval);
+
+    activeWatchers.set(path, interval);
+}
+
+/** Cancela observação de um path específico */
+export function unwatchState(path: string): void {
+    if (activeWatchers.has(path)) {
+        clearInterval(activeWatchers.get(path)!);
+        activeWatchers.delete(path);
+    }
+}
+
+/** Cancela todos os watchers ativos */
+export function clearWatchers(): void {
+    for (const interval of activeWatchers.values()) {
+        clearInterval(interval);
+    }
+    activeWatchers.clear();
+}
+
+/**
+ * Verifica estado com timeout opcional, retornando boolean em vez de erro.
+ */
+export async function verifyState(
+    path: string,
+    value: any,
+    options?: IVerifyOptions
+): Promise<boolean> {
+    try {
+        await waitingState(path, value, options);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/** Utils */
+function normalizeValue(val: any): string {
+    return typeof val === "object" ? JSON.stringify(val) : String(val);
+}
+function delay(ms: number): Promise<void> {
+    return new Promise(res => setTimeout(res, ms));
+}
+
 function getStateManager(): CollabState {
-
-    if (!window.preview.iframe) throw new Error('Invalid preview iframe');
-    if (!window.preview.iframe.contentWindow) throw new Error('Invalid preview iframe contentWindow');
-
-    const stateManager = (window.preview.iframe.contentWindow as IPreviewWindow).globalStateManagment;
+    const stateManager = globalState.globalStateManagment;
     if (!stateManager) throw new Error('Invalid preview stateManagment');
     return stateManager;
 }
 
-/**
- * Retrieves the global state and wraps it in a Proxy to intercept changes and validate waiting states.
- *
- * @returns {any} - The proxied state object.
- * @throws {Error} - Throws an error if the preview iframe or state management is invalid.
- */
 function getState(): {} {
-    if (!window.preview.iframe) throw new Error('Invalid preview iframe');
-    if (!window.preview.iframe.contentWindow) throw new Error('Invalid preview iframe contentWindow');
-
-    const state = (window.preview.iframe.contentWindow as IPreviewWindow)._ica;
+    const state = globalState._ica;
     if (!state) throw new Error('Invalid preview stateManagment');
-
-    function createProxy(obj: any): any {
-        if (typeof obj !== 'object' || obj === null) {
-            return obj;
-        }
-        return new Proxy(obj, {
-            set(target, key, value) {
-                target[key] = createProxy(value);
-
-                validateWaitingStates(getStateManager());
-                validateWatchedStates();
-
-
-                return true;
-            },
-            get(target, key) {
-                const result = target[key];
-                return createProxy(result);
-            }
-        });
-    }
-
-    const proxiedState = createProxy(state);
-    return proxiedState;
+    return state;
 }
 
-
+/** Types */
 interface IPreviewWindow extends Window {
     globalStateManagment: CollabState
     _ica: {},
 }
 
 interface IVerifyOptions {
-    /** Maximum time (in milliseconds) before giving up. */
-    timeout?: number;
-    /** Interval (in milliseconds) between each verification attempt. */
-    retryInterval?: number;
+    timeout?: number;       // tempo máximo em ms (0 = infinito)
+    retryInterval?: number; // intervalo entre verificações em ms
 }
-

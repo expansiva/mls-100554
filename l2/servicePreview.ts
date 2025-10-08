@@ -890,6 +890,7 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private async runTest(actualData: any, clear: boolean) {
+
         if (!this.astTSTest) throw new Error('Invalid AST');
         const testItem = this.addTestResultItem(actualData.functionName, 'running', clear);
         try {
@@ -971,7 +972,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private refreshAST() {
         if (!this.actualFile) return false;
-        const fileName = `_${this.actualFile.project}_${this.actualFile.shortName}`;
+        const fileName = this.actualFile.folder ? `_${this.actualFile.project}_${this.actualFile.folder}_${this.actualFile.shortName}` : `_${this.actualFile.project}_${this.actualFile.shortName}`;
         const models = mls.editor.models[fileName];
         if (!models) {
             this.error = `No found models for file: ${fileName}`;
