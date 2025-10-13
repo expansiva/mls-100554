@@ -186,7 +186,12 @@ function functionReplaceAnchor(e:MouseEvent) {
     if (!info) return;
     if (!originalPath) originalPath = info; // guarda 1 pagina do module
 
-    const href = (e.target as HTMLAnchorElement).href;
+    let anchor = (e.target as HTMLAnchorElement);
+    if (!anchor.getAttribute('href')) {
+        anchor = (e.target as HTMLAnchorElement).closest('a') as HTMLAnchorElement;
+    }
+
+    const href = anchor.href;
 
     let name = href ? href.replace('https://collab.codes/', '') : '';
     if (name === '') {
