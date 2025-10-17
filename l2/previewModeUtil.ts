@@ -197,8 +197,15 @@ function functionReplaceAnchor(e:MouseEvent) {
     if (name === '') {
         name = originalPath ? originalPath.shortName : info.shortName;
     }
+
+    const arrayName = name.split('/').filter(Boolean);
+    let folder = info.folder;
+    if (arrayName.length > 1) {
+        name = arrayName[1];
+        folder = arrayName[0];
+    }
     
-    const key = mls.stor.getKeyToFiles(info.project, 2, name, info.folder, '.ts');
+    const key = mls.stor.getKeyToFiles(info.project, 2, name, folder, '.ts');
 
     if (!mls.stor.files[key]) return;
 
