@@ -15,6 +15,7 @@ export interface IAgent {
   afterTool?(context: mls.msg.ExecutionContext, stepId: number): Promise<void>;
   installBot?(context: mls.msg.ExecutionContext): Promise<boolean>;
   beforeBot?(context: mls.msg.ExecutionContext, msg: string, toolsBeforeSendMessage: mls.bots.ToolsBeforeSendMessage[]): Promise<Record<string, any>>;
+  afterBot?(context: mls.msg.ExecutionContext, output: mls.msg.BotOutput): Promise<string>;
   replayForSupport?(task: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void>;
   
   getFeedBack?(task: mls.msg.TaskData): Promise<TemplateResult>;
