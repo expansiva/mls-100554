@@ -35,6 +35,7 @@ import {
     loadNotificationDeviceId,
     defaultThreadImage
 } from './_100554_collabMessageHelper';
+import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
 
 import './_100554_collabMessagesTaskInfo';
 import './_100554_collabMessagesTask';
@@ -689,7 +690,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                                     </div>                                
                                 </summary>
                                 <ul class="group-items">
-                                    ${items.map(item => this.renderThreadItemLi(item, prefix ))}
+                                    ${items.map(item => this.renderThreadItemLi(item, prefix))}
                                 </ul>
                             </details>
                         </li>
@@ -706,7 +707,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     private renderThreadItemLi(item: IFilteredThreads, prefix?: string) {
         let threadAvatar = this.getThreadAvatar(item);
         let threadName = this.getThreadName(item);
-        if (prefix) threadName = threadName.replace(prefix  + '/', '');
+        if (prefix) threadName = threadName.replace(prefix + '/', '');
         let lastMessage: string = item.thread.lastMessage || '';
         const unreadCount = item.thread.unreadCount || 0;
         const now = new Date();
@@ -1651,13 +1652,33 @@ export class CollabMessagesChat100554 extends StateLitElement {
 
         const footerData: IMessageFooter[] = [];
 
-        outputs?.forEach((item) => {
+
+        for await (let item of outputs || []) {
+
             const footerItem: IMessageFooter = {
                 title: item.botId,
                 lines: [item.output]
             }
-            footerData.push(footerItem)
-        });
+
+            const module = await this.loadAgent(item.botId, '');
+            if (module && module.afterBot && typeof module.afterBot === 'function') {
+                const context: mls.msg.ExecutionContext = {
+                    message: newMessage,
+                    task: undefined
+                }
+                try {
+                    const response = await module.afterBot(context, item);
+                    footerItem.lines = [response];
+
+                } catch (err: any) {
+                    footerItem.lines = [err.message];
+                }
+            }
+
+            footerData.push(footerItem);
+
+        }
+
 
         const alreadyExist = this.actualMessages.find(item =>
             item.content === oldMessage.content &&
@@ -1692,6 +1713,20 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.actualMessages = messagesInDb;
         this.actualMessagesParsed = this.parseMessages(this.actualMessages, this.lastTopicFilter);
         this.requestUpdate();
+    }
+
+    private async loadAgent(shortName: string, folder: string = ''): Promise<IAgent | undefined> {
+
+        try {
+            const module = await loadModuleFromProjectOrDependency(shortName, folder, '.ts');
+            if (typeof module.createAgent !== "function") throw new Error(`(loadAgent) createAgent function not found in ${shortName}`);
+            const agent = module.createAgent();
+            return agent;
+        } catch (error: any) {
+            console.error(`[loadAgent] ${error.message || error} `);
+            return undefined;
+        }
+
     }
 
     private async onTaskClick(taskId: string, messageId: string, threadId: string, message: IMessage) {

@@ -8,6 +8,7 @@ const activeWatchers = new Map<string, number>();
 /**
  * Inicializa ou atualiza o estado global em um caminho específico.
  */
+
 export function initState(path?: string, value?: string | object | unknown[]) {
     let globalState: GlobalState = getState();
     const stateManager = getStateManager();
@@ -94,6 +95,57 @@ export async function waitingState(
         await delay(retryInterval);
     }
 }
+
+// espera até que o state em `path` tenha um valor "não vazio"
+// resolve com o valor atual quando isso acontecer.
+// se quiser, aceita timeout em ms (opcional) para rejeitar
+export function waitForNonEmptyState(
+  path: string,
+  options?: { retryInterval?: number; timeout?: number }
+): Promise<string> {
+  const stateManager = getStateManager();
+  const retryInterval = options?.retryInterval ?? 100;
+  const timeout = options?.timeout; // ms | undefined
+
+  return new Promise((resolve, reject) => {
+    // Checagem imediata (importante: cobre caso já esteja preenchido)
+    try {
+      const initial = normalizeValue(stateManager.getState(path));
+      if (initial !== '' && initial !== undefined && initial !== null) {
+        resolve(String(initial));
+        return;
+      }
+    } catch (e) {
+      // se getState lançar, rejeitar
+      reject(e);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      try {
+        const current = normalizeValue(stateManager.getState(path));
+        if (current !== '' && current !== undefined && current !== null) {
+          clearInterval(interval);
+          if (timer) clearTimeout(timer);
+          resolve(String(current));
+        }
+      } catch (e) {
+        clearInterval(interval);
+        if (timer) clearTimeout(timer);
+        reject(e);
+      }
+    }, retryInterval);
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    if (typeof timeout === 'number') {
+      timer = setTimeout(() => {
+        clearInterval(interval);
+        reject(new Error(`waitForNonEmptyState timeout after ${timeout}ms for path: ${path}`));
+      }, timeout);
+    }
+  });
+}
+
 
 /**
  * Vigia continuamente um estado. Se ele mudar de valor, lança erro.
