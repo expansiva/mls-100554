@@ -19,6 +19,7 @@ export async function initCompileMonaco(project: number): Promise<boolean> {
         const depsActualProject = mls.l5.getProjectDependencies(project, false);
         const deps = [project, ...depsActualProject];
         for await (let prj of deps) {
+            if ([100529, 100131].includes(prj)) continue;
             const prjModel = mls.editor.getModels(prj, '', '');
             if ((!prjModel || !prjModel.ts) && prj !== mls.stor.LOCALPROJECTNUMBER) {
                 const info = await mls.stor.localDB.readPrjInfo(prj);

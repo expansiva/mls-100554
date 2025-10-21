@@ -243,6 +243,8 @@ export class Projects102009 extends StateLitElement {
 
           if (!projectDriver || !projectURL || projectDriver === 'mls') return;
 
+          if (!info || !info.projectDriver || !info.projectURL) return;
+
           const item = {
             project: p.id,
             title: p.name,
