@@ -80,7 +80,7 @@ export async function waitingState(
             return;
         }
 
-        if (initialValue !== current) {
+        if (initialValue && initialValue !== current) {
             throw new Error(
                 `Value for state invalid: path "${path}", expected "${expected}", got "${current}"`
             );
