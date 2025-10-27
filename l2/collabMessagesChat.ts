@@ -2,7 +2,7 @@
 
 import { html, LitElement, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation, collab_plus } from './_100554_collabIcons';
+import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation, collab_plus, collab_folder_tree } from './_100554_collabIcons';
 import { collabImport } from './_100554_collabImport';
 import { removeThreadFromSync, getThreadUpdateInBackground, checkIfNotificationUnread } from './_100554_collabMessagesSyncNotifications';
 import { openElementInServiceDetails, clearServiceDetails } from './_100554_libCommom';
@@ -46,6 +46,7 @@ import './_100554_collabMessagesThreadDetails';
 import './_100554_collabMessagesRichPreview';
 import './_100554_collabMessagesUserModal';
 import './_100554_collabMessagesThreadModal';
+import './_100554_collabMessagesFilter';
 
 import './_100554_collabMessagesAdd';
 
@@ -658,7 +659,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 return this.renderThreadItemLi(items[0]);
             } else {
                 const lastItem = items[0];
-                let threadAvatar = this.getThreadAvatar(lastItem);
+                // let threadAvatar = this.getThreadAvatar(lastItem);
                 const now = new Date();
                 const isToday =
                     lastItem._lastMessageDate.dateObject.getFullYear() === now.getFullYear() &&
@@ -674,10 +675,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                             <details>
                                 <summary class="group-title">
                                     <div class="thread-group-avatar">
-                                        ${threadAvatar.startsWith('<') && threadAvatar.endsWith('>') ?
-                        html`${unsafeHTML(threadAvatar)}` :
-                        html`<img src="${threadAvatar}"></img>`
-                    }
+                                        ${collab_folder_tree}
                                     </div>
                                     <div class="thread-group-content">
                                         <div class="thread-group-item-header">
@@ -890,6 +888,15 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private renderThreadSearch() {
+        return html`
+		<collab-messages-filter-100554
+			@search-change=${this.onSearchInput}
+			placeholder=${this.msg.placeholderSearch}>
+		</collab-messages-filter-100554>
+	`;
+    }
+
+    private renderThreadSearch2() {
         return html`<div class="thread-search">
                 <input type="search"
                     .value=${this.searchTerm}
@@ -918,9 +925,9 @@ export class CollabMessagesChat100554 extends StateLitElement {
             ></collab-messages-add-100554>`
     }
 
-    private onSearchInput(e: Event) {
-        const target = e.target as HTMLInputElement;
-        this.searchTerm = target.value.toLowerCase();
+    private onSearchInput(e: CustomEvent) {
+    
+        this.searchTerm = e.detail.toLowerCase();
         const ordenedThreads = this.getOrdenedThreadsByStatus();
         this.filteredThreads = this.getFilteredThreads(ordenedThreads);
     }

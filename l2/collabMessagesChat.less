@@ -1,7 +1,7 @@
 /// <mls shortName="collabMessagesChat" project="100554" enhancement="enhancementStyle" />
 
 collab-messages-chat-100554 {
-    
+
     position: relative;
     display: flex;
     flex-direction: column;
@@ -25,8 +25,10 @@ collab-messages-chat-100554 {
     }
 
     .header {
+        padding: .1rem;
         height: 50px;
-        background-color: @grey-color-lighter;
+        min-height: 50px;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
         color: @text-primary-color;
         cursor: pointer;
         display: flex;
@@ -38,6 +40,10 @@ collab-messages-chat-100554 {
 
         svg {
             fill: currentColor;
+        }
+
+        collab-messages-filter-100554 {
+            width: calc(100% - 50px);
         }
 
         .header-title {
@@ -125,6 +131,11 @@ collab-messages-chat-100554 {
             font-size: @font-size-16;
         }
 
+
+        .thread-group details:not([open]) {
+            background: @grey-color-light;
+        }
+
         .thread-group summary {
             cursor: pointer;
             list-style: none;
@@ -169,6 +180,12 @@ collab-messages-chat-100554 {
             .thread-group-avatar {
                 width: 50px;
                 height: 50px;
+
+                svg {
+                    fill: currentColor;
+                    width: 40px;
+                    height: 50px;
+                }
 
                 img {
                     border-radius: 15px;
