@@ -77,7 +77,7 @@ export class ServiceCollabMessages100554 extends ServiceBase {
         icon: '&#xf086',
         state: 'background',
         position: 'right',
-        tooltip: 'Collab Messages',
+        tooltip: 'Messages',
         visible: true,
         widget: '_100554_serviceCollabMessages',
         level: [0, 2, 3, 5]
