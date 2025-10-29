@@ -13,6 +13,7 @@ export class PreviewModeSinglePage {
     private models: mls.editor.IModels | undefined = undefined;
     private file: mls.stor.IFileInfo | undefined = undefined;
     private esbuild: any;
+    private needAwait = true;
 
     constructor(_j: IJSONDependence, _i: HTMLIFrameElement, _l: string, _s: boolean, _f: mls.stor.IFileInfo, _m: mls.editor.IModels | undefined) {
         this.json = _j;
@@ -26,7 +27,8 @@ export class PreviewModeSinglePage {
     public async init() {
         if (!this.json || !this.ifr) return;
         await this.loadEsbuild();
-        setTimeout(async () => await this.configIframe(), 200);
+        if (this.needAwait) setTimeout(async () => await this.configIframe(), 200);
+        else this.configIframe();
     }
 
     private async configIframe() {
@@ -51,7 +53,7 @@ export class PreviewModeSinglePage {
                             idPart = restParts[0];
                             restParts.shift();
                         }
-                        
+
                         const rest = restParts.join('/');
 
                         const lastSlashIndex = rest.lastIndexOf('/');
@@ -62,7 +64,7 @@ export class PreviewModeSinglePage {
                     }
 
                     const isValidStart = (path: string) => {
-                        return !path.startsWith("./l2/") && !path.startsWith("_") && !(path.startsWith("./_") && path.indexOf("/l2/") >= 0 )
+                        return !path.startsWith("./l2/") && !path.startsWith("_") && !(path.startsWith("./_") && path.indexOf("/l2/") >= 0)
                     }
 
                     if (valids.includes(args.path)) {
@@ -152,7 +154,8 @@ export class PreviewModeSinglePage {
         const virtualEntryPath = "virtual-entry.js";
         const virtualEntryContent = allImports.map(path => `import "${path}";`).join("\n");
 
-        const result = await this.esbuild.build({
+        const cachedJs = this.loadCache();
+        const result = cachedJs ? cachedJs : await this.esbuild.build({
             stdin: {
                 contents: virtualEntryContent,
                 resolveDir: "/",
@@ -173,7 +176,12 @@ export class PreviewModeSinglePage {
         const s = document.createElement('script') as HTMLScriptElement;
         s.textContent = result.outputFiles[0].text;
         this.ifr.contentDocument?.body.appendChild(s);
-        if (this.isService && this.file) util.simulateService(this.json, this.ifr, this.file)
+        if (this.isService && this.file) util.simulateService(this.json, this.ifr, this.file);
+        if (!(window as any).cachePreview) {
+            (window as any).cachePreview = {};
+        }
+
+        (window as any).cachePreview[this.json.importsJs[0]] = result;
 
     }
 
@@ -210,8 +218,11 @@ export class PreviewModeSinglePage {
 
     private async loadEsbuild() {
 
-        if ((mls as any).esbuild) this.esbuild = (mls as any).esbuild;
-        else if (!(mls as any).esbuildInLoad) await this.initializeEsBuild();
+        this.needAwait = true;
+        if ((mls as any).esbuild) {
+            this.esbuild = (mls as any).esbuild;
+            this.needAwait = false;
+        }else if (!(mls as any).esbuildInLoad) await this.initializeEsBuild();
     }
 
     private async initializeEsBuild() {
@@ -228,6 +239,27 @@ export class PreviewModeSinglePage {
 
         }
 
+    }
+
+    private loadCache() {
+        if (mls.actualLevel !== 7) return;
+        if (!(window as any).cachePreview || !this.json) return;
+        if (!(window as any).cachePreview[this.json.importsJs[0]]) return;
+
+        let needCompile = false;
+        this.json.importsJs.forEach((i) => {
+            const name = i.startsWith('/') ? i.replace('/', '') : i;
+            const f = mls.l2.getPath(name);
+            const key = mls.stor.getKeyToFiles(f.project, 2, f.shortName, f.folder, '.ts');
+            if (mls.stor.files[key] && mls.stor.files[key].inLocalStorage) {
+                needCompile = true;
+            }
+
+        });
+
+        if (needCompile) return;
+        
+        return (window as any).cachePreview[this.json.importsJs[0]];
     }
 
 }
