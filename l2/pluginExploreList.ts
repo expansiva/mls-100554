@@ -840,7 +840,7 @@ export class PluginExploreList extends PluginBaseModule {
         }
 
         const { project, shortName, folder, level } = base;
-        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, ext);
+        const key = mls.stor.getKeyToFiles(project, mls.actualLevel, shortName, folder, ext);
         let stor = mls.stor.files[key];
 
         if (!stor) {
