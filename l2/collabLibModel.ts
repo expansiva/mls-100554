@@ -54,7 +54,7 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
 
     const storFiles = await mls.stor.getFiles({ project: storFileBase.project, shortName: storFileBase.shortName, folder: storFileBase.folder, loadContent: true, });
 
-    let fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName, storFileBase.folder);
+    let fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName, storFileBase.folder, storFileBase.level);
 
     if (storFiles.less && (!fileModels || !fileModels.style)) {
         await createModel(storFiles.less, needCompile, awaitCompile);
@@ -88,7 +88,7 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
         await createModel(storFiles.defs, needCompile, awaitCompile);
     }
 
-    fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName, storFileBase.folder);
+    fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName, storFileBase.folder, storFileBase.level);
 
     return fileModels;
 
@@ -96,7 +96,7 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
 
 export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile: boolean = false): Promise<mls.editor.IModelBase | undefined> {
 
-    let fileModels = mls.editor.getModels(storFile.project, storFile.shortName, storFile.folder);
+    let fileModels = mls.editor.getModels(storFile.project, storFile.shortName, storFile.folder, storFile.level);
     const prop = mapExt[storFile.extension];
     if (fileModels && fileModels[prop]) return fileModels[prop];
 
@@ -177,7 +177,7 @@ type Extesion = '.ts' | '.d.ts' | '.html' | '.less' | '.test.ts' | '.defs.ts';
 
 async function _createProjectModel(project: number, contentTS: string): Promise<mls.editor.IModels> {
 
-    let projectModel = mls.editor.getModels(project, '', '');
+    let projectModel = mls.editor.getModels(project, '', '', 2);
     if (projectModel && projectModel.ts) return projectModel;
     const ftype = ".d.ts";
     const info: mls.stor.IFileInfo = {
@@ -292,7 +292,7 @@ async function _afterUpdate(storFile: mls.stor.IFileInfo, model: monaco.editor.I
         return;
     }
     if (storFile.status === 'renamed') {
-        const models = mls.editor.getModels(storFile.project, storFile.shortName, storFile.folder);
+        const models = mls.editor.getModels(storFile.project, storFile.shortName, storFile.folder, storFile.level);
         if (!models || models[tp] === undefined) return;
         const modelByType = models[tp];
         if (!modelByType) return;
@@ -378,7 +378,7 @@ async function _updateModelStatusLess(modelBase: mls.editor.IModelStyle, changed
 
     let modelValue = modelBase.model.getValue();
 
-    let fileModels = mls.editor.getModels(modelBase.storFile.project, modelBase.storFile.shortName, modelBase.storFile.folder);
+    let fileModels = mls.editor.getModels(modelBase.storFile.project, modelBase.storFile.shortName, modelBase.storFile.folder,modelBase.storFile.level);
 
     if (!fileModels) throw new Error('[_updateModelStatusLess] Not found file models')
 
