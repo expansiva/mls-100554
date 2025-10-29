@@ -1243,7 +1243,7 @@ export class ServiceSave extends ServiceBase {
         if (storFile.inLocalStorage) {
 
             await mls.stor.cache.setContent(storFile, null);
-            mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true);
+            mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true, storFile.level);
         }
 
         const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);

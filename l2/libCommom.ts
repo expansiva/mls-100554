@@ -310,8 +310,8 @@ export function convertColorToHex(color: string) {
     );
 }
 
-export async function getEnhancementName(file: { project: number, shortName: string, folder: string }): Promise<string> {
-    const key = mls.editor.getKeyModel(file.project, file.shortName, file.folder);
+export async function getEnhancementName(file: { project: number, shortName: string, folder: string, level:number }): Promise<string> {
+    const key = mls.editor.getKeyModel(file.project, file.shortName, file.folder, file.level);
     const mmodel = mls.editor.models[key];
     if (!mmodel || !mmodel.ts) throw new Error('model invalid');
     if (!mmodel.ts.compilerResults) throw new Error('model ts not compiled yet');
@@ -382,9 +382,9 @@ export async function getListNewFilesToDeleteByGroup(group: string, project: num
     );
 
     for await (let storFile of filesLocal) {
-        const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
+        const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder, storFile.level);
         let models: mls.editor.IModels | undefined = mls.editor.models[keyModel];
-        if (!models) models = await mls.editor.addModels(storFile.project, storFile.shortName, '')
+        if (!models) models = await mls.editor.addModels(storFile.project, storFile.shortName, '', storFile.level)
         if (models && models.ts) {
             mls.l2.typescript.parseTripleSlash(models.ts);
             const tpsGroup = models.ts.compilerResults?.tripleSlashMLS?.variables['groupName']
@@ -397,8 +397,8 @@ export async function getListNewFilesToDeleteByGroup(group: string, project: num
 
 export async function* deleteAllFilesLocal(filesToDelete: mls.stor.IFileInfo[]) {
 
-    const modelsToDelete: { project: number, shortName: string, folder: string }[] = Array.from(
-        new Map(filesToDelete.map(({ project, shortName, folder }) => [shortName, { project, shortName, folder }])).values()
+    const modelsToDelete: { project: number, shortName: string, folder: string, level:number }[] = Array.from(
+        new Map(filesToDelete.map(({ project, shortName, folder, level }) => [shortName, { project, shortName, folder, level }])).values()
     );
 
     const filesToDeleteCache: Set<string> = new Set();
@@ -426,8 +426,8 @@ export async function* deleteAllFilesLocal(filesToDelete: mls.stor.IFileInfo[]) 
     }
 
     for (const data of modelsToDelete) {
-        const keyModel = mls.editor.getKeyModel(data.project, data.shortName, data.folder);
-        mls.editor.deleteModels(data.project, data.shortName, data.folder, true);
+        const keyModel = mls.editor.getKeyModel(data.project, data.shortName, data.folder, data.level );
+        mls.editor.deleteModels(data.project, data.shortName, data.folder, true, data.level);
         yield `Model deleted : ${keyModel}`;
     }
 

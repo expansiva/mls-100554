@@ -585,7 +585,7 @@ export class PluginCreateProject extends CollabLitElement {
     const keys = Object.keys(mls.stor.files).filter((key) => key.startsWith(`${mls.stor.LOCALPROJECTNUMBER}_`));
     for (let key of keys) {
       const storFile = mls.stor.files[key];
-      mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true);
+      mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true, storFile.level);
       await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
       const ext = storFile.extension.replace('.ts', '.js');
       let targetKey = `https://collab.codes/local/_${storFile.project}_${storFile.shortName}${ext}?v=`;

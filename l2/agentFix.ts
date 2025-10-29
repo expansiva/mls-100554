@@ -488,7 +488,7 @@ async function getDefinitonsByImports(imports: string[], position: 'left' | 'rig
 
 
 function getModel(info: { project: number, shortName: string, folder: string }): mls.editor.IModels | undefined {
-    const key = mls.editor.getKeyModel(info.project, info.shortName, info.folder);
+    const key = mls.editor.getKeyModel(info.project, info.shortName, info.folder, mls.actualLevel);
     return mls.editor.models[key];
 }
 

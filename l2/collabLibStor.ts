@@ -96,7 +96,7 @@ export async function deleteFile(storFile: mls.stor.IFileInfo): Promise<void> {
     }
 
     storFile.status = 'deleted';
-    const keyToModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
+    const keyToModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder, storFile.level);
 
     if (storFile.getValueInfo) {
         let valueInfo = mls.editor.models[keyToModel] ? await storFile.getValueInfo() : {} as mls.stor.IFileInfoValue;
@@ -260,7 +260,7 @@ export async function undoFile(storFile: mls.stor.IFileInfo, removeProject: bool
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
     }
 
-    const keyToModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
+    const keyToModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder, storFile.level);
     if (!mls.editor.models[keyToModel]) return;
 
     const prop = mapExtUndo[storFile.extension];
@@ -327,7 +327,7 @@ export function replaceTripleslashAndTag(storFile: mls.stor.IFileInfo, newProjec
 
 async function deleteFileSystem(storFile: mls.stor.IFileInfo) {
 
-    mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true);
+    mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true, storFile.level);
     const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
     await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
     delete mls.stor.files[keyFiles];

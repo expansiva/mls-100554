@@ -253,7 +253,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         if (!project || !shortName) return undefined;
 
         const keyStorFile = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.html');
-        const keyModels = mls.editor.getKeyModel(project, shortName, folder);
+        const keyModels = mls.editor.getKeyModel(project, shortName, folder, 2);
 
         const storFile = mls.stor.files[keyStorFile];
         const models = mls.editor.models[keyModels];

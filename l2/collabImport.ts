@@ -56,7 +56,7 @@ async function fileInDevelopment(opts: CollabImportOptions): Promise<{ isDev: bo
 
 async function getFileVersion(opts: CollabImportOptions): Promise<string> {
     if (!opts.extension) opts.extension = '.ts';
-    const modelKey = mls.editor.getKeyModel(opts.project, opts.shortName, opts.folder);
+    const modelKey = mls.editor.getKeyModel(opts.project, opts.shortName, opts.folder, mls.actualLevel);
     const models = mls.editor.models[modelKey];
     if (!models) return '';
     const objExt = {

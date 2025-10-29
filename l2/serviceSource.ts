@@ -707,7 +707,7 @@ export class ServiceSource100554 extends ServiceBase {
         const onEditorEvents = async (): Promise<void> => {
 
             this.loading = true;
-            const keyModel = mls.editor.getKeyModel(fileAction.project, fileAction.shortName, fileAction.folder);
+            const keyModel = mls.editor.getKeyModel(fileAction.project, fileAction.shortName, fileAction.folder, 2);
             const models = mls.editor.models[keyModel];
             const prop = this.mapExt[fileAction.extension];
             if (!models || !models[prop]) this.setError('[onEditorEvents] Not found model');
@@ -748,7 +748,7 @@ export class ServiceSource100554 extends ServiceBase {
     private async lessChangedEditor(storFile: mls.stor.IFileInfo, position: string): Promise<void> {
         try {
 
-            const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
+            const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder, 2);
             const models = mls.editor.models[keyModel];
             if (!models || !models.style) this.setError('[lessChangedEditor] Not found model');
 

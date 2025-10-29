@@ -248,7 +248,7 @@ async function renderHtmlWithComponents(html: string): Promise<string> {
 }
 
 function getModel(info: { project: number, shortName: string, folder: string }): mls.editor.IModels | undefined {
-    const key = mls.editor.getKeyModel(info.project, info.shortName, info.folder);
+    const key = mls.editor.getKeyModel(info.project, info.shortName, info.folder, 2);
     return mls.editor.models[key];
 }
 

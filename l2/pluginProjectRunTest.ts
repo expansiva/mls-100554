@@ -178,7 +178,7 @@ export class PluginProjectRunTest extends PluginBaseModule {
             if (!storFile) continue;
             await instance.createModels(storFile);
 
-            const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
+            const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder, storFile.level);
             if (mls.editor.models[keyModel] && mls.editor.models[keyModel].test) rc.push(mls.editor.models[keyModel].test as mls.editor.IModelBase)
 
         }

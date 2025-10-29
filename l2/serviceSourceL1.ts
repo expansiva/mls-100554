@@ -234,7 +234,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
         }
 
         if (storFile.extension === '.ts') {
-            mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true);
+            mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true, storFile.level);
         }
 
         this.removeEventsStorFile(storFile);
@@ -585,7 +585,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
         let hasError = ok === false;
         if (!hasError && this.activeModels && this.activeModels.ts) {
 
-            const enhacementName = await getEnhancementName({ project, shortName, folder }).catch((e) => undefined);
+            const enhacementName = await getEnhancementName({ project, shortName, folder, level: modelBaseBE.storFile.level}).catch((e) => undefined);
             if (enhacementName) {
                 const path = mls.l2.getPath(enhacementName);
                 const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.error('Error on getEnhancementModule: ' + e.message); return undefined });
@@ -643,7 +643,7 @@ export class ServiceSourceL1100554 extends ServiceBase {
 
     private async deleteFile(storFile: mls.stor.IFileInfo) {
         await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: null });
-        mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true);
+        mls.editor.deleteModels(storFile.project, storFile.shortName, storFile.folder, true, storFile.level);
         this.removeEventsStorFile(storFile);
         const keyFiles = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, storFile.extension);
         delete mls.stor.files[keyFiles];
