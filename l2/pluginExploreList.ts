@@ -8,7 +8,8 @@ import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, IReqCreate
 import { createAllModels, createModel, readProjectTypescriptAndCompile } from './_100554_collabLibModel';
 import { ServiceBase } from './_100554_serviceBase';
 
-import './_100554_pluginExploreListAddL2'
+import './_100554_pluginExploreListAddL1';
+import './_100554_pluginExploreListAddL2';
 import './_100554_pluginExploreListAddL3';
 import './_100554_pluginExploreListAddL4';
 
@@ -129,6 +130,9 @@ export class PluginExploreList extends PluginBaseModule {
 
     private async showAdd() {
         switch (mls.actualLevel) {
+            case (1):
+                this.mode = 'addL1';
+                break;
             case (2):
                 this.addModeL2();
                 break;
@@ -241,6 +245,8 @@ export class PluginExploreList extends PluginBaseModule {
         switch (this.mode) {
             case ('list'):
                 return this.renderModeList();
+            case ('addL1'):
+                return this.renderAddL1();
             case ('addL2'):
                 return this.renderAddL2();
             case ('addL3'):
@@ -520,6 +526,10 @@ export class PluginExploreList extends PluginBaseModule {
 
     }
 
+    renderAddL1() {
+        return html`<plugin-explore-list-add-l1-100554 autoprepare='ss' position="${this.position}" .father="${this}" .service="${this.service}" level="1"></plugin-explore-list-add-l1-100554>`
+    }
+
     renderAddL2() {
         return html`<plugin-explore-list-add-l2-100554 level="${this.levelFiles}" position="${this.position}" .father="${this}"></plugin-explore-list-add-l2-100554>`
     }
@@ -773,9 +783,9 @@ export class PluginExploreList extends PluginBaseModule {
 
             //const files = await createAllModels(file, true);
 
-            await this.createModel(file, '.ts');
-            await this.createModel(file, '.less');
-            await this.createModel(file, '.html');
+            if([1,2,3,4].includes(mls.actualLevel))await this.createModel(file, '.ts');
+            if([2,3,4].includes(mls.actualLevel))await this.createModel(file, '.less');
+            if([2,3,4].includes(mls.actualLevel))await this.createModel(file, '.html');
 
             (params.action as any) = action;
             params.level = file.level;
@@ -793,7 +803,6 @@ export class PluginExploreList extends PluginBaseModule {
 
             if (['open'].includes(action)) {
 
-                //const lv = mls.actualLevel == 1 ? 1 : this.levelFiles;
                 const lv = mls.actualLevel;
                 let name = `_${file.project}_${file.shortName}`;
                 if (file.folder) name = `_${file.project}_${file.folder}/${file.shortName}`;
@@ -886,9 +895,17 @@ export class PluginExploreList extends PluginBaseModule {
     //------------ IMPLEMENTS -----------------
 
     private extensionLevel = {
+        1: '.ts',
         2: '.ts',
         3: '.ts',
         4: '.ts'
+    }
+
+    private levelByLevel = {
+        1: 1,
+        2: 2,
+        3: 2,
+        4: 2
     }
 
 
@@ -1127,11 +1144,12 @@ export class PluginExploreList extends PluginBaseModule {
 
     private validFileByLevel(sf: mls.stor.IFileInfo): boolean {
 
-        const ext = (this.extensionLevel as any)[this.levelFiles as any] as string;
-
+        const ext = (this.extensionLevel as any)[mls.actualLevel] as string;
+        const lv = mls.actualLevel === 1 ? 1 : this.levelFiles;
+        
         if (
             !this.myDep.includes(sf.project) ||
-            sf.level !== +(this.levelFiles as any) ||
+            sf.level !== lv ||
             sf.extension !== ext
         ) return false;
 
@@ -1139,11 +1157,15 @@ export class PluginExploreList extends PluginBaseModule {
 
         if (this.filterProject === -1 && sf.project !== mls.actualProject) return false;
 
-        if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
+        /*if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
+            return false;
+        }*/
+
+        if (mls.actualLevel === 1 && sf.level !== 1) {
             return false;
         }
 
-        if ([2, 4, 5, 6, 7].includes(mls.actualLevel) && sf.shortName.startsWith('be')) {
+        if ([4, 5, 6, 7].includes(mls.actualLevel) && sf.shortName.startsWith('be')) {
             return false;
         }
 
@@ -1156,7 +1178,7 @@ export class PluginExploreList extends PluginBaseModule {
         if (!window['mls']) return [];
         this.filesInLocal = [];
         const arraySf: mls.stor.IFileInfo[] = [];
-        const ext = (this.extensionLevel as any)[this.levelFiles as any] as string;
+        const ext = (this.extensionLevel as any)[mls.actualLevel] as string;
 
         for (const i of Object.keys(mls.stor.files)) {
 
@@ -1288,11 +1310,13 @@ export class PluginExploreList extends PluginBaseModule {
 
             for await (const i of lh) {
 
-                let key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
+                const lv = mls.actualLevel === 1 ? 1 : this.levelFiles;
+
+                let key = mls.stor.getKeyToFiles(i.project, lv, i.shortName, i.folder, i.extension);
 
                 if (!mls.stor.files[key] && +this.filterProject === 0) {
                     await mls.stor.server.loadProjectInfoIfNeeded(i.project);
-                    key = mls.stor.getKeyToFiles(i.project, this.levelFiles as any, i.shortName, i.folder, i.extension);
+                    key = mls.stor.getKeyToFiles(i.project, lv, i.shortName, i.folder, i.extension);
                 }
 
                 if (!mls.stor.files[key] || !this.validFileByLevel(mls.stor.files[key])) continue;
@@ -1364,7 +1388,9 @@ export class PluginExploreList extends PluginBaseModule {
         const invalidCharacters = /[_\{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
         if (invalidCharacters.test(action.name) || invalidCharacters.test(action.folder)) return false;
 
-        const key = mls.stor.getKeyToFiles(+action.project, this.levelFiles as any, action.name, action.folder, file.extension);
+        const lv = mls.actualLevel === 1 ? 1 : this.levelFiles;
+
+        const key = mls.stor.getKeyToFiles(+action.project, lv, action.name, action.folder, file.extension);
         return !mls.stor.files[key];
 
     }
@@ -1400,7 +1426,7 @@ export class PluginExploreList extends PluginBaseModule {
 
 }
 
-type TModeExploreList = 'list' | 'addL2' | 'addL3' | 'addL4';
+type TModeExploreList = 'list' | 'addL1' | 'addL2' | 'addL3' | 'addL4';
 
 if (!customElements.get('plugin-explore-list-100554')) {
     customElements.define('plugin-explore-list-100554', PluginExploreList);
