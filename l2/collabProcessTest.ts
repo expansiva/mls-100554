@@ -127,7 +127,7 @@ export class CollabProcessTest extends CollabLitElement {
 
 
             const info = (mls.actual[2] as any).left;
-            const key = mls.editor.getKeyModel(info.project, info.shortName, info.folder);
+            const key = mls.editor.getKeyModel(info.project, info.shortName, info.folder, 2);
 
             const model = mls.editor.models[key];
             if (!model || !model.test) throw new Error('Not found model');

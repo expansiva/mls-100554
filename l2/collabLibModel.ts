@@ -100,7 +100,7 @@ export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boo
     const prop = mapExt[storFile.extension];
     if (fileModels && fileModels[prop]) return fileModels[prop];
 
-    const key = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder) + storFile.extension;
+    const key = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder, storFile.level) + storFile.extension;
 
     if (modelPromises.has(key)) {
         return modelPromises.get(key)!;
@@ -447,7 +447,7 @@ async function _updateModelStatusTS(modelBase: mls.editor.IModelBase, changed: b
     let hasError = ok === false;
     if (!hasError) {
 
-        const enhacementName = await getEnhancementName({ project, shortName, folder }).catch((e) => undefined);
+        const enhacementName = await getEnhancementName({ project, shortName, folder, level:2 }).catch((e) => undefined);
         if (enhacementName && enhacementName !== "_blank") {
             const path = mls.l2.getPath(enhacementName);
             const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.error('Error on getEnhancementModule: ' + e.message); return undefined });

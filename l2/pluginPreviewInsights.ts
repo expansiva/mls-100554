@@ -685,7 +685,7 @@ export class PluginPreviewInsights100554 extends StateLitElement {
 
     const { project, folder, shortName } = mls.l2.getPath(this.page);
     if (!project || !shortName) throw new Error(`Project or shortName invalids: ${this.page}`);
-    const mkey = mls.editor.getKeyModel(project, shortName, folder);
+    const mkey = mls.editor.getKeyModel(project, shortName, folder, 2);
     this.models = mls.editor.models[mkey];
 
     const moduleDefs = await collabImport({ project, folder, shortName, extension: '.defs.ts' });
@@ -709,7 +709,7 @@ export class PluginPreviewInsights100554 extends StateLitElement {
     if ('compileEmbedding' in result) delete result.compileEmbedding;
 
     let models = mls.editor.getModels(result.meta.projectId, result.meta.shortName, result.meta.folder);
-    if (!models) models = await mls.editor.addModels(result.meta.projectId, result.meta.shortName, result.meta.folder || '')
+    if (!models) models = await mls.editor.addModels(result.meta.projectId, result.meta.shortName, result.meta.folder || '', 2)
     if (!models) throw new Error('Erro, model error on AddModels, stoping');
 
     const template = `/// <mls shortName="${result.meta.shortName}" project="${result.meta.projectId}" enhancement="_blank" />

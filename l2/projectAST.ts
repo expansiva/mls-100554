@@ -108,7 +108,7 @@ async function getModel(project: number, forceCreateModel: boolean = false): Pro
     const shortName = 'project';
     const folder = '';
     const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
-    const keyModels = mls.editor.getKeyModel(project, shortName, folder)
+    const keyModels = mls.editor.getKeyModel(project, shortName, folder, 2)
     const storFile = mls.stor.files[key];
     if (!storFile) return;
     let models = mls.editor.models[keyModels];

@@ -1078,7 +1078,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private async createModelIfNeeded(storFile: mls.stor.IFileInfo): Promise<monaco.editor.ITextModel | undefined> {
 
-        const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder);
+        const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder, storFile.level);
         const models = mls.editor.models[keyModel];
         if (!models?.html) {
             const model = await createModel(storFile, true, true);

@@ -410,7 +410,7 @@ export class ServicePreviewView extends StateLitElement {
 
         const file = mls.stor.files[key];
 
-        const mkey = mls.editor.getKeyModel(info.project as number, info.shortName as string, file.folder);
+        const mkey = mls.editor.getKeyModel(info.project as number, info.shortName as string, file.folder, file.level);
 
         if (!mls.stor.files[key]) throw new Error(this.msg.notFoundStorfile + ': ' + key);
 

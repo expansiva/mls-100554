@@ -179,7 +179,7 @@ export abstract class WcdOverlayItemLitBase extends CollabLitElement implements 
         const id = this.info.element.getAttribute('idel');
         if (!id) return;
         const infoL2 = (mls.actual[2] as any).left as any;
-        const name = mls.editor.getKeyModel(infoL2.project, infoL2.shortName, infoL2.folder );
+        const name = mls.editor.getKeyModel(infoL2.project, infoL2.shortName, infoL2.folder, infoL2.level );
         const models = mls.editor.models[name];
         if (!models || !models.html) return;
 

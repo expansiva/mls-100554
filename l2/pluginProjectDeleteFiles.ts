@@ -190,7 +190,7 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
         const shortName = 'designSystem';
         const folder = '';
         const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
-        const keyModels = mls.editor.getKeyModel(project, shortName, folder)
+        const keyModels = mls.editor.getKeyModel(project, shortName, folder, 2)
         const storFile = mls.stor.files[key];
         const models = mls.editor.models[keyModels];
         if (!storFile || !models || !models.ts) return;
