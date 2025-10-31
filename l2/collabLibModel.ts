@@ -328,6 +328,8 @@ function _onModelChange(e: monaco.editor.IModelContentChangedEvent, activeModel:
     clearTimeout(_onChangedContent);
     _onChangedContent = window.setTimeout(async () => {
 
+        storFile.updatedAt = new Date().toISOString();
+
         switch (storFile.extension) {
             case ('.ts'):
                 const ignoreChanges = (e.changes.length === 1 && e.changes[0].range.startLineNumber === 1 && e.changes[0].range.endLineNumber === 1 && e.changes[0].range.endColumn <= 2);
