@@ -9,6 +9,7 @@ import "./_100554_collabConsoleL1";
 export class ServicePreviewL1100554 extends ServiceBase {
 
     private esbuild: any;
+    private iframe: HTMLIFrameElement | undefined;
 
     constructor() {
         super();
@@ -22,6 +23,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
     //@property() msize: string = '';
     @property() error: string = '';
     @property() watch: boolean = true;
+    @property() startServer: boolean = false;
 
     //--------VARIABLES-----------
 
@@ -55,6 +57,14 @@ export class ServicePreviewL1100554 extends ServiceBase {
                     { text: 'pause', icon: 'f04b' },
                 ]
             },
+            startServer: {
+                type: 'cycle',
+                selected: 0,
+                options: [
+                    { text: 'Server On', icon: 'f192' },
+                    { text: 'Server Off', icon: 'f192' },
+                ]
+            },
         },
         onClickMain: () => { },
         onClickTabs: () => { },
@@ -68,7 +78,42 @@ export class ServicePreviewL1100554 extends ServiceBase {
     public onClickTools(op: string) {
 
         if (op === 'watchPreview') this.toogleWatch();
+        else if (op === 'startServer') this.onBtnStartServerClick();
         else throw new Error('Invalid option')
+    }
+
+    private onBtnStartServerClick() {
+        this.startServer = !this.startServer;
+
+        if (this.startServer && this.iframe && this.iframe.contentWindow) {
+
+            this.iframe.contentWindow.onmessage = (e) => {
+                const data = e.data;
+                if (data.type !== "fetch-request") return;
+
+                console.info('aqui');
+                // processa...
+                const resposta = {
+                    itens: ['Laranja', 'uva']
+                };
+
+                e.source?.postMessage({
+                    type: "fetch-response",
+                    id: data.id,
+                    body: JSON.stringify(resposta),
+                    status: 200,
+                    headers: { "Content-Type": "application/json" }
+                }, "*" as any);
+            };
+
+        } else {
+            if (this.iframe && this.iframe.contentWindow) {
+                this.iframe.contentWindow.onmessage = () => undefined;
+            }
+        }
+
+        return this.startServer;
+
     }
 
     //--------EVENTS-------------
@@ -177,14 +222,14 @@ export class ServicePreviewL1100554 extends ServiceBase {
 
         Array.from(this.elContent.children).forEach((i) => i.remove());
 
-        const iframe = document.createElement('iframe') as HTMLIFrameElement;
-        iframe.style.cssText = `height:100%; width: 100%; border:none`;
-        iframe.src = '/_100554_servicePreviewL1';
-        iframe.onload = () => this.configIframe(iframe);
-        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+        this.iframe = document.createElement('iframe') as HTMLIFrameElement;
+        this.iframe.style.cssText = `height:100%; width: 100%; border:none`;
+        this.iframe.src = '/_100554_servicePreviewL1';
+        this.iframe.onload = () => this.configIframe(this.iframe as HTMLIFrameElement);
+        this.iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
 
-        (window as any).previewL1 = iframe;
-        this.elContent.appendChild(iframe);
+        (window as any).previewL1 = this.iframe;
+        this.elContent.appendChild(this.iframe);
 
     }
 
@@ -313,8 +358,8 @@ export class ServicePreviewL1100554 extends ServiceBase {
                 const sf = mls.stor.files[p];
                 if (!sf || sf.level !== 1 || sf.extension != '.ts' || sf.project !== mls.actualProject) return '';
 
-                const verify = `/_${sf.project}_${sf.shortName}`;// folder
-                const name = './' + sf.shortName;
+                const verify = `/_${sf.project}_${sf.folder ? sf.folder + '/' : ''}${sf.shortName}`;
+                const name = './' + (sf.folder ? sf.folder + '/' : '') + sf.shortName;
 
                 const aux = info.importsJs.includes(verify) ? `Object.assign(window, m${i});` : '';
 
@@ -351,15 +396,16 @@ export class ServicePreviewL1100554 extends ServiceBase {
 
     private async getVirtualFiles(): Promise<Record<string, string>> {
 
-        let files:Record<string, string> = !(window as any).cachePreviewL1Files ? {} : (window as any).cachePreviewL1Files;
+        let files: Record<string, string> = !(window as any).cachePreviewL1Files ? {} : (window as any).cachePreviewL1Files;
 
         for (const [name, f] of Object.entries(mls.stor.files)) {
 
             if (!f || f.project !== mls.actualProject || f.level !== 1 || f.extension !== '.ts') continue;
 
-            if (files[f.shortName] && !f.inLocalStorage) continue;
+            const name = (f.folder ? f.folder + '/' + f.shortName : f.shortName).toLocaleLowerCase();
+            if (files[name] && !f.inLocalStorage) continue;
 
-            files[f.shortName] = await f.getContent() as string;
+            files[name] = await f.getContent() as string;
 
         }
 
@@ -377,14 +423,32 @@ export class ServicePreviewL1100554 extends ServiceBase {
                 // Resolver imports relativos
                 build.onResolve({ filter: /^\.|\// }, (args: any) => {
 
+                    if (args.importer.split('/').length >= 3) {
 
-                    const resolved = new URL(args.path, "file://" + args.resolveDir + "/").pathname;
-                    return { path: resolved.endsWith(".ts") || resolved.endsWith(".js") ? resolved : resolved + ".ts", namespace: "vfs" };
+                        const importer = args.importer;
+                        const base = "file://" + importer; 
+                        const resolvedURL = new URL(args.path, base);
+                        let resolved = resolvedURL.pathname;
+
+                        // adiciona extensão se faltar
+                        if (!resolved.endsWith(".ts") && !resolved.endsWith(".js")) {
+                            resolved += ".ts";
+                        }
+
+                        return {
+                            path: resolved,
+                            namespace: "vfs",
+                        };
+                    } else {
+
+                        const resolved = new URL(args.path, "file://" + args.resolveDir + "/").pathname;
+                        return { path: resolved.endsWith(".ts") || resolved.endsWith(".js") ? resolved : resolved + ".ts", namespace: "vfs" };
+                    }
                 });
 
                 // Retornar conteúdo dos arquivos da memória
                 build.onLoad({ filter: /\.(ts|js)$/, namespace: "vfs" }, (args: any) => {
-                    const path = args.path.replace(/^\/+/, "").replace('.ts', '').trim(); // remove /
+                    const path = (args.path.replace(/^\/+/, "").replace('.ts', '').trim()).toLocaleLowerCase(); // remove /
                     const content = files[path];
                     if (!content) {
                         console.warn("Arquivo não encontrado no virtual FS:", path);
