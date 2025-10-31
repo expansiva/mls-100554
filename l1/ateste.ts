@@ -1,8 +1,14 @@
 /// <mls shortName="ateste" project="100554" folder="" enhancement="_blank" groupName="" />
 
 
-import {convertFileNameToTag} from './_100554_utilsLit';
+export function ateste() {
+    console.info('estou no ateste');
+} 
 
-export function ateste(){
-    console.info('a');
+export async function outroteste() {
+    const sleep = (ms: number) => {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    await sleep(1000);
+    console.info('estou no await ateste');
 }

@@ -1,7 +1,8 @@
 /// <mls shortName="bteste" project="100554" folder="" enhancement="_blank" groupName="" />
 
-import { } from './ateste';
+import { ateste } from './ateste';    
 
-export function teste(){
+export function teste() {  
+    ateste();
     console.info('estou no bteste');
 }

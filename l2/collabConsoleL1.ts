@@ -37,50 +37,87 @@ export class CollabConsoleL1100554 extends CollabLitElement {
         if (event.key === "Enter") this.execute();
     }
 
-    private execute() {
-
+    private async execute() {
         if (!this.inputBox || !this.output) return;
+
         let command = this.inputBox.value.trim();
         this.inputBox.value = "";
 
-        if (command) {
-            this.output.innerHTML += `<div><span class="prompt">$</span> ${command}</div>`;
+        if (!command) return;
 
-            try {
-                if (!(window as any).consoleScope) (window as any).consoleScope = {};
-                let result;
-                if (command.startsWith("let ") || command.startsWith("const ") || command.startsWith("var ")) {
+        this.output.innerHTML += `<div><span class="prompt">$</span> ${command}</div>`;
 
-                    const varName = command.split(/\s+/)[1].split("=")[0].trim();
-                    command = command.split("=")[1].trim();
-                    const res = eval(command);
-                    (window as any).consoleScope[varName] = res
-                    result = res;
+        try {
+            if (!(window as any).consoleScope) (window as any).consoleScope = {};
 
-                } else result = new Function("with (window.consoleScope) { return " + command + "; }")();
+            let result;
 
-                if (typeof result === 'object') result = JSON.stringify(result);
+            // Função que executa async e com variáveis persistentes
+            const runAsync = async (code: string, scope: any) => {
+                const keys = Object.keys(scope);
+                const values = Object.values(scope);
+
+                const fn = new Function(...keys, `
+                return (async () => {
+                    return (${code});
+                })();
+            `);
+
+                return fn(...values);
+            };
+
+            // Detecta let/const/var
+            const isDeclaration = /^(let|const|var)\s+/.test(command);
+
+            if (isDeclaration) {
+                const match = command.match(/^(?:let|const|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*(.*)$/);
+
+                if (!match) throw new Error("Declaração inválida");
+
+                const varName = match[1];
+                const expr = match[2];
+
+                result = await runAsync(expr, (window as any).consoleScope);
+                (window as any).consoleScope[varName] = result;
+
+            } else {
+                result = await runAsync(command, (window as any).consoleScope);
+            }
+
+            if (typeof result === 'object') result = JSON.stringify(result);
+
+            if (result !== undefined)
                 this.output.innerHTML += `<div><span class="prompt">&lt;</span> ${result}</div>`;
 
-            } catch (error: any) {
-                this.output.innerHTML += `<div style="color: red;">Erro: ${error.message}</div>`;
-            }
-            this.output.scrollTop = this.output.scrollHeight;
+        } catch (error: any) {
+            this.output.innerHTML += `<div style="color: red;">Erro: ${error.message}</div>`;
         }
+
+        this.output.scrollTop = this.output.scrollHeight;
     }
 
     private configLog() {
 
         const originalLog = console.log;
+        const originalInfo = console.info;
 
-        console.log =  (...args) => {
-
+        const writeToConsole = (...args: any[]) => {
             if (!this.inputBox || !this.output) return;
-
-            const message = args.map(arg => typeof arg === "object" ? JSON.stringify(arg) : arg).join(" ");
-
+            const message = args
+                .map(arg => typeof arg === "object" ? JSON.stringify(arg) : String(arg))
+                .join(" ");
             this.output.innerHTML += `<div><span class="prompt">&lt;</span> ${message}</div>`;
+            this.output.scrollTop = this.output.scrollHeight;
+        };
+
+        console.log = (...args) => {
+            writeToConsole(...args);
             originalLog.apply(console, args);
+        };
+
+        console.info = (...args) => {
+            writeToConsole(...args);
+            originalInfo.apply(console, args);
         };
     }
 

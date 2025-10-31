@@ -8,8 +8,11 @@ import "./_100554_collabConsoleL1";
 @customElement('service-preview-l1-100554')
 export class ServicePreviewL1100554 extends ServiceBase {
 
+    private esbuild: any;
+
     constructor() {
         super();
+        this.init();
         this.setEvents();
     }
 
@@ -79,7 +82,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
     private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
 
         try {
-            
+
             if (![1].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
 
@@ -92,7 +95,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
 
             if (mls.istrace) console.info('is preview l1 repaint:');
 
-            const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 2, fileAction.shortName, fileAction.folder, '.ts');
+            const keyToFileInfo = mls.stor.getKeyToFiles(fileAction.project, 1, fileAction.shortName, fileAction.folder, '.ts');
             const storFile = mls.stor.files[keyToFileInfo];
 
             if (!storFile) return;
@@ -116,20 +119,46 @@ export class ServicePreviewL1100554 extends ServiceBase {
     render() {
 
         this.style.display = 'block';
-        if (!this.actualFile) return html`No file selected`;
+        if (!this.actualFile) this.error = `No file selected`;
 
         const hasError = this.error != '';
         const stErro = hasError ? 'color:red' : 'display:none';
         const stContent = hasError ? 'display:none' : 'height: 100%;';
 
         return html`
+        <div style="${stContent}" id="preview-container-l1"></div>
         <h1 style="${stErro}">${this.error}</h1>
-        <div style="${stContent}" id="preview-container-l1"></div>`;
+        `;
 
     }
 
     //--------IMPLEMENTS---------
 
+    private async init() {
+        await this.loadEsbuild();
+    }
+
+    private async loadEsbuild() {
+        if ((mls as any).esbuild) {
+            this.esbuild = (mls as any).esbuild;
+        } else if (!(mls as any).esbuildInLoad) await this.initializeEsBuild();
+    }
+
+    private async initializeEsBuild() {
+
+        (mls as any).esbuildInLoad = true;
+        const url = 'https://unpkg.com/esbuild-wasm@0.14.54/esm/browser.min.js';
+        if (!this.esbuild) {
+            this.esbuild = await import(url);
+            await this.esbuild.initialize({
+                wasmURL: "https://unpkg.com/esbuild-wasm@0.14.54/esbuild.wasm"
+            });
+            (mls as any).esbuild = this.esbuild;
+            (mls as any).esbuildInLoad = false
+
+        }
+
+    }
 
     private load(): void {
 
@@ -152,6 +181,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
         iframe.style.cssText = `height:100%; width: 100%; border:none`;
         iframe.src = '/_100554_servicePreviewL1';
         iframe.onload = () => this.configIframe(iframe);
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
 
         (window as any).previewL1 = iframe;
         this.elContent.appendChild(iframe);
@@ -228,13 +258,142 @@ export class ServicePreviewL1100554 extends ServiceBase {
         if (ret.errors.length > 0) {
             this.error = `Error(${ret.errors.length}) when compiling:${ret.errors[0].error}`;
             console.log('Errors in compile:', JSON.stringify(ret.errors));
+            return;
+        }
+
+        const bundle = await this.compileWithEsbuild(ret);
+
+        if (!bundle) {
+            this.error = "Build returned empty result";
+            return;
         }
 
         this.mountJSImporMap(ret, iframe);
-        this.mountJS(ret, iframe);
+        this.mountJSBundle(bundle, iframe);
         this.mountCSS(iframe);
         this.mountTokens(iframe, ret.tokens || '');
 
+    }
+
+    private mountJSBundle(jsCode: string, ifr: HTMLIFrameElement) {
+        try {
+            if (!ifr.contentDocument) return;
+
+            const script = document.createElement('script');
+            script.type = "module";
+            script.textContent = jsCode;
+
+            ifr.contentDocument.body.appendChild(script);
+
+            const scriptBase = document.createElement('script');
+            scriptBase.type = "module";
+            scriptBase.src = "/_100554_collabConsoleL1";
+
+            ifr.contentDocument.body.appendChild(scriptBase);
+
+
+
+        } catch (e: any) {
+            console.info('Error mountJSBundle: ' + e.message);
+        }
+    }
+
+    private async compileWithEsbuild(info: IJSONDependence): Promise<string | null> {
+        try {
+
+            if (!this.esbuild) {
+                console.warn("esbuild not loaded");
+                return null;
+            }
+
+            const virtualFiles: Record<string, string> = await this.getVirtualFiles();
+
+            let entryCode = Object.keys(mls.stor.files).map((p, i) => {
+
+                const sf = mls.stor.files[p];
+                if (!sf || sf.level !== 1 || sf.extension != '.ts' || sf.project !== mls.actualProject) return '';
+
+                const verify = `/_${sf.project}_${sf.shortName}`;// folder
+                const name = './' + sf.shortName;
+
+                const aux = info.importsJs.includes(verify) ? `Object.assign(window, m${i});` : '';
+
+                return `import * as m${i} from "${name}";
+                ${aux} 
+                `
+
+            }).join("\n").trim();
+
+
+
+            const result = await this.esbuild.build({
+                stdin: {
+                    contents: entryCode,
+                    sourcefile: "virtual-entry.ts",
+                    resolveDir: "/",
+                },
+                bundle: true,
+                write: false,
+                format: "esm",
+                loader: { ".ts": "ts" },
+                plugins: [this.getVirtualFilesPlugin(virtualFiles)]
+            });
+
+            if (!result.outputFiles || !result.outputFiles[0]) return null;
+
+            return result.outputFiles[0].text;
+
+        } catch (err) {
+            console.error("esbuild error:", err);
+            return null;
+        }
+    }
+
+    private async getVirtualFiles(): Promise<Record<string, string>> {
+
+        let files:Record<string, string> = !(window as any).cachePreviewL1Files ? {} : (window as any).cachePreviewL1Files;
+
+        for (const [name, f] of Object.entries(mls.stor.files)) {
+
+            if (!f || f.project !== mls.actualProject || f.level !== 1 || f.extension !== '.ts') continue;
+
+            if (files[f.shortName] && !f.inLocalStorage) continue;
+
+            files[f.shortName] = await f.getContent() as string;
+
+        }
+
+        (window as any).cachePreviewL1Files = files;
+
+        return files;
+
+    }
+
+    private getVirtualFilesPlugin(files: Record<string, string>) {
+        return {
+            name: "virtual-files",
+            setup(build: any) {
+
+                // Resolver imports relativos
+                build.onResolve({ filter: /^\.|\// }, (args: any) => {
+
+
+                    const resolved = new URL(args.path, "file://" + args.resolveDir + "/").pathname;
+                    return { path: resolved.endsWith(".ts") || resolved.endsWith(".js") ? resolved : resolved + ".ts", namespace: "vfs" };
+                });
+
+                // Retornar conteúdo dos arquivos da memória
+                build.onLoad({ filter: /\.(ts|js)$/, namespace: "vfs" }, (args: any) => {
+                    const path = args.path.replace(/^\/+/, "").replace('.ts', '').trim(); // remove /
+                    const content = files[path];
+                    if (!content) {
+                        console.warn("Arquivo não encontrado no virtual FS:", path);
+                        return { contents: "", loader: "ts" };
+                    }
+                    return { contents: content, loader: path.endsWith(".js") ? "js" : "ts" };
+                });
+            }
+        };
     }
 
     private mountJSImporMap(info: IJSONDependence, ifr: HTMLIFrameElement): void {
@@ -253,53 +412,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
 
     }
 
-    private mountJS(info: IJSONDependence, ifr: HTMLIFrameElement): void {
 
-        function loadScripts(scripts: string[]) {
-            const loadScript = (src: string) => {
-                return new Promise((resolve, reject) => {
-                    const script = document.createElement('script');
-                    script.type = 'module';
-                    script.id = src.replace('/', '');
-                    script.src = src;
-                    script.onload = resolve;
-                    script.onerror = reject;
-                    ifr.contentDocument?.body.appendChild(script);
-                });
-            };
-
-            let nextScript = Promise.resolve();
-            for (const script of scripts) {
-                nextScript = nextScript.then(() => loadScript(script)) as Promise<void>;
-            }
-            return nextScript;
-        }
-
-        try {
-
-            if (info.importsJs.length <= 0 || !ifr.contentDocument) return;
-            const s = document.createElement('script') as HTMLScriptElement;
-            s.textContent = `
-				window['mls'] = window['mls']  ? window['mls']  : parent.mls ? parent.mls : top['mls'];
-				window['globalVariation'] = window['globalVariation']  ? window['globalVariation']  : parent.globalVariation ? parent.globalVariation : top['globalVariation'];
-				window['latest'] = window['latest']  ? window['latest']  : parent.latest ? parent.latest : top['latest'];
-				window['Quill'] = window['Quill']  ? window['Quill']  : parent.Quill ? parent.Quill : top['Quill'];
-				window['EasyMDE'] = window['EasyMDE']  ? window['EasyMDE']  : parent.EasyMDE ? parent.EasyMDE : top['EasyMDE'];
-				window['l2_html'] = window['l2_html']  ? window['l2_html']  : parent.l2_html ? parent.l2_html : top['l2_html'];
-                window['monaco'] = window['monaco']  ? window['monaco']  : parent.monaco ? parent.monaco : top['monaco'];
-				window['l2_fieldTypes'] = window['l2_fieldTypes']  ? window['l2_fieldTypes']  : parent.l2_fieldTypes ? parent.l2_fieldTypes : top['l2_fieldTypes'];window['litDisableBundleWarning'] = true; window['collabActualLevel'] = ${this.level};
-
-                
-				`;
-            ifr.contentDocument?.body.appendChild(s);
-            loadScripts(info.importsJs);
-
-
-        } catch (e: any) {
-            console.info('Error mountJS: ' + e.message);
-        }
-
-    }
 
     private mountCSS(ifr: HTMLIFrameElement): void {
         try {

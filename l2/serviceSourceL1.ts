@@ -108,7 +108,7 @@ export class ServiceSource100554 extends ServiceBase {
 
             const { project, shortName, folder, level } = this.activeModels.ts.storFile;
 
-            const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, ext);
+            const key = mls.stor.getKeyToFiles(project, 1, shortName, folder, ext);
             let stor = mls.stor.files[key];
 
             if (!stor) {
@@ -131,7 +131,7 @@ export class ServiceSource100554 extends ServiceBase {
                 await createModel(stor, true, false);
             }
 
-            this.activeModels = mls.editor.getModels(project, shortName, folder);
+            this.activeModels = mls.editor.getModels(project, shortName, folder, level);
 
             if (op === EToolsSource.icDefs) {
                 if (!this.activeModels || !this.activeModels.defs || !this.activeModels.defs.storFile) return;
@@ -521,7 +521,6 @@ export class ServiceSource100554 extends ServiceBase {
             let keyTs = mls.stor.getKeyToFiles(storFileBase.project, 1, storFileBase.shortName, storFileBase.folder, '.ts');
 
             let keyDefs = mls.stor.getKeyToFiles(storFileBase.project, 1, storFileBase.shortName, storFileBase.folder, '.defs.ts');
-
 
             const storFiles = {
                 ts: mls.stor.files[keyTs],
@@ -1239,10 +1238,10 @@ export class ServiceSource100554 extends ServiceBase {
 
 enum EToolsSource {
     'icTs' = 0,
-    'icHTML' = 1,
+    'icDefs' = 1,
     'icStyle' = 2,
     'icTest' = 3,
-    'icDefs' = 4,
+    'icHTML' = 4,
 }
 
 export type FormattableModel = monaco.editor.ITextModel & { needFormat: boolean };
