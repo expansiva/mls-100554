@@ -208,7 +208,8 @@ async function loadMyNeedsToCompile(
         if (tags.length <= 0) return;
         const info = convertTagToFileName(tags[0]);
         if (!info) return;
-        const key = mls.stor.getKeyToFiles(info.project, 2, info.shortName, info.folder, '.ts');
+        const lv = mls.actualLevel === 1 ? 1 : 2;
+        const key = mls.stor.getKeyToFiles(info.project, lv, info.shortName, info.folder, '.ts');
         const f = mls.stor.files[key];
         const { project, shortName, folder } = info;
         if (!project || !shortName) return;
@@ -216,7 +217,10 @@ async function loadMyNeedsToCompile(
         const ipath = { project, shortName: shortName, folder: f ? f.folder : folder };
         const enhacementName = await getEnhancementFromFetch(ipath);
         if (!enhacementName) throw new Error('enhacementName not valid');
-        if (enhacementName === '_blank') return;
+        if (enhacementName === '_blank') {
+            await getJSBlank(myImports, ipath);
+            return;
+        }
 
         if (!myModules[enhacementName]) {
 
@@ -303,6 +307,14 @@ async function getJSImporMap(myImportsMap: string[], enhacementName: string, myM
         if (i.type !== 'cdn') return;
         myImportsMap.push(`"${i.name}": "${i.ref}"`);
     });
+
+}
+
+async function getJSBlank(myImports: string[],mfile: mls.cbe.IPath) {
+    
+    let key = getImportUrl(mfile);
+    if (myImports.includes(key)) return;
+    myImports.push(key);
 
 }
 
