@@ -11,7 +11,7 @@ import { IMenuItem } from './_100554_collabMenuWithSubMenu';
 export class ServiceApps100554 extends ServiceBase {
 
 	@state() menuModules: IMenuModule[] = [];
-	
+
 
 	public details: IService = {
 		icon: '&#xf0ca',
@@ -64,11 +64,15 @@ export class ServiceApps100554 extends ServiceBase {
 	}
 
 	private handleMenuClick(ev: CustomEvent) {
-		console.info(ev.detail)
-		const item: IMenuItem = ev.detail;
-		mls.actual[7].setFullName(item.url);
-		window.preview.iframe = undefined;
-		mls.services['100554_servicePreview_right']?.onReloader();
+		const item = ev.detail;
+		window.top?.postMessage({
+			type: 'loadPage',
+			project: item.project,
+			moduleName: item.module,
+			modulePath: item.path,
+			pageName: item.pageName,
+		})
+
 	}
 
 	private async getModules() {
@@ -86,7 +90,9 @@ export class ServiceApps100554 extends ServiceBase {
 			const moduleMenu: IMenuModule = {
 				menu: [],
 				icon: _module.icon || '',
-				name: _module.name
+				name: _module.name,
+				path: _module.path,
+				project: 0
 			};
 
 			const isDep = _module.path.startsWith('_');
@@ -96,30 +102,20 @@ export class ServiceApps100554 extends ServiceBase {
 			if (isDep) {
 				const iPath = mls.l2.getPath(_module.path);
 				if (!iPath.project) continue;
-				const { folder, project, shortName} = iPath;
+				const { folder, project, shortName } = iPath;
 				prjImport = project;
 				pathImport = folder ? folder + '/' + shortName : shortName;
+				moduleMenu.path = pathImport;
 				pathImport = pathImport.replace('/', '_');
 			}
-
+			moduleMenu.project = prjImport;
+			
 
 			const moduleInstance = await collabImport({ folder: pathImport, project: prjImport, shortName: 'module', extension: '.ts' });
 			const moduleConfig = moduleInstance?.moduleConfig;
 			if (!moduleConfig?.menu || moduleConfig.menu.length === 0) continue;
 			modules.push(moduleMenu);
 
-
-			/*
-			moduleConfig.menu.forEach((m: IModuleMenuItem) => {
-				const url = `_${actualProject}_${_module.path}/${m.pageName}`;
-				if (m.children) {
-
-				}
-				moduleMenu.menu.push({
-					...m,
-					url,
-				});
-			});*/
 
 			moduleConfig.menu.forEach((m: IModuleMenuItem) => {
 				const buildUrls = (item: IModuleMenuItem): IModuleMenuItem => {
@@ -145,7 +141,9 @@ export class ServiceApps100554 extends ServiceBase {
 
 interface IMenuModule {
 	name: string;
+	project: number,
 	icon: string;
+	path:string,
 	menu: IModuleMenuItem[];
 }
 
