@@ -10,6 +10,7 @@ let esBuild: any;
 export const DISTFOLDER = 'wwwroot';
 
 export async function buildModule(project: number, moduleName: string) {
+    
     await loadEsBuild();
     const moduleConfig = await getProjectModule(project, moduleName);
     const allPages = await getAllPages(project, moduleConfig.path) || [];
@@ -257,19 +258,25 @@ async function generateOutput(storFile: mls.stor.IFileInfo, htmlString: string, 
 }
 
 async function prepareStyleFile(project: number, theme: string) {
+
     const shortName = 'globalStyle';
-    const keyStorFileCssGlobal = mls.stor.getKeyToFiles(project, 2, shortName, DISTFOLDER, '.css');
+    const keyStorFileCssGlobal = mls.stor.getKeyToFiles(project, 2, 'project', '', '.less');
     const storFile = mls.stor.files[keyStorFileCssGlobal];
-    if (!storFile) {
+    if (!storFile) return;
+
+    const keyStorFileCssGlobalDist = mls.stor.getKeyToFiles(project, 2, shortName, DISTFOLDER, '.css');
+    const storFileDist = mls.stor.files[keyStorFileCssGlobalDist];
+
+    if (!storFileDist || storFile.inLocalStorage) {
         const globalCss: string | undefined = await getGlobalCss(project, theme);
         const tokens: string = await getTokensCss(project, theme);
         await generateOutputCssGlobal(project, `${globalCss}\n\n${tokens || ''}`);
         return;
     }
-    const versionStyle = storFile?.versionRef || '0';
+    const versionStyle = storFileDist?.versionRef || '0';
     const cacheStyle = await mls.stor.cache.getFileFromCache(project, DISTFOLDER, shortName, '.css', versionStyle);
     if (!cacheStyle) {
-        const contentStyle = await storFile.getContent();
+        const contentStyle = await storFileDist.getContent();
         if (contentStyle && typeof contentStyle === 'string') {
             await mls.stor.cache.addIfNeed({
                 project: project,
@@ -292,7 +299,7 @@ async function prepareRunTimeFile(project: number) {
     if (!storFile) return;
     const keyDist = mls.stor.getKeyToFiles(project, 2, shortName, DISTFOLDER, '.js');
     const storFileDist = mls.stor.files[keyDist];
-    if (!storFileDist) {
+    if (!storFileDist || storFile.inLocalStorage) {
         await buildRunTimeFile(storFile);
     }
     const version = storFileDist?.versionRef || '0';
