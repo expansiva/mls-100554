@@ -301,6 +301,7 @@ export class ServicePreviewView extends StateLitElement {
             this.father.setError('');
             this.setDevice(iframe);
             this.setTheme(iframe);
+            this.setMessage(iframe);
             await this.setMyFile();
 
             if (this.models &&
@@ -377,6 +378,40 @@ export class ServicePreviewView extends StateLitElement {
             this.error = e.message;
             this.showLoader(false);
         }
+    }
+
+    private pending: Record<string, any> = {};
+    private setMessage(iframe: HTMLIFrameElement) {
+        if (!(top as any).previewL1 || !iframe.contentWindow) return;
+
+        iframe.contentWindow.fetch = (url, options) => {
+            return new Promise((resolve) => {
+                const id: string = crypto.randomUUID();
+                this.pending[id] = resolve;
+
+
+                (top as any).previewL1.contentWindow.postMessage({
+                    type: "fetch-request",
+                    id,
+                    url,
+                    options
+                }, "*");
+            });
+        };
+
+        iframe.contentWindow.onmessage = (e) => {
+            const data = e.data;
+            if (data.type !== "fetch-response") return;
+
+            const resolve = this.pending[data.id];
+            if (!resolve) return;
+            delete this.pending[data.id];
+
+            resolve(new Response(data.body, {
+                status: data.status,
+                headers: data.headers
+            }));
+        };
     }
 
     private setTheme(iframe: HTMLIFrameElement) {

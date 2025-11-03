@@ -50,6 +50,34 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
 
 }
 
+export async function readProjectTypescriptAndCompileL1(project: number, shortName: string, needCompile: boolean = true) {
+
+    if (projectsLoadedL1.includes(project)) return;
+    if (mls.istrace) console.log('loading files L1 from project ' + project);
+    projectsLoadedL1.push(project);
+
+    const promises: Promise<mls.editor.IModels | mls.editor.IModelBase | undefined>[] = [];
+    const keys: string[] = Object.keys(mls.stor.files);
+
+    if ((window as any).traceLivecicle) console.info('creating: files model ', project);
+
+    for (const key of keys) {
+        const storFile = mls.stor.files[key];
+        if (storFile.project === mls.actualProject
+            && storFile.level === 1
+            && storFile.extension === '.ts'
+            && (mls.istrace || storFile.inLocalStorage)
+            && storFile.shortName !== shortName) {
+            promises.push(createModel(storFile, needCompile, false));
+        }
+    }
+    
+    if (mls.istrace) console.time('creating models L1');
+    await Promise.all(promises);
+    if (mls.istrace) console.timeEnd('creating models L1');
+
+}
+
 export async function createAllModels(storFileBase: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile: boolean = false, createStorIfNeed: boolean = true): Promise<mls.editor.IModels | undefined> {
 
     const storFiles = await mls.stor.getFiles({ project: storFileBase.project, shortName: storFileBase.shortName, folder: storFileBase.folder, loadContent: true, });
@@ -164,6 +192,7 @@ const modelPromises = new Map<string, Promise<mls.editor.IModelBase | undefined>
 
 const baseProject = 100554;
 const projectsLoaded: number[] = [];
+const projectsLoadedL1: number[] = [];
 
 const mapExt: Record<string, keyof typeof mls.editor.models[string]> = {
     '.ts': 'ts',

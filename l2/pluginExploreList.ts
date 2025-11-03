@@ -5,7 +5,7 @@ import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
 import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from './_100554_libCommom';
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, IReqCreateStorFile, createStorFile } from './_100554_collabLibStor';
-import { createAllModels, createModel, readProjectTypescriptAndCompile } from './_100554_collabLibModel';
+import { createAllModels, createModel, readProjectTypescriptAndCompile, readProjectTypescriptAndCompileL1 } from './_100554_collabLibModel';
 import { ServiceBase } from './_100554_serviceBase';
 
 import './_100554_pluginExploreListAddL1';
@@ -875,10 +875,10 @@ export class PluginExploreList extends PluginBaseModule {
 
     private fireEventThisProject = 0;
     private fireEventLoadProject(): void {
-
         if (this.fireEventThisProject === mls.actualProject) return;
         this.fireEventThisProject = mls.actualProject as number;
         readProjectTypescriptAndCompile(mls.actualProject as number, '', true);
+        readProjectTypescriptAndCompileL1(mls.actualProject as number, '', true);
     }
 
     private changeListTimeout: number = 0;
