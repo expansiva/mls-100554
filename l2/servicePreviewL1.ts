@@ -87,23 +87,39 @@ export class ServicePreviewL1100554 extends ServiceBase {
 
         if (this.startServer && this.iframe && this.iframe.contentWindow) {
 
-            this.iframe.contentWindow.onmessage = (e) => {
+            this.iframe.contentWindow.onmessage = async (e) => {
+                
                 const data = e.data;
-                if (data.type !== "fetch-request") return;
-
-                console.info('aqui');
-                // processa...
-                const resposta = {
-                    itens: ['Laranja', 'uva']
-                };
-
-                e.source?.postMessage({
+                console.info('message', data);
+                const res: ResponseMsgBase = {
                     type: "fetch-response",
                     id: data.id,
-                    body: JSON.stringify(resposta),
+                    body: '',
                     status: 200,
                     headers: { "Content-Type": "application/json" }
-                }, "*" as any);
+                }
+
+                if (data.type !== "fetch-request") res.status = 502; //Bad Gateway
+                else {
+
+                    const method = data.url.split('/').pop();
+
+                    if (!this.iframe || !(this.iframe.contentWindow as any)[method]) {
+                        res.status = 503; // Service Unavailable
+                    } else {
+
+                        const exec = (this.iframe.contentWindow as any)[method];
+                        const strJson = data.options && data.options.body ? data.options.body : '{}';
+                        const resposta = await exec(JSON.parse(strJson));
+                        res.body = JSON.stringify(resposta)
+
+                    }
+
+                }
+
+                if (window.preview.iframe && window.preview.iframe.contentWindow)
+                    window.preview.iframe.contentWindow.postMessage(res, "*" as any);
+                //e.source?.postMessage(res, "*" as any);
             };
 
         } else {
@@ -426,7 +442,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
                     if (args.importer.split('/').length >= 3) {
 
                         const importer = args.importer;
-                        const base = "file://" + importer; 
+                        const base = "file://" + importer;
                         const resolvedURL = new URL(args.path, base);
                         let resolved = resolvedURL.pathname;
 
@@ -536,4 +552,13 @@ export class ServicePreviewL1100554 extends ServiceBase {
         }, 500)
 
     }
+}
+
+interface ResponseMsgBase {
+    type: "fetch-response",
+    id: string,
+    body: string,
+    status: number,
+    headers: any
+
 }
