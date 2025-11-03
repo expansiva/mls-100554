@@ -39,11 +39,13 @@ export async function buildModule(project: number, moduleName: string) {
             const dtJs = new Date(storFiles.ts.updatedAt);
             const dtHtml = new Date(storFiles.html.updatedAt);
             if (dtJsDist < dtJs || dtHtmlDist < dtHtml) needBuild = true;
+            if (dtJsDist > dtJs && storFilesDist.storFileDistJs.inLocalStorage && !storFiles.ts.inLocalStorage) needBuild = true;
+            if (dtHtmlDist > dtHtml && storFilesDist.storFileDistHtml.inLocalStorage && !storFiles.html.inLocalStorage) needBuild = true;
             else needBuild = false;
         }
-        
+
         if (!needBuild) {
-            needBuild = await checkOrganismInPageIsOutdated(storFiles.defs.references?.widgets || [], dtHtmlDist, dtJsDist);
+            needBuild = await checkOrganismInPageIsOutdated(storFiles.defs.references?.widgets || [], dtHtmlDist, dtJsDist, storFiles.html.inLocalStorage, storFiles.ts.inLocalStorage);
         }
 
         if (needBuild) {
@@ -57,7 +59,7 @@ export async function buildModule(project: number, moduleName: string) {
 
 }
 
-async function checkOrganismInPageIsOutdated(widgets: mls.l4.DefsWidget[], outdatedHtml: Date, outdatedTs: Date) {
+async function checkOrganismInPageIsOutdated(widgets: mls.l4.DefsWidget[], outdatedHtml: Date, outdatedTs: Date, outdatedHTMLLocal: boolean, outdatedTsLocal: boolean) {
     let needBuild: boolean = false;
 
     for (let widget of widgets) {
@@ -74,19 +76,19 @@ async function checkOrganismInPageIsOutdated(widgets: mls.l4.DefsWidget[], outda
         });
         if (storFiles.ts?.updatedAt) {
             const dtJs = new Date(storFiles.ts.updatedAt);
-            if (outdatedTs < dtJs) {
+            if (outdatedTs < dtJs || (outdatedTs > dtJs && !outdatedTsLocal && storFiles.ts.inLocalStorage)) {
                 needBuild = true;
                 break;
             }
+
+
         }
         if (storFiles.html?.updatedAt) {
             const dtHtml = new Date(storFiles.html.updatedAt);
-            if (outdatedHtml < dtHtml) {
+            if (outdatedHtml < dtHtml || (outdatedHtml > dtHtml && !outdatedHTMLLocal && storFiles.html.inLocalStorage))
                 needBuild = true;
-                break;
-            }
+            break;
         }
-
     }
 
     return needBuild;
