@@ -7,6 +7,8 @@ import { StateLitElement } from './_100554_stateLitElement';
 export interface IMenu {
     name: string;
     icon: string;
+    project: number;
+    path: string,
     menu: IMenuItem[];
 }
 
@@ -31,6 +33,8 @@ export class WidgetMenuNavigation extends StateLitElement {
         {
 
             name: 'MDM',
+            project: 102019,
+            path: '',
             icon: '<i class="icon-mdm"></i>',
             menu: [
                 {
@@ -74,6 +78,8 @@ export class WidgetMenuNavigation extends StateLitElement {
         },
         {
             name: 'MDM2',
+            project: 102019,
+            path: '',
             icon: '<i class="icon-mdm"></i>',
             menu: [
                 {
@@ -178,8 +184,8 @@ export class WidgetMenuNavigation extends StateLitElement {
         return this.favorites.includes(key);
     }
 
-    private handleMenuClick(item: IMenuItem) {
-        this.dispatchEvent(new CustomEvent('menu-selected', { detail: item }));
+    private handleMenuClick(moduleItem: IMenu, item: IMenuItem) {
+        this.dispatchEvent(new CustomEvent('menu-selected', { detail: { ...item, project: moduleItem.project, module: moduleItem.name, path: moduleItem.path } }));
     }
 
     private renderMenuItem(moduleItem: IMenu, item: IMenuItem): any {
@@ -187,7 +193,7 @@ export class WidgetMenuNavigation extends StateLitElement {
 
         return html`
 			<li class="menu-item">
-				<div class="menu-item-header" @click=${() => this.handleMenuClick(item)}>
+				<div class="menu-item-header" @click=${() => this.handleMenuClick(moduleItem, item)}>
 					<span class="icon" .innerHTML=${item.icon}></span>
 					<span class="title">${item.title}</span>
 					<span
@@ -221,7 +227,7 @@ export class WidgetMenuNavigation extends StateLitElement {
                         <ul class="favorites">
                             ${this.favorites.map(favKey => {
                     const item = this.findItemByPath(favKey);
-                    if (!item) return null;
+                    if (!item || !item.menuItem || !item.moduleItem) return null;
 
                     const pathDisplay = favKey.replace(/\//g, ' / ');
 
@@ -229,9 +235,9 @@ export class WidgetMenuNavigation extends StateLitElement {
                         <li 
                             class="favorite-item"
                             title=${pathDisplay}
-                            @click=${() => this.handleMenuClick(item)}
+                            @click=${() => this.handleMenuClick(item.moduleItem as IMenu, item.menuItem as IMenuItem)}
                         >
-                            <span class="icon" .innerHTML=${item.icon}></span>
+                            <span class="icon" .innerHTML=${item.menuItem.icon}></span>
                             <span class="title">${pathDisplay}</span>
                         </li>
                     `;
@@ -258,21 +264,35 @@ export class WidgetMenuNavigation extends StateLitElement {
 		`;
     }
 
-    private findItemByPath(path: string): IMenuItem | null {
+    private findItemByPath(path: string): {
+        menuItem: IMenuItem | null,
+        moduleItem: IMenu | undefined
+    } {
         const parts = path.split('/');
         const moduleName = parts.shift();
         const module = this.menuModules.find(m => m.name === moduleName);
-        if (!module) return null;
+        if (!module) return {
+            menuItem: null,
+            moduleItem: undefined
+        };
 
         let currentItems = module.menu;
         let found: IMenuItem | null = null;
 
         for (const part of parts) {
             found = currentItems.find(i => i.title === part) || null;
-            if (!found) return null;
+            if (!found) {
+                return {
+                    menuItem: null,
+                    moduleItem: undefined
+                };
+            }
             currentItems = found.children || [];
         }
 
-        return found;
+        return {
+            menuItem: found,
+            moduleItem: module
+        }
     }
 }

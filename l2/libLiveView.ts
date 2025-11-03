@@ -38,11 +38,6 @@ export async function buildModule(project: number, moduleName: string) {
             else needBuild = false;
         }
 
-        console.info({
-            needBuild,
-            file: storFiles.ts.shortName
-        })
-
         if (needBuild) {
             await buildPage(storFiles.ts, storFiles.html, moduleConfig.theme);
         }
@@ -207,9 +202,6 @@ async function executeEsBuild(importsMap: Record<string, string>, valids: string
     allImports = [...new Set(allImports)];
     const virtualEntryPath = "virtual-entry.js";
     const virtualEntryContent = allImports.map(path => `import "${path}";`).join("\n");
-    console.info({
-        allImports
-    })
     const result = await esBuild.build({
         stdin: {
             contents: virtualEntryContent,
@@ -272,6 +264,7 @@ async function prepareStyleFile(project: number, theme: string) {
         const globalCss: string | undefined = await getGlobalCss(project, theme);
         const tokens: string = await getTokensCss(project, theme);
         await generateOutputCssGlobal(project, `${globalCss}\n\n${tokens || ''}`);
+        return;
     }
     const versionStyle = storFile?.versionRef || '0';
     const cacheStyle = await mls.stor.cache.getFileFromCache(project, DISTFOLDER, shortName, '.css', versionStyle);
@@ -297,10 +290,9 @@ async function prepareRunTimeFile(project: number) {
     const runTimeStorTime = mls.stor.getKeyToFiles(project, 2, shortName, '', '.ts');
     const storFile = mls.stor.files[runTimeStorTime];
     if (!storFile) return;
-
     const keyDist = mls.stor.getKeyToFiles(project, 2, shortName, DISTFOLDER, '.js');
     const storFileDist = mls.stor.files[keyDist];
-    if (!storFile) {
+    if (!storFileDist) {
         await buildRunTimeFile(storFile);
     }
     const version = storFileDist?.versionRef || '0';
@@ -391,19 +383,27 @@ async function getAllPages(project: number, modulePath: string) {
         const storFile = mls.stor.files[key];
         if (storFile.extension !== '.defs.ts' || storFile.project !== project || storFile.folder !== modulePath) continue;
         const keyToImport = storFile.folder ? `_${storFile.project}_${storFile.folder}_${storFile.shortName}` : `./_${storFile.project}_${storFile.shortName}`
-        const module = await import(`./${keyToImport}.defs.js`);
-        if (!module) return;
-        const defs = module?.defs;
-        if (!defs || defs.meta.type !== 'page') continue;
-        const keyHTML = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, '.html');
-        const keyTs = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, '.ts');
-        const sfTs = mls.stor.files[keyTs];
-        const sfHtml = mls.stor.files[keyHTML];
-        if (!sfTs || !sfHtml) continue;
-        allPages.push({
-            ts: sfTs,
-            html: sfHtml
-        });
+
+        try {
+            const module = await import(`./${keyToImport}.defs.js`);
+            if (!module) continue;
+            const defs = module?.defs;
+            if (!defs || defs.meta.type !== 'page') continue;
+            const keyHTML = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, '.html');
+            const keyTs = mls.stor.getKeyToFiles(storFile.project, storFile.level, storFile.shortName, storFile.folder, '.ts');
+            const sfTs = mls.stor.files[keyTs];
+            const sfHtml = mls.stor.files[keyHTML];
+            if (!sfTs || !sfHtml) continue;
+            allPages.push({
+                ts: sfTs,
+                html: sfHtml
+            });
+        } catch (err) {
+            console.error('Error on get defs from page:' + keyToImport)
+            continue;
+        }
+
+
     }
 
     return allPages;

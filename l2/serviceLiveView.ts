@@ -65,6 +65,7 @@ export class ServiceLiveView100554 extends ServiceBase {
     public onClickTabs = (op: number): void => {
         this.actualTab = op;
     }
+
     public onClickTools(op: string) {
 
         if (op === 'add') this.addTab();
@@ -75,14 +76,14 @@ export class ServiceLiveView100554 extends ServiceBase {
         title: '',
         main: {},
         tools: {
-            add: {
+            /* add: {
                 type: 'cycle',
                 onlyMenu: false,
                 selected: 0,
                 options: [
                     { text: this.msg.newTab, icon: collab_plus.strings[0] },
                 ]
-            }
+            }*/
         },
         tabs: {
             group: 'Mode',
@@ -98,26 +99,90 @@ export class ServiceLiveView100554 extends ServiceBase {
 
     };
 
-    onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
+    async onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+        if (visible && this.iframe?.contentDocument) {
+            const tabActual = this.tabs[this.actualTab];
+            if (!tabActual) return;
+            this.toogleLoading(true);
+            await buildModule(tabActual.project, tabActual.moduleName);
+            this.toogleLoading(false);
+        }
     }
 
     async firstUpdated() {
         const actual7 = mls.actual[7];
         if (!actual7 || !actual7.project) return;
         const fullName = mls.actual[7].getFullName();
-        const info = mls.l2.getPath(fullName)
-        const keyToImportProject = `./_${actual7.project}_project`;
+        const info = mls.l2.getPath(fullName);
+        await this.setInitialTabInfos(info.project, info.shortName, info.folder);
+    }
+
+    render() {
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
+        return html`
+			<div class="liveview-container">
+                ${this.tabs.map((tab, index) => {
+            return html`
+                <iframe
+                    tab-index=${index}
+                    style="width:100%; height:100%; border:none;display:none;"
+                    class="${this.actualTab === index ? '' : 'closed'}"
+                    src="/_100554_servicePreview"
+                    @load=${this.load}>
+                </iframe>
+            `
+        })}
+                
+			</div>
+		`;
+    }
+
+    private setEvents(): void {
+
+        window.top?.addEventListener('message', async (event) => {
+            const { type, project, moduleName, pageName, modulePath } = event.data;
+            if (type !== 'loadPage') return;
+            if (!this.liveViewReady) return;
+            try {
+                this.checkToLoadPage(pageName, moduleName, modulePath, project);
+            } catch (err) {
+                console.error('Erro ao carregar página no LiveView:', err);
+            }
+        });
+
+    }
+
+    private async checkToLoadPage(pageName: string, moduleName: string, modulePath: string, project: number) {
+
+        const tabActual = this.tabs[this.actualTab];
+        const oldProject = tabActual.project;
+        if (tabActual.project !== project || tabActual.moduleName !== moduleName) {
+            await this.setActualTabInfos(project, pageName, modulePath);
+        }
+
+        if (oldProject !== project) {
+            await this.injectGlobalStyle(true);
+            await this.injectScriptRunTime(true);
+        }
+
+        this.loadPage(pageName);
+
+    }
+
+    private async setInitialTabInfos(project: number, pageInitial: string, modulePath: string) {
+
+        const keyToImportProject = `./_${project}_project`;
         const moduleProject = await import(`./${keyToImportProject}`);
         if (!moduleProject) return;
-        const moduleConfig = moduleProject.modules.find((item: any) => item.path === info.folder);
-
+        const moduleConfig = moduleProject.modules.find((item: any) => item.path === modulePath);
         this.tabs = [{
             actualPage: '',
             moduleName: moduleConfig.name,
             modulePath: moduleConfig.path,
-            pageInitial: info.shortName,
-            project: actual7.project,
+            pageInitial,
+            project: project,
             icon: moduleConfig.icon
         }];
 
@@ -132,26 +197,28 @@ export class ServiceLiveView100554 extends ServiceBase {
 
     }
 
-    render() {
-        const lang = this.getMessageKey(messages);
-        this.msg = messages[lang];
+    private async setActualTabInfos(project: number, pageInitial: string, modulePath: string) {
 
-        return html`
-			<div class="liveview-container">
-                ${this.tabs.map((tab, index) => {
-            return html`
-                                <iframe
-                                    tab-index=${index}
-                                    style="width:100%; height:100%; border:none;display:none;"
-                                    class="${this.actualTab === index ? '' : 'closed'}"
-                                    src="/_100554_servicePreview"
-                                    @load=${this.load}>
-                                </iframe>
-                                `
-        })}
-				
-			</div>
-		`;
+        const tabActual = this.tabs[this.actualTab];
+        const keyToImportProject = `./_${project}_project`;
+        const moduleProject = await import(`./${keyToImportProject}`);
+        if (!moduleProject) return;
+        const moduleConfig = moduleProject.modules.find((item: any) => item.path === modulePath);
+
+        tabActual.actualPage = pageInitial;
+        tabActual.project = project;
+        tabActual.moduleName = moduleConfig.name;
+        tabActual.modulePath = modulePath;
+        tabActual.icon = moduleConfig.icon;
+        tabActual.pageInitial = pageInitial;
+        this.tabs = [...this.tabs];
+        await this.requestUpdate();
+
+        if (this.menu && this.menu.tabs && this.menu.refresh) {
+            this.menu.tabs.options[this.actualTab].text = this.tabs[this.actualTab].moduleName;
+            this.menu.tabs.options[this.actualTab].icon = this.tabs[this.actualTab].icon;
+            this.menu.refresh();
+        }
     }
 
     private async addTab() {
@@ -175,7 +242,6 @@ export class ServiceLiveView100554 extends ServiceBase {
     private async load() {
 
         const tabActual = this.tabs[this.actualTab];
-        await buildModule(tabActual.project, tabActual.moduleName);
 
         this.iframe = this.querySelector(`iframe[tab-index="${this.actualTab}"]`) as HTMLIFrameElement;
         this.setEvents();
@@ -202,6 +268,7 @@ export class ServiceLiveView100554 extends ServiceBase {
             body.appendChild(app);
         }
 
+
         const pre = doc.body.querySelector('pre');
         if (pre) pre.remove();
 
@@ -211,8 +278,14 @@ export class ServiceLiveView100554 extends ServiceBase {
         const meta = this.iframe.contentDocument?.querySelector('meta[name="color-scheme"]');
         if (meta) meta.remove();
         this.addScript();
-        this.liveViewReady = true;
+        this.addStyleApp();
 
+        this.iframe.style.display = '';
+        this.toogleLoading(true);
+        await buildModule(tabActual.project, tabActual.moduleName);
+        this.toogleLoading(false);
+
+        this.liveViewReady = true;
 
         if (!tabActual.actualPage && tabActual.pageInitial) {
             this.loadPage(tabActual.pageInitial);
@@ -220,28 +293,17 @@ export class ServiceLiveView100554 extends ServiceBase {
 
     }
 
-    private setEvents(): void {
-
-        this.iframe?.contentWindow?.addEventListener('message', async (event) => {
-
-            const { type, htmlUrl, jsUrl } = event.data;
-            if (type !== 'loadPage' || !htmlUrl || !jsUrl) return;
-            try {
-                this.clearOldPageScripts();
-                await Promise.all([
-                    this.injectHTML(htmlUrl),
-                    this.injectJS(jsUrl)
-                ]);
-                if (this.iframe) this.iframe.style.display = '';
-            } catch (err) {
-                console.error('Erro ao carregar página no LiveView:', err);
-            }
-        });
-
+    private toogleLoading(show: boolean) {
+        const divApp = this.iframe?.contentDocument?.querySelector('#app');
+        if (!divApp) return;
+        if (show) divApp.classList.add('loading');
+        else divApp.classList.remove('loading');
     }
 
-    public async loadPage(pageName: string) {
-        console.info(pageName)
+
+
+    private async loadPage(pageName: string) {
+
         if (!this.iframe?.contentWindow) {
             console.warn('[LiveView] iframe ainda não disponível.');
             return;
@@ -260,12 +322,14 @@ export class ServiceLiveView100554 extends ServiceBase {
         const cacheJs = await mls.stor.cache.getFileFromCache(tabActual.project, folderCache, pageName, '.js', versionJs);
         const cacheHtml = await mls.stor.cache.getFileFromCache(tabActual.project, folderCache, pageName, '.html', versionHtml);
 
+        if (!cacheHtml || !cacheJs) this.toogleLoading(true);
+
         if (!cacheHtml) {
             const contentHtml = await storFileHTML.getContent();
             if (contentHtml && typeof contentHtml === 'string') {
                 await mls.stor.cache.addIfNeed({
                     project: tabActual.project,
-                    folder:folderCache,
+                    folder: folderCache,
                     content: contentHtml,
                     extension: '.html',
                     shortName: pageName,
@@ -280,7 +344,7 @@ export class ServiceLiveView100554 extends ServiceBase {
             if (contentJs && typeof contentJs === 'string') {
                 await mls.stor.cache.addIfNeed({
                     project: tabActual.project,
-                    folder:folderCache,
+                    folder: folderCache,
                     content: contentJs,
                     extension: '.js',
                     shortName: pageName,
@@ -293,18 +357,22 @@ export class ServiceLiveView100554 extends ServiceBase {
         const htmlUrl: string = `/local/_${tabActual.project}_wwwroot/${tabActual.modulePath}/${pageName}.html?v=${versionHtml}`;
         const jsUrl: string = `/local/_${tabActual.project}_wwwroot/${tabActual.modulePath}/${pageName}.js?v=${versionJs}`;
 
-        this.iframe.contentWindow.postMessage({
-            type: 'loadPage',
-            htmlUrl,
-            jsUrl,
-        }, '*');
+        this.clearOldPageScripts();
+        await Promise.all([
+            this.injectHTML(htmlUrl),
+            this.injectJS(jsUrl)
+        ]);
+        if (this.iframe) this.iframe.style.display = '';
+        this.toogleLoading(false);
+
 
     }
 
     private APP_ID = 'app';
 
     private clearOldPageScripts() {
-        const oldScript = document.getElementById('liveview-page-script');
+        if (!this.iframe || !this.iframe.contentDocument || !this.iframe.contentDocument.body) return;
+        const oldScript = this.iframe.contentDocument.body.querySelector('#liveview-page-script');
         if (oldScript) oldScript.remove();
     }
 
@@ -324,14 +392,20 @@ export class ServiceLiveView100554 extends ServiceBase {
         this.iframe.contentDocument.body.appendChild(script);
     }
 
-    private async injectScriptRunTime() {
+    private async injectScriptRunTime(forceRecompile: boolean = false) {
         if (!this.iframe || !this.iframe.contentDocument) return;
         const tabActual = this.tabs[this.actualTab];
         const doc = this.iframe.contentDocument;
         const body = doc.body;
         const url = `/local/_${tabActual.project}_wwwroot/collabRunTime`;
 
-        if (!doc.getElementById('collab-runtime-script')) {
+        let scriptRunTime = doc.getElementById('collab-runtime-script');
+        if (forceRecompile && scriptRunTime) {
+            scriptRunTime.remove();
+            scriptRunTime = null
+        }
+
+        if (!scriptRunTime) {
             const script = doc.createElement('script');
             script.id = 'collab-runtime-script';
             script.src = `${url}`;
@@ -350,7 +424,7 @@ export class ServiceLiveView100554 extends ServiceBase {
 
     }
 
-    private async injectGlobalStyle() {
+    private async injectGlobalStyle(forceRecompile: boolean = false) {
         if (!this.iframe || !this.iframe.contentDocument) return;
         const tabActual = this.tabs[this.actualTab];
         const shortName = 'globalStyle'
@@ -361,7 +435,13 @@ export class ServiceLiveView100554 extends ServiceBase {
         const url = `/local/_${tabActual.project}_wwwroot/${shortName}.css?v=${version}`;
         const res = await fetch(url);
         const cssText = await res.text();
-        if (!this.iframe.contentDocument.getElementById('styleGlobal')) {
+        let styleGlobalEl = this.iframe.contentDocument.getElementById('styleGlobal');
+        if (forceRecompile && styleGlobalEl) {
+            styleGlobalEl.remove();
+            styleGlobalEl = null;
+        }
+
+        if (!styleGlobalEl) {
             const styleG = document.createElement('style');
             styleG.id = 'styleGlobal';
             styleG.textContent = cssText;
@@ -381,6 +461,59 @@ export class ServiceLiveView100554 extends ServiceBase {
         const href = anchor.href;
         let pageName = href ? href.replace('https://collab.codes/', '') : '';
         this.loadPage(pageName)
+
+    }
+
+    private addStyleApp() {
+        const style = document.createElement('style');
+        style.id = 'iframe-style';
+        style.textContent = `
+        html, body {
+            height: 100%;
+        }
+        #app.loading {
+            pointer-events: none;
+            opacity: .3;
+            position: relative;
+            height: 100%;
+
+        }
+        #app.loading::after{
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 35px;
+            aspect-ratio: 1;
+            background:
+                no-repeat radial-gradient(circle closest-side, #000 90%, #0000) 0 0,
+                no-repeat radial-gradient(circle closest-side, #000 90%, #0000) 0 100%,
+                no-repeat radial-gradient(circle closest-side, #000 90%, #0000) 100% 100%;
+            background-size: 40% 40%;
+            animation: l11 1s infinite linear;
+        }
+
+        @keyframes l11 {
+            25% {
+                background-position: 100% 0, 0 100%, 100% 100%
+            }
+
+            50% {
+                background-position: 100% 0, 0 0, 100% 100%
+            }
+
+            75% {
+                background-position: 100% 0, 0 0, 0 100%
+            }
+
+            100% {
+                background-position: 100% 100%, 0 0, 0 100%
+            }
+    }
+        `;
+
+        this.iframe?.contentDocument?.head.appendChild(style);
 
     }
 
