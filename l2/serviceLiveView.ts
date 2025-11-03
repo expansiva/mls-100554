@@ -106,7 +106,17 @@ export class ServiceLiveView100554 extends ServiceBase {
             const tabActual = this.tabs[this.actualTab];
             if (!tabActual) return;
             this.toogleLoading(true);
-            await buildModule(tabActual.project, tabActual.moduleName);
+            const needUpdate = await buildModule(tabActual.project, tabActual.moduleName);
+            if (needUpdate) {
+                const actual7 = mls.actual[7];
+                if (!actual7 || !actual7.project) return;
+                const fullName = mls.actual[7].getFullName();
+                const info = mls.l2.getPath(fullName);
+                this.tabs = [...[]];
+                this.requestUpdate();
+                await this.updateComplete;
+                await this.setInitialTabInfos(info.project, info.shortName, info.folder);
+            }
             this.toogleLoading(false);
         }
     }

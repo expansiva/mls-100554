@@ -10,10 +10,11 @@ let esBuild: any;
 export const DISTFOLDER = 'wwwroot';
 
 export async function buildModule(project: number, moduleName: string) {
-    
+
     await loadEsBuild();
     const moduleConfig = await getProjectModule(project, moduleName);
     const allPages = await getAllPages(project, moduleConfig.path) || [];
+    let buildRequired: boolean = false;
 
     await prepareStyleFile(project, moduleConfig.theme);
     await prepareRunTimeFile(project);
@@ -22,28 +23,68 @@ export async function buildModule(project: number, moduleName: string) {
 
         let needBuild: boolean = true;
         const storFilesDist = getDistStorFile(storFiles.ts);
-        if (storFilesDist &&
-            storFilesDist.storFileDistHtml &&
-            storFilesDist.storFileDistJs &&
-            storFilesDist.storFileDistHtml.updatedAt &&
-            storFilesDist.storFileDistJs.updatedAt &&
+        if (
+            !(storFilesDist.storFileDistHtml && storFilesDist.storFileDistHtml.updatedAt) ||
+            !(storFilesDist.storFileDistJs && storFilesDist.storFileDistJs.updatedAt)
+        ) continue;
+
+        const dtJsDist = new Date(storFilesDist.storFileDistJs.updatedAt);
+        const dtHtmlDist = new Date(storFilesDist.storFileDistHtml.updatedAt);
+
+        if (
             storFiles.ts.updatedAt &&
             storFiles.html.updatedAt
         ) {
 
-            const dtJsDist = new Date(storFilesDist.storFileDistJs.updatedAt);
-            const dtHtmlDist = new Date(storFilesDist.storFileDistJs.updatedAt);
             const dtJs = new Date(storFiles.ts.updatedAt);
             const dtHtml = new Date(storFiles.html.updatedAt);
             if (dtJsDist < dtJs || dtHtmlDist < dtHtml) needBuild = true;
             else needBuild = false;
         }
+        
+        if (!needBuild) {
+            needBuild = await checkOrganismInPageIsOutdated(storFiles.defs.references?.widgets || [], dtHtmlDist, dtJsDist);
+        }
 
         if (needBuild) {
+            buildRequired = true;
             await buildPage(storFiles.ts, storFiles.html, moduleConfig.theme);
         }
 
     }
+
+    return buildRequired;
+
+}
+
+async function checkOrganismInPageIsOutdated(widgets: mls.l4.DefsWidget[], outdatedHtml: Date, outdatedTs: Date) {
+    let needBuild: boolean = false;
+    for (let widget of widgets) {
+        if (!widget.used) continue;
+        const fileInfo = convertTagToFileName(widget.tag);
+        if (!fileInfo) continue;
+        const { folder, project, shortName } = fileInfo;
+        const storFiles = await mls.stor.getFiles({
+            folder,
+            project,
+            shortName,
+            level: 2,
+            loadContent: false
+        });
+        if (storFiles.ts?.updatedAt) {
+            const dtJs = new Date(storFiles.ts.updatedAt);
+            if (outdatedTs < dtJs) needBuild = true;
+            break;
+        }
+        if (storFiles.html?.updatedAt) {
+            const dtHtml = new Date(storFiles.html.updatedAt);
+            if (outdatedHtml < dtHtml) needBuild = true;
+            break;
+        }
+
+    }
+
+    return needBuild;
 
 }
 
@@ -257,12 +298,12 @@ async function generateOutput(storFile: mls.stor.IFileInfo, htmlString: string, 
 
 }
 
-async function prepareStyleFile(project: number, theme: string) {
+async function prepareStyleFile(project: number, theme: string): Promise<boolean> {
 
     const shortName = 'globalStyle';
     const keyStorFileCssGlobal = mls.stor.getKeyToFiles(project, 2, 'project', '', '.less');
     const storFile = mls.stor.files[keyStorFileCssGlobal];
-    if (!storFile) return;
+    if (!storFile) return false;
 
     const keyStorFileCssGlobalDist = mls.stor.getKeyToFiles(project, 2, shortName, DISTFOLDER, '.css');
     const storFileDist = mls.stor.files[keyStorFileCssGlobalDist];
@@ -271,7 +312,7 @@ async function prepareStyleFile(project: number, theme: string) {
         const globalCss: string | undefined = await getGlobalCss(project, theme);
         const tokens: string = await getTokensCss(project, theme);
         await generateOutputCssGlobal(project, `${globalCss}\n\n${tokens || ''}`);
-        return;
+        return true;
     }
     const versionStyle = storFileDist?.versionRef || '0';
     const cacheStyle = await mls.stor.cache.getFileFromCache(project, DISTFOLDER, shortName, '.css', versionStyle);
@@ -289,6 +330,7 @@ async function prepareStyleFile(project: number, theme: string) {
             });
         }
     }
+    return false;
 }
 
 async function prepareRunTimeFile(project: number) {
@@ -384,7 +426,7 @@ async function createStorFileOutput(data: { project: number, shortName: string, 
 
 async function getAllPages(project: number, modulePath: string) {
 
-    const allPages: { ts: mls.stor.IFileInfo, html: mls.stor.IFileInfo }[] = [];
+    const allPages: { ts: mls.stor.IFileInfo, html: mls.stor.IFileInfo, defs: mls.l4.BaseDefs }[] = [];
 
     for (let key of Object.keys(mls.stor.files)) {
         const storFile = mls.stor.files[key];
@@ -403,7 +445,8 @@ async function getAllPages(project: number, modulePath: string) {
             if (!sfTs || !sfHtml) continue;
             allPages.push({
                 ts: sfTs,
-                html: sfHtml
+                html: sfHtml,
+                defs
             });
         } catch (err) {
             console.error('Error on get defs from page:' + keyToImport)
