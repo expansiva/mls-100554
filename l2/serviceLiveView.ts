@@ -49,7 +49,7 @@ export class ServiceLiveView100554 extends ServiceBase {
     private liveViewReady = false;
 
     public details: IService = {
-        icon: '&#xf15b',
+        icon: '&#xf06e',
         state: 'foreground',
         position: 'right',
         tooltip: 'Live View',
