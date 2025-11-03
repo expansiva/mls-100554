@@ -4,6 +4,8 @@ import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { collab_eye, collab_plus } from './_100554_collabIcons';
+import { openService } from './_100554_libCommom';
+
 import { DISTFOLDER, buildModule } from './_100554_libLiveView';
 
 interface ITab {
@@ -177,6 +179,7 @@ export class ServiceLiveView100554 extends ServiceBase {
         const moduleProject = await import(`./${keyToImportProject}`);
         if (!moduleProject) return;
         const moduleConfig = moduleProject.modules.find((item: any) => item.path === modulePath);
+        if (!moduleConfig) return;
         this.tabs = [{
             actualPage: '',
             moduleName: moduleConfig.name,
@@ -194,6 +197,8 @@ export class ServiceLiveView100554 extends ServiceBase {
             this.menu.tabs.options[0].icon = this.tabs[0].icon;
             this.menu.refresh();
         }
+
+        openService('_100554_serviceApps', 'left', 7)
 
     }
 
