@@ -59,6 +59,7 @@ export async function buildModule(project: number, moduleName: string) {
 
 async function checkOrganismInPageIsOutdated(widgets: mls.l4.DefsWidget[], outdatedHtml: Date, outdatedTs: Date) {
     let needBuild: boolean = false;
+
     for (let widget of widgets) {
         if (!widget.used) continue;
         const fileInfo = convertTagToFileName(widget.tag);
@@ -73,13 +74,17 @@ async function checkOrganismInPageIsOutdated(widgets: mls.l4.DefsWidget[], outda
         });
         if (storFiles.ts?.updatedAt) {
             const dtJs = new Date(storFiles.ts.updatedAt);
-            if (outdatedTs < dtJs) needBuild = true;
-            break;
+            if (outdatedTs < dtJs) {
+                needBuild = true;
+                break;
+            }
         }
         if (storFiles.html?.updatedAt) {
             const dtHtml = new Date(storFiles.html.updatedAt);
-            if (outdatedHtml < dtHtml) needBuild = true;
-            break;
+            if (outdatedHtml < dtHtml) {
+                needBuild = true;
+                break;
+            }
         }
 
     }
