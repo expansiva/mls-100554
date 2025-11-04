@@ -14,7 +14,8 @@ interface ITab {
     project: number,
     pageInitial: string,
     actualPage: string,
-    icon: string
+    icon: string,
+    title: string,
 }
 
 /// **collab_i18n_start**
@@ -47,8 +48,12 @@ export class ServiceLiveView100554 extends ServiceBase {
 
     private tabs: ITab[] = [];
 
-    private iframe?: HTMLIFrameElement;
+    // private iframe?: HTMLIFrameElement;
     private liveViewReady = false;
+
+    get iframe(): HTMLIFrameElement | null {
+        return this.querySelector(`iframe[tab-index="${this.actualTab}"]`);
+    }
 
     public details: IService = {
         icon: '&#xf06e',
@@ -66,12 +71,7 @@ export class ServiceLiveView100554 extends ServiceBase {
 
     public onClickTabs = (op: number): void => {
         this.actualTab = op;
-    }
-
-    public onClickTools(op: string) {
-
-        if (op === 'add') this.addTab();
-        else throw new Error('Invalid option')
+        this.toogleLoading(false);
     }
 
     public menu: IServiceMenu = {
@@ -97,7 +97,6 @@ export class ServiceLiveView100554 extends ServiceBase {
         },
         onClickTabs: this.onClickTabs.bind(this),
         onClickMain: this.onClickMain.bind(this),
-        onClickTools: this.onClickTools.bind(this),
 
     };
 
@@ -154,11 +153,11 @@ export class ServiceLiveView100554 extends ServiceBase {
     private setEvents(): void {
 
         window.top?.addEventListener('message', async (event) => {
-            const { type, project, moduleName, pageName, modulePath } = event.data;
+            const { type, target, project, moduleName, pageName, modulePath } = event.data;
             if (type !== 'loadPage') return;
             if (!this.liveViewReady) return;
             try {
-                this.checkToLoadPage(pageName, moduleName, modulePath, project);
+                this.checkToLoadPage(pageName, moduleName, modulePath, project, target);
             } catch (err) {
                 console.error('Erro ao carregar página no LiveView:', err);
             }
@@ -166,14 +165,22 @@ export class ServiceLiveView100554 extends ServiceBase {
 
     }
 
-    private async checkToLoadPage(pageName: string, moduleName: string, modulePath: string, project: number) {
+    private async checkToLoadPage(pageName: string, moduleName: string, modulePath: string, project: number, target: string) {
+    
+        let tabActual = this.tabs[this.actualTab];
+        if (target !== '_blank') {
+            tabActual = this.tabs[0];
+            this.actualTab = 0;
+            await this.openTab();
+        }
 
-        const tabActual = this.tabs[this.actualTab];
         const oldProject = tabActual.project;
         if (tabActual.project !== project || tabActual.moduleName !== moduleName) {
             this.toogleLoading(true);
             await buildModule(project, moduleName);
-            await this.setActualTabInfos(project, pageName, modulePath);
+            await this.setActualTabInfos(project, pageName, modulePath, moduleName, target);
+        } else if (target === '_blank') {
+            await this.setActualTabInfos(project, pageName, modulePath, moduleName, target);
         }
 
         if (oldProject !== project) {
@@ -183,7 +190,6 @@ export class ServiceLiveView100554 extends ServiceBase {
 
         this.toogleLoading(false);
         this.loadPage(pageName);
-
     }
 
     private async setInitialTabInfos(project: number, pageInitial: string, modulePath: string) {
@@ -199,7 +205,8 @@ export class ServiceLiveView100554 extends ServiceBase {
             modulePath: moduleConfig.path,
             pageInitial,
             project: project,
-            icon: moduleConfig.icon
+            icon: moduleConfig.icon,
+            title: moduleConfig.name
         }];
 
         this.tabs = [...this.tabs];
@@ -211,11 +218,20 @@ export class ServiceLiveView100554 extends ServiceBase {
             this.menu.refresh();
         }
 
-        openService('_100554_serviceApps', 'left', 7)
+        openService('_100554_serviceApps', 'left', 7);
 
     }
 
-    private async setActualTabInfos(project: number, pageInitial: string, modulePath: string) {
+    private async setActualTabInfos(project: number, pageInitial: string, modulePath: string, moduleName: string, target: string) {
+
+        if (target === '_blank') {
+            const tabIndex = this.tabs.findIndex((tab) => tab.actualPage === pageInitial);
+            if (tabIndex > -1) {
+                this.actualTab = tabIndex;
+                await this.openTab();
+            }
+            else this.addTab(pageInitial, '', moduleName, modulePath, project)
+        }
 
         const tabActual = this.tabs[this.actualTab];
         const keyToImportProject = `./_${project}_project`;
@@ -233,19 +249,37 @@ export class ServiceLiveView100554 extends ServiceBase {
         await this.requestUpdate();
 
         if (this.menu && this.menu.tabs && this.menu.refresh) {
-            this.menu.tabs.options[this.actualTab].text = this.tabs[this.actualTab].moduleName;
-            this.menu.tabs.options[this.actualTab].icon = this.tabs[this.actualTab].icon;
+            this.menu.tabs.options[this.actualTab].text = tabActual.title;
+            this.menu.tabs.options[this.actualTab].icon = tabActual.icon;
             this.menu.refresh();
         }
     }
 
-    private async addTab() {
+    private async openTab() {
+        if (this.menu && this.menu.tabs && this.menu.refresh) {
+            this.menu.tabs.selected = this.actualTab;
+            this.menu.refresh();
+        };
+        this.tabs = [...this.tabs];
+        await this.requestUpdate();
+    }
 
-        const defaultTab = this.tabs[0];
+    private async addTab(actualPage: string, icon: string, moduleName: string, modulePath: string, project: number) {
+
+        const defaultTab: ITab = {
+            actualPage,
+            icon,
+            moduleName,
+            modulePath,
+            pageInitial: actualPage,
+            project,
+            title: moduleName + '/' + actualPage
+        }
+
         this.tabs.push({ ...defaultTab });
         if (this.menu && this.menu.tabs && this.menu.refresh) {
             this.menu.tabs.options.push({
-                text: defaultTab.moduleName,
+                text: defaultTab.title,
                 icon: defaultTab.icon,
             })
             this.menu.tabs.selected = this.tabs.length - 1;
@@ -260,8 +294,7 @@ export class ServiceLiveView100554 extends ServiceBase {
     private async load() {
 
         const tabActual = this.tabs[this.actualTab];
-
-        this.iframe = this.querySelector(`iframe[tab-index="${this.actualTab}"]`) as HTMLIFrameElement;
+        if (!this.iframe) return;
         this.setEvents();
 
         const doc = this.iframe?.contentDocument;
@@ -289,9 +322,6 @@ export class ServiceLiveView100554 extends ServiceBase {
 
         const pre = doc.body.querySelector('pre');
         if (pre) pre.remove();
-
-
-
         const meta = this.iframe.contentDocument?.querySelector('meta[name="color-scheme"]');
         if (meta) meta.remove();
         this.addScript();
@@ -340,7 +370,9 @@ export class ServiceLiveView100554 extends ServiceBase {
         const cacheJs = await mls.stor.cache.getFileFromCache(tabActual.project, folder, pageName, '.js', versionJs);
         const cacheHtml = await mls.stor.cache.getFileFromCache(tabActual.project, folder, pageName, '.html', versionHtml);
 
-        if (!cacheHtml || !cacheJs) this.toogleLoading(true);
+        if (!cacheHtml || !cacheJs) {
+            this.toogleLoading(true);
+        }
 
         if (!cacheHtml) {
             const contentHtml = await storFileHTML.getContent();
@@ -433,11 +465,7 @@ export class ServiceLiveView100554 extends ServiceBase {
                 script.onload = () => resolve(true);
                 script.onerror = (e) => reject(e);
             });
-
-            console.log('✅ Script runtime injetado com sucesso');
-        } else {
-            console.log('⚠️ Script runtime já injetado');
-        }
+        } 
 
     }
 

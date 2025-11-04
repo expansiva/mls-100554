@@ -28,42 +28,45 @@ export async function buildModule(project: number, moduleName: string) {
         if (
             !(storFilesDist.storFileDistHtml && storFilesDist.storFileDistHtml.updatedAt) ||
             !(storFilesDist.storFileDistJs && storFilesDist.storFileDistJs.updatedAt)
-        ) continue;
-
-        const dtJsDist = new Date(storFilesDist.storFileDistJs.updatedAt);
-        const dtHtmlDist = new Date(storFilesDist.storFileDistHtml.updatedAt);
-
-        if (
-            storFiles.ts.updatedAt &&
-            storFiles.html.updatedAt
         ) {
+            needBuild = true;
+        } else {
 
-            const dtJs = new Date(storFiles.ts.updatedAt);
-            const dtHtml = new Date(storFiles.html.updatedAt);
-            if (dtJsDist < dtJs || dtHtmlDist < dtHtml) needBuild = true;
-            else needBuild = false;
+            const dtJsDist = new Date(storFilesDist.storFileDistJs.updatedAt);
+            const dtHtmlDist = new Date(storFilesDist.storFileDistHtml.updatedAt);
 
             if (
-                storFilesDist.storFileDistJs.inLocalStorage &&
-                storFilesDist.storFileDistHtml.inLocalStorage &&
-                !storFiles.ts.inLocalStorage &&
-                !storFiles.html.inLocalStorage &&
-                dtJsDist > dtJs &&
-                dtHtml > dtHtml 
+                storFiles.ts.updatedAt &&
+                storFiles.html.updatedAt
             ) {
-                mls.stor.localStor.setContent(storFilesDist.storFileDistHtml, { content: null });
-                mls.stor.localStor.setContent(storFilesDist.storFileDistJs, { content: null });
-                needBuild = true;
-            } else if(!needBuild && !storFiles.html.inLocalStorage && !storFiles.ts.inLocalStorage) {
-                mls.stor.localStor.setContent(storFilesDist.storFileDistHtml, { content: null });
-                mls.stor.localStor.setContent(storFilesDist.storFileDistJs, { content: null });
-                needBuild = false;
+
+                const dtJs = new Date(storFiles.ts.updatedAt);
+                const dtHtml = new Date(storFiles.html.updatedAt);
+                if (dtJsDist < dtJs || dtHtmlDist < dtHtml) needBuild = true;
+                else needBuild = false;
+
+                if (
+                    storFilesDist.storFileDistJs.inLocalStorage &&
+                    storFilesDist.storFileDistHtml.inLocalStorage &&
+                    !storFiles.ts.inLocalStorage &&
+                    !storFiles.html.inLocalStorage &&
+                    dtJsDist > dtJs &&
+                    dtHtml > dtHtml
+                ) {
+                    mls.stor.localStor.setContent(storFilesDist.storFileDistHtml, { content: null });
+                    mls.stor.localStor.setContent(storFilesDist.storFileDistJs, { content: null });
+                    needBuild = true;
+                } else if (!needBuild && !storFiles.html.inLocalStorage && !storFiles.ts.inLocalStorage) {
+                    mls.stor.localStor.setContent(storFilesDist.storFileDistHtml, { content: null });
+                    mls.stor.localStor.setContent(storFilesDist.storFileDistJs, { content: null });
+                    needBuild = false;
+                }
+
             }
 
-        }
-
-        if (!needBuild) {
-            needBuild = await checkOrganismInPageIsOutdated(storFiles.defs.references?.widgets || [], dtHtmlDist, dtJsDist, storFiles.html.inLocalStorage, storFiles.ts.inLocalStorage);
+            if (!needBuild) {
+                needBuild = await checkOrganismInPageIsOutdated(storFiles.defs.references?.widgets || [], dtHtmlDist, dtJsDist, storFiles.html.inLocalStorage, storFiles.ts.inLocalStorage);
+            }
         }
 
         if (needBuild) {
