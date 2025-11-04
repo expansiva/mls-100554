@@ -67,6 +67,7 @@ export class ServiceApps100554 extends ServiceBase {
 		const item = ev.detail;
 		window.top?.postMessage({
 			type: 'loadPage',
+			target: item.target,
 			project: item.project,
 			moduleName: item.module,
 			modulePath: item.path,
@@ -152,5 +153,6 @@ interface IModuleMenuItem {
 	icon: string;
 	url: string,
 	pageName: string;
+	target: string,
 	children: IModuleMenuItem[]
 }

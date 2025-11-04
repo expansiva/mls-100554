@@ -17,6 +17,7 @@ export interface IMenuItem {
     icon: string;
     url: string;
     pageName: string;
+    target?: string,
     children?: IMenuItem[];
 }
 
@@ -185,7 +186,7 @@ export class WidgetMenuNavigation extends StateLitElement {
     }
 
     private handleMenuClick(moduleItem: IMenu, item: IMenuItem) {
-        this.dispatchEvent(new CustomEvent('menu-selected', { detail: { ...item, project: moduleItem.project, module: moduleItem.name, path: moduleItem.path } }));
+        this.dispatchEvent(new CustomEvent('menu-selected', { detail: { ...item, project: moduleItem.project, module: moduleItem.name, path: moduleItem.path  } }));
     }
 
     private renderMenuItem(moduleItem: IMenu, item: IMenuItem): any {
