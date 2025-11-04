@@ -21,6 +21,8 @@ export async function buildModule(project: number, moduleName: string) {
 
     for (let storFiles of allPages) {
 
+        if (storFiles.ts.shortName === 'pageSearch2') debugger;
+
         let needBuild: boolean = true;
         const storFilesDist = getDistStorFile(storFiles.ts);
         if (
@@ -39,9 +41,25 @@ export async function buildModule(project: number, moduleName: string) {
             const dtJs = new Date(storFiles.ts.updatedAt);
             const dtHtml = new Date(storFiles.html.updatedAt);
             if (dtJsDist < dtJs || dtHtmlDist < dtHtml) needBuild = true;
-            if (dtJsDist > dtJs && storFilesDist.storFileDistJs.inLocalStorage && !storFiles.ts.inLocalStorage) needBuild = true;
-            if (dtHtmlDist > dtHtml && storFilesDist.storFileDistHtml.inLocalStorage && !storFiles.html.inLocalStorage) needBuild = true;
             else needBuild = false;
+
+            if (
+                storFilesDist.storFileDistJs.inLocalStorage &&
+                storFilesDist.storFileDistHtml.inLocalStorage &&
+                !storFiles.ts.inLocalStorage &&
+                !storFiles.html.inLocalStorage &&
+                dtJsDist > dtJs &&
+                dtHtml > dtHtml 
+            ) {
+                mls.stor.localStor.setContent(storFilesDist.storFileDistHtml, { content: null });
+                mls.stor.localStor.setContent(storFilesDist.storFileDistJs, { content: null });
+                needBuild = true;
+            } else if(!needBuild && !storFiles.html.inLocalStorage && !storFiles.ts.inLocalStorage) {
+                mls.stor.localStor.setContent(storFilesDist.storFileDistHtml, { content: null });
+                mls.stor.localStor.setContent(storFilesDist.storFileDistJs, { content: null });
+                needBuild = false;
+            }
+
         }
 
         if (!needBuild) {
@@ -74,15 +92,15 @@ async function checkOrganismInPageIsOutdated(widgets: mls.l4.DefsWidget[], outda
             level: 2,
             loadContent: false
         });
+
         if (storFiles.ts?.updatedAt) {
             const dtJs = new Date(storFiles.ts.updatedAt);
             if (outdatedTs < dtJs || (outdatedTs > dtJs && !outdatedTsLocal && storFiles.ts.inLocalStorage)) {
                 needBuild = true;
                 break;
             }
-
-
         }
+
         if (storFiles.html?.updatedAt) {
             const dtHtml = new Date(storFiles.html.updatedAt);
             if (outdatedHtml < dtHtml || (outdatedHtml > dtHtml && !outdatedHTMLLocal && storFiles.html.inLocalStorage))
@@ -321,6 +339,7 @@ async function prepareStyleFile(project: number, theme: string): Promise<boolean
         await generateOutputCssGlobal(project, `${globalCss}\n\n${tokens || ''}`);
         return true;
     }
+
     const versionStyle = storFileDist?.versionRef || '0';
     const cacheStyle = await mls.stor.cache.getFileFromCache(project, DISTFOLDER, shortName, '.css', versionStyle);
     if (!cacheStyle) {

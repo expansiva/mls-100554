@@ -287,8 +287,7 @@ export class ServiceLiveView100554 extends ServiceBase {
         const pre = doc.body.querySelector('pre');
         if (pre) pre.remove();
 
-        this.injectGlobalStyle();
-        this.injectScriptRunTime();
+
 
         const meta = this.iframe.contentDocument?.querySelector('meta[name="color-scheme"]');
         if (meta) meta.remove();
@@ -299,6 +298,9 @@ export class ServiceLiveView100554 extends ServiceBase {
         this.toogleLoading(true);
         await buildModule(tabActual.project, tabActual.moduleName);
         this.toogleLoading(false);
+
+        this.injectGlobalStyle();
+        this.injectScriptRunTime();
 
         this.liveViewReady = true;
 
@@ -315,27 +317,26 @@ export class ServiceLiveView100554 extends ServiceBase {
         else divApp.classList.remove('loading');
     }
 
-
-
     private async loadPage(pageName: string) {
 
         if (!this.iframe?.contentWindow) {
             console.warn('[LiveView] iframe ainda não disponível.');
             return;
         }
+
         const tabActual = this.tabs[this.actualTab];
-        const folder = DISTFOLDER + '_' + tabActual.modulePath;
+        const folder = DISTFOLDER + '/' + tabActual.modulePath;
         const keyStorFileHTML = mls.stor.getKeyToFiles(tabActual.project, 2, pageName, folder, '.html');
         const keyStorFileJs = mls.stor.getKeyToFiles(tabActual.project, 2, pageName, folder, '.js');
 
         const storFileHTML = mls.stor.files[keyStorFileHTML];
         const storFileJs = mls.stor.files[keyStorFileJs];
 
-        const folderCache = DISTFOLDER + '/' + tabActual.modulePath;
+        // const folderCache = DISTFOLDER + '/' + tabActual.modulePath;
         const versionHtml = storFileHTML?.versionRef || '0';
         const versionJs = storFileJs?.versionRef || '0';
-        const cacheJs = await mls.stor.cache.getFileFromCache(tabActual.project, folderCache, pageName, '.js', versionJs);
-        const cacheHtml = await mls.stor.cache.getFileFromCache(tabActual.project, folderCache, pageName, '.html', versionHtml);
+        const cacheJs = await mls.stor.cache.getFileFromCache(tabActual.project, folder, pageName, '.js', versionJs);
+        const cacheHtml = await mls.stor.cache.getFileFromCache(tabActual.project, folder, pageName, '.html', versionHtml);
 
         if (!cacheHtml || !cacheJs) this.toogleLoading(true);
 
@@ -344,7 +345,7 @@ export class ServiceLiveView100554 extends ServiceBase {
             if (contentHtml && typeof contentHtml === 'string') {
                 await mls.stor.cache.addIfNeed({
                     project: tabActual.project,
-                    folder: folderCache,
+                    folder: folder,
                     content: contentHtml,
                     extension: '.html',
                     shortName: pageName,
@@ -359,7 +360,7 @@ export class ServiceLiveView100554 extends ServiceBase {
             if (contentJs && typeof contentJs === 'string') {
                 await mls.stor.cache.addIfNeed({
                     project: tabActual.project,
-                    folder: folderCache,
+                    folder: folder,
                     content: contentJs,
                     extension: '.js',
                     shortName: pageName,
@@ -379,7 +380,6 @@ export class ServiceLiveView100554 extends ServiceBase {
         ]);
         if (this.iframe) this.iframe.style.display = '';
         this.toogleLoading(false);
-
 
     }
 
