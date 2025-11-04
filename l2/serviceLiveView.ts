@@ -171,6 +171,8 @@ export class ServiceLiveView100554 extends ServiceBase {
         const tabActual = this.tabs[this.actualTab];
         const oldProject = tabActual.project;
         if (tabActual.project !== project || tabActual.moduleName !== moduleName) {
+            this.toogleLoading(true);
+            await buildModule(project, moduleName);
             await this.setActualTabInfos(project, pageName, modulePath);
         }
 
@@ -179,6 +181,7 @@ export class ServiceLiveView100554 extends ServiceBase {
             await this.injectScriptRunTime(true);
         }
 
+        this.toogleLoading(false);
         this.loadPage(pageName);
 
     }
@@ -332,7 +335,6 @@ export class ServiceLiveView100554 extends ServiceBase {
         const storFileHTML = mls.stor.files[keyStorFileHTML];
         const storFileJs = mls.stor.files[keyStorFileJs];
 
-        // const folderCache = DISTFOLDER + '/' + tabActual.modulePath;
         const versionHtml = storFileHTML?.versionRef || '0';
         const versionJs = storFileJs?.versionRef || '0';
         const cacheJs = await mls.stor.cache.getFileFromCache(tabActual.project, folder, pageName, '.js', versionJs);
