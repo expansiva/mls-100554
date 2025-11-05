@@ -184,7 +184,7 @@ export function isValidProjectName(name: string): boolean {
     const projectNameRegex = /^[a-zA-Z][a-zA-Z0-9_]*$/;
     return projectNameRegex.test(name);
 }
-  
+
 export function escapeHTML(str: string) {
     return str
         .replace(/&/g, "&amp;")
@@ -195,7 +195,7 @@ export function escapeHTML(str: string) {
 }
 
 function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export async function openService(service: string, position: 'left' | 'right', level: number, args?: Record<string, string>) {
@@ -310,7 +310,7 @@ export function convertColorToHex(color: string) {
     );
 }
 
-export async function getEnhancementName(file: { project: number, shortName: string, folder: string, level:number }): Promise<string> {
+export async function getEnhancementName(file: { project: number, shortName: string, folder: string, level: number }): Promise<string> {
     const key = mls.editor.getKeyModel(file.project, file.shortName, file.folder, file.level);
     const mmodel = mls.editor.models[key];
     if (!mmodel || !mmodel.ts) throw new Error('model invalid');
@@ -397,7 +397,7 @@ export async function getListNewFilesToDeleteByGroup(group: string, project: num
 
 export async function* deleteAllFilesLocal(filesToDelete: mls.stor.IFileInfo[]) {
 
-    const modelsToDelete: { project: number, shortName: string, folder: string, level:number }[] = Array.from(
+    const modelsToDelete: { project: number, shortName: string, folder: string, level: number }[] = Array.from(
         new Map(filesToDelete.map(({ project, shortName, folder, level }) => [shortName, { project, shortName, folder, level }])).values()
     );
 
@@ -426,7 +426,7 @@ export async function* deleteAllFilesLocal(filesToDelete: mls.stor.IFileInfo[]) 
     }
 
     for (const data of modelsToDelete) {
-        const keyModel = mls.editor.getKeyModel(data.project, data.shortName, data.folder, data.level );
+        const keyModel = mls.editor.getKeyModel(data.project, data.shortName, data.folder, data.level);
         mls.editor.deleteModels(data.project, data.shortName, data.folder, true, data.level);
         yield `Model deleted : ${keyModel}`;
     }
@@ -449,7 +449,7 @@ export async function loadModuleFromProjectOrDependency(name: string, folder: st
     const prj = mls.actualProject;
     if (!prj) throw new Error('Not found project actual!');
 
-    let key = mls.stor.getKeyToFiles(prj, 2, name, folder, ext);
+    let key = mls.stor.getKeyToFiles(prj, 2, name.trim(), folder.trim(), ext);
     if (mls.stor.files[key]) return await await collabImport({ project: prj, shortName: name, folder: folder });
 
     const info = mls.l5.getProjectDetails(prj);
@@ -463,12 +463,12 @@ export async function loadModuleFromProjectOrDependency(name: string, folder: st
     deps.forEach((dep) => {
         if (mls.stor.files[key]) return;
         prjDep = dep;
-        key = mls.stor.getKeyToFiles(dep, 2, name, folder, ext);
+        key = mls.stor.getKeyToFiles(dep, 2, name.trim(), folder.trim(), ext);
     });
 
     if (!mls.stor.files[key]) throw new Error('File not found in any dependency!');
 
-    return await await collabImport({ project: prjDep, shortName: name, folder: folder });
+    return await await collabImport({ project: prjDep, shortName: name.trim(), folder: folder.trim() });
 
 }
 
@@ -649,7 +649,7 @@ export function isNameValid(project: number, shortName: string, folder: string, 
     if (invalidsFolderAndName.includes(shortName.toLocaleLowerCase())) return isValid;
 
     if (folder) {
-        
+
         let isValidFolder = true;
 
         if (folder.startsWith('_')) return isValid;
