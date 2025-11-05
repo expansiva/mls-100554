@@ -20,20 +20,14 @@ export async function buildModule(project: number, moduleName: string) {
     await prepareRunTimeFile(project);
 
     for (let storFiles of allPages) {
-
-        if (storFiles.ts.shortName === 'pageSearch2') debugger;
-
-        let needBuild: boolean = true;
+        let needBuild: boolean = false;
         const storFilesDist = getDistStorFile(storFiles.ts);
-        if (
-            !(storFilesDist.storFileDistHtml && storFilesDist.storFileDistHtml.updatedAt) ||
-            !(storFilesDist.storFileDistJs && storFilesDist.storFileDistJs.updatedAt)
-        ) {
-            needBuild = true;
-        } else {
 
-            const dtJsDist = new Date(storFilesDist.storFileDistJs.updatedAt);
-            const dtHtmlDist = new Date(storFilesDist.storFileDistHtml.updatedAt);
+        if (!storFilesDist.storFileDistJs || !storFilesDist.storFileDistHtml) needBuild = true;
+        else {
+
+            const dtJsDist = new Date(storFilesDist.storFileDistJs.updatedAt || '');
+            const dtHtmlDist = new Date(storFilesDist.storFileDistHtml.updatedAt || '');
 
             if (
                 storFiles.ts.updatedAt &&
