@@ -1,7 +1,7 @@
 /// <mls shortName="serviceLiveView" project="100554" enhancement="_100554_enhancementLitService" />
 
 import { html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
 import { collab_eye, collab_plus } from './_100554_collabIcons';
 import { openService } from './_100554_libCommom';
@@ -45,6 +45,7 @@ export class ServiceLiveView100554 extends ServiceBase {
     private msg: MessageType = messages['en'];
 
     @state() actualTab: number = 0;
+    @query('.liveview-container') container?: HTMLElement;
 
     private tabs: ITab[] = [];
 
@@ -71,7 +72,7 @@ export class ServiceLiveView100554 extends ServiceBase {
 
     public onClickTabs = (op: number): void => {
         this.actualTab = op;
-        this.toogleLoading(false);
+        // this.toogleLoading(false);
     }
 
     public menu: IServiceMenu = {
@@ -116,7 +117,7 @@ export class ServiceLiveView100554 extends ServiceBase {
                 await this.updateComplete;
                 await this.setInitialTabInfos(info.project, info.shortName, info.folder);
             }
-            this.toogleLoading(false);
+            // this.toogleLoading(false);
         }
     }
 
@@ -166,7 +167,7 @@ export class ServiceLiveView100554 extends ServiceBase {
     }
 
     private async checkToLoadPage(pageName: string, moduleName: string, modulePath: string, project: number, target: string) {
-    
+
         let tabActual = this.tabs[this.actualTab];
         const _target = !target ? moduleName : target;
 
@@ -323,32 +324,35 @@ export class ServiceLiveView100554 extends ServiceBase {
             body.appendChild(app);
         }
 
-
         const pre = doc.body.querySelector('pre');
         if (pre) pre.remove();
         const meta = this.iframe.contentDocument?.querySelector('meta[name="color-scheme"]');
         if (meta) meta.remove();
+        
         this.addScript();
         this.addStyleApp();
-
         this.iframe.style.display = '';
-        this.toogleLoading(true);
-        await buildModule(tabActual.project, tabActual.moduleName);
-        this.toogleLoading(false);
 
-        this.injectGlobalStyle();
-        this.injectScriptRunTime();
+        try {
+            this.toogleLoading(true);
+            await buildModule(tabActual.project, tabActual.moduleName);
+            await this.injectGlobalStyle();
+            await this.injectScriptRunTime();
+            this.liveViewReady = true;
+            if (!tabActual.actualPage && tabActual.pageInitial) {
+                this.loadPage(tabActual.pageInitial);
+            }
+        } catch (err: any) {
+            this.setError(err.message);
 
-        this.liveViewReady = true;
-
-        if (!tabActual.actualPage && tabActual.pageInitial) {
-            this.loadPage(tabActual.pageInitial);
+        } finally {
+            this.toogleLoading(false);
         }
 
     }
 
     private toogleLoading(show: boolean) {
-        const divApp = this.iframe?.contentDocument?.querySelector('#app');
+        const divApp = this.container;  // this.iframe?.contentDocument?.querySelector('#app');
         if (!divApp) return;
         if (show) divApp.classList.add('loading');
         else divApp.classList.remove('loading');
@@ -371,54 +375,58 @@ export class ServiceLiveView100554 extends ServiceBase {
 
         const versionHtml = storFileHTML?.versionRef || '0';
         const versionJs = storFileJs?.versionRef || '0';
-        const cacheJs = await mls.stor.cache.getFileFromCache(tabActual.project, folder, pageName, '.js', versionJs);
-        const cacheHtml = await mls.stor.cache.getFileFromCache(tabActual.project, folder, pageName, '.html', versionHtml);
 
-        if (!cacheHtml || !cacheJs) {
+        try {
             this.toogleLoading(true);
-        }
-
-        if (!cacheHtml) {
-            const contentHtml = await storFileHTML.getContent();
-            if (contentHtml && typeof contentHtml === 'string') {
-                await mls.stor.cache.addIfNeed({
-                    project: tabActual.project,
-                    folder: folder,
-                    content: contentHtml,
-                    extension: '.html',
-                    shortName: pageName,
-                    version: versionHtml,
-                    contentType: 'text/plain'
-                });
+            const cacheJs = await mls.stor.cache.getFileFromCache(tabActual.project, folder, pageName, '.js', versionJs);
+            const cacheHtml = await mls.stor.cache.getFileFromCache(tabActual.project, folder, pageName, '.html', versionHtml);
+            if (!cacheHtml) {
+                const contentHtml = await storFileHTML.getContent();
+                if (contentHtml && typeof contentHtml === 'string') {
+                    await mls.stor.cache.addIfNeed({
+                        project: tabActual.project,
+                        folder: folder,
+                        content: contentHtml,
+                        extension: '.html',
+                        shortName: pageName,
+                        version: versionHtml,
+                        contentType: 'text/plain'
+                    });
+                }
             }
-        }
 
-        if (!cacheJs) {
-            const contentJs = await storFileJs.getContent();
-            if (contentJs && typeof contentJs === 'string') {
-                await mls.stor.cache.addIfNeed({
-                    project: tabActual.project,
-                    folder: folder,
-                    content: contentJs,
-                    extension: '.js',
-                    shortName: pageName,
-                    version: versionJs,
-                    contentType: 'application/javascript'
-                });
+            if (!cacheJs) {
+                const contentJs = await storFileJs.getContent();
+                if (contentJs && typeof contentJs === 'string') {
+                    await mls.stor.cache.addIfNeed({
+                        project: tabActual.project,
+                        folder: folder,
+                        content: contentJs,
+                        extension: '.js',
+                        shortName: pageName,
+                        version: versionJs,
+                        contentType: 'application/javascript'
+                    });
+                }
             }
-        }
 
-        const htmlUrl: string = `/local/_${tabActual.project}_wwwroot/${tabActual.modulePath}/${pageName}.html?v=${versionHtml}`;
-        const jsUrl: string = `/local/_${tabActual.project}_wwwroot/${tabActual.modulePath}/${pageName}.js?v=${versionJs}`;
+            const htmlUrl: string = `/local/_${tabActual.project}_wwwroot/${tabActual.modulePath}/${pageName}.html?v=${versionHtml}`;
+            const jsUrl: string = `/local/_${tabActual.project}_wwwroot/${tabActual.modulePath}/${pageName}.js?v=${versionJs}`;
 
-        this.clearOldPageScripts();
-        await Promise.all([
-            this.injectHTML(htmlUrl),
-            this.injectJS(jsUrl)
-        ]);
-        if (this.iframe) this.iframe.style.display = '';
-        this.toogleLoading(false);
-
+            this.clearOldPageScripts();
+            await Promise.all([
+                this.injectHTML(htmlUrl),
+                this.injectJS(jsUrl)
+            ]);
+            if (this.iframe) {
+                this.iframe.style.display = '';
+            }
+            this.toogleLoading(false);
+            
+        } catch (err: any) {
+            this.setError(err.message);
+            this.toogleLoading(false);
+        } 
     }
 
     private APP_ID = 'app';
@@ -469,7 +477,7 @@ export class ServiceLiveView100554 extends ServiceBase {
                 script.onload = () => resolve(true);
                 script.onerror = (e) => reject(e);
             });
-        } 
+        }
 
     }
 
@@ -509,7 +517,7 @@ export class ServiceLiveView100554 extends ServiceBase {
         }
         const href = anchor.href;
         let pageName = href ? href.replace('https://collab.codes/', '') : '';
-        this.loadPage(pageName)
+        this.loadPage(pageName);
 
     }
 
@@ -519,49 +527,7 @@ export class ServiceLiveView100554 extends ServiceBase {
         style.textContent = `
         html, body {
             height: 100%;
-        }
-        #app.loading {
-            pointer-events: none;
-            opacity: .3;
-            position: relative;
-            height: 100%;
-
-        }
-        #app.loading::after{
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 35px;
-            aspect-ratio: 1;
-            background:
-                no-repeat radial-gradient(circle closest-side, #000 90%, #0000) 0 0,
-                no-repeat radial-gradient(circle closest-side, #000 90%, #0000) 0 100%,
-                no-repeat radial-gradient(circle closest-side, #000 90%, #0000) 100% 100%;
-            background-size: 40% 40%;
-            animation: l11 1s infinite linear;
-        }
-
-        @keyframes l11 {
-            25% {
-                background-position: 100% 0, 0 100%, 100% 100%
-            }
-
-            50% {
-                background-position: 100% 0, 0 0, 100% 100%
-            }
-
-            75% {
-                background-position: 100% 0, 0 0, 0 100%
-            }
-
-            100% {
-                background-position: 100% 100%, 0 0, 0 100%
-            }
-    }
-        `;
-
+        }`;
         this.iframe?.contentDocument?.head.appendChild(style);
 
     }
