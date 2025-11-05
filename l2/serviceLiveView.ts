@@ -15,7 +15,7 @@ interface ITab {
     pageInitial: string,
     actualPage: string,
     icon: string,
-    title: string,
+    target: string,
 }
 
 /// **collab_i18n_start**
@@ -168,19 +168,22 @@ export class ServiceLiveView100554 extends ServiceBase {
     private async checkToLoadPage(pageName: string, moduleName: string, modulePath: string, project: number, target: string) {
     
         let tabActual = this.tabs[this.actualTab];
-        if (target !== '_blank') {
+        const _target = !target ? moduleName : target;
+
+        if (!_target) {
             tabActual = this.tabs[0];
             this.actualTab = 0;
             await this.openTab();
         }
 
         const oldProject = tabActual.project;
+
         if (tabActual.project !== project || tabActual.moduleName !== moduleName) {
             this.toogleLoading(true);
             await buildModule(project, moduleName);
-            await this.setActualTabInfos(project, pageName, modulePath, moduleName, target);
-        } else if (target === '_blank') {
-            await this.setActualTabInfos(project, pageName, modulePath, moduleName, target);
+            await this.setActualTabInfos(project, pageName, modulePath, moduleName, _target);
+        } else if (_target !== '') {
+            await this.setActualTabInfos(project, pageName, modulePath, moduleName, _target);
         }
 
         if (oldProject !== project) {
@@ -206,7 +209,7 @@ export class ServiceLiveView100554 extends ServiceBase {
             pageInitial,
             project: project,
             icon: moduleConfig.icon,
-            title: moduleConfig.name
+            target: moduleConfig.target || moduleConfig.name
         }];
 
         this.tabs = [...this.tabs];
@@ -217,20 +220,21 @@ export class ServiceLiveView100554 extends ServiceBase {
             this.menu.tabs.options[0].icon = this.tabs[0].icon;
             this.menu.refresh();
         }
-
         openService('_100554_serviceApps', 'left', 7);
 
     }
 
     private async setActualTabInfos(project: number, pageInitial: string, modulePath: string, moduleName: string, target: string) {
 
-        if (target === '_blank') {
-            const tabIndex = this.tabs.findIndex((tab) => tab.actualPage === pageInitial);
+        const _target = !target ? moduleName : target;
+
+        if (_target !== '') {
+            const tabIndex = this.tabs.findIndex((tab) => tab.target === _target);
             if (tabIndex > -1) {
                 this.actualTab = tabIndex;
                 await this.openTab();
             }
-            else this.addTab(pageInitial, '', moduleName, modulePath, project)
+            else this.addTab(pageInitial, '', moduleName, modulePath, project, _target)
         }
 
         const tabActual = this.tabs[this.actualTab];
@@ -249,7 +253,7 @@ export class ServiceLiveView100554 extends ServiceBase {
         await this.requestUpdate();
 
         if (this.menu && this.menu.tabs && this.menu.refresh) {
-            this.menu.tabs.options[this.actualTab].text = tabActual.title;
+            this.menu.tabs.options[this.actualTab].text = tabActual.target;
             this.menu.tabs.options[this.actualTab].icon = tabActual.icon;
             this.menu.refresh();
         }
@@ -264,7 +268,7 @@ export class ServiceLiveView100554 extends ServiceBase {
         await this.requestUpdate();
     }
 
-    private async addTab(actualPage: string, icon: string, moduleName: string, modulePath: string, project: number) {
+    private async addTab(actualPage: string, icon: string, moduleName: string, modulePath: string, project: number, target: string) {
 
         const defaultTab: ITab = {
             actualPage,
@@ -273,13 +277,13 @@ export class ServiceLiveView100554 extends ServiceBase {
             modulePath,
             pageInitial: actualPage,
             project,
-            title: moduleName + '/' + actualPage
+            target: target || moduleName
         }
 
         this.tabs.push({ ...defaultTab });
         if (this.menu && this.menu.tabs && this.menu.refresh) {
             this.menu.tabs.options.push({
-                text: defaultTab.title,
+                text: defaultTab.target,
                 icon: defaultTab.icon,
             })
             this.menu.tabs.selected = this.tabs.length - 1;
