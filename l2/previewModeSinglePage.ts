@@ -61,17 +61,23 @@ export class PreviewModeSinglePage {
                         };
                     }
 
-                    if (( args.path.startsWith("./") || args.path.startsWith("../")) &&
-                        !args.importer.startsWith("https://") && !myMap[args.importer] ) {
-                        
+                    if ((args.path.startsWith("./") || args.path.startsWith("../")) &&
+                        !args.importer.startsWith("https://") && !myMap[args.importer]) {
+
                         const url = new URL(args.path, 'file:' + args.importer);
                         let path = url.pathname;
-                        const info = mls.l2.getPath(args.importer.replace('/', ''));
-                        if (!info.project) info.project = mls.actualProject as number;
-                        if (path.indexOf(`_${info.project}_`) < 0) {
-                            path = url.pathname.replace('/',`/_${mls.actualProject}_`)
+
+                        if (!(/_(\d+)_/.test(path))) {
+
+                            const info = mls.l2.getPath(args.importer.replace('/l2/', '').replace('/', ''));
+
+                            if (!info.project) info.project = mls.actualProject as number;
+                            
+                            if (path.indexOf(`_${info.project}_`) < 0) {
+                                path = url.pathname.replace('/', `/_${info.project}_`)
+                            }
                         }
-    
+
                         return { path, namespace: 'virtual' };
 
                     }
@@ -262,7 +268,7 @@ export class PreviewModeSinglePage {
         if ((mls as any).esbuild) {
             this.esbuild = (mls as any).esbuild;
             this.needAwait = false;
-        }else if (!(mls as any).esbuildInLoad) await this.initializeEsBuild();
+        } else if (!(mls as any).esbuildInLoad) await this.initializeEsBuild();
     }
 
     private async initializeEsBuild() {
@@ -298,7 +304,7 @@ export class PreviewModeSinglePage {
         });
 
         if (needCompile) return;
-        
+
         return (window as any).cachePreview[this.json.importsJs[0]];
     }
 
