@@ -384,19 +384,26 @@ export class ServicePreviewView extends StateLitElement {
     private setMessage(iframe: HTMLIFrameElement) {
         if (!(top as any).previewL1 || !iframe.contentWindow) return;
 
+        const originalFetch = iframe.contentWindow.fetch;
+
         iframe.contentWindow.fetch = (url, options) => {
-            return new Promise((resolve) => {
-                const id: string = crypto.randomUUID();
-                this.pending[id] = resolve;
+
+            if (typeof url === "string" && (url === '/exec' || url.startsWith("/exec/"))) {
+                return new Promise((resolve) => {
+                    const id: string = crypto.randomUUID();
+                    this.pending[id] = resolve;
 
 
-                (top as any).previewL1.contentWindow.postMessage({
-                    type: "fetch-request",
-                    id,
-                    url,
-                    options
-                }, "*");
-            });
+                    (top as any).previewL1.contentWindow.postMessage({
+                        type: "fetch-request",
+                        id,
+                        url,
+                        options
+                    }, "*");
+                });
+            }
+
+            return originalFetch(url, options);
         };
 
         iframe.contentWindow.onmessage = (e) => {

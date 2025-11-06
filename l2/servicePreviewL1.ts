@@ -57,14 +57,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
                     { text: 'pause', icon: 'f04b' },
                 ]
             },
-            startServer: {
-                type: 'cycle',
-                selected: 0,
-                options: [
-                    { text: 'Server On', icon: 'f192' },
-                    { text: 'Server Off', icon: 'f192' },
-                ]
-            },
+
         },
         onClickMain: () => { },
         onClickTabs: () => { },
@@ -82,13 +75,21 @@ export class ServicePreviewL1100554 extends ServiceBase {
         else throw new Error('Invalid option')
     }
 
-    private onBtnStartServerClick() {
-        this.startServer = !this.startServer;
 
+
+    private onBtnStartServerClick() {
+
+        this.startServer = !this.startServer;
+        this.configStartServer();
+        return this.startServer;
+
+    }
+
+    private configStartServer() {
         if (this.startServer && this.iframe && this.iframe.contentWindow) {
 
             this.iframe.contentWindow.onmessage = async (e) => {
-                
+
                 const data = e.data;
                 console.info('message', data);
                 const res: ResponseMsgBase = {
@@ -102,7 +103,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
                 if (data.type !== "fetch-request") res.status = 502; //Bad Gateway
                 else {
 
-                    const method = data.url.split('/').pop();
+                    const method = data.url.split('/').filter(Boolean).join('_');
 
                     if (!this.iframe || !(this.iframe.contentWindow as any)[method]) {
                         res.status = 503; // Service Unavailable
@@ -127,9 +128,6 @@ export class ServicePreviewL1100554 extends ServiceBase {
                 this.iframe.contentWindow.onmessage = () => undefined;
             }
         }
-
-        return this.startServer;
-
     }
 
     //--------EVENTS-------------
@@ -163,6 +161,23 @@ export class ServicePreviewL1100554 extends ServiceBase {
             this.openMe();
             this.actualFileKey = keyToFileInfo;
             this.actualFile = storFile;
+
+            if (storFile.shortName === 'index') {
+                this.menu.tools.startServer = {
+                    type: 'cycle',
+                    selected: 0,
+                    options: [
+                        { text: 'Server On', icon: 'f192' },
+                        { text: 'Server Off', icon: 'f192' },
+                    ]
+                }
+            } else {
+                delete this.menu.tools.startServer;
+            }
+
+            if (this.menu.refresh) this.menu.refresh('tools');
+
+
             this.onReloader();
 
         } catch (e) {
@@ -247,6 +262,8 @@ export class ServicePreviewL1100554 extends ServiceBase {
         (window as any).previewL1 = this.iframe;
         this.elContent.appendChild(this.iframe);
 
+        //if (this.startServer) this.configStartServer();
+
     }
 
     private toogleWatch() {
@@ -314,7 +331,15 @@ export class ServicePreviewL1100554 extends ServiceBase {
 
 
         iframe.contentDocument.body.innerHTML = txt;
-        const ret = await getDependenciesByHtmlFile(this.actualFile, txt, this.actualTheme, true);
+
+        let name = `/_${this.actualFile.project}_${this.actualFile.shortName}`;
+        if (this.actualFile.folder) name = `/_${this.actualFile.project}_${this.actualFile.folder}/${this.actualFile.shortName}`;
+
+        const ret = {
+            errors: [] as any,
+            importsJs: ["/_100554_collabConsoleL1", name],
+            importsMap: ['"lit": "https://cdn.jsdelivr.net/gh/lit/dist@3/all/lit-all.min.js"', '"lit/decorators.js": "https://cdn.jsdelivr.net/npm/lit@3.0.0/decorators/+esm"']
+        } as IJSONDependence;
 
         if (ret.errors.length > 0) {
             this.error = `Error(${ret.errors.length}) when compiling:${ret.errors[0].error}`;
@@ -375,7 +400,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
                 if (!sf || sf.level !== 1 || sf.extension != '.ts' || sf.project !== mls.actualProject) return '';
 
                 const verify = `/_${sf.project}_${sf.folder ? sf.folder + '/' : ''}${sf.shortName}`;
-                const name = './' + (sf.folder ? sf.folder + '/' : '') + sf.shortName;
+                const name = './' + (sf.folder ? sf.folder + '/' : '') + sf.shortName+'.js';
 
                 const aux = info.importsJs.includes(verify) ? `Object.assign(window, m${i});` : '';
 
@@ -418,7 +443,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
 
             if (!f || f.project !== mls.actualProject || f.level !== 1 || f.extension !== '.ts') continue;
 
-            const name = (f.folder ? f.folder + '/' + f.shortName : f.shortName).toLocaleLowerCase();
+            const name = ((f.folder ? f.folder + '/' + f.shortName : f.shortName) + '.js').toLocaleLowerCase();
             if (files[name] && !f.inLocalStorage) continue;
 
             files[name] = await f.getContent() as string;
@@ -448,7 +473,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
 
                         // adiciona extensão se faltar
                         if (!resolved.endsWith(".ts") && !resolved.endsWith(".js")) {
-                            resolved += ".ts";
+                            resolved += ".js";
                         }
 
                         return {
@@ -458,19 +483,19 @@ export class ServicePreviewL1100554 extends ServiceBase {
                     } else {
 
                         const resolved = new URL(args.path, "file://" + args.resolveDir + "/").pathname;
-                        return { path: resolved.endsWith(".ts") || resolved.endsWith(".js") ? resolved : resolved + ".ts", namespace: "vfs" };
+                        return { path: resolved.endsWith(".ts") || resolved.endsWith(".js") ? resolved : resolved + ".js", namespace: "vfs" };
                     }
                 });
 
                 // Retornar conteúdo dos arquivos da memória
                 build.onLoad({ filter: /\.(ts|js)$/, namespace: "vfs" }, (args: any) => {
-                    const path = (args.path.replace(/^\/+/, "").replace('.ts', '').trim()).toLocaleLowerCase(); // remove /
+                    const path = (args.path.replace(/^\/+/, "").trim()).toLocaleLowerCase(); // remove /
                     const content = files[path];
                     if (!content) {
                         console.warn("Arquivo não encontrado no virtual FS:", path);
                         return { contents: "", loader: "ts" };
                     }
-                    return { contents: content, loader: path.endsWith(".js") ? "js" : "ts" };
+                    return { contents: content, loader: "ts" };
                 });
             }
         };
