@@ -7,6 +7,7 @@ import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, 
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, IReqCreateStorFile, createStorFile } from './_100554_collabLibStor';
 import { createAllModels, createModel, readProjectTypescriptAndCompile, readProjectTypescriptAndCompileL1 } from './_100554_collabLibModel';
 import { ServiceBase } from './_100554_serviceBase';
+import { isNameValid } from './_100554_libCommom';
 
 import './_100554_pluginExploreListAddL1';
 import './_100554_pluginExploreListAddL2';
@@ -783,9 +784,9 @@ export class PluginExploreList extends PluginBaseModule {
 
             //const files = await createAllModels(file, true);
 
-            if([1,2,3,4].includes(mls.actualLevel))await this.createModel(file, '.ts');
-            if([2,3,4].includes(mls.actualLevel))await this.createModel(file, '.less');
-            if([2,3,4].includes(mls.actualLevel))await this.createModel(file, '.html');
+            if ([1, 2, 3, 4].includes(mls.actualLevel)) await this.createModel(file, '.ts');
+            if ([2, 3, 4].includes(mls.actualLevel)) await this.createModel(file, '.less');
+            if ([2, 3, 4].includes(mls.actualLevel)) await this.createModel(file, '.html');
 
             (params.action as any) = action;
             params.level = file.level;
@@ -1146,7 +1147,7 @@ export class PluginExploreList extends PluginBaseModule {
 
         const ext = (this.extensionLevel as any)[mls.actualLevel] as string;
         const lv = mls.actualLevel === 1 ? 1 : this.levelFiles;
-        
+
         if (
             !this.myDep.includes(sf.project) ||
             sf.level !== lv ||
@@ -1385,10 +1386,16 @@ export class PluginExploreList extends PluginBaseModule {
 
         if (action.project === '' || action.name === '') return false;
         if (action.name.length === 0 || action.name.length > 255) return false;
-        const invalidCharacters = /[_\{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
-        if (invalidCharacters.test(action.name) || invalidCharacters.test(action.folder)) return false;
+        //const invalidCharacters = /[_\{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
+        //if (invalidCharacters.test(action.name) || invalidCharacters.test(action.folder)) return false;
+
+
 
         const lv = mls.actualLevel === 1 ? 1 : this.levelFiles;
+
+        const ret = isNameValid(+action.project, action.name, action.folder, lv, file.extension);
+
+        if (!ret) return false;
 
         const key = mls.stor.getKeyToFiles(+action.project, lv, action.name, action.folder, file.extension);
         return !mls.stor.files[key];

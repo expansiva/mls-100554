@@ -46,6 +46,65 @@ export class PreviewModeSinglePage {
 
                 build.onResolve({ filter: /.*/ }, (args: any) => {
 
+                    if (valids.includes(args.path)) {
+                        return {
+                            path: args.path,
+                            namespace: 'virtual',
+                        };
+                    }
+
+                    if (args.path.startsWith("_") &&
+                        !args.importer.startsWith("https://")) {
+                        return {
+                            path: args.path.replace('_', '/_'),
+                            namespace: 'virtual',
+                        };
+                    }
+
+                    if (( args.path.startsWith("./") || args.path.startsWith("../")) &&
+                        !args.importer.startsWith("https://") && !myMap[args.importer] ) {
+                        
+                        const url = new URL(args.path, 'file:' + args.importer);
+                        let path = url.pathname;
+                        const info = mls.l2.getPath(args.importer.replace('/', ''));
+                        if (!info.project) info.project = mls.actualProject as number;
+                        if (path.indexOf(`_${info.project}_`) < 0) {
+                            path = url.pathname.replace('/',`/_${mls.actualProject}_`)
+                        }
+    
+                        return { path, namespace: 'virtual' };
+
+                    }
+
+                    // import url externa
+                    if ((
+                        args.path.startsWith("./") ||
+                        args.path.startsWith("../") ||
+                        args.path.startsWith("/")) &&
+                        args.importer.startsWith("https://")) {
+
+                        const url = new URL(args.path, args.importer);
+                        return { path: url.href, namespace: 'virtual' };
+
+                    }
+
+                    // import url externa
+                    if (args.path.startsWith("/") && myMap[args.importer]) {
+                        const url = new URL(args.path, myMap[args.importer]);
+                        return { path: url.href, namespace: 'virtual' };
+                    }
+
+                    // url externa
+                    if (args.path.startsWith("http")) {
+                        return { path: args.path, namespace: 'virtual' };
+                    }
+
+                    /*
+                    
+                    const isValidStart = (path: string) => {
+                        return !path.startsWith("./l2/") && !path.startsWith("_") && !(path.startsWith("./_") && path.indexOf("/l2/") >= 0)
+                    }
+
                     const transforPathInitId = (input: string) => {
 
                         let [idPart, ...restParts] = input.split('/');
@@ -62,26 +121,7 @@ export class PreviewModeSinglePage {
 
                         return `/${path}/${idPart}${file}`;
                     }
-
-                    const isValidStart = (path: string) => {
-                        return !path.startsWith("./l2/") && !path.startsWith("_") && !(path.startsWith("./_") && path.indexOf("/l2/") >= 0)
-                    }
-
-                    if (valids.includes(args.path)) {
-                        return {
-                            path: args.path,
-                            namespace: 'virtual',
-                        };
-                    }
-
-                    if (args.path.startsWith("./") &&
-                        !args.importer.startsWith("https://") && isValidStart(args.path)) {
-                        return {
-                            path: args.path.replace('./', '/'),
-                            namespace: 'virtual',
-                        };
-                    }
-
+                    
                     if ((
                         args.path.startsWith("./") ||
                         args.path.startsWith("../") ||
@@ -122,7 +162,7 @@ export class PreviewModeSinglePage {
                             path: args.path.replace('./l2/', `/_${mls.actualProject}_`),
                             namespace: 'virtual',
                         };
-                    }
+                    }*/
 
 
                     return null;

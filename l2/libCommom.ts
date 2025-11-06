@@ -445,31 +445,23 @@ export async function* deleteAllFilesLocal(filesToDelete: mls.stor.IFileInfo[]) 
 }
 
 export async function loadModuleFromProjectOrDependency(name: string, folder: string, ext: string): Promise<any> {
-
     const prj = mls.actualProject;
     if (!prj) throw new Error('Not found project actual!');
-
     let key = mls.stor.getKeyToFiles(prj, 2, name.trim(), folder.trim(), ext);
     if (mls.stor.files[key]) return await await collabImport({ project: prj, shortName: name, folder: folder });
-
     const info = mls.l5.getProjectDetails(prj);
     if (!info && prj !== mls.stor.LOCALPROJECTNUMBER) throw new Error('Not found project details from actual project!');
     let deps: number[] = [];
-
     if (info) deps = info.prj_dependencies;
     else deps = [100554]
-
     let prjDep = 0;
     deps.forEach((dep) => {
         if (mls.stor.files[key]) return;
         prjDep = dep;
         key = mls.stor.getKeyToFiles(dep, 2, name.trim(), folder.trim(), ext);
     });
-
     if (!mls.stor.files[key]) throw new Error('File not found in any dependency!');
-
     return await await collabImport({ project: prjDep, shortName: name.trim(), folder: folder.trim() });
-
 }
 
 export function findStorFileInProjectsOrDeps(
@@ -652,7 +644,7 @@ export function isNameValid(project: number, shortName: string, folder: string, 
 
         let isValidFolder = true;
 
-        if (folder.startsWith('_')) return isValid;
+        if (folder.startsWith('_') && level !== 1) return isValid;
 
         for (const inv of invalidsFolderAndName) {
 
@@ -669,7 +661,7 @@ export function isNameValid(project: number, shortName: string, folder: string, 
 }
 
 function hasInvalidCharacter(name: string): boolean {
-    const invalidCharacters = /[_\{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
+    const invalidCharacters = /[\{}\[\]\*$@#=\-+!|?,<>=.;^~º°""''``áàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ]/;
     if (invalidCharacters.test(name) || name.indexOf("\\") >= 0) return true;
     return false
 }

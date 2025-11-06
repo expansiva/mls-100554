@@ -1,4 +1,4 @@
-/// <mls shortName="collabLitElement" project="100554" enhancement="_blank" />
+/// <mls shortName="collabLitElement" project="100554" enhancement="_100554_enhancementLit" />
 
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
