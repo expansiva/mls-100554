@@ -382,24 +382,38 @@ export class ServicePreviewView extends StateLitElement {
 
     private pending: Record<string, any> = {};
     private setMessage(iframe: HTMLIFrameElement) {
-        if (!(top as any).previewL1 || !iframe.contentWindow) return;
+
+        if (!iframe.contentWindow) return;
 
         const originalFetch = iframe.contentWindow.fetch;
 
         iframe.contentWindow.fetch = (url, options) => {
 
-            if (typeof url === "string" && (url === '/exec' || url.startsWith("/exec/"))) {
-                return new Promise((resolve) => {
+            //  /exec /exec/ ateste/exec atest/exec/
+            if (typeof url === "string" && url.indexOf("/exec") >= 0) {
+                return new Promise((resolve, reject) => {
                     const id: string = crypto.randomUUID();
                     this.pending[id] = resolve;
 
+                    const keys = Object.values((top as any).previewL1);
+                    if (url.startsWith('/exec/') || url.startsWith('exec/')) {
+                        (keys[0] as HTMLIFrameElement).contentWindow?.postMessage({
+                            type: "fetch-request",
+                            id,
+                            url,
+                            options
+                        }, "*");
+                    } else {
+                        const server = url.split('/exec').filter(Boolean).shift() as string || '****';
+                        if (!(top as any).previewL1[server]) reject('Not found server');
 
-                    (top as any).previewL1.contentWindow.postMessage({
-                        type: "fetch-request",
-                        id,
-                        url,
-                        options
-                    }, "*");
+                        ((top as any).previewL1[server] as HTMLIFrameElement).contentWindow?.postMessage({
+                            type: "fetch-request",
+                            id,
+                            url,
+                            options
+                        }, "*");
+                    }
                 });
             }
 
@@ -599,7 +613,7 @@ export class ServicePreviewView extends StateLitElement {
     }
 
     private addGlobalCss(globalCss: string) {
-        if(!globalCss) return
+        if (!globalCss) return
         try {
             const iframe = window.preview.iframe;
             if (!iframe || !iframe.contentDocument) return;

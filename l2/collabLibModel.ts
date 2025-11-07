@@ -66,9 +66,8 @@ export async function readProjectTypescriptAndCompileL1(project: number, shortNa
         if (storFile.project === mls.actualProject
             && storFile.level === 1
             && storFile.extension === '.ts'
-            && (mls.istrace || storFile.inLocalStorage)
             && storFile.shortName !== shortName) {
-            promises.push(createModel(storFile, needCompile, false));
+            promises.push(createModel(storFile, true, false));
         }
     }
     

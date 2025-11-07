@@ -1,5 +1,9 @@
 /// <mls shortName="ateste" project="100554" folder="" enhancement="_blank" groupName="" />
 
+export function exec() {
+    console.info('estou no ateste');
+    return 'estou no ateste'
+}
 
 export function ateste() {
     console.info('estou no ateste');
