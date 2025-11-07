@@ -1,18 +1,44 @@
 /// <mls shortName="serviceLiveView" project="100554" enhancement="_100554_enhancementLitService" />
 
-import { html } from 'lit';
+import { html, nothing, unsafeHTML } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { openService } from './_100554_libCommom';
-import { buildModule } from './_100554_libLiveView';
+import { openService, getProjectConfig } from './_100554_libCommom';
+import { convertFileNameToTag } from './_100554_utilsLit';
 import './_100554_collabNav4Menu';
-import './_100554_collabAuraLiveView';
-import { CollabAuraLiveView100554 } from './_100554_collabAuraLiveView';
+
+/// **collab_i18n_start**
+const message_pt = {
+    noFindModule: 'Nenhum modulo configurado.',
+}
+
+const message_en = {
+    noFindModule: 'No modules configured',
+}
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en': message_en,
+    'pt': message_pt
+}
+/// **collab_i18n_end**
+
 
 @customElement('service-live-view-100554')
 export class ServiceLiveView100554 extends ServiceBase {
 
-    @query('collab-aura-live-view-100554') liveView?: CollabAuraLiveView100554;
+    private msg: MessageType = messages['en'];
+
+    private get liveView(): any | null {
+        if (!this.liveViewTag) return null;
+        return this.querySelector(this.liveViewTag) as any | null;
+    }
+
+    private startInstance: any;
+    private buildInstance: any;
+
+    @state() private liveViewTag?: string;
 
     public details: IService = {
         icon: '&#xf06e',
@@ -33,11 +59,13 @@ export class ServiceLiveView100554 extends ServiceBase {
     };
 
     async onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
+
         if (visible && this.liveView?.iframe?.contentDocument) {
+
             const tabActual = this.liveView.tabs[this.liveView.actualTab];
             if (!tabActual) return;
             this.loading = true;
-            const needUpdate = await buildModule(tabActual.project, tabActual.moduleName);
+            const needUpdate = await this.buildInstance?.buildModule(tabActual.project, tabActual.moduleName);
             this.loading = false;
 
             if (needUpdate) {
@@ -48,21 +76,45 @@ export class ServiceLiveView100554 extends ServiceBase {
                 await this.liveView.init(info.project, info.shortName, info.folder);
             }
         }
+
     }
 
-    async firstUpdated() {
-        const actual7 = mls.actual[7];
-        if (!actual7 || !actual7.project) return;
-        openService('_100554_serviceApps', 'left', 7);
-        const fullName = mls.actual[7].getFullName();
-        const info = mls.l2.getPath(fullName);
-        this.liveView?.init(info.project, info.shortName, info.folder);
+    async connectedCallback() {
+        super.connectedCallback();
+        const moduleConfig = await getProjectConfig(mls.actualProject as number);
+        if (!moduleConfig || !moduleConfig.masterFrontEnd) return;
+        const info = mls.l2.getPath(moduleConfig.masterFrontEnd.liveView)
+        await import(`./${moduleConfig.masterFrontEnd.liveView}`);
+        this.buildInstance = await import(`./${moduleConfig.masterFrontEnd.build}`);
+        this.startInstance = await import(`./${moduleConfig.masterFrontEnd.start}`);
+        this.liveViewTag = convertFileNameToTag(info);
+
     }
+
+    async updated(_changedProperties: Map<PropertyKey, unknown>) {
+
+        if (_changedProperties.has('liveViewTag') && _changedProperties.get('liveViewTag') !== '') {
+            console.info('passei aq');
+            const actual7 = mls.actual[7];
+            if (!actual7 || !actual7.project) return;
+            openService('_100554_serviceApps', 'left', 7);
+            const fullName = mls.actual[7].getFullName();
+            const info = mls.l2.getPath(fullName);
+            this.liveView.setAttribute('mode', 'develpoment');
+            await this.liveView.updatedCompleted;
+            this.liveView?.init(info.project, info.shortName, info.folder);
+        }
+
+    }
+
 
     render() {
-        return html`
-			<collab-aura-live-view-100554 mode="develpoment"></collab-aura-live-view-100554>
-		`;
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
+        if (!this.liveViewTag) return html`<h3>${this.msg.noFindModule}<h3>`;
+        const htmlString = `<${this.liveViewTag}></${this.liveViewTag}>`;
+        return html`${unsafeHTML(htmlString)}`;
     }
 
 }
