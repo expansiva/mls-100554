@@ -2,9 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { getInstanceByFile, openService, saveOpenedFile, getLastModule, setLastModule } from './_100554_libCommom';
-import { collabImport } from './_100554_collabImport';
-
+import { getInstanceByFile, openService, saveOpenedFile, getLastModule, setLastModule, getProjectConfig } from './_100554_libCommom';
 import { StateLitElement } from './_100554_stateLitElement';
 
 import '/_100554_pluginDeleteModule';
@@ -166,8 +164,8 @@ export class Modules100554 extends StateLitElement {
       const f = mls.stor.files[key];
       if (!f) throw new Error('[setMyModules] Not found storfile');
 
-      const { folder, shortName, project } = f;
-      const mm = await collabImport({ folder, project, shortName }) as any;
+      const { project } = f;
+      const mm = await getProjectConfig(project);
       if (!mm || !mm.modules) throw new Error('[setMyModules] Not found modules')
 
       const ar: IMyModule[] = [];

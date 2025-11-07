@@ -1,0 +1,103 @@
+/// <mls shortName="collabNav4Menu" project="100554" enhancement="enhancementStyle" folder="" />
+
+collab-nav4-menu-100554 {
+	display: block;
+	background: @bg-primary-color;
+	border-radius: 6px;
+
+	.collab-nav4-menu-100554-nav {
+		display: flex;
+		padding: @space-8 5px;
+
+		.collab-nav4-menu-100554-tab {
+			display: flex;
+			align-items: center;
+			gap: @space-8;
+			cursor: pointer;
+			padding: 6px 12px;
+			background: @bg-secondary-color-lighter;
+			color: @text-primary-color;
+			transition: all @transition-slow;
+			// border-radius: 8px 8px 0 0;
+			border: none;
+			border-bottom: 1px solid @bg-secondary-color;
+			box-shadow: none;
+			position: relative;
+			z-index: 0;
+
+			svg {
+				fill: currentColor;
+			}
+
+			&:first-child {
+				border-top-left-radius: 6px;
+			}
+
+			&:last-child {
+				border-top-right-radius: 6px;
+			}
+
+			&:hover {
+				background: @bg-secondary-color-hover;
+			}
+
+			&.active {
+				border: 1px solid @grey-color;
+				border-bottom: none;
+				background: @bg-primary-color;
+				color: @active-color;
+				font-weight: @font-weight-bold;
+			}
+
+			.icon {
+				display: flex;
+				align-items: center;
+				font-size: @font-size-16;
+			}
+
+			.text {
+				font-size: @font-size-12;
+			}
+
+			.close-btn {
+				margin-left: 4px;
+				background: transparent;
+				border: none;
+				color: @text-primary-color-lighter;
+				cursor: pointer;
+				font-size: @font-size-16;
+				transition: color @transition-slow;
+
+				&:hover {
+					color: @error-color;
+				}
+			}
+		}
+
+		// Modo onlyicon
+		&.onlyicon {
+			.collab-nav4-menu-100554-tab {
+				.text {
+					display: none;
+				}
+
+				&.active {
+					.text {
+						display: inline;
+					}
+				}
+			}
+		}
+
+		// Modo fixed (sem close)
+		&.fixed {
+			.collab-nav4-menu-100554-tab .close-btn {
+				display: none;
+			}
+		}
+	}
+
+
+}
+
+

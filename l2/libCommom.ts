@@ -679,11 +679,58 @@ export async function clearServiceDetails() {
     serviceDetails.clear();
 }
 
+export async function getProjectConfig(project: number): Promise<IProjectConfig | undefined> {
+    const moduleProject = await collabImport({ folder: '', project, shortName: 'project', extension: '.ts' });;
+    if (!moduleProject) return undefined;
+    return moduleProject.projectConfig;
+}
+
+export async function getProjectModuleConfig(path: string, project: number): Promise<IProjectModuleConfig | undefined> {
+    const moduleConfig = await collabImport({ folder: path, project, shortName: 'module', extension: '.ts' });
+    if (!moduleConfig) return undefined;
+    return moduleConfig.moduleConfig;
+}
+
 
 export type OpenedFile = string | OpenedFileL2;
 export type UserOpenedFiles = Record<number, OpenedFile>;
 export type OpenedFileL2 = { left?: string; right?: string };
 
+export interface IProjectModuleConfig {
+    theme: string,
+    initialPage: string
+    menu: IProjectModuleConfigMenu[]
+}
+
+export interface IProjectModuleConfigMenu {
+    pageName: string,
+    title: string,
+    auth: string,
+    icon?: string,
+    target?: string,
+
+}
+export interface IProjectConfigModules {
+    name: string,
+    path: string,
+    pathServer?: string,
+    auth: string,
+    icon?: string
+}
+
+export interface IProjectConfig {
+    masterFrontEnd: {
+        build: string,
+        start: string,
+        liveView: string,
+    },
+    masterBackEnd: {
+        build: string,
+        start: string,
+        serverView: string,
+    },
+    modules: IProjectConfigModules[]
+}
 
 interface ICalculateTotalStringSize {
     totalsize: number, // em bytes
