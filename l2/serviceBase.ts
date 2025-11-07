@@ -347,7 +347,7 @@ export interface IToolsData2 extends IBaseToolsData {
 type IToolsData = IToolsData1 | IToolsData2;
 
 export interface IServiceMenu {
-
+    enabled?: boolean;
     title: IOptions | string,
     main: IMain,
     tabs: ITabs | undefined,
