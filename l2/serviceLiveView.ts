@@ -24,16 +24,12 @@ export class ServiceLiveView100554 extends ServiceBase {
         level: [7]
     };
 
-    public onClickMain(op: string): void {
-        if (this.menu.setMode) this.menu.setMode('initial');
-    }
-
     public menu: IServiceMenu = {
+        enabled: false,
         title: '',
         main: {},
         tools: {},
         tabs: undefined,
-        onClickMain: this.onClickMain.bind(this),
     };
 
     async onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
