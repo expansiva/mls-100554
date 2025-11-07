@@ -94,7 +94,6 @@ export class ServiceLiveView100554 extends ServiceBase {
     async updated(_changedProperties: Map<PropertyKey, unknown>) {
 
         if (_changedProperties.has('liveViewTag') && _changedProperties.get('liveViewTag') !== '') {
-            console.info('passei aq');
             const actual7 = mls.actual[7];
             if (!actual7 || !actual7.project) return;
             openService('_100554_serviceApps', 'left', 7);
@@ -102,6 +101,9 @@ export class ServiceLiveView100554 extends ServiceBase {
             const info = mls.l2.getPath(fullName);
             this.liveView.setAttribute('mode', 'develpoment');
             await this.liveView.updatedCompleted;
+            if (this.startInstance.start && typeof this.startInstance.start === 'function') {
+                this.startInstance.start();
+            }
             this.liveView?.init(info.project, info.shortName, info.folder);
         }
 
