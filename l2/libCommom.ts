@@ -719,12 +719,12 @@ export interface IProjectConfigModules {
 }
 
 export interface IProjectConfig {
-    masterFrontEnd: {
+    masterFrontEnd?: {
         build: string,
         start: string,
         liveView: string,
     },
-    masterBackEnd: {
+    masterBackEnd?: {
         build: string,
         start: string,
         serverView: string,
