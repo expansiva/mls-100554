@@ -1,11 +1,11 @@
 /// <mls shortName="serviceApps" project="100554" enhancement="_100554_enhancementLitService" />
 
-import { html, css, nothing } from 'lit';
+import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
+import { getProjectConfig } from './_100554_libCommom';
 import { collabImport } from './_100554_collabImport';
 import './_100554_collabMenuWithSubMenu';
-import { IMenuItem } from './_100554_collabMenuWithSubMenu';
 
 @customElement('service-apps-100554')
 export class ServiceApps100554 extends ServiceBase {
@@ -80,11 +80,11 @@ export class ServiceApps100554 extends ServiceBase {
 		const actualProject = mls.actualProject;
 		if (!actualProject) return;
 
-		const moduleProject = await collabImport({ folder: '', project: actualProject, shortName: 'project', extension: '.ts' });
+		
+
+		const moduleProject = await getProjectConfig(actualProject);
 		if (!moduleProject?.modules || !Array.isArray(moduleProject.modules)) return;
-
 		const modules: IMenuModule[] = [];
-
 
 		for await (let _module of moduleProject.modules) {
 			if (!_module) continue;
@@ -135,7 +135,7 @@ export class ServiceApps100554 extends ServiceBase {
 			});
 		}
 
-		this.menuModules = [...modules]; // força atualização reativa
+		this.menuModules = [...modules];
 	}
 
 }

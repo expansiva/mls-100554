@@ -30,77 +30,7 @@ export class WidgetMenuNavigation extends StateLitElement {
 
     @property() menuTitle: string = '';
 
-    @state() menuModules: IMenu[] = [
-        {
-
-            name: 'MDM',
-            project: 102019,
-            path: '',
-            icon: '<i class="icon-mdm"></i>',
-            menu: [
-                {
-                    title: 'Pessoas',
-                    icon: '👤',
-                    url: '/pessoas',
-                    pageName: 'pessoas',
-                    children: [
-                        {
-                            title: 'Cadastrar',
-                            icon: '➕',
-                            url: '/pessoas/add',
-                            pageName: 'pessoas_add',
-                            children: []
-                        },
-                        {
-                            title: 'Cadastrar2',
-                            icon: '➕',
-                            url: '/pessoas/add',
-                            pageName: 'pessoas_add2',
-                            children: []
-                        },
-                        {
-                            title: 'Cadastrar3',
-                            icon: '➕',
-                            url: '/pessoas/add',
-                            pageName: 'pessoas_add3',
-                            children: [
-                                {
-                                    title: 'Cadastrar4',
-                                    icon: '➕',
-                                    url: '/pessoas/add',
-                                    pageName: 'pessoas_add4',
-                                    children: []
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            name: 'MDM2',
-            project: 102019,
-            path: '',
-            icon: '<i class="icon-mdm"></i>',
-            menu: [
-                {
-                    title: 'Pessoas',
-                    icon: '👤',
-                    url: '/pessoas',
-                    pageName: 'pessoas',
-                    children: [
-                        {
-                            title: 'Cadastrar',
-                            icon: '➕',
-                            url: '/pessoas/add',
-                            pageName: 'pessoas_add',
-                            children: []
-                        }
-                    ]
-                }
-            ]
-        }
-    ];
+    @state() menuModules: IMenu[] = [];
 
     @state() favorites: string[] = [];
 
