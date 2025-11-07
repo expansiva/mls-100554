@@ -3,18 +3,18 @@ import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { getDependenciesByHtmlFile, IJSONDependence } from './_100554_libCompile';
 import { IService, IServiceMenu, IToolbarContent, ServiceBase } from './_100554_serviceBase';
-import "./_100554_collabConsoleL1";
+import "./_100554_servicePreviewL1ListServer";
 
 @customElement('service-preview-l1-100554')
 export class ServicePreviewL1100554 extends ServiceBase {
 
-    private esbuild: any;
-    private iframe: HTMLIFrameElement | undefined;
+    //private esbuild: any;
+    //private iframe: HTMLIFrameElement | undefined;
 
     constructor() {
         super();
-        this.init();
-        this.setEvents();
+        //this.init();
+        //this.setEvents();
     }
 
     //--------PROPERTS------------ 
@@ -49,7 +49,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
         main: {},
         tabs: undefined,
         tools: {
-            watchPreview: {
+            /*watchPreview: {
                 type: 'cycle',
                 selected: 0,
                 options: [
@@ -57,6 +57,14 @@ export class ServicePreviewL1100554 extends ServiceBase {
                     { text: 'pause', icon: 'f04b' },
                 ]
             },
+            startServer: {
+                type: 'cycle',
+                selected: 0,
+                options: [
+                    { text: 'Server On', icon: 'f192' },
+                    { text: 'Server Off', icon: 'f192' },
+                ]
+            }*/
 
         },
         onClickMain: () => { },
@@ -70,14 +78,14 @@ export class ServicePreviewL1100554 extends ServiceBase {
 
     public onClickTools(op: string) {
 
-        if (op === 'watchPreview') this.toogleWatch();
-        else if (op === 'startServer') this.onBtnStartServerClick();
-        else throw new Error('Invalid option')
+        //if (op === 'watchPreview') this.toogleWatch();
+        //else if (op === 'startServer') this.onBtnStartServerClick();
+        //else throw new Error('Invalid option')
     }
 
 
 
-    private onBtnStartServerClick() {
+    /*private onBtnStartServerClick() {
 
         this.startServer = !this.startServer;
         this.configStartServer();
@@ -162,19 +170,6 @@ export class ServicePreviewL1100554 extends ServiceBase {
             this.actualFileKey = keyToFileInfo;
             this.actualFile = storFile;
 
-            if (storFile.shortName === 'index') {
-                this.menu.tools.startServer = {
-                    type: 'cycle',
-                    selected: 0,
-                    options: [
-                        { text: 'Server On', icon: 'f192' },
-                        { text: 'Server Off', icon: 'f192' },
-                    ]
-                }
-            } else {
-                delete this.menu.tools.startServer;
-            }
-
             if (this.menu.refresh) this.menu.refresh('tools');
 
 
@@ -184,7 +179,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
             console.info(e);
         }
 
-    }
+    }*/
 
     //--------COMPONENT----------
 
@@ -203,14 +198,14 @@ export class ServicePreviewL1100554 extends ServiceBase {
 
         return html`
         <div style="${stContent}" id="preview-container-l1"></div>
-        <h1 style="${stErro}">${this.error}</h1>
+        <service-preview-l1-list-server-100554></service-preview-l1-list-server-100554>
         `;
 
     }
 
     //--------IMPLEMENTS---------
 
-    private async init() {
+    /*private async init() {
         await this.loadEsbuild();
     }
 
@@ -400,7 +395,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
                 if (!sf || sf.level !== 1 || sf.extension != '.ts' || sf.project !== mls.actualProject) return '';
 
                 const verify = `/_${sf.project}_${sf.folder ? sf.folder + '/' : ''}${sf.shortName}`;
-                const name = './' + (sf.folder ? sf.folder + '/' : '') + sf.shortName+'.js';
+                const name = './' + (sf.folder ? sf.folder + '/' : '') + sf.shortName + '.js';
 
                 const aux = info.importsJs.includes(verify) ? `Object.assign(window, m${i});` : '';
 
@@ -576,7 +571,7 @@ export class ServicePreviewL1100554 extends ServiceBase {
             this.load();
         }, 500)
 
-    }
+    }*/
 }
 
 interface ResponseMsgBase {
