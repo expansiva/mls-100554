@@ -12,7 +12,6 @@ interface TabItem {
     allowClose?: boolean;
 }
 
-
 @customElement('collab-nav4-menu-100554')
 export class CollabNav4Menu extends StateLitElement {
 
@@ -86,6 +85,5 @@ export class CollabNav4Menu extends StateLitElement {
 			`;
         }
     }
-
 
 }
