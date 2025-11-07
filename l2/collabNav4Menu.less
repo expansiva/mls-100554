@@ -16,8 +16,6 @@ collab-nav4-menu-100554 {
 		height: 40px;
 
 		.collab-nav4-menu-100554-tab {
-			box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, 0.1);
-
 			display: flex;
 			align-items: center;
 			gap: @space-8;
@@ -41,6 +39,11 @@ collab-nav4-menu-100554 {
 				background: @bg-secondary-color-hover;
 			}
 
+			.arrow {
+				font-size: 10px;
+				transition: transform 0.2s;
+			}
+
 			&.active {
 				border: 1px solid @grey-color;
 				border-bottom: none;
@@ -61,6 +64,7 @@ collab-nav4-menu-100554 {
 			}
 
 			.close-btn {
+				display: flex;
 				margin-left: 4px;
 				background: transparent;
 				border: none;
@@ -73,7 +77,12 @@ collab-nav4-menu-100554 {
 					color: @error-color;
 				}
 			}
+
+			&.open .dropdown-btn .arrow {
+				transform: rotate(180deg);
+			}
 		}
+
 
 		// Modo onlyicon
 		&.onlyicon {
@@ -94,6 +103,53 @@ collab-nav4-menu-100554 {
 		&.fixed {
 			.collab-nav4-menu-100554-tab .close-btn {
 				display: none;
+			}
+		}
+	}
+
+	.dropdown-btn {
+		border: 1px solid #cecece;
+		border-radius: 8px;
+		margin: auto 1rem;
+		height: 30px;
+		width: 30px;
+		cursor: pointer;
+	}
+
+
+	.dropdown-menu {
+		position: absolute;
+		top: 42px;
+		left: 10px;
+		background: #fff;
+		border: 1px solid #ccc;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+		border-radius: 6px;
+		min-width: 300px;
+		z-index: 10;
+		padding: 4px 0;
+
+		.dropdown-title{
+			text-align: center;
+			padding: .3rem;
+			border-bottom: 1px solid @grey-color-light;
+			h3{
+				font-size: @font-size-16;
+				margin: 0;
+			}
+		}
+
+		.dropdown-item {
+			height: 30px;
+			padding: 8px 12px;
+			cursor: pointer;
+			transition: background 0.2s;
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+
+			&:hover, &.selected {
+				background: #f2f2f2;
 			}
 		}
 	}

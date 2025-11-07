@@ -3,7 +3,7 @@
 import { html, unsafeHTML } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { StateLitElement } from './_100554_stateLitElement';
-import { collab_bars, collab_bell } from './_100554_collabIcons';
+import { collab_bars, collab_bell, collab_chevron_down, collab_xmark } from './_100554_collabIcons';
 
 
 interface TabItem {
@@ -11,7 +11,6 @@ interface TabItem {
     icon?: string;
     allowClose?: boolean;
 }
-
 @customElement('collab-nav4-menu-100554')
 export class CollabNav4Menu extends StateLitElement {
 
@@ -24,8 +23,15 @@ export class CollabNav4Menu extends StateLitElement {
 
     ];
 
+    @state() private isDropdownOpen = false;
+
+    private toggleDropdown() {
+        this.isDropdownOpen = !this.isDropdownOpen;
+    }
+
     private handleSelect(index: number) {
         this.selectedIndex = index;
+        this.isDropdownOpen = false;
         this.dispatchEvent(
             new CustomEvent('tab-selected', {
                 detail: { index },
@@ -37,6 +43,7 @@ export class CollabNav4Menu extends StateLitElement {
 
     private handleClose(e: Event, index: number) {
         e.stopPropagation();
+        this.isDropdownOpen = false;
         if (!this.options) return;
         const closed = this.options.splice(index, 1);
         this.requestUpdate();
@@ -56,34 +63,56 @@ export class CollabNav4Menu extends StateLitElement {
     }
 
     private renderNav() {
-        if (this.options) {
-            
+        return html`
+		<nav class="collab-nav4-menu-100554-nav ${this.mode}">
+        	<!-- Botão tipo "setinha do Chrome" -->
+			<button class="dropdown-btn" @click=${this.toggleDropdown}>
+				<span class="arrow">${collab_chevron_down}</span>
+			</button>
+			${this.options.map((tab, i) => {
+            const isActive = i === this.selectedIndex;
             return html`
-				<nav class="collab-nav4-menu-100554-nav ${this.mode}">
-					${this.options.map((tab, i) => {
-                const isActive = i === this.selectedIndex;
-                return html`
-							<div
-								class="collab-nav4-menu-100554-tab ${isActive ? 'active' : ''}"
-								@click=${() => this.handleSelect(i)}
-							>
-								${tab.icon ? html`<span class="icon" .innerHTML=${tab.icon}></span>` : ''}
-								${this.mode === 'full' || isActive
-                        ? html`<span class="text">${tab.text}</span>`
-                        : ''}
-								${this.mode !== 'fixed' && tab.allowClose
-                        ? html`
-											<button class="close-btn" @click=${(e: Event) => this.handleClose(e, i)}>
-												×
-											</button>
-									  `
-                        : ''}
-							</div>
-						`;
-            })}
-				</nav>
-			`;
-        }
+					<div
+						class="collab-nav4-menu-100554-tab ${isActive ? 'active' : ''}"
+						@click=${() => this.handleSelect(i)}
+					>
+						${tab.icon ? html`<span class="icon" .innerHTML=${tab.icon}></span>` : ''}
+						${this.mode === 'full' || isActive ? html`<span class="text">${tab.text}</span>` : ''}
+						${this.mode !== 'fixed' && tab.allowClose
+                    ? html`
+									<button class="close-btn" @click=${(e: Event) => this.handleClose(e, i)}>
+										${collab_xmark}
+									</button>
+							  `
+                    : ''}
+					</div>
+				`;
+        })}
+
+		
+		</nav>
+
+		${this.isDropdownOpen
+                ? html`
+					<div class="dropdown-menu">
+                        <div class="dropdown-title">
+                            <h3>Guias abertas</h3>
+                        </div>
+						${this.options.map(
+                    (tab, i) => {
+                        const isActive = i === this.selectedIndex;
+
+                        return html`
+								<div class="dropdown-item ${isActive ? 'selected' : ''}" @click=${() => this.handleSelect(i)}>
+									${unsafeHTML(tab.icon || '')}
+									${tab.text}
+								</div>
+							`
+                    })}
+					</div>
+			  `
+                : ''}
+	`;
     }
 
 }
