@@ -395,9 +395,9 @@ export class ServicePreviewView extends StateLitElement {
                     const id: string = crypto.randomUUID();
                     this.pending[id] = resolve;
 
-                    const keys = Object.values((top as any).previewL1);
+                    const keys = Object.values((top as any).previewL1) as any;
                     if (url.startsWith('/exec/') || url.startsWith('exec/')) {
-                        (keys[0] as HTMLIFrameElement).contentWindow?.postMessage({
+                        (keys[0].iframe as HTMLIFrameElement).contentWindow?.postMessage({
                             type: "fetch-request",
                             id,
                             url,
@@ -407,7 +407,7 @@ export class ServicePreviewView extends StateLitElement {
                         const server = url.split('/exec').filter(Boolean).shift() as string || '****';
                         if (!(top as any).previewL1[server]) reject('Not found server');
 
-                        ((top as any).previewL1[server] as HTMLIFrameElement).contentWindow?.postMessage({
+                        ((top as any).previewL1[server].iframe as HTMLIFrameElement).contentWindow?.postMessage({
                             type: "fetch-request",
                             id,
                             url,
