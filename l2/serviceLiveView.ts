@@ -36,6 +36,7 @@ export class ServiceLiveView100554 extends ServiceBase {
     }
 
     private startInstance: any;
+    private startServerInstance: any;
     private buildInstance: any;
 
     @state() private liveViewTag?: string;
@@ -80,6 +81,7 @@ export class ServiceLiveView100554 extends ServiceBase {
     }
 
     async connectedCallback() {
+        
         super.connectedCallback();
         const moduleConfig = await getProjectConfig(mls.actualProject as number);
         if (!moduleConfig || !moduleConfig.masterFrontEnd) return;
@@ -87,6 +89,11 @@ export class ServiceLiveView100554 extends ServiceBase {
         await import(`./${moduleConfig.masterFrontEnd.liveView}`);
         this.buildInstance = await import(`./${moduleConfig.masterFrontEnd.build}`);
         this.startInstance = await import(`./${moduleConfig.masterFrontEnd.start}`);
+
+        if (moduleConfig.masterBackEnd && moduleConfig.masterBackEnd.start) {
+            this.startServerInstance = await import(`./${moduleConfig.masterBackEnd.start}`);
+        }
+
         this.liveViewTag = convertFileNameToTag(info);
 
     }
@@ -101,14 +108,19 @@ export class ServiceLiveView100554 extends ServiceBase {
             const info = mls.l2.getPath(fullName);
             this.liveView.setAttribute('mode', 'develpoment');
             await this.liveView.updatedCompleted;
+
             if (this.startInstance.start && typeof this.startInstance.start === 'function') {
-                this.startInstance.start();
+                await this.startInstance.start();
             }
+
+            if (this.startServerInstance && typeof this.startServerInstance.start === 'function') {
+                await this.startServerInstance.start(info.project, 'all');
+            }
+            
             this.liveView?.init(info.project, info.shortName, info.folder);
+            
         }
-
     }
-
 
     render() {
         const lang = this.getMessageKey(messages);
