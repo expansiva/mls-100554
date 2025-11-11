@@ -2,7 +2,7 @@
 
 import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement'
+import { CollabLitElement } from './_100554_collabLitElement' 
 import { updateHTML } from './_100554_collabDOMSync';
 
 @customElement('ateste-100554')
