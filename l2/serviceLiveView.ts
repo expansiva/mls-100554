@@ -3,7 +3,7 @@
 import { html, nothing, unsafeHTML } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { openService, getProjectConfig } from './_100554_libCommom';
+import { openService, getProjectConfig, getProjectModuleConfig } from './_100554_libCommom';
 import { convertFileNameToTag } from './_100554_utilsLit';
 import './_100554_collabNav4Menu';
 
@@ -81,7 +81,7 @@ export class ServiceLiveView100554 extends ServiceBase {
     }
 
     async connectedCallback() {
-        
+
         super.connectedCallback();
         const moduleConfig = await getProjectConfig(mls.actualProject as number);
         if (!moduleConfig || !moduleConfig.masterFrontEnd) return;
@@ -101,8 +101,19 @@ export class ServiceLiveView100554 extends ServiceBase {
     async updated(_changedProperties: Map<PropertyKey, unknown>) {
 
         if (_changedProperties.has('liveViewTag') && _changedProperties.get('liveViewTag') !== '') {
+
             const actual7 = mls.actual[7];
-            if (!actual7 || !actual7.project) return;
+            if (!actual7 || !actual7.project) {
+                const projectConfig = await getProjectConfig(mls.actualProject as number);
+                if (!projectConfig) return;
+                const firstModule = projectConfig.modules[0];
+                if (!firstModule) return;
+                const moduleConfig = await getProjectModuleConfig(firstModule.path, mls.actualProject as number);
+                if (!moduleConfig) return;
+                const page = moduleConfig.initialPage;
+                mls.actual[7].setFullName(`_${mls.actualProject}_${firstModule.path}/${page}`);
+            }
+
             openService('_100554_serviceApps', 'left', 7);
             const fullName = mls.actual[7].getFullName();
             const info = mls.l2.getPath(fullName);
@@ -116,9 +127,9 @@ export class ServiceLiveView100554 extends ServiceBase {
             if (this.startServerInstance && typeof this.startServerInstance.start === 'function') {
                 await this.startServerInstance.start(info.project, 'all');
             }
-            
+
             this.liveView?.init(info.project, info.shortName, info.folder);
-            
+
         }
     }
 
