@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, queryAll, query } from 'lit/decorators.js';
 import { setProjectDetails, getProjectDetails } from './_100554_libCommom';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import './_100554_pluginCreateNewProject'
+//import './_100554_pluginCreateNewProject'
 
 /// **collab_i18n_start**
 const message_pt = {
