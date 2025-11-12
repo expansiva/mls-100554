@@ -46,6 +46,13 @@ export class PreviewModeSinglePage {
 
                 build.onResolve({ filter: /.*/ }, (args: any) => {
 
+                    if (args.path.startsWith('./_100554_')) {
+                        return {
+                            path: args.path.replace('./_100554_', '/_100554_'),
+                            namespace: 'virtual',
+                        };
+                    }
+
                     if (valids.includes(args.path)) {
                         return {
                             path: args.path,
@@ -72,7 +79,7 @@ export class PreviewModeSinglePage {
                             const info = mls.l2.getPath(args.importer.replace('/l2/', '').replace('/', ''));
 
                             if (!info.project) info.project = mls.actualProject as number;
-                            
+
                             if (path.indexOf(`_${info.project}_`) < 0) {
                                 path = url.pathname.replace('/', `/_${info.project}_`)
                             }
