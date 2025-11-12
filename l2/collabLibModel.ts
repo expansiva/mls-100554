@@ -356,7 +356,6 @@ function _onModelChange(e: monaco.editor.IModelContentChangedEvent, activeModel:
     clearTimeout(_onChangedContent);
     _onChangedContent = window.setTimeout(async () => {
 
-        storFile.updatedAt = new Date().toISOString();
 
         switch (storFile.extension) {
             case ('.ts'):
@@ -540,6 +539,7 @@ async function _checkSameContent(modelBase: mls.editor.IModelBase, storFile: mls
         }
     } else {
         if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
+        storFile.updatedAt = new Date().toISOString();
         await mls.stor.localStor.setContent(storFile, await _getValueInfo(modelBase));
     }
 }
