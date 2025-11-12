@@ -74,7 +74,9 @@ export class ServiceLiveView100554 extends ServiceBase {
                 if (!actual7 || !actual7.project) return;
                 const fullName = mls.actual[7].getFullName();
                 const info = mls.l2.getPath(fullName);
+                this.loading = true;
                 await this.liveView.init(info.project, info.shortName, info.folder);
+                this.loading = false;
             }
         }
 
@@ -100,17 +102,24 @@ export class ServiceLiveView100554 extends ServiceBase {
 
     async updated(_changedProperties: Map<PropertyKey, unknown>) {
 
+        super.updated(_changedProperties);
+
         if (_changedProperties.has('liveViewTag') && _changedProperties.get('liveViewTag') !== '') {
+
+            this.loading = true;
+
+            const projectConfig = await getProjectConfig(mls.actualProject as number);
 
             const actual7 = mls.actual[7];
             if (!actual7 || !actual7.project) {
-                const projectConfig = await getProjectConfig(mls.actualProject as number);
+
                 if (!projectConfig) return;
                 const firstModule = projectConfig.modules[0];
                 if (!firstModule) return;
                 const moduleConfig = await getProjectModuleConfig(firstModule.path, mls.actualProject as number);
                 if (!moduleConfig) return;
                 const page = moduleConfig.initialPage;
+
                 mls.actual[7].setFullName(`_${mls.actualProject}_${firstModule.path}/${page}`);
             }
 
@@ -128,7 +137,9 @@ export class ServiceLiveView100554 extends ServiceBase {
                 await this.startServerInstance.start(info.project, 'all');
             }
 
-            this.liveView?.init(info.project, info.shortName, info.folder);
+            await this.buildInstance?.buildModule(info.project, info.folder);
+            await this.liveView?.init(info.project, info.shortName, info.folder);
+            this.loading = false;
 
         }
     }
