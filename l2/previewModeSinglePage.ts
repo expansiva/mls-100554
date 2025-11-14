@@ -35,10 +35,16 @@ export class PreviewModeSinglePage {
 
         if (!this.json || !this.ifr || !this.esbuild || !this.file) return;
 
-        const myMap = this.parseImportsMap(this.json.importsMap);
+        let myMap = this.parseImportsMap(this.json.importsMap);
         const find = this.findWidgets(this.ifr.contentDocument?.body)
         let valids = [...Object.keys(myMap), ...this.json.importsJs, ...find];
         valids = [...new Set(valids)];
+
+        if (Object.keys(myMap).length === 0) myMap = {
+            lit: "https://cdn.jsdelivr.net/gh/lit/dist@3/all/lit-all.min.js",
+            "lit/decorators.js":"https://cdn.jsdelivr.net/npm/lit@3.0.0/decorators/+esm"
+
+        } 
 
         const virtualFsPlugin = {
             name: 'virtual-fs',
@@ -110,6 +116,10 @@ export class PreviewModeSinglePage {
                     // url externa
                     if (args.path.startsWith("http")) {
                         return { path: args.path, namespace: 'virtual' };
+                    }
+
+                    if (myMap[args.path]) {
+                        return { path: myMap[args.path], namespace: 'virtual' };
                     }
 
                     /*
