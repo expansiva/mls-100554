@@ -926,7 +926,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
     }
 
     private onSearchInput(e: CustomEvent) {
-    
+
         this.searchTerm = e.detail.toLowerCase();
         const ordenedThreads = this.getOrdenedThreadsByStatus();
         this.filteredThreads = this.getFilteredThreads(ordenedThreads);
@@ -1536,7 +1536,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (agentName) agentToCall = agentName;
         const message: IMessage = await this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
         try {
-            const moduleAgent = await collabImport({ project: PROJECTAGENTDEFAULT, shortName: agentToCall, folder: '' });
+            const moduleAgent = await loadModuleFromProjectOrDependency(agentToCall, '', '.ts');
             if (!moduleAgent || !moduleAgent.createAgent || typeof moduleAgent.createAgent !== 'function') throw new Error('Invalid agent')
             const agent: IAgent = moduleAgent.createAgent()
             context.message = message;
