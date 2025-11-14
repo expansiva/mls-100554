@@ -19,6 +19,7 @@ import { getTemporaryContext } from './_100554_aiAgentHelper';
 import { createModel } from './_100554_collabLibModel';
 
 import { PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
+import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
 import { IAgent } from './_100554_aiAgentBase';
 
 import './_100554_collabConsole';
@@ -659,7 +660,9 @@ export class ServicePreview100554 extends ServiceBase {
             return;
         }
 
-        const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentName}`);
+        // const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentName}`);
+
+        const moduleAgent = await loadModuleFromProjectOrDependency(agentName, '', '.ts');
         if (!moduleAgent?.createAgent || typeof moduleAgent.createAgent !== 'function') {
             throw new Error('Invalid agent');
         }
@@ -1092,7 +1095,7 @@ export class ServicePreview100554 extends ServiceBase {
             const model = await this.createModelIfNeeded(storFile);
             if (!this._ed1 || !model) return;
             this._ed1.setModel(model);
-        } catch (e:any) {
+        } catch (e: any) {
             this.error = '[setModel] Error:' + (e.message ? e.message : 'Not found model');
         }
 
@@ -1390,15 +1393,15 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private previewL2(mode: string) {
-        
+
         if (!mls.actual[2].left) {
 
             const last = getLastOpenedFiles(mls.actualProject || 0);
-            if(!last || !last['2']){
+            if (!last || !last['2']) {
                 this.clearPreview();
                 return;
             }
-            
+
             const lp = (last['2'] as OpenedFileL2).left;
             if (!lp) {
                 this.clearPreview();
