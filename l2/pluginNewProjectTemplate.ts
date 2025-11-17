@@ -172,8 +172,20 @@ export const template_l2Project = {
     template: `
 /// <mls shortName="project" project="[project]" enhancement="_100554_enhancementLit" groupName="other" />
 
-export const modules = [];
-    `
+export const projectConfig = {
+    masterFrontEnd: {
+        build: '',
+        start: '',
+        liveView: '',
+    },
+    masterBackEnd: {
+        build: '',
+        start: '',
+        serverView: ''
+    },
+    modules: []
+}
+`
 }
 
 export const template_coreIndex = {
