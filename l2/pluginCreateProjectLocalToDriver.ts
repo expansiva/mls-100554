@@ -422,7 +422,7 @@ export class PluginCreateProject extends CollabLitElement {
     if (!dt) return;
     mls.stor.projects[project] = {
       project,
-      projectDependencies: [100554],
+      projectDependencies: [100554, 102020],
       projectDriver: dt.projectDriver,
       projectURL: dt.projectURL
     };
@@ -614,6 +614,7 @@ export class PluginCreateProject extends CollabLitElement {
 
     const keyOldDesignSystem = `${oldProject}_2_designSystem`
     const keysFiltered = keys.filter(file => file.startsWith(`${oldProject}_5_`) || /\.ts$/.test(file) && !/\.defs\.ts$/.test(file) && !/\.test\.ts$/.test(file));
+
     const keyDs = keysFiltered.find((key) => key.startsWith(keyOldDesignSystem));
     if (!keyDs) throw new Error('Project must be design system file');
     const storFileDs = mls.stor.files[keyDs];
@@ -642,9 +643,8 @@ export class PluginCreateProject extends CollabLitElement {
               await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: newContent });
 
             } else {
-              newContent = await this.replaceSpecificProjectId(content, newProject.toString(), oldProject.toString());
+              newContent = await this.replaceSpecificProjectId(content, oldProject.toString(), newProject.toString());
               await mls.stor.localStor.setContent(storFile, { contentType: 'string', content: newContent });
-
             }
           }
         }
