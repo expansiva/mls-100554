@@ -8,12 +8,12 @@ import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
 import { createNewFile } from "./_100554_pluginNewFileBase";
 import { formatHtml } from './_100554_collabDOMSync';
 import { addNewTokensTheme } from './_100554_designSystemBase';
-import { addModule } from './_100554_projectAST';
+import { collabImport } from './_100554_collabImport';
+import { createModel } from './_100554_collabLibModel';
 
 import {
   getNextPendingStepByAgentName,
   getNextInProgressStepByAgentName,
-  getAgentStepByAgentName,
   notifyTaskChange,
   updateTaskTitle,
   updateStepStatus,
@@ -52,7 +52,7 @@ export function createAgent(): IAgent {
       return _replayForSupport(context, payload);
     }
   };
-  
+
 }
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
@@ -192,7 +192,7 @@ async function createPage(context: mls.msg.ExecutionContext) {
   }
 
   const organismUsed = extractOrganismTags(finalSource);
-  context.task = await updateLongMemory(context, organismUsed, actualTaskIndex, shortName1, step.stepId );
+  context.task = await updateLongMemory(context, organismUsed, actualTaskIndex, shortName1, step.stepId);
   await generateFiles(step, context.task, payload4, payload3, finalSource, organismUsed, projectToSave, folder, groupName, shortName1, actualTaskIndex);
   return context;
 }
@@ -223,7 +223,7 @@ async function getPrompts(payload3: PayLoad3, organismDeclared: string[], pageIn
   return prompts;
 }
 
-async function updateLongMemory(context: mls.msg.ExecutionContext, newOrganism: string[], actualTaskIndex: number, pageName:string, stepId: number) {
+async function updateLongMemory(context: mls.msg.ExecutionContext, newOrganism: string[], actualTaskIndex: number, pageName: string, stepId: number) {
   const byLongMemory = context.task?.iaCompressed?.longMemory['organism_created'];
   const pagesCreated = context.task?.iaCompressed?.longMemory['pages_created'];
 
@@ -237,7 +237,7 @@ async function updateLongMemory(context: mls.msg.ExecutionContext, newOrganism: 
   }
 
   if (!dataPagesCreated[stepId]) dataPagesCreated[stepId] = pageName;
-  
+
   const task = await appendLongTermMemory(context, {
     'organism_created': JSON.stringify(newOrganismArr),
     'next_page': actualTaskIndex.toString(),
@@ -361,6 +361,8 @@ async function generateFiles(
 
 async function createProjectFile(moduleName: string, project: number, payload3: PayLoad3) {
 
+  debugger;
+
   const shortName = 'project';
   const folder = '';
   const enhancement = '_blank';
@@ -370,18 +372,61 @@ async function createProjectFile(moduleName: string, project: number, payload3: 
     const ts = `
 /// <mls shortName="${shortName}" project="${project}" folder="${folder}" enhancement="_blank" />
 
-export const modules = [{ name: '${moduleName}' }];
+export const projectConfig = {
+    modules: [{
+      name: '${moduleName}',
+      path: '${moduleName}',
+      auth: 'admin'
+    }];
+}
 
 `;
 
     await createNewFile({ project, shortName, folder, position: 'right', enhancement, sourceTS: ts.trim(), sourceHTML: '', sourceLess: '', sourceDefs: '', openPreview: false });
   } else {
 
-    await addModule(project, moduleName, true);
+    const moduleProject = await collabImport({ folder: '', project, shortName: 'project', extension: '.ts' });
+    if (!moduleProject) return;
+
+    if (!moduleProject.projectConfig.modules) {
+      moduleProject.projectConfig.modules = []
+    }
+
+    moduleProject.projectConfig.modules.push({
+      name: moduleName,
+      path: moduleName,
+      auth: 'admin'
+    });
+
+    const modelTS = await getModel(project, true);
+    if (!modelTS) return;
+    const model = modelTS.model;
+
+    const newText = `
+    /// <mls shortName="project" project="${project}" enhancement="_blank" groupName="other" />
+
+    export const projectConfig = ${JSON.stringify(moduleProject.projectConfig, null, 2)}
+
+    `
+    model.setValue(newText.trim());
 
   }
 
+}
 
+async function getModel(project: number, forceCreateModel: boolean = false): Promise<mls.editor.IModelTS | undefined> {
+  const shortName = 'project';
+  const folder = '';
+  const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
+  const keyModels = mls.editor.getKeyModel(project, shortName, folder, 2)
+  const storFile = mls.stor.files[key];
+  if (!storFile) return;
+  let models = mls.editor.models[keyModels];
+  if (!models || !models.ts && forceCreateModel) {
+    const modelTS = await createModel(storFile);
+    return modelTS;
+  };
+  return models.ts;
 }
 
 async function createModuleFile(shortName: string, project: number, folder: string, groupName: string, payload3: PayLoad3) {
@@ -462,9 +507,9 @@ function generateTsPage(
   const ts = `
 /// <mls shortName="${info.shortName}" project="${info.project}" folder="${info.folder}" enhancement="${enhancement}" groupName="${groupName}" />
 
-import { CollabPageElement } from './_100554_collabPageElement';
+import { CollabPageElement } from '_100554_collabPageElement';
 import { customElement } from 'lit/decorators.js';
-import { globalState, initState, setState } from './_100554_collabState';
+import { globalState, initState, setState } from '_100554_collabState';
 
 @customElement('${pageTagName}')
 export class Page${info.shortName.charAt(0).toUpperCase()}${info.shortName.slice(1)} extends CollabPageElement {
@@ -652,7 +697,7 @@ function generateTsOrganism(
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { IcaOrganismBase } from './_100554_icaOrganismBase';
+import { IcaOrganismBase } from '_100554_icaOrganismBase';
 
 @customElement('${tagName}')
 export class ${shortName} extends IcaOrganismBase {
