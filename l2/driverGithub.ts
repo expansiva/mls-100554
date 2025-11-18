@@ -232,16 +232,17 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 	}
 
 	private async _setContents(project: number, fileInfos: mls.stor.IFileInfo[], comments: string | null): Promise<boolean> {
-
-		try {
-
+		const ret = await this.processFiles(project, fileInfos, comments || 'update git');
+		return true;
+		/*try {
+			
 			return this.setContents2(fileInfos, comments);
 
 		} catch (e: any) {
 
 			throw new Error(e.message);
 
-		}
+		}*/
 
 	}
 
@@ -584,6 +585,232 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 	}
 
 	//-------------IO----------------
+
+
+	private async githubRequest(path: string, method: string, token: string, body?: any) {
+		return fetch(`https://api.github.com${path}`, {
+			method,
+			mode: 'cors',
+			cache: 'no-cache',
+			credentials: 'same-origin',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				Authorization: 'bearer ' + mKey,
+			},
+			referrerPolicy: 'no-referrer',
+			body: body ? JSON.stringify(body) : undefined,
+		}).then(r => r.json());
+	}
+
+	private async getSha(owner: string, repo: string, path: string, token: string) {
+		const res = await fetch(
+			`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+			{
+
+				mode: 'cors',
+				cache: 'no-cache',
+				credentials: 'same-origin',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					Authorization: 'bearer ' + mKey,
+				},
+				referrerPolicy: 'no-referrer'
+			}
+		);
+
+		if (res.status === 404) return null;
+		return await res.json();
+	}
+
+	private async saveFile(info: {
+		token: string,
+		owner: string,
+		repo: string,
+		path: string,
+		content: string,
+		message: string,
+		branch: string,
+		file: mls.stor.IFileInfo
+	}) {
+
+
+		const body: any = {
+			message: info.message,
+			branch: info.branch,
+			content: info.content,
+		};
+
+		if ( !['new',  'renamed'].includes(info.file.status)) {
+			const sha = await this.getSha(info.owner, info.repo, info.path, info.token);
+			body.sha = sha.sha;
+
+		}
+
+		return this.githubRequest(
+			`/repos/${info.owner}/${info.repo}/contents/${info.path}`,
+			"PUT",
+			info.token,
+			body
+		);
+	}
+
+
+	private async deleteFile({
+		token,
+		owner,
+		repo,
+		path,
+		message,
+		branch = "main"
+	}: any) {
+		const existing = await this.getSha(owner, repo, path, token);
+		if (!existing) throw new Error("File not found");
+		await this.githubRequest(
+			`/repos/${owner}/${repo}/contents/${path}`,
+			"DELETE",
+			token,
+			{
+				message,
+				sha: existing.sha,
+				force: true,
+				branch,
+			}
+		);
+		return true;
+	}
+
+	private async processFiles(project:number, files: mls.stor.IFileInfo[], coments:string) {
+
+		const parallelLimit = 1;
+
+		this.verifyMKey();
+
+		const info = await dL.getMyKeysBranch(project, true);
+
+		// Lista expandida de tarefas atômicas
+		const expandedTasks: {
+			type: "update" | "delete";
+			path: string;
+			originalFile: mls.stor.IFileInfo;
+		}[] = [];
+
+		// ----- 1) EXPANSÃO -----
+		for (const file of files) {
+			const folderAux = file.folder === "" || file.folder.endsWith("/") ? "" : "/";
+			const extAux = file.extension.startsWith(".") ? "" : ".";
+			const levelPath = file.level === 0 ? "" : `l${file.level}/`;
+
+			const newPath =
+				levelPath +
+				file.folder.replace(/\\/g, "/") +
+				folderAux +
+				file.shortName +
+				extAux +
+				file.extension;
+
+			if (file.status === "deleted") {
+				expandedTasks.push({ type: "delete", path: newPath, originalFile: file });
+				continue;
+			}
+
+			if (file.status === "new" || file.status === "changed") {
+				expandedTasks.push({ type: "update", path: newPath, originalFile: file });
+				continue;
+			}
+
+			if (file.status === "renamed") {
+				const oldInfo = await (file.getValueInfo?.() ?? undefined);
+				if (!oldInfo) continue;
+
+				const oldPath =
+					levelPath +
+					file.folder.replace(/\\/g, "/") +
+					folderAux +
+					oldInfo.originalShortName +
+					extAux +
+					file.extension;
+
+				expandedTasks.push({ type: "delete", path: oldPath, originalFile: file });
+				expandedTasks.push({ type: "update", path: newPath, originalFile: file });
+				continue;
+			}
+
+			throw new Error(`Status invalid: ${file.status}`);
+		}
+
+		// ----- 2) FUNÇÕES ADIADAS -----
+		const deferredTasks: (() => Promise<any>)[] = expandedTasks.map(task => {
+			return async () => {
+
+				if (task.type === "delete") {
+					return this.deleteFile({
+						token: mKey,
+						owner: info.owner,
+						repo: info.repo,
+						branch: info.branch,
+						path: task.path,
+						message: coments
+					});
+				}
+
+				// update
+				let cont = await this.verifyAndGetContent(task.originalFile);
+
+				if (typeof cont !== "string") {
+					cont = await dL.fileToBase64(cont as File);
+					[, cont] = cont.split("base64,");
+				} else {
+					cont = dL.base64EncodeUnicode(cont);
+				}
+
+				return this.saveFile({
+					token: mKey,
+					owner: info.owner,
+					repo: info.repo,
+					branch: info.branch,
+					path: task.path,
+					content: cont,
+					message: coments,
+					file: task.originalFile
+				});
+			};
+		});
+
+		// ----- 3) EXECUÇÃO EM BATCHES (interrompe ao 1º erro) -----
+		const results: any[] = [];
+
+		for (let i = 0; i < deferredTasks.length; i += parallelLimit) {
+
+			const batchFns = deferredTasks.slice(i, i + parallelLimit);
+
+			// executa o batch em paralelo
+			const promises = batchFns.map(fn => fn());
+
+			const settled = await Promise.allSettled(promises);
+
+			// registrar e detectar erro
+			for (let j = 0; j < settled.length; j++) {
+				const idx = i + j;
+				const file = expandedTasks[idx].originalFile;
+				const s = settled[j];
+
+				if (s.status === "fulfilled") {
+					results.push({ file, status: "fulfilled", value: s.value });
+				} else {
+					results.push({ file, status: "rejected", reason: s.reason });
+
+					// 🔥 PARA TUDO → lança erro imediatamente
+					throw new Error(
+						`Error in file ${file.shortName}: ${s.reason?.message || s.reason}`
+					);
+				}
+			}
+		}
+
+		// ----- 4) Tudo OK -----
+		return results;
+	}
+
 
 	public syncForkIO(opt: { repoOrigin: string, ownerOrigin: string, branchOrigin: string, repoDest: string, ownerDest: string, branchDest: string }): Promise<boolean> {
 
