@@ -323,7 +323,7 @@ export class ServiceSave extends ServiceBase {
                     </div>
                 </div>
                 <h4 class="mt-3" data-mlsline="23">${this.myMessage.fileChanges}</h4>
-                <small style="font-size:12px">${this.totFileSize ? this.totFileSize : this.myMessage.msgTotFile}</small> 
+                <small style="font-size:12px; display:none">${this.totFileSize ? this.totFileSize : this.myMessage.msgTotFile}</small> 
                 <ul>
                     ${repeat(keys, ((key: any) => key) as any, ((k: any, index: any) => { return this.renderProject(k, index); }) as any)}
                 </ul>
@@ -599,6 +599,7 @@ export class ServiceSave extends ServiceBase {
         let mountText = item.shortName + item.extension;
         let disabled = false;
         let errorLocal = false;
+        let onlyFather = false;
         let span = `<span style = "font-size: 12px; color: #7678a6; margin-left: 5px;" class="fa ${this.oIcon[item.status].icon}" title = "${this.oIcon[item.status].title}" > </span>`;
         if (item.hasError && item.status !== 'deleted') {
             span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px; height: 16px;" class="fa fa-bug" title="Error"></span>';
@@ -611,6 +612,8 @@ export class ServiceSave extends ServiceBase {
         if (item.status === 'renamed' && item.getValueInfo) {
             const itemNew = await item.getValueInfo();
             mountText = `${itemNew.originalShortName + item.extension} to ${mountText} `;
+            disabled = true;
+            onlyFather = true;
         }
 
         errorLocal = !(await mls.stor.localDB.existFile({ project: item.project, extension: item.extension, shortName: item.shortName, folder: item.folder, level: item.level }));
@@ -621,7 +624,7 @@ export class ServiceSave extends ServiceBase {
             file: item,
             text: mountText,
             span: span,
-            onlyFather: false,
+            onlyFather,
             disabled: disabled,
             errorLocal
         }
@@ -645,8 +648,8 @@ export class ServiceSave extends ServiceBase {
         const el = e.target as HTMLInputElement;
         if (!el) return;
         this.setValueAllChilds(el);
-        clearTimeout(this.timeSumTotal);
-        this.timeSumTotal = setTimeout(() => this.sumTotalSize(), 300);
+        //clearTimeout(this.timeSumTotal);
+        //this.timeSumTotal = setTimeout(() => this.sumTotalSize(), 300);
     }
 
     private setValueAllChilds(el: HTMLInputElement): void {
@@ -669,8 +672,8 @@ export class ServiceSave extends ServiceBase {
         const el = e.target as HTMLInputElement;
         if (!el) return;
         this.verifyStatusFather(el);
-        clearTimeout(this.timeSumTotal);
-        this.timeSumTotal = setTimeout(() => this.sumTotalSize(), 300);
+        //clearTimeout(this.timeSumTotal);
+        //this.timeSumTotal = setTimeout(() => this.sumTotalSize(), 300);
     }
 
     private async sumTotalSize() {
@@ -902,8 +905,9 @@ export class ServiceSave extends ServiceBase {
             }
             return;
         } catch (e: any) {
-            this.error = e.message;
-            this.setError(e.message);
+            //this.error = e.message;
+            //this.setError(e.message);
+            throw new Error(e.message + ' in: onSavenewPullrequest');
         }
     }
 
