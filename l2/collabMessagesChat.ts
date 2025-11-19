@@ -35,6 +35,7 @@ import {
     loadNotificationDeviceId,
     defaultThreadImage
 } from './_100554_collabMessageHelper';
+
 import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
 
 import './_100554_collabMessagesTaskInfo';
@@ -60,6 +61,7 @@ const message_pt = {
     loading: 'Carregando...',
     btnAddParticipant: 'Adicionar participante',
     threadDetails: 'Detalhes da sala',
+    threadAdd: 'Adicionar sala',
     msgNotSend: 'Mensagem não enviada*',
     noThreads: 'Nenhuma sala disponível no momento.',
     placeholderSearch: 'Digite para filtrar',
@@ -75,6 +77,7 @@ const message_en = {
     loading: 'Loading...',
     btnAddParticipant: 'Add Participant',
     threadDetails: 'Thread details',
+    threadAdd: 'Add thread',
     msgNotSend: 'Message not sent*',
     noThreads: 'No threads available at the moment.',
     placeholderSearch: 'Type to filter',
@@ -254,7 +257,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
             case 'threadAdd':
                 return html`
                     <div class="header">
-                        <span @click=${this.onTitleClick}>${collab_chevron_left} Threads</span>
+                        <span @click=${this.onTitleClick}>${collab_chevron_left} ${this.msg.threadAdd}</span>
                     </div>`;
             default:
                 return null;
