@@ -27,7 +27,7 @@ const message_pt = {
     languagesHint: 'A cada mensagem será verificado o idioma da mensagem e feito a tradução para os idiomas acima, deixe em branco para não gastar créditos.',
     validateFormError: 'Preencha todos os campos obrigatórios.',
     userError: 'ID de usuário inválido.',
-    btnAdd: 'Adicionar thread',
+    btnAdd: 'Adicionar',
     advanced: 'Configurações avançadas',
     successSaving: 'Alterações salvas com sucesso!',
     dmValidationError: "Usuário inválido",
@@ -50,6 +50,8 @@ const message_pt = {
     detailsIcon: 'Configurar ícone',
     threadNameInvalid: 'O nome deve começar com #',
     selectUser: 'Selecione um usuário',
+    dmDesc: 'Converse privadamente com apenas uma pessoa.',
+    channelDesc: 'Crie um espaço para discutir tópicos com várias pessoas.'
 }
 
 const message_en = {
@@ -69,7 +71,7 @@ const message_en = {
     validateFormError: 'Please fill in all required fields.',
     userError: 'Invalid user ID.',
     advanced: 'Advanced settings',
-    btnAdd: 'Add thread',
+    btnAdd: 'Add',
     successSaving: 'Saved successfully!',
     dmValidationError: "Invalid user",
     channelValidationError: "Channel name must start with '#'.",
@@ -91,18 +93,22 @@ const message_en = {
     detailsIcon: 'Set up icon',
     threadNameInvalid: 'The name must start with #',
     selectUser: 'Select a user',
+    dmDesc: 'Chat privately with just one person.',
+    channelDesc: 'Create a space to discuss topics with multiple people.'
 }
 
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = { en: message_en, pt: message_pt };
 /// **collab_i18n_end**
 
+type ThreadType = 'dm' | 'channel';
+
 @customElement('collab-messages-add-100554')
 export class CollabMessagesAdd100554 extends StateLitElement {
 
     private msg: MessageType = messages['en'];
 
-    @state() private threadType: 'dm' | 'channel' = 'dm';
+    @state() private threadType: ThreadType = 'dm';
     @state() private threadName: string = '';
     @state() private visibility: mls.msg.ThreadVisibility = 'private';
     @state() private group: mls.msg.ThreadGroup = 'CRM';
@@ -124,7 +130,6 @@ export class CollabMessagesAdd100554 extends StateLitElement {
     @property() labelOk: string = '';
     @property() labelError: string = '';
     @property() userId: string | undefined;
-
 
     @query('#languageInput') languageInput?: CollabInputTag;
 
@@ -195,19 +200,62 @@ export class CollabMessagesAdd100554 extends StateLitElement {
         return html`
         <div class="section-add-thread">
 
-            <label>${this.msg.threadType}
-                <select 
-                    .value=${this.threadType}
-                    @change=${(e: Event) => this.threadType = (e.target as HTMLSelectElement).value as 'dm' | 'channel'}>
-                    <option value="dm">DM</option>
-                    <option value="channel">Channel</option>
-                </select>
-            </label>
+             <div class="selector-container form-group">
+                <label >${this.msg.threadType}</label>
+                
+                <div class="radio-group">
+                
+                <label class="radio-label ${this.threadType === 'dm' ? 'selected' : ''}">
+                    <input 
+                        type="radio" 
+                        name="threadType" 
+                        value="dm" 
+                        class="radio-input"
+                        .checked=${this.threadType === 'dm'}
+                        @change=${this._handleChange}
+                    >
+                    <div class="content-wrapper">
+
+                        <div class="option-title">
+                            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                            <span>DM</span>
+                        </div>
+                        <div class="option-desc">
+                            ${this.msg.dmDesc}
+                        </div>                        
+                    </div>
+                </label>
+
+                <!-- Opção Channel -->
+                <label class="radio-label ${this.threadType === 'channel' ? 'selected' : ''}">
+                    <input 
+                        type="radio" 
+                        name="threadType" 
+                        value="channel" 
+                        class="radio-input"
+                        .checked=${this.threadType === 'channel'}
+                        @change=${this._handleChange}
+                    >
+                    <div class="content-wrapper">
+                    
+                        <div class="option-title">
+                            <svg viewBox="0 0 24 24"><path d="M20 10V8h-4V4h-2v4h-4V4H8v4H4v2h4v4H4v2h4v4h2v-4h4v4h2v-4h4v-2h-4v-4h4zm-6 4h-4v-4h4v4z"/></svg>
+                            <span>Channel</span>
+                        </div>
+                        <div class="option-desc">
+                            ${this.msg.channelDesc}
+                        </div>
+                    </div>
+                    
+                </label>
+
+                </div>
+            </div>
 
 
             ${this.threadType === 'dm' ? html`
-                <label>
-                    ${this.msg.dmUser}
+                <div class="form-group">
+                    <label> ${this.msg.dmUser} </label>
                     <select
                         .value=${this.dmUser}
                         @change=${(e: Event) => this.dmUser = (e.target as HTMLSelectElement).value}>
@@ -216,54 +264,62 @@ export class CollabMessagesAdd100554 extends StateLitElement {
                             <option value="${user.userId}">@${user.name}</option>
                         `)}
                     </select>
-                </label>
+                </div>
+
+                
             ` : ''}
 
             ${this.threadType === 'channel' ? html`
-                <label>${this.msg.threadName}
+                <div class="form-group">
+                    <label>${this.msg.threadName} </label>
                     <input type="text" placeholder="#nome-do-canal"
                         .value=${this.threadName}
-                         pattern="^#.*"
+                            pattern="^#.*"
                         @input=${(e: Event) => this.threadName = (e.target as HTMLInputElement).value}
                     >
                     <span class="field-thread-name-error">${this.msg.threadNameInvalid}</span>
-                </label>
+                </div>
+
+                
             ` : ''}
 
             ${this.threadType === 'channel' ? html`
-                <label> ${this.msg.visibility}
-                <select name="visibility" required
-                    .value=${this.visibility}
-                    @change=${(e: Event) => this.visibility = (e.target as HTMLSelectElement).value as mls.msg.ThreadVisibility}>
-                      <option value="public">${this.msg.visibilityPublic}</option>
-                    <option value="private">${this.msg.visibilityPrivate}</option>
-                    <option value="company">${this.msg.visibilityCompany}</option>
-                    <option value="team">${this.msg.visibilityTeam}</option>
-                </select>
-                </label>            
+                <div class="form-group">
+                    <label> ${this.msg.visibility} </label>   
+                    <select name="visibility" required
+                        .value=${this.visibility}
+                        @change=${(e: Event) => this.visibility = (e.target as HTMLSelectElement).value as mls.msg.ThreadVisibility}>
+                        <option value="public">${this.msg.visibilityPublic}</option>
+                        <option value="private">${this.msg.visibilityPrivate}</option>
+                        <option value="company">${this.msg.visibilityCompany}</option>
+                        <option value="team">${this.msg.visibilityTeam}</option>
+                    </select>
+                </div>
+                         
             `: ''}
-            
-            <label> ${this.msg.group}
-                <select name="group" required
-                    .value=${this.group}
-                    @change=${(e: Event) => this.group = (e.target as HTMLSelectElement).value as mls.msg.ThreadGroup}>
-                    <option value="CRM">CRM</option>
-                    <option value="TASK">TASK</option>
-                    <option value="DOCS">DOCS</option>
-                    <option value="CONNECT">CONNECT</option>
-                    <option value="APPS">APPS</option>
-                </select>
-            </label>
+            <div class="form-group">
+                <label> ${this.msg.group}</label>
+                    <select name="group" required
+                        .value=${this.group}
+                        @change=${(e: Event) => this.group = (e.target as HTMLSelectElement).value as mls.msg.ThreadGroup}>
+                        <option value="CRM">CRM</option>
+                        <option value="TASK">TASK</option>
+                        <option value="DOCS">DOCS</option>
+                        <option value="CONNECT">CONNECT</option>
+                        <option value="APPS">APPS</option>
+                    </select>
+            </div>
 
-            <label> ${this.msg.languages}
-                <collab-input-tag-100554 
-                    pattern="^[a-z]{2}$|^[a-z]{2}-[A-Z]{2}$"
-                    .value=${this.languages.join(',')}
-                    .onValueChanged=${(value: string) => this.languages = value.split(',')}
-                    id="languageInput"
-                ></collab-input-tag-100554>
-                <small> ${this.msg.languagesHint}</small>
-            </label>
+            <div class="form-group">
+                <label> ${this.msg.languages}</label>
+                    <collab-input-tag-100554 
+                        pattern="^[a-z]{2}$|^[a-z]{2}-[A-Z]{2}$"
+                        .value=${this.languages.join(',')}
+                        .onValueChanged=${(value: string) => this.languages = value.split(',')}
+                        id="languageInput"
+                    ></collab-input-tag-100554>
+                    <small> ${this.msg.languagesHint}</small>
+            </div>
 
         
             ${this.threadType === 'channel' ? html`
@@ -289,11 +345,17 @@ export class CollabMessagesAdd100554 extends StateLitElement {
         </div>`;
     }
 
+
+    private _handleChange(e: Event) {
+        const input = e.target as HTMLInputElement;
+        this.threadType = input.value as ThreadType;
+    }
+
     private renderBotsConfig() {
         return html`
             <details>
                 <summary>${this.msg.detailsBot}</summary>
-                <div>
+                <div class="form-group">
                     <label>${this.msg.selectAgent}</label>
                     <select @change=${(e: Event) => this._selectedAgent = (e.target as HTMLSelectElement).value}>
                         ${this.agentsBots.map(agent => html`
@@ -322,7 +384,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
         return html`
             <details>
                 <summary>${this.msg.detailsInitialMessage}</summary>
-                <div>
+                <div class="form-group">
                     <label>${this.msg.initialMessage}</label>
                     <textarea 
                         rows="5" 
@@ -339,7 +401,7 @@ export class CollabMessagesAdd100554 extends StateLitElement {
         return html`
             <details>
                 <summary>${this.msg.detailsIcon}</summary>
-                <div>
+                <div class="form-group">
                     <label>${this.msg.avatarUrl}</label>
                     <textarea 
                         rows="5" 
