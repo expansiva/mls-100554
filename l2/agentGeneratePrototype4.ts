@@ -10,6 +10,8 @@ import { formatHtml } from './_100554_collabDOMSync';
 import { addNewTokensTheme } from './_100554_designSystemBase';
 import { collabImport } from './_100554_collabImport';
 import { createModel } from './_100554_collabLibModel';
+import { addModule } from './_100554_projectAST';
+
 
 import {
   getNextPendingStepByAgentName,
@@ -361,72 +363,9 @@ async function generateFiles(
 
 async function createProjectFile(moduleName: string, project: number, payload3: PayLoad3) {
 
-  debugger;
+  const res = await addModule(project, moduleName, true);
+  if(!res.ok) throw new Error(`[${agentName}](createProjectFile) ${res.message}`)
 
-  const shortName = 'project';
-  const folder = '';
-  const enhancement = '_blank';
-  const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
-  const storFile = mls.stor.files[key];
-  if (!storFile) {
-    const ts = `
-/// <mls shortName="${shortName}" project="${project}" folder="${folder}" enhancement="_blank" />
-
-export const projectConfig = {
-    modules: [{
-      name: '${moduleName}',
-      path: '${moduleName}',
-      auth: 'admin'
-    }];
-}
-
-`;
-
-    await createNewFile({ project, shortName, folder, position: 'right', enhancement, sourceTS: ts.trim(), sourceHTML: '', sourceLess: '', sourceDefs: '', openPreview: false });
-  } else {
-
-    const moduleProject = await collabImport({ folder: '', project, shortName: 'project', extension: '.ts' });
-    if (!moduleProject) return;
-
-    if (!moduleProject.projectConfig.modules) {
-      moduleProject.projectConfig.modules = []
-    }
-
-    moduleProject.projectConfig.modules.push({
-      name: moduleName,
-      path: moduleName,
-      auth: 'admin'
-    });
-
-    const modelTS = await getModel(project, true);
-    if (!modelTS) return;
-    const model = modelTS.model;
-
-    const newText = `
-    /// <mls shortName="project" project="${project}" enhancement="_blank" groupName="other" />
-
-    export const projectConfig = ${JSON.stringify(moduleProject.projectConfig, null, 2)}
-
-    `
-    model.setValue(newText.trim());
-
-  }
-
-}
-
-async function getModel(project: number, forceCreateModel: boolean = false): Promise<mls.editor.IModelTS | undefined> {
-  const shortName = 'project';
-  const folder = '';
-  const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
-  const keyModels = mls.editor.getKeyModel(project, shortName, folder, 2)
-  const storFile = mls.stor.files[key];
-  if (!storFile) return;
-  let models = mls.editor.models[keyModels];
-  if (!models || !models.ts && forceCreateModel) {
-    const modelTS = await createModel(storFile);
-    return modelTS;
-  };
-  return models.ts;
 }
 
 async function createModuleFile(shortName: string, project: number, folder: string, groupName: string, payload3: PayLoad3) {

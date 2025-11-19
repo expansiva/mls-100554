@@ -1,48 +1,71 @@
 /// <mls shortName="projectAST" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
 
 import { createModel } from './_100554_collabLibModel';
+import { collabImport } from './_100554_collabImport';
+import { createNewFile } from "./_100554_pluginNewFileBase";
 
 // Adds a new module with the given name to the modules array in the editor content.
 export async function addModule(project: number, moduleName: string, forceCreateModel: boolean = false) {
+
+    const shortName = 'project';
+    const folder = '';
+    const enhancement = '_blank';
+    const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
+    const storFile = mls.stor.files[key];
+
+    if (!storFile) {
+        const ts = `
+/// <mls shortName="${shortName}" project="${project}" folder="${folder}" enhancement="_blank" />
+
+export const projectConfig = {
+    modules: [{
+      name: '${moduleName}',
+      path: '${moduleName}',
+      auth: 'admin'
+    }];
+}
+
+`;
+
+        await createNewFile({ project, shortName, folder, position: 'right', enhancement, sourceTS: ts.trim(), sourceHTML: '', sourceLess: '', sourceDefs: '', openPreview: false });
+
+        return { ok: true };
+
+    }
 
     const modelTS = await getModel(project, forceCreateModel);
     if (!modelTS) return { ok: false, message: "No models found" };
     const model = modelTS.model;
 
-    const code = model.getValue();
-    const modules = parseModulesArray(code);
+    const moduleProject = await collabImport({
+        folder: "",
+        project,
+        shortName: "project",
+        extension: ".ts",
+    });
 
-    if (!modules) return { ok: false, message: "Could not parse modules array" };
+    if (!moduleProject) {
+        return { ok: false, message: "Project file not found" };
+    }
 
-    // Checks if the module already exists by name.
-    if (modules.some((m: any) => m.name === moduleName))
-        return { ok: false, message: "Module already exists" };
+    if (!moduleProject.projectConfig.modules) {
+        return { ok: false, message: "No modules found" };
+    }
 
-    // Adds the new module to the array.
-    modules.push({ name: moduleName });
+    moduleProject.projectConfig.modules.push({
+        name: moduleName,
+        path: moduleName,
+        auth: 'admin'
+    });
 
-    // Regenerates the array text with 2-space indentation.
-    // Converts JSON output to JS-like syntax with single quotes and no quotes on keys.
-    const newArrayText = JSON.stringify(modules, null, 2)
-        .replace(/\"([^"]+)\":/g, '$1:') // remove quotes from keys
-        .replace(/\"/g, "'");            // convert double quotes to single quotes
+    const newText = `
+    /// <mls shortName="project" project="${project}" enhancement="_blank" groupName="other" />
 
-    // Finds the position of the original array text in the code.
-    const regex = /export\s+const\s+modules\s*=\s*(\[[\s\S]*?\]);/m;
-    const match = regex.exec(code);
-    if (!match) return { ok: false, message: "Could not find modules array" };
+    export const projectConfig = ${JSON.stringify(moduleProject.projectConfig, null, 2)}
 
-    // Replaces the old array with the new formatted array.
-    const start = match.index + match[0].indexOf(match[1]);
-    const end = start + match[1].length;
-    const fullText = model.getValue();
+    `
+    model.setValue(newText.trim());
 
-    const newText =
-        fullText.slice(0, start) +
-        newArrayText +
-        fullText.slice(end);
-
-    model.setValue(newText);
     return { ok: true };
 }
 
@@ -52,59 +75,27 @@ export async function removeModule(project: number, moduleName: string, forceCre
     if (!modelTS) return { ok: false, message: "No models found" };
     const model = modelTS.model;
 
-    const code = model.getValue();
-    const modules = parseModulesArray(code);
+    const moduleProject = await collabImport({ folder: '', project, shortName: 'project', extension: '.ts' });
+    if (!moduleProject) return;
 
-    if (!modules) return { ok: false, message: "Could not parse modules array" };
-    const index = modules.findIndex((m: any) => m.name === moduleName);
-    if (index === -1) {
-        return { ok: false, message: "Module not found" };
-    }
+    if (!moduleProject.projectConfig.modules) return { ok: false, message: "No modules found" };
+    const index = moduleProject.projectConfig.modules.findIndex((mod: any) => mod.name === moduleName)
+    if (index === -1) return { ok: false, message: `No module found with name ${moduleName}` };
 
-    modules.splice(index, 1);
+    moduleProject.projectConfig.modules.splice(index, 1);
 
-    const newArrayText = JSON.stringify(modules, null, 2)
-        .replace(/\"([^"]+)\":/g, '$1:') // remove quotes from keys
-        .replace(/\"/g, "'");            // convert double quotes to single quotes
+    const newText = `
+    /// <mls shortName="project" project="${project}" enhancement="_blank" groupName="other" />
 
-    const regex = /export\s+const\s+modules\s*=\s*(\[[\s\S]*?\]);/m;
-    const match = regex.exec(code);
-    if (!match) return { ok: false, message: "Could not find modules array" };
+    export const projectConfig = ${JSON.stringify(moduleProject.projectConfig, null, 2)}
 
-    const start = match.index + match[0].indexOf(match[1]);
-    const end = start + match[1].length;
-    const fullText = model.getValue();
-
-    const newText =
-        fullText.slice(0, start) +
-        newArrayText +
-        fullText.slice(end);
-
-    model.setValue(newText);
+    `
+    model.setValue(newText.trim());
     return { ok: true };
 }
 
 
-// Parses the `modules` array from the code string using JavaScript evaluation.
-// Returns the array or null if parsing fails.
-function parseModulesArray(code: string): any[] | null {
-    try {
-        // Extracts only the array content (text between brackets)
-        const regex = /export\s+const\s+modules\s*=\s*(\[[\s\S]*?\]);/m;
-        const match = regex.exec(code);
-        if (!match) return null;
-
-        const arrayCode = match[1];
-
-        // Uses Function constructor to safely evaluate the array as JavaScript.
-        const fn = new Function(`return ${arrayCode};`);
-        return fn();
-    } catch {
-        return null;
-    }
-}
-
-async function getModel(project: number, forceCreateModel: boolean = false): Promise<mls.editor.IModelTS  | undefined> {
+async function getModel(project: number, forceCreateModel: boolean = false): Promise<mls.editor.IModelTS | undefined> {
     const shortName = 'project';
     const folder = '';
     const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');

@@ -3,7 +3,7 @@
 import { html, svg, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { getListNewFilesToDeleteByGroup, deleteAllFilesLocal } from './_100554_libCommom';
+import { getListNewFilesToDeleteByFolder, deleteAllFilesLocal } from './_100554_libCommom';
 import { removeModule } from './_100554_projectAST';
 import { removeTokensTheme } from './_100554_designSystemBase';
 
@@ -11,7 +11,7 @@ import { removeTokensTheme } from './_100554_designSystemBase';
 const message_pt = {
     btnSearch: 'Pesquisar',
     btnDelete: 'Deletar',
-    lblSearch: 'Grupo a pesquisar:',
+    lblSearch: 'Caminho do modulo:',
     lblChoice: 'Selecionar tipo de arquivo:',
     lblTotal: 'Total arquivos encontrados:',
 }
@@ -19,7 +19,7 @@ const message_pt = {
 const message_en = {
     btnSearch: 'Search',
     btnDelete: 'Delete',
-    lblSearch: 'Group to search:',
+    lblSearch: 'Module path:',
     lblChoice: 'Select file type:',
     lblTotal: 'Total files found:',
 };
@@ -154,7 +154,7 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
             this.logs.push('No project selected');
             return;
         }
-        this.filesToDelete = await getListNewFilesToDeleteByGroup(this.groupName, project, this.groupName);
+        this.filesToDelete = await getListNewFilesToDeleteByFolder(project, this.groupName, true);
         this.selectedFiles = new Map(
             this.filesToDelete.map(file => [this.getFileKey(file), file])
         );
@@ -172,7 +172,7 @@ export class PluginProjectDeleteFiles extends PluginBaseModule {
             this.logs.push(log);
             this.requestUpdate();
         }
-        
+
 
         await this.removeThemeFromDesignSystem(this.groupName, project);
         await this.removeModuleFromProjectFile(this.groupName, project);
