@@ -370,27 +370,14 @@ function formatSize(bytes: number) {
 }
 
 
-export async function getListNewFilesToDeleteByGroup(group: string, project: number, folder: string, includeDist: boolean = false) {
+export async function getListNewFilesToDeleteByFolder(project: number, folder: string, includeDist: boolean = false) {
 
-    const filesToDelete: mls.stor.IFileInfo[] = [];
-
-    const filesLocal = Object.values(mls.stor.files).filter(file =>
+    const filesToDelete = Object.values(mls.stor.files).filter(file =>
         file.inLocalStorage &&
-        (file.folder === folder || (includeDist && file.folder === `wwwroot/${file.folder}`)) &&
+        (file.folder === folder || (includeDist && file.folder === `wwwroot/${folder}`)) &&
         file.project === project &&
         file.status === 'new'
     );
-
-    for await (let storFile of filesLocal) {
-        const keyModel = mls.editor.getKeyModel(storFile.project, storFile.shortName, storFile.folder, storFile.level);
-        let models: mls.editor.IModels | undefined = mls.editor.models[keyModel];
-        if (!models) models = await mls.editor.addModels(storFile.project, storFile.shortName, '', storFile.level)
-        if (models && models.ts) {
-            mls.l2.typescript.parseTripleSlash(models.ts);
-            const tpsGroup = models.ts.compilerResults?.tripleSlashMLS?.variables['groupName']
-            if (group === tpsGroup) filesToDelete.push(storFile);
-        }
-    }
 
     return filesToDelete;
 }
