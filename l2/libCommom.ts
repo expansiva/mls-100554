@@ -370,13 +370,13 @@ function formatSize(bytes: number) {
 }
 
 
-export async function getListNewFilesToDeleteByGroup(group: string, project: number, folder: string) {
+export async function getListNewFilesToDeleteByGroup(group: string, project: number, folder: string, includeDist: boolean = false) {
 
     const filesToDelete: mls.stor.IFileInfo[] = [];
 
     const filesLocal = Object.values(mls.stor.files).filter(file =>
         file.inLocalStorage &&
-        file.folder === folder &&
+        (file.folder === folder || (includeDist && file.folder === `wwwroot/${file.folder}`)) &&
         file.project === project &&
         file.status === 'new'
     );
