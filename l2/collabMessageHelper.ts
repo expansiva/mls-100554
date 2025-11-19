@@ -4,6 +4,7 @@ import { getTemporaryContext, notifyMessageSendChange, notifyThreadChange, notif
 import { IAgent } from './_100554_aiAgentBase';
 import { collabImport } from './_100554_collabImport';
 import { addThread, listThreads, updateThread, updateUsers } from './_100554_msgDBController';
+import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
 
 const LS_KEY_OLD = 'collabChatPreferences';
 const LOCAL_STORAGE_KEY = '_100554_serviceCollabMessages';
@@ -67,9 +68,13 @@ export async function addMessage(threadId: string, messageContent: string, conte
     }
 
     const agentName = extractAgentName(messageContent) || AGENTDEFAULT;
-    const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentName}`);
+    loadModuleFromProjectOrDependency
+    const moduleAgent = await loadModuleFromProjectOrDependency(agentName, '', '.ts');
+
+    // const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentName}`);
     const agent: IAgent = moduleAgent.createAgent();
     await agent.beforePrompt(context);
+    return context;
 
 }
 
@@ -88,7 +93,8 @@ export async function getBotsContext(thread: mls.msg.Thread, prompt: string, con
     const auxContextToBot: Record<string, any>[] = []
     for await (let bot of botsVarsBefore2) {
         try {
-            const moduleBot = await collabImport({ project: PROJECTAGENTDEFAULT, shortName: bot.toolName, folder: '' });
+            // const moduleBot = await collabImport({ project: PROJECTAGENTDEFAULT, shortName: bot.toolName, folder: '' });
+            const moduleBot = await loadModuleFromProjectOrDependency(bot.toolName, '', '.ts');
             if (!moduleBot || !moduleBot.createAgent || typeof moduleBot.createAgent !== 'function') continue;
             const agent: IAgent = moduleBot.createAgent();
             if (agent && agent.beforeBot && typeof agent.beforeBot === 'function') {
