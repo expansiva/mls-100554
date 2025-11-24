@@ -841,9 +841,9 @@ export class PluginExploreList extends PluginBaseModule {
         }
 
         const { project, shortName, folder, level } = base;
-        const key = mls.stor.getKeyToFiles(project, mls.actualLevel, shortName, folder, ext);
+        const key = mls.stor.getKeyToFiles(project, base.level, shortName, folder, ext);
         let stor = mls.stor.files[key];
-
+        debugger;
         if (!stor) {
 
             const param: IReqCreateStorFile = {
