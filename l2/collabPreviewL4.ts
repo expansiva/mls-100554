@@ -137,7 +137,7 @@ export class CollabPreviewL4 extends CollabLitElement {
     }
 
     private _setHover(elId: string, active: boolean) {
-
+        if (!elId) return;
         if (!this.elOverlayHover) this.createOverlay();
         if (!this.elOverlayHover) return;
 
