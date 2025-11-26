@@ -8,18 +8,18 @@ import {
     getInteractionStepId,
     getNextPendentStep,
     safeParseArgs,
-    appendPromptToInteraction,
     appendLongTermMemory,
     getStepById,
     notifyTaskChange,
     dispatchDetailsTaskClose,
     updateTaskTitle,
     getNextStepIdAvaliable,
+    getAgentInstanceByName
 } from "./_100554_aiAgentHelper";
 
 
-import { getTask, getMessage, addMessage } from "./_100554_msgDBController";
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
+import { getTask, getMessage } from "./_100554_msgDBController";
+import { IAgent } from './_100554_aiAgentBase';
 import { getUserId } from "./_100554_collabMessageHelper";
 import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
 
@@ -300,14 +300,8 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
 export async function loadAgent(shortName: string, folder: string = ''): Promise<IAgent | undefined> {
 
     try {
-
-        const module = await loadModuleFromProjectOrDependency(shortName, folder, '.ts');
-        if (typeof module.createAgent !== "function") throw new Error(`(loadAgent) createAgent function not found in ${shortName}`);
-        const agent = module.createAgent();
-        if (typeof agent.beforePrompt !== "function") throw new Error(`(loadAgent) beforePrompt function not found in ${shortName}`);
-        if (typeof agent.afterPrompt !== "function") throw new Error(`(loadAgent) afterPrompt function not found in ${shortName}`);
+        const agent = await getAgentInstanceByName(shortName);
         return agent;
-
     } catch (error: any) {
         console.error(`[loadAgent] ${error.message || error} `);
         return undefined;

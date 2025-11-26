@@ -11,15 +11,13 @@ import { createThread } from './_100554_collabMessageHelper';
 import { getThreadByName } from './_100554_msgDBController';
 
 import { globalState, setState, initState, getState } from './_100554_collabState';
-import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test, collab_xmark } from './_100554_collabIcons';
+import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from './_100554_collabIcons';
 import { CollabState } from './_100554_collabState';
 import { TsTestAst } from './_100554_tsTestAST';
 import { getUserId } from './_100554_collabMessageHelper';
-import { getTemporaryContext } from './_100554_aiAgentHelper';
+import { getTemporaryContext, getAgentInstanceByName } from './_100554_aiAgentHelper';
 import { createModel } from './_100554_collabLibModel';
 
-import { PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
-import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
 import { IAgent } from './_100554_aiAgentBase';
 
 import './_100554_collabConsole';
@@ -660,21 +658,15 @@ export class ServicePreview100554 extends ServiceBase {
             return;
         }
 
-        // const moduleAgent = await import(`/_${PROJECTAGENTDEFAULT}_${agentName}`);
-
-        const moduleAgent = await loadModuleFromProjectOrDependency(agentName, '', '.ts');
-        if (!moduleAgent?.createAgent || typeof moduleAgent.createAgent !== 'function') {
-            throw new Error('Invalid agent');
-        }
-
-        const agent: IAgent = moduleAgent.createAgent();
+        const moduleAgent = await getAgentInstanceByName(agentName);
+        if (!moduleAgent) throw new Error('Invalid agent');
         const context = getTemporaryContext(threadId, userId, prompt);
 
         if (!this.tasksInProgress.get(this.page)) {
             this.tasksInProgress.set(this.page, new Set());
         }
         this.tasksInProgress.get(this.page)?.add(context);
-        await agent.beforePrompt(context);
+        await moduleAgent.beforePrompt(context);
     }
 
 
@@ -1010,8 +1002,16 @@ export class ServicePreview100554 extends ServiceBase {
         if (!mls.actual[2].left || !this.watch) return this.light;
         const htmlEl: HTMLHtmlElement | undefined = this.getIframePreviewHTML();
         if (htmlEl) {
-            if (this.light) htmlEl.removeAttribute('data-theme');
-            else htmlEl.setAttribute('data-theme', 'dark');
+            if (this.light) {
+                htmlEl.removeAttribute('data-theme');
+                htmlEl.classList.remove('dark');
+
+            }
+            else {
+                htmlEl.setAttribute('data-theme', 'dark');
+                htmlEl.classList.add('dark');
+            }
+
         }
         this.onStyleChanged();
         return this.light;

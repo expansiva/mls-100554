@@ -5,6 +5,8 @@ import { getUserId, createThread } from "./_100554_collabMessageHelper";
 import { getThreadByName } from './_100554_msgDBController';
 import { loadAgent } from './_100554_aiAgentOrchestration';
 import { openService } from './_100554_libCommom';
+import { IAgent } from './_100554_aiAgentBase';
+import { collabImport } from './_100554_collabImport';
 
 /**
  * Helper function to collect all steps from a task in a flat array
@@ -114,6 +116,52 @@ export const getInteractionStepId = (task: mls.msg.TaskData, stepId: number): nu
   return null;
 }
 
+export async function getAgentInstanceByName(agentName: string): Promise<IAgent | undefined> {
+
+    const projectActual = mls.actualProject;
+    if (!projectActual) throw new Error('Not found project actual!');
+
+    const deps: number[] = mls.l5.getProjectDependencies(projectActual, false);
+    const projectsToSearch = [projectActual, ...(deps.length === 0 ? [100554] : deps)];
+
+    // função interna para buscar dentro de 1 projeto
+    const searchInProject = (projectId: number) => {
+        let foundInFolder: mls.stor.IFileInfo | undefined;
+
+        for (const file of Object.values(mls.stor.files)) {
+            if (
+                file.project === projectId &&
+                file.shortName.startsWith('agent') &&
+                file.shortName === agentName
+            ) {
+                if (file.folder === '') {
+                    return file;
+                }
+                foundInFolder = file;
+            }
+        }
+        return foundInFolder;
+    };
+
+    for (const projId of projectsToSearch) {
+        const agent = searchInProject(projId);
+        if (agent) {
+            try {
+                const moduleAgent = await collabImport({ project: agent.project, shortName: agent.shortName, folder: agent.folder.trim() });
+                if (typeof moduleAgent.createAgent !== "function") throw new Error(`[getAgentInstanceByName] createAgent function not found in ${agentName}`);
+                const agentInstance = moduleAgent.createAgent();
+                if (typeof agentInstance.beforePrompt !== "function") throw new Error(`[getAgentInstanceByName] beforePrompt function not found in ${agentName}`);
+                if (typeof agentInstance.afterPrompt !== "function") throw new Error(`[getAgentInstanceByName] afterPrompt function not found in ${agentName}`);
+                return agentInstance;
+            } catch (error: any) {
+                console.error(`[loadAgent] ${error.message || error} `);
+                return undefined;
+            }
+        }
+    }
+
+    return undefined;
+}
 
 
 
