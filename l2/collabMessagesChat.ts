@@ -3,7 +3,6 @@
 import { html, LitElement, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { collab_chevron_left, collab_gear, collab_translate, collab_circle_exclamation, collab_plus, collab_folder_tree } from './_100554_collabIcons';
-import { collabImport } from './_100554_collabImport';
 import { removeThreadFromSync, getThreadUpdateInBackground, checkIfNotificationUnread } from './_100554_collabMessagesSyncNotifications';
 import { openElementInServiceDetails, clearServiceDetails } from './_100554_libCommom';
 import { listUsers, deleteAllMessagesFromThread } from './_100554_msgDBController';
@@ -12,7 +11,7 @@ import { setFavicon } from './_100554_collabInit';
 import {
     getTemporaryContext,
     formatTimestamp,
-    getNextResultStep,
+    getAgentInstanceByName,
     notifyThreadChange
 } from './_100554_aiAgentHelper';
 
@@ -36,7 +35,6 @@ import {
     defaultThreadImage
 } from './_100554_collabMessageHelper';
 
-import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
 
 import './_100554_collabMessagesTaskInfo';
 import './_100554_collabMessagesTask';
@@ -51,7 +49,7 @@ import './_100554_collabMessagesFilter';
 
 import './_100554_collabMessagesAdd';
 
-import { IChatPreferences, AGENTDEFAULT, PROJECTAGENTDEFAULT } from './_100554_collabMessageHelper';
+import { IChatPreferences, AGENTDEFAULT } from './_100554_collabMessageHelper';
 import { StateLitElement } from './_100554_stateLitElement';
 import { CollabMessagesPrompt100554 } from './_100554_collabMessagesPrompt';
 import { IAgent } from './_100554_aiAgentBase';
@@ -1539,9 +1537,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
         if (agentName) agentToCall = agentName;
         const message: IMessage = await this.createTempMessage(prompt, this.userId, this.actualThread.thread.threadId);
         try {
-            const moduleAgent = await loadModuleFromProjectOrDependency(agentToCall, '', '.ts');
-            if (!moduleAgent || !moduleAgent.createAgent || typeof moduleAgent.createAgent !== 'function') throw new Error('Invalid agent')
-            const agent: IAgent = moduleAgent.createAgent()
+            const agent = await this.loadAgent(agentToCall);
             context.message = message;
             await agent.beforePrompt(context);
         } catch (err: any) {
@@ -1670,7 +1666,7 @@ export class CollabMessagesChat100554 extends StateLitElement {
                 lines: [item.output]
             }
 
-            const module = await this.loadAgent(item.botId, '');
+            const module = await this.loadAgent(item.botId);
             if (module && module.afterBot && typeof module.afterBot === 'function') {
                 const context: mls.msg.ExecutionContext = {
                     message: newMessage,
@@ -1725,16 +1721,14 @@ export class CollabMessagesChat100554 extends StateLitElement {
         this.requestUpdate();
     }
 
-    private async loadAgent(shortName: string, folder: string = ''): Promise<IAgent | undefined> {
+    private async loadAgent(shortName: string): Promise<IAgent> {
 
         try {
-            const module = await loadModuleFromProjectOrDependency(shortName, folder, '.ts');
-            if (typeof module.createAgent !== "function") throw new Error(`(loadAgent) createAgent function not found in ${shortName}`);
-            const agent = module.createAgent();
+            const agent = await getAgentInstanceByName(shortName);
+            if (!agent) throw new Error(`(loadAgent) createAgent function not found in ${shortName}`);
             return agent;
         } catch (error: any) {
-            console.error(`[loadAgent] ${error.message || error} `);
-            return undefined;
+            throw new Error(`[loadAgent] ${error.message || error} `);
         }
 
     }
