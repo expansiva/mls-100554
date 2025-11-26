@@ -431,12 +431,15 @@ export async function* deleteAllFilesLocal(filesToDelete: mls.stor.IFileInfo[]) 
     }
 }
 
+
 export async function loadModuleFromProjectOrDependency(name: string, folder: string, ext: string): Promise<any> {
+
     const prj = mls.actualProject;
     if (!prj) throw new Error('Not found project actual!');
     let key = mls.stor.getKeyToFiles(prj, 2, name.trim(), folder.trim(), ext);
     if (mls.stor.files[key]) return await await collabImport({ project: prj, shortName: name, folder: folder });
     const info = mls.l5.getProjectDetails(prj);
+
     if (!info && prj !== mls.stor.LOCALPROJECTNUMBER) throw new Error('Not found project details from actual project!');
     let deps: number[] = [];
     if (info) deps = info.prj_dependencies;
@@ -447,9 +450,11 @@ export async function loadModuleFromProjectOrDependency(name: string, folder: st
         prjDep = dep;
         key = mls.stor.getKeyToFiles(dep, 2, name.trim(), folder.trim(), ext);
     });
+
     if (!mls.stor.files[key]) throw new Error('File not found in any dependency!');
     return await await collabImport({ project: prjDep, shortName: name.trim(), folder: folder.trim() });
 }
+
 
 export function findStorFileInProjectsOrDeps(
     projectActual: number,
