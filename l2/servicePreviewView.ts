@@ -361,6 +361,9 @@ export class ServicePreviewView extends StateLitElement {
                 iframe.contentDocument.body.style.margin = '0';
                 iframe.contentDocument.body.style.height = '100%';
                 iframe.contentDocument.body.style.width = '100%';
+                // iframe.contentDocument.body.classList.add('bg-white');
+                // iframe.contentDocument.body.classList.add('dark:bg-slate-900');
+
                 iframe.contentDocument.body.style.background = 'var(--bg-primary-color)';
                 iframe.contentDocument.body.style.color = 'var(--text-primary-color)';
 
@@ -441,6 +444,7 @@ export class ServicePreviewView extends StateLitElement {
         const meta = iframe.contentDocument?.querySelector('meta[name="color-scheme"]');
         if (!isLight && html) {
             html.setAttribute('data-theme', 'dark');
+            html.classList.add('dark');
         }
         if (meta) meta.remove();
     }
@@ -567,10 +571,7 @@ export class ServicePreviewView extends StateLitElement {
         }
 
         this.addGlobalCss(ret.globalCss);
-
-        /*Array.from(domVirtual.children).forEach((i) => {
-            iframe.contentDocument?.body.appendChild(i);
-        })*/
+        this.addTailwind();
 
         mls.events.fire(
             mls.actualLevel as any,
@@ -612,6 +613,25 @@ export class ServicePreviewView extends StateLitElement {
         await c.init();
     }
 
+    private async addTailwind() {
+
+        const iframe = window.preview.iframe;
+        if (!iframe || !iframe.contentDocument) return;
+
+        const doc = iframe.contentDocument;
+        doc.getElementById("tw-cdn")?.remove();
+        const script = doc.createElement("script");
+        script.id = "tw-cdn";
+        script.type = "module";
+        script.src = "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4";
+        doc.head.appendChild(script);
+        doc.body.classList.add(`theme-${this.actualtheme.toLowerCase()}`);
+
+
+
+    }
+
+
     private addGlobalCss(globalCss: string) {
         if (!globalCss) return
         try {
@@ -622,6 +642,7 @@ export class ServicePreviewView extends StateLitElement {
             const style = document.createElement('style');
             style.textContent = globalCss;
             style.id = 'global_css';
+            style.type = "text/tailwindcss";
             iframe.contentDocument.head.appendChild(style);
 
         } catch (e: any) {
