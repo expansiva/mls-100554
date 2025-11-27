@@ -132,7 +132,7 @@ export async function getAgentInstanceByName(agentName: string): Promise<IAgent 
             if (
                 file.project === projectId &&
                 file.shortName.startsWith('agent') &&
-                file.shortName === agentName
+                file.shortName === agentName.trim()
             ) {
                 if (file.folder === '') {
                     return file;
