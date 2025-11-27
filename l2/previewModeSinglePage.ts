@@ -74,7 +74,7 @@ export class PreviewModeSinglePage {
                         };
                     }
 
-                    if ((args.path.startsWith("./") || args.path.startsWith("../")) &&
+                    if ((args.path.startsWith("/") || args.path.startsWith("./") || args.path.startsWith("../")) &&
                         !args.importer.startsWith("https://") && !myMap[args.importer]) {
 
                         const url = new URL(args.path, 'file:' + args.importer);
