@@ -59,9 +59,10 @@ import { ReactiveUnstable } from '_100554_litReactiveElement';
 export * from '_100554_litClassMap';
 export * from '_100554_litIfDefined';
 export * from '_100554_litLive';
-export * from '_100554_litStyleMap';
-export { ChildPart, IsTemplateResult, Primitive, TemplateResultType, clearPart, getCommittedValue, getDirectiveClass, insertPart, isCompiledTemplateResult, isDirectiveResult, isPrimitive, isSingleExpression, isTemplateResult, removePart, setChildPartValue, setCommittedValue } from '_100554_litDirectivesHelper';
-export * from '_100554_litWhen';
+export * from '_100554_litStyleMap';   
+export type ChildPart = any;
+export {  IsTemplateResult, Primitive, TemplateResultType, clearPart, getCommittedValue, getDirectiveClass, insertPart, isCompiledTemplateResult, isDirectiveResult, isPrimitive, isSingleExpression, isTemplateResult, removePart, setChildPartValue, setCommittedValue } from '_100554_litDirectivesHelper';
+export * from '_100554_litWhen'; 
 
 type RepeatFunction = () => void;
 export const repeat = (
