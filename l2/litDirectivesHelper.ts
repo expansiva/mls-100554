@@ -19,7 +19,7 @@ import {
   PartInfo,
   AttributePartInfo,
 } from './_100554_litDirectives';
-type Primitive = null | undefined | boolean | number | string | symbol | bigint;
+export type Primitive = null | undefined | boolean | number | string | symbol | bigint;
 
 const {_ChildPart: ChildPart} = _$LH;
 
@@ -50,7 +50,7 @@ export const TemplateResultType = {
 export type TemplateResultType =
   (typeof TemplateResultType)[keyof typeof TemplateResultType];
 
-type IsTemplateResult = {
+export type IsTemplateResult = {
   (val: unknown): val is TemplateResult | CompiledTemplateResult;
   <T extends TemplateResultType>(
     val: unknown,

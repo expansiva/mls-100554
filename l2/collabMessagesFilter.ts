@@ -2,8 +2,8 @@
 
 import { html, classMap } from 'lit';
 import { customElement, state, property } from 'lit/decorators.js';
-import { StateLitElement } from './l2/stateLitElement';
-import { collab_magnifying_glass } from './_100554_collabIcons'
+import { StateLitElement } from './_100554_stateLitElement';
+import { collab_magnifying_glass } from './_100554_collabIcons' 
 
 @customElement('collab-messages-filter-100554')
 export class CollabMessagesFilter100554 extends StateLitElement {

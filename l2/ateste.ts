@@ -1,70 +1,174 @@
 /// <mls shortName="ateste" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement' 
+import { customElement, property, state, query } from 'lit/decorators.js';
+import { CollabLitElement } from './_100554_collabLitElement';
 import { updateHTML } from './_100554_collabDOMSync';
+import { createModel } from './_100554_collabLibModel'
 
 @customElement('ateste-100554')
 export class SimpleGreeting extends CollabLitElement {
 
-    @property() selectedId: number | null = 2;
-    @state() items = [
-        { id: 1, name: 'Banana', color: 'green' },
-        { id: 2, name: 'Maçã', color: 'red' },
-        { id: 3, name: 'Uva', color: 'purple' },
-    ];
+  @query('#teste') teste: HTMLTextAreaElement | undefined;
+  @state() list: string[] = []
+  @state() current = 0;
+  @state() tot = 0;
 
   render() {
-
-      console.log('teste 2')
-        return html`
+    return html` 
     <div>
-      <h3>Frutas:</h3>
-      <ul>
-        ${repeat(
-            this.items,
-            ((item: any) => item.id) as any,
-            ((item: any) => {
-
-                const classes = {
-                    'highlight': item.color === 'green',
-                    'selected': item.id === this.selectedId,
-                };
-
-                const styles = {
-                    color: item.color,
-                    cursor: 'pointer',
-                };
-
-                return html`
-              <li
-                class=${classMap(classes)}
-                style=${styleMap(styles)}
-                title=${ifDefined(item.name)}
-                @click=${() => (this.selectedId = item.id)}
-              >
-                ${item.name}
-              </li>
-            `;
-            }) as any
-        )}
-      </ul>
-
-      ${when(
-            this.selectedId !== null,
-            () => html`<p>Selecionado: ${this.getSelectedName()}</p>`,
-            () => html`<p>Nenhuma fruta selecionada.</p>`
-        )}
+      <h2>${this.current}/${this.tot}</h2>
+      <button style="border:1px solid gray;" @click=${this.clickBusca}> Rodar</button>
+      <ol style="background:black;color:white; height:150px; overflow:auto" id="list">
+      ${this.list.map((l) => html`<li>${l}</li>`)}
+      </ol>
+      <textarea style="border:1px solid gray; margin-top:1rem; width:100%; min-height:300px" id="teste"></textarea>
     </div>
   `;
+  }
+
+  async clickBusca() {
+
+    let itens: string[] = [];
+    let erros = [];
+
+    Object.keys(mls.stor.files).forEach((key) => {
+
+      const f = mls.stor.files[key];
+
+      if (!f || f.level !== 2 || !['.ts'].includes(f.extension) || f.shortName === 'ateste' || f.shortName.startsWith('wcd') || f.shortName.startsWith('ica')) return;
+
+      itens.push(key);
+
+    })
+
+    //itens = ['100554_2_collabInit.ts'];
+    this.tot = itens.length;
+    for await (const key of itens) {
+
+      this.current = this.current + 1;
+      const f = mls.stor.files[key];
+      if (!f) continue;
+
+      let source = await f.getContent() as string;
+
+      if (!source || !this.teste) return;
+
+      let newSource = this.tratarFinalImportMultiLinha(source);
+      newSource = this.tratarImportLateralExclusivo(newSource);
+      newSource = this.tratarAwaitImportDinamico(newSource);
+      newSource = newSource.replace(`enhancement="_100554_enhancementLitService"`, `enhancement="_100554_enhancementLit"`)
+
+      this.teste.value = newSource;
+
+      const info: mls.stor.IFileInfoValue = {
+        contentType: 'string',
+        content: newSource,
+      }
+
+      f.status = 'changed';
+      await mls.stor.localStor.setContent(f, info);
+
+      const m = await createModel(f, true, true) as mls.editor.IModelTS;
+
+      if (m && m.compilerResults && m.compilerResults.errors.length > 0) {
+        erros.push(key);
+        f.hasError = true;
+      } else if(m && !m.model.isDisposed) {
+        mls.editor.deleteModels(f.project, f.shortName, f.folder, true, f.level)
+      }
+
+      if (m) {
+      //  mls.editor.deleteModels(f.project, f.shortName, f.folder, true, f.level)
+      }
+
+      this.list.push(key);
+
+      this.list = [... this.list];
+
     }
 
+    console.info('---------ERROS---------', erros);
+  }
 
-    private getSelectedName(): string {
-        const found = this.items.find(i => i.id === this.selectedId);
-        return found ? found.name : '';
-    }
+  tratarAwaitImportDinamico(source: string): string {
+    // Expressão Regular para encontrar:
+    // 1: 'await import("'
+    // 2: O caminho do arquivo (após o prefixo do projeto e caminhos relativos, que são descartados)
+    // 3: '")'
+    const regex = /(await\s+import\s*\(\s*['"])(?:\.\/|\.\.\/|\/)?_?100554_?[\/\_]*([\w\-\/\.]+)(['"]\s*\))/g;
+
+    const sourceTratado = source.replace(regex, (match, prefix, path, suffix) => {
+      // O `path` captura o nome do arquivo e suas pastas, sem o prefixo do projeto
+
+      // 1. Limpa o caminho de restos de extensão (.js, .ts) e barras extras
+      let caminhoLimpo = path.replace(/\.(?:js|ts|jsx|tsx)$/i, '');
+      caminhoLimpo = caminhoLimpo.replace(/^\/|\/$/g, '');
+
+      // 2. Trata caminhos que usavam '_' como separador de pasta/arquivo
+      caminhoLimpo = caminhoLimpo.replace(/_/g, '/');
+
+      // 3. Constrói o novo caminho padronizado: '/_100554_/l2/caminho/do/arquivo.js'
+      const novoCaminho = `/_100554_/l2/${caminhoLimpo}.js`;
+
+      // Retorna a linha completa com o caminho tratado
+      return `${prefix}${novoCaminho}${suffix}`;
+    });
+
+    return sourceTratado;
+  }
+
+  tratarImportLateralExclusivo(source: string): string {
+    // Expressão Regular para encontrar o padrão exato de importação lateral:
+    // 1: Captura 'import '
+    // 2: Captura o caminho, removendo './', '_100554_', e o que for necessário.
+    // 3: Captura ';
+    const regex = /(import\s+['"])(?:\.\/)?_?100554_?[\/\_]*([\w\-\/\.]+)(['"];)/g;
+
+    const sourceTratado = source.replace(regex, (match, prefix, path, suffix) => {
+      // Limpa o caminho de restos de extensão (.js, .ts)
+      let caminhoLimpo = path.replace(/\.(?:js|ts|jsx|tsx)$/i, '');
+
+      // Remove underscores iniciais que possam ter restado
+      caminhoLimpo = caminhoLimpo.replace(/^_/, '');
+
+      // Constrói o novo caminho padronizado: '/_100554_/l2/caminho/do/arquivo.js'
+      const novoCaminho = `/_100554_/l2/${caminhoLimpo}.js`;
+
+      return `${prefix}${novoCaminho}${suffix}`;
+    });
+
+    return sourceTratado;
+  }
+
+
+  tratarFinalImportMultiLinha(source: string): string {
+    // Expressão Regular focada na linha que começa com '}' seguido por 'from' e o caminho.
+    // 1: Captura '\} from "'
+    // 2: Captura o caminho do arquivo (após o prefixo do projeto, que é descartado)
+    // 3: Captura o ';' final
+    // O prefixo do projeto (_100554_) e o caminho relativo (./) são removidos do match principal
+    const regex = /(from\s+['"])(?:\.\/|\.\.\/|\/)?_?100554_?[\/\_]*([\w\-\/\.]+)(['"])/g;
+
+    const sourceTratado = source.replace(regex, (match, prefix, path, suffix) => {
+      // O `path` captura o nome do arquivo e suas pastas, sem o prefixo do projeto
+
+      // 1. Limpa o caminho de restos de extensão (.js, .ts) e barras extras
+      let caminhoLimpo = path.replace(/\.(?:js|ts|jsx|tsx)$/i, '');
+      caminhoLimpo = caminhoLimpo.replace(/^\/|\/$/g, '');
+
+      // 2. Trata caminhos que usavam '_' como separador de pasta no nome do arquivo
+      caminhoLimpo = caminhoLimpo.replace(/_/g, '/');
+
+      // 3. Constrói o novo caminho padronizado: '/_100554_/l2/caminho/do/arquivo.js'
+      const novoCaminho = `/_100554_/l2/${caminhoLimpo}.js`;
+
+      // Retorna a linha completa com o caminho tratado
+      return `${prefix}${novoCaminho}${suffix}`;
+    });
+
+    return sourceTratado;
+  }
+
 }
-
 
