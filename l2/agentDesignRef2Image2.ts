@@ -10,7 +10,7 @@ import {
     getAgentStepByAgentName    
 } from "./_100554_aiAgentHelper";
 
-import { getPayload1 } from './l2/agentDesignRef2Image';
+import { getPayload1 } from './_100554_agentDesignRef2Image';
 
 import { startNewAiTask, executeNextStep, startNewInteractionInAiTask } from "./_100554_aiAgentOrchestration";
 
