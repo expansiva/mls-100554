@@ -150,7 +150,7 @@ export class CssHelperIndex extends StateLitElement {
 
         for await (let plugin of allPlugins) {
 
-            const instance = await import(`./${plugin.widget}`);
+            const instance = await import(`/${plugin.widget}`);
             let description: string = '';
 
             if (!instance || !instance.tags || !Array.isArray(instance.tags)) continue;
