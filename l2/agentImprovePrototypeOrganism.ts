@@ -1,14 +1,14 @@
 /// <mls shortName="agentImprovePrototypeOrganism" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import { createAllModels } from './_100554_collabLibModel';
-import { getImages } from './_100554_libUnsplash';
-import { getTokensLess, getGlobalLess } from './_100554_designSystemBase';
-import { removeTokensFromSource } from './_100554_enhancementStyle';
-import { forceServiceInstance } from './_100554_libCommom';
-import { getState } from './_100554_collabState';
-import { ServiceSource100554 } from './_100554_serviceSource';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { createAllModels } from '/_100554_/l2/collabLibModel.js';
+import { getImages } from '/_100554_/l2/libUnsplash.js';
+import { getTokensLess, getGlobalLess } from '/_100554_/l2/designSystemBase.js';
+import { removeTokensFromSource } from '/_100554_/l2/enhancementStyle.js';
+import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
+import { getState } from '/_100554_/l2/collabState.js';
+import { ServiceSource100554 } from '/_100554_/l2/serviceSource.js';
 
 import {
     getNextPendingStepByAgentName,
@@ -17,14 +17,14 @@ import {
     appendLongTermMemory,
     updateTaskTitle,
     updateStepStatus
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
     executeNextStep,
     addNewStep
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentImprovePrototypeOrganism";
 const project = 100554;
