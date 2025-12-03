@@ -2,9 +2,9 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { getDependenciesByHtml, IJSONDependence } from './_100554_libCompile';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { getDependenciesByHtml, IJSONDependence } from '/_100554_/l2/libCompile.js';
 
 
 @customElement('ica-load-page-100554')
