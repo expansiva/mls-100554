@@ -1,9 +1,9 @@
 /// <mls shortName="libCompile" project="100554" enhancement="_blank" />
 
-// import { getDSInstance } from './_100554_libDesignSystem'
+// import { getDSInstance } from '/_100554_/l2/libDesignSystem.js'
 
-import { getTokensCss, getGlobalCss } from './_100554_designSystemBase';
-import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
+import { getTokensCss, getGlobalCss } from '/_100554_/l2/designSystemBase.js';
+import { convertFileNameToTag, convertTagToFileName } from '/_100554_/l2/utilsLit.js';
 
 export const getDependenciesByHtmlFile = (file: mls.stor.IFileInfo, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
