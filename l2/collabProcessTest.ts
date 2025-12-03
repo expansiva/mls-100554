@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { TsTestAst } from "./_100554_tsTestAST";
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { TsTestAst } from "/_100554_/l2/tsTestAST.js";
 
 @customElement('collab-process-test-100554')
 export class CollabProcessTest extends CollabLitElement {
