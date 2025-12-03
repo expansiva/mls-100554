@@ -1,9 +1,9 @@
 /// <mls shortName="aiPrompts" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { ITool, IAgent } from './_100554_aiAgentBase'
-import { descriptionForPrompt } from './_100554_icaBaseDescription'
-import { getTokensLess } from './_100554_designSystemBase';
-import { getState, setState } from './_100554_collabState';
+import { ITool, IAgent } from '/_100554_/l2/aiAgentBase.js'
+import { descriptionForPrompt } from '/_100554_/l2/icaBaseDescription.js'
+import { getTokensLess } from '/_100554_/l2/designSystemBase.js';
+import { getState, setState } from '/_100554_/l2/collabState.js';
 
 export function systemAgentsAvailable(): mls.msg.IAMessageInputType {
     return {
