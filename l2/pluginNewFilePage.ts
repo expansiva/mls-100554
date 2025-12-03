@@ -2,13 +2,13 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { StateLitElement } from './_100554_stateLitElement';
-import { getMessageKey } from "./_100554_collabLitElement";
-import { propertyDataSource } from './_100554_collabDecorators';
-import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget, changeStateName, getTemplateImport } from "./_100554_pluginNewFileBase";
-import { ServiceBase } from './_100554_serviceBase';
-import './_100554_widgetTextCode';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { getMessageKey } from "/_100554_/l2/collabLitElement.js";
+import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
+import { IDetails, createNewFile, changeTagName, changeClassName, changeWidget, changeStateName, getTemplateImport } from "/_100554_/l2/pluginNewFileBase.js";
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import '/_100554_/l2/widgetTextCode.js';
 
 /// **collab_i18n_start**
 const message_pt = {
