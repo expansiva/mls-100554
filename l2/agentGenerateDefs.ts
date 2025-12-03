@@ -1,10 +1,10 @@
 /// <mls shortName="agentGenerateDefs" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { forceServiceInstance } from './_100554_libCommom';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import { getState } from './_100554_collabState';
-import { createAllModels } from './_100554_collabLibModel';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { getState } from '/_100554_/l2/collabState.js';
+import { createAllModels } from '/_100554_/l2/collabLibModel.js';
 
 
 import {
@@ -14,13 +14,13 @@ import {
     getNextPendentStep,
     updateTaskTitle,
     notifyTaskChange
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
     executeNextStep
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentGenerateDefs";
 
