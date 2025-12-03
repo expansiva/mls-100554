@@ -1,7 +1,7 @@
 /// <mls shortName="msgTestApi" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 
 @customElement('msg-test-api-100554')
 export class MsgTestAPI extends StateLitElement {
