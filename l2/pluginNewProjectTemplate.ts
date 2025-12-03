@@ -193,7 +193,7 @@ export const template_coreIndex = {
     template: `
     /// <mls shortName="pluginCollabCoreIndex" project="[project]" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { PluginBaseIndex } from './_100554_pluginBaseIndex';
+import { PluginBaseIndex } from '/_100554_/l2/pluginBaseIndex.js';
 
 export class PluginCollabCoreIndex extends PluginBaseIndex {
 
@@ -629,7 +629,7 @@ export const template_ds = {
     template: `
 /// <mls shortName="designSystem" project="[project]" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IDesignSystemTokens } from './_100554_designSystemBase';
+import { IDesignSystemTokens } from '/_100554_/l2/designSystemBase.js';
 
 export const tokens: IDesignSystemTokens[] = [
     {
