@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import { AttributePart, noChange } from './_100554_litHtml';
+import { AttributePart, noChange } from '/_100554_/l2/litHtml.js';
 import {
   directive,
   Directive,
@@ -14,7 +14,7 @@ import {
   PartInfo,
   PartType,
   Part
-} from './_100554_litDirectives';
+} from '/_100554_/l2/litDirectives.js';
 
 /**
  * A key-value set of class names to truthy values.
