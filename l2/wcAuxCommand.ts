@@ -2,7 +2,7 @@
 
 import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 
 @customElement('wc-aux-command-100554')
 export class WcAuxCommand100554 extends StateLitElement {
