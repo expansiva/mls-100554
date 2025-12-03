@@ -2,10 +2,10 @@
 
 import { html, repeat } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { convertTagToFileName } from './_100554_utilsLit';
-import { ServiceBase } from './_100554_serviceBase';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { convertTagToFileName } from '/_100554_/l2/utilsLit.js';
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { IcaLitElementBase } from '/_100554_/l2/icaLitElementBase.js';
 
 export const initCollabICATree = '';
 
