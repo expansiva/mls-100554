@@ -2,7 +2,7 @@
 
 import { html, css, repeat, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getMyKeysBranch } from './_100554_libCommom';
+import { getMyKeysBranch } from '/_100554_/l2/libCommom';
 
 export const initServiceSaveaddBranch = () => {
 }
