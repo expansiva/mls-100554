@@ -2,19 +2,19 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { createAllFiles, IReqCreateAllFiles } from './_100554_collabLibStor';
-import { createConfigFile } from './_100554_libProjectConfig';
-import { createModel } from './_100554_collabLibModel';
-import { addMessage, createThread } from './_100554_collabMessageHelper';
-import { getThreadByName } from './_100554_msgDBController';
-import { setProjectDetails, checkIfHasLocalProject, setLocalProjectName, isValidProjectName } from './_100554_libCommom';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { createAllFiles, IReqCreateAllFiles } from '/_100554_/l2/collabLibStor.js';
+import { createConfigFile } from '/_100554_/l2/libProjectConfig.js';
+import { createModel } from '/_100554_/l2/collabLibModel.js';
+import { addMessage, createThread } from '/_100554_/l2/collabMessageHelper.js';
+import { getThreadByName } from '/_100554_/l2/msgDBController.js';
+import { setProjectDetails, checkIfHasLocalProject, setLocalProjectName, isValidProjectName } from '/_100554_/l2/libCommom.js';
 
 import {
   template_ds,
   template_l5Project,
   template_l2Project
-} from './_100554_pluginNewProjectTemplate';
+} from '/_100554_/l2/pluginNewProjectTemplate.js';
 
 /// **collab_i18n_start**
 const message_pt = {
