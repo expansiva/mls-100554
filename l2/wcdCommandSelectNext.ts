@@ -1,6 +1,6 @@
 /// <mls shortName="wcdCommandSelectNext" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IWCDCommand } from './_100554_wcdTypes';
+import { IWCDCommand } from '/_100554_/l2/wcdTypes.js';
 
 export async function execute(param: IWCDCommand) {
 
