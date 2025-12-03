@@ -2,7 +2,7 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, queryAll } from 'lit/decorators.js';
-import { collab_chevron_right } from './_100554_collabIcons'
+import { collab_chevron_right } from '/_100554_/l2/collabIcons.js'
 
 @customElement('collab-spliter-horizontal-var-fixed-100554')
 export class CollabSpliterHorizontalVarFixed100554 extends LitElement {
