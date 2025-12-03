@@ -1,8 +1,8 @@
 /// <mls shortName="wcdAdd" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { collab_xmark } from './_100554_collabIcons';
+import { WcdToolboxItemBase } from '/_100554_/l2/wcdToolboxItemBase.js';
+import { collab_xmark } from '/_100554_/l2/collabIcons.js';
 
 @customElement('wcd-add-100554')
 export class WcdAdd100554 extends WcdToolboxItemBase {
@@ -81,31 +81,31 @@ export class WcdAdd100554 extends WcdToolboxItemBase {
     private async loadComponent(button: string) {
         switch (button) {
             case 'image':
-                await import('./_100554_wcdAddItemImage');
+                await import('/_100554_/l2/wcdAddItemImage.js');
                 return 'wcd-add-item-image-100554';
             case 'unsplash':
-                await import('./_100554_wcdAddItemUnsplash');
+                await import('/_100554_/l2/wcdAddItemUnsplash.js');
                 return 'wcd-add-item-unsplash-100554';
             case 'video':
-                await import('./_100554_wcdAddItemVideo');
+                await import('/_100554_/l2/wcdAddItemVideo.js');
                 return 'wcd-add-item-video-100554';
             case 'video':
-                await import('./_100554_wcdAddItemVideo');
+                await import('/_100554_/l2/wcdAddItemVideo.js');
                 return 'wcd-add-item-video-100554';
             case 'code':
-                await import('./_100554_wcdAddItemCode');
+                await import('/_100554_/l2/wcdAddItemCode.js');
                 return 'wcd-add-item-code-100554';
             case 'embed':
-                await import('./_100554_wcdAddItemEmbed');
+                await import('/_100554_/l2/wcdAddItemEmbed.js');
                 return 'wcd-add-item-embed-100554';
             case 'part':
-                await import('./_100554_wcdAddItemPart');
+                await import('/_100554_/l2/wcdAddItemPart.js');
                 return 'wcd-add-item-part-100554';
             case 'add':
-                await import('./_100554_wcdAddWidget');
+                await import('/_100554_/l2/wcdAddWidget.js');
                 return 'wcd-add-widget-100554';
             case 'del':
-                await import('./_100554_wcdAddItemDel');
+                await import('/_100554_/l2/wcdAddItemDel.js');
                 return 'wcd-add-item-del-100554';
             default:
                 console.error('invalid button name: "' + button + '"');
