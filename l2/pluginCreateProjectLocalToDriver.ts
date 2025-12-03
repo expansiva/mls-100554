@@ -2,22 +2,22 @@
 
 import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { gitHubLogin, gitLabLogin, isProviderConnected, gitlabIcon, githubIcon } from './_100554_libProviders';
-import { replaceTripleslashAndTag, createStorFile, IReqCreateStorFile } from './_100554_collabLibStor';
-import { getLocalProjectName, isValidProjectName, setProjectDetails } from './_100554_libCommom';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement';
+import { gitHubLogin, gitLabLogin, isProviderConnected, gitlabIcon, githubIcon } from '/_100554_/l2/libProviders';
+import { replaceTripleslashAndTag, createStorFile, IReqCreateStorFile } from '/_100554_/l2/collabLibStor';
+import { getLocalProjectName, isValidProjectName, setProjectDetails } from '/_100554_/l2/libCommom';
 
 import {
   collab_arrows_rotate
-} from './_100554_collabIcons';
+} from '/_100554_/l2/collabIcons';
 
 import {
   template_package,
   template_build,
   template_tsconfig,
-} from './_100554_pluginNewProjectTemplate';
+} from '/_100554_/l2/pluginNewProjectTemplate';
 
-import './_100554_pluginNewProjectLog';
+import '/_100554_/l2/pluginNewProjectLog';
 
 
 /// **collab_i18n_start**
