@@ -1,7 +1,7 @@
 /// <mls shortName="pluginBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, LitElement, TemplateResult } from 'lit';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { customElement, property, state } from 'lit/decorators.js';
 
 
