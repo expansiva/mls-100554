@@ -2,16 +2,16 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getDependenciesByHtmlFile, getTokens, IJSONDependence } from './_100554_libCompile';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { createModel } from './_100554_collabLibModel';
-import { getBaseTemplate } from './_100554_libCommom';
-import { createStorFile, IReqCreateStorFile } from './_100554_collabLibStor';
+import { getDependenciesByHtmlFile, getTokens, IJSONDependence } from '/_100554_/l2/libCompile.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { createModel } from '/_100554_/l2/collabLibModel.js';
+import { getBaseTemplate } from '/_100554_/l2/libCommom.js';
+import { createStorFile, IReqCreateStorFile } from '/_100554_/l2/collabLibStor.js';
 
-import { compileStyleUsingStorFile } from './_100554_enhancementStyle';
-import { StateLitElement } from './_100554_stateLitElement';
-import { PreviewModeSinglePage } from './_100554_previewModeSinglePage';
-import { PreviewModeMinimum } from './_100554_previewModeMinimum';
+import { compileStyleUsingStorFile } from '/_100554_/l2/enhancementStyle.js';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { PreviewModeSinglePage } from '/_100554_/l2/previewModeSinglePage.js';
+import { PreviewModeMinimum } from '/_100554_/l2/previewModeMinimum.js';
 
 /// **collab_i18n_start**
 const message_pt = {
