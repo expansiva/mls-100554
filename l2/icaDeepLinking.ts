@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { globalState } from './_100554_collabState';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { globalState } from '/_100554_/l2/collabState.js';
 
 @customElement('ica-deep-linking-100554')
 export class IcaDeepLinking100554 extends StateLitElement {
