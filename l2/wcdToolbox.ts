@@ -2,15 +2,15 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { convertFileNameToTag } from './_100554_utilsLit'
-import { CollabLitElement } from './_100554_collabLitElement';
-import { ServiceBase } from './_100554_serviceBase';
-import { WCDToolboxMethodos, WCDToolboxItemMethodos, WCDOverlayMethods } from './_100554_wcdTypes';
-import { globalWcd } from './_100554_wcdState';
-import { execute as excCommandDel } from './_100554_wcdCommandDel';
-import { dispatchEventConciliate } from './_100554_wcdCommandBase';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { WCDToolboxMethodos, WCDToolboxItemMethodos, WCDOverlayMethods } from '/_100554_/l2/wcdTypes.js';
+import { globalWcd } from '/_100554_/l2/wcdState.js';
+import { execute as excCommandDel } from '/_100554_/l2/wcdCommandDel.js';
+import { dispatchEventConciliate } from '/_100554_/l2/wcdCommandBase.js';
 
-import * as tps from './_100554_icaTypes';
+import * as tps from '/_100554_/l2/icaTypes.js';
 
 export function initWCDToolbox() {
     return true;

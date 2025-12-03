@@ -2,10 +2,10 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { getVideos, addAssets } from './_100554_designSystemBase';
-import { execute } from './_100554_wcdCommandAddVideo';
-import { WCDOverlayMethods } from './_100554_wcdTypes';
-import { globalWcd } from './_100554_wcdState';
+import { getVideos, addAssets } from '/_100554_/l2/designSystemBase.js';
+import { execute } from '/_100554_/l2/wcdCommandAddVideo.js';
+import { WCDOverlayMethods } from '/_100554_/l2/wcdTypes.js';
+import { globalWcd } from '/_100554_/l2/wcdState.js';
 
 @customElement('wcd-dialog-video-100554')
 export class WcdDialogVideo100554 extends LitElement {

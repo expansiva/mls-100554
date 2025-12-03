@@ -1,11 +1,11 @@
 /// <mls shortName="wcdCommandAdd" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { IWCDCommand, WCDOverlayMethods } from './_100554_wcdTypes';
-import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
-import { PREFIX_ICA_ID } from './_100554_collabPageElement';
-import { countElementsWithTagName } from './_100554_wcdGlobal';
-import { globalWcd } from './_100554_wcdState';
+import { IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js';
+import { IWCDCommand, WCDOverlayMethods } from '/_100554_/l2/wcdTypes.js';
+import { dispatchEventConciliate, importFilesIfNeeded } from '/_100554_/l2/wcdCommandBase.js';
+import { PREFIX_ICA_ID } from '/_100554_/l2/collabPageElement.js';
+import { countElementsWithTagName } from '/_100554_/l2/wcdGlobal.js';
+import { globalWcd } from '/_100554_/l2/wcdState.js';
 
 export async function executeFromTag(tagBase: string, tagMain: string, ) {
 

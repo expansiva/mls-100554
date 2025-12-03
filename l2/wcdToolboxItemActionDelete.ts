@@ -2,9 +2,9 @@
 
 import { html, render } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { IWCDCommand } from './_100554_wcdTypes';
-import { execute as excCommandDel } from './_100554_wcdCommandDel';
+import { WcdToolboxItemBase } from '/_100554_/l2/wcdToolboxItemBase.js';
+import { IWCDCommand } from '/_100554_/l2/wcdTypes.js';
+import { execute as excCommandDel } from '/_100554_/l2/wcdCommandDel.js';
 
 @customElement('wcd-toolbox-item-action-delete-100554')
 export class WCDToolboxItemActionEditAttr extends WcdToolboxItemBase {

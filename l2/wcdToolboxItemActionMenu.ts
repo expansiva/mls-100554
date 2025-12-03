@@ -2,9 +2,9 @@
 
 import { html, } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { globalWcd } from './_100554_wcdState';
+import { WcdToolboxItemBase } from '/_100554_/l2/wcdToolboxItemBase.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { globalWcd } from '/_100554_/l2/wcdState.js';
 
 
 @customElement('wcd-toolbox-item-action-menu-100554')

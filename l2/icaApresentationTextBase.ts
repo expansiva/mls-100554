@@ -1,7 +1,7 @@
 /// <mls shortName="icaApresentationTextBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
-import { ActionTag } from './_100554_icaTypes';
+import { IcaLitElementBase } from '/_100554_/l2/icaLitElementBase.js';
+import { ActionTag } from '/_100554_/l2/icaTypes.js';
 
 export abstract class IcaApresentationTextBase extends IcaLitElementBase {
 

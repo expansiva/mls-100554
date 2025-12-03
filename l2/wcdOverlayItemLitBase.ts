@@ -1,10 +1,10 @@
 /// <mls shortName="wcdOverlayItemLitBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { PropertyValueMap } from 'lit';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { IICADepths } from './_100554_icaTypes';
-import { WCDOverlayItensMethods, WCDOverlayMethods, WCDToolboxMethodos } from './_100554_wcdTypes';
-import './_100554_wcdToolbox';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { IICADepths } from '/_100554_/l2/icaTypes.js';
+import { WCDOverlayItensMethods, WCDOverlayMethods, WCDToolboxMethodos } from '/_100554_/l2/wcdTypes.js';
+import '/_100554_/l2/wcdToolbox.js';
 
 export abstract class WcdOverlayItemLitBase extends CollabLitElement implements WCDOverlayItensMethods {
 

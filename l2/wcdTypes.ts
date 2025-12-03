@@ -1,6 +1,6 @@
 /// <mls shortName="wcdTypes" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import * as tps from './_100554_icaTypes';
+import * as tps from '/_100554_/l2/icaTypes.js';
 
 export interface WCDToolboxMethodos extends HTMLElement {
     lastHelper:string,

@@ -2,11 +2,11 @@
 
 import { html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { collab_code } from './_100554_collabIcons';
-import { CollabLitElement } from "./_100554_collabLitElement";
-import * as commandCode from './_100554_wcdCommandAddCodeBlock';
-import { WCDOverlayMethods } from './_100554_wcdTypes';
-import { globalWcd } from './_100554_wcdState';
+import { collab_code } from '/_100554_/l2/collabIcons.js';
+import { CollabLitElement } from "/_100554_/l2/collabLitElement.js";
+import * as commandCode from '/_100554_/l2/wcdCommandAddCodeBlock.js';
+import { WCDOverlayMethods } from '/_100554_/l2/wcdTypes.js';
+import { globalWcd } from '/_100554_/l2/wcdState.js';
 /// **collab_i18n_start**
 const message_pt = {
     code: 'Adicionar um novo bloco de código',

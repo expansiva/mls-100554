@@ -2,10 +2,10 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { execute } from './_100554_wcdCommandAddEmbedLink';
-import { WCDOverlayMethods } from './_100554_wcdTypes';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { globalWcd } from './_100554_wcdState';
+import { execute } from '/_100554_/l2/wcdCommandAddEmbedLink.js';
+import { WCDOverlayMethods } from '/_100554_/l2/wcdTypes.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { globalWcd } from '/_100554_/l2/wcdState.js';
 
 /// **collab_i18n_start**
 const message_pt = {

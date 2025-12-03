@@ -2,7 +2,7 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
+import { WcdToolboxItemBase } from '/_100554_/l2/wcdToolboxItemBase.js';
 
 @customElement('wcd-toolbox-item-action-title-100554')
 export class WcdToolboxItemActionTitle extends WcdToolboxItemBase {

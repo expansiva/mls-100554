@@ -2,12 +2,12 @@
 
 import { html, repeat, LitElement, render } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { dispatchEventConciliate } from './_100554_wcdCommandBase';
-import { loadPluginProject } from './_100554_libCommom';
-import { getAtributtesByEl, checkAttributteHasVariation, getDescriptionAttr } from './_100554_icaBaseDescription';
-import "./_100554_wcdToolboxItemActionEditVariation";
+import { WcdToolboxItemBase } from '/_100554_/l2/wcdToolboxItemBase.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { dispatchEventConciliate } from '/_100554_/l2/wcdCommandBase.js';
+import { loadPluginProject } from '/_100554_/l2/libCommom.js';
+import { getAtributtesByEl, checkAttributteHasVariation, getDescriptionAttr } from '/_100554_/l2/icaBaseDescription.js';
+import "/_100554_/l2/wcdToolboxItemActionEditVariation.js";
 
 @customElement('wcd-toolbox-item-action-edit-attr-out-100554')
 export class WCDToolboxItemActionEditAttrOut extends WcdToolboxItemBase {

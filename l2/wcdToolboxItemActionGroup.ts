@@ -2,8 +2,8 @@
 
 import { html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import * as icaGlobal from './_100554_icaGlobal';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
+import * as icaGlobal from '/_100554_/l2/icaGlobal.js';
+import { WcdToolboxItemBase } from '/_100554_/l2/wcdToolboxItemBase.js';
 
 //version 4
 @customElement('wcd-toolbox-item-action-group-100554')

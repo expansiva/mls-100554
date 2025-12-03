@@ -2,8 +2,8 @@
 
 import { html, svg, LitElement, render, css, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { WCDPopupItem } from './_100554_wcdPopupItem';
-import { WCDPopupMethodos } from './_100554_wcdTypes';
+import { WCDPopupItem } from '/_100554_/l2/wcdPopupItem.js';
+import { WCDPopupMethodos } from '/_100554_/l2/wcdTypes.js';
 
 @customElement('wcd-popup-item-h1-100554')
 export class WCDPopupItemH1 extends WCDPopupItem {

@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
+import { WcdToolboxItemBase } from '/_100554_/l2/wcdToolboxItemBase.js';
 
 @customElement('wcd-toolbox-item-action-edit-code-100554')
 export class WCDToolboxItemActionEditCode extends WcdToolboxItemBase {

@@ -2,11 +2,11 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { initWcdPopup } from './_100554_wcdPopup';
-import { WCDPopupMethodos } from './_100554_wcdTypes';
-import { dispatchEventConciliate } from './_100554_wcdCommandBase';
-import { globalWcd } from './_100554_wcdState';
+import { WcdToolboxItemBase } from '/_100554_/l2/wcdToolboxItemBase.js';
+import { initWcdPopup } from '/_100554_/l2/wcdPopup.js';
+import { WCDPopupMethodos } from '/_100554_/l2/wcdTypes.js';
+import { dispatchEventConciliate } from '/_100554_/l2/wcdCommandBase.js';
+import { globalWcd } from '/_100554_/l2/wcdState.js';
 
 @customElement('wcd-toolbox-item-action-edit-text-100554')
 export class WCDToolboxItemActionEditText extends WcdToolboxItemBase {

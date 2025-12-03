@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { propertyDataSource, propertyCompositeDataSource } from './_100554_collabDecorators';
-import { StateLitElement } from './_100554_stateLitElement';
+import { propertyDataSource, propertyCompositeDataSource } from '/_100554_/l2/collabDecorators.js';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 
 type MindMapSelected = MindMapSelectedFile | MindMapSelectedPlugin;
 

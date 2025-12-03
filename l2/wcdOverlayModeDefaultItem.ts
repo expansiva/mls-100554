@@ -2,10 +2,10 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { WcdOverlayItemLitBase } from './_100554_wcdOverlayItemLitBase';
-import { WCDOverlayMethods, WCDToolboxMethodos } from './_100554_wcdTypes';
-import { IICADepths } from './_100554_icaTypes';
-import { getPosition } from './_100554_icaGlobal';
+import { WcdOverlayItemLitBase } from '/_100554_/l2/wcdOverlayItemLitBase.js';
+import { WCDOverlayMethods, WCDToolboxMethodos } from '/_100554_/l2/wcdTypes.js';
+import { IICADepths } from '/_100554_/l2/icaTypes.js';
+import { getPosition } from '/_100554_/l2/icaGlobal.js';
 
 @customElement('wcd-overlay-mode-default-item-100554')
 export class WcdOverlayModeDefaultItem extends WcdOverlayItemLitBase {

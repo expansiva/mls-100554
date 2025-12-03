@@ -2,8 +2,8 @@
 
 import { html, LitElement, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { WCDToolboxItemEditTextMethodos, WCDPopupMethodos } from './_100554_wcdTypes';
-import { globalWcd } from './_100554_wcdState';
+import { WCDToolboxItemEditTextMethodos, WCDPopupMethodos } from '/_100554_/l2/wcdTypes.js';
+import { globalWcd } from '/_100554_/l2/wcdState.js';
 
 export function initWcdPopup(): boolean {
   return true;
@@ -64,34 +64,34 @@ export class WCDPopup extends LitElement implements WCDPopupMethodos {
   private async loadComponent(button: string) {
     switch (button) {
       case 'bold':
-        await import('./_100554_wcdPopupItemBold');
+        await import('/_100554_/l2/wcdPopupItemBold.js');
         return 'wcd-popup-item-bold-100554';
       case 'italic':
-        await import('./_100554_wcdPopupItemItalic');
+        await import('/_100554_/l2/wcdPopupItemItalic.js');
         return 'wcd-popup-item-italic-100554';
       case 'link':
-        await import('./_100554_wcdPopupItemLink');
+        await import('/_100554_/l2/wcdPopupItemLink.js');
         return 'wcd-popup-item-link-100554';
       case 'separator':
-        await import('./_100554_wcdPopupItemSeparator');
+        await import('/_100554_/l2/wcdPopupItemSeparator.js');
         return 'wcd-popup-item-separator-100554';
       case 'h1':
-        await import('./_100554_wcdPopupItemH1');
+        await import('/_100554_/l2/wcdPopupItemH1.js');
         return 'wcd-popup-item-h1-100554';
       case 'h2':
-        await import('./_100554_wcdPopupItemH2');
+        await import('/_100554_/l2/wcdPopupItemH2.js');
         return 'wcd-popup-item-h2-100554';
       case 'h3':
-        await import('./_100554_wcdPopupItemH3');
+        await import('/_100554_/l2/wcdPopupItemH3.js');
         return 'wcd-popup-item-h3-100554';
       case 'h4':
-        await import('./_100554_wcdPopupItemH4');
+        await import('/_100554_/l2/wcdPopupItemH4.js');
         return 'wcd-popup-item-h4-100554';
       case 'blockquote':
-        await import('./_100554_wcdPopupItemBlockQuote');
+        await import('/_100554_/l2/wcdPopupItemBlockQuote.js');
         return 'wcd-popup-item-block-quote-100554';
       case 'dropcap':
-        await import('./_100554_wcdPopupItemDropCap');
+        await import('/_100554_/l2/wcdPopupItemDropCap.js');
         return 'wcd-popup-item-drop-cap-100554';
       default:
         console.error('invalid button name: "' + button + '"');

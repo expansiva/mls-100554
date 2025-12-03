@@ -2,10 +2,10 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { getImages, addAssets } from './_100554_designSystemBase';
-import { execute, executechange } from './_100554_wcdCommandAddImage';
-import { WCDOverlayMethods } from './_100554_wcdTypes';
-import { globalWcd } from './_100554_wcdState';
+import { getImages, addAssets } from '/_100554_/l2/designSystemBase.js';
+import { execute, executechange } from '/_100554_/l2/wcdCommandAddImage.js';
+import { WCDOverlayMethods } from '/_100554_/l2/wcdTypes.js';
+import { globalWcd } from '/_100554_/l2/wcdState.js';
 
 @customElement('wcd-dialog-image-100554')
 export class WcdDialogImage100554 extends LitElement {

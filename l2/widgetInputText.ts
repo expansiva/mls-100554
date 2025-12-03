@@ -2,8 +2,8 @@
 
 import { html, ifDefined } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IAutoCapitalize, IcaFormsInputStringBase } from './_100554_icaFormsInputStringBase';
-import { propertyDataSource } from './_100554_collabDecorators';
+import { IAutoCapitalize, IcaFormsInputStringBase } from '/_100554_/l2/icaFormsInputStringBase.js';
+import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
 
 @customElement('widget-input-text-100554')
 export class WcInputText100554 extends IcaFormsInputStringBase {

@@ -2,7 +2,7 @@
 
 import { html, svg, LitElement, render, css, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { WCDPopupItem } from './_100554_wcdPopupItem'
+import { WCDPopupItem } from '/_100554_/l2/wcdPopupItem.js'
 
 @customElement('wcd-popup-item-link-100554')
 export class WCDPopupItemLink extends WCDPopupItem {

@@ -2,9 +2,9 @@
 
 import { html, render } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { IWCDCommand } from './_100554_wcdTypes';
-import { execute as excCommandEnter } from './_100554_wcdCommandEnter';
+import { WcdToolboxItemBase } from '/_100554_/l2/wcdToolboxItemBase.js';
+import { IWCDCommand } from '/_100554_/l2/wcdTypes.js';
+import { execute as excCommandEnter } from '/_100554_/l2/wcdCommandEnter.js';
 
 
 @customElement('wcd-toolbox-item-action-add-100554')

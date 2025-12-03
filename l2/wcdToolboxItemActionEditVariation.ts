@@ -2,9 +2,9 @@
 
 import { html, repeat, LitElement, render } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { dispatchEventConciliate } from './_100554_wcdCommandBase';
-import { getConfigProject } from './_100554_libProjectConfig';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { dispatchEventConciliate } from '/_100554_/l2/wcdCommandBase.js';
+import { getConfigProject } from '/_100554_/l2/libProjectConfig.js';
 
 @customElement('wcd-toolbox-item-action-edit-variation-100554')
 export class WCDToolboxItemActionEditAttrOut extends CollabLitElement {

@@ -2,7 +2,7 @@
 
 import { svg, TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { WCDPopupItemH1 } from "./_100554_wcdPopupItemH1";
+import { WCDPopupItemH1 } from "/_100554_/l2/wcdPopupItemH1.js";
 
 @customElement('wcd-popup-item-block-quote-100554')
 export class WCDPopupItemBlockQuote extends WCDPopupItemH1 {

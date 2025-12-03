@@ -1,6 +1,6 @@
 /// <mls shortName="icaBaseDescription" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBaseMethods } from './_100554_icaTypes';
+import { IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js';
 
 const attributeDefinitions = [
   { path: "name", lit: "@property({ type: String }) name: string | undefined;", desc: "Identifier name of the element." },

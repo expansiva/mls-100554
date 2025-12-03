@@ -2,9 +2,9 @@
 
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement'
-import { globalWcd } from './_100554_wcdState';
-import './_100554_wcdToolboxItemActionEditAttrOut';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
+import { globalWcd } from '/_100554_/l2/wcdState.js';
+import '/_100554_/l2/wcdToolboxItemActionEditAttrOut.js';
 
 @customElement('wcd-toolbox-item-action-edit-attr-dialog-100554')
 export class WcdToolboxItemActionEditAttrDialog extends CollabLitElement {

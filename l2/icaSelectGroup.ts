@@ -2,11 +2,11 @@
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement'
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
 
 import {
     getGroups
-} from './_100554_icaBaseDescription';
+} from '/_100554_/l2/icaBaseDescription.js';
 
 @customElement('ica-select-group-100554')
 export class IcaSelectGroup extends CollabLitElement {

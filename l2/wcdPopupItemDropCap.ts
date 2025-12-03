@@ -2,8 +2,8 @@
 
 import { html, svg, LitElement, render, css, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { WCDPopupItem } from './_100554_wcdPopupItem'
-import { globalWcd } from './_100554_wcdState';
+import { WCDPopupItem } from '/_100554_/l2/wcdPopupItem.js'
+import { globalWcd } from '/_100554_/l2/wcdState.js';
 
 @customElement('wcd-popup-item-drop-cap-100554')
 export class WCDPopupItemDropCap extends WCDPopupItem {

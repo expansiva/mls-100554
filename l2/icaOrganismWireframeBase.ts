@@ -1,8 +1,8 @@
 /// <mls shortName="icaOrganismWireframeBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html } from 'lit';
-import { StateLitElement } from './_100554_stateLitElement';
-import { convertTagToFileName } from './_100554_utilsLit'
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { convertTagToFileName } from '/_100554_/l2/utilsLit.js'
 
 export abstract class IcaOrganismWireframeBase extends StateLitElement {
 

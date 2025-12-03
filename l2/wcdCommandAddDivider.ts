@@ -1,10 +1,10 @@
 /// <mls shortName="wcdCommandAddDivider" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { IWCDCommand } from './_100554_wcdTypes';
-import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
-import { PREFIX_ICA_ID } from './_100554_collabPageElement';
-import { findParentElementWithTagName, getSiblingsAfter, countElementsWithTagName } from './_100554_wcdGlobal';
+import { IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js';
+import { IWCDCommand } from '/_100554_/l2/wcdTypes.js';
+import { dispatchEventConciliate, importFilesIfNeeded } from '/_100554_/l2/wcdCommandBase.js';
+import { PREFIX_ICA_ID } from '/_100554_/l2/collabPageElement.js';
+import { findParentElementWithTagName, getSiblingsAfter, countElementsWithTagName } from '/_100554_/l2/wcdGlobal.js';
 
 export async function execute(param: IWCDCommand) {
 

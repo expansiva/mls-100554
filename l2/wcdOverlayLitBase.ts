@@ -2,10 +2,10 @@
 
 
 import { property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { ActionTag, IICADepths, IcaLitElementBaseMethods, } from './_100554_icaTypes';
-import { WCDOverlayMethods, IWCDCommand, WCDToolboxMethodos, IListWidgetBase, WCDOverlayItensMethods } from './_100554_wcdTypes';
-import { getPosition } from './_100554_icaGlobal';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { ActionTag, IICADepths, IcaLitElementBaseMethods, } from '/_100554_/l2/icaTypes.js';
+import { WCDOverlayMethods, IWCDCommand, WCDToolboxMethodos, IListWidgetBase, WCDOverlayItensMethods } from '/_100554_/l2/wcdTypes.js';
+import { getPosition } from '/_100554_/l2/icaGlobal.js';
 
 export abstract class WcdOverlayLitBase extends CollabLitElement implements WCDOverlayMethods {
 

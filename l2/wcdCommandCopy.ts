@@ -1,8 +1,8 @@
 /// <mls shortName="wcdCommandCopy" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { WCDOverlayMethods, IWCDCommand } from './_100554_wcdTypes';
-import { dispatchEventConciliate } from './_100554_wcdCommandBase';
+import { IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js';
+import { WCDOverlayMethods, IWCDCommand } from '/_100554_/l2/wcdTypes.js';
+import { dispatchEventConciliate } from '/_100554_/l2/wcdCommandBase.js';
 
 var infoCopy: IcaLitElementBaseMethods | undefined = undefined;
 
