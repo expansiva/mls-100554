@@ -1,10 +1,10 @@
 /// <mls shortName="icaGlobal" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-import * as tps from './_100554_icaTypes';
+import * as tps from '/_100554_/l2/icaTypes.js';
 
 export const PREFIX = 'ica'
 export const PREFIXWCD = 'wcd'
 export const ATTRGROUP = 'isicagroup'
-export const ICAPAGE = 'ica-page-100554'
+export const ICAPAGE = 'ica-page-100554' 
 export const CHANGESTATE = 'changeState';
 
 export function getPosition(icaInfo: tps.IICADepths, boundingPage: DOMRect) {
