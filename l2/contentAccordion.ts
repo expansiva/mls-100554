@@ -2,7 +2,7 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement'
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
 
 @customElement('content-accordion-100554')
 export class ContentAccordion extends CollabLitElement {
