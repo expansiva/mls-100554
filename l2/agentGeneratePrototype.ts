@@ -1,10 +1,10 @@
 /// <mls shortName="agentGeneratePrototype" project="100554" enhancement="_100554_enhancementLit" />
 
 import { html, TemplateResult, unsafeHTML } from 'lit';
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import './_100554_widgetQuestionsForClarification';
-import './_100554_agentGeneratePrototypeFeedback';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import '/_100554_/l2/widgetQuestionsForClarification.js';
+import '/_100554_/l2/agentGeneratePrototypeFeedback.js';
 
 import {
     getNextPendingStepByAgentName,
@@ -16,7 +16,7 @@ import {
     notifyTaskChange,
     updateStepStatus,
     updateTaskTitle
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
     startNewInteractionInAiTask,
@@ -25,7 +25,7 @@ import {
     addNewStep,
     ClarificationValue,
     startClarification
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentGeneratePrototype";
 const project = 100554;
@@ -86,7 +86,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 
 const _getFeedBack = async (task: mls.msg.TaskData): Promise<TemplateResult> => {
     if (!task) throw new Error(`[${agentName}](getFeedBack) Invalid task`);
-    // await import('./_100554_agentGeneratePrototypeFeedback');
+    // await import('/_100554_/l2/agentGeneratePrototypeFeedback.js');
     return html`<agent-generate-prototype-feedback-100554 .task=${task}></agent-generate-prototype-feedback-100554>`
 }
 
