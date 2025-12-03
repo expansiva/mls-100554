@@ -1,15 +1,15 @@
 /// <mls shortName="agentNewWidget2" project="100554" enhancement="_blank" groupName="other" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { forceServiceInstance } from './_100554_libCommom';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { createNewFile } from "./_100554_pluginNewFileBase";
-import { descriptionForPrompt } from "./_100554_icaBaseDescription";
-import { initCompileMonaco } from "./_100554_collabInit";
-import { initState } from './_100554_collabState';
-import { formatHtml } from './_100554_collabDOMSync';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { createNewFile } from "/_100554_/l2/pluginNewFileBase.js";
+import { descriptionForPrompt } from "/_100554_/l2/icaBaseDescription.js";
+import { initCompileMonaco } from "/_100554_/l2/collabInit.js";
+import { initState } from '/_100554_/l2/collabState.js';
+import { formatHtml } from '/_100554_/l2/collabDOMSync.js';
 
-import { preferModelType, systemComponentsInstruction, systemTokensLessInstruction, getPromptByHtml } from './_100554_aiPrompts';
+import { preferModelType, systemComponentsInstruction, systemTokensLessInstruction, getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 
 import {
     getNextPendingStepByAgentName,
@@ -17,14 +17,14 @@ import {
     updateStepStatus,
     getNextPendentStep,
     updateTaskTitle
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
     startNewAiTask,
     executeNextStep,
     startNewInteractionInAiTask,
     addNewStep
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentNewWidget2";
 const project = 100554;
