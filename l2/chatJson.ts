@@ -1,6 +1,6 @@
 /// <mls shortName="chatJson" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { TaskData } from './_100554_iaChatInterfaces';
+import { TaskData } from '/_100554_/l2/iaChatInterfaces.js';
 
 interface IChatUser {
     type: 'user',
