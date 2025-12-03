@@ -2,17 +2,17 @@
 
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { loadPluginProject, forceServiceInstance } from './_100554_libCommom';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { readProjectTypescriptAndCompile } from './_100554_collabLibModel';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
+import { loadPluginProject, forceServiceInstance } from '/_100554_/l2/libCommom.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { readProjectTypescriptAndCompile } from '/_100554_/l2/collabLibModel.js';
 
-import { PluginEditStyleL3 } from './_100554_pluginEditStyleL3';
+import { PluginEditStyleL3 } from '/_100554_/l2/pluginEditStyleL3.js';
 
-import "./_100554_pluginExploreList";
-import "./_100554_pluginPrototypeImprove";
-import './_100554_pluginOrganismAdd';
-import './_100554_pluginOrganismProperty';
+import "/_100554_/l2/pluginExploreList.js";
+import "/_100554_/l2/pluginPrototypeImprove.js";
+import '/_100554_/l2/pluginOrganismAdd.js';
+import '/_100554_/l2/pluginOrganismProperty.js';
 
 /// **collab_i18n_start**
 const message_pt = {
