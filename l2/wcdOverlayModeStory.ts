@@ -2,16 +2,16 @@
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { WcdOverlayLitBase } from './_100554_wcdOverlayLitBase';
-import { ActionTag,  IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { IWCDCommand } from './_100554_wcdTypes';
-import { execute as excCommandEnter } from './_100554_wcdCommandEnter';
-import { execute as excCommandDel } from './_100554_wcdCommandDel';
-import { execute as excCommandCopy } from './_100554_wcdCommandCopy';
-import { execute as excCommandNext } from './_100554_wcdCommandSelectNext';
-import { execute as excCommandUndo } from './_100554_wcdCommandUndo';
-import './_100554_wcdOverlayModeStoryItem';
-import { CollabPageElement } from './_100554_collabPageElement';
+import { WcdOverlayLitBase } from '/_100554_/l2/wcdOverlayLitBase.js';
+import { ActionTag,  IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js';
+import { IWCDCommand } from '/_100554_/l2/wcdTypes.js';
+import { execute as excCommandEnter } from '/_100554_/l2/wcdCommandEnter.js';
+import { execute as excCommandDel } from '/_100554_/l2/wcdCommandDel.js';
+import { execute as excCommandCopy } from '/_100554_/l2/wcdCommandCopy.js';
+import { execute as excCommandNext } from '/_100554_/l2/wcdCommandSelectNext.js';
+import { execute as excCommandUndo } from '/_100554_/l2/wcdCommandUndo.js';
+import '/_100554_/l2/wcdOverlayModeStoryItem.js';
+import { CollabPageElement } from '/_100554_/l2/collabPageElement.js';
 
 @customElement('wcd-overlay-mode-story-100554')
 export class WcdOverlayModeStory extends WcdOverlayLitBase {
