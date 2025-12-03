@@ -2,10 +2,10 @@
 
 import { html, nothing, unsafeHTML } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { openService, getProjectConfig, getProjectModuleConfig } from './_100554_libCommom';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import './_100554_collabNav4Menu';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
+import { openService, getProjectConfig, getProjectModuleConfig } from '/_100554_/l2/libCommom.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import '/_100554_/l2/collabNav4Menu.js';
 
 /// **collab_i18n_start**
 const message_pt = {
