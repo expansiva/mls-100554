@@ -1,7 +1,7 @@
 /// <mls shortName="wcdState" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { WCDToolboxMethodos, WCDToolboxItemMethodos, WCDOverlayMethods } from './_100554_wcdTypes';
-import { IcaLitElementBaseMethods } from './_100554_icaTypes';
+import { WCDToolboxMethodos, WCDToolboxItemMethodos, WCDOverlayMethods } from '/_100554_/l2/wcdTypes.js';
+import { IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js';
 
 /*declare global {
     interface Window {
