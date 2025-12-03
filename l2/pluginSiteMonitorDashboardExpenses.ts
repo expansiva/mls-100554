@@ -2,7 +2,7 @@
 
 import { html, css, svg, TemplateResult } from 'lit';
 import { query, property } from 'lit/decorators.js';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 
 export const pluginData: mls.plugin.IPluginData = {
     title: "Expenses",
@@ -27,7 +27,7 @@ export class PluginSiteMonitorDashboardExpenses extends PluginBaseModule {
 
     async prepare() {
 
-        await import('./_100554_widgetCollabChart');
+        await import('/_100554_/l2/widgetCollabChart.js');
 
         this.chartData = {
             tooltip: {

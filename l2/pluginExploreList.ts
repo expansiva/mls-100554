@@ -2,17 +2,17 @@
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js'; 
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from './_100554_libCommom';
-import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, IReqCreateStorFile, createStorFile } from './_100554_collabLibStor';
-import { createAllModels, createModel, readProjectTypescriptAndCompile, readProjectTypescriptAndCompileL1 } from './_100554_collabLibModel';
-import { ServiceBase } from './_100554_serviceBase';
-import { isNameValid } from './_100554_libCommom';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from '/_100554_/l2/libCommom.js';
+import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, IReqCreateStorFile, createStorFile } from '/_100554_/l2/collabLibStor.js';
+import { createAllModels, createModel, readProjectTypescriptAndCompile, readProjectTypescriptAndCompileL1 } from '/_100554_/l2/collabLibModel.js';
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { isNameValid } from '/_100554_/l2/libCommom.js';
 
-import './_100554_pluginExploreListAddL1';
-import './_100554_pluginExploreListAddL2';
-import './_100554_pluginExploreListAddL3';
-import './_100554_pluginExploreListAddL4';
+import '/_100554_/l2/pluginExploreListAddL1.js';
+import '/_100554_/l2/pluginExploreListAddL2.js';
+import '/_100554_/l2/pluginExploreListAddL3.js';
+import '/_100554_/l2/pluginExploreListAddL4.js';
 
 /// **collab_i18n_start**
 
@@ -147,7 +147,7 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
     private async addModeL2() {
-        //await import('./_100554_serviceListFilesAdd');
+        //await import('/_100554_/l2/serviceListFilesAdd.js');
         this.inFilter = false;
         this.mode = 'addL2';
     }

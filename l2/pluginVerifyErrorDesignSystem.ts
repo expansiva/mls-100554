@@ -2,8 +2,8 @@
 
 import { html, repeat } from 'lit';
 import { property, customElement } from 'lit/decorators.js';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { preCompileLessByThemeOrDefault } from './_100554_designSystemBase';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { preCompileLessByThemeOrDefault } from '/_100554_/l2/designSystemBase.js';
 
 /// **collab_i18n_start**
 const message_pt = {

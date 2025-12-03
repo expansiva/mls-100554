@@ -2,11 +2,11 @@
 
 import { html, css, svg, TemplateResult } from 'lit';
 import { query, property } from 'lit/decorators.js';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { getDateFormated } from './_100554_libCommom';
-import { getConfigProject } from './_100554_libProjectConfig';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { getDateFormated } from '/_100554_/l2/libCommom.js';
+import { getConfigProject } from '/_100554_/l2/libProjectConfig.js';
 
-import * as icons from './_100554_collabIcons';
+import * as icons from '/_100554_/l2/collabIcons.js';
 
 export const pluginData: mls.plugin.IPluginData = {
     title: "Usage",

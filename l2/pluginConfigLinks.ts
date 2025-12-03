@@ -2,8 +2,8 @@
 
 import { html, svg, TemplateResult, repeat, unsafeHTML } from 'lit';
 import { query, property } from 'lit/decorators.js';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { getConfigProject, updateConfigProject } from './_100554_libProjectConfig';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { getConfigProject, updateConfigProject } from '/_100554_/l2/libProjectConfig.js';
 
 export class PluginConfigLinks extends PluginBaseModule {
 

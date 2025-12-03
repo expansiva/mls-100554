@@ -2,10 +2,10 @@
 
 import { html, css, svg, TemplateResult, LitElement } from 'lit';
 import { query, property, customElement } from 'lit/decorators.js';
-import { getAllWebComponentsInSource } from './_100554_libCompile';
-import { convertTagToFileName } from './_100554_utilsLit';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import "./_100554_pluginProjectInfo";
+import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
+import { convertTagToFileName } from '/_100554_/l2/utilsLit.js';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import "/_100554_/l2/pluginProjectInfo.js";
 
 export const pluginData: mls.plugin.IPluginData = {
     title: "Project Detail",

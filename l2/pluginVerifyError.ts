@@ -2,8 +2,8 @@
 
 import { html, repeat } from 'lit';
 import { property } from 'lit/decorators.js';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { initCompileMonaco } from './_100554_collabInit';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { initCompileMonaco } from '/_100554_/l2/collabInit.js';
 
 /// **collab_i18n_start**
 const message_pt = {

@@ -2,15 +2,15 @@
 
 import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { loadChatPreferences, IChatPreferences, saveChatPreferences, getUserId, createThread } from './_100554_collabMessageHelper';
-import { getThreadByName } from './_100554_msgDBController';
-import { IAgent } from './_100554_aiAgentBase';
-import { getTemporaryContext, getAllSteps } from './_100554_aiAgentHelper';
-import { listThreads } from './_100554_msgDBController';
-import { updateHTML } from './_100554_collabDOMSync';
-import { collab_trash } from './_100554_collabIcons';
-import { setState } from './_100554_collabState';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { loadChatPreferences, IChatPreferences, saveChatPreferences, getUserId, createThread } from '/_100554_/l2/collabMessageHelper.js';
+import { getThreadByName } from '/_100554_/l2/msgDBController.js';
+import { IAgent } from '/_100554_/l2/aiAgentBase.js';
+import { getTemporaryContext, getAllSteps } from '/_100554_/l2/aiAgentHelper.js';
+import { listThreads } from '/_100554_/l2/msgDBController.js';
+import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
+import { collab_trash } from '/_100554_/l2/collabIcons.js';
+import { setState } from '/_100554_/l2/collabState.js';
 @customElement('plugin-agent-playground-100554')
 
 export class AgentTester extends CollabLitElement {

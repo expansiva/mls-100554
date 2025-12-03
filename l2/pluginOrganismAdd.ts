@@ -2,9 +2,9 @@
 
 import { html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
-import { executeAgentByFile } from './_100554_aiAgentHelper'
-import { CollabLitElement } from './_100554_collabLitElement';
-import { ServiceBase } from './_100554_serviceBase';
+import { executeAgentByFile } from '/_100554_/l2/aiAgentHelper.js'
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
 
 /// **collab_i18n_start** 
 const message_pt = {

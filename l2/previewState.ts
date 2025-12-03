@@ -1,6 +1,6 @@
 /// <mls shortName="previewState" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import {WCDToolboxMethodos} from './_100554_wcdTypes';
+import {WCDToolboxMethodos} from '/_100554_/l2/wcdTypes.js';
 
 declare global {
     interface Window {

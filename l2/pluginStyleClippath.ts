@@ -2,11 +2,11 @@
 
 import { html, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { propertyDataSource } from './_100554_collabDecorators';
-import { getState, setState } from './_100554_collabState';
-import { getMessageKey } from './_100554_collabLitElement'
-import { ICSSState } from './_100554_lessCSS';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
+import { getState, setState } from '/_100554_/l2/collabState.js';
+import { getMessageKey } from '/_100554_/l2/collabLitElement.js'
+import { ICSSState } from '/_100554_/l2/lessCSS.js';
 
 /// **collab_i18n_start**
 const message_pt = {

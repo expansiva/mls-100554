@@ -2,11 +2,11 @@
 
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { ServiceBase } from './_100554_serviceBase';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { propertyDataSource } from './_100554_collabDecorators';
-import { isNameValid } from './_100554_libCommom';
-import { createStorFile, IReqCreateStorFile } from './_100554_collabLibStor';
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
+import { isNameValid } from '/_100554_/l2/libCommom.js';
+import { createStorFile, IReqCreateStorFile } from '/_100554_/l2/collabLibStor.js';
 
 /// **collab_i18n_start**
 const message_pt = {

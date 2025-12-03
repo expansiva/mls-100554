@@ -2,10 +2,10 @@
 
 import { html, svg, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { getListNewFilesToDeleteByFolder, deleteAllFilesLocal } from './_100554_libCommom';
-import { removeModule } from './_100554_projectAST';
-import { removeTokensTheme } from './_100554_designSystemBase';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { getListNewFilesToDeleteByFolder, deleteAllFilesLocal } from '/_100554_/l2/libCommom.js';
+import { removeModule } from '/_100554_/l2/projectAST.js';
+import { removeTokensTheme } from '/_100554_/l2/designSystemBase.js';
 
 /// **collab_i18n_start**
 const message_pt = {

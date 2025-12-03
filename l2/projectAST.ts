@@ -1,8 +1,8 @@
 /// <mls shortName="projectAST" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
 
-import { createModel } from './_100554_collabLibModel';
-import { collabImport } from './_100554_collabImport';
-import { createNewFile } from "./_100554_pluginNewFileBase";
+import { createModel } from '/_100554_/l2/collabLibModel.js';
+import { collabImport } from '/_100554_/l2/collabImport.js';
+import { createNewFile } from "/_100554_/l2/pluginNewFileBase.js";
 
 // Adds a new module with the given name to the modules array in the editor content.
 export async function addModule(project: number, moduleName: string, forceCreateModel: boolean = false) {

@@ -2,9 +2,9 @@
 
 import { html, css, svg, TemplateResult, repeat } from 'lit';
 import { query, property, state } from 'lit/decorators.js';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { getConfigProject } from './_100554_libProjectConfig';
-import { collab_trash, collab_lock, collab_lock_open } from './_100554_collabIcons';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { getConfigProject } from '/_100554_/l2/libProjectConfig.js';
+import { collab_trash, collab_lock, collab_lock_open } from '/_100554_/l2/collabIcons.js';
 
  
 /// **collab_i18n_start**

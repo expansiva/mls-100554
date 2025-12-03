@@ -2,13 +2,13 @@
 
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { convertFileNameToTag } from './_100554_utilsLit'
-import { ServiceBase } from './_100554_serviceBase';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { IDetails } from "./_100554_pluginNewFileBase";
-import { propertyDataSource } from './_100554_collabDecorators';
-import { getState, setState, initState } from './_100554_collabState';
-import { loadPluginProject, isNameValid } from './_100554_libCommom';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { IDetails } from "/_100554_/l2/pluginNewFileBase.js";
+import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
+import { getState, setState, initState } from '/_100554_/l2/collabState.js';
+import { loadPluginProject, isNameValid } from '/_100554_/l2/libCommom.js';
 
 /// **collab_i18n_start**
 const message_pt = {

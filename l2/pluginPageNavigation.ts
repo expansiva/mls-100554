@@ -2,13 +2,13 @@
 
 import { html, repeat } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { collab_trash, collab_pencil, collab_bars } from './_100554_collabIcons';
-import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
-import { selectLevel, openService } from './_100554_libCommom';
-import { formatHtml, setValueInModeKeepingUndo } from './_100554_collabDOMSync';
-import { CollabPreviewL4 } from './_100554_collabPreviewL4';
-import { openCollabMessage } from './_100554_aiAgentHelper';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { collab_trash, collab_pencil, collab_bars } from '/_100554_/l2/collabIcons.js';
+import { convertTagToFileName, convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { selectLevel, openService } from '/_100554_/l2/libCommom.js';
+import { formatHtml, setValueInModeKeepingUndo } from '/_100554_/l2/collabDOMSync.js';
+import { CollabPreviewL4 } from '/_100554_/l2/collabPreviewL4.js';
+import { openCollabMessage } from '/_100554_/l2/aiAgentHelper.js';
 
 /// **collab_i18n_start**
 const message_pt = {

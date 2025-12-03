@@ -2,8 +2,8 @@
 
 import { html, css, svg, TemplateResult } from 'lit';
 import { query, property } from 'lit/decorators.js';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { CollabEditMd } from './_100554_collabEditMd';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { CollabEditMd } from '/_100554_/l2/collabEditMd.js';
 
 export const pluginData: mls.plugin.IPluginData = {
     title: "README.md",
@@ -23,7 +23,7 @@ export class PluginProjectReadMe extends PluginBaseModule {
     @query('collab-edit-md-100554') mkEditor: CollabEditMd | undefined;
 
     async prepare() {
-        await import('./_100554_collabEditMd');
+        await import('/_100554_/l2/collabEditMd.js');
         this.setReadme();
     }
 

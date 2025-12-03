@@ -1,6 +1,6 @@
 /// <mls shortName="pluginNewFileBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-import { openService, isNameValid } from './_100554_libCommom'
-import { createAllFiles, IReqCreateAllFiles } from './_100554_collabLibStor';
+import { openService, isNameValid } from '/_100554_/l2/libCommom.js'
+import { createAllFiles, IReqCreateAllFiles } from '/_100554_/l2/collabLibStor.js';
 
 export interface IDetails {
     title: string,

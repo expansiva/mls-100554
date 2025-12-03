@@ -2,13 +2,13 @@
 
 import { html, css, svg, TemplateResult, repeat, LitElement } from 'lit';
 import { query, property } from 'lit/decorators.js';
-import { forceServiceInstance } from './_100554_libCommom'
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { ICANTest, ICANIntegration, TsTestAst } from './_100554_tsTestAST';
-import { CollabPageElement } from './_100554_collabPageElement';
-import { collab_fileTest } from './_100554_collabIcons';
+import { forceServiceInstance } from '/_100554_/l2/libCommom.js'
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { ICANTest, ICANIntegration, TsTestAst } from '/_100554_/l2/tsTestAST.js';
+import { CollabPageElement } from '/_100554_/l2/collabPageElement.js';
+import { collab_fileTest } from '/_100554_/l2/collabIcons.js';
 
-import './_100554_collabResultTest';
+import '/_100554_/l2/collabResultTest.js';
 
 /// **collab_i18n_start**
 const message_pt = {

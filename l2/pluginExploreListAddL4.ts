@@ -2,13 +2,13 @@
 
 import { html, repeat, TemplateResult } from 'lit';
 import { customElement, state, property, query } from 'lit/decorators.js';
-import { createAllFiles, IReqCreateAllFiles } from './_100554_collabLibStor';
-import { getTemplateImport } from './_100554_pluginNewFileBase';
-import { convertFileNameToTag } from './_100554_utilsLit'
-import { getInstanceByFile, isNameValid } from './_100554_libCommom';
-import { executeAgentByFile } from './_100554_aiAgentHelper'
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { ServiceBase } from './_100554_serviceBase';
+import { createAllFiles, IReqCreateAllFiles } from '/_100554_/l2/collabLibStor.js';
+import { getTemplateImport } from '/_100554_/l2/pluginNewFileBase.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
+import { getInstanceByFile, isNameValid } from '/_100554_/l2/libCommom.js';
+import { executeAgentByFile } from '/_100554_/l2/aiAgentHelper.js'
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
 
 
 /// **collab_i18n_start**
