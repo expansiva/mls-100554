@@ -5,7 +5,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js'
-
+ 
 @customElement('ateste-100554')
 export class SimpleGreeting extends CollabLitElement {
 
@@ -78,7 +78,7 @@ export class SimpleGreeting extends CollabLitElement {
 
       ) itens.push(key);*/
 
-      if (f && f.level === 2 && ['.ts'].includes(f.extension) &&
+      /*if (f && f.level === 2 && ['.ts'].includes(f.extension) &&
 
         (
           f.shortName.startsWith('p')
@@ -96,6 +96,23 @@ export class SimpleGreeting extends CollabLitElement {
         !f.shortName.startsWith('previewModeUtil')
 
 
+
+      ) itens.push(key);*/
+
+      if (f && f.level === 2 && ['.ts'].includes(f.extension) &&
+
+        (
+          f.shortName.startsWith('i') ||
+          f.shortName.startsWith('w')
+
+        ) &&
+
+        !f.shortName.startsWith('icaApresentationTextRichBase') &&
+        !f.shortName.startsWith('icaLitElementBase') &&
+        !f.shortName.startsWith('icaTypes') &&        
+        !f.shortName.startsWith('icaApresentationTextCodeBase') &&
+        !f.shortName.startsWith('widgetTextCode') &&
+        !f.shortName.startsWith('widgetDefs') 
 
       ) itens.push(key);
 
