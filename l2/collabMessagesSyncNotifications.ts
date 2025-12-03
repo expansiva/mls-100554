@@ -1,9 +1,9 @@
 /// <mls shortName="collabMessagesSyncNotifications" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
 
-import { getUserId, loadNotificationDeviceId, loadNotificationPreferencesAudio } from "./_100554_collabMessageHelper";
-import { getThread, updateThread, getMessage, addMessages, getAllThreads, addThread } from './_100554_msgDBController';
-import { notifyThreadChange } from './_100554_aiAgentHelper';
-import { setFavicon } from './_100554_collabInit';
+import { getUserId, loadNotificationDeviceId, loadNotificationPreferencesAudio } from "/_100554_/l2/collabMessageHelper.js";
+import { getThread, updateThread, getMessage, addMessages, getAllThreads, addThread } from '/_100554_/l2/msgDBController.js';
+import { notifyThreadChange } from '/_100554_/l2/aiAgentHelper.js';
+import { setFavicon } from '/_100554_/l2/collabInit.js';
 
 export const threadSyncMap = new Map<string, boolean>();
 let hasNotificationMessages: boolean = false;
