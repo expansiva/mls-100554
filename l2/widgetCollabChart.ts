@@ -2,8 +2,8 @@
 
 import { html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { propertyDataSource } from './_100554_collabDecorators';
-import { StateLitElement } from './_100554_stateLitElement';
+import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 
 declare var echarts: any;
 
