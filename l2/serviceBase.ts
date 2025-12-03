@@ -1,8 +1,8 @@
 /// <mls shortName="serviceBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { StateLitElement } from './_100554_stateLitElement';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { customElement, property, state } from 'lit/decorators.js';
-import * as libCommom from './_100554_libCommom';
+import * as libCommom from '/_100554_/l2/libCommom.js';
 
 @customElement('service-base-100554')
 export abstract class ServiceBase extends StateLitElement {
