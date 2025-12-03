@@ -2,9 +2,9 @@
 
 import { html, repeat } from 'lit';
 import { customElement, query, property, state } from 'lit/decorators.js';
-import { convertFileNameToTag } from '/_100554_/l2/utilsLit';
-import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule';
-import { LessAST } from "/_100554_/l2/pluginEditStyleAST";
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { LessAST } from "/_100554_/l2/pluginEditStyleAST.js";
 
 /// **collab_i18n_start**
 const message_pt = {
