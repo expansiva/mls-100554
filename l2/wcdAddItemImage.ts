@@ -2,9 +2,9 @@
 
 import { html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { collab_image } from './_100554_collabIcons';
-import { CollabLitElement } from "./_100554_collabLitElement";
-import { globalWcd } from './_100554_wcdState';
+import { collab_image } from '/_100554_/l2/collabIcons.js';
+import { CollabLitElement } from "/_100554_/l2/collabLitElement.js";
+import { globalWcd } from '/_100554_/l2/wcdState.js';
 /// **collab_i18n_start**
 const message_pt = {
     image: 'Adicionar uma imagem',
