@@ -1,8 +1,8 @@
 /// <mls shortName="enhancementStyle" project="100554" enhancement="_blank" groupName="other" />
 
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { getCssWithoutTag } from './_100554_processCssLit'
-import { preCompileLess as compileLess } from './_100554_designSystemBase'
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { getCssWithoutTag } from '/_100554_/l2/processCssLit.js'
+import { preCompileLess as compileLess } from '/_100554_/l2/designSystemBase.js'
 
 export const requires: mls.l2.enhancement.IRequire[] = [];
 
