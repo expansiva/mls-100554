@@ -3,7 +3,7 @@
 import { html, css, LitElement, repeat, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertTagToFileName, convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'; 
 
 @customElement('collab-panel-item-100554')
 export class CollabPanelItem extends CollabLitElement {
@@ -97,7 +97,7 @@ export class CollabPanelItem extends CollabLitElement {
     private async setMyInfo() {
         if (!this.widget) return;
         const file = mls.l2.getPath(this.widget);
-        const modulePlugin = await import('./' + `_${file.project}_${file.shortName}`);
+        const modulePlugin = await import('/' + `_${file.project}_${file.shortName}`);
         this.myInfo = modulePlugin.pluginData;
         this.setAttribute('loading', '');
 
