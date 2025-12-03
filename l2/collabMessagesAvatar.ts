@@ -2,8 +2,8 @@
 
 import { html, css, svg, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { collab_user } from './_100554_collabIcons';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { collab_user } from '/_100554_/l2/collabIcons.js';
 
 @customElement('collab-messages-avatar-100554')
 export class CollabMessagesAvatar100554 extends StateLitElement {
