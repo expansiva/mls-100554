@@ -1,10 +1,10 @@
 /// <mls shortName="agentGeneratePrototype3" project="100554" enhancement="_blank" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import { getPayload2, PayLoad2 } from './_100554_agentGeneratePrototype2';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { getPayload2, PayLoad2 } from '/_100554_/l2/agentGeneratePrototype2.js';
 
-import { getTokensLess, getTokens, IDesignSystemTokens} from "./_100554_designSystemBase";
+import { getTokensLess, getTokens, IDesignSystemTokens} from "/_100554_/l2/designSystemBase.js";
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
@@ -13,13 +13,13 @@ import {
     updateTaskTitle,
     updateStepStatus,
     getNextPendentStep
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
     addNewStep,
     ClarificationQuestions,
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentGeneratePrototype3";
 const project = 100554;
