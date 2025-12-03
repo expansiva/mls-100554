@@ -2,31 +2,31 @@
 
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IServiceMenu, IOptions } from './_100554_serviceBase';
-import { getTokens } from './_100554_designSystemBase';
-import { getConfigProject } from './_100554_libProjectConfig';
-import { createPath, getLastOpenedFiles, OpenedFileL2 } from './_100554_libCommom';
-import { collabImport } from './_100554_collabImport';
-import { createThread } from './_100554_collabMessageHelper';
-import { getThreadByName } from './_100554_msgDBController';
+import { ServiceBase, IService, IServiceMenu, IOptions } from '/_100554_/l2/serviceBase.js';
+import { getTokens } from '/_100554_/l2/designSystemBase.js';
+import { getConfigProject } from '/_100554_/l2/libProjectConfig.js';
+import { createPath, getLastOpenedFiles, OpenedFileL2 } from '/_100554_/l2/libCommom.js';
+import { collabImport } from '/_100554_/l2/collabImport.js';
+import { createThread } from '/_100554_/l2/collabMessageHelper.js';
+import { getThreadByName } from '/_100554_/l2/msgDBController.js';
 
-import { globalState, setState, initState, getState } from './_100554_collabState';
-import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from './_100554_collabIcons';
-import { CollabState } from './_100554_collabState';
-import { TsTestAst } from './_100554_tsTestAST';
-import { getUserId } from './_100554_collabMessageHelper';
-import { getTemporaryContext, getAgentInstanceByName } from './_100554_aiAgentHelper';
-import { createModel } from './_100554_collabLibModel';
+import { globalState, setState, initState, getState } from '/_100554_/l2/collabState.js';
+import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from '/_100554_/l2/collabIcons.js';
+import { CollabState } from '/_100554_/l2/collabState.js';
+import { TsTestAst } from '/_100554_/l2/tsTestAST.js';
+import { getUserId } from '/_100554_/l2/collabMessageHelper.js';
+import { getTemporaryContext, getAgentInstanceByName } from '/_100554_/l2/aiAgentHelper.js';
+import { createModel } from '/_100554_/l2/collabLibModel.js';
 
-import { IAgent } from './_100554_aiAgentBase';
+import { IAgent } from '/_100554_/l2/aiAgentBase.js';
 
-import './_100554_collabConsole';
-import './_100554_collabResultTest';
-import './_100554_servicePreviewView';
-import './_100554_pluginPreviewInsights';
-import './_100554_collabMessagesPrompt';
-import './_100554_collabSpliterVerticalVarFixed';
-import './_100554_collabSpliterHorizontalVarFixed';
+import '/_100554_/l2/collabConsole.js';
+import '/_100554_/l2/collabResultTest.js';
+import '/_100554_/l2/servicePreviewView.js';
+import '/_100554_/l2/pluginPreviewInsights.js';
+import '/_100554_/l2/collabMessagesPrompt.js';
+import '/_100554_/l2/collabSpliterVerticalVarFixed.js';
+import '/_100554_/l2/collabSpliterHorizontalVarFixed.js';
 
 /// **collab_i18n_start**
 const message_pt = {
