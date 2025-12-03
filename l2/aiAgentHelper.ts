@@ -1,12 +1,12 @@
 /// <mls shortName="aiAgentHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { updateMessage, getMessage } from "./_100554_msgDBController";
-import { getUserId, createThread } from "./_100554_collabMessageHelper";
-import { getThreadByName } from './_100554_msgDBController';
-import { loadAgent } from './_100554_aiAgentOrchestration';
-import { openService } from './_100554_libCommom';
-import { IAgent } from './_100554_aiAgentBase';
-import { collabImport } from './_100554_collabImport';
+import { updateMessage, getMessage } from "/_100554_/l2/msgDBController.js";
+import { getUserId, createThread } from "/_100554_/l2/collabMessageHelper.js";
+import { getThreadByName } from '/_100554_/l2/msgDBController.js';
+import { loadAgent } from '/_100554_/l2/aiAgentOrchestration.js';
+import { openService } from '/_100554_/l2/libCommom.js';
+import { IAgent } from '/_100554_/l2/aiAgentBase.js';
+import { collabImport } from '/_100554_/l2/collabImport.js';
 
 /**
  * Helper function to collect all steps from a task in a flat array
