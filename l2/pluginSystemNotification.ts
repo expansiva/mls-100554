@@ -2,7 +2,7 @@
 
 import { html, css, svg, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 
 /// **collab_i18n_start**
 const message_pt = {
