@@ -2,11 +2,11 @@
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { getConfigProject } from './_100554_libProjectConfig';
-import { loadPluginProject } from './_100554_libCommom';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
+import { getConfigProject } from '/_100554_/l2/libProjectConfig.js';
+import { loadPluginProject } from '/_100554_/l2/libCommom.js';
 
-import './_100554_collabTiles';
+import '/_100554_/l2/collabTiles.js';
 
 @customElement('service-dashboard-100554')
 export class ServiceDashboard100554 extends ServiceBase {
