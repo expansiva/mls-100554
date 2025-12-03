@@ -2,10 +2,10 @@
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { WCDOverlayMethods } from './_100554_wcdTypes';
-import * as commandChangeImage from './_100554_wcdCommandChangeSizeImage';
-import { globalWcd } from './_100554_wcdState';
+import { WcdToolboxItemBase } from '/_100554_/l2/wcdToolboxItemBase.js';
+import { WCDOverlayMethods } from '/_100554_/l2/wcdTypes.js';
+import * as commandChangeImage from '/_100554_/l2/wcdCommandChangeSizeImage.js';
+import { globalWcd } from '/_100554_/l2/wcdState.js';
 
 @customElement('wcd-menu-item-image-100554')
 export class WcdAdd100554 extends WcdToolboxItemBase {
