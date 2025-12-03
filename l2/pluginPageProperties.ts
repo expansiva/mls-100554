@@ -2,8 +2,8 @@
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { ServiceBase } from './_100554_serviceBase';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
 
 /// **collab_i18n_start**
 const message_pt = {
