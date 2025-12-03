@@ -1,8 +1,8 @@
 /// <mls shortName="agentGeneratePrototype2" project="100554" enhancement="_blank" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import { getPayload1, PayLoad1 } from './_100554_agentGeneratePrototype';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { getPayload1, PayLoad1 } from '/_100554_/l2/agentGeneratePrototype.js';
 
 import {
     getNextPendingStepByAgentName,
@@ -13,7 +13,7 @@ import {
     getNextInProgressStepByAgentName,
     updateStepStatus,
     updateTaskTitle
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
     startNewInteractionInAiTask,
@@ -23,7 +23,7 @@ import {
     ClarificationValue,
     ClarificationQuestions,
     startClarification
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentGeneratePrototype2";
 const project = 100554;
