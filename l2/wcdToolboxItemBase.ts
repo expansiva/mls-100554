@@ -1,9 +1,9 @@
 /// <mls shortName="wcdToolboxItemBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import {WCDToolboxMethodos, WCDToolboxItemMethodos} from './_100554_wcdTypes';
-import { IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { globalWcd } from './_100554_wcdState';
+import {WCDToolboxMethodos, WCDToolboxItemMethodos} from '/_100554_/l2/wcdTypes.js';
+import { IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { globalWcd } from '/_100554_/l2/wcdState.js';
 
 export abstract class WcdToolboxItemBase extends CollabLitElement implements WCDToolboxItemMethodos {
 
