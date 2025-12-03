@@ -2,9 +2,9 @@
 
 import { html } from 'lit';
 import { customElement, state, property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { collab_file_pen, collab_magnifying_glass } from './_100554_collabIcons';
-import { getState } from './_100554_collabState';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { collab_file_pen, collab_magnifying_glass } from '/_100554_/l2/collabIcons.js';
+import { getState } from '/_100554_/l2/collabState.js';
 
 @customElement('plugin-prototype-improve-100554')
 export class PluginPrototypeImprove100554 extends StateLitElement {
