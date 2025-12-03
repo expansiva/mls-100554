@@ -2,11 +2,11 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { IcaApresentationTextCodeBase } from './_100554_icaApresentationTextCodeBase';
-import { IcaLitElementBaseMethods } from '_100554_icaTypes';
-import { WCDToolboxMethodos } from '_100554_wcdTypes';
-import { dispatchEventConciliate } from './_100554_wcdCommandBase';
+import { WcdToolboxItemBase } from '/_100554_/l2/wcdToolboxItemBase.js';
+import { IcaApresentationTextCodeBase } from '/_100554_/l2/icaApresentationTextCodeBase.js';
+import { IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js';
+import { WCDToolboxMethodos } from '/_100554_/l2/wcdTypes.js';
+import { dispatchEventConciliate } from '/_100554_/l2/wcdCommandBase.js';
 
 @customElement('wcd-toolbox-item-action-code-language-100554')
 export class WcdToolboxItemActionCodeLanguage extends WcdToolboxItemBase {
