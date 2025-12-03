@@ -2,10 +2,10 @@
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { convertTagToFileName } from './_100554_utilsLit';
-import { openService, selectLevel } from './_100554_libCommom';
-import './_100554_collabL3EditText';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { convertTagToFileName } from '/_100554_/l2/utilsLit.js';
+import { openService, selectLevel } from '/_100554_/l2/libCommom.js';
+import '/_100554_/l2/collabL3EditText.js';
 
 @customElement('collab-preview-l4-100554')
 export class CollabPreviewL4 extends CollabLitElement {
