@@ -2,7 +2,7 @@
 
 import { html, unsafeHTML, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 @customElement('mls-history-list-100554')
 export class MlsHistoryList extends CollabLitElement {
