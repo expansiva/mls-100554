@@ -1,6 +1,6 @@
 /// <mls shortName="pluginCollabCoreIndex" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { PluginBaseIndex } from './_100554_pluginBaseIndex';
+import { PluginBaseIndex } from '/_100554_/l2/pluginBaseIndex.js';
 
 export class PluginCollabCoreIndex extends PluginBaseIndex {
 
