@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import './_100554_widgetTextCode';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import '/_100554_/l2/widgetTextCode.js';
 
 /// **collab_i18n_start**
 const message_pt = {
