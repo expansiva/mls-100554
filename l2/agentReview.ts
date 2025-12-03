@@ -1,7 +1,7 @@
 /// <mls shortName="agentReview" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { preferModelType, getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
@@ -9,12 +9,12 @@ import {
     getNextPendentStep,
     updateTaskTitle,
     appendLongTermMemory
-} from "./_100554_aiAgentHelper";
-import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "./_100554_aiAgentOrchestration";
-import { forceServiceInstance } from './_100554_libCommom';
-import { getState } from './_100554_collabState';
-import { ServiceSource100554 } from './_100554_serviceSource';
-import { createAllModels } from './_100554_collabLibModel';
+} from "/_100554_/l2/aiAgentHelper.js";
+import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "/_100554_/l2/aiAgentOrchestration.js";
+import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
+import { getState } from '/_100554_/l2/collabState.js';
+import { ServiceSource100554 } from '/_100554_/l2/serviceSource.js';
+import { createAllModels } from '/_100554_/l2/collabLibModel.js';
 
 const agentName = "agentReview";
 
