@@ -2,9 +2,9 @@
 
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { postBackClarification } from "./_100554_aiAgentOrchestration";
-import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { postBackClarification } from "/_100554_/l2/aiAgentOrchestration.js";
+import { convertFileNameToTag, convertTagToFileName } from '/_100554_/l2/utilsLit.js';
 
 @customElement('widget-clarification-new-widget-100554')
 export class WcClarificationPlannerNewWidget100554 extends StateLitElement {
