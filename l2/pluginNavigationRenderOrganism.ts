@@ -2,14 +2,14 @@
 
 import { html, repeat, TemplateResult, LitElement } from 'lit';
 import { customElement, state, property, query } from 'lit/decorators.js';
-import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
-import { collab_trash, collab_pencil, collab_bars, collab_info } from './_100554_collabIcons';
-import { openService } from './_100554_libCommom';
-import { openCollabMessage } from './_100554_aiAgentHelper';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { CollabPreviewL3 } from './_100554_collabPreviewL3';
-import { ServiceBase } from './_100554_serviceBase';
-import { setState } from './_100554_collabState';
+import { convertFileNameToTag, convertTagToFileName } from '/_100554_/l2/utilsLit.js';
+import { collab_trash, collab_pencil, collab_bars, collab_info } from '/_100554_/l2/collabIcons.js';
+import { openService } from '/_100554_/l2/libCommom.js';
+import { openCollabMessage } from '/_100554_/l2/aiAgentHelper.js';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { CollabPreviewL3 } from '/_100554_/l2/collabPreviewL3.js';
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { setState } from '/_100554_/l2/collabState.js';
 
 
 
