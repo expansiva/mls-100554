@@ -2,8 +2,8 @@
 
 import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { collab_file_pen, collab_message, collab_floppy_disk, collab_xmark, collab_trash } from './_100554_collabIcons';
+import { StateLitElement } from '/_100554_/l2/stateLitElement';
+import { collab_file_pen, collab_message, collab_floppy_disk, collab_xmark, collab_trash } from '/_100554_/l2/collabIcons';
 
 @customElement('widget-defs-list-edit-100554')
 export class WidgetDefsListEdit100554 extends StateLitElement {

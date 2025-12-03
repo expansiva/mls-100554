@@ -1,12 +1,12 @@
 /// <mls shortName="servicePreviewL1" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, css, unsafeHTML } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { getDependenciesByHtmlFile, IJSONDependence } from './_100554_libCompile';
-import { IService, IServiceMenu, IToolbarContent, ServiceBase } from './_100554_serviceBase';
-import "./_100554_servicePreviewL1ListServer";
+import { getDependenciesByHtmlFile, IJSONDependence } from '/_100554_/l2/libCompile.js';
+import { IService, IServiceMenu, IToolbarContent, ServiceBase } from '/_100554_/l2/serviceBase.js';
+import "/_100554_/l2/servicePreviewL1ListServer.js";
 
-import { openService, getProjectConfig } from './_100554_libCommom';
-import { convertFileNameToTag } from './_100554_utilsLit';
+import { openService, getProjectConfig } from '/_100554_/l2/libCommom.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
 
 /// **collab_i18n_start**
 const message_pt = {

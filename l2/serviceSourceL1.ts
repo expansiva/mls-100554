@@ -2,22 +2,22 @@
 
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from './_100554_serviceBase';
-import { initState } from './_100554_collabState';
-import { propertyDataSource } from './_100554_collabDecorators';
-import {  collab_typescript, collab_file_code } from './_100554_collabIcons';
-import { createAgent } from './_100554_agentFix';
-import { getTemporaryContext } from './_100554_aiAgentHelper';
-import {  getUserId, createThread } from './_100554_collabMessageHelper';
-import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate } from './_100554_libCommom';
-import { createAllModels, readProjectTypescriptAndCompile, createModel } from './_100554_collabLibModel';
-import { IReqCreateStorFile, createStorFile } from './_100554_collabLibStor';
-import { getThreadByName } from './_100554_msgDBController';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_100554_/l2/serviceBase.js';
+import { initState } from '/_100554_/l2/collabState.js';
+import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
+import {  collab_typescript, collab_file_code } from '/_100554_/l2/collabIcons.js';
+import { createAgent } from '/_100554_/l2/agentFix.js';
+import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
+import {  getUserId, createThread } from '/_100554_/l2/collabMessageHelper.js';
+import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate } from '/_100554_/l2/libCommom.js';
+import { createAllModels, readProjectTypescriptAndCompile, createModel } from '/_100554_/l2/collabLibModel.js';
+import { IReqCreateStorFile, createStorFile } from '/_100554_/l2/collabLibStor.js';
+import { getThreadByName } from '/_100554_/l2/msgDBController.js';
 
-import { CollabSpliterVerticalVarFixed100554 } from './_100554_collabSpliterVerticalVarFixed';
-import './_100554_collabSpliterVerticalVarFixed';
-import './_100554_collabSpliterHorizontalVarFixed';
-import './_100554_cssHelperIndex';
+import { CollabSpliterVerticalVarFixed100554 } from '/_100554_/l2/collabSpliterVerticalVarFixed.js';
+import '/_100554_/l2/collabSpliterVerticalVarFixed.js';
+import '/_100554_/l2/collabSpliterHorizontalVarFixed.js';
+import '/_100554_/l2/cssHelperIndex.js';
 
 /// **collab_i18n_start**
 const message_pt = {

@@ -2,8 +2,8 @@
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
-import { PluginBaseModule } from './_100554_pluginBaseModule';
-import { getDependenciesByMFile } from './_100554_libCompile';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { getDependenciesByMFile } from '/_100554_/l2/libCompile.js';
 
 /// **collab_i18n_start**
 const message_pt = {

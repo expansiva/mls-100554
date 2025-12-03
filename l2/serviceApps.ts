@@ -2,10 +2,10 @@
 
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { getProjectConfig } from './_100554_libCommom';
-import { collabImport } from './_100554_collabImport';
-import './_100554_collabMenuWithSubMenu';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
+import { getProjectConfig } from '/_100554_/l2/libCommom.js';
+import { collabImport } from '/_100554_/l2/collabImport.js';
+import '/_100554_/l2/collabMenuWithSubMenu.js'; 
 
 @customElement('service-apps-100554')
 export class ServiceApps100554 extends ServiceBase {

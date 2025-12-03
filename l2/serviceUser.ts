@@ -2,10 +2,10 @@
 
 import { html, repeat, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { loadPluginProject } from './_100554_libCommom';
-import './_100554_collabPanel';
-import './_100554_collabPanelItem';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
+import { loadPluginProject } from '/_100554_/l2/libCommom.js';
+import '/_100554_/l2/collabPanel.js';
+import '/_100554_/l2/collabPanelItem.js';
 
 /// **collab_i18n_start**
 const message_pt = {

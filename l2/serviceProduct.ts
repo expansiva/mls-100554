@@ -2,9 +2,9 @@
 
 import { html, css, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
 
-import './_100554_widgetMindMapL4';
+import '/_100554_/l2/widgetMindMapL4.js';
 
 @customElement('service-product-100554')
 export class ServiceWorkspace100554 extends ServiceBase {

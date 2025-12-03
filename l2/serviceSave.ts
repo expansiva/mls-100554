@@ -1,15 +1,15 @@
 /// <mls shortName="serviceSave" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, unsafeHTML, repeat } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { ServiceBase, IService, IServiceMenu } from './_100554_serviceBase';
-import { collab_branch } from './_100554_collabIcons';
-import { undoFile } from './_100554_collabLibStor';
-import { initServiceSaveaddBranch } from './_100554_saveAddBranch';
-import { getMyKeysBranch, calculateTotalStringSize } from './_100554_libCommom';
-import { getConfigProject, updateConfigProject } from './_100554_libProjectConfig';
-import { readProjectTypescriptAndCompile } from './_100554_collabLibModel';
-import './_100554_pluginCreateProjectLocalToDriver';
+import { customElement, property, state } from 'lit/decorators.js'; 
+import { ServiceBase, IService, IServiceMenu } from '/_100554_/l2/serviceBase.js';
+import { collab_branch } from '/_100554_/l2/collabIcons.js';
+import { undoFile } from '/_100554_/l2/collabLibStor.js';
+import { initServiceSaveaddBranch } from '/_100554_/l2/saveAddBranch.js';
+import { getMyKeysBranch, calculateTotalStringSize } from '/_100554_/l2/libCommom.js';
+import { getConfigProject, updateConfigProject } from '/_100554_/l2/libProjectConfig.js';
+import { readProjectTypescriptAndCompile } from '/_100554_/l2/collabLibModel.js';
+import '/_100554_/l2/pluginCreateProjectLocalToDriver.js';
 
 initServiceSaveaddBranch();
 

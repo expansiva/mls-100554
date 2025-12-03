@@ -1,6 +1,6 @@
 /// <mls shortName="tsTestAST" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { MonacoDriver } from "./_100554_tsTestMonaco";
+import { MonacoDriver } from "/_100554_/l2/tsTestMonaco.js";
 
 /**
  * Represents an AST node.
@@ -666,8 +666,8 @@ export class TsTestAst {
         this.ast = this.parse();
         if (!this.ast) throw new Error('Invalid ast');
 
-        const import1 = `import { initState, setState, verifyState, watchState } from './_100554_libManagementCan';`
-        const import2 = `import { ICANTest, ICANIntegration, ICANSchema } from './_100554_tsTestAST';`
+        const import1 = `import { initState, setState, verifyState, watchState } from '/_100554_/l2/libManagementCan.js';`
+        const import2 = `import { ICANTest, ICANIntegration, ICANSchema } from '/_100554_/l2/tsTestAST.js';`
 
         const importItem1 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_libManagementCan');
         if (!importItem1) this._addImport(import1);

@@ -1,29 +1,29 @@
 /// <mls shortName="serviceCollabMessages" project="100554" enhancement="_100554_enhancementLitService" groupName="other" />
 
-import { addCoachMark, ICoachMarks } from './_100554_coachMarks';
+import { addCoachMark, ICoachMarks } from '/_100554_/l2/coachMarks.js';
 import { html, css, LitElement } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { listThreads, addThread, listUsers, updateUsers, getThread, cleanupThreads, getTask } from './_100554_msgDBController';
+import { listThreads, addThread, listUsers, updateUsers, getThread, cleanupThreads, getTask } from '/_100554_/l2/msgDBController.js';
 import {
     saveLastTab,
     loadLastTab,
     saveUserId,
     saveLastAlertTime,
     loadLastAlertTime
-} from "./_100554_collabMessageHelper";
-import { openService } from "./_100554_libCommom";
-import { checkIfNotificationUnread } from './_100554_collabMessagesSyncNotifications';
+} from "/_100554_/l2/collabMessageHelper.js";
+import { openService } from "/_100554_/l2/libCommom.js";
+import { checkIfNotificationUnread } from '/_100554_/l2/collabMessagesSyncNotifications.js';
 
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { ICollabMessageEvent } from './_100554_collabMessageHelper';
-import { setFavicon } from './_100554_collabInit';
-import { collab_bell_slash, collab_xmark } from './_100554_collabIcons';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
+import { ICollabMessageEvent } from '/_100554_/l2/collabMessageHelper.js';
+import { setFavicon } from '/_100554_/l2/collabInit.js';
+import { collab_bell_slash, collab_xmark } from '/_100554_/l2/collabIcons.js';
 
-import './_100554_collabMessagesAdd';
-import './_100554_collabMessagesChat';
-import './_100554_collabTasks';
-import './_100554_collabMessagesSettings';
-import './_100554_collabMessagesFindtask';
+import '/_100554_/l2/collabMessagesAdd.js';
+import '/_100554_/l2/collabMessagesChat.js';
+import '/_100554_/l2/collabTasks.js';
+import '/_100554_/l2/collabMessagesSettings.js';
+import '/_100554_/l2/collabMessagesFindtask.js';
 
 /// **collab_i18n_start** 
 const message_pt = {
