@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { getInstanceByFile, openService, saveOpenedFile, getLastModule, setLastModule, getProjectConfig } from './_100554_libCommom';
-import { StateLitElement } from './_100554_stateLitElement';
+import { getInstanceByFile, openService, saveOpenedFile, getLastModule, setLastModule, getProjectConfig } from '/_100554_/l2/libCommom.js';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 
 import '/_100554_pluginDeleteModule';
 
