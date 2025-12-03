@@ -2,7 +2,7 @@
 
 // To improve system performance, avoid using imports, as this file is loaded during initialization.
 
-import { PluginBaseIndex } from './_100554_pluginBaseIndex';
+import { PluginBaseIndex } from '/_100554_/l2/pluginBaseIndex.js';
 
 export class PluginProjectIndex extends PluginBaseIndex {
 
