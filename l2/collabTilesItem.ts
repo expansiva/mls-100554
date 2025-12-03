@@ -2,8 +2,8 @@
 
 import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 
 @customElement('collab-tiles-item-100554')
