@@ -1,6 +1,6 @@
 /// <mls shortName="agentPlanner1" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
 
 import {
     getNextPendingStepByAgentName,
@@ -10,7 +10,7 @@ import {
     getStepById,
     updateTaskTitle,
     notifyTaskChange
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
     systemAgentsAvailable,
@@ -19,14 +19,14 @@ import {
     addRAGAdditionalInformation,
     preferModelType,
     getPromptByHtml
-} from "./_100554_aiPrompts";
+} from "/_100554_/l2/aiPrompts.js";
 
 
 import {
     startNewAiTask,
     executeNextStep,
     startNewInteractionInAiTask,
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentPlanner1";
 
