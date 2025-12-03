@@ -1,10 +1,10 @@
 /// <mls shortName="ateste" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';
-import { customElement, property, state, query } from 'lit/decorators.js'; 
+import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
-import { createModel } from '/_100554_/l2/collabLibModel.js' 
+import { createModel } from '/_100554_/l2/collabLibModel.js'
 
 @customElement('ateste-100554')
 export class SimpleGreeting extends CollabLitElement {
@@ -61,7 +61,7 @@ export class SimpleGreeting extends CollabLitElement {
 
       itens.push(key);*/
 
-      if (f && f.level === 2 && ['.ts'].includes(f.extension) &&
+      /*if (f && f.level === 2 && ['.ts'].includes(f.extension) &&
         (
 
           f.shortName.startsWith('service') ||
@@ -75,6 +75,27 @@ export class SimpleGreeting extends CollabLitElement {
           f.shortName.startsWith('pluginNewProjectLog') 
 
         )
+
+      ) itens.push(key);*/
+
+      if (f && f.level === 2 && ['.ts'].includes(f.extension) &&
+
+        (
+          f.shortName.startsWith('p')
+
+        ) &&
+
+        !f.shortName.startsWith('pluginPreview') &&
+        !f.shortName.startsWith('previewModeSinglePage') &&
+        !f.shortName.startsWith('previewModeMinimum') &&
+        !f.shortName.startsWith('pluginCreateProjectLocalToDriver') &&
+        !f.shortName.startsWith('pluginNewProjectLog') && 
+        !f.shortName.startsWith('process') &&
+        !f.shortName.startsWith('pluginTask') &&
+        !f.shortName.startsWith('pluginStyleIndexItem') &&
+        !f.shortName.startsWith('previewModeUtil')
+
+
 
       ) itens.push(key);
 
