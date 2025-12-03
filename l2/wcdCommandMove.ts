@@ -1,8 +1,8 @@
 /// <mls shortName="wcdCommandMove" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { dispatchEventConciliate } from './_100554_wcdCommandBase';
-import { canMoveElement } from './_100554_icaBaseDescription';
+import { IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js';
+import { dispatchEventConciliate } from '/_100554_/l2/wcdCommandBase.js';
+import { canMoveElement } from '/_100554_/l2/icaBaseDescription.js';
 
 export function move(el: IcaLitElementBaseMethods, target: IcaLitElementBaseMethods, pos: 'above' | 'below' | 'inside', update: boolean = true) {
 
