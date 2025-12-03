@@ -179,7 +179,7 @@ export class CollabMessagesPrompt100554 extends StateLitElement {
         for await (const k of keys) {
             if (k.indexOf('agent') < 0) continue;
             const file = mls.stor.files[k];
-            const path = `./_${file.project}_${file.folder ? file.folder + '/' : ''}${file.shortName}`;
+            const path = `/_${file.project}_${file.folder ? file.folder + '/' : ''}${file.shortName}`;
             if (file.extension !== '.ts' || !file.shortName.startsWith('agent')) continue;
             try {
                 const mdl = await import(path);
