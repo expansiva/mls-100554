@@ -1,20 +1,20 @@
 /// <mls shortName="agentProjectSearch" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 
 import {
   getAgentStepByAgentName,
   notifyTaskChange,
   updateStepStatus,
   getNextStepIdAvaliable,
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
   startNewAiTask,
   executeNextStep,
   addNewStep
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentProjectSearch";
 const project: number = 100554;//Number(localStorage.getItem("l5-last-project") || "1");
