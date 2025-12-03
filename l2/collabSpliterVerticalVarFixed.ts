@@ -2,7 +2,7 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { collab_chevron_down } from './_100554_collabIcons'
+import { collab_chevron_down } from '/_100554_/l2/collabIcons.js'
 
 @customElement('collab-spliter-vertical-var-fixed-100554')
 export class CollabSpliterVerticalVarFixed100554 extends LitElement {
