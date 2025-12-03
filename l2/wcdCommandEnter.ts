@@ -1,9 +1,9 @@
 /// <mls shortName="wcdCommandEnter" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { IWCDCommand } from './_100554_wcdTypes';
-import { dispatchEventConciliate, importFilesIfNeeded } from './_100554_wcdCommandBase';
-import { findParentElementWithTagName, countElementsWithTagName } from './_100554_wcdGlobal';
+import { IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js';
+import { IWCDCommand } from '/_100554_/l2/wcdTypes.js';
+import { dispatchEventConciliate, importFilesIfNeeded } from '/_100554_/l2/wcdCommandBase.js';
+import { findParentElementWithTagName, countElementsWithTagName } from '/_100554_/l2/wcdGlobal.js';
 
 
 export function execute(param: IWCDCommand) {
