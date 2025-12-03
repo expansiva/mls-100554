@@ -1,5 +1,5 @@
 /// <mls shortName="wcdCommandBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-import { convertTagToFileName } from './_100554_utilsLit';
+import { convertTagToFileName } from '/_100554_/l2/utilsLit.js';
 
 export function dispatchEventConciliate() {
     mls.events.fire([2], ['DomAction']);
