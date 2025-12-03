@@ -2,9 +2,9 @@
 
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { collab_trash } from './_100554_collabIcons';
-import { updateHTML } from './_100554_collabDOMSync';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { collab_trash } from '/_100554_/l2/collabIcons.js';
+import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
 
 @customElement('ai-agent-custom-100554')
 export class CollabFCATree extends CollabLitElement {
