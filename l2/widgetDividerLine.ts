@@ -2,7 +2,7 @@
 
 import { html, css, LitElement } from 'lit'; 
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 
 @customElement('widget-divider-line-100554')
 export class WidgetDivider100554 extends StateLitElement {
