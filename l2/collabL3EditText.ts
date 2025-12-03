@@ -2,12 +2,12 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { initState } from './_100554_collabState';
-import { createModel } from './_100554_collabLibModel';
-import './_100554_collabL3PreviewText';
-import './_100554_collabL3PreviewTextAttr';
-import './_100554_collabL3PreviewTextI18n';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { initState } from '/_100554_/l2/collabState.js';
+import { createModel } from '/_100554_/l2/collabLibModel.js';
+import '/_100554_/l2/collabL3PreviewText.js';
+import '/_100554_/l2/collabL3PreviewTextAttr.js';
+import '/_100554_/l2/collabL3PreviewTextI18n.js';
 
 
 @customElement('collab-l3-edit-text-100554')
