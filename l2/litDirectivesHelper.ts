@@ -12,13 +12,13 @@ import {
   DirectiveParent,
   TemplateResult,
   CompiledTemplateResult,
-} from './_100554_litHtml';
+} from '/_100554_/l2/litHtml.js';
 import {
   DirectiveResult,
   DirectiveClass,
   PartInfo,
   AttributePartInfo,
-} from './_100554_litDirectives';
+} from '/_100554_/l2/litDirectives.js';
 export type Primitive = null | undefined | boolean | number | string | symbol | bigint;
 
 const {_ChildPart: ChildPart} = _$LH;
