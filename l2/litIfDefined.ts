@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import { nothing } from './_100554_litHtml';
+import { nothing } from '/_100554_/l2/litHtml.js';
 
 /**
  * For AttributeParts, sets the attribute if the value is defined and removes
