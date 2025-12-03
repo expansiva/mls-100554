@@ -2,10 +2,10 @@
 
 import { html } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from './_100554_serviceBase';
-import { getAllWebComponentsInSource } from './_100554_libCompile';
-import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
-import { loadPluginProject } from './_100554_libCommom';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_100554_/l2/serviceBase.js';
+import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
+import { convertTagToFileName, convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { loadPluginProject } from '/_100554_/l2/libCommom.js';
 import('./_100554_collabPanel');
 
 /// **collab_i18n_start**
