@@ -2,7 +2,7 @@
 
 import { html, css, svg } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
 
 @customElement('service-prompt-100554')
 export class ServicePrompt100554 extends ServiceBase {
