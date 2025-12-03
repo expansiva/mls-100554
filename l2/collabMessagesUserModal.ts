@@ -2,9 +2,9 @@
 
 import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { collab_message } from './_100554_collabIcons';
-import { createThreadDM, getDmThreadByUsers, addMessage } from './_100554_collabMessageHelper';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { collab_message } from '/_100554_/l2/collabIcons.js';
+import { createThreadDM, getDmThreadByUsers, addMessage } from '/_100554_/l2/collabMessageHelper.js';
 
 /// **collab_i18n_start**
 const message_pt = {

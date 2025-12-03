@@ -2,9 +2,9 @@
 
 import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { updateHTML } from './_100554_collabDOMSync';
-import { createModel } from './_100554_collabLibModel'
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
+import { createModel } from '/_100554_/l2/collabLibModel.js' 
 
 @customElement('ateste-100554')
 export class SimpleGreeting extends CollabLitElement {
@@ -30,15 +30,15 @@ export class SimpleGreeting extends CollabLitElement {
   async clickBusca() {
 
     let itens: string[] = [];
-    let erros = [];
+    let erros:string[] = [];
 
     Object.keys(mls.stor.files).forEach((key) => {
 
       const f = mls.stor.files[key];
 
-      if (!f || f.level !== 2 || !['.ts'].includes(f.extension) || f.shortName === 'ateste' || f.shortName.startsWith('wcd') || f.shortName.startsWith('ica')) return;
+      //if (!f || f.level !== 2 || !['.ts'].includes(f.extension) || f.shortName === 'ateste' || f.shortName.startsWith('wcd') || f.shortName.startsWith('ica')) return;
 
-      itens.push(key);
+      if(f && f.level === 2 && ['.ts'].includes(f.extension) && (f.shortName.startsWith('c') || f.shortName.startsWith('d') || f.shortName.startsWith('l') || f.shortName.startsWith('e') || f.shortName.startsWith('m') || f.shortName.startsWith('a') || f.shortName.startsWith('validate') || f.shortName.startsWith('process') || f.shortName.startsWith('stateLit') || f.shortName.startsWith('pluginTask')|| f.shortName.startsWith('icaApresentationTextRichBase')|| f.shortName.startsWith('icaLitElementBase')|| f.shortName.startsWith('icaTypes')|| f.shortName.startsWith('widgetTextCode')|| f.shortName.startsWith('icaApresentationTextCodeBase') || f.shortName.startsWith('pluginStyleIndexItem')) && !f.shortName.startsWith('collabMessagesThreadModal') && !f.shortName.startsWith('previewModeUtil')) itens.push(key);
 
     })
 
@@ -57,7 +57,7 @@ export class SimpleGreeting extends CollabLitElement {
       let newSource = this.tratarFinalImportMultiLinha(source);
       newSource = this.tratarImportLateralExclusivo(newSource);
       newSource = this.tratarAwaitImportDinamico(newSource);
-      newSource = newSource.replace(`enhancement="_100554_enhancementLitService"`, `enhancement="_100554_enhancementLit"`)
+      newSource = newSource.replace(`enhancement="_100554_enhancementLit"`, `enhancement="_100554_enhancementLit"`)
 
       this.teste.value = newSource;
 
@@ -171,4 +171,5 @@ export class SimpleGreeting extends CollabLitElement {
   }
 
 }
+
 

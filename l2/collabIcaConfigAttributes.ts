@@ -2,8 +2,8 @@
 
 import { html, repeat } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { ServiceBase } from './_100554_serviceBase';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 export const initCollabICATree = '';
 

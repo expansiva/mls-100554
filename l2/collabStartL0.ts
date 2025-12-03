@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 
 /// **collab_i18n_start**
 const message_pt = {

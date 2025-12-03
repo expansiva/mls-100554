@@ -1,8 +1,8 @@
 /// <mls shortName="dependenciesLit" project="100554" enhancement="_blank" />
 				
-import { convertTagToFileName } from './_100554_utilsLit'
-import type { IJSDoc } from './_100554_propiertiesLit';
-import { setErrorOnModel } from './_100554_validateLit'
+import { convertTagToFileName } from '/_100554_/l2/utilsLit.js'
+import type { IJSDoc } from '/_100554_/l2/propiertiesLit.js';
+import { setErrorOnModel } from '/_100554_/l2/validateLit.js'
 
 export function getComponentDependencies(model: mls.editor.IModelTS): string[] {
 

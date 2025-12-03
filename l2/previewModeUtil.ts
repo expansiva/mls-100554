@@ -1,8 +1,8 @@
 /// <mls shortName="previewModeUtil" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IJSONDependence } from './_100554_libCompile';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { ServiceBase } from './_100554_serviceBase'
+import { IJSONDependence } from '/_100554_/l2/libCompile';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit';
+import { ServiceBase } from '/_100554_/l2/serviceBase'
 
 export function mountJSImporMap(info: IJSONDependence, ifr: HTMLIFrameElement): void {
 
@@ -131,7 +131,7 @@ export function addNav3(ifr: HTMLIFrameElement, file: mls.stor.IFileInfo) {
         const tag = convertFileNameToTag({ project: file.project, shortName: file.shortName, folder: file.folder });
         const old = ifr.contentDocument.querySelector(tag);
         if (!old) return;
-        await import(`./_${file.project}_${file.shortName}`);
+        await import(`/_${file.project}_/l2/${file.shortName}`);
 
         const instance = old.cloneNode() as ServiceBase;
         const lvl = instance.getAttribute('level') || '2';

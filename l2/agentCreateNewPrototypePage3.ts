@@ -1,15 +1,15 @@
 /// <mls shortName="agentCreateNewPrototypePage3" project="100554" enhancement="_blank" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { loadModuleFromProjectOrDependency } from '/_100554_/l2/libCommom.js';
 
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
     executeNextStep,
     addNewStep
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 import {
     getNextPendingStepByAgentName,
@@ -18,7 +18,7 @@ import {
     updateTaskTitle,
     getNextPendentStep,
     appendLongTermMemory
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 const agentName = "agentCreateNewPrototypePage3";
 

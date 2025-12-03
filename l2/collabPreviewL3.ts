@@ -2,9 +2,9 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { initState } from './_100554_collabState';
-import './_100554_collabL3EditText';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { initState } from '/_100554_/l2/collabState.js';
+import '/_100554_/l2/collabL3EditText.js';
 
 @customElement('collab-preview-l3-100554')
 export class CollabPreviewL3 extends CollabLitElement {

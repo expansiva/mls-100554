@@ -1,10 +1,10 @@
 /// <mls shortName="libCommom" project="100554" enhancement="_blank" groupName="other" />
 
-import { getMessageKey } from "./_100554_collabLitElement";
-import { getAllWebComponentsInSource } from './_100554_libCompile';
-import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
-import { collabImport } from './_100554_collabImport';
-import { ServiceDetail100554 } from './_100554_serviceDetail';
+import { getMessageKey } from "/_100554_/l2/collabLitElement.js";
+import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
+import { convertTagToFileName, convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { collabImport } from '/_100554_/l2/collabImport.js';
+import { ServiceDetail100554 } from '/_100554_/l2/serviceDetail.js';
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -556,7 +556,7 @@ export function getBaseTemplate(file: IInfoFile, enhancement: string = '_blank')
 
         case ('.less'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n${convertFileNameToTag({ project, shortName, folder })} {\n\n// Here your less\n\n }`;
 
-        case ('.test.ts'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n import { ICANTest, ICANIntegration, ICANSchema  } from './_100554_tsTestAST';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
+        case ('.test.ts'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n import { ICANTest, ICANIntegration, ICANSchema  } from '/_100554_/l2/tsTestAST.js';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
 
         case ('.defs.ts'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n`;
 

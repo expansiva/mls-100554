@@ -2,11 +2,11 @@
 
 import { html, css, repeat } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { ServiceBase } from './_100554_serviceBase';
-import { getUserId } from "./_100554_collabMessageHelper";
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { getUserId } from "/_100554_/l2/collabMessageHelper.js";
 
-import './_100554_collabMessagesTaskDetails';
+import '/_100554_/l2/collabMessagesTaskDetails.js';
 
 
 /// **collab_i18n_start** 

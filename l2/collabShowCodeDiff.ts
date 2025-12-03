@@ -8,8 +8,8 @@ import {
     collab_repeat,
     collab_thumbs_down,
     collab_thumbs_up,
-} from './_100554_collabIcons'
-import { CollabLitElement } from './_100554_collabLitElement';
+} from '/_100554_/l2/collabIcons.js'
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 
 export function initCollabShowCodeDiff100554() {
@@ -17,7 +17,7 @@ export function initCollabShowCodeDiff100554() {
 }
 /// **collab_i18n_start**
 const message_pt = {
-    diff: 'Com Diferença',
+    diff: 'Com DiferenÃ§a',
     reject: 'Rejeitar',
     tryAgain: 'Tentar Novamente',
     accept: 'Aceitar',

@@ -2,19 +2,19 @@
 
 import { html, css, repeat } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { updateUsers } from './_100554_msgDBController';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { updateUsers } from '/_100554_/l2/msgDBController.js';
 
-import { ServiceBase } from './_100554_serviceBase';
-import { loadChatPreferences, saveChatPreferences, saveNotificationPreferencesAudio, loadNotificationPreferencesAudio } from './_100554_collabMessageHelper';
+import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { loadChatPreferences, saveChatPreferences, saveNotificationPreferencesAudio, loadNotificationPreferencesAudio } from '/_100554_/l2/collabMessageHelper.js';
 import {
     IChatPreferences,
     TranslateMode,
     loadNotificationPreferences,
     registerToken,
     saveNotificationPreferences
-} from './_100554_collabMessageHelper';
-import { listThreads } from './_100554_msgDBController';
+} from '/_100554_/l2/collabMessageHelper.js';
+import { listThreads } from '/_100554_/l2/msgDBController.js';
 
 import {
     collab_user,
@@ -23,7 +23,7 @@ import {
     collab_dot,
     collab_message,
     collab_bell
-} from './_100554_collabIcons';
+} from '/_100554_/l2/collabIcons.js';
 
 /// **collab_i18n_start** 
 const message_pt = {

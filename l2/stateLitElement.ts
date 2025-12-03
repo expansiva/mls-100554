@@ -1,8 +1,8 @@
 /// <mls shortName="stateLitElement" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { CollabLitElement } from './_100554_collabLitElement';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { PropertyValueMap } from 'lit';
-import { getState, setState, subscribe, unsubscribe, notify } from './_100554_collabState';
+import { getState, setState, subscribe, unsubscribe, notify } from '/_100554_/l2/collabState.js';
 
 const isTrace = false;
 

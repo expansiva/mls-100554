@@ -2,8 +2,8 @@
 
 import { html, css, LitElement, repeat, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { convertTagToFileName, convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 @customElement('collab-panel-item-100554')
 export class CollabPanelItem extends CollabLitElement {

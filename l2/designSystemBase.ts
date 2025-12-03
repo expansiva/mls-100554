@@ -1,9 +1,9 @@
 /// <mls shortName="designSystemBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { ServiceSource100554 } from './_100554_serviceSource';
-import { forceServiceInstance } from './_100554_libCommom';
-import { createAllModels } from './_100554_collabLibModel'
-import { collabImport } from './_100554_collabImport';
+import { ServiceSource100554 } from '/_100554_/l2/serviceSource.js';
+import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
+import { createAllModels } from '/_100554_/l2/collabLibModel.js'
+import { collabImport } from '/_100554_/l2/collabImport.js';
 
 export const acceptedImages = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".webp"];
 export const acceptedVideos = [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v"]

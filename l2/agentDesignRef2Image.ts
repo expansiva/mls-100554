@@ -1,16 +1,16 @@
 /// <mls shortName="agentDesignRef2Image" project="100554" enhancement="_blank" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 import {
     getNextInProgressStepByAgentName,
     getAgentStepByAgentName,
     updateStepStatus,
     updateTaskTitle,
     getNextStepIdAvaliable
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
-import { startNewAiTask, addNewStep, executeNextStep } from "./_100554_aiAgentOrchestration";
+import { startNewAiTask, addNewStep, executeNextStep } from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentDesignRef2Image";
 const nextAgentName = "agentDesignRef2Image2";

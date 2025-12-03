@@ -1,8 +1,8 @@
 /// <mls shortName="collabLibStor" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { convertFileNameToTag } from './_100554_utilsLit'
-import { createModel, createAllModels } from './_100554_collabLibModel'
-import { getBaseTemplate, verifyNeedAddTripleslach } from './_100554_libCommom';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
+import { createModel, createAllModels } from '/_100554_/l2/collabLibModel.js'
+import { getBaseTemplate, verifyNeedAddTripleslach } from '/_100554_/l2/libCommom.js';
 
 export async function createStorFile(req: IReqCreateStorFile, needCreateModel: boolean, needCompile: boolean = true, awaitCompile: boolean = false): Promise<mls.stor.IFileInfo> {
 

@@ -2,7 +2,7 @@
 
 import { html, css, LitElement, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 @customElement('driver-test-100554')
 export class DriverTest extends CollabLitElement {

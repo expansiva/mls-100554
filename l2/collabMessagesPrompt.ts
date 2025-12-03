@@ -1,13 +1,13 @@
 /// <mls shortName="collabMessagesPrompt" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 import { html, ifDefined } from 'lit';
 import { customElement, property, state, query, } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { collab_arrow_up_long } from './_100554_collabIcons';
-import { getThread, listUsers } from './_100554_msgDBController';
-import { IAgent } from './_100554_aiAgentBase'
-import { emojiList } from './_100554_collabMessagesEmojis'
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { collab_arrow_up_long } from '/_100554_/l2/collabIcons.js';
+import { getThread, listUsers } from '/_100554_/l2/msgDBController.js';
+import { IAgent } from '/_100554_/l2/aiAgentBase.js'
+import { emojiList } from '/_100554_/l2/collabMessagesEmojis.js'
 
-import './_100554_collabMessagesAvatar';
+import '/_100554_/l2/collabMessagesAvatar.js';
 
 @customElement('collab-messages-prompt-100554')
 export class CollabMessagesPrompt100554 extends StateLitElement {

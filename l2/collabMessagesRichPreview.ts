@@ -2,9 +2,9 @@
 
 import { html, unsafeHTML, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { IcaApresentationTextRichBase } from './_100554_icaApresentationTextRichBase';
-import { propertyDataSource } from './_100554_collabDecorators';
-import './_100554_widgetTextCode';
+import { IcaApresentationTextRichBase } from '/_100554_/l2/icaApresentationTextRichBase.js';
+import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
+import '/_100554_/l2/widgetTextCode.js';
 
 @customElement('collab-messages-rich-preview-100554')
 export class WidgetText2CollabMessagesMD extends IcaApresentationTextRichBase {

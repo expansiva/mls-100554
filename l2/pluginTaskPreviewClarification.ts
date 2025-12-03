@@ -2,9 +2,9 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement'; 
-import {getStepById, getTemporaryContext} from "./_100554_aiAgentHelper";
-import { IAgent } from './_100554_aiAgentBase';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'; 
+import {getStepById, getTemporaryContext} from "/_100554_/l2/aiAgentHelper.js";
+import { IAgent } from '/_100554_/l2/aiAgentBase.js';
 
 @customElement('plugin-task-preview-clarification-100554')   
 export class PluginTaskPreviewClarification extends CollabLitElement { 

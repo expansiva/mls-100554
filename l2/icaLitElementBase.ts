@@ -1,8 +1,8 @@
 /// <mls shortName="icaLitElementBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import * as tps from './_100554_icaTypes';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import * as tps from '/_100554_/l2/icaTypes.js';
 
 export abstract class IcaLitElementBase extends StateLitElement implements tps.IcaLitElementBaseMethods {
 

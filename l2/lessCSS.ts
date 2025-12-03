@@ -1,7 +1,7 @@
 /// <mls shortName="lessCSS" project="100554" enhancement="_blank" />
 
-import { LessAst } from "./_100554_lessAST";
-import { setState, getState, initState } from './_100554_collabState';
+import { LessAst } from "/_100554_/l2/lessAST.js";
+import { setState, getState, initState } from '/_100554_/l2/collabState.js';
 
 /**
  * A unique symbol used as a key for properties that should be ignored during JSON serialization.

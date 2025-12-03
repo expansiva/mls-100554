@@ -1,10 +1,10 @@
 /// <mls shortName="agentGenerateStyle" project="100554" enhancement="_blank" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import { createAllModels } from './_100554_collabLibModel';
-import { removeTokensFromSource } from './_100554_enhancementStyle';
-import { getTokensLess, getGlobalLess } from './_100554_designSystemBase';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { createAllModels } from '/_100554_/l2/collabLibModel.js';
+import { removeTokensFromSource } from '/_100554_/l2/enhancementStyle.js';
+import { getTokensLess, getGlobalLess } from '/_100554_/l2/designSystemBase.js';
 
 import {
     getNextPendingStepByAgentName,
@@ -13,13 +13,13 @@ import {
     appendLongTermMemory,
     notifyTaskChange,
     updateStepStatus,
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
     executeNextStep,
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentGenerateStyle";
 const project = 100554;

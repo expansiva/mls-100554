@@ -2,15 +2,15 @@
 
 import { html, css, repeat, ifDefined } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { updateThread, getUser, deleteAllMessagesFromThread } from './_100554_msgDBController';
-import { collab_triangle_exclamation, collab_user } from './_100554_collabIcons';
-import { notifyThreadChange } from './_100554_aiAgentHelper';
-import { StateLitElement } from './_100554_stateLitElement';
-import { addMessage } from "./_100554_collabMessageHelper";
+import { updateThread, getUser, deleteAllMessagesFromThread } from '/_100554_/l2/msgDBController.js';
+import { collab_triangle_exclamation, collab_user } from '/_100554_/l2/collabIcons.js';
+import { notifyThreadChange } from '/_100554_/l2/aiAgentHelper.js';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { addMessage } from "/_100554_/l2/collabMessageHelper.js";
 
-import './_100554_collabInputTag';
-import './_100554_collabMessagesAddParticipant';
-import './_100554_collabMessagesChangeAvatar';
+import '/_100554_/l2/collabInputTag.js';
+import '/_100554_/l2/collabMessagesAddParticipant.js';
+import '/_100554_/l2/collabMessagesChangeAvatar.js';
 
 /// **collab_i18n_start** 
 const message_pt = {

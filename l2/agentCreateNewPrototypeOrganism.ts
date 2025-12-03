@@ -1,18 +1,18 @@
 /// <mls shortName="agentCreateNewPrototypeOrganism" project="100554" enhancement="_blank" />
 
 import { html, TemplateResult } from 'lit';
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
-import { createAllModels } from './_100554_collabLibModel';
-import { convertFileNameToTag } from './_100554_utilsLit'; 
-import './_100554_agentCreateNewPrototypeOrganismFeedback';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { loadModuleFromProjectOrDependency } from '/_100554_/l2/libCommom.js';
+import { createAllModels } from '/_100554_/l2/collabLibModel.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'; 
+import '/_100554_/l2/agentCreateNewPrototypeOrganismFeedback.js';
 
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
     addNewStep
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 import {
     getNextPendingStepByAgentName,
@@ -21,7 +21,7 @@ import {
     updateTaskTitle,
     getNextPendentStep,
     appendLongTermMemory
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 const agentName = "agentCreateNewPrototypeOrganism";
 

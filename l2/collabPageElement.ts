@@ -2,10 +2,10 @@
 
 import { html, PropertyValueMap } from 'lit';
 import { property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { WCDOverlayMethods  } from './_100554_wcdTypes';
-import { IICADepths, IcaLitElementBaseMethods } from './_100554_icaTypes'
-import { convertTagToFileName } from './_100554_utilsLit'
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { WCDOverlayMethods  } from '/_100554_/l2/wcdTypes.js';
+import { IICADepths, IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js'
+import { convertTagToFileName } from '/_100554_/l2/utilsLit.js'
 
 export const PREFIX_ICA_ID = 'ica_';
 

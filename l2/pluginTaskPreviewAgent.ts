@@ -2,9 +2,9 @@
 
 import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { IAgent } from './_100554_aiAgentBase';
-import { getTemporaryContext } from './_100554_aiAgentHelper'; 
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { IAgent } from '/_100554_/l2/aiAgentBase.js';
+import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js'; 
  
 @customElement('plugin-task-preview-agent-100554')
 export class PluginTaskPreviewAgent extends CollabLitElement { 

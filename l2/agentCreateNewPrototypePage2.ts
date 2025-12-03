@@ -1,12 +1,12 @@
 /// <mls shortName="agentCreateNewPrototypePage2" project="100554" enhancement="_blank" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import { getImages } from './_100554_libUnsplash';
-import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
-import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
-import { createNewFile } from "./_100554_pluginNewFileBase";
-import { formatHtml } from './_100554_collabDOMSync';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { getImages } from '/_100554_/l2/libUnsplash.js';
+import { convertFileNameToTag, convertTagToFileName } from '/_100554_/l2/utilsLit.js';
+import { loadModuleFromProjectOrDependency } from '/_100554_/l2/libCommom.js';
+import { createNewFile } from "/_100554_/l2/pluginNewFileBase.js";
+import { formatHtml } from '/_100554_/l2/collabDOMSync.js';
 
 import {
     getNextPendingStepByAgentName,
@@ -19,14 +19,14 @@ import {
     getNextPendentStep,
     getInteractionStepId,
     getStepById
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
     executeNextStep,
     addNewStep,
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentCreateNewPrototypePage2";
 const agentProject = 100554;
@@ -416,9 +416,9 @@ function generateTsPage(
     const ts = `
 /// <mls shortName="${info.shortName}" project="${info.project}" folder="${info.folder}" enhancement="${enhancement}" groupName="${groupName}" />
 
-import { CollabPageElement } from './_100554_collabPageElement';
+import { CollabPageElement } from '/_100554_/l2/collabPageElement.js';
 import { customElement } from 'lit/decorators.js';
-import { globalState, initState, setState } from './_100554_collabState';
+import { globalState, initState, setState } from '/_100554_/l2/collabState.js';
 
 @customElement('${pageTagName}')
 export class Page${info.shortName.charAt(0).toUpperCase()}${info.shortName.slice(1)} extends CollabPageElement {
@@ -606,7 +606,7 @@ function generateTsOrganism(
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { IcaOrganismBase } from './_100554_icaOrganismBase';
+import { IcaOrganismBase } from '/_100554_/l2/icaOrganismBase.js';
 
 @customElement('${tagName}')
 export class ${shortName} extends IcaOrganismBase {

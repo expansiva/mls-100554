@@ -1,22 +1,22 @@
 /// <mls shortName="agentBotWeddingGifts" project="100554" enhancement="_blank" />
 
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import './_100554_widgetQuestionsForClarification';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import '/_100554_/l2/widgetQuestionsForClarification.js';
 
 import {
     getNextInProgressStepByAgentName,
     notifyTaskChange,
     notifyThreadChange,
     updateStepStatus,
-} from "./_100554_aiAgentHelper";
-import { addMessage } from "./_100554_collabMessageHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
+import { addMessage } from "/_100554_/l2/collabMessageHelper.js";
 
 import {
     startNewAiTask,
     executeNextStep,
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentBotWeddingGifts";
 const project = 100554;

@@ -2,10 +2,10 @@
 
 import { html, css, unsafeHTML } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { StateLitElement } from './_100554_stateLitElement';
-import { IAgent } from './_100554_aiAgentBase';
-import { getTemporaryContext } from './_100554_aiAgentHelper';
-import { defaultThreadImage } from './_100554_collabMessageHelper';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { IAgent } from '/_100554_/l2/aiAgentBase.js';
+import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
+import { defaultThreadImage } from '/_100554_/l2/collabMessageHelper.js';
 
 
 /// **collab_i18n_start** 

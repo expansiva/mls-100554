@@ -15,13 +15,13 @@ import {
     updateTaskTitle,
     getNextStepIdAvaliable,
     getAgentInstanceByName
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 
-import { getTask, getMessage } from "./_100554_msgDBController";
-import { IAgent } from './_100554_aiAgentBase';
-import { getUserId } from "./_100554_collabMessageHelper";
-import { loadModuleFromProjectOrDependency } from './_100554_libCommom';
+import { getTask, getMessage } from "/_100554_/l2/msgDBController.js";
+import { IAgent } from '/_100554_/l2/aiAgentBase.js';
+import { getUserId } from "/_100554_/l2/collabMessageHelper.js";
+import { loadModuleFromProjectOrDependency } from '/_100554_/l2/libCommom.js';
 
 const agentName = 'aiAgentOrchestration';
 

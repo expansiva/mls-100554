@@ -1,8 +1,8 @@
 /// <mls shortName="agentImprovePrototype" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
 
-import { convertTagToFileName } from './_100554_utilsLit';
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
+import { convertTagToFileName } from '/_100554_/l2/utilsLit.js';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
@@ -11,7 +11,7 @@ import {
     notifyTaskChange,
     updateStepStatus,
     getNextPendentStep
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
     startNewInteractionInAiTask,
@@ -20,7 +20,7 @@ import {
     addNewStep,
     ClarificationValue,
     startClarification
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentImprovePrototype";
 const project = 100554;

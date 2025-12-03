@@ -1,16 +1,16 @@
 /// <mls shortName="agentGeneratePrototype4" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import { getPayload3, PayLoad3 } from './_100554_agentGeneratePrototype3';
-import { getImages } from './_100554_libUnsplash';
-import { convertFileNameToTag, convertTagToFileName } from './_100554_utilsLit';
-import { createNewFile } from "./_100554_pluginNewFileBase";
-import { formatHtml } from './_100554_collabDOMSync';
-import { addNewTokensTheme } from './_100554_designSystemBase';
-import { collabImport } from './_100554_collabImport';
-import { createModel } from './_100554_collabLibModel';
-import { addModule } from './_100554_projectAST';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { getPayload3, PayLoad3 } from '/_100554_/l2/agentGeneratePrototype3.js';
+import { getImages } from '/_100554_/l2/libUnsplash.js';
+import { convertFileNameToTag, convertTagToFileName } from '/_100554_/l2/utilsLit.js';
+import { createNewFile } from "/_100554_/l2/pluginNewFileBase.js";
+import { formatHtml } from '/_100554_/l2/collabDOMSync.js';
+import { addNewTokensTheme } from '/_100554_/l2/designSystemBase.js';
+import { collabImport } from '/_100554_/l2/collabImport.js';
+import { createModel } from '/_100554_/l2/collabLibModel.js';
+import { addModule } from '/_100554_/l2/projectAST.js';
 
 
 import {
@@ -23,14 +23,14 @@ import {
   getNextPendentStep,
   getInteractionStepId,
   getStepById
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
   startNewInteractionInAiTask,
   startNewAiTask,
   executeNextStep,
   addNewStep,
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentGeneratePrototype4";
 const agentProject = 100554;
@@ -446,9 +446,9 @@ function generateTsPage(
   const ts = `
 /// <mls shortName="${info.shortName}" project="${info.project}" folder="${info.folder}" enhancement="${enhancement}" groupName="${groupName}" />
 
-import { CollabPageElement } from '_100554_collabPageElement';
+import { CollabPageElement } from '/_100554_/l2/collabPageElement.js';
 import { customElement } from 'lit/decorators.js';
-import { globalState, initState, setState } from '_100554_collabState';
+import { globalState, initState, setState } from '/_100554_/l2/collabState.js';
 
 @customElement('${pageTagName}')
 export class Page${info.shortName.charAt(0).toUpperCase()}${info.shortName.slice(1)} extends CollabPageElement {
@@ -636,7 +636,7 @@ function generateTsOrganism(
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { IcaOrganismBase } from '_100554_icaOrganismBase';
+import { IcaOrganismBase } from '/_100554_/l2/icaOrganismBase.js';
 
 @customElement('${tagName}')
 export class ${shortName} extends IcaOrganismBase {

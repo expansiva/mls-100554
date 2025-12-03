@@ -2,7 +2,7 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 export function addCoachMark(json: ICoachMarks) {
     let coachMark = document.querySelector('coach-marks-100554') as CoachMarks100554;

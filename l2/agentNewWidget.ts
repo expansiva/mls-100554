@@ -1,12 +1,12 @@
 /// <mls shortName="agentNewWidget" project="100554" enhancement="_blank" groupName="other" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getListFilesStart, systemReturnJsonFormat, preferModelType, systemComponentsInstruction, getPromptByHtml } from './_100554_aiPrompts';
-import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getStepById, updateStepStatus, notifyTaskChange, calculateStepsStatistics, getInteractionStepId, } from "./_100554_aiAgentHelper";
-import { startNewAiTask, executeNextStep, startNewInteractionInAiTask, addNewStep } from "./_100554_aiAgentOrchestration";
-import { initState } from './_100554_collabState';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getListFilesStart, systemReturnJsonFormat, preferModelType, systemComponentsInstruction, getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { getNextPendingStepByAgentName, getNextInProgressStepByAgentName, getStepById, updateStepStatus, notifyTaskChange, calculateStepsStatistics, getInteractionStepId, } from "/_100554_/l2/aiAgentHelper.js";
+import { startNewAiTask, executeNextStep, startNewInteractionInAiTask, addNewStep } from "/_100554_/l2/aiAgentOrchestration.js";
+import { initState } from '/_100554_/l2/collabState.js';
 
-import './_100554_widgetClarificationNewWidget';
+import '/_100554_/l2/widgetClarificationNewWidget.js';
 
 const agentName = "agentNewWidget";
 const widgetPrefix = "widget";

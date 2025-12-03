@@ -1,7 +1,7 @@
 /// <mls shortName="processCssLit" project="100554" enhancement="_blank" />
 
-import { compileStyleUsingMFile } from './_100554_enhancementStyle';
-import { generateCompactTimestamp } from './_100554_libCommom';
+import { compileStyleUsingMFile } from '/_100554_/l2/enhancementStyle.js';
+import { generateCompactTimestamp } from '/_100554_/l2/libCommom.js';
 
 export async function injectStyle(modelTS: mls.editor.IModelTS, theme: string): Promise<void> {
     injectStyleWithoutShadowRoot(modelTS, theme);

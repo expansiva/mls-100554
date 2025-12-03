@@ -2,14 +2,14 @@
 
 import { html, when, repeat } from 'lit';
 import { customElement, property, queryAll } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { propertyDataSource } from './_100554_collabDecorators';
-import { PluginStyleIndexItem } from './_100554_pluginStyleIndexItem';
-import { IHelpers, IMode } from './_100554_cssHelperIndexBase';
-import { ICSSState } from './_100554_lessCSS';
-import { setState, getState } from './_100554_collabState';
-import { loadPluginProject } from './_100554_libCommom';
-import './_100554_pluginStyleIndexItem';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
+import { PluginStyleIndexItem } from '/_100554_/l2/pluginStyleIndexItem.js';
+import { IHelpers, IMode } from '/_100554_/l2/cssHelperIndexBase.js';
+import { ICSSState } from '/_100554_/l2/lessCSS.js';
+import { setState, getState } from '/_100554_/l2/collabState.js';
+import { loadPluginProject } from '/_100554_/l2/libCommom.js';
+import '/_100554_/l2/pluginStyleIndexItem.js';
 
 /// **collab_i18n_start**
 const message_pt = {

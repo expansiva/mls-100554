@@ -2,13 +2,13 @@
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { initManagerCoachMark } from "./_100554_collabManagerCoachMarks";
-import { getTokensCss } from './_100554_designSystemBase';
-import { getProjectDetails, setProjectDetails, getLastOpenedFiles, findStorFileInProjectsOrDeps, getInstanceByFile, saveOpenedFile } from './_100554_libCommom';
-import { loadNotificationPreferences } from './_100554_collabMessageHelper';
-import { listenToThreadEvents } from './_100554_collabMessagesSyncNotifications';
-import { openService, getLastModule } from './_100554_libCommom';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { initManagerCoachMark } from "/_100554_/l2/collabManagerCoachMarks.js";
+import { getTokensCss } from '/_100554_/l2/designSystemBase.js';
+import { getProjectDetails, setProjectDetails, getLastOpenedFiles, findStorFileInProjectsOrDeps, getInstanceByFile, saveOpenedFile } from '/_100554_/l2/libCommom.js';
+import { loadNotificationPreferences } from '/_100554_/l2/collabMessageHelper.js';
+import { listenToThreadEvents } from '/_100554_/l2/collabMessagesSyncNotifications.js';
+import { openService, getLastModule } from '/_100554_/l2/libCommom.js';
 
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
@@ -171,7 +171,7 @@ export class CollabInit extends CollabLitElement {
      */
     private async instanceDriverGitHub(): Promise<void> {
         if (window.traceLifeCycle) console.info('loading: driver github');
-        const { DriverGitHub } = await import('./_100554_driverGithub');
+        const { DriverGitHub } = await import('/_100554_/l2/driverGithub.js');
         const instanceGitHub = new DriverGitHub();
         const driverInstanceGitHub = mls.stor.others.getDriver('github');
         if (!driverInstanceGitHub) mls.stor.others.addDriver(instanceGitHub, 'github');
@@ -182,7 +182,7 @@ export class CollabInit extends CollabLitElement {
      */
     private async instanceDriverGitLab(): Promise<void> {
         if (window.traceLifeCycle) console.info('loading: driver gitlab');
-        const { DriverGitLab } = await import('./_100554_driverGitlab');
+        const { DriverGitLab } = await import('/_100554_/l2/driverGitlab.js');
         const instanceGitLab = new DriverGitLab();
         const driverInstanceGitLab = mls.stor.others.getDriver('gitlab');
         if (!driverInstanceGitLab) mls.stor.others.addDriver(instanceGitLab, 'gitlab');

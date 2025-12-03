@@ -2,16 +2,16 @@
 
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { getPayload3 } from './_100554_agentGeneratePrototype3';
-import { getPayload4, PayLoad4 } from './_100554_agentGeneratePrototype4';
-import { selectLevel, openService } from './_100554_libCommom';
-import { getTask } from './_100554_msgDBController';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { getPayload3 } from '/_100554_/l2/agentGeneratePrototype3.js';
+import { getPayload4, PayLoad4 } from '/_100554_/l2/agentGeneratePrototype4.js';
+import { selectLevel, openService } from '/_100554_/l2/libCommom.js';
+import { getTask } from '/_100554_/l2/msgDBController.js';
 
 
 import {
     getAgentStepByAgentName,
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 /// **collab_i18n_start** 
 const message_pt = {

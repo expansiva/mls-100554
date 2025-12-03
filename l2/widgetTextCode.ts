@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { IcaApresentationTextCodeBase } from './_100554_icaApresentationTextCodeBase';
+import { IcaApresentationTextCodeBase } from '/_100554_/l2/icaApresentationTextCodeBase.js';
 
 @customElement('widget-text-code-100554')
 export class WidgetTextCode extends IcaApresentationTextCodeBase {

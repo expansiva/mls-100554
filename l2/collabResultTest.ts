@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { collab_spinner_clock, collab_check, collab_xmark } from './_100554_collabIcons'
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { collab_spinner_clock, collab_check, collab_xmark } from '/_100554_/l2/collabIcons.js'
 
 @customElement('collab-result-test-100554')
 export class CollabConsole100554 extends StateLitElement {

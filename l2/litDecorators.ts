@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import { ReactiveElement, PropertyDeclaration } from '_100554_litReactiveElement';
+import { ReactiveElement, PropertyDeclaration } from '/_100554_/l2/litReactiveElement.js';
 
 type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
 

@@ -1,17 +1,17 @@
 /// <mls shortName="agentCreateNewPrototypeOrganism2" project="100554" enhancement="_blank" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';;
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { forceServiceInstance } from './_100554_libCommom';
-import { getTokensLess, getGlobalLess } from './_100554_designSystemBase';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';;
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
+import { getTokensLess, getGlobalLess } from '/_100554_/l2/designSystemBase.js';
 
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
     addNewStep
 
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 import {
     getNextPendingStepByAgentName,
@@ -20,7 +20,7 @@ import {
     updateStepStatus,
     updateTaskTitle,
     appendLongTermMemory
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 const agentName = "agentCreateNewPrototypeOrganism2";
 

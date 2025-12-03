@@ -1,6 +1,6 @@
 /// <mls shortName="libManagementCan" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { CollabState, GlobalState, globalState } from './_100554_collabState';
+import { CollabState, GlobalState, globalState } from '/_100554_/l2/collabState.js';
 
 /** Guarda watchers ativos */
 const activeWatchers = new Map<string, number>();

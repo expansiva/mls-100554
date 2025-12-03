@@ -1,11 +1,11 @@
 /// <mls shortName="driverGithub" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import * as dL from './_100554_driverLib';
+import * as dL from '/_100554_/l2/driverLib.js';
 
-let mKey = "";
+let mKey = (window as any)['mKey'] || "";
 
 export function init(initString: string) {
-	mKey = atob(initString);
+	(window as any)['mKey'] = atob(initString);
 }
 
 export class DriverGitHub extends mls.stor.others.DriverIOBase {

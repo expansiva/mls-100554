@@ -1,11 +1,11 @@
 /// <mls shortName="collabTiles" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, LitElement, repeat } from 'lit';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 import { customElement, property, query } from 'lit/decorators.js';
-import { getConfigProject, updateConfigProjectPlugins } from './_100554_libProjectConfig';
-import './_100554_collabTilesItem';
+import { getConfigProject, updateConfigProjectPlugins } from '/_100554_/l2/libProjectConfig.js';
+import '/_100554_/l2/collabTilesItem.js';
 import 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.3/Sortable.min.js';//https://github.com/SortableJS/Sortable/blob/master/Sortable.js
 @customElement('collab-tiles-100554')
 export class CollabTiles extends CollabLitElement {

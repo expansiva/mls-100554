@@ -1,7 +1,7 @@
 /// <mls shortName="agentFix" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAgent } from './_100554_aiAgentBase';
-import { preferModelType } from './_100554_aiPrompts';
+import { IAgent } from '/_100554_/l2/aiAgentBase.js';
+import { preferModelType } from '/_100554_/l2/aiPrompts.js';
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
@@ -9,14 +9,14 @@ import {
     getNextFlexiblePendingStep,
     updateTaskTitle,
     appendLongTermMemory,
-} from "./_100554_aiAgentHelper";
-import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "./_100554_aiAgentOrchestration";
-import { forceServiceInstance } from './_100554_libCommom';
-import { getState, setState } from './_100554_collabState';
-import { ServiceSource100554 } from './_100554_serviceSource';
-import { descriptionForPrompt } from "./_100554_icaBaseDescription";
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { createAllModels } from './_100554_collabLibModel';
+} from "/_100554_/l2/aiAgentHelper.js";
+import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "/_100554_/l2/aiAgentOrchestration.js";
+import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
+import { getState, setState } from '/_100554_/l2/collabState.js';
+import { ServiceSource100554 } from '/_100554_/l2/serviceSource.js';
+import { descriptionForPrompt } from "/_100554_/l2/icaBaseDescription.js";
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { createAllModels } from '/_100554_/l2/collabLibModel.js';
 
 const agentName = "agentFix";
 
@@ -394,7 +394,7 @@ function systemWidgetsDescriptionsInstruction(data: IDataPrompt): mls.msg.IAMess
 Em caso de componentes extends Ica.....Base, se necessário analisar o arquivo description abaixo para melhor definir as correções:
 Para definição de qual decorator usar em cada tipo de atributo, levar em consideração:   
 
-- Se necessário fazer o import:  { propertyCompositeDataSource, propertyDataSource } from './_100554_collabDecorators';
+- Se necessário fazer o import:  { propertyCompositeDataSource, propertyDataSource } from '/_100554_/l2/collabDecorators.js';
 - @propertyDataSource: Propriedade ligada a um único state dinâmico. Exemplo de binding: "{{page1.name}}".
 - @propertyCompositeDataSource: Propriedade composta por múltiplos states dinâmicos. Exemplo: "Olá {{page1.userId}} - {{page1.userName}}".
 - para atributos na classe 'Text', use '@propertyCompositeDataSource'.

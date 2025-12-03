@@ -2,7 +2,7 @@
 
 import { html, ifDefined } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 
 export function initCollabInputTag() {
     return true;

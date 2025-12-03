@@ -1,7 +1,7 @@
 /// <mls shortName="validateLit" project="100554" enhancement="_blank" />
 
-import type { IDecoratorDictionary, IDecoratorDetails, IDecoratorClassInfo } from './_100554_propiertiesLit';
-import { convertFileNameToTag } from './_100554_utilsLit';
+import type { IDecoratorDictionary, IDecoratorDetails, IDecoratorClassInfo } from '/_100554_/l2/propiertiesLit.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
 
 export function validateTagName(modelTS: mls.editor.IModelTS): boolean {
 

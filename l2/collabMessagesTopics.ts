@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { collab_chevron_down, collab_chevron_right } from './_100554_collabIcons';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { collab_chevron_down, collab_chevron_right } from '/_100554_/l2/collabIcons.js';
 
 
 @customElement('collab-messages-topics-100554')

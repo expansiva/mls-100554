@@ -1,12 +1,12 @@
 /// <mls shortName="agentFullScan" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAgent } from './_100554_aiAgentBase';
-import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
+import { IAgent } from '/_100554_/l2/aiAgentBase.js';
+import { preferModelType, getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 import {
     getNextPendingStepByAgentName, getNextInProgressStepByAgentName, updateStepStatus, getNextPendentStep, updateTaskTitle, calculateStepsStatistics,
-} from "./_100554_aiAgentHelper";
-import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "./_100554_aiAgentOrchestration";
-import { addMessage } from './_100554_collabMessageHelper';
+} from "/_100554_/l2/aiAgentHelper.js";
+import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "/_100554_/l2/aiAgentOrchestration.js";
+import { addMessage } from '/_100554_/l2/collabMessageHelper.js';
 
 
 const agentName = "agentFullScan";

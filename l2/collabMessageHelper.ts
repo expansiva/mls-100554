@@ -1,7 +1,7 @@
 /// <mls shortName="collabMessageHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { getTemporaryContext, notifyMessageSendChange, notifyThreadChange, notifyThreadCreate, getAgentInstanceByName } from './_100554_aiAgentHelper';
-import { addThread, listThreads, updateThread } from './_100554_msgDBController';
+import { getTemporaryContext, notifyMessageSendChange, notifyThreadChange, notifyThreadCreate, getAgentInstanceByName } from '/_100554_/l2/aiAgentHelper.js';
+import { addThread, listThreads, updateThread } from '/_100554_/l2/msgDBController.js';
 
 
 const LS_KEY_OLD = 'collabChatPreferences';

@@ -2,10 +2,10 @@
 
 import { html, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { getRootAgent } from './_100554_aiAgentHelper';
-import { IAgent } from './_100554_aiAgentBase';
-import { loadAgent } from './_100554_aiAgentOrchestration';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { getRootAgent } from '/_100554_/l2/aiAgentHelper.js';
+import { IAgent } from '/_100554_/l2/aiAgentBase.js';
+import { loadAgent } from '/_100554_/l2/aiAgentOrchestration.js';
 
 @customElement('plugin-task-log-preview-100554')
 export class PluginTaskLogPreview100554 extends StateLitElement {

@@ -2,13 +2,13 @@
 
 import { html, css } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { addThread, updateThread } from './_100554_msgDBController';
-import { notifyThreadChange, notifyThreadCreate, getTemporaryContext } from './_100554_aiAgentHelper';
-import { CollabInputTag } from './_100554_collabInputTag';
-import { getUserId, getDmThreadByUsers, addMessage, createThreadDM } from './_100554_collabMessageHelper';
-import { IAgent } from './_100554_aiAgentBase'
-import './_100554_collabInputTag';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { addThread, updateThread } from '/_100554_/l2/msgDBController.js';
+import { notifyThreadChange, notifyThreadCreate, getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
+import { CollabInputTag } from '/_100554_/l2/collabInputTag.js';
+import { getUserId, getDmThreadByUsers, addMessage, createThreadDM } from '/_100554_/l2/collabMessageHelper.js';
+import { IAgent } from '/_100554_/l2/aiAgentBase.js'
+import '/_100554_/l2/collabInputTag.js';
 
 /// **collab_i18n_start** 
 const message_pt = {

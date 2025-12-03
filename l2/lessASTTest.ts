@@ -2,7 +2,7 @@
 
 import { html, css, LitElement } from 'lit'; 
 import { customElement, property } from 'lit/decorators.js';
-import { LessCSS } from "./_100554_lessCSS";
+import { LessCSS } from "/_100554_/l2/lessCSS.js";
 
 @customElement('less-a-s-t-test-100554')
 export class LessASTTest100554 extends LitElement {

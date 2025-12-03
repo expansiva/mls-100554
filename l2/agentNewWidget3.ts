@@ -1,9 +1,9 @@
 /// <mls shortName="agentNewWidget3" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
-import { initState } from './_100554_collabState';
-import { formatHtml } from './_100554_collabDOMSync';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { preferModelType, getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { initState } from '/_100554_/l2/collabState.js';
+import { formatHtml } from '/_100554_/l2/collabDOMSync.js';
 
 import {
     getNextPendingStepByAgentName,
@@ -11,14 +11,14 @@ import {
     updateStepStatus,
     getNextPendentStep,
     updateTaskTitle
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
     executeNextStep,
     startNewInteractionInAiTask,
     startNewAiTask,
     addNewStep
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentNewWidget3";
 

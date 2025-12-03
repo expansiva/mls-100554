@@ -17,20 +17,20 @@ import {
   adoptStyles,
   CSSResultGroup,
   CSSResultOrNative,
-} from '_100554_litCssTag';
+} from '/_100554_/l2/litCssTag.js';
 import type {
   ReactiveController,
   ReactiveControllerHost,
-} from '_100554_litReactiveController';
+} from '/_100554_/l2/litReactiveController.js';
 
 // In the Node build, this import will be injected by Rollup:
 // import {HTMLElement, customElements} from '@lit-labs/ssr-dom-shim';
 
-export * from '_100554_litCssTag';
+export * from '/_100554_/l2/litCssTag.js';
 export type {
   ReactiveController,
   ReactiveControllerHost,
-} from '_100554_litReactiveController';
+} from '/_100554_/l2/litReactiveController.js';
 
 const NODE_MODE = false;
 const global:any = NODE_MODE ? globalThis : window;

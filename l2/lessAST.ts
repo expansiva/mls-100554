@@ -1,6 +1,6 @@
 /// <mls shortName="lessAST" project="100554" enhancement="_blank"/>
 
-import { MonacoDriver } from "./_100554_lessMonaco";
+import { MonacoDriver } from "/_100554_/l2/lessMonaco.js";
 
 interface ILessAST {
     root: {

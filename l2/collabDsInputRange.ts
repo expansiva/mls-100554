@@ -2,7 +2,7 @@
 
 import { html, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 
 export function initCollabDSInputRange() { };
 

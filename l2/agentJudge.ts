@@ -1,15 +1,15 @@
 /// <mls shortName="agentJudge" project="100554" enhancement="_blank" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getPromptByHtml } from './_100554_aiPrompts';
-import { createModel } from './_100554_collabLibModel';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { createModel } from '/_100554_/l2/collabLibModel.js';
 
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
     executeNextStep,
     addNewStep
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 import {
     getNextFlexiblePendingStep,
@@ -19,7 +19,7 @@ import {
     updateTaskTitle,
     getNextPendentStep,
     appendLongTermMemory
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 const agentName = "agentJudge";
 

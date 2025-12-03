@@ -2,13 +2,13 @@
 
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { getClarification } from './_100554_aiAgentOrchestration';
-import { getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById } from './_100554_aiAgentHelper';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { getClarification } from '/_100554_/l2/aiAgentOrchestration.js';
+import { getNextPendentStep, getNextClarificationStep, getInteractionStepId, getStepById } from '/_100554_/l2/aiAgentHelper.js';
 
-import './_100554_collabMessagesTaskDetails';
-import './_100554_pluginTaskPreview';
-import './_100554_pluginTaskLogPreview';
+import '/_100554_/l2/collabMessagesTaskDetails.js';
+import '/_100554_/l2/pluginTaskPreview.js';
+import '/_100554_/l2/pluginTaskLogPreview.js';
 
 @customElement('collab-messages-task-info-100554')
 export class WidgetAiInteraction100554 extends StateLitElement {

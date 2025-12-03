@@ -1,9 +1,9 @@
 /// <mls shortName="agentWebCare" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { forceServiceInstance } from './_100554_libCommom';
-import { preferModelType, systemComponentsInstruction, getPromptByHtml } from './_100554_aiPrompts';
-import { initState } from './_100554_collabState';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
+import { preferModelType, systemComponentsInstruction, getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { initState } from '/_100554_/l2/collabState.js';
 
 import {
     getNextPendingStepByAgentName,
@@ -11,12 +11,12 @@ import {
     updateStepStatus,
     getNextPendentStep,
     updateTaskTitle
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
 import {
     startNewInteractionInAiTask,
     startNewAiTask
-} from "./_100554_aiAgentOrchestration";
+} from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentWebCare";
 const project = 100554;

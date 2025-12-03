@@ -2,12 +2,12 @@
 
 import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { collab_clock_static, collab_users } from './_100554_collabIcons';
-import { getDateFormated } from './_100554_libCommom';
-import { formatTimestamp } from './_100554_aiAgentHelper';
+import { StateLitElement } from '/_100554_/l2/stateLitElement';
+import { collab_clock_static, collab_users } from '/_100554_/l2/collabIcons';
+import { getDateFormated } from '/_100554_/l2/libCommom';
+import { formatTimestamp } from '/_100554_/l2/aiAgentHelper'; 
 
-import './_100554_collabMessagesAvatar';
+import '/_100554_/l2/collabMessagesAvatar';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -78,7 +78,7 @@ export class CollabMessagesThreadModal100554 extends StateLitElement {
                 <div>
                     <div class="collab-messages-thread-modal-title">${this.thread?.name}</div>
                     <div class="collab-messages-thread-modal-subtitle">${collab_users}${this.thread?.users.length || '0'} ${this.msg.userInThread}</div>
-                    <div class="collab-messages-thread-modal-subtitle">${collab_clock_static} ${getDateFormated(formatTimestamp(this.thread?.lastMessageTime || '').dateFull)}</div>
+                    <div class="collab-messages-thread-modal-subtitle">${collab_clock_static} {getDateFormated(formatTimestamp(this.thread?.lastMessageTime || '').dateFull)}</div>
                     <div class="collab-messages-thread-modal-userStatus ${this.thread?.status}"> ● ${this.thread?.status}</div>
                 </div>
             </div>

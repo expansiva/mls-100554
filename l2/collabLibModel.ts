@@ -1,10 +1,10 @@
 /// <mls shortName="collabLibModel" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { removeTokensFromSource } from './_100554_enhancementStyle';
-import { getTokensLess } from './_100554_designSystemBase';
-import { getEnhancementName, getBaseTemplate } from './_100554_libCommom';
-import { setErrorOnModel } from './_100554_validateLit'
-import { convertFileNameToTag } from './_100554_utilsLit'
+import { removeTokensFromSource } from '/_100554_/l2/enhancementStyle.js';
+import { getTokensLess } from '/_100554_/l2/designSystemBase.js';
+import { getEnhancementName, getBaseTemplate } from '/_100554_/l2/libCommom.js';
+import { setErrorOnModel } from '/_100554_/l2/validateLit.js'
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
 
 export async function readProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true) {
 
@@ -411,7 +411,7 @@ async function _updateModelStatusLess(modelBase: mls.editor.IModelStyle, changed
 
     if (!fileModels) throw new Error('[_updateModelStatusLess] Not found file models')
 
-    const enhancementInstanceLess = await import('./_100554_enhancementStyle')
+    const enhancementInstanceLess = await import('/_100554_/l2/enhancementStyle.js')
     if (enhancementInstanceLess) await enhancementInstanceLess.onAfterChange(fileModels);
 
     mls.l2.less.compileStyle(modelBase);

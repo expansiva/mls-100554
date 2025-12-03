@@ -2,8 +2,8 @@
 
 import { html, css, LitElement, repeat, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import './_100554_collabPanelItem';
-import { CollabLitElement } from './_100554_collabLitElement';
+import '/_100554_/l2/collabPanelItem.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 
 @customElement('collab-panel-100554')
