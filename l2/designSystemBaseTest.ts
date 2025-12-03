@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { getImages, getVideos, getTokens, getTokensLess, getTokensCss, addAssets, addNewTokensTheme } from './_100554_designSystemBase';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { getImages, getVideos, getTokens, getTokensLess, getTokensCss, addAssets, addNewTokensTheme } from '/_100554_/l2/designSystemBase.js';
 
 @customElement('design-system-base-test-100554')
 export class DesignSystemBaseTest100554 extends StateLitElement {
