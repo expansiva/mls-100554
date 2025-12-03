@@ -2,7 +2,7 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { TsTestAst, ICANIntegration, ICANTest } from "./_100554_tsTestAST";
+import { TsTestAst, ICANIntegration, ICANTest } from "/_100554_/l2/tsTestAST.js";
 
 @customElement('ts-test-a-s-t-teste-100554')
 export class LessASTTest100554 extends LitElement {
