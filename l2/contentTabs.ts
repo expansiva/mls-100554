@@ -2,7 +2,7 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement'
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
 
 @customElement('content-tabs-100554')
 export class ContentTabs extends CollabLitElement {
