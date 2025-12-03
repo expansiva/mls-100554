@@ -2,7 +2,7 @@
 
 import { html, css, repeat, ifDefined, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js'; 
 import {
   collab_file_pen,
   collab_bug_x12,
@@ -14,18 +14,18 @@ import {
   collab_code,
   collab_file_fragment,
   collab_file_half_dashed
-} from './_100554_collabIcons';
-import { globalState, getState, initState } from './_100554_collabState';
-import { collabImport } from './_100554_collabImport';
+} from '/_100554_/l2/collabIcons.js';
+import { globalState, getState, initState } from '/_100554_/l2/collabState.js';
+import { collabImport } from '/_100554_/l2/collabImport.js';
 
 
-import { ServiceSource100554 } from './_100554_serviceSource';
+import { ServiceSource100554 } from '/_100554_/l2/serviceSource.js';
 
-import './_100554_collabInputTag';
-import './_100554_widgetDefsPlanningChecklistEdit';
-import './_100554_widgetDefsListEdit';
-import './_100554_widgetDefsObjectListEdit';
-import './_100554_widgetDefsPluginListEdit'
+import '/_100554_/l2/collabInputTag.js';
+import '/_100554_/l2/widgetDefsPlanningChecklistEdit.js';
+import '/_100554_/l2/widgetDefsListEdit.js';
+import '/_100554_/l2/widgetDefsObjectListEdit.js';
+import '/_100554_/l2/widgetDefsPluginListEdit'
 
 /// **collab_i18n_start**
 const message_pt = {
