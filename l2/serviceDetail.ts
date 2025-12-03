@@ -2,9 +2,9 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from './_100554_serviceBase';
-import { getAllWebComponentsInSource } from './_100554_libCompile';
-import { convertTagToFileName, convertFileNameToTag } from './_100554_utilsLit';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
+import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
+import { convertTagToFileName, convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
 
 @customElement('service-detail-100554')
 export class ServiceDetail100554 extends ServiceBase {
