@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {AttributePart, noChange, nothing}  from './_100554_litHtml';
+import {AttributePart, noChange, nothing}  from '/_100554_/l2/litHtml.js';
 
 import {
   directive,
@@ -15,8 +15,8 @@ import {
   PartInfo,
   PartType,
   Part
-}  from './_100554_litDirectives';
-import {isSingleExpression, setCommittedValue} from './_100554_litDirectivesHelper';
+}  from '/_100554_/l2/litDirectives.js';
+import {isSingleExpression, setCommittedValue} from '/_100554_/l2/litDirectivesHelper.js';
 
 class LiveDirective extends Directive {
   constructor(partInfo: PartInfo) {
