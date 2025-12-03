@@ -5,7 +5,7 @@ import {
     onAfterChange as onAfterChangeDefault,
     onAfterCompile as onAfterCompileDefault,
     requires as requiresDefault,
-} from './_100554_enhancementLit';
+} from '/_100554_/l2/enhancementLit.js';
 
 export const requires = requiresDefault;
 
