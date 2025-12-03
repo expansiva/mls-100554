@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { getMessageKey } from './_100554_collabLitElement';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { getMessageKey } from '/_100554_/l2/collabLitElement.js';
 
 /// **collab_i18n_start**
 const message_pt = {
