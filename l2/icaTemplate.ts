@@ -1,8 +1,8 @@
 /// <mls shortName="icaTemplate" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { customElement } from 'lit/decorators.js';
-import { ActionTag, IAllowCommand } from './_100554_icaTypes';
-import { IcaLitElementBase } from './_100554_icaLitElementBase';
+import { ActionTag, IAllowCommand } from '/_100554_/l2/icaTypes.js';
+import { IcaLitElementBase } from '/_100554_/l2/icaLitElementBase.js';
 
 @customElement('ica-template-100554')
 export abstract class IcaTemplate extends IcaLitElementBase {
