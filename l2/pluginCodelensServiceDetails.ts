@@ -2,7 +2,7 @@
 
 import { html, unsafeHTML, LitElement } from 'lit';
 import { customElement, } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 /// **collab_i18n_start**
 const message_pt = {
