@@ -1,6 +1,6 @@
 /// <mls shortName="driverGitlab" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import * as dL from './_100554_driverLib';
+import * as dL from '/_100554_/l2/driverLib.js';
 
 let mKey = "";
 
