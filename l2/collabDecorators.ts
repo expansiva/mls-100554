@@ -2,7 +2,7 @@
 
 import { PropertyDeclaration } from 'lit';
 import { property } from 'lit/decorators.js';
-import { getState, setState } from './_100554_collabState';
+import { getState, setState } from '/_100554_/l2/collabState.js';
 
 /**
  * Custom decorator to bind properties to multiple data sources dynamically.
