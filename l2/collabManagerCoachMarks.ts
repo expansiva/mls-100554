@@ -1,7 +1,7 @@
 /// <mls shortName="collabManagerCoachMarks" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { addCoachMark, ICoachMarks } from './_100554_coachMarks';
-import {getMessageKey} from './_100554_collabLitElement'
+import { addCoachMark, ICoachMarks } from '/_100554_/l2/coachMarks.js';
+import {getMessageKey} from '/_100554_/l2/collabLitElement.js'
 
 /// **collab_i18n_start**
 const message_pt = {
