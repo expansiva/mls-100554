@@ -2,9 +2,9 @@
 
 import { html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { globalWcd } from './_100554_wcdState';
-import { CollabLitElement } from "./_100554_collabLitElement";
-import { execute as excCommandDel } from './_100554_wcdCommandDel';
+import { globalWcd } from '/_100554_/l2/wcdState.js';
+import { CollabLitElement } from "/_100554_/l2/collabLitElement.js";
+import { execute as excCommandDel } from '/_100554_/l2/wcdCommandDel.js';
 
 /// **collab_i18n_start**
 const message_pt = {
