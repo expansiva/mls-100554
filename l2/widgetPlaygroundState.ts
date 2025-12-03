@@ -2,7 +2,7 @@
 
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { initState, setState} from './_100554_collabState';
+import { initState, setState} from '/_100554_/l2/collabState.js';
 
 @customElement('widget-playground-state-100554')
 export class WidgetPlaygroundState extends LitElement { 
