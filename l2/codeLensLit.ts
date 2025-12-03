@@ -1,6 +1,6 @@
 /// <mls shortName="codeLensLit" project="100554" enhancement="_blank" />
 
-import type { IDecoratorDictionary, IDecoratorDetails } from './_100554_propiertiesLit';
+import type { IDecoratorDictionary, IDecoratorDetails } from '/_100554_/l2/propiertiesLit.js';
 
 // File: CodeLens
 export function setCodeLens(model1: mls.editor.IModelTS) {
