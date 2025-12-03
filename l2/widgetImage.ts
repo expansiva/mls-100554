@@ -2,7 +2,7 @@
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 
 @customElement('widget-image-100554')
 export class WcImage100554 extends StateLitElement {
