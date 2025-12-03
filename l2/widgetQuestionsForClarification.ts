@@ -2,9 +2,9 @@
 
 import { html } from 'lit';
 import { property, state } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 
-import { ClarificationValue, endClarification } from './_100554_aiAgentOrchestration';
+import { ClarificationValue, endClarification } from '/_100554_/l2/aiAgentOrchestration.js';
 
 export class WidgetQuestionsForClarification100554 extends StateLitElement {
   @property({ type: Object }) value: ClarificationValue | null = null;
