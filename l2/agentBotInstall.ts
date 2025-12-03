@@ -1,9 +1,9 @@
 /// <mls shortName="agentBotInstall" project="100554" enhancement="_blank" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { getNextInProgressStepByAgentName, updateStepStatus, notifyMessageSendChange } from "./_100554_aiAgentHelper";
-import { executeNextStep, loadAgent } from "./_100554_aiAgentOrchestration";
-import { addMessage } from "./_100554_collabMessageHelper";
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { getNextInProgressStepByAgentName, updateStepStatus, notifyMessageSendChange } from "/_100554_/l2/aiAgentHelper.js";
+import { executeNextStep, loadAgent } from "/_100554_/l2/aiAgentOrchestration.js";
+import { addMessage } from "/_100554_/l2/collabMessageHelper.js";
 
 const agentName = "agentBotInstall";
 
