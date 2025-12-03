@@ -2,13 +2,13 @@
 
 import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { WCDOverlayMethods, IListWidgetBase } from './_100554_wcdTypes';
-import { CollabLitElement } from './_100554_collabLitElement'
-import { globalWcd } from './_100554_wcdState';
-import { executeFromTag, getOverlay } from './_100554_wcdCommandAdd';
-import { convertFileNameToTag } from './_100554_utilsLit';
-import { getGroups } from './_100554_icaBaseDescription';
-import { loadPluginProject } from './_100554_libCommom';
+import { WCDOverlayMethods, IListWidgetBase } from '/_100554_/l2/wcdTypes.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
+import { globalWcd } from '/_100554_/l2/wcdState.js';
+import { executeFromTag, getOverlay } from '/_100554_/l2/wcdCommandAdd.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { getGroups } from '/_100554_/l2/icaBaseDescription.js';
+import { loadPluginProject } from '/_100554_/l2/libCommom.js';
 
 
 /// **collab_i18n_start**
