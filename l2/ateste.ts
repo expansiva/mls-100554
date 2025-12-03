@@ -1,7 +1,7 @@
 /// <mls shortName="ateste" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';
-import { customElement, property, state, query } from 'lit/decorators.js';
+import { customElement, property, state, query } from 'lit/decorators.js'; 
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js' 
@@ -30,15 +30,54 @@ export class SimpleGreeting extends CollabLitElement {
   async clickBusca() {
 
     let itens: string[] = [];
-    let erros:string[] = [];
+    let erros: string[] = [];
 
     Object.keys(mls.stor.files).forEach((key) => {
 
       const f = mls.stor.files[key];
 
-      //if (!f || f.level !== 2 || !['.ts'].includes(f.extension) || f.shortName === 'ateste' || f.shortName.startsWith('wcd') || f.shortName.startsWith('ica')) return;
+      /*if (f && f.level === 2 && ['.ts'].includes(f.extension) &&
+        (
+          f.shortName.startsWith('c') ||
+          f.shortName.startsWith('d') ||
+          f.shortName.startsWith('l') ||
+          f.shortName.startsWith('e') ||
+          f.shortName.startsWith('m') ||
+          f.shortName.startsWith('a') ||
+          f.shortName.startsWith('validate') ||
+          f.shortName.startsWith('process') ||
+          f.shortName.startsWith('stateLit') ||
+          f.shortName.startsWith('pluginTask') ||
+          f.shortName.startsWith('icaApresentationTextRichBase') ||
+          f.shortName.startsWith('icaLitElementBase') ||
+          f.shortName.startsWith('icaTypes') ||
+          f.shortName.startsWith('widgetTextCode') ||
+          f.shortName.startsWith('icaApresentationTextCodeBase') ||
+          f.shortName.startsWith('pluginStyleIndexItem') ||
+          f.shortName.startsWith('collabMessagesThreadModal') ||
+          f.shortName.startsWith('previewModeUtil')
+        )
+      ) return;
 
-      if(f && f.level === 2 && ['.ts'].includes(f.extension) && (f.shortName.startsWith('c') || f.shortName.startsWith('d') || f.shortName.startsWith('l') || f.shortName.startsWith('e') || f.shortName.startsWith('m') || f.shortName.startsWith('a') || f.shortName.startsWith('validate') || f.shortName.startsWith('process') || f.shortName.startsWith('stateLit') || f.shortName.startsWith('pluginTask')|| f.shortName.startsWith('icaApresentationTextRichBase')|| f.shortName.startsWith('icaLitElementBase')|| f.shortName.startsWith('icaTypes')|| f.shortName.startsWith('widgetTextCode')|| f.shortName.startsWith('icaApresentationTextCodeBase') || f.shortName.startsWith('pluginStyleIndexItem')) && !f.shortName.startsWith('collabMessagesThreadModal') && !f.shortName.startsWith('previewModeUtil')) itens.push(key);
+      itens.push(key);*/
+
+      if (f && f.level === 2 && ['.ts'].includes(f.extension) &&
+        (
+
+          f.shortName.startsWith('service') ||
+          f.shortName.startsWith('pluginPreview') ||
+          f.shortName.startsWith('tsTest') ||
+          f.shortName.startsWith('previewModeSinglePage') ||
+          f.shortName.startsWith('previewModeMinimum') || 
+          f.shortName.startsWith('widgetDefs') ||
+          f.shortName.startsWith('saveAddBranch') ||
+          f.shortName.startsWith('pluginCreateProjectLocalToDriver') ||
+          f.shortName.startsWith('pluginNewProjectLog') 
+
+        )
+
+      ) itens.push(key);
+
 
     })
 
@@ -74,12 +113,12 @@ export class SimpleGreeting extends CollabLitElement {
       if (m && m.compilerResults && m.compilerResults.errors.length > 0) {
         erros.push(key);
         f.hasError = true;
-      } else if(m && !m.model.isDisposed) {
+      } else if (m && !m.model.isDisposed) {
         mls.editor.deleteModels(f.project, f.shortName, f.folder, true, f.level)
       }
 
       if (m) {
-      //  mls.editor.deleteModels(f.project, f.shortName, f.folder, true, f.level)
+        //  mls.editor.deleteModels(f.project, f.shortName, f.folder, true, f.level)
       }
 
       this.list.push(key);
