@@ -1,7 +1,7 @@
 /// <mls shortName="agentGenerateAvatarSvg" project="100554" enhancement="_blank" />
 
-import { IAgent, svg_agent } from './_100554_aiAgentBase';
-import { preferModelType, getPromptByHtml } from './_100554_aiPrompts';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { preferModelType, getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 import {
     getAgentStepByAgentName,
     getNextInProgressStepByAgentName,
@@ -9,9 +9,9 @@ import {
     getNextPendentStep,
     updateTaskTitle,
     appendLongTermMemory
-} from "./_100554_aiAgentHelper";
+} from "/_100554_/l2/aiAgentHelper.js";
 
-import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "./_100554_aiAgentOrchestration";
+import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "/_100554_/l2/aiAgentOrchestration.js";
 
 const agentName = "agentGenerateAvatarSvg";
 
