@@ -1,7 +1,7 @@
 /// <mls shortName="previewModeMinimum" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IJSONDependence } from './_100554_libCompile';
-import * as util from './_100554_previewModeUtil';
+import { IJSONDependence } from '/_100554_/l2/libCompile';
+import * as util from '/_100554_/l2/previewModeUtil';
 
 export class PreviewModeMinimum {
 
