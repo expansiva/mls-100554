@@ -2,9 +2,9 @@
 
 import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement'
-import { IJSONDependence } from './_100554_libCompile';
-import "./_100554_collabConsoleL1";
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
+import { IJSONDependence } from '/_100554_/l2/libCompile.js';
+import "/_100554_/l2/collabConsoleL1.js";
 
 @customElement('service-preview-l1-list-server-100554')
 export class ServicePreviewL1ListServer extends CollabLitElement {
