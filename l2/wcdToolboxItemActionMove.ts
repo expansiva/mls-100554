@@ -2,11 +2,11 @@
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { WcdToolboxItemBase } from './_100554_wcdToolboxItemBase';
-import { IcaLitElementBaseMethods } from './_100554_icaTypes';
-import { WCDOverlayItensMethods } from './_100554_wcdTypes';
-import { move, updateOverlay } from './_100554_wcdCommandMove';
-import { getPosition } from './_100554_icaGlobal'; 
+import { WcdToolboxItemBase } from '/_100554_/l2/wcdToolboxItemBase.js';
+import { IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js';
+import { WCDOverlayItensMethods } from '/_100554_/l2/wcdTypes.js';
+import { move, updateOverlay } from '/_100554_/l2/wcdCommandMove.js';
+import { getPosition } from '/_100554_/l2/icaGlobal.js'; 
 
 
 @customElement('wcd-toolbox-item-action-move-100554')
