@@ -2,26 +2,26 @@
 
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from './_100554_serviceBase';
-import { formatHtml, sync } from './_100554_collabDOMSync';
-import { removeTokensFromSource } from './_100554_enhancementStyle';
-import { getTokensLess } from './_100554_designSystemBase';
-import { LessCSS } from "./_100554_lessCSS";
-import { initState, getState } from './_100554_collabState';
-import { propertyDataSource } from './_100554_collabDecorators';
-import { collab_html, collab_typescript, collab_less, collab_fileTest, collab_file_code } from './_100554_collabIcons';
-import { createAgent } from './_100554_agentFix';
-import { getTemporaryContext } from './_100554_aiAgentHelper';
-import { loadChatPreferences, getUserId, createThread } from './_100554_collabMessageHelper';
-import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate } from './_100554_libCommom';
-import { createAllModels, readProjectTypescriptAndCompile, createModel } from './_100554_collabLibModel';
-import { IReqCreateStorFile, createStorFile } from './_100554_collabLibStor';
-import { getThreadByName } from './_100554_msgDBController';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_100554_/l2/serviceBase.js';
+import { formatHtml, sync } from '/_100554_/l2/collabDOMSync.js';
+import { removeTokensFromSource } from '/_100554_/l2/enhancementStyle.js';
+import { getTokensLess } from '/_100554_/l2/designSystemBase.js';
+import { LessCSS } from "/_100554_/l2/lessCSS.js";
+import { initState, getState } from '/_100554_/l2/collabState.js';
+import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
+import { collab_html, collab_typescript, collab_less, collab_fileTest, collab_file_code } from '/_100554_/l2/collabIcons.js';
+import { createAgent } from '/_100554_/l2/agentFix.js';
+import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
+import { loadChatPreferences, getUserId, createThread } from '/_100554_/l2/collabMessageHelper.js';
+import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate } from '/_100554_/l2/libCommom.js';
+import { createAllModels, readProjectTypescriptAndCompile, createModel } from '/_100554_/l2/collabLibModel.js';
+import { IReqCreateStorFile, createStorFile } from '/_100554_/l2/collabLibStor.js';
+import { getThreadByName } from '/_100554_/l2/msgDBController.js';
 
-import { CollabSpliterVerticalVarFixed100554 } from './_100554_collabSpliterVerticalVarFixed';
-import './_100554_collabSpliterVerticalVarFixed';
-import './_100554_collabSpliterHorizontalVarFixed';
-import './_100554_cssHelperIndex';
+import { CollabSpliterVerticalVarFixed100554 } from '/_100554_/l2/collabSpliterVerticalVarFixed.js';
+import '/_100554_/l2/collabSpliterVerticalVarFixed.js';
+import '/_100554_/l2/collabSpliterHorizontalVarFixed.js';
+import '/_100554_/l2/cssHelperIndex.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -874,7 +874,7 @@ export class ServiceSource100554 extends ServiceBase {
             this._ed1.setSelection(
                 new monaco.Selection(lineNumber, 1, lineNumber, line.length + 1)
             );
-            const enhancementInstanceLess = await import('./_100554_enhancementStyle')
+            const enhancementInstanceLess = await import('/_100554_/l2/enhancementStyle.js')
             if (enhancementInstanceLess && this.activeModels) await enhancementInstanceLess.onAfterChange(this.activeModels);
         }
 
@@ -1005,7 +1005,7 @@ export class ServiceSource100554 extends ServiceBase {
                 if (this.mode !== 'icStyle' || !this.activeModels || !this.activeModels.style) return;
                 const uriActual = this.activeModels.style.model.uri.toString();
                 if (uris.some(uri => uri.toString() === uriActual)) {
-                    const enhancementInstanceLess = await import('./_100554_enhancementStyle');
+                    const enhancementInstanceLess = await import('/_100554_/l2/enhancementStyle.js');
                     if (enhancementInstanceLess && this.activeModels) await enhancementInstanceLess.onAfterMarkersChange(this.activeModels);
                 }
             });
