@@ -2,9 +2,9 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { CollabLitElement } from './_100554_collabLitElement';
-import { IHelpers } from './_100554_cssHelperIndexBase';
-import { convertFileNameToTag } from './_100554_utilsLit'
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { IHelpers } from '/_100554_/l2/cssHelperIndexBase.js';
+import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
 
 import {
     collab_heart,
@@ -13,7 +13,7 @@ import {
     collab_angles_right,
     collab_chevron_right,
     collab_info_circle
-} from './_100554_collabIcons'
+} from '/_100554_/l2/collabIcons.js'
 
 @customElement('plugin-style-index-item-100554')
 export class PluginStyleIndexItem extends CollabLitElement {
