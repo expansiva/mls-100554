@@ -3,11 +3,10 @@
 import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
-import { loadChatPreferences, IChatPreferences, saveChatPreferences, getUserId, createThread } from '/_100554_/l2/collabMessageHelper.js';
-import { getThreadByName } from '/_100554_/l2/msgDBController.js';
+import { loadChatPreferences, IChatPreferences, saveChatPreferences, getUserId, createThread } from '/_102025_/l2/collabMessagesHelper.js';
+import { getThreadByName, listThreads } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { IAgent } from '/_100554_/l2/aiAgentBase.js';
 import { getTemporaryContext, getAllSteps } from '/_100554_/l2/aiAgentHelper.js';
-import { listThreads } from '/_100554_/l2/msgDBController.js';
 import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
 import { collab_trash } from '/_100554_/l2/collabIcons.js';
 import { setState } from '/_100554_/l2/collabState.js';
