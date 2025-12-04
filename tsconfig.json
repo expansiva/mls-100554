@@ -3,8 +3,8 @@
         "target": "es2020",
         "module": "ES2020",
         "esModuleInterop": true,
-        "outDir": "./preBuild/l2",
-        "rootDir": "./prel2",
+        "outDir": "./preBuild/",
+        "rootDir": "./project",
         "strict": true,
         "removeComments": false,
         "noUnusedParameters": false,
@@ -18,10 +18,10 @@
         "strictNullChecks": false,
         "paths": {
             "lit": [
-                "./prel2/_100554_litElement.ts"
+                "./project/_100554_/l2/litElement.ts"
             ],
             "lit/decorators.js": [
-                "./prel2/_100554_litDecorators.ts"
+                "./project/_100554_/l2/litDecorators.ts"
             ]
         },
         "lib": [
@@ -30,7 +30,7 @@
         ]
     },
     "include": [
-        "prel2/**/*",
+        "project/**/*",
         "monaco.d.ts",
         "mls.d.ts"
     ],
