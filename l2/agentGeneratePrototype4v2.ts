@@ -1,4 +1,4 @@
-/// <mls shortName="agentGeneratePrototype4" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls shortName="agentGeneratePrototype4v2" project="100554" enhancement="_blank" />
 
 import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase';
 import { getPromptByHtml } from '/_100554_/l2/aiPrompts';
@@ -9,7 +9,6 @@ import { createNewFile } from "/_100554_/l2/pluginNewFileBase";
 import { formatHtml } from '/_100554_/l2/collabDOMSync';
 import { addNewTokensTheme } from '/_100554_/l2/designSystemBase';
 import { addModule } from '/_100554_/l2/projectAST';
-
 
 import {
   getNextPendingStepByAgentName,
@@ -28,9 +27,9 @@ import {
   startNewAiTask,
   executeNextStep,
   addNewStep,
-} from '/_100554_/l2/aiAgentOrchestration';
+} from "/_100554_/l2/aiAgentOrchestration";
 
-const agentName = "agentGeneratePrototype4";
+const agentName = "agentGeneratePrototype4v2";
 const agentProject = 100554;
 const projectToSave = mls.actualProject || 0;
 const enhancementTs = '_100554_enhancementLit';
@@ -56,6 +55,7 @@ export function createAgent(): IAgent {
 }
 
 const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+
   const taskTitle = "Planning 4...";
   if (!context || !context.message) throw new Error("Invalid context");
 
@@ -117,7 +117,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
   if (!stepPendent) throw new Error(`[${agentName}](afterPrompt) Invalid next stepPendent`);
 
   const newStep: mls.msg.AIPayload = {
-    agentName: 'agentGeneratePrototype4',
+    agentName: 'agentGeneratePrototype4v2',
     prompt: nextPage.toString(),
     status: 'pending',
     stepId: stepPendent.stepId + 1,
@@ -174,6 +174,11 @@ async function createPage(context: mls.msg.ExecutionContext) {
     finalSource = replaceByPriority(finalSource, key, url);
   }
 
+  if (finalSource) {
+    console.info(finalSource);
+    throw new Error('Error force');
+  }
+
 
   const actualTaskIndex = context.task?.iaCompressed?.longMemory['next_page'] ? +(context.task?.iaCompressed?.longMemory['next_page']) : 0;
   const folder = context.task?.iaCompressed?.longMemory['module_name'];
@@ -209,12 +214,35 @@ async function getPrompts(payload3: PayLoad3, organismDeclared: string[], pageIn
   const organismsUsed = payload3.organism.filter((item) => organismNames.includes(item.organismTag));
   const tagName = convertFileNameToTag({ project: actualProject, shortName: payload3.pages[pageIndex].pageName });
 
+  const { pageName, pageGoal } = payload3.pages[pageIndex];
+  const { pageHtml } = payload3.pagesWireframe[pageIndex];
+
+  const { moduleGoal, moduleName, userLanguage, requirements } = payload3.finalModuleDetails;
+
+  const finalModuleDetails = {
+    moduleGoal,
+    moduleName,
+    userLanguage,
+    requirements
+  };
+
+  const { logoDescription, iconStyle, illustrationStyle, colorPalette } = payload3.visualIdentity;
+
+
+  const visualIdentity = {
+    logoDescription,
+    iconStyle,
+    illustrationStyle,
+    colorPalette
+  }
+
   const data: Record<string, string> = {
-    page: JSON.stringify(payload3.pages[pageIndex]),
-    pageWireframe: JSON.stringify(payload3.pagesWireframe[pageIndex]),
-    finalModuleDetails: JSON.stringify(payload3.finalModuleDetails, null, 2),
+    pageName,
+    pageGoal,
+    pageWireframe: arrayToHtml(pageHtml),
     organismDetails: JSON.stringify(organismsUsed, null, 2),
-    tokens: JSON.stringify(payload3.tokens),
+    finalModuleDetails: JSON.stringify(finalModuleDetails, null, 2),
+    visualIdentity: JSON.stringify(visualIdentity, null, 2),
     organismDeclared: JSON.stringify(organismDeclared),
     project: actualProject?.toString() || '',
     tag: tagName
@@ -223,6 +251,31 @@ async function getPrompts(payload3: PayLoad3, organismDeclared: string[], pageIn
   const prompts = await getPromptByHtml({ project: agentProject, shortName: agentName, folder: '', data })
   return prompts;
 }
+
+function arrayToHtml(lines: string[]): string {
+  let indentLevel = 0;
+  const indentChar = "\t";
+  const html: string[] = [];
+
+  const isClosingTag = (line: string) => /^<\/.+?>$/.test(line.trim());
+  const isSelfClosing = (line: string) =>
+    /\/>$/.test(line.trim()) ||
+    /^<.+><\/.+>$/.test(line.trim());
+
+  for (let raw of lines) {
+    const line = raw.trim();
+    if (isClosingTag(line)) {
+      indentLevel = Math.max(indentLevel - 1, 0);
+    }
+    html.push(indentChar.repeat(indentLevel) + line);
+
+    if (!isClosingTag(line) && !isSelfClosing(line) && /^<[^/!][^>]*>$/.test(line)) {
+      indentLevel++;
+    }
+  }
+  return html.join("\n");
+}
+
 
 async function updateLongMemory(context: mls.msg.ExecutionContext, newOrganism: string[], actualTaskIndex: number, pageName: string, stepId: number) {
   const byLongMemory = context.task?.iaCompressed?.longMemory['organism_created'];
@@ -363,7 +416,7 @@ async function generateFiles(
 async function createProjectFile(moduleName: string, project: number, payload3: PayLoad3) {
 
   const res = await addModule(project, moduleName, true);
-  if(!res.ok) throw new Error(`[${agentName}](createProjectFile) ${res.message}`)
+  if (!res.ok) throw new Error(`[${agentName}](createProjectFile) ${res.message}`)
 
 }
 

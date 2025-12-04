@@ -168,11 +168,11 @@ ${this.renderButonAdd()}
         </label>
             
         <div style="position:relative">
-            <select id="selCompare" @change=${()=> this.msgSelectGroup = false}>
+            <select id="selCompare" @change=${() => this.msgSelectGroup = false}>
             <option value="">-- Select to compare --</option>
             ${repeat(this.combinations, ((key: string) => key + 'comp') as any, ((g: string) => {
-                return html`<option value=${g} ?selected=${this.actualGrup === g}>${g.replace(';', ' x ')}</option>`
-            }) as any)}
+            return html`<option value=${g} ?selected=${this.actualGrup === g}>${g.replace(';', ' x ')}</option>`
+        }) as any)}
             
             </select>
             <small style="color:red; position: absolute; top: 29px; left: 0;${this.msgSelectGroup ? '' : 'display:none'}">Select a comparison mode</small>
@@ -302,7 +302,9 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         }
         const left = (mls.actual[2] as any).left;
         if (!left) return;
-        this._agent = `_${left.project}_${left.shortName}`;
+        const agentName = `_${left.project}_${left.folder ? left.folder + '/' : ''}${left.shortName}`
+        this._agent = agentName;
+
 
     }
 
@@ -429,7 +431,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
                 const ret = await Promise.all(arrayPromisse);
 
                 if (this.activeJudge) {
-                    
+
                     let [ret1, ret2] = ret;
                     ret1 = ret1.split('responded:')?.pop()?.trim() || '';
                     ret2 = ret2.split('responded:')?.pop()?.trim() || '';
@@ -438,20 +440,20 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
                     const allSteps1 = getAllSteps(obj1.task.iaCompressed.nextSteps);
                     const allSteps2 = getAllSteps(obj2.task.iaCompressed.nextSteps);
                     const obj = {
-                        title1:selectedGroups[0],
+                        title1: selectedGroups[0],
                         context1: JSON.stringify(allSteps1[allSteps1.length - 1]),
-                        title2:selectedGroups[1],
+                        title2: selectedGroups[1],
                         context2: JSON.stringify(allSteps2[allSteps2.length - 1]),
                     };
 
                     this.result = await this._callAgent('_100554_agentJudge', JSON.stringify(obj), '');
 
-                    
+
                 } else {
                     this.result = ret
                 }
 
-                
+
 
             }
 
@@ -727,7 +729,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
     private _onCheckboxChange(e: Event) {
         const target = e.target as HTMLInputElement;
         this.activeGroup = target.checked;
-    } 
+    }
 
     private _onCheckboxChangeJudge(e: Event) {
         const target = e.target as HTMLInputElement;
