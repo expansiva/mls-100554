@@ -6,8 +6,7 @@ import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { initManagerCoachMark } from "/_100554_/l2/collabManagerCoachMarks.js";
 import { getTokensCss } from '/_100554_/l2/designSystemBase.js';
 import { getProjectDetails, setProjectDetails, getLastOpenedFiles, findStorFileInProjectsOrDeps, getInstanceByFile, saveOpenedFile } from '/_100554_/l2/libCommom.js';
-import { loadNotificationPreferences } from '/_100554_/l2/collabMessageHelper.js';
-import { listenToThreadEvents } from '/_100554_/l2/collabMessagesSyncNotifications.js';
+
 import { openService, getLastModule } from '/_100554_/l2/libCommom.js';
 
 let on1CompileMonaco = true;
@@ -372,10 +371,10 @@ export class CollabInit extends CollabLitElement {
     private async loadLastProject() {
         if (window.traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
         if (!this.actualProject) return;
-        if (this.actualProject === 100554) {
-            if (this.actualProject && this.actualProject !== this.defaultLocalProject) await mls.stor.server.loadProjectInfoIfNeeded(this.actualProject);
-            return;
-        }
+        // if (this.actualProject === 100554) {
+        //     if (this.actualProject && this.actualProject !== this.defaultLocalProject) await mls.stor.server.loadProjectInfoIfNeeded(this.actualProject);
+        //     return;
+        // }
         const depsActualProject = mls.l5.getProjectDependencies(this.actualProject, false);
         const deps = [this.actualProject, ...depsActualProject];
         for await (let prj of deps) {
@@ -608,10 +607,20 @@ export class CollabInit extends CollabLitElement {
         };
     }
 
-    private initNotificationIfEnabled() {
-        const preferences = loadNotificationPreferences();
-        if (preferences !== 'granted' || Notification.permission !== 'granted') return;
-        listenToThreadEvents();
+    private async initNotificationIfEnabled() {
+
+        try {
+            let preferences: string | null | undefined;
+            const module = await import('/_102025_/l2/collabMessagesHelper.js');
+            if (!module || !module.loadNotificationPreferences) preferences = null;
+            if (preferences !== 'granted' && Notification.permission !== 'granted') return;
+            const moduleSync = await import('/_102025_/l2/collabMessagesSyncNotifications.js');
+            if (!moduleSync || !moduleSync.listenToThreadEvents || typeof moduleSync.listenToThreadEvents !== 'function') return;
+            moduleSync.listenToThreadEvents();
+        } catch (err: any) {
+            console.error('Error on listen notifications' + err.message)
+        }
+
     }
 
 }
