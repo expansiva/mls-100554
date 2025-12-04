@@ -10,12 +10,12 @@ export const requires: mls.l2.enhancement.IRequire[] = [
     {
         type: 'tspath',
         name: 'lit',
-        ref: "file://server/_100554_litElement.ts"
+        ref: "file://server/_100554_/l2/litElement.ts"
     },
     {
         type: 'tspath',
         name: 'lit/decorators.js',
-        ref: "file://server/_100554_litDecorators.ts"
+        ref: "file://server/_100554_/l2/litDecorators.ts"
     },
     {
         type: "cdn",
