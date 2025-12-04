@@ -7,18 +7,17 @@ import { getTokens } from '/_100554_/l2/designSystemBase.js';
 import { getConfigProject } from '/_100554_/l2/libProjectConfig.js';
 import { createPath, getLastOpenedFiles, OpenedFileL2 } from '/_100554_/l2/libCommom.js';
 import { collabImport } from '/_100554_/l2/collabImport.js';
-import { createThread } from '/_100554_/l2/collabMessageHelper.js';
-import { getThreadByName } from '/_100554_/l2/msgDBController.js';
+
+import { createThread, getUserId } from '/_102025_/l2/collabMessagesHelper.js';
+import { getThreadByName } from '/_102025_/l2/collabMessagesIndexedDB.js';
 
 import { globalState, setState, initState, getState } from '/_100554_/l2/collabState.js';
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from '/_100554_/l2/collabIcons.js';
 import { CollabState } from '/_100554_/l2/collabState.js';
 import { TsTestAst } from '/_100554_/l2/tsTestAST.js';
-import { getUserId } from '/_100554_/l2/collabMessageHelper.js';
 import { getTemporaryContext, getAgentInstanceByName } from '/_100554_/l2/aiAgentHelper.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
 
-import { IAgent } from '/_100554_/l2/aiAgentBase.js';
 
 import '/_100554_/l2/collabConsole.js';
 import '/_100554_/l2/collabResultTest.js';
