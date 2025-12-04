@@ -11,7 +11,7 @@ import {
     notifyThreadChange,
     updateStepStatus,
 } from "/_100554_/l2/aiAgentHelper.js";
-import { addMessage } from "/_100554_/l2/collabMessageHelper.js";
+import { addMessage } from '/_102025_/l2/collabMessagesHelper.js';
 
 import {
     startNewAiTask,
