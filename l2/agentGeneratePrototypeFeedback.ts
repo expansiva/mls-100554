@@ -6,8 +6,6 @@ import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { getPayload3 } from '/_100554_/l2/agentGeneratePrototype3.js';
 import { getPayload4, PayLoad4 } from '/_100554_/l2/agentGeneratePrototype4.js';
 import { selectLevel, openService } from '/_100554_/l2/libCommom.js';
-import { getTask } from '/_100554_/l2/msgDBController.js';
-
 
 import {
     getAgentStepByAgentName,
