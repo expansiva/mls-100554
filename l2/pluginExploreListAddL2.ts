@@ -39,7 +39,7 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
-/// **collab_i18n_end**
+/// **collab_i18n_end** 
 
 @customElement('plugin-explore-list-add-l2-100554')
 export class ServiceListFilesAdd100554 extends CollabLitElement {
@@ -266,7 +266,7 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
     private async getPluginsInfo(plugins: mls.plugin.MenuAction[]): Promise<IPlugins[]> {
         const rc: IPlugins[] = [];
         for await (const plugin of plugins) {
-            const instance = await import(`./${plugin.widget}`);
+            const instance = await import(`/${plugin.widget}`);
             if (!instance.details ||
                 typeof instance.details !== 'object' ||
                 !['title', 'description', 'tags'].every(prop => prop in instance.details)
