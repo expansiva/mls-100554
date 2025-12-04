@@ -6,7 +6,7 @@ import { collab_chevron_down } from '/_100554_/l2/collabIcons.js'
 
 @customElement('collab-spliter-vertical-var-fixed-100554')
 export class CollabSpliterVerticalVarFixed100554 extends LitElement {
-
+  
   @property({ type: String }) fixedheight = '0';
   @property({ type: String }) complementcolor = '#000';
   @property({ type: Number }) spliterHeight = 20;

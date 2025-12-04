@@ -3,7 +3,7 @@
 import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
 import { getNextInProgressStepByAgentName, updateStepStatus, notifyMessageSendChange } from "/_100554_/l2/aiAgentHelper.js";
 import { executeNextStep, loadAgent } from "/_100554_/l2/aiAgentOrchestration.js";
-import { addMessage } from "/_100554_/l2/collabMessageHelper.js";
+import { addMessage } from '/_102025_/l2/collabMessagesHelper.js';
 
 const agentName = "agentBotInstall";
 

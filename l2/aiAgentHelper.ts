@@ -1,7 +1,7 @@
 /// <mls shortName="aiAgentHelper" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { updateMessage, getMessage } from "/_100554_/l2/msgDBController.js";
-import { getUserId, createThread } from "/_100554_/l2/collabMessageHelper.js";
+import { updateMessage, getMessage } from '/_102025_/l2/collabMessagesIndexedDB.js';
+import { getUserId, createThread } from '/_102025_/l2/collabMessagesHelper.js';
 import { getThreadByName } from '/_100554_/l2/msgDBController.js';
 import { loadAgent } from '/_100554_/l2/aiAgentOrchestration.js';
 import { openService } from '/_100554_/l2/libCommom.js';

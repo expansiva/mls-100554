@@ -6,8 +6,8 @@ import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { createAllFiles, IReqCreateAllFiles } from '/_100554_/l2/collabLibStor.js';
 import { createConfigFile } from '/_100554_/l2/libProjectConfig.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
-import { addMessage, createThread } from '/_100554_/l2/collabMessageHelper.js';
-import { getThreadByName } from '/_100554_/l2/msgDBController.js';
+import { addMessage, createThread } from '/_102025_/l2/collabMessagesHelper.js';
+import { getThreadByName } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { setProjectDetails, checkIfHasLocalProject, setLocalProjectName, isValidProjectName } from '/_100554_/l2/libCommom.js';
 
 import {
