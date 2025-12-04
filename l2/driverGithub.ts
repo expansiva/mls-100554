@@ -2,10 +2,10 @@
 
 import * as dL from '/_100554_/l2/driverLib.js';
 
-let mKey = (window as any)['mKey'] || "";
+let mKey =  "";
 
 export function init(initString: string) {
-	(window as any)['mKey'] = atob(initString);
+	mKey = atob(initString);
 }
 
 export class DriverGitHub extends mls.stor.others.DriverIOBase {
