@@ -2,8 +2,8 @@
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from './_100554_stateLitElement';
-import { addMessage } from './_100554_collabMessageHelper';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { addMessage } from '/_100554_/l2/collabMessageHelper.js';
 
 @customElement('test-generate-defs-100554')
 export class TestGenerateDefs100554 extends StateLitElement {
