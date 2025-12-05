@@ -7,7 +7,7 @@ import { collab_user } from '/_100554_/l2/collabIcons.js';
 import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
 import { convertTagToFileName, convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
 import { loadPluginProject } from '/_100554_/l2/libCommom.js';
-import('./_100554_collabPanel');
+import('/_100554_/l2/collabPanel.js');
 
 /// **collab_i18n_start**
 const message_pt = {
