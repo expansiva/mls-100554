@@ -1,6 +1,6 @@
 /// <mls shortName="toolMortgageCalculator" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { ITool, svg_tool } from './_100554_aiAgentBase';
+import { ITool, svg_tool } from '/_100554_/l2/aiAgentBase.js';
 
 const toolName = "toolMortgageCalculator";
 
