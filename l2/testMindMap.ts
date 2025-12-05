@@ -2,7 +2,7 @@
 
  import { html } from 'lit'; 
  import { customElement, state } from 'lit/decorators.js';
- import { StateLitElement } from './_100554_stateLitElement';
+ import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 
  @customElement('test-mind-map-100554')
  export class TestMindMap100554 extends StateLitElement {
