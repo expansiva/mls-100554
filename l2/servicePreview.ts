@@ -702,7 +702,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private pluginResultJS: HTMLElement | undefined;
     private showResultJS() {
-        import('./_100554_pluginPreviewResultJs');
+        import('/_100554_/l2/pluginPreviewResultJs.js');
         if (this.menu.setMode) {
             this.pluginResultJS = document.createElement('plugin-preview-result-js-100554');
             this.pluginResultJS.setAttribute('msize', this.msize);
@@ -715,7 +715,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private pluginResultTestJS: HTMLElement | undefined;
     private showResultTestJS() {
-        import('./_100554_pluginPreviewResultTestJs');
+        import('/_100554_/l2/pluginPreviewResultTestJs.js');
         if (this.menu.setMode) {
             this.pluginResultTestJS = document.createElement('plugin-preview-result-test-js-100554');
             this.pluginResultTestJS.setAttribute('msize', this.msize);
