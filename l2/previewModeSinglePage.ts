@@ -2,6 +2,8 @@
 
 import { IJSONDependence } from '/_100554_/l2/libCompile';
 import { convertTagToFileName } from '/_100554_/l2/utilsLit';
+import { setErrorOnModel } from '/_100554_/l2/validateLit';
+
 import * as util from '/_100554_/l2/previewModeUtil';
 
 export class PreviewModeSinglePage {
@@ -42,9 +44,9 @@ export class PreviewModeSinglePage {
 
         if (Object.keys(myMap).length === 0) myMap = {
             lit: "https://cdn.jsdelivr.net/gh/lit/dist@3/all/lit-all.min.js",
-            "lit/decorators.js":"https://cdn.jsdelivr.net/npm/lit@3.0.0/decorators/+esm"
+            "lit/decorators.js": "https://cdn.jsdelivr.net/npm/lit@3.0.0/decorators/+esm"
 
-        } 
+        }
 
         const virtualFsPlugin = {
             name: 'virtual-fs',
@@ -101,10 +103,8 @@ export class PreviewModeSinglePage {
                         args.path.startsWith("../") ||
                         args.path.startsWith("/")) &&
                         args.importer.startsWith("https://")) {
-
                         const url = new URL(args.path, args.importer);
                         return { path: url.href, namespace: 'virtual' };
-
                     }
 
                     // import url externa
@@ -122,72 +122,6 @@ export class PreviewModeSinglePage {
                         return { path: myMap[args.path], namespace: 'virtual' };
                     }
 
-                    /*
-                    
-                    const isValidStart = (path: string) => {
-                        return !path.startsWith("./l2/") && !path.startsWith("_") && !(path.startsWith("./_") && path.indexOf("/l2/") >= 0)
-                    }
-
-                    const transforPathInitId = (input: string) => {
-
-                        let [idPart, ...restParts] = input.split('/');
-                        if (input.startsWith('./')) {
-                            idPart = restParts[0];
-                            restParts.shift();
-                        }
-
-                        const rest = restParts.join('/');
-
-                        const lastSlashIndex = rest.lastIndexOf('/');
-                        const path = rest.substring(0, lastSlashIndex);
-                        const file = rest.substring(lastSlashIndex + 1);
-
-                        return `/${path}/${idPart}${file}`;
-                    }
-                    
-                    if ((
-                        args.path.startsWith("./") ||
-                        args.path.startsWith("../") ||
-                        args.path.startsWith("/")) &&
-                        myMap[args.importer] && isValidStart(args.path)) {
-
-                        const url = new URL(args.path, myMap[args.importer]);
-                        return { path: url.href, namespace: 'virtual' };
-
-                    }
-
-                    if ((
-                        args.path.startsWith("./") ||
-                        args.path.startsWith("../") ||
-                        args.path.startsWith("/")) &&
-                        args.importer.startsWith("https://") && isValidStart(args.path)) {
-
-                        const url = new URL(args.path, args.importer);
-                        return { path: url.href, namespace: 'virtual' };
-
-                    }
-
-                    if (args.path.startsWith("http")) {
-                        return { path: args.path, namespace: 'virtual' };
-                    }
-
-                    if ((args.path.startsWith("_") || args.path.startsWith("./_")) &&
-                        !args.importer.startsWith("https://") && !args.path.startsWith("./l2/")) {
-                        return {
-                            path: transforPathInitId(args.path),
-                            namespace: 'virtual',
-                        };
-                    }
-
-                    if (args.path.indexOf("/l2/") &&
-                        !args.importer.startsWith("https://")) {
-                        return {
-                            path: args.path.replace('./l2/', `/_${mls.actualProject}_`),
-                            namespace: 'virtual',
-                        };
-                    }*/
-
-
                     return null;
                 });
 
@@ -202,14 +136,23 @@ export class PreviewModeSinglePage {
                         const text = await res.text();
                         return { contents: text, loader: 'js' };
 
-                    } catch (e) {
+                    } catch (e: any) {
                         console.info('erro:' + args.path);
-                        return { contents: '', loader: 'js' }
+                        return {
+                            contents: '',
+                            loader: 'js',
+                            warnings: [{
+                                text: e.message, notes: [
+                                    { text: 'build-error' }
+                                ]
+                            }]
+                        }
                     }
 
                 });
             },
         };
+
 
         let allImports = [...this.json.importsJs, ...find];
         allImports = [...new Set(allImports)];
@@ -232,6 +175,19 @@ export class PreviewModeSinglePage {
             write: false,
             plugins: [virtualFsPlugin]
         });
+
+        if (result.warnings && result.warnings.length > 0) {
+            const msgs = result.warnings
+                .filter((item: any) => item.notes?.[0]?.text === 'build-error')
+                .map((item:any) => item.text)
+                .join('\n');
+
+            if (this.models?.ts?.model && msgs.trim()) {
+                const lineLength = this.models.ts.model.getLineLength(1);
+                setErrorOnModel(this.models.ts.model, 1, 1, lineLength, msgs, monaco.MarkerSeverity.Error);
+                this.models.ts.storFile.hasError = true;
+            }
+        }
 
         util.mountJSImporMap(this.json, this.ifr);
         util.mountTokens(this.json.tokens || '', this.file);
@@ -310,7 +266,7 @@ export class PreviewModeSinglePage {
         if (!(window as any).cachePreview[this.json.importsJs[0]]) return;
 
         let needCompile = false;
-        this.json.importsJs.forEach((i) => {
+        this.json.importsJs.forEach((i: string) => {
             const name = i.startsWith('/') ? i.replace('/', '') : i;
             const f = mls.l2.getPath(name);
             const key = mls.stor.getKeyToFiles(f.project, 2, f.shortName, f.folder, '.ts');
