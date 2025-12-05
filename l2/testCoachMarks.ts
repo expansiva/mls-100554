@@ -1,8 +1,8 @@
 /// <mls shortName="testCoachMarks" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { CollabPageElement } from './_100554_collabPageElement';
+import { CollabPageElement } from '/_100554_/l2/collabPageElement.js';
 import { customElement } from 'lit/decorators.js';
-import {addCoachMark, ICoachMarks} from './_100554_coachMarks';
+import {addCoachMark, ICoachMarks} from '/_100554_/l2/coachMarks.js';
 @customElement('test-coach-marks-100554') 
 export class TestCoachMarks100554 extends CollabPageElement {
  
