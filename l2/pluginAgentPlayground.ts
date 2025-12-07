@@ -301,7 +301,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         }
         const left = (mls.actual[2] as any).left;
         if (!left) return;
-        const agentName = `_${left.project}_${left.folder ? left.folder + '/' : ''}${left.shortName}`
+        const agentName = `_${left.project}_/l2/${left.folder ? left.folder + '/' : ''}${left.shortName}`
         this._agent = agentName;
 
 
@@ -538,19 +538,24 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         if (!userId) return `Agent "${agentName}" error: Not found userID`;
         let context;
         try {
-            const moduleAgent = await import(`./${agentName}`);
-            if (!moduleAgent) return 'Not found agent:' + agentName;
-            if (!moduleAgent.createAgent) return 'Not found createAgent:' + agentName;
+            context = getTemporaryContext(threadId, userId, '@@' + agentName + ' ' + message);
+        } catch (e: any) {
+            this.inError = true;
+            return `[pluginAgentPlayground] [getTemporaryContext] Agent "${agentName}" error: ${e.message}\n\n${JSON.stringify(context, null, 2)}`
+        }
+        try {
+            const moduleAgent = await import(`/${agentName}`);
+            if (!moduleAgent) throw new Error('Not found agent:' + agentName);
+            if (!moduleAgent.createAgent) throw new Error('Not found createAgent:' + agentName);
             const agt = moduleAgent.createAgent() as IAgent;
-            context = getTemporaryContext(threadId, userId, '@@' + agt.agentName + ' ' + message);
             context.modeSingleStep = true;
             setState('playgroundAgent.modeCompare', group);
             await agt.beforePrompt(context);
             setState('playgroundAgent.modeCompare', undefined);
-            return `Agent "${agentName}" responded:\n${JSON.stringify(context, null, 2)}`;
+            return `[pluginAgentPlayground] Agent "${agentName}" responded:\n${JSON.stringify(context, null, 2)}`;
         } catch (e: any) {
             this.inError = true;
-            return `Agent "${agentName}" error: ${e.message}\n\n${JSON.stringify(context, null, 2)}`
+            return `[pluginAgentPlayground] Agent "${agentName}" error: ${e.message}\n\n${JSON.stringify(context, null, 2)}`
         }
     }
 
