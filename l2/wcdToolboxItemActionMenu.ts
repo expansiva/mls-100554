@@ -79,7 +79,7 @@ export class WcdToolboxItemActionMenu extends WcdToolboxItemBase {
             if (file === '_100554_wcdToolboxItemActionAdd' && item.args === 'child' && globalWcd.elICA && !(globalWcd.elICA as any).allowAddChild) return;
 
             if (!this.isLoad.includes(file)) {
-                if (!file.startsWith('./')) file = './' + file;
+                if (!file.startsWith('/')) file = '/' + file;
                 await import(file);
             }
 
