@@ -93,8 +93,8 @@ export class ServicePreviewL1100554 extends ServiceBase {
         const moduleConfig = await getProjectConfig(mls.actualProject as number);
         if (!moduleConfig || !moduleConfig.masterBackEnd) return;
         const info = mls.l2.getPath(moduleConfig.masterBackEnd.serverView)
-        await import(`./${moduleConfig.masterBackEnd.serverView}`);
-        this.startInstance = await import(`./${moduleConfig.masterBackEnd.start}`);
+        await import(`/${moduleConfig.masterBackEnd.serverView}`);
+        this.startInstance = await import(`/${moduleConfig.masterBackEnd.start}`);
         await this.startInstance.start(mls.actualProject, 'none');
         this.liveViewTag = convertFileNameToTag(info);
 
