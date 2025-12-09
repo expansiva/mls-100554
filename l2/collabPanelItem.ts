@@ -97,7 +97,7 @@ export class CollabPanelItem extends CollabLitElement {
     private async setMyInfo() {
         if (!this.widget) return;
         const file = mls.l2.getPath(this.widget);
-        const modulePlugin = await import('/' + `_${file.project}_${file.shortName}`);
+        const modulePlugin = await import('/' + `_${file.project}_/l2/${file.shortName}`);
         this.myInfo = modulePlugin.pluginData;
         this.setAttribute('loading', '');
 
