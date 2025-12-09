@@ -312,13 +312,13 @@ export class ServiceOrganism100554 extends ServiceBase {
 
         if (plgNavName) {
             const { folder, project, shortName } = mls.l2.getPath(plgNavName);
-            await import(`./_${project}_${shortName}`);
+            await import(`/_${project}_/l2/${shortName}`);
             this.pluginNav = convertFileNameToTag({ project, shortName, folder });
         }
 
         if (plgStlpName) {
             const { folder, project, shortName } = mls.l2.getPath(plgStlpName);
-            await import(`./_${project}_${shortName}`);
+            await import(`/_${project}_/l2/${shortName}`);
             this.pluginStyle = convertFileNameToTag({ project, shortName, folder });
         }
     }
