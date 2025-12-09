@@ -10,10 +10,14 @@ import '/_100554_/l2/collabNav4Menu.js';
 /// **collab_i18n_start**
 const message_pt = {
     noFindModule: 'Nenhum modulo configurado.',
+    noFindBuild: 'Nenhum arquivo "build" encontrado.',
+    noFindStart: 'Nenhum arquivo "start" encontrado.',
 }
 
 const message_en = {
     noFindModule: 'No modules configured',
+    noFindBuild: 'No find "build" file.',
+    noFindStart: 'No find "start" file.',
 }
 
 type MessageType = typeof message_en;
@@ -87,16 +91,26 @@ export class ServiceLiveView100554 extends ServiceBase {
         super.connectedCallback();
         const moduleConfig = await getProjectConfig(mls.actualProject as number);
         if (!moduleConfig || !moduleConfig.masterFrontEnd) return;
-        const info = mls.l2.getPath(moduleConfig.masterFrontEnd.liveView)
-        await import(`/${moduleConfig.masterFrontEnd.liveView}`);
-        this.buildInstance = await import(`/${moduleConfig.masterFrontEnd.build}`);
-        this.startInstance = await import(`/${moduleConfig.masterFrontEnd.start}`);
+        const infoLiveView = mls.l2.getPath(moduleConfig.masterFrontEnd.liveView);
+        const infoBuild = mls.l2.getPath(moduleConfig.masterFrontEnd.build);
+        const infoStart = mls.l2.getPath(moduleConfig.masterFrontEnd.start);
+
+        const storFileLiveView = mls.stor.files[mls.stor.getKeyToFiles(infoLiveView.project, 2, infoLiveView.shortName, infoLiveView.folder, '.ts')];
+        const storFileBuild = mls.stor.files[mls.stor.getKeyToFiles(infoBuild.project, 2, infoBuild.shortName, infoBuild.folder, '.ts')];
+        const storFileStart = mls.stor.files[mls.stor.getKeyToFiles(infoStart.project, 2, infoStart.shortName, infoStart.folder, '.ts')];
+
+        if (storFileLiveView) await import(`/${moduleConfig.masterFrontEnd.liveView}`);
+        if (storFileBuild) this.buildInstance = await import(`/${moduleConfig.masterFrontEnd.build}`);
+        if (storFileStart) this.startInstance = await import(`/${moduleConfig.masterFrontEnd.start}`);
 
         if (moduleConfig.masterBackEnd && moduleConfig.masterBackEnd.start) {
-            this.startServerInstance = await import(`/${moduleConfig.masterBackEnd.start}`);
+            const infoBuildBE = mls.l2.getPath(moduleConfig.masterBackEnd.start);
+            const storFileStartBE = mls.stor.files[mls.stor.getKeyToFiles(infoBuildBE.project, 2, infoBuildBE.shortName, infoBuildBE.folder, '.ts')];
+            if (storFileStartBE) this.startServerInstance = await import(`/${moduleConfig.masterBackEnd.start}`);
         }
 
-        this.liveViewTag = convertFileNameToTag(info);
+        if (infoLiveView.shortName) this.liveViewTag = convertFileNameToTag(infoLiveView);
+
 
     }
 
@@ -113,11 +127,20 @@ export class ServiceLiveView100554 extends ServiceBase {
             const actual7 = mls.actual[7];
             if (!actual7 || !actual7.project) {
 
-                if (!projectConfig) return;
+                if (!projectConfig) {
+                    this.loading = false;
+                    return;
+                }
                 const firstModule = projectConfig.modules[0];
-                if (!firstModule) return;
+                if (!firstModule) {
+                    this.loading = false;
+                    return;
+                };
                 const moduleConfig = await getProjectModuleConfig(firstModule.path, mls.actualProject as number);
-                if (!moduleConfig) return;
+                if (!moduleConfig) {
+                    this.loading = false;
+                    return;
+                };
                 const page = moduleConfig.initialPage;
 
                 mls.actual[7].setFullName(`_${mls.actualProject}_${firstModule.path}/${page}`);
@@ -149,6 +172,9 @@ export class ServiceLiveView100554 extends ServiceBase {
         this.msg = messages[lang];
 
         if (!this.liveViewTag) return html`<h3>${this.msg.noFindModule}<h3>`;
+        else if (!this.startInstance) return html`<h3>${this.msg.noFindStart}<h3>`;
+        else if (!this.buildInstance) return html`<h3>${this.msg.noFindBuild}<h3>`;
+
         const htmlString = `<${this.liveViewTag}></${this.liveViewTag}>`;
         return html`${unsafeHTML(htmlString)}`;
     }
