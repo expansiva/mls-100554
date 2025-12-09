@@ -23,7 +23,7 @@ import '/_100554_/l2/collabConsole.js';
 import '/_100554_/l2/collabResultTest.js';
 import '/_100554_/l2/servicePreviewView.js';
 import '/_100554_/l2/pluginPreviewInsights.js';
-import '/_100554_/l2/collabMessagesPrompt.js';
+import '/_102025_/l2/collabMessagesPrompt.js';
 import '/_100554_/l2/collabSpliterVerticalVarFixed.js';
 import '/_100554_/l2/collabSpliterHorizontalVarFixed.js';
 
