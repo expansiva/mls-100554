@@ -117,7 +117,7 @@ export class CollabTilesItem extends CollabLitElement {
     private async loadingPlugin() {
 
         const infoPathPlugin = mls.l2.getPath(this.plugin);
-        await import('./' + `_${infoPathPlugin.project}_${infoPathPlugin.shortName}`);
+        await import('/' + `_${infoPathPlugin.project}_/l2/${infoPathPlugin.shortName}`);
         const tag = convertFileNameToTag(infoPathPlugin);
         this.elPlugin = document.createElement(tag);
         this.elPlugin.setAttribute('dashboardindex', this.index);
