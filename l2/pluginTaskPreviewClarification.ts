@@ -205,7 +205,7 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
         const agentName = this.getAgentBeforeStep(this.step.stepId);
         if (!agentName) return;
 
-        const url = `./_${this.DEFAULTPROJECT}_${agentName}`;
+        const url = `/_${this.DEFAULTPROJECT}_/l2/${agentName}`;
         const md = await import(url) as any;
         const agent = md.createAgent() as IAgent;
         const ctx = getTemporaryContext('11111', this.task.owner, '');
