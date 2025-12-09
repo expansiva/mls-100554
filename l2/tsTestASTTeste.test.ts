@@ -1,7 +1,7 @@
 /// <mls shortName="tsTestASTTeste" project="100554" enhancement="_blank" />
-import { setState, verifyState } from './_100554_libManagementCan';
+import { setState, verifyState } from '/_100554_/l2/libManagementCan.js';
 
-import { ICANTest, ICANIntegration, ICANSchema } from './_100554_tsTestAST';
+import { ICANTest, ICANIntegration, ICANSchema } from '/_100554_/l2/tsTestAST.js';
 
 export const integrations: ICANIntegration[] = [
     {
