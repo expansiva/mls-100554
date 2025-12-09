@@ -111,7 +111,7 @@ export class ServicePreviewL1ListServer extends CollabLitElement {
 
     private async init() {
 
-        const url = `/_${mls.actualProject}_project`;
+        const url = `/_${mls.actualProject}_/l2/project`;
         const m = await import(url);
         const array: IListItem[] = [];
         if (m.modules) {
