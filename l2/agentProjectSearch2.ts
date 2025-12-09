@@ -428,7 +428,7 @@ async function scanDefsFiles2(
     payload1: PayLoad1,
     file: mls.stor.IFileInfo
 ): Promise<ScanDefsFileResult | null> {
-    const fileJS: string = `./_${file.project}_${file.shortName}.defs.js`;
+    const fileJS: string = `/_${file.project}_/l2/${file.shortName}.defs.js`;
     const fileNoExtension: string = `${file.shortName}`;
     try {
         const url = await mls.stor.cache.getURL(file.project, file.folder, file.shortName, file.extension.replace(".ts", ".js"), file.versionRef)
