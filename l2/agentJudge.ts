@@ -52,6 +52,8 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
 
         let pp = context.message.content
             .replace(`@@ ${agentName}`, '')
+            .replace(`@@_100554_${agentName}`, '')
+            .replace(`@@ _100554_${agentName}`, '')
             .replace(`@@${agentName}`, '').trim();
 
         let data = JSON.parse(pp);
