@@ -97,7 +97,7 @@ export class SimpleGreeting extends CollabLitElement {
 
 
 
-      ) itens.push(key);*/
+      ) itens.push(key);
 
       if (f && f.level === 2 && ['.ts'].includes(f.extension) &&
 
@@ -117,6 +117,11 @@ export class SimpleGreeting extends CollabLitElement {
       ) itens.push(key);
 
 
+    })*/
+
+    if (f && f.level === 2 && ['.test.ts'].includes(f.extension)) itens.push(key);
+
+
     })
 
     //itens = ['100554_2_collabInit.ts'];
@@ -129,12 +134,16 @@ export class SimpleGreeting extends CollabLitElement {
 
       let source = await f.getContent() as string;
 
-      if (!source || !this.teste) return;
+      if (!source || !this.teste || source.indexOf('import') < 0) {
+        if(this.teste)this.teste.value = 'Nada';
+        continue;
+      }
 
       let newSource = this.tratarFinalImportMultiLinha(source);
       newSource = this.tratarImportLateralExclusivo(newSource);
       newSource = this.tratarAwaitImportDinamico(newSource);
       newSource = newSource.replace(`enhancement="_100554_enhancementLit"`, `enhancement="_100554_enhancementLit"`)
+      newSource = newSource.replace(/l2\/l2/g, 'l2');
 
       this.teste.value = newSource;
 
