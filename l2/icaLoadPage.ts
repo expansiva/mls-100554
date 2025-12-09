@@ -14,11 +14,11 @@ export class IcaLoadPage100554 extends StateLitElement {
 
     async loadPage() {
         if (!this.src) return;
-        await import(`./${this.src}`);
+        await import(`/${this.src}`);
         const html = await this.getHTML();
         const deps = await this.getDeps(html);
         for await (let importJs of deps.importsJs) {
-            await import(`.${importJs}`);
+            await import(`${importJs}`);
         }
 
         const infoPath = mls.l2.getPath(this.src)

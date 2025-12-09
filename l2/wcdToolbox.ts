@@ -1,5 +1,5 @@
 /// <mls shortName="wcdToolbox" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
-
+ 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
@@ -249,7 +249,7 @@ export class WCDToolbox extends CollabLitElement implements WCDToolboxMethodos {
         try {
 
             if (this.hasImport.includes(imports)) return true;
-            if (!imports.startsWith('./')) imports = './' + imports;
+            if (!imports.startsWith('/')) imports = '/' + imports;
             await import(imports);
             this.hasImport.push(imports);
             return true;

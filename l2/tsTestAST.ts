@@ -509,7 +509,7 @@ export class TsTestAst {
         const params = testFind.params[paramsIndex];
         const suffix = `.test.js?cacheBuster=${Date.now()}`
         const { folder, project, shortName } = this.modelTest.storFile;
-        const fileName = folder ? `./_${project}_${folder}_${shortName}${suffix}` : `./_${project}_${shortName}${suffix}`
+        const fileName = folder ? `/_${project}_/l2/${folder}_${shortName}${suffix}` : `/_${project}_/l2/${shortName}${suffix}`
         let module;
 
         try {
@@ -669,13 +669,13 @@ export class TsTestAst {
         const import1 = `import { initState, setState, verifyState, watchState } from '/_100554_/l2/libManagementCan.js';`
         const import2 = `import { ICANTest, ICANIntegration, ICANSchema } from '/_100554_/l2/tsTestAST.js';`
 
-        const importItem1 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_libManagementCan');
+        const importItem1 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === '/_100554_/l2/ibManagementCan');
         if (!importItem1) this._addImport(import1);
         else this._addImport(import1, importItem1);
 
         this.ast = this.parse();
 
-        const importItem2 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === './_100554_tsTestAST');
+        const importItem2 = this.ast?.children?.find((item) => item.type === 'ImportDeclaration' && item.value === '/_100554_/l2/tsTestAST');
         if (!importItem2) this._addImport(import2);
         else this._addImport(import2, importItem2);
     }

@@ -88,12 +88,12 @@ export class ServiceLiveView100554 extends ServiceBase {
         const moduleConfig = await getProjectConfig(mls.actualProject as number);
         if (!moduleConfig || !moduleConfig.masterFrontEnd) return;
         const info = mls.l2.getPath(moduleConfig.masterFrontEnd.liveView)
-        await import(`./${moduleConfig.masterFrontEnd.liveView}`);
-        this.buildInstance = await import(`./${moduleConfig.masterFrontEnd.build}`);
-        this.startInstance = await import(`./${moduleConfig.masterFrontEnd.start}`);
+        await import(`/${moduleConfig.masterFrontEnd.liveView}`);
+        this.buildInstance = await import(`/${moduleConfig.masterFrontEnd.build}`);
+        this.startInstance = await import(`/${moduleConfig.masterFrontEnd.start}`);
 
         if (moduleConfig.masterBackEnd && moduleConfig.masterBackEnd.start) {
-            this.startServerInstance = await import(`./${moduleConfig.masterBackEnd.start}`);
+            this.startServerInstance = await import(`/${moduleConfig.masterBackEnd.start}`);
         }
 
         this.liveViewTag = convertFileNameToTag(info);

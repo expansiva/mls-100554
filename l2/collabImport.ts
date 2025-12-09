@@ -75,11 +75,11 @@ async function getFileVersion(opts: CollabImportOptions): Promise<string> {
 function getUrlFromFileInfo(opts: CollabImportOptions, version: string | null, isDev: boolean): string {
     if (!opts.extension) opts.extension = '.ts';
     if (opts.shortName === 'designSystem' && opts.folder === '' && opts.extension === '.ts') {
-        const base = opts.folder ? `/_${opts.project}_${opts.folder}/${opts.shortName}` : `/_${opts.project}_${opts.shortName}`;
+        const base = opts.folder ? `/_${opts.project}_/l2/${opts.folder}/${opts.shortName}` : `/_${opts.project}_/l2/${opts.shortName}`;
         return `${base}?t=${isDev ? Date.now() : version}`;
     }
 
-    const base = opts.folder ? `/_${opts.project}_${opts.folder}/${opts.shortName}` : `/_${opts.project}_${opts.shortName}`;
+    const base = opts.folder ? `/_${opts.project}_/l2/${opts.folder}/${opts.shortName}` : `/_${opts.project}_/l2/${opts.shortName}`;
     const base2 = version ? `${base}?t=${version}` : base;
     const base3 = opts.extension !== '.ts' ? `${base}${extensions[opts.extension]}` : base2
     return base3;

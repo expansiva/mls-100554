@@ -124,9 +124,9 @@ export abstract class CollabPageElement extends StateLitElement {
             if (this.hasImport.includes(imports)) return true;
             const info = convertTagToFileName(imports);
             if (!info) return;
-            imports = `_${info.project}_${info.shortName}`;
+            imports = `_${info.project}_/l2/${info.shortName}`;
             if (!imports.startsWith('./')) {
-                imports = './' + imports;                
+                imports = '/' + imports;                
             }
             await import(imports);
             this.hasImport.push(imports);

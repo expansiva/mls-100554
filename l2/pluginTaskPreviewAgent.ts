@@ -247,7 +247,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
 
         try {
 
-            const md = await import(`/_100554_${this.step.agentName}`);
+            const md = await import(`/_100554_/l2/${this.step.agentName}`);
             if (!md || !md.createAgent) return;
 
             const info = md.createAgent();
@@ -309,7 +309,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
 
         try {
             load(true);
-            const moduleAgent = await import(`./_${this.PROJECTNUMBER}_${agentName}`);
+            const moduleAgent = await import(`/_${this.PROJECTNUMBER}_/l2/${agentName}`);
             if (!moduleAgent || !this.task) throw new Error('Not found agent:' + agentName);
             if (!moduleAgent.createAgent) throw new Error('Not found createAgent:' + agentName);
 

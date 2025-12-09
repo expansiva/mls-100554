@@ -584,8 +584,8 @@ export async function getInstanceByFile(file: mls.stor.IFileInfo): Promise<Objec
         let { project, shortName, folder, extension } = file;
         if (file.extension === '.ts') extension = '';
 
-        let key = `/_${project}_${shortName}${extension}`;
-        if (folder) key = `/_${project}_${folder}/${shortName}${extension}`;
+        let key = `/_${project}_/l2/${shortName}${extension}`;
+        if (folder) key = `/_${project}_/l2/${folder}/${shortName}${extension}`;
         key = key.replace('.ts', '.js');
         const m = await import(key);
         return m;

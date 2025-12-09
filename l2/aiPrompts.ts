@@ -110,7 +110,7 @@ export async function getListFilesStart(start: 'widget' | 'tool' | 'agent'): Pro
             if (k.indexOf(start) < 0) continue;
 
             const file = mls.stor.files[k];
-            const path = `./_${file.project}_${file.shortName}`;
+            const path = `/_${file.project}_/l2/${file.shortName}`;
 
             if (file.extension !== '.ts' || !file.shortName.startsWith(start)) continue;
 

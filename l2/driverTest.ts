@@ -100,7 +100,7 @@ export class DriverTest extends CollabLitElement {
         }
 
         try {
-            const i = await import(`./${this.iptDriver.value}`);
+            const i = await import(`/${this.iptDriver.value}`);
             const cls = this.iptClass.value;
             if (!i[cls]) throw new Error('Invalid driver name');
             this.instance = new i[cls]();

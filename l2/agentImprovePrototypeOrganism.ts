@@ -251,7 +251,7 @@ async function getPrompts(data: IDataMessage, info: mls.cbe.IPath): Promise<mls.
     let less = await getContentByExtension(info, 'style');
     if (less) less = removeTokensFromSource(less);
 
-    const themeModule = await import(`./_${info.project}_${info.folder}/module`);
+    const themeModule = await import(`/_${info.project}_/l2/${info.folder}/module`);
     let theme = 'Default';
     if (themeModule && themeModule.moduleConfig && themeModule.moduleConfig.theme && typeof themeModule.moduleConfig.theme === 'string') {
         theme = themeModule.moduleConfig.theme;
