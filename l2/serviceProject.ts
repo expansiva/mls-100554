@@ -370,7 +370,7 @@ export class ServiceProject100554 extends ServiceBase {
         const div = details.querySelector('div');
         if (!div || div.childElementCount > 0) return;
         const { folder, project, shortName } = mls.l2.getPath(details.data.widget);
-        await import(`./_${project}_${shortName}`);
+        await import(`/_${project}_/l2/${shortName}`);
         const pluginTag = convertFileNameToTag({ project, shortName, folder });
         const pluginEl = document.createElement(pluginTag);
         pluginEl.setAttribute('autoprepare', '');
