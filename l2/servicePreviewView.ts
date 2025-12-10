@@ -447,6 +447,8 @@ export class ServicePreviewView extends StateLitElement {
             html.classList.add('dark');
         }
         if (meta) meta.remove();
+        iframe.contentDocument?.body.classList.add(`theme-${this.actualtheme.toLowerCase()}`);
+
     }
 
     private setDevice(iframe: HTMLIFrameElement) {
@@ -571,7 +573,6 @@ export class ServicePreviewView extends StateLitElement {
         }
 
         this.addGlobalCss(ret.globalCss);
-        this.addTailwind();
 
         mls.events.fire(
             mls.actualLevel as any,
@@ -613,23 +614,6 @@ export class ServicePreviewView extends StateLitElement {
         await c.init();
     }
 
-    private async addTailwind() {
-
-        const iframe = window.preview.iframe;
-        if (!iframe || !iframe.contentDocument) return;
-
-        const doc = iframe.contentDocument;
-        doc.getElementById("tw-cdn")?.remove();
-        const script = doc.createElement("script");
-        script.id = "tw-cdn";
-        script.type = "module";
-        script.src = "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4";
-        doc.head.appendChild(script);
-        doc.body.classList.add(`theme-${this.actualtheme.toLowerCase()}`);
-
-
-
-    }
 
 
     private addGlobalCss(globalCss: string) {
