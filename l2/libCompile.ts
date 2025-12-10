@@ -236,6 +236,8 @@ async function loadMyNeedsToCompile(
         }
 
         await getJSImporMap(myImportsMap, enhacementName, myModules);
+        await getJSImportEnhancement(myImports, enhacementName, myModules);
+
         await getJS(myImports, enhacementName, ipath, myModules);
 
     } catch (e: any) {
@@ -285,13 +287,27 @@ async function getEnhancementFromFetch(file: { project: number, shortName: strin
 }
 
 function getImportUrl(info: mls.cbe.IPath): string {
-    let url = `/_${info.project}_${info.shortName}`;
+    let url = `/_${info.project}_/l2/${info.shortName}`;
     if (info.folder) {
-        url = `/_${info.project}_${info.folder}/${info.shortName}`
+        url = `/_${info.project}_/l2/${info.folder}/${info.shortName}`
     }
     return url;
 }
 
+async function getJSImportEnhancement(myImports: string[], enhacementName: string, myModules: any) {
+
+    if (!myModules[enhacementName]) throw new Error('Enhacement not found ');
+    const mmodule = myModules[enhacementName].mModule as mls.l2.enhancement.IEnhancementInstance;
+
+    if (!mmodule || !mmodule.requires) return;
+    const aRequire = mmodule.requires;
+
+    aRequire.forEach((i) => {
+        if (i.type !== 'import') return;
+        myImports.push(i.ref);
+    });
+
+}
 async function getJSImporMap(myImportsMap: string[], enhacementName: string, myModules: any) {
 
     if (!myModules[enhacementName]) throw new Error('Enhacement not found ');
@@ -311,11 +327,9 @@ async function getJSImporMap(myImportsMap: string[], enhacementName: string, myM
 }
 
 async function getJSBlank(myImports: string[],mfile: mls.cbe.IPath) {
-    
     let key = getImportUrl(mfile);
     if (myImports.includes(key)) return;
     myImports.push(key);
-
 }
 
 async function getJS(myImports: string[], enhacementName: string, mfile: mls.cbe.IPath, myModules: any) {
@@ -323,9 +337,6 @@ async function getJS(myImports: string[], enhacementName: string, mfile: mls.cbe
     let key = getImportUrl(mfile);
     if (myImports.includes(key)) return;
     myImports.push(key);
-    /*const keyTestFile = mls.stor.getKeyToFiles(mfile.project, 2, mfile.shortName, mfile.folder, '.test.ts');
-    const storFileTest = mls.stor.files[keyTestFile];
-    if (storFileTest) myImports.push(`${key}.test.js`);*/
 }
 
 
