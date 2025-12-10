@@ -7,7 +7,7 @@ import { initManagerCoachMark } from "/_100554_/l2/collabManagerCoachMarks.js";
 import { getTokensCss } from '/_100554_/l2/designSystemBase.js';
 import { getProjectDetails, setProjectDetails, getLastOpenedFiles, findStorFileInProjectsOrDeps, getInstanceByFile, saveOpenedFile } from '/_100554_/l2/libCommom.js';
 
-import { openService, getLastModule } from '/_100554_/l2/libCommom.js';
+import { getLastModule } from '/_100554_/l2/libCommom.js';
 
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
@@ -33,23 +33,6 @@ export async function initCompileMonaco(project: number): Promise<boolean> {
     }
     return true;
 }
-
-/*
-export async function initCompileMonaco(project: number): Promise<boolean> {
-    if (!on1CompileMonaco) return true;
-    try {
-        await mls.editor.InitMonaco();
-        const prjModel = mls.editor.getModels(project, '', '');
-        if ((!prjModel || !prjModel.ts) && project !== mls.stor.LOCALPROJECTNUMBER) {
-            const info = await mls.stor.localDB.readPrjInfo(project);
-            mls.editor.createModelProjectDefinition(project, info.indexModules);
-        }
-        on1CompileMonaco = false;
-    } catch (err: any) {
-        throw new Error(err.message);
-    }
-    return true;
-}*/
 
 export function setFavicon(notification: boolean) {
     const link: HTMLLinkElement | null = document.querySelector("#collabcodes_icon[rel~='icon']");
@@ -99,8 +82,6 @@ export class CollabInit extends CollabLitElement {
     render() {
         return html``;
     }
-
-    private defaultLocalProject = 100000;
 
     /**
      * Initializes the system life cycle.
@@ -153,9 +134,11 @@ export class CollabInit extends CollabLitElement {
     private onLevelChangedToL2(data: { to: number, from: number }) {
         if (!this.firstAccessLevels[2]) return;
         this.firstAccessLevels[2] = false;
-        openService('_100554_serviceSource', 'left', 2);
+        const page = top?.document.querySelector('collab-page');
+        if (!page) return;
+        const toolbar = page.querySelector(`collab-nav-2[toolbarposition="left"]`) as HTMLElement;
+        (toolbar as any).state[2].left = '_100554_serviceSource';
     }
-
     /**
      * Loads and sets up collaboration drivers asynchronously.
      */
@@ -371,25 +354,13 @@ export class CollabInit extends CollabLitElement {
     private async loadLastProject() {
         if (window.traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
         if (!this.actualProject) return;
-        // if (this.actualProject === 100554) {
-        //     if (this.actualProject && this.actualProject !== this.defaultLocalProject) await mls.stor.server.loadProjectInfoIfNeeded(this.actualProject);
-        //     return;
-        // }
         const depsActualProject = mls.l5.getProjectDependencies(this.actualProject, false);
         const deps = [this.actualProject, ...depsActualProject];
         for await (let prj of deps) {
-            if (this.actualProject && this.actualProject !== this.defaultLocalProject) await mls.stor.server.loadProjectInfoIfNeeded(prj);
+            if (this.actualProject && this.actualProject !== mls.stor.LOCALPROJECTNUMBER) await mls.stor.server.loadProjectInfoIfNeeded(prj);
         }
         initCompileMonaco(this.actualProject);
     }
-
-    /*
-       private async loadLastProject() {
-        if (window.traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
-        // Alterar this.defaultLocalProject usar da lib
-        if (this.actualProject && this.actualProject !== this.defaultLocalProject ) await mls.stor.server.loadProjectInfoIfNeeded(this.actualProject);
-    }
-    */
 
     private setLastOpenedFiles() {
 
