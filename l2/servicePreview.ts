@@ -1632,12 +1632,12 @@ export class ServicePreview100554 extends ServiceBase {
                     <div slot="right" style="height:100%;" id="preview-details"></div>
                 </collab-spliter-horizontal-var-fixed-100554>
                 <div slot="bottom">
-                    <collab-messages-prompt-100554
+                    <collab-messages-prompt-102025
                     acceptAutoCompleteAgents="true"
                     scope="l${this.level}_preview"  
                     placeholder="${this.msg.promptPlaceholder}"
                     .onSend=${this.handleSend.bind(this)}
-                    ></collab-messages-prompt-100554>
+                    ></collab-messages-prompt-102025>
                 </div>
             </collab-spliter-vertical-var-fixed-100554>`;
     }
