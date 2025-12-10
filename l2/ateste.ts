@@ -119,7 +119,7 @@ export class SimpleGreeting extends CollabLitElement {
 
     })*/
 
-    if (f && f.level === 2 && ['.test.ts'].includes(f.extension)) itens.push(key);
+    if (f && f.level === 2 && f.project === mls.actualProject && ['.test.ts'].includes(f.extension)) itens.push(key); 
 
 
     })

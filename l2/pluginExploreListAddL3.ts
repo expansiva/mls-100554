@@ -7,6 +7,7 @@ import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
 import { getTemplateImport } from '/_100554_/l2/pluginNewFileBase.js';
 import { getInstanceByFile, isNameValid } from '/_100554_/l2/libCommom.js';
 import { executeAgentByFile } from '/_100554_/l2/aiAgentHelper.js'
+import { collabImport } from '/_100554_/l2/collabImport.js'
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { ServiceBase } from '/_100554_/l2/serviceBase.js';  
 
@@ -120,12 +121,13 @@ export class PluginExploreListAddL3 extends PluginBaseModule {
         const file = mls.stor.files[key];
         if (!file ) return;
 
-        const m: any | undefined = await getInstanceByFile(file);
+        //const m: any | undefined = await getInstanceByFile(file);
+        const m: any | undefined = await collabImport({ project: file.project, folder: file.folder, shortName: file.shortName, extension: file.extension as any });
 
-        if (!m || !m.modules) return;
+        if (!m || !m.projectConfig || !m.projectConfig.modules) return;
 
         const md:string[] = [];
-        m.modules.forEach((i: any) => md.push(i.name));
+        m.projectConfig.modules.forEach((i: any) => md.push(i.name));
 
         this.modules = md;
         setTimeout(() => { 
@@ -146,8 +148,8 @@ export class PluginExploreListAddL3 extends PluginBaseModule {
 
             this.showLoad(true);
 
-            if (!this.iptModule || !this.iptOrganism || !this.iptOrganism.value || !this.iptPrompt || !this.iptPrompt.value) {
-                throw new Error('Enter the name of the organization and prompt');
+            if (!this.iptModule || !this.iptOrganism || !this.iptOrganism.value || !this.iptPrompt || !this.iptPrompt.value || !this.iptModule.value) {
+                throw new Error('Enter the name, module and prompt');
             }
 
             const project = mls.actualProject || 0;

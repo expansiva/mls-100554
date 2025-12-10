@@ -7,6 +7,7 @@ import { getTemplateImport } from '/_100554_/l2/pluginNewFileBase.js';
 import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
 import { getInstanceByFile, isNameValid } from '/_100554_/l2/libCommom.js';
 import { executeAgentByFile } from '/_100554_/l2/aiAgentHelper.js'
+import { collabImport } from '/_100554_/l2/collabImport.js'
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { ServiceBase } from '/_100554_/l2/serviceBase.js';
 
@@ -116,15 +117,16 @@ export class PluginExploreListAddL4 extends PluginBaseModule {
         const file = mls.stor.files[key];
         if (!file) return;
 
-        const m: any | undefined = await getInstanceByFile(file);
+        //const m: any | undefined = await getInstanceByFile(file);
+        const m: any | undefined = await collabImport({ project: file.project, folder: file.folder, shortName: file.shortName, extension: file.extension as any });
 
-        if (!m || !m.modules) return;
+        if (!m || !m.projectConfig || !m.projectConfig.modules) return;
 
         const md: string[] = [];
-        m.modules.forEach((i: any) => md.push(i.name));
+        m.projectConfig.modules.forEach((i: any) => md.push(i.name));
 
         this.modules = md;
-        setTimeout(() => { 
+        setTimeout(() => {
             const sel = this.querySelector('#iptModule') as HTMLSelectElement;
             if (sel && mls.actualModule) sel.value = mls.actualModule;
         }, 100);
@@ -136,15 +138,27 @@ export class PluginExploreListAddL4 extends PluginBaseModule {
         (this.father as any).mode = 'list'
     }
 
+    private verifyModuleConfig() {
+        if (!this.iptModule || !this.iptModule.value) {
+            throw new Error('Not found module');
+        }
+
+        const key = mls.stor.getKeyToFiles(mls.actualProject || 0, 2, 'module', this.iptModule.value, '.ts');
+
+        if (!mls.stor.files[key]) throw new Error('Not found file module');
+    }
+
     private async createFile() {
 
         try {
 
             this.showLoad(true);
 
-            if (!this.iptModule || !this.iptPage || !this.iptPage.value || !this.iptPrompt || !this.iptPrompt.value) {
-                throw new Error('Enter the name of the page and prompt');
+            if (!this.iptModule || !this.iptPage || !this.iptPage.value || !this.iptPrompt || !this.iptPrompt.value || !this.iptModule.value) {
+                throw new Error('Enter the name of the page, module and prompt');
             }
+
+            this.verifyModuleConfig();
 
             const project = mls.actualProject || 0;
             const folder = this.iptModule.value || '';
@@ -220,11 +234,11 @@ export const defs: mls.l4.BaseDefs = {
             if (files.ts && !(files.ts instanceof Error)) {
                 this.setHistory(files.ts);
                 const prompt = JSON.stringify({
-                    project:project.toString(),
+                    project: project.toString(),
                     shortName: name,
                     folder,
                     userPrompt: this.iptPrompt.value
-                    
+
                 })
                 await executeAgentByFile('agentCreateNewPrototypePage', prompt, files.ts, true);
             }
@@ -272,7 +286,7 @@ export const defs: mls.l4.BaseDefs = {
 
     }
 
-    private getNewNameAndValid(prj: number, name: string, folder:string): boolean {
+    private getNewNameAndValid(prj: number, name: string, folder: string): boolean {
         if (name === '' || !name || name === null) return false;
         return isNameValid(prj, name, folder, 2, '.ts');
     }
@@ -291,12 +305,12 @@ export const defs: mls.l4.BaseDefs = {
         if (invalidCharacters.test(obj.shortName)) return false;
 
         const key = mls.stor.getKeyToFiles(obj.project, obj.level, obj.shortName, obj.folder, obj.extension);
-        let find = false; 
+        let find = false;
         const keys = Object.keys(mls.stor.files);
         for (const k of keys) {
             if (key.toLocaleLowerCase() === k.toLocaleLowerCase()) find = true;
         }
-        return !mls.stor.files[key] && !find; 
+        return !mls.stor.files[key] && !find;
 
     }
 
