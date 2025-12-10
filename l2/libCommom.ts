@@ -477,7 +477,6 @@ export function findStorFileInProjectsOrDeps(
 }
 
 
-
 const STORAGE_KEY = '_100554_serviceInit';
 export function saveOpenedFile(project: number, level: number, file: OpenedFile): void {
 
@@ -513,6 +512,12 @@ export function saveOpenedFile(project: number, level: number, file: OpenedFile)
 export function getLastOpenedFiles(project: number): UserOpenedFiles {
     const data = getAllUserOpenedFiles();
     return data[project] ?? {};
+}
+
+export function deleteLastOpenedFiles(project: number) {
+    const data = getAllUserOpenedFiles();
+    if (data[project]) delete data[project];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
 function getAllUserOpenedFiles(): Record<string, UserOpenedFiles> {
