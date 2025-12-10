@@ -30,7 +30,7 @@ export function createAgent(): IAgent {
         avatar_url: svg_agent,
         agentDescription: "Responsavel por fazer o arquivo defs de uma nova pagina",
         visibility: "public",
-        scope: ['l2_preview'],
+        scope: [],
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _beforePrompt(context);
         },
