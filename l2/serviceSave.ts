@@ -821,6 +821,7 @@ export class ServiceSave extends ServiceBase {
             const msg = txt.value;
             const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
             this.verifyNeedSelectDS(array);
+            this.freeToSaveProjectAndDs(array);
             this.arrayRollback = array;
             const oldOwner = this.owner;
             const oldRepo = this.repo;
@@ -1287,6 +1288,26 @@ export class ServiceSave extends ServiceBase {
             JSON.stringify(options),
             0
         );
+    }
+
+    private freeToSaveProjectAndDs(arr:mls.stor.IFileInfo[]) {
+        const keyDS = mls.stor.getKeyToFiles(mls.actualProject as number, 2, 'designSystem', '', '.ts');
+        const keyPrj = mls.stor.getKeyToFiles(mls.actualProject as number, 2, 'project', '', '.ts');
+        const fileDS = mls.stor.files[keyDS];
+        const filePrj = mls.stor.files[keyPrj];
+
+        if (!fileDS || !filePrj) throw new Error('[freeToSaveProjectAndDs]: Not found files');
+        
+        if (fileDS.status !== 'new' && filePrj.status !== 'new') return;
+
+        const findDS = arr.find((f) => f.shortName === fileDS.shortName && f.folder === fileDS.folder && f.project === fileDS.project && f.extension === '.ts');
+
+        const findPrj = arr.find((f) => f.shortName === filePrj.shortName && f.folder === filePrj.folder && f.project === filePrj.project && f.extension === '.ts');
+
+        if (!findDS || !findPrj) throw new Error('The project and designerSystem files must be saved.');
+
+
+
     }
 
     private async undoFile(storFile: mls.stor.IFileInfo) {
