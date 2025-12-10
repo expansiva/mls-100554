@@ -192,6 +192,39 @@ export class ServiceSource100554 extends ServiceBase {
 
         }
 
+    } 
+
+    private async createModelIfNeedWithOutActiveModel(project:number, folder:string,shortName:string, ext: string) {
+
+        try {
+            
+            const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, ext);
+            let stor = mls.stor.files[key];
+
+            if (!stor) {
+
+                let template = getBaseTemplate({ folder, shortName, project, extension: ext });
+
+                const param: IReqCreateStorFile = {
+                    project,
+                    shortName,
+                    folder,
+                    level:2,
+                    extension: ext,
+                    source: template,
+                    status: 'new'
+                }
+
+                await createStorFile(param, true, true, false);
+
+            } else {
+                await createModel(stor, true, false);
+            }
+
+        } catch (e) {
+
+        }
+
     }
 
     public onClickTitle = () => {
@@ -296,7 +329,14 @@ export class ServiceSource100554 extends ServiceBase {
         }
         const { project, shortName, folder } = storFile;
         let models = mls.editor.getModels(project, shortName, folder);
-        if (!models || !models.ts) models = await createAllModels(storFile);        
+        if (!models || !models.ts) {
+            //models = await createAllModels(storFile);
+            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.ts');
+            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.less');
+            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.html');
+
+            models = mls.editor.getModels(project, shortName, folder);
+        }       
         if (!models) return;
         this.activeModels = models;
         await readProjectTypescriptAndCompile(project, '', true)
@@ -1636,7 +1676,14 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             return;
         }
         let models = mls.editor.getModels(project, shortName, folder);
-        if (!models || !models.ts) models = await createAllModels(storFile);        
+        if (!models || !models.ts) {
+            //models = await createAllModels(storFile);
+            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.ts');
+            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.less');
+            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.html');
+
+            models = mls.editor.getModels(project, shortName, folder);
+        }        
         if (!models) return;
         this.activeModels = models;
         await readProjectTypescriptAndCompile(actualProject, '', true)
