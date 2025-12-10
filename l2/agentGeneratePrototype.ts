@@ -36,7 +36,6 @@ export function createAgent(): IAgent {
         avatar_url: svg_agent,
         agentDescription: "Agent for create a new Module",
         visibility: "public",
-        scope: ["l2_preview", "l3_preview", "l4_preview", "l7_preview"],
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _beforePrompt(context);
         },

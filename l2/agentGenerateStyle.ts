@@ -1,6 +1,6 @@
 /// <mls shortName="agentGenerateStyle" project="100554" enhancement="_blank" />
 
-import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { IAgent } from '/_100554_/l2/aiAgentBase.js';
 import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 import { createAllModels } from '/_100554_/l2/collabLibModel.js';
 import { removeTokensFromSource } from '/_100554_/l2/enhancementStyle.js';
@@ -27,7 +27,7 @@ const project = 100554;
 export function createAgent(): IAgent {
     return {
         agentName,
-        avatar_url: svg_agent,
+        avatar_url: svgStyle,
         agentDescription: "Agent for optimize style",
         visibility: "public",
         scope: ['l2_preview'],
@@ -139,7 +139,7 @@ async function getContentByExtension(info: mls.cbe.IPath, modelType: 'html' | 't
             if (!stotFile) throw new Error(`[${agentName}][getContentByExtension]: Invalid storFile`);
             models = await createAllModels(stotFile);
         }
-    
+
         if (!models) throw new Error(`[${agentName}][getContentByExtension]:Not found models for file:` + info.shortName);
         if (!models[modelType]) return '';
         return models[modelType]?.model.getValue();
@@ -165,7 +165,7 @@ async function updateFile(context: mls.msg.ExecutionContext) {
     const fileName = context.task?.iaCompressed?.longMemory['fileName'];
     if (!fileName) throw new Error(`[${agentName}] updateFile: Invalid task memory arguments`);
 
-    const { logs,  resultHtmlComponent, resultLessComponent, resultLessGlobal, resultTypescriptComponent } = result;
+    const { logs, resultHtmlComponent, resultLessComponent, resultLessGlobal, resultTypescriptComponent } = result;
 
     const { folder, project, shortName } = mls.l2.getPath(fileName);
 
@@ -227,6 +227,8 @@ async function prepareGlobalCss(css: string, projectId: number, theme: string) {
     const tokensCss = `\n\n//Start Less Tokens\n${tokens}\n//End Less Tokens`;
     return `/// <mls shortName="project" project="${projectId}" enhancement="enhancementStyle" folder="" />\nproject-${projectId} {\n${cssContent}\n}${tokensCss}`;
 }
+
+const svgStyle = `<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M17.5.381a1.5 1.5 0 0 1 .119 2.119l-9 10a1.14 1.14 0 0 1-.2.18 5.116 5.116 0 0 1-.69 2.54 4.1 4.1 0 0 1-.7.9c-2.2 2.21-6.529 2.25-7 1.26-.15-.33.22-.57 1.31-2.45 1.3-2.27 1.4-3 1.95-3.55.099-.103.21-.194.33-.27a4.092 4.092 0 0 1 2.76-.7l.04.04L15.379.5A1.5 1.5 0 0 1 17.5.381z" fill="#494c4e" fill-rule="evenodd"></path> </g></svg>`
 
 interface IDataPrompt {
     page: string,

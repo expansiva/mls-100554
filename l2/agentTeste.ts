@@ -29,7 +29,7 @@ export function createAgent(): IAgent {
         avatar_url: svg_agent,
         agentDescription: "Agente de teste",
         visibility: "public",
-        scope: ['l2_preview'],
+        scope: [],
         async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _beforePrompt(context);
         },
