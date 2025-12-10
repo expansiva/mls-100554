@@ -1,7 +1,7 @@
 /// <mls shortName="pluginExploreList" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
-import { property, queryAll } from 'lit/decorators.js'; 
+import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from '/_100554_/l2/libCommom.js';
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, IReqCreateStorFile, createStorFile } from '/_100554_/l2/collabLibStor.js';
@@ -580,6 +580,9 @@ export class PluginExploreList extends PluginBaseModule {
             e.stopPropagation();
             const mfile = this.getMyFileInElement(e.target as HTMLElement);
             if (!mfile) return;
+            if (['project', 'designSystem'].includes(mfile.shortName) && mfile.folder === '' && mfile.status === 'new') {
+                throw new Error(`This action cannot be performed on this file at this time.`);
+            }
             await undoAllFiles(mfile);
             this.closeAllMenus();
             this.changeList();
@@ -595,6 +598,9 @@ export class PluginExploreList extends PluginBaseModule {
             e.stopPropagation();
             const mfile = this.getMyFileInElement(e.target as HTMLElement);
             if (!mfile) throw new Error('[clickOptDel] Not found file');
+            if (['project', 'designSystem'].includes(mfile.shortName) && mfile.folder === '') {
+                throw new Error(`The file ${mfile.shortName} cannot be deleted.`);
+            }
             await deleteAllFiles(mfile)
             this.closeAllMenus();
             this.changeList();
@@ -653,17 +659,24 @@ export class PluginExploreList extends PluginBaseModule {
             this.showError('[clickOptRename] Not found element');
             return;
         }
-        const spanFileName = li.querySelector('.spanFileName') as HTMLElement;
-        spanFileName.setAttribute('contentEditable', 'true');
 
-        const oldValue = spanFileName.innerText;
-        li.onclick = () => { };
+        const spanFileName = li.querySelector('.spanFileName') as HTMLElement;
 
         const mfile = this.getMyFileInElement(e.target as HTMLElement);
         if (!mfile || !spanFileName) {
             this.showError('[clickOptRename] Not found element rename');
             return;
         }
+
+        if (['project', 'designSystem'].includes(mfile.shortName) && mfile.folder === '' ) {
+            this.showError(`This file cannot be renamed.`);
+            return;
+        }
+    
+        spanFileName.setAttribute('contentEditable', 'true');
+
+        const oldValue = spanFileName.innerText;
+        li.onclick = () => { };
 
         spanFileName.onkeydown = (event: KeyboardEvent) => {
 
