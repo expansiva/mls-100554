@@ -27,8 +27,13 @@ export const requires: mls.l2.enhancement.IRequire[] = [
         type: "cdn",
         name: "lit/decorators.js",
         ref: "https://cdn.jsdelivr.net/npm/lit@3.0.0/decorators/+esm",
-
+    },
+        {
+        type: "import",
+        name: "tailwind.js",
+        ref: "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4",
     }
+
 ];
 
 export const getDefaultHtmlExamplePreview = (modelTS: mls.editor.IModelTS): string => {
