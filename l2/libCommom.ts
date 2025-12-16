@@ -633,7 +633,7 @@ export function isNameValid(project: number, shortName: string, folder: string, 
 
     if (mls.stor.files[key] || find) return isValid;
 
-    const invalidsFolderAndName = ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'collab', 'widget'];
+    const invalidsFolderAndName = ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'collab'];
 
     if (invalidsFolderAndName.includes(shortName.toLocaleLowerCase())) return isValid;
 

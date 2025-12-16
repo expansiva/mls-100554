@@ -105,7 +105,7 @@ export class ServiceLiveView100554 extends ServiceBase {
 
         if (moduleConfig.masterBackEnd && moduleConfig.masterBackEnd.start) {
             const infoBuildBE = mls.l2.getPath(moduleConfig.masterBackEnd.start);
-            const storFileStartBE = mls.stor.files[mls.stor.getKeyToFiles(infoBuildBE.project, 2, infoBuildBE.shortName, infoBuildBE.folder, '.ts')];
+            const storFileStartBE = mls.stor.files[mls.stor.getKeyToFiles(infoBuildBE.project, 2, infoBuildBE.shortName.replace('.js', '').replace('.ts', ''), infoBuildBE.folder.replace('/l2', ''), '.ts')];
             if (storFileStartBE) this.startServerInstance = await import(`/${moduleConfig.masterBackEnd.start}`);
         }
 
@@ -157,6 +157,7 @@ export class ServiceLiveView100554 extends ServiceBase {
             }
 
             if (this.startServerInstance && typeof this.startServerInstance.start === 'function') {
+                
                 await this.startServerInstance.start(info.project, 'all');
             }
 
