@@ -52,6 +52,9 @@ export const projectConfig = {
         return { ok: false, message: "No modules found" };
     }
 
+    const m = moduleProject.projectConfig.modules.find((item: any) => item.name === moduleName);
+    if (m) return { ok: true }
+
     moduleProject.projectConfig.modules.push({
         name: moduleName,
         path: moduleName,
