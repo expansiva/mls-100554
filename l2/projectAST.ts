@@ -68,8 +68,48 @@ export const projectConfig = {
 
     `
     model.setValue(newText.trim());
+    await mls.l2.typescript.compileAndPostProcess(modelTS, false, true);
+    return { ok: true };
+}
+
+export async function configureMasterFrontEnd(project: number, start: string, build: string, liveView: string) {
+    const modelTS = await getModel(project, true);
+    if (!modelTS) return { ok: false, message: "No models found" };
+    const model = modelTS.model;
+
+    const moduleProject = await collabImport({
+        folder: "",
+        project,
+        shortName: "project",
+        extension: ".ts",
+    });
+
+
+    if (!moduleProject) {
+        return { ok: false, message: "Project file not found" };
+    }
+
+    if (!moduleProject.projectConfig) {
+        return { ok: false, message: "No projectConfig found" };
+    }
+
+    moduleProject.projectConfig.masterFrontEnd = {
+        build,
+        start,
+        liveView
+    }
+
+    const newText = `
+    /// <mls shortName="project" project="${project}" enhancement="_blank" groupName="other" />
+
+    export const projectConfig = ${JSON.stringify(moduleProject.projectConfig, null, 2)}
+
+    `
+    model.setValue(newText.trim());
 
     return { ok: true };
+
+
 }
 
 export async function removeModule(project: number, moduleName: string, forceCreateModel: boolean = false) {
