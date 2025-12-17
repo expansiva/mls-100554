@@ -3,10 +3,8 @@
 import { html, css, svg, TemplateResult, repeat } from 'lit';
 import { query, property, state } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
-import { getConfigProject } from '/_100554_/l2/libProjectConfig.js';
-import { collab_trash, collab_lock, collab_lock_open } from '/_100554_/l2/collabIcons.js';
+import { collab_trash, collab_lock, collab_lock_open, collab_arrow_up_long, collab_arrow_down_long } from '/_100554_/l2/collabIcons.js';
 
- 
 /// **collab_i18n_start**
 const message_pt = {
     detailsResume: 'Resumo',
@@ -23,7 +21,14 @@ const message_pt = {
     projectCreatedAt: 'Criado em',
     projectURL: 'URL do Projeto',
     save: 'Salvar',
-    successSavingDeps: 'Dependências atualizadas'
+    successSavingDeps: 'Dependências atualizadas',
+    errorDepNull: "Informe o ID da dependência.",
+    errorDepSame: "Não é permitido adicionar o próprio projeto como dependência.",
+    errorDepAlreadyAdded: "Esta dependência já foi adicionada.",
+    errorDepInvalid: "Este projeto não existe.",
+    btnAddDep: "Adicionar",
+    btnOpenDep: "Adicionar nova dependência",
+    placeholderDep: "ID da dependência"
 }
 
 const message_en = {
@@ -41,7 +46,14 @@ const message_en = {
     projectCreatedAt: 'CreatedAt',
     projectURL: 'Project URL',
     save: 'Save',
-    successSavingDeps: 'Dependencies updated'
+    successSavingDeps: 'Dependencies updated',
+    errorDepNull: "Please enter the dependency ID.",
+    errorDepSame: "You cannot add the project itself as a dependency.",
+    errorDepAlreadyAdded: "This dependency has already been added.",
+    errorDepInvalid: "This project does not exist.",
+    btnAddDep: "Add",
+    btnOpenDep: "Add new dependency",
+    placeholderDep: "Dependency ID"
 
 }
 
@@ -80,13 +92,16 @@ export class PluginProjectInfo extends PluginBaseModule {
     @property() isSavingDeps: boolean = false;
     @property() labelOk: string = '';
     @property() labelError: string = '';
+    @property() labelErrorDeps: string = '';
+    @property() isAddingDep = false;
+    @property() newDepId: number | null = null;
+
+
     @query('.plugin-body') body: HTMLDivElement | undefined;
     private projectDetails: mls.cbe.IPrj_settings | undefined;
 
     async prepare() {
-
         await this.init();
-
     }
 
 
@@ -178,17 +193,45 @@ export class PluginProjectInfo extends PluginBaseModule {
                                         </span>
                                     </div>
                                     <div class="deps-details-actions">
-                                        <span @click=${() => { this.deps.splice(index, 1); this.requestUpdate(); }}>
+                                        <span @click=${() => this.moveDepUp(index)}>${collab_arrow_up_long}</span>
+                                        <span @click=${() => this.moveDepDown(index)}>${collab_arrow_down_long}</span>
+                                        <span @click=${() => {
+                    this.deps.splice(index, 1);
+                    this.requestUpdate();
+                }}>
                                             ${collab_trash}
                                         </span>
                                     </div>
+
                                 </li>
                             `
         })}
+        
+                    <li class="li-add" @click=${this.toggleAddDep}>
+                        <span>${this.msg.btnOpenDep}</span>
+                    </li>
                     </ul>
+                    <div class="add-dep-wrapper ${this.isAddingDep ? 'open' : ''}">
+                    <div class="add-dep-content">
+                        <input
+                            type="number"
+                            placeholder=${this.msg.placeholderDep}
+                            .value=${this.newDepId ?? ''}
+                            @input=${(e: any) => this.newDepId = Number(e.target.value)}
+                        />
+
+                        <button @click=${this.addDependency}>
+                            ${this.msg.btnAddDep}
+                        </button>
+                    </div>
+
+                    ${this.labelErrorDeps ? html`<small class="saving-error">${this.labelErrorDeps}<small>` : ''}      
+
+                    </div>
                     <div class="deps-action">
                         <button
                             ?disabled=${this.isSavingDeps}
+                            @click=${this.handleSaveDeps}
                         >
                             ${this.isSavingDeps ? html`<span class="loader"></span>` : this.msg.save}
                         </button>
@@ -202,49 +245,68 @@ export class PluginProjectInfo extends PluginBaseModule {
         `
     }
 
-    renderInfoFork(): TemplateResult {
-        return html`
-        <div class="details-card">
-            <details close>
-                <summary>${this.msg.fork}</summary>
-                <div>
-                    ${this.renderForksItem()}
-                </div>
-            </details>
-        </div>
-        `
-    }
-
-    renderForksItem(): TemplateResult {
-
-        if (!this.forks && !this.branches) return html`No fork of this project`;
-
-        const forks = this.forks ? html`<ul>
-            ${repeat(this.forks,
-            ((fk: mls.stor.others.IFork) => fk.nameWithOwner) as any,
-            ((f: mls.stor.others.IFork, index: any) => {
-
-                return html`<li>${f.nameWithOwner}</li>`;
-
-            }) as any
-        )}</ul>` : html``
-            ;
-
-        const branches = this.branches ? html`<ul>
-            ${repeat(this.branches,
-            ((br: mls.stor.others.IBranch) => br.name) as any,
-            ((b: mls.stor.others.IBranch, index: any) => {
-
-                return html`<li>${b.name}</li>`;
-
-            }) as any
-        )}</ul>` : html``
-            ;
-
-        return html`${forks}${branches}`
-    }
 
     //-------IMPLEMENTS-----------
+
+    private moveDepUp(index: number) {
+        if (index === 0) return;
+        const deps = [...this.deps];
+        [deps[index - 1], deps[index]] = [deps[index], deps[index - 1]];
+        this.deps = deps;
+    }
+
+    private moveDepDown(index: number) {
+        if (index === this.deps.length - 1) return;
+        const deps = [...this.deps];
+        [deps[index], deps[index + 1]] = [deps[index + 1], deps[index]];
+        this.deps = deps;
+    }
+
+    toggleAddDep() {
+        this.isAddingDep = !this.isAddingDep;
+        if (this.isAddingDep) {
+            this.newDepId = null;
+            this.labelErrorDeps = '';
+        }
+    }
+
+    private addDependency() {
+        if (this.newDepId === null) {
+            this.labelErrorDeps = this.msg.errorDepNull;
+            return;
+        }
+
+        if (this.newDepId === this.project) {
+            this.labelErrorDeps = this.msg.errorDepSame;
+            return;
+        }
+
+        const exists = this.deps.some(dep => dep.id === this.newDepId);
+        if (exists) {
+            this.labelErrorDeps = this.msg.errorDepAlreadyAdded;
+            return;
+        }
+
+        const depDetails = mls.l5.getProjectDetails(this.newDepId);
+
+        if (!depDetails) {
+            this.labelErrorDeps = this.msg.errorDepInvalid;
+            return;
+        }
+
+        this.deps = [
+            ...this.deps,
+            {
+                id: this.newDepId,
+                name: depDetails.name,
+                auth: depDetails.userAuth
+            }
+        ];
+
+        this.newDepId = null;
+        this.isAddingDep = false;
+        this.labelErrorDeps = '';
+    }
 
     private async handleSaveDeps() {
         this.labelError = '';
@@ -264,29 +326,10 @@ export class PluginProjectInfo extends PluginBaseModule {
     }
 
     private async saveDeps() {
-
-
         if (!this.project) throw new Error(`Project not found`);
         if (!this.projectDetails) throw new Error(`Project details ${this.project} not found`);
-
-        if ('created_at' in this.projectDetails) delete (this.projectDetails as any).created_at;
-        if ('archived_at' in this.projectDetails) delete (this.projectDetails as any).archived_at;
-        if ('repository_lastModified' in this.projectDetails) delete this.projectDetails.repository_lastModified;
-        if ('files' in this.projectDetails) delete this.projectDetails.files;
-
-        const orgIndex = mls.l5.getProjectOrgIndex(this.project);
-        if (!orgIndex) throw new Error('Project not found in organizations');
-        const orgName = Object.keys(mls.stor.orgs)[orgIndex];
         this.projectDetails.prj_dependencies = this.deps.map((item) => item.id);
-
-        const args = {
-            action: "savePrjSettings",
-            project: this.project,
-            orgIndex,
-            orgName,
-            projectDetails: this.projectDetails
-        };
-        await mls.api.base.cbePost(args)
+        mls.api.cbeSavePrjSettings(this.project);        
     }
 
     private async init() {
@@ -297,7 +340,6 @@ export class PluginProjectInfo extends PluginBaseModule {
             if (!project) return;
             this.setInfos(project);
             this.deps = this.getDependencies();
-            await this.getForks(project);
 
         } catch (err: any) {
             console.info(err);
@@ -352,60 +394,7 @@ export class PluginProjectInfo extends PluginBaseModule {
         }
     }
 
-    private async getForks(project: number) {
 
-        const driver = mls.stor.others.getDefaultDriver(project);
-        const dB = this.getMyKeysBranch(project);
-        const forks = await driver.listForks(dB.owner, dB.repo);
-        const branches = await driver.listBranches(dB.owner, dB.repo);
-        this.forks = forks;
-        this.branches = branches;
-
-    }
-
-    private getMyKeysBranch(project: number): { branch: string, owner: string, repo: string } {
-
-        try {
-
-            const obj = mls.l5.getProjectDetails(project);
-            if (!obj || !obj.value) throw new Error('Error getProjectDetails in:' + project);
-
-            const json = JSON.parse(obj.value);
-            if (!json) throw new Error('Error getProjectDetails .value json in:' + project);
-
-            let info = '';
-
-            if (!json.projectURL && json.l5_actionPrjSettings) {
-
-                info = json.l5_actionPrjSettings.projectURL;
-
-            } else if (json.projectURL) {
-
-                info = json.projectURL;
-
-            } else {
-                throw new Error('Error project info:' + project);
-            }
-
-            if (info.endsWith('/')) {
-                info = info.substring(0, info.length - 1);
-            }
-
-            const array = info.split('/');
-
-            if (array.length < 3) {
-                throw new Error('Insufficient information to progress');
-            }
-
-            return { branch: array[array.length - 3], owner: array[array.length - 2], repo: array[array.length - 1] };
-
-        } catch (e: any) {
-
-            throw new Error('Error get info branch: ' + e.message);
-
-        }
-
-    }
 
 }
 

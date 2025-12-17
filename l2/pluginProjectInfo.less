@@ -20,6 +20,21 @@ plugin-project-info-100554 {
         font-size: @font-size-12;
     }
 
+    input,
+    select,
+    textarea {
+        display: block;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        outline: none;
+    }
+
     button {
         background-color: @info-color;
         border-radius: 8px;
@@ -124,6 +139,7 @@ plugin-project-info-100554 {
     }
 
     .deps-action {
+        margin-top: 4rem;
         display: flex;
         justify-content: end;
     }
@@ -131,6 +147,18 @@ plugin-project-info-100554 {
     .deps-details-list {
         list-style: none;
         padding-inline-start: 0;
+
+        li.li-add {
+            border: none;
+            display: flex;
+            justify-content: center;
+
+            span {
+                text-decoration: underline;
+                color: @active-color;
+                cursor: pointer;
+            }
+        }
 
         li {
             padding: .75rem 1.25rem;
@@ -149,7 +177,8 @@ plugin-project-info-100554 {
 
             .deps-details-tags {
                 span {
-                    display: inline-block;
+                    display: flex;
+                    align-items: center;
                     padding: .2em .3em;
                     font-size: 75%;
                     text-align: center;
@@ -168,11 +197,41 @@ plugin-project-info-100554 {
             }
 
             .deps-details-actions {
+                display: flex;
+                gap: .5rem;
                 margin-left: auto;
                 cursor: pointer;
 
             }
         }
+    }
+
+    .add-dep-wrapper {
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        transform: translateY(-8px);
+        transition:
+            max-height 300ms ease,
+            opacity 200ms ease,
+            transform 200ms ease;
+    }
+
+    .add-dep-wrapper.open {
+        max-height: 120px;
+        /* ajuste conforme o conteúdo */
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .add-dep-content {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .add-dep-content input {
+        flex: 1;
     }
 
     details {
@@ -188,5 +247,4 @@ plugin-project-info-100554 {
     }
 
 }
-
 
