@@ -1,4 +1,4 @@
-/// <mls shortName="pluginPageNavigation" project="100554" enhancement="_100554_enhancementLit" groupName="other" /> 
+/// <mls shortName="pluginPageNavigation" project="100554" enhancement="_100554_enhancementLit" groupName="other" />     
 
 import { html, repeat } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -134,7 +134,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         const renderHeader = () => {
             //@dblclick="${(e: MouseEvent) => this.editEl(e, item)}"
             return html`
-                <div 
+                <div  
                     .info=${item}
                     id="${item.tagName + idx}"                      
                     class="header ${cls} activegpbtnslider" 
