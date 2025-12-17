@@ -26,6 +26,10 @@ plugin-page-navigation-100554 {
             margin-right: .1rem;
             font-size: 1rem;
             user-select: none;
+
+            svg{
+                fill: @text-primary-color;
+            }
         }
 
 
@@ -98,6 +102,7 @@ plugin-page-navigation-100554 {
         //background: #c4c4c2;
         //border-radius: 4px;
         border-top: 1px solid #c4c4c4;
+    
     }
 
     ul li div.activeBranch .groupHiddenListIcon {
@@ -148,10 +153,10 @@ plugin-page-navigation-100554 {
         justify-content: end;
         align-items: center;
         gap: .5rem;
-        color: #444343;
+        color: @text-primary-color-disabled;
 
         svg {
-            fill: #444343;
+            fill: @text-primary-color-disabled;
             ;
         }
     }
