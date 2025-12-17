@@ -5,9 +5,9 @@ import { customElement, state } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { setProjectDetails, checkIfHasLocalProject, getLocalProjectName } from '/_100554_/l2/libCommom.js';
 import './_100554_pluginCreateProject'
-
+ 
 @customElement('projects-100554')
-export class Projects102009 extends StateLitElement {
+export class Projects102009 extends StateLitElement { 
 
   @state() currentView: 'list' | 'details' | 'add' = 'list';
   @state() archiveConfirmationText = '';
