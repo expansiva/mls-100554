@@ -20,7 +20,7 @@ plugin-preview-insights-100554 {
         display: flex;
         justify-content: space-between;
         border-bottom: 1px solid #ccc;
-        background-color: #f0f0f0;
+        background-color: @bg-primary-color;
         overflow: hidden;
         flex-shrink: 0;
     }
@@ -71,7 +71,7 @@ plugin-preview-insights-100554 {
     }
 
     .tab-button.active {
-        background-color: #ffffff;
+        background-color: @bg-primary-color-lighter-disabled;
         font-weight: bold;
         border-bottom: 2px solid @active-color;
     }
@@ -81,12 +81,22 @@ plugin-preview-insights-100554 {
         flex: 1;
         padding: @space-8;
         margin: 0;
-        background-color: #ffffff;
-        color: #000000;
+        background-color: @bg-primary-color-lighter;
+        color: @text-primary-color;
         display: flex;
         flex-grow: 1;
         flex-direction: column;
-        height: 1px;
+        h1{
+            padding-left: .3rem;
+            display: flex;
+            gap:.5rem;
+            align-items: center;
+
+            svg{
+                fill: @text-primary-color;
+                color: @text-primary-color;
+            }
+        }
     }
 
     section {
