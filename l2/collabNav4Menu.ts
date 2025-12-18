@@ -6,11 +6,12 @@ import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { collab_bars, collab_bell, collab_chevron_down, collab_xmark } from '/_100554_/l2/collabIcons.js';
 
 
-interface TabItem {
+interface TabItem { 
     text: string;
     icon?: string;
-    allowClose?: boolean;
+    allowClose?: boolean;  
 }
+
 @customElement('collab-nav4-menu-100554')
 export class CollabNav4Menu extends StateLitElement {
 
