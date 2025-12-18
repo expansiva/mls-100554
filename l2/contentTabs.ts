@@ -2,12 +2,12 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 @customElement('content-tabs-100554')
 export class ContentTabs extends CollabLitElement { 
 
-    private navItems: HTMLElement[] = [];
+    private navItems: HTMLElement[] = []; 
     private contentItems: HTMLElement[] = [];
     @property({ type: Number, reflect: true }) selectedIndex = 0;
 
