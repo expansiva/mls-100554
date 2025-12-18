@@ -6,8 +6,8 @@ collab-nav4-menu-100554 {
 	font-size: 14px;
 	display: block;
 	font-weight: 400;
-	background: #f6f6f6;
-	border-radius: 6px;
+	background: var(--collab-nav-bg-3);
+
 	height: 40px;
 	box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, 0.1);
 
@@ -21,7 +21,7 @@ collab-nav4-menu-100554 {
 			gap: @space-8;
 			cursor: pointer;
 			padding: 6px 12px;
-			background: @bg-secondary-color-lighter;
+			background: var(--collab-nav-bg-3);
 			color: @text-primary-color;
 			transition: all @transition-slow;
 			border: none;
@@ -36,7 +36,7 @@ collab-nav4-menu-100554 {
 
 
 			&:hover {
-				background: @bg-secondary-color-hover;
+				background: @bg-secondary-color-lighter;
 			}
 
 			.arrow {
@@ -47,8 +47,7 @@ collab-nav4-menu-100554 {
 			&.active {
 				border: 1px solid @grey-color;
 				border-bottom: none;
-				background: @bg-primary-color;
-				color: @active-color;
+				background: @bg-secondary-color-lighter;
 				font-weight: @font-weight-bold;
 			}
 
@@ -108,12 +107,17 @@ collab-nav4-menu-100554 {
 	}
 
 	.dropdown-btn {
-		border: 1px solid #cecece;
+		border: 1px solid var(--collab-nav-bg-3);
 		border-radius: 8px;
 		margin: auto 1rem;
 		height: 30px;
 		width: 30px;
 		cursor: pointer;
+		background: var(--collab-nav-bg-3);
+
+		svg{
+			fill: @text-primary-color;
+		}
 	}
 
 
@@ -121,8 +125,8 @@ collab-nav4-menu-100554 {
 		position: absolute;
 		top: 42px;
 		left: 10px;
-		background: #fff;
-		border: 1px solid #ccc;
+		background: var(--collab-nav-bg-3);
+		border: 1px solid var(--collab-nav-bg-3);
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 		border-radius: 6px;
 		min-width: 300px;
@@ -149,7 +153,8 @@ collab-nav4-menu-100554 {
 			gap: 1rem;
 
 			&:hover, &.selected {
-				background: #f2f2f2;
+				background: @bg-secondary-color-lighter;
+				color: var(--collab-nav-color-active);
 			}
 		}
 	}

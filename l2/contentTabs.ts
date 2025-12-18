@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
 
 @customElement('content-tabs-100554')
-export class ContentTabs extends CollabLitElement {
+export class ContentTabs extends CollabLitElement { 
 
     private navItems: HTMLElement[] = [];
     private contentItems: HTMLElement[] = [];
