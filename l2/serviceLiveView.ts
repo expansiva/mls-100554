@@ -146,7 +146,7 @@ export class ServiceLiveView100554 extends ServiceBase {
                 mls.actual[7].setFullName(`_${mls.actualProject}_${firstModule.path}/${page}`);
             }
 
-            openService('_100554_serviceApps', 'left', 7);
+            // openService('_100554_serviceCollabMessages', 'left', 7, { mode: 'Apps ' });
             const fullName = mls.actual[7].getFullName();
             const info = mls.l2.getPath(fullName);
             this.liveView.setAttribute('mode', 'develpoment');
@@ -157,7 +157,7 @@ export class ServiceLiveView100554 extends ServiceBase {
             }
 
             if (this.startServerInstance && typeof this.startServerInstance.start === 'function') {
-                
+
                 await this.startServerInstance.start(info.project, 'all');
             }
 
