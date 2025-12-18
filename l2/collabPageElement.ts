@@ -3,7 +3,6 @@
 import { html, PropertyValueMap } from 'lit';
 import { property } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { WCDOverlayMethods  } from '/_100554_/l2/wcdTypes.js';
 import { IICADepths, IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js'
 import { convertTagToFileName } from '/_100554_/l2/utilsLit.js'
 
@@ -23,7 +22,7 @@ export abstract class CollabPageElement extends StateLitElement {
 
     @property({ type: String, reflect: true }) level: string = window.mls && mls.actualLevel ? mls.actualLevel.toString() :  '7';
 
-    public overlay: WCDOverlayMethods | undefined;
+    public overlay: any | undefined;
 
     public isPage = true;
 
@@ -108,7 +107,7 @@ export abstract class CollabPageElement extends StateLitElement {
         if (!this.modeoverlay) return;
         const ok = await this.importWCDOverlay(this.modeoverlay);
         if (!ok) return;
-        this.overlay = document.createElement(this.modeoverlay) as WCDOverlayMethods;
+        this.overlay = document.createElement(this.modeoverlay) as any;
         this.overlay.myItens = this.findAllElementsIca(this);
         this.overlay.createOverlayItems();
         this.appendChild(this.overlay as HTMLElement);
