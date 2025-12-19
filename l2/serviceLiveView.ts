@@ -73,6 +73,7 @@ export class ServiceLiveView100554 extends ServiceBase {
             const needUpdate = await this.buildInstance?.buildModule(tabActual.project, tabActual.moduleName);
             this.loading = false;
 
+            /*
             if (needUpdate) {
                 const actual7 = mls.actual[7];
                 if (!actual7 || !actual7.project) return;
@@ -81,7 +82,7 @@ export class ServiceLiveView100554 extends ServiceBase {
                 this.loading = true;
                 await this.liveView.init(info.project, info.shortName, info.folder);
                 this.loading = false;
-            }
+            }*/
         }
 
     }
