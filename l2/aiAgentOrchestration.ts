@@ -13,13 +13,12 @@ import {
     notifyTaskChange,
     dispatchDetailsTaskClose,
     updateTaskTitle,
-    getNextStepIdAvaliable,
-    getAgentInstanceByName
+    getNextStepIdAvaliable
 } from "/_100554_/l2/aiAgentHelper.js";
 
-
+import { collabImport } from '/_100554_/l2/collabImport.js';
 import { getTask, getMessage } from '/_102025_/l2/collabMessagesIndexedDB.js';
-import { IAgent } from '/_100554_/l2/aiAgentBase.js';
+import { IAgent, IAgentAsync, AgentIntent } from '/_100554_/l2/aiAgentBase.js';
 import { getUserId } from '/_102025_/l2/collabMessagesHelper.js';
 import { loadModuleFromProjectOrDependency } from '/_100554_/l2/libCommom.js';
 
@@ -48,6 +47,7 @@ export async function startNewAiTask(
             userMessage,
             agentName,
             inputAI,
+            longTermMemory
         };
 
         const value = await mls.api.msgAddMessageAI(args);
@@ -62,7 +62,7 @@ export async function startNewAiTask(
         context.message = ret.message;
         notifyTaskChange(context, oldContextCreateAt);
 
-        if ((mls as any).istraceAgent) console.log(JSON.stringify(context, null, 2));
+        if (mls.isTraceAgent) console.log(JSON.stringify(context, null, 2));
         if (longTermMemory) context.task = await appendLongTermMemory(context, longTermMemory);
         await afterPrompt(context);
 
@@ -71,6 +71,46 @@ export async function startNewAiTask(
         throw new Error(`[${agentName}](startNewAiTask) ${error.message || error}`);
     }
 }
+
+export async function startNewAiTaskAsync(
+    taskTitle: string,
+    agent: IAgentAsync,
+    userMessage: string,
+    inputAI: mls.msg.IAMessageInputType[],
+    context: mls.msg.ExecutionContext,
+    longTermMemory?: Record<string, string>
+): Promise<void> {
+    const oldContextCreateAt = context.message.createAt;
+    try {
+        const args: mls.msg.RequestAddMessageAI = {
+            action: "addMessageAI",
+            threadId: context.message.threadId,
+            userId: context.message.senderId,
+            taskTitle,
+            userMessage,
+            agentName: agent.agentName,
+            inputAI,
+            longTermMemory
+        };
+
+        const value = await mls.api.msgAddMessageAI(args);
+        if (!value) throw new Error(`[${agent.agentName}](startNewAiTaskAsync) Error on return addMessageAI`);
+        if (value.statusCode !== 200) throw new Error(`[${agent.agentName}](startNewAiTaskAsync) Error on addMessageAI: ${value.msg || ''})`);
+        0
+        const ret = value as mls.msg.ResponseAddMessageAI;
+        context.task = ret.task;
+        context.message = ret.message;
+        notifyTaskChange(context, oldContextCreateAt);
+
+        if (mls.isTraceAgent) console.log(JSON.stringify(context, null, 2));
+        //await afterPrompt(context);
+
+    } catch (error: any) {
+        onError(context, 1, error.message, oldContextCreateAt);
+        throw new Error(`[${agentName}](startNewAiTask) ${error.message || error}`);
+    }
+}
+
 
 type AfterPrompt = (context: mls.msg.ExecutionContext) => Promise<void>;
 
@@ -100,7 +140,7 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
         }
         notifyTaskChange(context);
 
-        if ((mls as any).istraceAgent) console.log(JSON.stringify(context, null, 2));
+        if (mls.isTraceAgent) console.log(JSON.stringify(context, null, 2));
         await afterPrompt(context);
     }
     catch (error: any) {
@@ -211,7 +251,7 @@ async function executeNextTool(context: mls.msg.ExecutionContext, step: mls.msg.
         const traceMsg = `Error executing tool ${step.toolName}: ${rc.error} `;
         console.error(traceMsg);
         context = await updateStepStatus(context, step.stepId, "failed", traceMsg);
-        if ((mls as any).istraceAgent) console.log(JSON.stringify(context.task, null, 2));
+        if (mls.isTraceAgent) console.log(JSON.stringify(context.task, null, 2));
         return;
     }
 
@@ -239,7 +279,7 @@ async function executeNextTool(context: mls.msg.ExecutionContext, step: mls.msg.
             rags: null
         }
 
-        if ((mls as any).istraceAgent) console.log(JSON.stringify(context.task, null, 2));
+        if (mls.isTraceAgent) console.log(JSON.stringify(context.task, null, 2));
         await addNewStep(context, stepdIdToChangeStatus, [newStep]);
         return;
 
@@ -283,29 +323,24 @@ async function executeNextAgent(context: mls.msg.ExecutionContext, step: mls.msg
     if (!step.agentName) throw new Error(`[${agentName}](executeNextAgent) Agent name is missing`);
 
     try {
-
-        const info = mls.l2.getPath(`_${mls.actualProject}_${step.agentName} `); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
-        const agent = await loadAgent(info.shortName, info.folder);
+        const agent = await loadAgent(step.agentName);
         if (!agent) throw new Error(`[${agentName}](executeNextAgent) createAgent function not found in ${mls.actualProject} ${step.agentName} `);
-        await agent.beforePrompt(context);
-
+        await executeBeforePrompt(agent, context);
     } catch (error: any) {
         const msg = `${error.message || ''}`;
         onError(context, step.stepId, msg);
         console.error(msg);
-
     }
 }
 
-export async function loadAgent(shortName: string, folder: string = ''): Promise<IAgent | undefined> {
+export async function loadAgent(agentName: string): Promise<IAgent | IAgentAsync | undefined> {
 
     try {
-        const agent = await getAgentInstanceByName(shortName);
+        const agent = await getAgentInstanceByName(agentName);
         return agent;
     } catch (error: any) {
         console.error(`[loadAgent] ${error.message || error} `);
         return undefined;
-
     }
 
 }
@@ -324,15 +359,47 @@ export async function loadTool(shortName: string): Promise<any | undefined> {
 
 }
 
+export async function executeBeforePrompt(agent: IAgent | IAgentAsync, context: mls.msg.ExecutionContext): Promise<void> {
+    // execute one of this: beforePrompt, beforePromptAtomic, beforePromptImplicit
+    if ((agent as IAgent).beforePrompt) {
+        return await (agent as IAgent).beforePrompt(context);
+    }
+    agent = agent as IAgentAsync;
+    let content = context.message.content;
+    if (content.startsWith("@@")) content = content.split(" ").slice(1).join(" ").trim(); // remove agent name
+
+    if (agent.beforePromptImplicit) {
+        // no args
+        if (!content) {
+            const intents = await agent.beforePromptImplicit(context);
+            return processIntents(intents);
+        }
+    }
+    if (agent.beforePromptAtomic) {
+        // file ref
+        const file = mls.stor.getFileStorFromJson(content, {});
+        if (file) {
+            const intents = await agent.beforePromptAtomic(context, file, content);
+            return processIntents(intents);
+        }
+    }
+    throw new Error(`Invalid agent ${agent.agentName}, no beforePrompt`);
+}
+
+async function processIntents(intents: AgentIntent[]): Promise<void> {
+    throw new Error('not implemented processIntents');
+}
+
 async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep, functionName: string, stepId: number, args?: object): Promise<any> {
     if (!context || !context.task) throw new Error(`[${agentName}](executeAgentFunction) Invalid context`);
     if (!step.agentName) throw new Error(`[${agentName}](executeAgentFunction) Agent name is missing`);
 
     try {
-        const info = mls.l2.getPath(`_${mls.actualProject}_${step.agentName} `); // agentName = 'agenteWidget' || 'folder1/agenteWidget'
-        const agent = await loadAgent(info.shortName, info.folder) as any;
-        if (typeof agent[functionName] !== "function") throw new Error(`[${agentName}](executeAgentFunction) ${functionName} function not found in ${step.agentName} `);
-        return await agent[functionName](context, stepId, args);
+        const agent = await loadAgent(step.agentName);
+        if (!agent) throw new Error(`[${agentName}](executeAgentFunction) invalid agent`);
+        const fn = (agent as any)[functionName];
+        if (typeof fn !== "function") throw new Error(`[${agentName}](executeAgentFunction) ${functionName} function not found in ${step.agentName} `);
+        return await fn(context, stepId, args);
     } catch (error: any) {
         console.error(`[${agentName}](executeAgentFunction)  ${error.message || error} `);
     }
@@ -341,7 +408,7 @@ async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls
 
 async function executeNextResult(context: mls.msg.ExecutionContext, step: mls.msg.AIResultStep) {
     if (!context || !context.task) throw new Error(`[${agentName}](executeNextResult) Invalid context`);
-    if ((mls as any).istraceAgent) console.log("result:", step.result);
+    if (mls.isTraceAgent) console.log("result:", step.result);
     context = await updateStepStatus(context, step.stepId, "completed");
     notifyTaskChange(context);
     return executeNextStep(context);
@@ -350,7 +417,7 @@ async function executeNextResult(context: mls.msg.ExecutionContext, step: mls.ms
 
 async function executeNextFlexible(context: mls.msg.ExecutionContext, step: mls.msg.AIFlexibleResultStep) {
     if (!context || !context.task) throw new Error(`[${agentName}](executeNextFlexible) Invalid context`);
-    if ((mls as any).istraceAgent) console.log("Flexible:", step.result);
+    if (mls.isTraceAgent) console.log("Flexible:", step.result);
     context = await updateStepStatus(context, step.stepId, "completed");
     notifyTaskChange(context);
     return executeNextStep(context);
@@ -361,7 +428,7 @@ async function executeNextClarification(context: mls.msg.ExecutionContext, step:
     if (!context || !context.task) throw new Error(`[${agentName}](executeNextClarification) Invalid context`);
     // if (!step.clarificationMessage) throw new Error("clarification message is missing");
     // notifyTaskChange(context);
-    // if ((mls as any).istraceAgent) console.log("clarification:", step.clarificationMessage);
+    // if (mls.istraceAgent) console.log("clarification:", step.clarificationMessage);
     // context.task = await updateStepStatus(context.task, step.stepId, "waiting_for_user");
 
 }
@@ -578,4 +645,54 @@ export interface Question {
 export interface QuestionOption {
     id: string;
     label: string;
+}
+
+/**
+ * agentName, ex: 'agentXX1' or '_100554_/l2/agents/agentXX1'
+ */
+async function getAgentInstanceByName(agentNameOrPath: string): Promise<IAgent | IAgentAsync | undefined> {
+
+    const projectActual = mls.actualProject;
+    if (!projectActual) throw new Error('Not found project actual!');
+    let projectsToSearch: number[];
+    const fileInfo = mls.stor.getPathToFile(agentNameOrPath)
+    if (fileInfo.project > 0) {
+        // full path
+        projectsToSearch = [fileInfo.project];
+    } else {
+        projectsToSearch = mls.l5.getProjectDependencies(projectActual, true);
+    }
+
+    const searchInProject = (projectId: number) => {
+        let foundInFolder: mls.stor.IFileInfo | undefined;
+
+        for (const file of Object.values(mls.stor.files)) {
+            if (
+                file.project === projectId &&
+                file.shortName.startsWith('agent') &&
+                file.shortName === fileInfo.shortName
+            ) {
+                if (file.folder === '' || file.folder === fileInfo.folder) {
+                    return file;
+                }
+                foundInFolder = file;
+            }
+        }
+        return foundInFolder;
+    };
+
+    for (const projId of projectsToSearch) {
+        const agent = searchInProject(projId);
+        if (!agent) continue;
+        try {
+            const moduleAgent = await collabImport({ project: agent.project, shortName: agent.shortName, folder: agent.folder.trim() });
+            if (typeof moduleAgent.createAgent !== "function") throw new Error(`[getAgentInstanceByName] createAgent function not found in ${agentName}`);
+            const agentInstance = moduleAgent.createAgent();
+            return agentInstance;
+        } catch (error: any) {
+            console.error(`[loadAgent] ${error.message || error} `);
+            return undefined;
+        };
+    }
+    return undefined;
 }
