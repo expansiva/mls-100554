@@ -2,7 +2,7 @@
 
 import { updateMessage, getMessage, getThreadByName } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { getUserId, createThread } from '/_102025_/l2/collabMessagesHelper.js';
-import { loadAgent } from '/_100554_/l2/aiAgentOrchestration.js';
+import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
 import { openService } from '/_100554_/l2/libCommom.js';
 import { IAgent } from '/_100554_/l2/aiAgentBase.js';
 import { collabImport } from '/_100554_/l2/collabImport.js';
@@ -115,6 +115,7 @@ export const getInteractionStepId = (task: mls.msg.TaskData, stepId: number): nu
   return null;
 }
 
+// todo: remove , this function has moved to orchestration js
 export async function getAgentInstanceByName(agentName: string): Promise<IAgent | undefined> {
 
     const projectActual = mls.actualProject;
@@ -506,20 +507,15 @@ export async function executeAgentByFile(agentName: string, prompt: string, file
   const threadId = thread?.threadId;
   if (!threadId) throw new Error('[executeAgentByFile] Cannot find thread');
 
-  const info = mls.l2.getPath(`_${mls.actualProject}_${agentName}`);
-  const agent = await loadAgent(info.shortName, info.folder);
+  const agent = await loadAgent(agentName);
   if (!agent) throw new Error('[executeAgentByFile] Invalid Agent' + agentName);
 
   const context = getTemporaryContext(threadId, userId, prompt);
 
   if (openMsg) {
-    agent.beforePrompt(context);
     mls.events.fire([mls.actualLevel], 'collabMessages' as any, JSON.stringify({ threadId: threadId, taskId: 'last', type: 'thread-open' }));
-  } else {
-    await agent.beforePrompt(context);
   }
-
-
+  executeBeforePrompt(agent, context);
 }
 
 export async function openCollabMessage(file: mls.stor.IFileInfo) {
