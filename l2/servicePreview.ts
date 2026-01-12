@@ -15,9 +15,8 @@ import { globalState, setState, initState, getState } from '/_100554_/l2/collabS
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from '/_100554_/l2/collabIcons.js';
 import { CollabState } from '/_100554_/l2/collabState.js';
 import { TsTestAst } from '/_100554_/l2/tsTestAST.js';
-import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
+import { getTemporaryContext, getAgentInstanceByName } from '/_100554_/l2/aiAgentHelper.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
-import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
 
 
 import '/_100554_/l2/collabConsole.js';
@@ -564,27 +563,40 @@ export class ServicePreview100554 extends ServiceBase {
 
         this.loading = true;
 
+        const { project, shortName, folder } = mls.l2.getPath(this.page);
+        const fullName = `_${project}_/l2/${folder ? folder + '/' : ''} ${shortName}`;
+
         if (opt.agentName === 'agentReview') {
             const modes = ['typescript', 'html', 'less'];
             await Promise.all(
                 modes.map(mode => {
-                    const payload = { page: this.page, prompt: value, position: 'left', mode };
-                    return this.fireCollab(opt.agentName, JSON.stringify(payload));
+                    const payload = { fullName, page: this.page, prompt: value, position: 'left', mode };
+                    return this.fireCollab(opt.agentName, JSON.stringify(payload), fullName);
                 })
             ).catch((err) => {
                 this.setError('Error on send message:' + err.message);
+                this.loading = false;
             })
             return;
         }
 
         if (opt.agentName === 'agentGeneratePrototype') {
-            return this.fireCollab(opt.agentName, value);
+            try {
+                return this.fireCollab(opt.agentName, value, fullName);
+            } catch (err: any) {
+                this.setError('Error on send message:' + err.message);
+                this.loading = false;
+                return;
+            }
+
         }
 
         try {
-            await this.fireCollab(opt.agentName, JSON.stringify({ page: this.page, prompt: value, position: 'left' }));
+            await this.fireCollab(opt.agentName, JSON.stringify({ fullName, page: this.page, prompt: value, position: 'left' }), fullName);
+            this.loading = false;
         } catch (err: any) {
             this.setError('Error on send message:' + err.message);
+            this.loading = false;
         }
 
     }
@@ -633,19 +645,21 @@ export class ServicePreview100554 extends ServiceBase {
         else if (actual.size === 0) this.loading = false;
     }
 
-    private async fireCollab(agentName: string, prompt: string) {
+    private async fireCollab(agentName: string, prompt: string, fullName:string) {
 
-        let threadPromise = this.threadCache.get(this.page);
+        fullName = fullName ? fullName : this.page;
+
+        let threadPromise = this.threadCache.get(fullName);
 
         if (!threadPromise) {
             threadPromise = (async () => {
-                let thread = await getThreadByName(this.page);
+                let thread = await getThreadByName(fullName);
                 if (!thread) {
-                    thread = await createThread(this.page, [], 'company');
+                    thread = await createThread(fullName, [], 'company');
                 }
                 return thread;
             })();
-            this.threadCache.set(this.page, threadPromise);
+            this.threadCache.set(fullName, threadPromise);
         }
 
         const thread = await threadPromise;
@@ -658,15 +672,15 @@ export class ServicePreview100554 extends ServiceBase {
             return;
         }
 
-        const agent = await loadAgent(agentName);
-        if (!agent) throw new Error('Invalid agent');
+        const moduleAgent = await getAgentInstanceByName(agentName);
+        if (!moduleAgent) throw new Error('Invalid agent');
         const context = getTemporaryContext(threadId, userId, prompt);
 
-        if (!this.tasksInProgress.get(this.page)) {
-            this.tasksInProgress.set(this.page, new Set());
+        if (!this.tasksInProgress.get(fullName)) {
+            this.tasksInProgress.set(fullName, new Set());
         }
-        this.tasksInProgress.get(this.page)?.add(context);
-        await executeBeforePrompt(agent, context);
+        this.tasksInProgress.get(fullName)?.add(context);
+        await moduleAgent.beforePrompt(context);
     }
 
 
