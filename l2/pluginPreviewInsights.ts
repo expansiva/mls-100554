@@ -58,7 +58,7 @@ export class PluginPreviewInsights100554 extends StateLitElement {
   @property({ type: String }) page: string = '';
   @property({ type: String, converter: Number }) level: number = 0;
 
-  @property({ type: String }) fileType?: "page" | "widget" | "plugin" | "module" | "lib" | "table" | "organism" | "service" | "info" | undefined
+  @property({ type: String }) fileType?: mls.l4.ComponentType | undefined;
 
   @state() private defs?: mls.l4.BaseDefs;
   @state() private loading: boolean = false;
@@ -741,7 +741,7 @@ const defsMock: mls.l4.BaseDefs = {
     "projectId": 100554,
     "folder": "",
     "shortName": "pluginCreateNewProject",
-    "type": "plugin",
+    "type": "pluginUI",
     "group": "other",
     "tags": [
       "lit",
@@ -754,12 +754,6 @@ const defsMock: mls.l4.BaseDefs = {
     "widgets": [
       {
         tag: 'widget-1',
-        analysis: {
-          hasLogic: true,
-          independent: true,
-          reusable: true,
-          suggestion: 'widget'
-        },
         bindings: [], // string[]
         purpose: '',
         used: true

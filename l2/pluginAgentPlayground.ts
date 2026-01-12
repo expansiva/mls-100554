@@ -10,6 +10,8 @@ import { getTemporaryContext, getAllSteps } from '/_100554_/l2/aiAgentHelper.js'
 import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
 import { collab_trash } from '/_100554_/l2/collabIcons.js';
 import { setState } from '/_100554_/l2/collabState.js';
+import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
+
 @customElement('plugin-agent-playground-100554')
 
 export class AgentTester extends CollabLitElement {
@@ -544,13 +546,12 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
             return `[pluginAgentPlayground] [getTemporaryContext] Agent "${agentName}" error: ${e.message}\n\n${JSON.stringify(context, null, 2)}`
         }
         try {
-            const moduleAgent = await import(`/${agentName}`);
-            if (!moduleAgent) throw new Error('Not found agent:' + agentName);
-            if (!moduleAgent.createAgent) throw new Error('Not found createAgent:' + agentName);
-            const agt = moduleAgent.createAgent() as IAgent;
+            
+            const agent = await loadAgent(agentName);
             context.modeSingleStep = true;
             setState('playgroundAgent.modeCompare', group);
-            await agt.beforePrompt(context);
+            if (!agent) throw new Error('Not found agent:' + agentName);
+            executeBeforePrompt(agent, context);
             setState('playgroundAgent.modeCompare', undefined);
             return `[pluginAgentPlayground] Agent "${agentName}" responded:\n${JSON.stringify(context, null, 2)}`;
         } catch (e: any) {

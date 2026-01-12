@@ -15,8 +15,9 @@ import { globalState, setState, initState, getState } from '/_100554_/l2/collabS
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from '/_100554_/l2/collabIcons.js';
 import { CollabState } from '/_100554_/l2/collabState.js';
 import { TsTestAst } from '/_100554_/l2/tsTestAST.js';
-import { getTemporaryContext, getAgentInstanceByName } from '/_100554_/l2/aiAgentHelper.js';
+import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
+import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
 
 
 import '/_100554_/l2/collabConsole.js';
@@ -657,15 +658,15 @@ export class ServicePreview100554 extends ServiceBase {
             return;
         }
 
-        const moduleAgent = await getAgentInstanceByName(agentName);
-        if (!moduleAgent) throw new Error('Invalid agent');
+        const agent = await loadAgent(agentName);
+        if (!agent) throw new Error('Invalid agent');
         const context = getTemporaryContext(threadId, userId, prompt);
 
         if (!this.tasksInProgress.get(this.page)) {
             this.tasksInProgress.set(this.page, new Set());
         }
         this.tasksInProgress.get(this.page)?.add(context);
-        await moduleAgent.beforePrompt(context);
+        await executeBeforePrompt(agent, context);
     }
 
 

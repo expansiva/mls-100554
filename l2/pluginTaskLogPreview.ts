@@ -4,7 +4,7 @@ import { html, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { getRootAgent } from '/_100554_/l2/aiAgentHelper.js';
-import { IAgent } from '/_100554_/l2/aiAgentBase.js';
+import { IAgent, IAgentAsync } from '/_100554_/l2/aiAgentBase.js';
 import { loadAgent } from '/_100554_/l2/aiAgentOrchestration.js';
 
 @customElement('plugin-task-log-preview-100554')
@@ -48,8 +48,7 @@ export class PluginTaskLogPreview100554 extends StateLitElement {
     const firstAgent = getRootAgent(this.task);
     if (!firstAgent) return;
     const agentName = firstAgent.agentName;
-    const info = mls.l2.getPath(`_${mls.actualProject}_${agentName} `);
-    const agent: IAgent | undefined = await loadAgent(info.shortName, info.folder);
+    const agent: IAgent | IAgentAsync | undefined = await loadAgent(agentName);
     if (!agent || !agent.getFeedBack) return;
     const html = await agent.getFeedBack(this.task);
     this.template = html;

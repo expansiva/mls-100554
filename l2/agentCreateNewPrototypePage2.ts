@@ -534,6 +534,7 @@ function generateDefsPage(
             folder: info.folder,
             shortName: info.shortName,
             type: "page",
+            scope: "app",
             devFidelity: "scaffold",
             group: payload.finalModuleDetails.moduleName,
             tags: ["lit", "page"]
@@ -807,7 +808,6 @@ function extractOrganismTagsFromHtml(pageHtml: string[]): mls.l4.DefsWidget[] {
     const arr = widgets.map((tag) => {
         const w: mls.l4.DefsWidget = {
             tag,
-            analysis: undefined,
             bindings: [],
             purpose: '',
             used: true

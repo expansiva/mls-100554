@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { addMessage } from '/_100554_/l2/collabMessageHelper.js';
+// import { addMessage } from '/_100554_/l2/collabMessageHelper.js';
 
 @customElement('test-generate-defs-100554')
 export class TestGenerateDefs100554 extends StateLitElement {
@@ -75,7 +75,7 @@ export class TestGenerateDefs100554 extends StateLitElement {
                     (async () => {
                         if (!file || !file.ts) return;
                         try {
-                            await addMessage(this.threadId, command);
+                            // await addMessage(this.threadId, command);
                             this.log.push("added message: " + command);
                         } catch (e: any) {
                             this.log.push("erro ao adicionar mensagem: " + (e?.message || e));
