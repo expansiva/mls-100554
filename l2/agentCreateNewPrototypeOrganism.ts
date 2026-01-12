@@ -11,7 +11,7 @@ import '/_100554_/l2/agentCreateNewPrototypeOrganismFeedback.js';
 import {
     startNewInteractionInAiTask,
     startNewAiTask,
-    addNewStep
+    addNewStep 
 } from "/_100554_/l2/aiAgentOrchestration.js";
 
 import {
@@ -165,12 +165,9 @@ async function updateDefs(context: mls.msg.ExecutionContext, step: mls.msg.AIPay
             folder: folder,
             shortName: shortName,
             type: "organism",
+            scope: 'app',
             devFidelity: "scaffold",
             group: folder,
-            tags: [
-                "lit",
-                "organism"
-            ]
         },
         references: {
             widgets: [],
