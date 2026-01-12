@@ -28,6 +28,8 @@ export class ServiceHistories100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
 
+    private renderSideBySide = false;
+
     constructor() {
         super();
         mls.events.addEventListener([2, 5], ['HistoriesSelected' as any], (ev) => this.onSelectHistories(ev));
@@ -57,6 +59,8 @@ export class ServiceHistories100554 extends ServiceBase {
 
     public onClickMain(op: string) {
         if (op === 'opHistories') this.showStart();
+        else if (op === 'opSide') this.showSideBySide(true);
+        else if (op === 'opOnlyOne') this.showSideBySide(false);
         else if (this.menu.setMode) this.menu.setMode('initial');
 
     }
@@ -65,6 +69,8 @@ export class ServiceHistories100554 extends ServiceBase {
         title: 'Histories',
         main: {
             opHistories: 'Start',
+            opSide: 'Side by Side',
+            opOnlyOne: 'Inline Diff'
         },
         tabs: undefined,
         tools: {},
@@ -108,6 +114,7 @@ export class ServiceHistories100554 extends ServiceBase {
         if (params.position === this.position) return;
 
         if (!this.serviceItemNav) return;
+        this.loading = true;
         this.showNav2Item(true);
         this.openMe();
 
@@ -121,10 +128,15 @@ export class ServiceHistories100554 extends ServiceBase {
 
         const key = mls.stor.getKeyToFiles(params.project, params.level, params.shortName, params.folder, params.extension);
         const storFile = mls.stor.files[key];
-        if (!storFile) return;
+        if (!storFile) {
+            this.loading = false;
+            return;
+        }
         this.fileInfo = storFile;
         this.hashModified = params.hashModified;
         this.hashOriginal = params.hashOriginal;
+
+        this.renderSideBySide = false;
 
         let src2: string = '';
         if (this.hashModified === 'local') {
@@ -136,8 +148,16 @@ export class ServiceHistories100554 extends ServiceBase {
 
         const src1 = this.hashOriginal ? await this.getHistories(this.hashOriginal) : '';
         this.setInitialHistories(src1, src2, editorType[params.extension]);
+        this.updateEditor();
         this.setMsizeEditor();
+        this.loading = false;
 
+    }
+
+    private showSideBySide(show:boolean) {
+        this.renderSideBySide = show;
+        this.updateEditor();
+        return true;
     }
 
     private async getHistories(hash: string): Promise<string> {
@@ -179,11 +199,27 @@ export class ServiceHistories100554 extends ServiceBase {
         if (!this.c2 || this._ed1) return;
         const opt = {
             automaticLayout: true,
-            renderSideBySide: false
+            renderSideBySide: this.renderSideBySide
         };
         this._ed1 = monaco.editor.createDiffEditor(this.c2, opt);
         (this.c2 as any)['mlsEditor'] = this._ed1;
         this.setMsizeEditor();
+    }
+
+    private updateEditor() {
+        if (!this._ed1) return;
+        this._ed1.updateOptions({
+            renderSideBySide: this.renderSideBySide
+        });
+
+        const originalEditor = this._ed1.getOriginalEditor();
+        const modifiedEditor = this._ed1.getModifiedEditor();
+
+        originalEditor.setPosition({ lineNumber: 1, column: 1 });
+        modifiedEditor.setPosition({ lineNumber: 1, column: 1 });
+
+        originalEditor.revealLine(1);
+        modifiedEditor.revealLine(1);
     }
 
     private setMsizeEditor() {
@@ -235,4 +271,5 @@ interface IEventParams {
     folder: string,
     hashOriginal: string,
     hashModified: string,
+    renderSideBySide?: boolean
 }
