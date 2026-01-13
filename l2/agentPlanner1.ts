@@ -17,7 +17,6 @@ import {
     systemRagsAvailable,
     systemToolsAvailable,
     addRAGAdditionalInformation,
-    preferModelType,
     getPromptByHtml
 } from "/_100554_/l2/aiPrompts.js";
 
@@ -106,7 +105,7 @@ export async function getPrompts(prompt: string | undefined, rags: string[] | nu
     const tools = await systemToolsAvailable();
 
     const data = {
-        mode: preferModelType("cost"),
+        mode: '<!-- modelType: code -->', // cost
         agentsAvailable: agents.content,
         ragsAvailable: ragsA.content,
         toolsAvailable: tools.content,

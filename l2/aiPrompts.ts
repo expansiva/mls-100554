@@ -63,7 +63,6 @@ Você deve retornar um array de objetos no formato JSON. Cada objeto representa 
     };
 }
 
-export const preferModelType = (modelType: any) => `<!-- modelType: code -->`; // obsolete
 
 function getAgentsList(): string {
 
