@@ -1613,7 +1613,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                 });
             }
 
-            if (lineContent.includes('// REVIEW: Error') || lineContent.includes('<!-- REVIEW: Error')) {
+            if (lineContent.includes('//' + ' REVIEW: Error') || lineContent.includes('<!--' + ' REVIEW: Error')) {
                 decorations.push({
                     range: new monaco.Range(i, 1, i, 1),
                     options: {
