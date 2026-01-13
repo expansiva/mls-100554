@@ -367,9 +367,11 @@ export async function executeBeforePrompt(agent: IAgent | IAgentAsync, context: 
     agent = agent as IAgentAsync;
     let content = context.message.content;
     if (content.startsWith("@@")) content = content.split(" ").slice(1).join(" ").trim(); // remove agent name
+    if (mls.isTraceAgent) console.log(`[executeBeforePrompt] content:"${content}"`)
 
     if (agent.beforePromptImplicit) {
         // no args
+        if (mls.isTraceAgent) console.log(`[executeBeforePrompt] isImpricit=${!content}`)
         if (!content) {
             const intents = await agent.beforePromptImplicit(context);
             return processIntents(intents);
@@ -377,13 +379,27 @@ export async function executeBeforePrompt(agent: IAgent | IAgentAsync, context: 
     }
     if (agent.beforePromptAtomic) {
         // file ref
-        const file = mls.stor.getFileStorFromJson(content, {});
+        const { jsonText, rest } = splitJsonAndText(content)
+        const file = mls.stor.getFileStorFromJson(jsonText, {});
+        if (mls.isTraceAgent) console.log(`[executeBeforePrompt] isAtomic=${file ? "yes:" + JSON.stringify(file) : "no"}, userPromptAfterJson:${rest}`)
         if (file) {
-            const intents = await agent.beforePromptAtomic(context, file, content);
+            const intents = await agent.beforePromptAtomic(context, file, rest);
             return processIntents(intents);
         }
     }
     throw new Error(`Invalid agent ${agent.agentName}, no beforePrompt`);
+}
+
+function splitJsonAndText(input: string): { jsonText: string; rest: string } {
+  const start = input.indexOf("{");
+  const end = input.indexOf("}");
+
+  if (start === -1 || end === -1 || end < start) return { jsonText: input, rest: ""};
+
+  const jsonText = input.slice(start, end + 1).trim();
+  const rest = input.slice(end + 1).trim();
+
+  return { jsonText, rest };
 }
 
 async function processIntents(intents: AgentIntent[]): Promise<void> {
@@ -663,29 +679,27 @@ async function getAgentInstanceByName(agentNameOrPath: string): Promise<IAgent |
         projectsToSearch = mls.l5.getProjectDependencies(projectActual, true);
     }
 
-    const searchInProject = (projectId: number) => {
+    function searchInProject(projectId: number) {
         let foundInFolder: mls.stor.IFileInfo | undefined;
 
         for (const file of Object.values(mls.stor.files)) {
-            if (
-                file.project === projectId &&
-                file.shortName.startsWith('agent') &&
-                file.shortName === fileInfo.shortName
-            ) {
-                if (file.folder === '' || file.folder === fileInfo.folder) {
-                    return file;
-                }
-                foundInFolder = file;
+            if (file.project !== projectId 
+              || file.extension !== ".ts"
+              || !file.shortName.startsWith('agent') 
+              || file.shortName !== fileInfo.shortName) continue;
+            if (file.folder === '' || file.folder === fileInfo.folder) {
+                return file;
             }
+            foundInFolder = file;
         }
         return foundInFolder;
     };
 
     for (const projId of projectsToSearch) {
-        const agent = searchInProject(projId);
-        if (!agent) continue;
+        const agentInfo = searchInProject(projId);
+        if (!agentInfo) continue;
         try {
-            const moduleAgent = await collabImport({ project: agent.project, shortName: agent.shortName, folder: agent.folder.trim() });
+            const moduleAgent = await collabImport({ project: agentInfo.project, shortName: agentInfo.shortName, folder: agentInfo.folder.trim() });
             if (typeof moduleAgent.createAgent !== "function") throw new Error(`[getAgentInstanceByName] createAgent function not found in ${agentName}`);
             const agentInstance = moduleAgent.createAgent();
             return agentInstance;
