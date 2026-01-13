@@ -545,13 +545,12 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
             this.inError = true;
             return `[pluginAgentPlayground] [getTemporaryContext] Agent "${agentName}" error: ${e.message}\n\n${JSON.stringify(context, null, 2)}`
         }
-        try {
-            
+        try {            
             const agent = await loadAgent(agentName);
             context.modeSingleStep = true;
             setState('playgroundAgent.modeCompare', group);
             if (!agent) throw new Error('Not found agent:' + agentName);
-            executeBeforePrompt(agent, context);
+            await executeBeforePrompt(agent, context);
             setState('playgroundAgent.modeCompare', undefined);
             return `[pluginAgentPlayground] Agent "${agentName}" responded:\n${JSON.stringify(context, null, 2)}`;
         } catch (e: any) {
