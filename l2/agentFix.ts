@@ -1,7 +1,6 @@
 /// <mls shortName="agentFix" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent } from '/_100554_/l2/aiAgentBase.js';
-import { preferModelType } from '/_100554_/l2/aiPrompts.js';
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
@@ -150,7 +149,7 @@ async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType
 function systemMainInstruction(): mls.msg.IAMessageInputType {
     return {
         type: 'system',
-        content: `${preferModelType("code")}
+        content: `<!-- modelType: code -->
 Você é um agente especializado em corrigir erros de componentes web desenvolvidos com o framework Lit. Você receberá um arquivo typescript ou html ou less, e um json de definição(estilo metadata com informaçoes gerais):
 - Arquivo '.ts' com a lógica do componente
 - Arquivo '.html' com a pagina em que o componente esta sendo usado.
