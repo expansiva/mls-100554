@@ -1,7 +1,7 @@
 /// <mls shortName="agentImprove" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
-import { preferModelType, getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
@@ -104,7 +104,7 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
 async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType[]> {
 
     const dataPrompt = {
-        mode: preferModelType('code'),
+        mode: '<!-- modelType: code -->',
         html: await getContentByExtension(data.page, 'html'),
         typescript: await getContentByExtension(data.page, 'ts'),
         style: await getContentByExtension(data.page, 'style'),
