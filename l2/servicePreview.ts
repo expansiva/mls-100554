@@ -673,7 +673,6 @@ export class ServicePreview100554 extends ServiceBase {
             return;
         }
 
-        //const moduleAgent = await getAgentInstanceByName(agentName);
         const moduleAgent = await loadAgent(agentName);
         if (!moduleAgent) throw new Error('Invalid agent');
         const context = getTemporaryContext(threadId, userId, prompt);
@@ -682,7 +681,6 @@ export class ServicePreview100554 extends ServiceBase {
             this.tasksInProgress.set(fullName, new Set());
         }
         this.tasksInProgress.get(fullName)?.add(context);
-        //await moduleAgent.beforePrompt(context);
         await executeBeforePrompt(moduleAgent, context);
     }
 

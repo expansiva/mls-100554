@@ -115,56 +115,6 @@ export const getInteractionStepId = (task: mls.msg.TaskData, stepId: number): nu
   return null;
 }
 
-// todo: remove , this function has moved to orchestration js
-export async function getAgentInstanceByName(agentName: string): Promise<IAgent | undefined> {
-
-    const projectActual = mls.actualProject;
-    if (!projectActual) throw new Error('Not found project actual!');
-
-    const deps: number[] = mls.l5.getProjectDependencies(projectActual, false);
-    const projectsToSearch = [projectActual, ...(deps.length === 0 ? [100554] : deps)];
-
-    // função interna para buscar dentro de 1 projeto
-    const searchInProject = (projectId: number) => {
-        let foundInFolder: mls.stor.IFileInfo | undefined;
-
-        for (const file of Object.values(mls.stor.files)) {
-            if (
-                file.project === projectId &&
-                file.shortName.startsWith('agent') &&
-                file.shortName === agentName.trim()
-            ) {
-                if (file.folder === '') {
-                    return file;
-                }
-                foundInFolder = file;
-            }
-        }
-        return foundInFolder;
-    };
-
-    for (const projId of projectsToSearch) {
-        const agent = searchInProject(projId);
-        if (agent) {
-            try {
-                const moduleAgent = await collabImport({ project: agent.project, shortName: agent.shortName, folder: agent.folder.trim() });
-                if (typeof moduleAgent.createAgent !== "function") throw new Error(`[getAgentInstanceByName] createAgent function not found in ${agentName}`);
-                const agentInstance = moduleAgent.createAgent();
-                if (typeof agentInstance.beforePrompt !== "function") throw new Error(`[getAgentInstanceByName] beforePrompt function not found in ${agentName}`);
-                if (typeof agentInstance.afterPrompt !== "function") throw new Error(`[getAgentInstanceByName] afterPrompt function not found in ${agentName}`);
-                return agentInstance;
-            } catch (error: any) {
-                console.error(`[loadAgent] ${error.message || error} `);
-                return undefined;
-            }
-        }
-    }
-
-    return undefined;
-}
-
-
-
 export type StatisticsAITask = {
   agents: number, tools: number, clarification: number, result: number, flexible: number,
   totalCost: number, totalSteps: number,
