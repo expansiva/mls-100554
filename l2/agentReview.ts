@@ -1,7 +1,7 @@
 /// <mls shortName="agentReview" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
-import { preferModelType, getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import {  getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 import {
     getNextPendingStepByAgentName,
     getNextInProgressStepByAgentName,
