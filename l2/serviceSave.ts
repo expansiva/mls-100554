@@ -82,7 +82,8 @@ export class ServiceSave extends ServiceBase {
 
     @property() isFreeToSave: boolean = false;
     @property() itens: IDefItem | undefined = undefined;
-    @property() otherProjects: number[] = [];
+    //@property() otherProjects: number[] = [];
+    @property() otherProjects: Record<string, Record<string, string[]>> = {};
     @property() error: string = '';
     @property() totFileSize: string = '';
 
@@ -225,7 +226,7 @@ export class ServiceSave extends ServiceBase {
                 ${this.renderItens()}
                 ${this.renderOthersProjects()}
             `;
-        } else if (this.otherProjects.length > 0) {
+        } else if (Object.keys(this.otherProjects).length > 0) {
             return html`
                 ${this.renderHeader()}
                 ${this.renderOthersProjects()}
@@ -286,26 +287,54 @@ export class ServiceSave extends ServiceBase {
     }
 
     renderOthersProjects() {
-        this.filterOtherProject();
+        //this.filterOtherProject();
         return html`
         <sectionsave>
             <ul>
-                ${repeat(this.otherProjects, ((key: string) => key) as any, ((k: number, index: any) => { return this.renderOthersProjectsItens(k) }) as any)}
+                ${repeat(Object.keys(this.otherProjects), ((key: string) => key) as any, ((k: number, index: any) => { return this.renderOthersProjectsItens(k) }) as any)}
             </ul>
         </sectionsave>`
     }
 
     renderOthersProjectsItens(project: number) {
         return html`
-        <li style="cursor: not-allowed;opacity: .5;">
-            <div style="cursor: not-allowed;">
-                <span class="fatv fa-caret-righttv" style="cursor: not-allowed;">
+        <li style="cursor: pointer;">
+            <div style="cursor: pointer;">
+                <span @click="${this.openMeList}" class="fatv fa-caret-righttv" style="cursor: pointer;">
                     <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
                 </span>
                 <input type="checkbox" disabled style="cursor: not-allowed;">
-                <label style="cursor: not-allowed;">${project}</label>
+                <label style="cursor: pointer;">${project}</label>
+                
             </div>
+            <ul>
+                    ${repeat(Object.keys(this.otherProjects[project]), ((item: any) => 'other'+project+item) as any, ((i: any, indexI: any) => { return this.renderItensOtherProjects(project, i); }) as any)}
+                </ul>
         </li> `;
+    }
+
+    renderItensOtherProjects(project:number, path:string) {
+        const itens = this.otherProjects[project][path];
+
+        return html`
+        <li style="cursor: pointer;">
+            <div style="cursor: pointer;">
+                <span @click="${this.openMeList}" class="fatv fa-caret-righttv" style="cursor: pointer;">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
+                </span>
+                <input type="checkbox" disabled style="cursor: not-allowed;">
+                <label style="cursor: pointer;">${path}</label>
+                
+            </div>
+            <ul>
+                ${repeat(itens, ((item: any) => 'other'+project+path+item) as any, ((i: any, indexI: any) => { return html`<li><div><span></span><input type="checkbox" disabled style="cursor: not-allowed;">
+                <label style="cursor: pointer;">${i}</label></div></li>` }) as any)}
+            </ul>
+        </li> 
+        `
+
+
+
     }
 
     renderItens() {
@@ -403,6 +432,7 @@ export class ServiceSave extends ServiceBase {
 
     renderItem(item: Iitem, indexP: number, indexL: number, indexM: number, index: number, forceError: boolean) {
 
+        const extension = item.text.split('.').pop();
         return html`
             <li style="padding-left: 1.1rem;" class="${item.errorLocal ? 'errorLocal' : ''}">
                 <div style="align-items: center;">
@@ -410,8 +440,8 @@ export class ServiceSave extends ServiceBase {
                 ? html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
                 : html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
             }
-                    <label for= "l3-${indexP}-${indexL}-${indexM}-${index}" >
-                        ${item.text}
+                    <label for= "l3-${indexP}-${indexL}-${indexM}-${index}" data-tooltip="${item.text}" title="${item.text}">
+                        .${extension}
                         ${unsafeHTML(item.span)}
                     </label>
                     ${this.renderAuxActionsItem(item)}
@@ -483,7 +513,7 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
-    private filterOtherProject() {
+    /*private filterOtherProject() {
         const find = (f: number | undefined) => {
             let i = -1;
             this.otherProjects.forEach((prj, idx) => {
@@ -495,7 +525,7 @@ export class ServiceSave extends ServiceBase {
         if (f >= 0) this.otherProjects.splice(f, 1);
         f = find(0);
         if (f >= 0) this.otherProjects.splice(f, 1);
-    }
+    }*/
 
     private async init(isSetInfoProject: boolean = true) {
         this.showLoader(true);
@@ -550,7 +580,8 @@ export class ServiceSave extends ServiceBase {
 
             const objProjects: any = {};
             const filesKeys = Object.keys(mls.stor.files);
-            this.otherProjects = await mls.stor.localDB.getAllProjects();
+            //this.otherProjects = await mls.stor.localDB.getAllProjects();
+            this.otherProjects = await this.getOtherProjects();
 
             for (const fKey of filesKeys) {
                 const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
@@ -579,6 +610,37 @@ export class ServiceSave extends ServiceBase {
             this.error = e.message;
             this.setError(e.message);
         }
+    }
+
+    private async getOtherProjects() {
+
+        let dt = await mls.stor.localDB.getKeysWithPrefix('File_');
+        dt = dt.filter((t) => t.indexOf(`_${mls.actualProject}_`) < 0);
+
+        const info:any = {};
+
+        dt.forEach((i) => {
+
+            const file = mls.stor.localDB.parseKeyToFile(i);
+            const name = `${file.folder ? file.folder + '/' : ''}${file.shortName}`
+            if (info[file.project]) {
+
+                if (info[file.project][name]) {
+                    info[file.project][name].push(file.extension);
+                } else {
+                    info[file.project][name] = [file.extension];
+                }
+                
+            } else {
+
+                info[file.project] = {[name]: [file.extension]}
+                
+            }
+
+        });
+
+        return info;
+
     }
 
     private setProjectLevelShortName(obj: any, prj: number, level: number, folder: string, shortname: string): any[] {
