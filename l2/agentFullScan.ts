@@ -1,7 +1,7 @@
 /// <mls shortName="agentFullScan" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { IAgent } from '/_100554_/l2/aiAgentBase.js';
-import { preferModelType, getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 import {
     getNextPendingStepByAgentName, getNextInProgressStepByAgentName, updateStepStatus, getNextPendentStep, updateTaskTitle, calculateStepsStatistics,
 } from "/_100554_/l2/aiAgentHelper.js";
