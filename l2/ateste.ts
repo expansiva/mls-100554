@@ -4,11 +4,11 @@ import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
-import { createModel } from '/_100554_/l2/collabLibModel.js'
+import { createModel } from '/_100554_/l2/collabLibModel.js' 
  
 @customElement('ateste-100554')
 export class SimpleGreeting extends CollabLitElement {
-
+  //test
   @query('#teste') teste: HTMLTextAreaElement | undefined;
   @state() list: string[] = []
   @state() current = 0;
