@@ -447,7 +447,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
                         context2: JSON.stringify(allSteps2[allSteps2.length - 1]),
                     };
 
-                    this.result = await this._callAgent('_100554_agentJudge', JSON.stringify(obj), '');
+                    this.result = await this._callAgent('_100554_/l2/agentJudge', JSON.stringify(obj), '');
 
 
                 } else {
