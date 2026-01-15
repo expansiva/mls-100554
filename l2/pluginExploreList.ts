@@ -9,11 +9,6 @@ import { createAllModels, createModel, readProjectTypescriptAndCompile, readProj
 import { ServiceBase } from '/_100554_/l2/serviceBase.js';
 import { isNameValid } from '/_100554_/l2/libCommom.js';
 
-import '/_100554_/l2/pluginExploreListAddL1.js';
-import '/_100554_/l2/pluginExploreListAddL2.js';
-import '/_100554_/l2/pluginExploreListAddL3.js';
-import '/_100554_/l2/pluginExploreListAddL4.js';
-
 /// **collab_i18n_start**
 
 const message_pt = {
@@ -130,26 +125,25 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
     private async showAdd() {
+        this.inFilter = false;
         switch (mls.actualLevel) {
             case (1):
+                await import('/_100554_/l2/pluginExploreListAddL1.js');
                 this.mode = 'addL1';
                 break;
             case (2):
-                this.addModeL2();
+                await import('/_100554_/l2/pluginExploreListAddL2.js');
+                this.mode = 'addL2';
                 break;
             case (3):
+                await import('/_100554_/l2/pluginExploreListAddL3.js');
                 this.mode = 'addL3';
                 break;
             case (4):
+                await import('/_100554_/l2/pluginExploreListAddL4.js');
                 this.mode = 'addL4';
                 break;
         }
-    }
-
-    private async addModeL2() {
-        //await import('/_100554_/l2/serviceListFilesAdd.js');
-        this.inFilter = false;
-        this.mode = 'addL2';
     }
 
     private filesInLocal: mls.stor.IFileInfo[] = [];
@@ -668,11 +662,11 @@ export class PluginExploreList extends PluginBaseModule {
             return;
         }
 
-        if (['project', 'designSystem'].includes(mfile.shortName) && mfile.folder === '' ) {
+        if (['project', 'designSystem'].includes(mfile.shortName) && mfile.folder === '') {
             this.showError(`This file cannot be renamed.`);
             return;
         }
-    
+
         spanFileName.setAttribute('contentEditable', 'true');
 
         const oldValue = spanFileName.innerText;
