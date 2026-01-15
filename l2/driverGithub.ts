@@ -749,7 +749,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 						repo: info.repo,
 						branch: info.branch,
 						path: task.path,
-						message: coments
+						message: `delete: ${task.path}`//coments
 					});
 				}
 
@@ -770,7 +770,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					branch: info.branch,
 					path: task.path,
 					content: cont,
-					message: coments,
+					message: `save: ${task.path}`,//coments,
 					file: task.originalFile
 				});
 			};
