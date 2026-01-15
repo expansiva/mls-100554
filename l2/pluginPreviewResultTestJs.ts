@@ -48,10 +48,10 @@ export class PluginPreviewResultJs extends PluginBaseModule {
         this.createEditor();
         const actualFile = (mls.actual[2] as any).left;
         if (!actualFile) return;
-        const { project, shortName } = actualFile;
-        this.setInitialModelProdTestJS(project, shortName, 'compiling...');
-        await this.getCompileResults(project, shortName);
-        this.setInitialModelProdTestJS(project, shortName, this.results.prodJS);
+        const { project, shortName, folder } = actualFile;
+        this.setInitialModelProdTestJS(project, shortName, folder, 'compiling...');
+        await this.getCompileResults(project, shortName, folder);
+        this.setInitialModelProdTestJS(project, shortName, folder, this.results.prodJS);
 
     }
 
@@ -71,9 +71,9 @@ export class PluginPreviewResultJs extends PluginBaseModule {
         this.editor.mlsEditor = this._ed1;
     }
 
-    private async getCompileResults(project: number, shortName: string): Promise<void> {
-
-        const models = mls.editor.models[`_${project}_${shortName}`]
+    private async getCompileResults(project: number, shortName: string, folder: string): Promise<void> {
+        const models = mls.editor.getModels(project, shortName, folder, 2);
+        // const models = mls.editor.models[`_${project}_${shortName}`]
         if (!models || !models.test) return;
         if (models.test.compilerResults && !models.test.compilerResults.prodJS) models.test.compilerResults.modelNeedCompile = true;
         await mls.l2.typescript.compile(models.test);
@@ -89,8 +89,8 @@ export class PluginPreviewResultJs extends PluginBaseModule {
 
     }
 
-    private setInitialModelProdTestJS(project: number, shortName: string, src: string) {
-        const model1 = this.createOrGetModel(project, shortName, 'javascript', src);
+    private setInitialModelProdTestJS(project: number, shortName: string, folder: string, src: string) {
+        const model1 = this.createOrGetModel(project, shortName, folder, 'javascript', src);
         if (!model1) return;
         if (this._ed1) this._ed1.setModel(model1);
     }
@@ -99,8 +99,9 @@ export class PluginPreviewResultJs extends PluginBaseModule {
         return monaco.Uri.parse(`file://server/${shortFN}_results_test_js.ts`);
     }
 
-    private createOrGetModel(project: number, shortName: string, editorType: string, src: string): monaco.editor.ITextModel {
-        const uri = this.getUri(`_${project}_${shortName}`);
+    private createOrGetModel(project: number, shortName: string, folder: string, editorType: string, src: string): monaco.editor.ITextModel {
+        let name = folder ? `_${project}_${folder}_${shortName}` : `_${project}_${shortName}`;
+        const uri = this.getUri(name);
         let modelResultJS = monaco.editor.getModel(uri);
         if (modelResultJS) {
             modelResultJS.setValue(src);
