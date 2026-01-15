@@ -412,6 +412,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         if (!item.doSelect) return;
         this.setProjectActual(item.project);
         this.setOrgActual(item.project);
+        this.addOnHistory(item);
         window.location.reload();
 
         // this._fireEventProjectSelected(item.project);
