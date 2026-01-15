@@ -32,6 +32,9 @@ export function createAgent(): IAgent {
         async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
             return _afterPrompt(context);
         },
+        async replayForSupport(context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> {
+            return _replayForSupport(context, payload);
+        }
     }
 };
 
@@ -102,6 +105,11 @@ const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> =>
     context.task = await updateTaskTitle(context.task, "Widget fixed");
     await executeNextStep(context);
 
+}
+
+const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> => {
+    console.info('_replayForSupport');
+    return;
 }
 
 function consistDataParams(data: IDataPrompt): IDataPrompt {
@@ -496,7 +504,7 @@ async function updateFile(context: mls.msg.ExecutionContext) {
 
     if (!context || !context.task) throw new Error('Not found context to updateFile');
     const step = getNextFlexiblePendingStep(context.task);
-    
+
     if (!step || step.type !== 'flexible') throw new Error('Invalid step in updateFile');
     const result: IDataResult = step.result;
 
