@@ -95,6 +95,7 @@ export class ServiceSave extends ServiceBase {
         super();
         readProjectTypescriptAndCompile(mls.actualProject as number, '', true);
         this.setEvents();
+        this.setError('');
     }
 
     //---------SERVICE-------------
@@ -484,11 +485,13 @@ export class ServiceSave extends ServiceBase {
 
             if (!(el as any).item) return;
 
-            this.showLoader(true);
+            mls.events.fire([5], 'HistoriesSelected' as mls.events.TypeEvent, JSON.stringify({action:"loader",position: 'left',}), 0);
+
+            //this.showLoader(true);
             const f = ((el as any).item.file as mls.stor.IFileInfo);
             const h = await f.getHistory();
             if (!h || h.length <= 0) {
-                this.showLoader(false);
+                //this.showLoader(false);
                 return;
             }
 
@@ -504,10 +507,10 @@ export class ServiceSave extends ServiceBase {
                 renderSideBySide: true,
             }
             mls.events.fire([5], 'HistoriesSelected' as mls.events.TypeEvent, JSON.stringify(obj), 0);
-            this.showLoader(false);
+            //this.showLoader(false);
 
         } catch (err: any) {
-            this.showLoader(false);
+            //this.showLoader(false);
             this.setError(err.message);
 
         }

@@ -125,36 +125,42 @@ export class ServiceHistories100554 extends ServiceBase {
             '.less': 'less',
         }
 
-
-        const key = mls.stor.getKeyToFiles(params.project, params.level, params.shortName, params.folder, params.extension);
-        const storFile = mls.stor.files[key];
-        if (!storFile) {
-            this.loading = false;
-            return;
-        }
-        this.fileInfo = storFile;
-        this.hashModified = params.hashModified;
-        this.hashOriginal = params.hashOriginal;
-
-        this.renderSideBySide = false;
-
-        let src2: string = '';
-        if (this.hashModified === 'local') {
-            const info = this.fileInfo.getValueInfo ? await this.fileInfo.getValueInfo() : undefined;
-            src2 = info && info.content ? info.content as string : (await this.fileInfo.getContent()) as string;
+        if (params.action) {
+            this.setInitialHistories('loading...', 'loading...', 'typescript');
         } else {
-            src2 = this.hashModified ? await this.getHistories(this.hashModified) : '';
+
+            const key = mls.stor.getKeyToFiles(params.project, params.level, params.shortName, params.folder, params.extension);
+            const storFile = mls.stor.files[key];
+            if (!storFile) {
+                this.loading = false;
+                return;
+            }
+            this.fileInfo = storFile;
+            this.hashModified = params.hashModified;
+            this.hashOriginal = params.hashOriginal;
+
+            this.renderSideBySide = false;
+
+            let src2: string = '';
+            if (this.hashModified === 'local') {
+                const info = this.fileInfo.getValueInfo ? await this.fileInfo.getValueInfo() : undefined;
+                src2 = info && info.content ? info.content as string : (await this.fileInfo.getContent()) as string;
+            } else {
+                src2 = this.hashModified ? await this.getHistories(this.hashModified) : '';
+            }
+
+            const src1 = this.hashOriginal ? await this.getHistories(this.hashOriginal) : '';
+            this.setInitialHistories(src1, src2, editorType[params.extension]);
+
         }
 
-        const src1 = this.hashOriginal ? await this.getHistories(this.hashOriginal) : '';
-        this.setInitialHistories(src1, src2, editorType[params.extension]);
         this.updateEditor();
         this.setMsizeEditor();
         this.loading = false;
 
     }
 
-    private showSideBySide(show:boolean) {
+    private showSideBySide(show: boolean) {
         this.renderSideBySide = show;
         this.updateEditor();
         return true;
@@ -271,5 +277,6 @@ interface IEventParams {
     folder: string,
     hashOriginal: string,
     hashModified: string,
-    renderSideBySide?: boolean
+    renderSideBySide?: boolean,
+    action?: string
 }
