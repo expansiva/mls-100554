@@ -442,7 +442,7 @@ export class ServiceSave extends ServiceBase {
                 : html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
             }
                     <label for= "l3-${indexP}-${indexL}-${indexM}-${index}" data-tooltip="${item.text}" title="${item.text}">
-                        .${extension}
+                        ${item.file.extension} 
                         ${unsafeHTML(item.span)}
                     </label>
                     ${this.renderAuxActionsItem(item)}
