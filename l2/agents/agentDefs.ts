@@ -1,11 +1,9 @@
-/// <mls shortName="agentDefs" project="100554" enhancement="_blank" folder="agents" />
+/// <mls shortName="agentDefs" project="100554" enhancement="_100554_enhancementAgent" folder="agents" />
 
-
-import { IAgentAsync, svg_agent, AgentIntent } from '/_100554_/l2/aiAgentBase.js';
+import { IAgentAsync, IAgentMeta, svg_agent } from '/_100554_/l2/aiAgentBase.js';
 import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
 import { getState } from '/_100554_/l2/collabState.js';
 import { createAllModels } from '/_100554_/l2/collabLibModel.js';
-
 
 import {
   getNextPendingStepByAgentName,
@@ -18,89 +16,86 @@ import {
 
 import {
   startNewInteractionInAiTask,
-  startNewAiTaskAsync, 
+  startNewAiTaskAsync,
   executeNextStep
 } from "/_100554_/l2/aiAgentOrchestration.js";
 import { getSource, getPromptByTS } from '/_100554_/l2/aiPrompts.js'
 
-
-const agentProject = 100554;
-const agentFolder = "agents";
-const agentName = "agentDefs";
-
 export function createAgent(): IAgentAsync {
   return {
-    agentName,
-    agentProject,
-    agentFolder,
-    avatar_url: svg_agent,
+    agentName: "agentDefs",
+    agentProject: 100554,
+    agentFolder: "agents",
     agentDescription: "Create or Update Defs",
     visibility: "public",
-    async beforePromptAtomic(
-      context: mls.msg.ExecutionContext,
-      file: mls.stor.IFileInfo,
-      userPrompt: string
-    ): Promise<AgentIntent[]> {
-      if (userPrompt) throw new Error("[beforePromptAtomic] invalid args: '${userPrompt}'");
-      const source = await getSource(file);
-      if (typeof source !== 'string' || !source) throw new Error(`[beforePromptAtomic] invalid source`)
-
-      const inputs: mls.msg.IAMessageInputType[] = await getPromptByTS({
-        project: agentProject, shortName: agentName, folder: agentFolder, data: {
-          system1, // parse systemPrompt
-          userPrompt: source
-        }
-      });
-
-      await startNewAiTaskAsync(
-        "generating defs...",
-        this,
-        context.message.content,
-        inputs,
-        context);
-
-      return [];
-    },
-    // async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
-    //   // only accept if this agent is the first agent
-    //   try {
-    //     return await initNewTaskFromUserInput(context,
-    //       this, // IAgent
-    //       {
-    //         taskTitle: "generating defs...",
-    //         acceptFreePrompt: false,
-    //         systemForFreePrompt: null,
-    //         commands: [{ commandName: "update", system: system1, human: humanCommandUpdate }], // update all files in project
-    //         jsons: [{ schemeType: 'ref', system: system1 }] // atomic , 1 ref
-    //       }
-    //     );
-    //   } catch (e) {
-    //     console.log("[beforePrompt] error", e);
-    //   }
-    // },
-    // async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
-    //   return _afterPrompt(context);
-    // },
+    beforePromptAtomic,
+    afterPromptStep
   };
 }
 
-const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-  if (!context || !context.message || !context.task) throw new Error("Invalid context");
-  const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-  if (!step) throw new Error(`[${agentName}] afterPrompt: No step for this agent`);
+async function beforePromptAtomic(
+  agent: IAgentMeta,
+  context: mls.msg.ExecutionContext,
+  file: mls.stor.IFileInfo,
+  userPrompt: string,
+): Promise<mls.msg.AgentIntent[]> {
 
-  context = await updateStepStatus(context, step.stepId, "completed");
-  if (!context.task) throw new Error("Invalid context task");
-  const payload = getNextPendentStep(context.task) as mls.msg.AIPayload | null;
-  // context = await updateDefs(context, payload);
-  notifyTaskChange(context);
-  await executeNextStep(context);
+  if (userPrompt) throw new Error(`[beforePromptAtomic] invalid args: '${userPrompt}'`);
+  const source = await getSource(file);
+  if (typeof source !== 'string' || !source) throw new Error(`[beforePromptAtomic] invalid source`)
+
+  // const inputs: mls.msg.IAMessageInputType[] = await getPromptByTS({
+  //   project: agent.agentProject, shortName: agent.agentName, folder: agent.agentFolder, data: {
+  //     system1, // parse systemPrompt
+  //     userPrompt: source
+  //   }
+  // });
+  const inputs: mls.msg.IAMessageInputType[] = [
+    { type: "system", content: system1 },
+    { type: "human", content: source }
+  ]
+
+  // await startNewAiTaskAsync(
+  //   "generating defs...",
+  //   agent,
+  //   context.message.content,
+  //   inputs,
+  //   context);
+
+  const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
+    type: "add-message-ai",
+    request: {
+      action: 'addMessageAI',
+      agentName: agent.agentName,
+      inputAI: inputs,
+      taskTitle: `Generating defs file ${mls.stor.getShortPath(file)}`,
+      threadId: context.message.threadId,
+      userMessage: context.message.content,
+      longTermMemory: {}
+    }
+  }
+  return [addMessageAI];
+
+};
+
+async function afterPromptStep(
+  agent: IAgentMeta,
+  context: mls.msg.ExecutionContext,
+  step: mls.msg.AIAgentStep
+): Promise<mls.msg.AgentIntent[]> {
+  console.log('afterPromptStep ', step)
+  if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid args`);
+  const updateStatus: mls.msg.AgentIntentUpdateStatus = {
+    type: 'update-status',
+    step,
+    status: "completed"
+  };
+  return [updateStatus];
+
 }
 
-export const humanCommandUpdate = ``;
-
-export const system1 = `
-<!-- modelType: codeflash -->
+const system1 = `
+<!-- modelType: code -->
 <!-- modelTypeList: geminiChat, code (grok), deepseekchat, codeflash, deepseekreasoner, mini (4.1) ou nano (openai), codeinstruct -->
 
 You are a Senior Software Engineer at Collab.codes.
