@@ -1623,10 +1623,13 @@ export class ServicePreview100554 extends ServiceBase {
         super.updated(changedProperties);
         const hasMsize = changedProperties.has('msize');
         if (hasMsize) {
-            const msize = changedProperties.get('msize');
+            const msize = this.msize;//changedProperties.get('msize');
             if (!msize || typeof msize !== 'string' || !this.monacoeditor) return;
             this.monacoeditor.setAttribute('msize', msize);
-            if (this.pluginResultJS) this.pluginResultJS.setAttribute('msize', msize);
+            
+            if (this.pluginResultJS) {
+                this.pluginResultJS.setAttribute('msize', msize);
+            }
             if (this.pluginResultTestJS) this.pluginResultTestJS.setAttribute('msize', msize);
         }
     }
