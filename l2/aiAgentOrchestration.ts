@@ -18,7 +18,7 @@ import {
 
 import { collabImport } from '/_100554_/l2/collabImport.js';
 import { getTask, getMessage } from '/_102025_/l2/collabMessagesIndexedDB.js';
-import { IAgent, IAgentAsync, AgentIntent } from '/_100554_/l2/aiAgentBase.js';
+import { IAgent, IAgentAsync } from '/_100554_/l2/aiAgentBase.js';
 import { getUserId } from '/_102025_/l2/collabMessagesHelper.js';
 import { loadModuleFromProjectOrDependency } from '/_100554_/l2/libCommom.js';
 
@@ -373,8 +373,8 @@ export async function executeBeforePrompt(agent: IAgent | IAgentAsync, context: 
         // no args
         if (mls.isTraceAgent) console.log(`[executeBeforePrompt] isImpricit=${!content}`)
         if (!content) {
-            const intents = await agent.beforePromptImplicit(context);
-            return processIntents(intents);
+            const intents = await agent.beforePromptImplicit(agent, context);
+            return await processIntents(agent, context, intents);
         }
     }
     if (agent.beforePromptAtomic) {
@@ -383,27 +383,45 @@ export async function executeBeforePrompt(agent: IAgent | IAgentAsync, context: 
         const file = mls.stor.getFileStorFromJson(jsonText, {});
         if (mls.isTraceAgent) console.log(`[executeBeforePrompt] isAtomic=${file ? "yes:" + JSON.stringify(file) : "no"}, userPromptAfterJson:${rest}`)
         if (file) {
-            const intents = await agent.beforePromptAtomic(context, file, rest);
-            return processIntents(intents);
+            const intents = await agent.beforePromptAtomic(agent, context, file, rest);
+            return await processIntents(agent, context, intents);
         }
     }
     throw new Error(`Invalid agent ${agent.agentName}, no beforePrompt`);
 }
 
 function splitJsonAndText(input: string): { jsonText: string; rest: string } {
-  const start = input.indexOf("{");
-  const end = input.indexOf("}");
+    const start = input.indexOf("{");
+    const end = input.indexOf("}");
 
-  if (start === -1 || end === -1 || end < start) return { jsonText: input, rest: ""};
+    if (start === -1 || end === -1 || end < start) return { jsonText: input, rest: "" };
 
-  const jsonText = input.slice(start, end + 1).trim();
-  const rest = input.slice(end + 1).trim();
+    const jsonText = input.slice(start, end + 1).trim();
+    const rest = input.slice(end + 1).trim();
 
-  return { jsonText, rest };
+    return { jsonText, rest };
 }
 
-async function processIntents(intents: AgentIntent[]): Promise<void> {
-    throw new Error('not implemented processIntents');
+async function processIntents(agent: IAgentAsync, context: mls.msg.ExecutionContext, intents: mls.msg.AgentIntent[]): Promise<void> {
+
+    const oldContextCreateAt = context.message.createAt;
+    const value = await mls.api.msgApplyIntents({
+        userId: context.message.senderId,
+        intents
+    });
+    if (!value) throw new Error(`[${agentName}](startNewAiTask) Error on return msgApplyIntents`);
+    if (value.statusCode !== 200) throw new Error(`[${agentName}](startNewAiTask) Error on msgApplyIntents: ${value.msg || ''})`);
+    const ret = value as mls.msg.ResponseApplyIntents;
+
+    context.task = ret.task;
+    if (ret.message) context.message = ret.message;
+    notifyTaskChange(context, oldContextCreateAt);
+
+    console.log('[processIntents] resp from processIntents:', ret)
+    const hooks = context.task.iaCompressed?.queueFrontEnd;
+    if (!hooks) return;
+    console.log('[processIntents] hooks:', hooks);
+    throw new Error('not implemented processIntents process hooks');
 }
 
 async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep, functionName: string, stepId: number, args?: object): Promise<any> {
@@ -520,8 +538,7 @@ export async function postBackClarification(
         });
 
         ret.context.task = resp.task;
-        await notifyTaskChange(ret.context);
-
+        notifyTaskChange(ret.context);
         dispatchDetailsTaskClose(taskId);
         return;
     }
@@ -683,10 +700,10 @@ async function getAgentInstanceByName(agentNameOrPath: string): Promise<IAgent |
         let foundInFolder: mls.stor.IFileInfo | undefined;
 
         for (const file of Object.values(mls.stor.files)) {
-            if (file.project !== projectId 
-              || file.extension !== ".ts"
-              || !file.shortName.startsWith('agent') 
-              || file.shortName !== fileInfo.shortName) continue;
+            if (file.project !== projectId
+                || file.extension !== ".ts"
+                || !file.shortName.startsWith('agent')
+                || file.shortName !== fileInfo.shortName) continue;
             if (file.folder === '' || file.folder === fileInfo.folder) {
                 return file;
             }
