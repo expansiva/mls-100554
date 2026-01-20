@@ -1,9 +1,8 @@
 /// <mls shortName="collabPageElement" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, PropertyValueMap } from 'lit';
+import { html, PropertyValueMap, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { IICADepths, IcaLitElementBaseMethods } from '/_100554_/l2/icaTypes.js'
 import { convertTagToFileName } from '/_100554_/l2/utilsLit.js'
 
 export const PREFIX_ICA_ID = 'ica_';
@@ -138,8 +137,8 @@ export abstract class CollabPageElement extends StateLitElement {
 
     }
 
-    private findAllElementsIca(el: HTMLElement): IICADepths[] {
-        let elements: IICADepths[] = [];
+    private findAllElementsIca(el: HTMLElement): ElDepths[] {
+        let elements: ElDepths[] = [];
         let elToSearch: Element | ShadowRoot = el;
 
         const arrayEls: HTMLElement[] = [];
@@ -148,7 +147,7 @@ export abstract class CollabPageElement extends StateLitElement {
 
             if (element.getAttribute('mls_origin') && !arrayEls.includes(element)) {
                 const { x, y, height, width } = element.getBoundingClientRect();
-                elements.push({ element: element as IcaLitElementBaseMethods, depth, x, y, height, width, opacity: element.style.opacity });
+                elements.push({ element: element as LitElementBaseMethods, depth, x, y, height, width, opacity: element.style.opacity });
                 arrayEls.push(element);
                 return;
             }
@@ -176,5 +175,38 @@ export abstract class CollabPageElement extends StateLitElement {
 
     }
 
+}
+
+interface ElDepths {
+    element: LitElementBaseMethods,
+    depth: number,
+    x: number,
+    y: number,
+    height: number,
+    width: number,
+    opacity: string,
+}
+
+export interface LitElementBaseMethods extends LitElement {
+    level: '1' | '2' | '3' | '4' | '5' | '6' | '7' | undefined;
+    globalVariation: number | undefined;
+    //widget: string | undefined;
+    baseName: string;
+    overlayRef: HTMLElement | undefined;
+    mySymbol: string;
+    getActionsTags(): ActionTag[];
+}
+
+interface ActionTag {
+    name: string; // tag name or component name
+    position?: 'p-l0' | 'p-l1' | 'p-l2' | 'p-l3' | 'p-l4' | 'p-m0' | 'p-m1' | 'p-m2' | 'p-m3' | 'p-m4' | 'p-r0' | 'p-r1' | 'p-r2' | 'p-r3' | 'p-r4' | 'p-title' | 'p-title-top' | '' ; // suggestion of position, WCD will define
+    args?: string; // optional args string, can be a JSON string
+    level?: number[]; // levels where this will be visible
+    toolboxOptions?: IToolboxOptions
+}
+
+export interface IToolboxOptions {
+    background?: string,
+    border?: string,
 }
 
