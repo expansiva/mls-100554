@@ -1,25 +1,7 @@
 /// <mls shortName="agentDefs" project="100554" enhancement="_100554_enhancementAgent" folder="agents" />
 
-import { IAgentAsync, IAgentMeta, svg_agent } from '/_100554_/l2/aiAgentBase.js';
-import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
-import { getState } from '/_100554_/l2/collabState.js';
-import { createAllModels } from '/_100554_/l2/collabLibModel.js';
-
-import {
-  getNextPendingStepByAgentName,
-  getNextInProgressStepByAgentName,
-  updateStepStatus,
-  getNextPendentStep,
-  updateTaskTitle,
-  notifyTaskChange
-} from "/_100554_/l2/aiAgentHelper.js";
-
-import {
-  startNewInteractionInAiTask,
-  startNewAiTaskAsync,
-  executeNextStep
-} from "/_100554_/l2/aiAgentOrchestration.js";
-import { getSource, getPromptByTS } from '/_100554_/l2/aiPrompts.js'
+import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
+import { getSource } from '/_100554_/l2/aiPrompts.js'
 
 export function createAgent(): IAgentAsync {
   return {
@@ -29,6 +11,8 @@ export function createAgent(): IAgentAsync {
     agentDescription: "Create or Update Defs",
     visibility: "public",
     beforePromptAtomic,
+    beforePromptImplicit,
+    beforePromptStep,
     afterPromptStep
   };
 }
@@ -40,27 +24,14 @@ async function beforePromptAtomic(
   userPrompt: string,
 ): Promise<mls.msg.AgentIntent[]> {
 
-  if (userPrompt) throw new Error(`[beforePromptAtomic] invalid args: '${userPrompt}'`);
-  const source = await getSource(file);
+  if (!userPrompt) throw new Error(`[beforePromptAtomic] invalid args: '${userPrompt}'`);
+  const source = (await file.getContent()) as string | null;
   if (typeof source !== 'string' || !source) throw new Error(`[beforePromptAtomic] invalid source`)
 
-  // const inputs: mls.msg.IAMessageInputType[] = await getPromptByTS({
-  //   project: agent.agentProject, shortName: agent.agentName, folder: agent.agentFolder, data: {
-  //     system1, // parse systemPrompt
-  //     userPrompt: source
-  //   }
-  // });
   const inputs: mls.msg.IAMessageInputType[] = [
     { type: "system", content: system1 },
     { type: "human", content: source }
   ]
-
-  // await startNewAiTaskAsync(
-  //   "generating defs...",
-  //   agent,
-  //   context.message.content,
-  //   inputs,
-  //   context);
 
   const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
     type: "add-message-ai",
@@ -78,12 +49,76 @@ async function beforePromptAtomic(
 
 };
 
+async function beforePromptImplicit(
+  agent: IAgentMeta,
+  context: mls.msg.ExecutionContext,
+  userPrompt: string,
+): Promise<mls.msg.AgentIntent[]> {
+
+  if (userPrompt !== "update") throw new Error(`[afterPromptImplicit] Use one of this commands: "update"`)
+
+  const paths: string[] = mls.stor.findFilesNeedingDefsUpdate({ project: mls.actualProject || 0, level: 2 })
+    .map(f => mls.stor.getKeyToFile(f))
+    .filter(Boolean)
+    .slice(0, 5); // only 5 first, test
+
+  const inputs: mls.msg.IAMessageInputType[] = [
+    { type: "system", content: system1 },
+  ];
+
+  const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
+    type: "add-message-ai",
+    request: {
+      action: 'addMessageAI',
+      agentName: agent.agentName,
+      inputAI: inputs,
+      taskTitle: `Generating defs for ${paths.length} files`,
+      threadId: context.message.threadId,
+      userMessage: context.message.content,
+      longTermMemory: {},
+    },
+    executionMode: {
+      type: 'parallel',
+      args: paths
+    }
+  };
+  return [addMessageAI];
+
+}
+
+async function beforePromptStep(
+  agent: IAgentMeta,
+  context: mls.msg.ExecutionContext,
+  parentStep: mls.msg.AIAgentStep,
+  step: mls.msg.AIAgentStep, 
+  hookSequential: number,
+  args?: string
+): Promise<mls.msg.AgentIntent[]> {
+  if (!args) throw new Error(`[beforePromptStep] args invalid`)
+  const file = mls.stor.files[args];
+  if (!file) throw new Error(`[beforePromptStep] invalid args, file dont exists: ${args}`)
+  const source = (await file.getContent()) as string | null;
+  if (typeof source !== 'string' || !source) throw new Error(`[beforePromptAtomic] invalid source`)
+
+  const continueParallel: mls.msg.AgentIntentContinueParallelStep = {
+    type: "continue-parallel-step",
+    args,
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    hookSequential,
+    parentStepId: parentStep.stepId,
+    humanPrompt: source
+  }
+  return [continueParallel];
+
+}
+
 async function afterPromptStep(
   agent: IAgentMeta,
   context: mls.msg.ExecutionContext,
   step: mls.msg.AIAgentStep
 ): Promise<mls.msg.AgentIntent[]> {
-  console.log('afterPromptStep ', step)
   if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid args`);
   const updateStatus: mls.msg.AgentIntentUpdateStatus = {
     type: 'update-status',

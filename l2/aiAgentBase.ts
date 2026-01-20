@@ -85,15 +85,25 @@ export type IAgentLifecycleHooks = {
     userPrompt: string
   ): Promise<mls.msg.AgentIntent[]>
 
-  /**
-   * Called when the agent is invoked without an explicit user prompt
-   * (e.g. a command-style invocation like "@@agentFix").
-   *
-   * This starts a new task with an implicit intent.
-   */
+/**
+ * Called when the agent is invoked without a free-form user prompt.
+ *
+ * The user may optionally provide a command or parameters as part of the
+ * agent invocation (e.g. "@@agentFix", "@@agentFix security").
+ *
+ * In this mode, the agent does not receive an explicit descriptive prompt.
+ * Instead, the system infers the initial intent based on:
+ * - the agent name
+ * - optional command or parameters
+ * - the current execution context
+ *
+ * This hook is responsible for creating a new task and returning the
+ * initial orchestration intents.
+ */
   beforePromptImplicit?(
     agent: IAgentMeta,
     context: mls.msg.ExecutionContext,
+    userPrompt: string
   ): Promise<mls.msg.AgentIntent[]>
 
   /**
@@ -110,7 +120,10 @@ export type IAgentLifecycleHooks = {
   beforePromptStep?(
     agent: IAgentMeta,
     context: mls.msg.ExecutionContext,
-    step: mls.msg.AIAgentStep
+    parentStep: mls.msg.AIAgentStep,
+    step: mls.msg.AIAgentStep,
+    hookSequential: number,
+    args?: string
   ): Promise<mls.msg.AgentIntent[]>
 
   /**
