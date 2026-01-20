@@ -1,7 +1,6 @@
 /// <mls shortName="aiPrompts" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { ITool, IAgent } from '/_100554_/l2/aiAgentBase.js'
-import { descriptionForPrompt } from '/_100554_/l2/icaBaseDescription.js'
 import { getTokensLess } from '/_100554_/l2/designSystemBase.js';
 import { getState, setState } from '/_100554_/l2/collabState.js';
 
@@ -147,13 +146,6 @@ function getDefTool(tool: ITool): string {
         .join(', ');
 
     return `${tool.toolName}: ${tool.description} (args: ${argsList})`;
-}
-
-export function systemComponentsInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `${descriptionForPrompt}`
-    }
 }
 
 export async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageInputType> {
