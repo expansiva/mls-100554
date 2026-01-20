@@ -169,64 +169,6 @@ export const getTemporaryContext = (threadId: string, userId: string, prompt: st
   return context;
 };
 
-export function safeParseArgs(args: string): Record<string, any> {
-  // must accept entries like
-  // { a: 5, b: 4 }
-  // a:5,b:4
-  // a=5, b=4
-  if (!args) throw new Error("No args provided");
-
-  let input = args.trim();
-
-  if (input.startsWith("{")) {
-    try {
-      return JSON.parse(input);
-    } catch (e) {
-      throw new Error("Invalid JSON format");
-    }
-  }
-
-  if (input.includes("=") && !input.includes(":")) {
-    input = input.replace(/([a-zA-Z0-9_]+)\s*=/g, '"$1":');
-  } else {
-    input = input.replace(/(^|,)\s*([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
-  }
-
-  if (!input.startsWith("{")) {
-    input = `{${input}}`;
-  }
-
-  try {
-    return JSON.parse(input);
-  } catch (e) {
-    throw new Error("Invalid args format, cannot parse.");
-  }
-}
-
-export function argsValidator(
-  args: Record<string, any>,
-  schema: Record<string, { type: string, description?: string; optional?: boolean }>
-): void {
-  for (const key in schema) {
-    const isOptional = schema[key].optional === true;
-
-    if (!(key in args)) {
-      if (!isOptional) {
-        throw new Error(`Missing argument: ${key}`);
-      }
-      continue; // ok se for opcional
-    }
-
-    const expectedType = schema[key].type;
-    let actualType: string = typeof args[key];
-    actualType = actualType === 'object' ? (Array.isArray(args[key]) ? 'array' : 'object') : actualType
-
-    if (expectedType !== actualType) {
-      throw new Error(`Invalid type for argument '${key}': expected '${expectedType}', got '${actualType}'`);
-    }
-  }
-}
-
 export async function appendLongTermMemory(context: mls.msg.ExecutionContext, longTermMemory: Record<string, string>) {
   if (!context.task) throw new Error('[appendLongTermMemory] invalid task');
   const messageId: string | undefined = context.task.messageid_created;
