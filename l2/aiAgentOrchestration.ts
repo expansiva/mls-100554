@@ -1,13 +1,11 @@
 /// <mls shortName="aiAgentOrchestration" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import {
-    argsValidator,
     calculateStepsByFilter,
     updateStepStatus,
     calculateStepsStatistics,
     getInteractionStepId,
     getNextPendentStep,
-    safeParseArgs,
     appendLongTermMemory,
     getStepById,
     notifyTaskChange,
@@ -17,7 +15,7 @@ import {
 } from "/_100554_/l2/aiAgentHelper.js";
 
 import { collabImport } from '/_100554_/l2/collabImport.js';
-import { getTask, getMessage } from '/_102025_/l2/collabMessagesIndexedDB.js';
+import { getTask, getMessage, addOrUpdateTask } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { IAgent, IAgentAsync } from '/_100554_/l2/aiAgentBase.js';
 import { getUserId } from '/_102025_/l2/collabMessagesHelper.js';
 import { loadModuleFromProjectOrDependency } from '/_100554_/l2/libCommom.js';
@@ -303,11 +301,11 @@ export async function executeTool(toolName: string, args: string): Promise<IExec
         const tool = await loadTool(toolName);
         if (!args) {
             // no args provided
-            argsValidator({}, tool.argsSchema);
+            mls.common.argsValidator({}, tool.argsSchema);
             rc.result = await tool.execute();
         } else {
-            const parsedArgs = safeParseArgs(args);
-            argsValidator(parsedArgs, tool.argsSchema);
+            const parsedArgs = mls.common.safeParseArgs(args);
+            mls.common.argsValidator(parsedArgs, tool.argsSchema);
             rc.result = await tool.execute(parsedArgs);
         }
         rc.status = true;
@@ -361,22 +359,12 @@ export async function loadTool(shortName: string): Promise<any | undefined> {
 
 export async function executeBeforePrompt(agent: IAgent | IAgentAsync, context: mls.msg.ExecutionContext): Promise<void> {
     // execute one of this: beforePrompt, beforePromptAtomic, beforePromptImplicit
-    if ((agent as IAgent).beforePrompt) {
-        return await (agent as IAgent).beforePrompt(context);
-    }
+    if ((agent as IAgent).beforePrompt) return await (agent as IAgent).beforePrompt(context);
     agent = agent as IAgentAsync;
     let content = context.message.content;
     if (content.startsWith("@@")) content = content.split(" ").slice(1).join(" ").trim(); // remove agent name
     if (mls.isTraceAgent) console.log(`[executeBeforePrompt] content:"${content}"`)
 
-    if (agent.beforePromptImplicit) {
-        // no args
-        if (mls.isTraceAgent) console.log(`[executeBeforePrompt] isImpricit=${!content}`)
-        if (!content) {
-            const intents = await agent.beforePromptImplicit(agent, context);
-            return await processIntents(agent, context, intents);
-        }
-    }
     if (agent.beforePromptAtomic) {
         // file ref
         const { jsonText, rest } = splitJsonAndText(content)
@@ -386,6 +374,12 @@ export async function executeBeforePrompt(agent: IAgent | IAgentAsync, context: 
             const intents = await agent.beforePromptAtomic(agent, context, file, rest);
             return await processIntents(agent, context, intents);
         }
+    }
+    if (agent.beforePromptImplicit) {
+        // no structured args
+        if (mls.isTraceAgent) console.log(`[executeBeforePrompt] implicit`)
+        const intents = await agent.beforePromptImplicit(agent, context, content);
+        return await processIntents(agent, context, intents);
     }
     throw new Error(`Invalid agent ${agent.agentName}, no beforePrompt`);
 }
@@ -403,7 +397,7 @@ function splitJsonAndText(input: string): { jsonText: string; rest: string } {
 }
 
 async function processIntents(agent: IAgentAsync, context: mls.msg.ExecutionContext, intents: mls.msg.AgentIntent[]): Promise<void> {
-
+    if (mls.isTraceAgent) console.log(`[processIntents] intents length: ${intents.length}`);
     const oldContextCreateAt = context.message.createAt;
     const value = await mls.api.msgApplyIntents({
         userId: context.message.senderId,
@@ -416,12 +410,69 @@ async function processIntents(agent: IAgentAsync, context: mls.msg.ExecutionCont
     context.task = ret.task;
     if (ret.message) context.message = ret.message;
     notifyTaskChange(context, oldContextCreateAt);
+    if (!context.task?.iaCompressed) return;
 
-    console.log('[processIntents] resp from processIntents:', ret)
-    const hooks = context.task.iaCompressed?.queueFrontEnd;
-    if (!hooks) return;
-    console.log('[processIntents] hooks:', hooks);
-    throw new Error('not implemented processIntents process hooks');
+    let _hooks = context.task.iaCompressed.queueFrontEnd || [];
+    const hooksToProcess = _hooks
+        .filter(h => h.type !== 'pooling')
+        .slice(0, 5); // max 5 hooks by turn
+    let newIntents: mls.msg.AgentIntent[] = [];
+    for (const hook of hooksToProcess) {
+        newIntents.push(...await processIntents2(agent, context, hook), ...getRemoveIntent(agent, context, hook));
+    }
+    await addOrUpdateTask(context.task); // UI feedback, update task in indexedDB
+    if (newIntents.length < 1) {
+        newIntents = await processHookPooling(agent, context);
+        if (newIntents.length < 1) return; // just leave
+    }
+    processIntents(agent, context, newIntents); // reentrance processIntents, fire and forget to fast UI feedback 
+}
+
+async function processIntents2(agent: IAgentAsync, context: mls.msg.ExecutionContext, hook: mls.msg.AgentHooks): Promise<mls.msg.AgentIntent[]> {
+    try {
+        if (hook.type === "beforePromptStep") return await processHookBeforePromptStep(agent, context, hook);
+        if (hook.type === "afterPromptStep") return await processHookAfterPromptStep(agent, context, hook);
+        throw new Error(`not implemented processIntents process hooks, type:${hook.type}`);
+    } catch (e: any) {
+        console.error(`error processing taskid:${context.task?.PK}, hook:${hook.type}, message:${e.message || e} `)
+        return [];
+    }
+}
+
+async function processHookPooling(agent: IAgentAsync, context: mls.msg.ExecutionContext): Promise<mls.msg.AgentIntentRemoveHook[]> {
+    const hook: mls.msg.AgentHookPooling | undefined = (context.task?.iaCompressed?.queueFrontEnd.find(f => f.type === 'pooling')) as mls.msg.AgentHookPooling;
+    if (!hook || !hook.afterMs || hook.afterMs < 1000) return [];
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(getRemoveIntent(agent, context, hook));
+        }, hook.afterMs);
+    });
+}
+
+function getRemoveIntent(agent: IAgentAsync, context: mls.msg.ExecutionContext, hook: mls.msg.AgentHooks): mls.msg.AgentIntentRemoveHook[] {
+    return [{
+    type: 'remove-hook',
+    hookSequential: hook.hookSequential,
+    threadId: context.message.threadId,
+    messageId: context.message.orderAt,
+    taskId: context.task?.PK || ''
+    }];      
+}
+async function processHookBeforePromptStep(agent: IAgentAsync, context: mls.msg.ExecutionContext, hook: mls.msg.AgentHookBeforePromptStep): Promise<mls.msg.AgentIntent[]> {
+    if (!agent.beforePromptStep) throw new Error(`Agent ${agent.agentName} do not have beforePromptStep`);
+    if (!context.task) throw new Error('[processHookBeforePromptStep] invalid task');
+    const step = getStepById(context.task, hook.stepId) as mls.msg.AIAgentStep;
+    const parentStep = getStepById(context.task, hook.parentStepId) as mls.msg.AIAgentStep;
+    if (!step || !parentStep) throw new Error('[processHookBeforePromptStep] invalid stepId or parentStepId');
+    const rc = await agent.beforePromptStep(agent, context, parentStep, step, hook.hookSequential, hook.args);
+    return rc;
+}
+
+async function processHookAfterPromptStep(agent: IAgentAsync, context: mls.msg.ExecutionContext, hook: mls.msg.AgentHookAfterPromptStep): Promise<mls.msg.AgentIntent[]> {
+    if (!agent.afterPromptStep) throw new Error(`Agent ${agent.agentName} do not have afterPromptStep`);
+    if (!context.task) throw new Error('[processHookBeforePromptStep] invalid task');
+    const step = getStepById(context.task, hook.stepId) as mls.msg.AIAgentStep;
+    return await agent.afterPromptStep(agent, context, step);
 }
 
 async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep, functionName: string, stepId: number, args?: object): Promise<any> {
