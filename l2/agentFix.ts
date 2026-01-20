@@ -13,7 +13,6 @@ import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "/_
 import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
 import { getState, setState } from '/_100554_/l2/collabState.js';
 import { ServiceSource100554 } from '/_100554_/l2/serviceSource.js';
-import { descriptionForPrompt } from "/_100554_/l2/icaBaseDescription.js";
 import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
 import { createAllModels } from '/_100554_/l2/collabLibModel.js';
 
@@ -134,7 +133,6 @@ async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType
     if (data.mode === 'typescript') {
         prompts.push(await systemDefinitionTypescript(data));
         prompts.push(await systemImportsDefinitionTs(data));
-        prompts.push(systemWidgetsDescriptionsInstruction(data));
         prompts.push(await systemDefinitionErrorsTs(data));
     }
 
@@ -372,53 +370,6 @@ async function systemDefinitionErrorsLess(data: IDataPrompt): Promise<mls.msg.IA
         throw new Error(`[${agentName}][systemDefinitionErrorsLess]: ${e.message}`);
     }
 
-}
-
-function systemWidgetsDescriptionsInstruction(data: IDataPrompt): mls.msg.IAMessageInputType {
-
-    const models = getModelByDataPage(data.page)
-    if (!models || !models.ts) throw new Error(`[${agentName}][systemImportsDefinitionTs]: not found models for file:` + data.page);
-    const imports = models.ts.compilerResults?.imports || [];
-
-    const hasBaseIca = imports.find((item) => item.startsWith('./_100554_ica') && item.endsWith('Base'));
-    if (!hasBaseIca) {
-        return {
-            type: 'system',
-            content: ''
-        }
-    }
-
-    const tagWidgetBase = hasBaseIca.replace('./', '').replace('Base', '');
-    const { folder, project, shortName } = mls.l2.getPath(tagWidgetBase);
-    let tag = convertFileNameToTag({ project, shortName, folder });
-    tag = extractBaseComponentName(tag);
-    const content = extractComponentMarkdown(descriptionForPrompt, tag.replace('-100554', ''));
-
-    return {
-        type: 'system',
-        content: `## DEFINIÇÕES DE COMPONENTE ICA
-        
-Em caso de componentes extends Ica.....Base, se necessário analisar o arquivo description abaixo para melhor definir as correções:
-Para definição de qual decorator usar em cada tipo de atributo, levar em consideração:   
-
-- Se necessário fazer o import:  { propertyCompositeDataSource, propertyDataSource } from '/_100554_/l2/collabDecorators.js';
-- @propertyDataSource: Propriedade ligada a um único state dinâmico. Exemplo de binding: "{{page1.name}}".
-- @propertyCompositeDataSource: Propriedade composta por múltiplos states dinâmicos. Exemplo: "Olá {{page1.userId}} - {{page1.userName}}".
-- para atributos na classe 'Text', use '@propertyCompositeDataSource'.
-- para atributos na classe 'Bind', use '@propertyDataSource'.
-- para atributos na classe 'Cfg', use '@propertyDataSource'.
-- Propriedade autofocus deve ser definida conforme lit "@propertyDataSource({{ type: Boolean }}) autofocus: boolean = false;"
-- Propriedade name deve ser definida conforme lit "@propertyCompositeDataSource({{ type: String }}) name: string | undefined;"
-- Atributos A11y (optional): role, ariaLabel, ariaDescribedBy, ariaExpanded, ariaSelected ect. O mesmo deve ser definido da seguinte forma ex: "@propertyDataSource({{ type: String }}) ariaLabel: string = '';"
-- Todo atributo aria é string e não string | undefined, sempre iniciar com '';
-
-Segue as definições do componente baseado na classe extends Ica.....Base :
-
-${content}
-
-
-`
-    }
 }
 
 function systemOutInstruction(): mls.msg.IAMessageInputType {

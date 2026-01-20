@@ -607,10 +607,10 @@ function generateTsOrganism(
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { IcaOrganismBase } from '/_100554_/l2/icaOrganismBase.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 @customElement('${tagName}')
-export class ${shortName} extends IcaOrganismBase {
+export class ${shortName} extends CollabLitElement {
     render(){
         return html\`${doc.body.innerHTML}\`
     }
