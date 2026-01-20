@@ -1,6 +1,7 @@
 /// <mls shortName="aiPrompts" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { ITool, IAgent } from '/_100554_/l2/aiAgentBase.js'
+import { descriptionForPrompt } from '/_100554_/l2/icaBaseDescription.js'
 import { getTokensLess } from '/_100554_/l2/designSystemBase.js';
 import { getState, setState } from '/_100554_/l2/collabState.js';
 
@@ -148,6 +149,13 @@ function getDefTool(tool: ITool): string {
     return `${tool.toolName}: ${tool.description} (args: ${argsList})`;
 }
 
+export function systemComponentsInstruction(): mls.msg.IAMessageInputType {
+    return {
+        type: 'system',
+        content: `${descriptionForPrompt}`
+    }
+}
+
 export async function systemTokensLessInstruction(): Promise<mls.msg.IAMessageInputType> {
     const project = mls.actualProject;
     const theme = 'Default';
@@ -254,114 +262,10 @@ interface IReqGetPromptByHtml {
     state: any
 }
 
-export async function getPromptByTS(dt: { project: number, shortName: string, folder: string, extension?: string, data: { system1: string, userPrompt: string } }): Promise<mls.msg.IAMessageInputType[]> {
-
-    if (!dt.data?.userPrompt) throw new Error(`[getPromptByTS]: userPrompt invalid`);
-    if (!dt.data?.system1) throw new Error(`[getPromptByTS]: system1 invalid`);
-    dt.extension = ".ts";
-    const sourceTS = await getSource(dt);
-    if (!sourceTS) throw new Error(`[getPromptByTS]: source dont exists ${JSON.stringify(dt)}.`);
-    const content = injectRegionsIntoTemplate(dt.data.system1, sourceTS, { warnUnusedRegions: true });
-    const rc: mls.msg.IAMessageInputType[] =
-        [
-            { type: "system", content },
-            { type: "human", content: dt.data.userPrompt }
-        ]
-    return rc
-}
-
-export async function getSource(dt: { project: number, shortName: string, folder: string, extension?: string, level?: number }): Promise<string | null> {
-    if (!dt.project || !dt.shortName || !dt.folder || !dt.extension) throw new Error(`[getSource]: incomplete parameters: project | shortName | folder | extension.`);
-    if (dt.level !== 1) dt.level = 2;
+export async function getSource(dt: mls.stor.IFileInfo): Promise<string | null> {
     const keyFile = mls.stor.getKeyToFiles(dt.project, dt.level, dt.shortName, dt.folder, dt.extension);
     if (!mls.stor.files[keyFile]) throw new Error(`[getSource]: not found stor.file ${keyFile}.`);
-    return (await mls.stor.files[keyFile].getContent()) as string | null;
+    const rc = (await mls.stor.files[keyFile].getContent()) as string | null;
+    return rc
 }
-
-/**
- * Replaces [[REGION_NAME]] placeholders in the template with the actual content
- * from //#region REGION_NAME blocks in the source TypeScript file.
- * 
- * Throws clear errors if:
- * - A region is opened but not closed
- * - Regions are nested
- * - Region name is duplicated
- * - A placeholder exists but no matching region
- * - A region exists but no placeholder uses it (optional, can be disabled)
- */
-export function injectRegionsIntoTemplate(
-    template: string,
-    sourceTS: string,
-    options: { warnUnusedRegions?: boolean } = { warnUnusedRegions: true }
-): string {
-    const regions = new Map<string, string[]>();
-    let currentRegion: string | null = null;
-    const lines = sourceTS.split('\n');
-
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const trimmed = line.trimStart();
-
-        if (trimmed.startsWith('//#region')) {
-            const match = line.match(/\/\/\s*#region\s+([\w-]+)/);
-            if (!match) {
-                throw new Error(`Invalid //#region syntax at line ${i + 1}: ${line}`);
-            }
-            const name = match[1];
-
-            if (currentRegion !== null) {
-                throw new Error(`Nested //#region "${name}" inside "${currentRegion}" at line ${i + 1}`);
-            }
-            if (regions.has(name)) {
-                throw new Error(`Duplicate //#region "${name}" at line ${i + 1}`);
-            }
-
-            currentRegion = name;
-            regions.set(name, []);
-        }
-        else if (trimmed.startsWith('//#endregion')) {
-            if (currentRegion === null) {
-                throw new Error(`Unexpected //#endregion at line ${i + 1}`);
-            }
-            currentRegion = null;
-        }
-        else if (currentRegion !== null) {
-            regions.get(currentRegion)!.push(line);
-        }
-    }
-
-    if (currentRegion !== null) {
-        throw new Error(`Unclosed //#region "${currentRegion}" at end of file`);
-    }
-
-    const regionStrings = new Map<string, string>();
-    for (const [name, linesArr] of regions) {
-        const content = linesArr.join('\n').trim();
-        if (content) { 
-            regionStrings.set(name, content);
-        }
-    }
-
-    let result = template;
-    const used = new Set<string>();
-
-    result = result.replace(/\[\[([\w-]+)\]\]/g, (match, name: string) => {
-        used.add(name);
-        if (!regionStrings.has(name)) {
-            throw new Error(`Placeholder [[${name}]] not found in source regions`);
-        }
-        return regionStrings.get(name)!;
-    });
-
-    if (options.warnUnusedRegions) {
-        for (const name of regionStrings.keys()) {
-            if (!used.has(name)) {
-                console.warn(`Warning: //#region ${name} defined but not used`);
-            }
-        }
-    }
-
-    return result;
-}
-
 
