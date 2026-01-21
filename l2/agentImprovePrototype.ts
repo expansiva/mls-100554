@@ -1,6 +1,6 @@
 /// <mls shortName="agentImprovePrototype" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
 
-import { convertTagToFileName } from '/_100554_/l2/utilsLit.js';
+import { convertTagToFileName } from '/_102027_/l2/utils.js';
 import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
 import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 import {
