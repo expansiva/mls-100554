@@ -19,6 +19,8 @@ export abstract class ServiceBase extends StateLitElement {
 
     @state() loading: boolean = false;
 
+    @state() loadingFeedBack: string = '';
+
     private _nav3Service: IMlsNav3 | null | undefined;
 
     private _serviceContent: IToolbarContent | null | undefined;
@@ -148,6 +150,17 @@ export abstract class ServiceBase extends StateLitElement {
 
             }
         }
+
+        
+        if (changedProperties.has('loadingFeedBack')) {
+            const loadingFeedBack = changedProperties.get('loadingFeedBack');
+            if (loadingFeedBack !== undefined) {
+                const nav3Service = this.getNav3Service();
+                if (!nav3Service) return;
+                nav3Service.setAttribute('loadingFeedBack', this.loadingFeedBack);
+            }
+        }
+
     }
 
     private checkFocus() {
