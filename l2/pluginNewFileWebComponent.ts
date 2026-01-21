@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { convertFileNameToTag } from '/_102027_/l2/utils.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { getMessageKey } from "/_100554_/l2/collabLitElement.js";
 import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';

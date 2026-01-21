@@ -4,7 +4,7 @@ import { html, unsafeHTML } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { IHelpers } from '/_100554_/l2/cssHelperIndexBase.js';
-import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
+import { convertFileNameToTag } from '/_102027_/l2/utils.js';
 
 import {
     collab_heart,

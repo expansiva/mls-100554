@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
+import { convertFileNameToTag } from '/_102027_/l2/utils.js';
 import { ServiceBase } from '/_100554_/l2/serviceBase.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { IDetails } from "/_100554_/l2/pluginNewFileBase.js";
