@@ -1,6 +1,6 @@
 /// <mls shortName="enhancementAgent" project="100554" enhancement="_blank" groupName="other" />
-import { getPropierties } from '/_100554_/l2/propiertiesLit.js'
-import { getComponentDependencies } from '/_100554_/l2/dependenciesLit.js'
+
+import { getPropierties } from '/_102027_/l2/propiertiesLit.js'
 
 export const requires: mls.l2.enhancement.IRequire[] = []
 
@@ -11,7 +11,7 @@ export const getDesignDetails = async (
         defaultGroupName: "",
         defaultHtmlExamplePreview: "",
         properties: getPropierties(modelTS),
-        webComponentDependencies: getComponentDependencies(modelTS)
+        webComponentDependencies: []
     };
 };
 

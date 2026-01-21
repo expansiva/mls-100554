@@ -1,10 +1,8 @@
 /// <mls shortName="previewModeSinglePage" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { IJSONDependence } from '/_100554_/l2/libCompile';
-import { convertTagToFileName } from '/_100554_/l2/utilsLit';
-import { setErrorOnModel } from '/_100554_/l2/validateLit';
-
-import * as util from '/_100554_/l2/previewModeUtil';
+import { IJSONDependence } from '/_100554_/l2/libCompile.js';
+import { setErrorOnModel, convertTagToFileName } from '/_102027_/l2/utils.js';
+import * as util from '/_100554_/l2/previewModeUtil.js';
 
 export class PreviewModeSinglePage {
 

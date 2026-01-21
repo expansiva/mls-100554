@@ -1,10 +1,8 @@
 /// <mls shortName="collabLibModel" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { removeTokensFromSource } from '/_100554_/l2/enhancementStyle.js';
-import { getTokensLess } from '/_100554_/l2/designSystemBase.js';
 import { getEnhancementName, getBaseTemplate } from '/_100554_/l2/libCommom.js';
-import { setErrorOnModel } from '/_100554_/l2/validateLit.js'
-import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
+import { setErrorOnModel } from '/_102027_/l2/utils.js';
+import { getTokensLess, removeTokensFromSource } from '/_102027_/l2/designSystemBase.js';
 
 export async function readProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true) {
 
@@ -70,7 +68,7 @@ export async function readProjectTypescriptAndCompileL1(project: number, shortNa
             promises.push(createModel(storFile, true, false));
         }
     }
-    
+
     if (mls.istrace) console.time('creating models L1');
     await Promise.all(promises);
     if (mls.istrace) console.timeEnd('creating models L1');
@@ -407,7 +405,7 @@ async function _updateModelStatusLess(modelBase: mls.editor.IModelStyle, changed
 
     let modelValue = modelBase.model.getValue();
 
-    let fileModels = mls.editor.getModels(modelBase.storFile.project, modelBase.storFile.shortName, modelBase.storFile.folder,modelBase.storFile.level);
+    let fileModels = mls.editor.getModels(modelBase.storFile.project, modelBase.storFile.shortName, modelBase.storFile.folder, modelBase.storFile.level);
 
     if (!fileModels) throw new Error('[_updateModelStatusLess] Not found file models')
 
@@ -476,7 +474,7 @@ async function _updateModelStatusTS(modelBase: mls.editor.IModelBase, changed: b
     let hasError = ok === false;
     if (!hasError) {
 
-        const enhacementName = await getEnhancementName({ project, shortName, folder, level:2 }).catch((e) => undefined);
+        const enhacementName = await getEnhancementName({ project, shortName, folder, level: 2 }).catch((e) => undefined);
         if (enhacementName && enhacementName !== "_blank") {
             const path = mls.l2.getPath(enhacementName);
             const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.error('Error on getEnhancementModule: ' + e.message); return undefined });

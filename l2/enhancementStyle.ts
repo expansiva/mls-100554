@@ -1,8 +1,8 @@
 /// <mls shortName="enhancementStyle" project="100554" enhancement="_blank" groupName="other" />
 
-import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
-import { getCssWithoutTag } from '/_100554_/l2/processCssLit.js'
-import { preCompileLess as compileLess } from '/_100554_/l2/designSystemBase.js'
+import { convertFileNameToTag } from '/_102027_/l2/utils.js'
+import { getCssWithoutTag } from '/_102027_/l2/processCssLit.js'
+import { removeTokensFromSource, removeCommentLines } from '/_102027_/l2/libCompileStyle.js';
 
 export const requires: mls.l2.enhancement.IRequire[] = [];
 
@@ -147,28 +147,6 @@ export function getLineSelectorByText(model: monaco.editor.ITextModel, searchTex
     return null;
 }
 
-export function removeTokensFromSource(src: string) {
-    const regex = /\/\/Start Less Tokens[\s\S]*?\/\/End Less Tokens/g;
-    return src.replace(regex, '');
-}
-
-export function removeCommentLines(text: string) {
-
-    const lines = text.split('\n');
-    const lineCount = lines.length - 1;
-
-    const newLines = [];
-
-    for (let lineNumber = 1; lineNumber <= lineCount; lineNumber++) {
-        const lineContent = lines[lineNumber]
-        if (!isCommentLine(lineContent)) {
-            newLines.push(lineContent);
-        }
-    }
-    const newContent = newLines.join('\n');
-    return newContent;
-}
-
 export function getRootSelectors(lessContent: string): string[] {
     const rootSelectors = [];
     const regex = /^([^\s{]+(?:\.[^\s{]+)*(?:\s+[^\s{]+)*)\s*\{/gm;
@@ -185,87 +163,6 @@ export function isCommentLine(line: string) {
         return true;
     }
     return line.trim().startsWith('/*') && line.trim().endsWith('*/');
-}
-
-export async function compileStyleUsingMFile(modelStyle: mls.editor.IModelStyle, theme: string = 'Default') {
-    const model: monaco.editor.ITextModel = modelStyle.model;
-    const { project, shortName, folder } = modelStyle.storFile;
-    const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.less');
-    const storFileLess = mls.stor.files[keyToStorFileLess];
-    if (!model || !storFileLess) return;
-    let val = model.getValue();
-    val = removeTokensFromSource(val);
-    val = removeCommentLines(val);
-
-    try {
-        return preCompileLess(project, val, theme, modelStyle);
-    } catch (err: any) {
-        throw new Error(err.message);
-    }
-}
-
-
-export async function compileStyleUsingStorFile(shortName: string, project: number, folder:string, theme: string = 'Default') {
-
-    const keyToStorFileLess = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.less');
-    const storFileLess = mls.stor.files[keyToStorFileLess];
-    if (!storFileLess) return;
-
-    let val = storFileLess.getValueInfo ? (await storFileLess.getValueInfo()).content : await storFileLess.getContent();
-    if (!val || typeof val !== 'string') return '';
-
-    val = removeTokensFromSource(val);
-    val = removeCommentLines(val);
-
-    try {
-        return preCompileLess(project, val, theme);
-    } catch (err: any) {
-        throw new Error(err.message);
-    }
-}
-
-
-async function preCompileLess(project: number, less: string, theme: string, modelStyle?: mls.editor.IModelStyle): Promise<string> {
-
-    try {
-
-        let newLess = await compileLess(project, less, theme)
-        return newLess;
-
-    } catch (e: any) {
-
-        console.info(e);
-        if (typeof e === 'string') errorCompileLess(e);
-        else if (e && e.message) errorCompileLess(e.message);
-        else errorCompileLess(`Error: invalid less`);
-        if (modelStyle && modelStyle.storFile) {
-            modelStyle.storFile.hasError = true;
-        }
-
-        return '';
-    }
-
-}
-
-function errorCompileLess(err: string) {
-
-    const model = mls.editor.instances[mls.editor.activeInstance].getModel();
-    if (!model || model.getLanguageId() !== 'less') return;
-    monaco.editor.setModelMarkers(model, 'markerSource', []);
-    const markers: monaco.editor.IMarkerData[] = [];
-
-    const markerOptions = {
-        severity: monaco.MarkerSeverity.Error,
-        message: err,
-        startLineNumber: 0,
-        startColumn: 0,
-        endLineNumber: 0,
-        endColumn: 50,
-    };
-    markers.push(markerOptions);
-
-    monaco.editor.setModelMarkers(model, 'markerSource', markers);
-
 }
 
 export async function setStylesProcessed(newCss: string, el: HTMLElement, tag: string) {

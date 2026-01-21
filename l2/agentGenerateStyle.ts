@@ -3,7 +3,7 @@
 import { IAgent } from '/_100554_/l2/aiAgentBase.js';
 import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 import { createAllModels } from '/_100554_/l2/collabLibModel.js';
-import { removeTokensFromSource } from '/_100554_/l2/enhancementStyle.js';
+import { removeTokensFromSource } from '/_102027_/l2/libCompileStyle.js';
 import { getTokensLess, getGlobalLess } from '/_100554_/l2/designSystemBase.js';
 
 import {
