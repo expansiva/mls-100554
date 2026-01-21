@@ -2,7 +2,7 @@
 
 import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
 import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';;
-import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { convertFileNameToTag } from '/_102027_/l2/utils.js';
 import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
 import { getTokensLess, getGlobalLess } from '/_100554_/l2/designSystemBase.js';
 
