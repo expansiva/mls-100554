@@ -3,7 +3,7 @@
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getDependenciesByHtmlFile, getTokens, IJSONDependence } from '/_100554_/l2/libCompile.js';
-import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { convertFileNameToTag } from '/_102027_/l2/utils.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
 import { getBaseTemplate } from '/_100554_/l2/libCommom.js';
 import { createStorFile, IReqCreateStorFile } from '/_100554_/l2/collabLibStor.js';

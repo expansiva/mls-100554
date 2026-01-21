@@ -4,7 +4,7 @@ import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
 import { loadPluginProject, forceServiceInstance } from '/_100554_/l2/libCommom.js';
-import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { convertFileNameToTag } from '/_102027_/l2/utils.js';
 import { readProjectTypescriptAndCompile } from '/_100554_/l2/collabLibModel.js';
 
 import { PluginEditStyleL3 } from '/_100554_/l2/pluginEditStyleL3.js';
