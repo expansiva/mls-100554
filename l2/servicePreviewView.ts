@@ -8,7 +8,8 @@ import { createModel } from '/_100554_/l2/collabLibModel.js';
 import { getBaseTemplate } from '/_100554_/l2/libCommom.js';
 import { createStorFile, IReqCreateStorFile } from '/_100554_/l2/collabLibStor.js';
 
-import { compileStyleUsingStorFile } from '/_100554_/l2/enhancementStyle.js';
+import { compileStyleUsingStorFile } from '/_102027_/l2/libCompileStyle.js';
+
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { PreviewModeSinglePage } from '/_100554_/l2/previewModeSinglePage.js';
 import { PreviewModeMinimum } from '/_100554_/l2/previewModeMinimum.js';
