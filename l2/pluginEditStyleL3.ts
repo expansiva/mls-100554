@@ -2,7 +2,7 @@
 
 import { html, repeat } from 'lit';
 import { customElement, query, property, state } from 'lit/decorators.js';
-import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { convertFileNameToTag } from '/_102027_/l2/utils.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { LessAST } from "/_100554_/l2/pluginEditStyleAST.js";
 
