@@ -4,7 +4,6 @@ import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
 import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
 import { loadModuleFromProjectOrDependency } from '/_100554_/l2/libCommom.js';
 import { createAllModels } from '/_100554_/l2/collabLibModel.js';
-import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
 
 import {
     startNewInteractionInAiTask,
