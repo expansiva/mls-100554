@@ -2,7 +2,7 @@
 
 import * as dL from '/_100554_/l2/driverLib.js';
 
-let mKey =  "";
+let mKey = "";
 
 export function init(initString: string) {
 	mKey = atob(initString);
@@ -231,7 +231,27 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-	private async _setContents(project: number, fileInfos: mls.stor.IFileInfo[], comments: string | null): Promise<boolean> {
+	private async _setContents(
+		project: number,
+		fileInfos: mls.stor.IFileInfo[],
+		comments: string | null
+	): Promise<boolean> {
+
+		const gen = this.processFiles(project, fileInfos, comments || "update git");
+
+		try {
+			for await (const event of gen) {
+				(window as any).messageSave = event;
+			}
+
+			return true;
+
+		} catch (e: any) {
+			throw new Error(e.message);
+		}
+	}
+
+	private async _setContentsOld(project: number, fileInfos: mls.stor.IFileInfo[], comments: string | null): Promise<boolean> {
 		const ret = await this.processFiles(project, fileInfos, comments || 'update git');
 		return true;
 		/*try {
@@ -640,7 +660,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			content: info.content,
 		};
 
-		if ( !['new',  'renamed'].includes(info.file.status)) {
+		if (!['new', 'renamed'].includes(info.file.status)) {
 			const sha = await this.getSha(info.owner, info.repo, info.path, info.token);
 			body.sha = sha.sha;
 
@@ -679,7 +699,143 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		return true;
 	}
 
-	private async processFiles(project:number, files: mls.stor.IFileInfo[], coments:string) {
+	private async *processFiles(
+		project: number,
+		files: mls.stor.IFileInfo[],
+		coments: string
+	): AsyncGenerator<String, any[], void> {
+
+		const parallelLimit = 1;
+		this.verifyMKey();
+
+		const info = await dL.getMyKeysBranch(project, true);
+
+		const expandedTasks: {
+			type: "update" | "delete";
+			path: string;
+			originalFile: mls.stor.IFileInfo;
+		}[] = [];
+
+		// ----- 1) EXPANSÃO -----
+		for (const file of files) {
+			const folderAux = file.folder === "" || file.folder.endsWith("/") ? "" : "/";
+			const extAux = file.extension.startsWith(".") ? "" : ".";
+			const levelPath = file.level === 0 ? "" : `l${file.level}/`;
+
+			const newPath =
+				levelPath +
+				file.folder.replace(/\\/g, "/") +
+				folderAux +
+				file.shortName +
+				extAux +
+				file.extension;
+
+			if (file.status === "deleted") {
+				expandedTasks.push({ type: "delete", path: newPath, originalFile: file });
+				continue;
+			}
+
+			if (file.status === "new" || file.status === "changed") {
+				expandedTasks.push({ type: "update", path: newPath, originalFile: file });
+				continue;
+			}
+
+			if (file.status === "renamed") {
+				const oldInfo = await (file.getValueInfo?.() ?? undefined);
+				if (!oldInfo) continue;
+
+				const oldPath =
+					levelPath +
+					file.folder.replace(/\\/g, "/") +
+					folderAux +
+					oldInfo.originalShortName +
+					extAux +
+					file.extension;
+
+				expandedTasks.push({ type: "delete", path: oldPath, originalFile: file });
+				expandedTasks.push({ type: "update", path: newPath, originalFile: file });
+				continue;
+			}
+
+			throw new Error(`Status invalid: ${file.status}`);
+		}
+
+
+		// ----- 2) FUNÇÕES ADIADAS -----
+		const deferredTasks: (() => Promise<any>)[] = expandedTasks.map(task => {
+			return async () => {
+				if (task.type === "delete") {
+					return this.deleteFile({
+						token: mKey,
+						owner: info.owner,
+						repo: info.repo,
+						branch: info.branch,
+						path: task.path,
+						message: `delete: ${task.path}`
+					});
+				}
+
+				let cont = await this.verifyAndGetContent(task.originalFile);
+
+				if (typeof cont !== "string") {
+					cont = await dL.fileToBase64(cont as File);
+					[, cont] = cont.split("base64,");
+				} else {
+					cont = dL.base64EncodeUnicode(cont);
+				}
+
+				return this.saveFile({
+					token: mKey,
+					owner: info.owner,
+					repo: info.repo,
+					branch: info.branch,
+					path: task.path,
+					content: cont,
+					message: `save: ${task.path}`,
+					file: task.originalFile
+				});
+			};
+		});
+
+		// ----- 3) EXECUÇÃO EM BATCHES -----
+		const results: any[] = [];
+
+		for (let i = 0; i < deferredTasks.length; i += parallelLimit) {
+
+			const batchFns = deferredTasks.slice(i, i + parallelLimit);
+
+			for (let j = 0; j < batchFns.length; j++) {
+				const idx = i + j;
+				const task = expandedTasks[idx];
+
+				const fileName = `${task.originalFile.folder ? task.originalFile.folder + '/' : ''}${task.originalFile.shortName}${task.originalFile.extension}`
+
+				yield `start: ${fileName}`;
+
+				try {
+					const value = await batchFns[j]();
+
+					results.push({ file: task.originalFile, status: "fulfilled", value });
+
+					yield `success: ${fileName}`;
+
+				} catch (err) {
+					results.push({ file: task.originalFile, status: "rejected", reason: err });
+
+					yield `error: ${fileName}`;
+
+					// 🔥 para tudo
+					throw new Error(
+						`Error in file ${task.originalFile.shortName}: ${(err as any)?.message || err}`
+					);
+				}
+			}
+		}
+
+		return results;
+	}
+
+	private async processFilesOld(project: number, files: mls.stor.IFileInfo[], coments: string) {
 
 		const parallelLimit = 1;
 

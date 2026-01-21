@@ -1,7 +1,7 @@
 /// <mls shortName="serviceSave" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, css, unsafeHTML, repeat } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js'; 
+import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IServiceMenu } from '/_100554_/l2/serviceBase.js';
 import { collab_branch } from '/_100554_/l2/collabIcons.js';
 import { undoFile } from '/_100554_/l2/collabLibStor.js';
@@ -124,8 +124,10 @@ export class ServiceSave extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
         if (visible && reinit) {
+            setTimeout(()=>this.setError(''),500);
             this.updateList();
         } else if (visible && !reinit) {
+            setTimeout(()=>this.setError(''),500);
             this.updateList();
         }
     }
@@ -309,12 +311,12 @@ export class ServiceSave extends ServiceBase {
                 
             </div>
             <ul>
-                    ${repeat(Object.keys(this.otherProjects[project]), ((item: any) => 'other'+project+item) as any, ((i: any, indexI: any) => { return this.renderItensOtherProjects(project, i); }) as any)}
+                    ${repeat(Object.keys(this.otherProjects[project]), ((item: any) => 'other' + project + item) as any, ((i: any, indexI: any) => { return this.renderItensOtherProjects(project, i); }) as any)}
                 </ul>
         </li> `;
     }
 
-    renderItensOtherProjects(project:number, path:string) {
+    renderItensOtherProjects(project: number, path: string) {
         const itens = this.otherProjects[project][path];
 
         return html`
@@ -328,8 +330,10 @@ export class ServiceSave extends ServiceBase {
                 
             </div>
             <ul>
-                ${repeat(itens, ((item: any) => 'other'+project+path+item) as any, ((i: any, indexI: any) => { return html`<li><div><span></span><input type="checkbox" disabled style="cursor: not-allowed;">
-                <label style="cursor: pointer;">${i}</label></div></li>` }) as any)}
+                ${repeat(itens, ((item: any) => 'other' + project + path + item) as any, ((i: any, indexI: any) => {
+            return html`<li><div><span></span><input type="checkbox" disabled style="cursor: not-allowed;">
+                <label style="cursor: pointer;">${i}</label></div></li>`
+        }) as any)}
             </ul>
         </li> 
         `
@@ -485,7 +489,7 @@ export class ServiceSave extends ServiceBase {
 
             if (!(el as any).item) return;
 
-            mls.events.fire([5], 'HistoriesSelected' as mls.events.TypeEvent, JSON.stringify({action:"loader",position: 'left',}), 0);
+            mls.events.fire([5], 'HistoriesSelected' as mls.events.TypeEvent, JSON.stringify({ action: "loader", position: 'left', }), 0);
 
             //this.showLoader(true);
             const f = ((el as any).item.file as mls.stor.IFileInfo);
@@ -620,7 +624,7 @@ export class ServiceSave extends ServiceBase {
         let dt = await mls.stor.localDB.getKeysWithPrefix('File_');
         dt = dt.filter((t) => t.indexOf(`_${mls.actualProject}_`) < 0);
 
-        const info:any = {};
+        const info: any = {};
 
         dt.forEach((i) => {
 
@@ -633,11 +637,11 @@ export class ServiceSave extends ServiceBase {
                 } else {
                     info[file.project][name] = [file.extension];
                 }
-                
+
             } else {
 
-                info[file.project] = {[name]: [file.extension]}
-                
+                info[file.project] = { [name]: [file.extension] }
+
             }
 
         });
@@ -855,6 +859,10 @@ export class ServiceSave extends ServiceBase {
     private arrayRollback: mls.stor.IFileInfo[] = [];
     //Sempre que salvar vai gerar um novo branch no usuario e solicitar um pullrequest.
     private async onSave(e: MouseEvent) {
+        const oldOwner = this.owner;
+        const oldRepo = this.repo;
+        const oldBranch = this.branch;
+
         try {
             e.stopPropagation();
             const el = e.target as HTMLButtonElement;
@@ -896,22 +904,21 @@ export class ServiceSave extends ServiceBase {
             this.verifyNeedSelectDS(array);
             this.freeToSaveProjectAndDs(array);
             this.arrayRollback = array;
-            const oldOwner = this.owner;
-            const oldRepo = this.repo;
-            const oldBranch = this.branch;
             this.isRemovedFork = false;
 
-            await this.fireCreateForkOrUpdate();
-            console.info('gerou o fork');
+            this.loadingFeedBack = `Checking repository...`;
+            await this.fireCreateForkOrUpdate();    
+            //console.info('gerou o fork');
 
             await this.fireCreateNewBranch();
-            console.info('gerou o branche');
+            //console.info('gerou o branche');
 
             await this.onSavenewPullrequest(array, msg);
-            console.info('gerou o push');
+            //console.info('gerou o push');
+            this.loadingFeedBack = `Generating a pull request...`;
 
             await this.firePullrequest(msg);
-            console.info('gerou o pullrequest');
+            //console.info('gerou o pullrequest');
 
             this.backChecked();
 
@@ -931,6 +938,10 @@ export class ServiceSave extends ServiceBase {
             this.showLoader(false);
 
         } catch (err: any) {
+            this.owner = oldOwner;
+            this.repo = oldRepo;
+            this.branch = oldBranch;
+
             this.arrayRollback.forEach((i) => {
                 if (!i.inLocalStorage) i.inLocalStorage = true;
             });
@@ -974,8 +985,32 @@ export class ServiceSave extends ServiceBase {
                 }
                 arrSet.push(i);
             });
+
+            let father = this;
+            let currentFile = 0;
+            let _value: any;
+            Object.defineProperty(window as any, "messageSave", {
+                get() {
+                    return _value;
+                },
+                set(newValue) {
+                    const oldValue = _value;
+                    _value = newValue;
+
+                    let aux = newValue;
+                    if (newValue.startsWith('success')) {
+                        currentFile++;
+                        aux = '';
+                    }
+                    father.loadingFeedBack = `TOTAL (${currentFile}/${arrSet.length})<br>${aux}`;
+
+                },
+                configurable: true
+            });
+
             if (arrSet.length > 0) {
                 await mls.stor.setContents(arrSet, msg);
+
             }
             return;
         } catch (e: any) {
@@ -999,13 +1034,13 @@ export class ServiceSave extends ServiceBase {
             const isForkExist = await (driver as any).checkForkIO(this.owner, this.repo, info.login);
 
             if (!isForkExist) {
-                console.info('criou um novo fork');
+                //console.info('criou um novo fork');
                 const ret = await driver.createFork(info.login, this.repo, this.owner, info.login);
                 if (!ret) throw new Error('Error create fork');
                 this.owner = info.login;
                 this.branch = 'main';
             } else {
-                console.info('atualizou fork');
+                //console.info('atualizou fork');
                 const opt = {
                     repoOrigin: this.repo,
                     ownerOrigin: this.owner,
@@ -1338,7 +1373,7 @@ export class ServiceSave extends ServiceBase {
         this.fireEventsDetails();
     }
 
-    private fireEventsDetails() { 
+    private fireEventsDetails() {
 
         this.isFreeToSave = false;
         this.freeToSave = { ts: false, less: false, hasDS: false };
@@ -1363,14 +1398,14 @@ export class ServiceSave extends ServiceBase {
         );
     }
 
-    private freeToSaveProjectAndDs(arr:mls.stor.IFileInfo[]) {
+    private freeToSaveProjectAndDs(arr: mls.stor.IFileInfo[]) {
         const keyDS = mls.stor.getKeyToFiles(mls.actualProject as number, 2, 'designSystem', '', '.ts');
         const keyPrj = mls.stor.getKeyToFiles(mls.actualProject as number, 2, 'project', '', '.ts');
         const fileDS = mls.stor.files[keyDS];
         const filePrj = mls.stor.files[keyPrj];
 
         if (!fileDS || !filePrj) throw new Error('[freeToSaveProjectAndDs]: Not found files');
-        
+
         if (fileDS.status !== 'new' && filePrj.status !== 'new') return;
 
         const findDS = arr.find((f) => f.shortName === fileDS.shortName && f.folder === fileDS.folder && f.project === fileDS.project && f.extension === '.ts');
