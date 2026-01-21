@@ -11,8 +11,11 @@ export class CollabLitElement extends LitElement {
   @property({ type: Number }) globalVariation: number = globalState.globalVariation || 0;
 
   createRenderRoot() {
+    
     return this;
+
   }
+
 
   protected updated(changedProperties: Map<string | number | symbol, unknown>): void {
     super.updated(changedProperties);
