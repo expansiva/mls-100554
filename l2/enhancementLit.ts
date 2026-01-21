@@ -46,8 +46,6 @@ export const getDesignDetails = async (modelTS: mls.editor.IModelTS): Promise<ml
                 properties: getPropierties(modelTS),
                 webComponentDependencies: []
             }
-
-            console.info(ret)
             resolve(ret);
         } catch (e) {
             reject(e);
