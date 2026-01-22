@@ -3,10 +3,7 @@
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
-import { initManagerCoachMark } from "/_100554_/l2/collabManagerCoachMarks.js";
-import { getTokensCss } from '/_100554_/l2/designSystemBase.js';
 import { getProjectDetails, setProjectDetails, getLastOpenedFiles, findStorFileInProjectsOrDeps, getInstanceByFile, saveOpenedFile } from '/_100554_/l2/libCommom.js';
-
 import { getLastModule } from '/_100554_/l2/libCommom.js';
 
 let on1CompileMonaco = true;
@@ -91,6 +88,7 @@ export class CollabInit extends CollabLitElement {
         this.setDrivers();
         const language = this.setAndGetBaseUrl();
         this.setHTMLLang(language);
+        this.initCoachMark();
         this.setTheme();
         this.setTokensCss();
         this.actualProject = this.setProjectActual();
@@ -224,7 +222,16 @@ export class CollabInit extends CollabLitElement {
         if (window.traceLifeCycle) console.info('setting: htmlLang');
         const htmlEl = document.documentElement;
         if (htmlEl) htmlEl.lang = lang;
-        initManagerCoachMark();
+    }
+
+    private async initCoachMark() {
+        try {
+            const module = await import('/_100554_/l2/collabManagerCoachMarks.js');
+            if (!module || !module.initManagerCoachMark || typeof module.initManagerCoachMark !== 'function') return;
+            module.initManagerCoachMark();
+        } catch (err: any) {
+            console.error('Error on listen initCoachMark' + err.message)
+        }
     }
 
     /**
@@ -266,12 +273,18 @@ export class CollabInit extends CollabLitElement {
     private async setTokensCss(): Promise<void> {
 
         if (window.traceLifeCycle) console.info('setting: tokens');
-        const tokensCss = await getTokensCss(this.baseProject, 'Default');
+        try {
+            const module = await import('/_100554_/l2/designSystemBase.js');
+            if (!module || !module.getTokensCss || typeof module.getTokensCss !== 'function') return;
+            const tokensCss = await module.getTokensCss(this.baseProject, 'Default');
+            const style = document.createElement('style');
+            style.textContent = tokensCss;
+            style.id = 'collab-tokens';
+            document.head.appendChild(style);
+        } catch (err: any) {
+            console.error('Error on listen initCoachMark' + err.message)
+        }
 
-        const style = document.createElement('style');
-        style.textContent = tokensCss;
-        style.id = 'collab-tokens';
-        document.head.appendChild(style);
     }
 
     /**
