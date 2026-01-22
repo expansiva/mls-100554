@@ -1,6 +1,6 @@
 /// <mls shortName="collabLibStor" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { convertFileNameToTag } from '/_100554_/l2/utilsLit.js'
+import { convertFileNameToTag } from '/_102027_/l2/utils';
 import { createModel, createAllModels } from '/_100554_/l2/collabLibModel.js'
 import { getBaseTemplate, verifyNeedAddTripleslach } from '/_100554_/l2/libCommom.js';
 
