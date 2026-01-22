@@ -3,7 +3,7 @@
 import { html, PropertyValueMap, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { convertTagToFileName } from '/_100554_/l2/utilsLit.js'
+import { convertTagToFileName } from '/_102027_/l2/utils';
 
 export const PREFIX_ICA_ID = 'ica_';
 
