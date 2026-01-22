@@ -2,7 +2,7 @@
 
 import { getMessageKey } from "/_100554_/l2/collabLitElement.js";
 import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
-import { convertTagToFileName, convertFileNameToTag } from '/_100554_/l2/utilsLit.js';
+import { convertTagToFileName, convertFileNameToTag } from '/_102027_/l2/utils';
 import { collabImport } from '/_100554_/l2/collabImport.js';
 import { ServiceDetail100554 } from '/_100554_/l2/serviceDetail.js';
 
