@@ -1,6 +1,6 @@
 /// <mls shortName="collabPanel" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, css, LitElement, repeat, unsafeHTML } from 'lit';
+import { html, css, UnsafeHTMLDirective, repeat, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import '/_100554_/l2/collabPanelItem.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
@@ -11,7 +11,7 @@ export class CollabPanel extends CollabLitElement {
 
     @query('details') detail: HTMLDetailsElement | undefined;
     @property({ type: Boolean, reflect: true }) open = true;
-    @property({ reflect: true }) icon = '';
+    @property({ reflect: true }) icon?: any;
 
     public myData: IPluginMenuAction[] = [];
 
