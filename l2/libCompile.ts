@@ -3,7 +3,7 @@
 // import { getDSInstance } from '/_100554_/l2/libDesignSystem.js'
 
 import { getTokensCss, getGlobalCss } from '/_100554_/l2/designSystemBase.js';
-import { convertFileNameToTag, convertTagToFileName } from '/_100554_/l2/utilsLit.js';
+import { convertFileNameToTag, convertTagToFileName } from '/_102027_/l2/utils';
 
 export const getDependenciesByHtmlFile = (file: mls.stor.IFileInfo, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
