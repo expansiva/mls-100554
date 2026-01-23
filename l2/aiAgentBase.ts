@@ -133,7 +133,9 @@ export type IAgentLifecycleHooks = {
   afterPromptStep?(
     agent: IAgentMeta,
     context: mls.msg.ExecutionContext,
-    step: mls.msg.AIAgentStep
+    parentStep: mls.msg.AIAgentStep,
+    step: mls.msg.AIAgentStep,
+    hookSequential: number,
   ): Promise<mls.msg.AgentIntent[]>
 
 }

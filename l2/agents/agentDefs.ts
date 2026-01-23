@@ -1,7 +1,7 @@
 /// <mls shortName="agentDefs" project="100554" enhancement="_100554_enhancementAgent" folder="agents" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
-import { getSource } from '/_100554_/l2/aiPrompts.js'
+import { createModel } from '/_100554_/l2/collabLibModel.js';
 
 export function createAgent(): IAgentAsync {
   return {
@@ -60,8 +60,9 @@ async function beforePromptImplicit(
   const paths: string[] = mls.stor.findFilesNeedingDefsUpdate({ project: mls.actualProject || 0, level: 2 })
     .map(f => mls.stor.getKeyToFile(f))
     .filter(Boolean)
-    .slice(0, 5); // only 5 first, test
+    .slice(0, 3); // only x first 
 
+  if (paths.length < 1) throw new Error('no files to update defs');
   const inputs: mls.msg.IAMessageInputType[] = [
     { type: "system", content: system1 },
   ];
@@ -90,7 +91,7 @@ async function beforePromptStep(
   agent: IAgentMeta,
   context: mls.msg.ExecutionContext,
   parentStep: mls.msg.AIAgentStep,
-  step: mls.msg.AIAgentStep, 
+  step: mls.msg.AIAgentStep,
   hookSequential: number,
   args?: string
 ): Promise<mls.msg.AgentIntent[]> {
@@ -117,20 +118,89 @@ async function beforePromptStep(
 async function afterPromptStep(
   agent: IAgentMeta,
   context: mls.msg.ExecutionContext,
-  step: mls.msg.AIAgentStep
+  parentStep: mls.msg.AIAgentStep,
+  step: mls.msg.AIAgentStep,
+  hookSequential: number,
 ): Promise<mls.msg.AgentIntent[]> {
-  if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid args`);
+  if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
+  const payload = (step.interaction?.payload?.[0]) as Output || undefined;
+  if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
+  let status: mls.msg.AIStepStatus = 'completed';
+  try {
+    await updateDefs(payload.result);
+  } catch (e) {
+    console.error(e);
+    status = 'failed';
+  }
+
   const updateStatus: mls.msg.AgentIntentUpdateStatus = {
     type: 'update-status',
-    step,
-    status: "completed"
+    hookSequential,
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    parentStepId: parentStep.stepId,
+    stepId: step.stepId,
+    status
   };
   return [updateStatus];
 
 }
 
+async function updateDefs(defs: mls.l4.BaseDefs): Promise<void> {
+  if (!defs.meta.projectId || !defs.meta.shortName) throw new Error("Invalid step in update defs, incorrect meta: '" + defs?.meta?.projectId + "', '" + defs?.meta?.shortName + "'");
+
+  const template = `/// <mls shortName="${defs.meta.shortName}" project="${defs.meta.projectId}" enhancement="_blank" />
+
+// Do not change – automatically generated code. 
+
+export const defs: mls.l4.BaseDefs = ${JSON.stringify(defs, null, 2)}
+    `;
+
+  const level: 2 | 1 = defs.meta.level || 2;
+  let params = { project: defs.meta.projectId, level, shortName: defs.meta.shortName, folder: defs.meta.folder, loadContent: false, content: template, versionRef: '0', extension: '.defs.ts' };
+  const files = await mls.stor.getFiles(params);
+  if (!files.ts) throw new Error(`[agentDefs] file .ts dont exists, defs: ${JSON.stringify(defs.meta)}`);
+  if (!files.defs) {
+    await createStorFile(params);
+  } else {
+    await updateStorFile(params);
+  }
+}
+
+async function createStorFile(params: { project: number, shortName: string, level: number, folder: string, content: string, extension: string, versionRef: string }): Promise<mls.stor.IFileInfo> {
+  const file = await mls.stor.addOrUpdateFile(params);
+  if (!file) throw new Error('[agentDefs] Invalid storFile');
+  const path = mls.stor.getKeyToFile(params);
+  console.log(`[agentDefs] creating new file: ${path}`)
+  file.status = 'new';
+  const fileInfo: mls.stor.IFileInfoValue = {
+    content: params.content,
+    contentType: 'string',
+  };
+  await mls.stor.localStor.setContent(file, fileInfo);
+  file.updatedAt = new Date().toISOString();
+  return file;
+}
+
+async function updateStorFile(params: { project: number, shortName: string, level: number, folder: string, content: string, extension: string, versionRef: string }): Promise<void> {
+  const file = await mls.stor.addOrUpdateFile(params);
+  if (!file) throw new Error('[agentDefs] Invalid storFile');
+  const path = mls.stor.getKeyToFile(params);
+  console.log(`[agentDefs] updating file: ${path}`);
+  const models = mls.editor.getModels(params.project, params.shortName, params.folder, params.level);
+  if (!models || !models.defs) {
+    const modelDefs = await createModel(file, false, false);
+    if (!modelDefs) throw new Error('[agentDefs] model .defs not created');
+    modelDefs.model.setValue(params.content);
+  } else {
+    models.defs.model.setValue(params.content);
+  }
+  file.updatedAt = new Date().toISOString();
+}
+
 const system1 = `
-<!-- modelType: code -->
+<!-- modelType: codeflash -->
 <!-- modelTypeList: geminiChat, code (grok), deepseekchat, codeflash, deepseekreasoner, mini (4.1) ou nano (openai), codeinstruct -->
 
 You are a Senior Software Engineer at Collab.codes.
@@ -175,8 +245,9 @@ export interface BaseDefs {
 
   meta: {
     projectId: number;
-    folder: string;
+    folder: string; // default="" or defined in first line of file
     shortName: string;
+    level: 2;
     componentType: ComponentType;
     componentScope: ComponentScope;
     executionRegions?: string[]; // ['BR', 'PT']
