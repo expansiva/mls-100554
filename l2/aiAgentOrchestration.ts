@@ -472,7 +472,8 @@ async function processHookAfterPromptStep(agent: IAgentAsync, context: mls.msg.E
     if (!agent.afterPromptStep) throw new Error(`Agent ${agent.agentName} do not have afterPromptStep`);
     if (!context.task) throw new Error('[processHookBeforePromptStep] invalid task');
     const step = getStepById(context.task, hook.stepId) as mls.msg.AIAgentStep;
-    return await agent.afterPromptStep(agent, context, step);
+    const parentStep = getStepById(context.task, hook.parentStepId) as mls.msg.AIAgentStep;
+    return await agent.afterPromptStep(agent, context, parentStep, step, hook.hookSequential);
 }
 
 async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep, functionName: string, stepId: number, args?: object): Promise<any> {
