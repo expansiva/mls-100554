@@ -24,7 +24,7 @@ async function beforePromptAtomic(
   userPrompt: string,
 ): Promise<mls.msg.AgentIntent[]> {
 
-  if (!userPrompt) throw new Error(`[beforePromptAtomic] invalid args: '${userPrompt}'`);
+  if (userPrompt) throw new Error(`[beforePromptAtomic] invalid args: '${userPrompt}'`);
   const source = (await file.getContent()) as string | null;
   if (typeof source !== 'string' || !source) throw new Error(`[beforePromptAtomic] invalid source`)
 
@@ -245,7 +245,7 @@ export interface BaseDefs {
 
   meta: {
     projectId: number;
-    folder: string; // default="" or defined in first line of file
+    folder: string; // Do not infer 'folder' from level or path; if 'folder' is not explicitly defined in the triple-slash metadata, it must be an empty string ("").
     shortName: string;
     level: 2;
     componentType: ComponentType;
@@ -293,15 +293,10 @@ export interface BaseDefs {
     generalDescription?: string;
     goal?: string;
     businessCapabilities: string[]; // all business already implemented
+    technicalCapabilities: string[];
+    intentHints?: string[]; // ex "appointment reminder"
     implementedFeatures: string[];
     constraints?: string[]; // functional + non-functional constraints
-  };
-
-  toBe?: {
-    pendingEnhancements?: string[];
-    userRequestsFeatures?: string[]; // User feature requests
-    userRequestsBugs?: string[]; // User bug reports
-    userRequestsEnhancements?: string[]; // User suggestions for improvements
   };
 
 }
@@ -334,6 +329,7 @@ export type ComponentType =
   'editorService' | // (editor) Editor-only panel or toolbar.
   'agent' | // (editor) Specialized LLM orchestrator (prepares prompts, chains tools, etc.).
   'tool' | // (editor) Reusable function or module (e.g., data processing, integrations).
+  'service' | // (editor) tool UI
 
   'other'; // Miscellaneous, does not fit other types.
 
