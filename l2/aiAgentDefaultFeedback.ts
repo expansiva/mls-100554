@@ -20,7 +20,7 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
         //this.task = await getTask('20251205185425.1001');
         //this.task = await getTask('20251127123524.1001');
         // this.task = await getTask('20260126134300.1001');
-        //this.task = await getTask('20260126125152.1001');
+        // this.task = await getTask('20260126125152.1001');
         this.isAgentParallelMode = !!this.task?.iaCompressed?.nextSteps[0].progress;
         // console.info({ task: this.task, parallel: this.isAgentParallelMode })
     }
@@ -213,6 +213,8 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
                         `;
     }
 
+
+
     private renderTrace() {
         const step = this.selectedTraceStep;
 
@@ -239,16 +241,55 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
                 ? html`<div>No logs</div>`
                 : html`
                     <ul class="log-list">
-                        ${logs.map((l: any) => html`
-                            <li class="log-item">
-                                <pre>${JSON.stringify(l, null, 2)}</pre>
-                            </li>
-                        `)}
+                        ${logs.map((l: unknown) => html`
+                        <li class="log-item">
+                            ${this.renderLogItem(l)}
+                        </li>
+                    `)}
                     </ul>
                 `}
         </section>
             `;
     }
+
+    private renderLogItem(raw: unknown) {
+
+        const data = this.tryParseJSON(raw);
+
+        if (typeof data === 'object' && data !== null) {
+            const obj = data as any;
+
+            return html`
+            <div class="log-card">
+                ${obj.title ? html`<strong>${obj.title}</strong>` : nothing}
+
+                ${Array.isArray(obj.trace)
+                    ? html`
+                        <ul class="trace-steps">
+                            ${obj.trace.map((t: string) =>
+                        html`<li>${t}</li>`
+                    )}
+                        </ul>
+                    `
+                    : html`<pre>${JSON.stringify(obj, null, 2)}</pre>`}
+            </div>
+        `;
+        }
+
+        return html`<pre>${String(data)}</pre>`;
+    }
+
+
+    private tryParseJSON(value: unknown) {
+        if (typeof value !== 'string') return value;
+
+        try {
+            return JSON.parse(value);
+        } catch {
+            return value; // continua string normal
+        }
+    }
+
 
 
     render() {
