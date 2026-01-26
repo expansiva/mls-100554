@@ -25,12 +25,9 @@ async function beforePromptAtomic(
 ): Promise<mls.msg.AgentIntent[]> {
 
   if (userPrompt) throw new Error(`[beforePromptAtomic] invalid args: '${userPrompt}'`);
-  const source = (await file.getContent()) as string | null;
-  if (typeof source !== 'string' || !source) throw new Error(`[beforePromptAtomic] invalid source`)
-
   const inputs: mls.msg.IAMessageInputType[] = [
     { type: "system", content: system1 },
-    { type: "human", content: source }
+    { type: "human", content: await getSource(file) }
   ]
 
   const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
@@ -97,9 +94,6 @@ async function beforePromptStep(
 ): Promise<mls.msg.AgentIntent[]> {
   if (!args) throw new Error(`[beforePromptStep] args invalid`)
   const file = mls.stor.files[args];
-  if (!file) throw new Error(`[beforePromptStep] invalid args, file dont exists: ${args}`)
-  const source = (await file.getContent()) as string | null;
-  if (typeof source !== 'string' || !source) throw new Error(`[beforePromptAtomic] invalid source`)
 
   const continueParallel: mls.msg.AgentIntentContinueParallelStep = {
     type: "continue-parallel-step",
@@ -109,7 +103,7 @@ async function beforePromptStep(
     taskId: context.task?.PK || '',
     hookSequential,
     parentStepId: parentStep.stepId,
-    humanPrompt: source
+    humanPrompt: await getSource(file)
   }
   return [continueParallel];
 
@@ -127,7 +121,8 @@ async function afterPromptStep(
   if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
   let status: mls.msg.AIStepStatus = 'completed';
   try {
-    await updateDefs(payload.result);
+    const asIs = payload.result;
+    await updateDefs(asIs);
   } catch (e) {
     console.error(e);
     status = 'failed';
@@ -147,20 +142,43 @@ async function afterPromptStep(
 
 }
 
-async function updateDefs(defs: mls.l4.BaseDefs): Promise<void> {
-  if (!defs.meta.projectId || !defs.meta.shortName) throw new Error("Invalid step in update defs, incorrect meta: '" + defs?.meta?.projectId + "', '" + defs?.meta?.shortName + "'");
+async function getSource(file: mls.stor.IFileInfo): Promise<string> {
+  // change first line to new pattern
+  if (!file) throw new Error(`[beforePromptStep] invalid args, file dont exists`)
+  const source = (await file.getContent()) as string | null;
+  if (typeof source !== 'string' || !source) throw new Error(`[beforePromptAtomic] invalid source`)
+  const array = source.split("\n");
+  if (!array || array.length < 2) throw new Error('[beforePrompt] invalid source, no lines');
+  const fileReference = mls.stor.convertFileToFileReference(file);
+  if (!array[0].includes('fileReference')) {
+    const tp = mls.common.tripleslash.parseXMLTripleSlash(array[0]).variables;
+    array[0] = `/// <mls fileReference="${fileReference}" group=${tp.group || ""} enhancement=${tp.enhancemente || ""} />`
+  }
 
-  const template = `/// <mls shortName="${defs.meta.shortName}" project="${defs.meta.projectId}" enhancement="_blank" />
+  return `
+FILE: ${fileReference}
+LANG: typescript
+BEGIN_CODE
+${array.map(f => f.trim()).filter(Boolean).join("\n")}
+END_CODE
+`
+}
+
+async function updateDefs(defs: AsIs): Promise<void> {
+  const fileReference: string = defs?.meta?.fileReference || "";
+  let fileInfo = mls.stor.convertFileReferenceToFile(fileReference);
+  if (!fileReference || fileInfo.project < 1) throw new Error(`Invalid step in update defs, incorrect meta fileRecerence: ${fileReference}`);
+
+  const template = `/// <mls fileReference="${defs.meta.fileReference}" enhancement="_blank" />
 
 // Do not change – automatically generated code. 
 
-export const defs: mls.l4.BaseDefs = ${JSON.stringify(defs, null, 2)}
+export const asis: mls.defs.AsIs = ${JSON.stringify(defs, null, 2)}
     `;
 
-  const level: 2 | 1 = defs.meta.level || 2;
-  let params = { project: defs.meta.projectId, level, shortName: defs.meta.shortName, folder: defs.meta.folder, loadContent: false, content: template, versionRef: '0', extension: '.defs.ts' };
-  const files = await mls.stor.getFiles(params);
+  const files = await mls.stor.getFiles({ ...fileInfo, loadContent: false });
   if (!files.ts) throw new Error(`[agentDefs] file .ts dont exists, defs: ${JSON.stringify(defs.meta)}`);
+  const params = { ...fileInfo, content: template, versionRef: '0' };
   if (!files.defs) {
     await createStorFile(params);
   } else {
@@ -201,13 +219,15 @@ async function updateStorFile(params: { project: number, shortName: string, leve
 
 const system1 = `
 <!-- modelType: codeflash -->
-<!-- modelTypeList: geminiChat, code (grok), deepseekchat, codeflash, deepseekreasoner, mini (4.1) ou nano (openai), codeinstruct -->
+<!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) ou nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10-->
 
 You are a Senior Software Engineer at Collab.codes.
 
-Your task is to analyze the TypeScript code provided in the user message and generate structured documentation (BaseDefs) for the component.
+You will receive a user message containing:
+FILE, LANG, and a code block delimited by BEGIN_CODE and END_CODE.
 
-This documentation will be used for search, filtering, and AI-driven development workflows.
+Task:
+Generate an AsIsFactual JSON object that strictly follows the provided JSON schema.
 
 ## Details
 [[SudoLang]]
@@ -223,31 +243,34 @@ You must return the object strictly as JSON
 
 //#region SudoLang
 const constraints = [
-  'Always output valid JSON only.',
+  'Output MUST be valid JSON only.',
   'NO indentation, NO newlines except when strictly required by JSON syntax.',
   'NO extra spaces or whitespace.',
-  'Only include data that can be directly and confidently derived from the code',
-  'Only include states that start with "db." or "ui." prefix, as these are the global states',
-  'Only declare imports and dependencies that are ACTUALLY present in the code. Do NOT invent or assume any imports/dependencies.'
-]
+  'Any text outside JSON is a failure.',
+  'Only extract information that appears literally in the provided code.',
+  'No interpretation, no abstraction, no normalization.',
+  'If something is not explicitly declared in code, it MUST NOT appear in the output.',
+  'Do NOT create empty arrays or placeholder values.',
+  'Do NOT populate optional fields unless data is explicitly present.',
+  'Only list imports and dependencies that can be verified line-by-line in the code.',
+  'Only list state paths that appear verbatim in the code and start with "db." or "ui.".',
+  'If uncertain, omit.'
+];
 //#endregion
 
 //#region OutputSection
 export type Output =
   {
     type: "flexible";
-    result: BaseDefs;
+    result: AsIs;
   };
 //#endregion
 
 //#region Defs1
-export interface BaseDefs {
+export interface AsIs {
 
   meta: {
-    projectId: number;
-    folder: string; // Do not infer 'folder' from level or path; if 'folder' is not explicitly defined in the triple-slash metadata, it must be an empty string ("").
-    shortName: string;
-    level: 2;
+    fileReference: string;
     componentType: ComponentType;
     componentScope: ComponentScope;
     executionRegions?: string[]; // ['BR', 'PT']
@@ -290,14 +313,14 @@ export interface BaseDefs {
   };
 
   asIs: {
-    generalDescription?: string;
-    goal?: string;
-    businessCapabilities: string[]; // all business already implemented
-    technicalCapabilities: string[];
-    intentHints?: string[]; // ex "appointment reminder"
-    implementedFeatures: string[];
-    constraints?: string[]; // functional + non-functional constraints
-  };
+    semantic: {
+      generalDescription: string; // short, like a head line
+      businessCapabilities: string[];
+      technicalCapabilities: string[];
+      implementedFeatures: string[];
+      constraints?: string[]; // functional + non-functional constraints
+    };
+  }
 
 }
 //#endregion
@@ -338,27 +361,12 @@ export type ComponentType =
 //#region Defs3
 export interface DefsImports {
   ref: string; // ex: "/_100111_/page1.js"
-  dependencies: DefsDependency[]
+  dependencies?: { // If an import has no named bindings, omit dependencies entirely.
+    name: string; // ex: "formatCurrency"
+    type?: "function" | "service" | "constant" | "interface" | "type" | "class" | "hook" | "component" | "?";
+    purpose?: string; // Functional role of this dependency
+  }[];
 }
-
-/**
- * Represents a shared service, helper or reusable logic dependency.
- */
-export interface DefsDependency {
-  name: string; // ex: "formatCurrency"
-  type?: DependencyType;
-  purpose?: string; // Functional role of this dependency
-}
-
-export type DependencyType =
-  | "function"
-  | "service"
-  | "constant"
-  | "interface"
-  | "type"
-  | "class"
-  | "hook"
-  | "component";
 
 export type UserRole = string;
 //#endregion
