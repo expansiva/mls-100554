@@ -93,7 +93,7 @@ export function getPayload1(context: mls.msg.ExecutionContext): PayLoad1 {
   payload1.userPrompt = agentStep?.interaction?.input.find((input) => input.type === 'human')?.content || '';
 
   if (payload1.embedding) {
-    payload1.embeddingVector = mls.l4.decompressVector(payload1.embedding);
+    // payload1.embeddingVector = mls.l4.decompressVector(payload1.embedding);
   }
 
   return payload1;
