@@ -143,6 +143,7 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
 
     private renderTaskProgress() {
         if (!this.task) return html``;
+        if (this.task.status !== 'in progress') return html``;
 
         const root = this.task.iaCompressed?.nextSteps[0];
         if (!root?.progress) return html``;
