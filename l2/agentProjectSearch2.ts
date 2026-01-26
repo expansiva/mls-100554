@@ -437,12 +437,12 @@ async function scanDefsFiles2(
             return null;
         }
         const mod = await import(fileJS);
-        const defs = mod.defs as mls.l4.BaseDefs;
+        const defs = mod.defs;
         if (!defs) return null;
 
         let rag: ScanDefsFileRAG | null = null;
         if (payload1.embeddingVector && Array.isArray(defs.textToEmbedding) && defs.embedding) {
-            const vectorb = mls.l4.decompressVector(defs.embedding);
+            const vectorb:number[] | number[][] = []; //mls.l4.decompressVector(defs.embedding);
             rag = cosineSimilarity(fileNoExtension, defs.textToEmbedding, payload1.embeddingVector as number[], vectorb)
         }
 
