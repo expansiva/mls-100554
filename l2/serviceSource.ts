@@ -64,7 +64,6 @@ export class ServiceSource100554 extends ServiceBase {
     @property({ type: Boolean }) panelRightOpened = false;
     @property({ type: String }) activeModels: mls.editor.IModels | undefined;
     @property() isModeHistory: boolean = false;
-
     @property({ type: String }) mode: IModes = 'icTs';
     @property({ type: String }) textOverlayLoading: string = '';
 
