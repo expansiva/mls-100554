@@ -1,7 +1,5 @@
 /// <mls shortName="agentDefs" project="100554" enhancement="_blank" folder="agents" />
 
-/// <mls fileReference="_100554_/l2/serviceSave.ts" enhancement="_blank" />
-
 // Do not change – automatically generated code. 
 
 export const asis: mls.defs.AsIs = {
@@ -9,12 +7,11 @@ export const asis: mls.defs.AsIs = {
     "fileReference": "_100554_/l2/serviceSave.ts",
     "componentType": "service",
     "componentScope": "editor",
-    "group": "",
-    "devFidelity": "final",
     "languages": [
       "en",
       "pt"
-    ]
+    ],
+    "devFidelity": "final"
   },
   "references": {
     "webComponents": [
@@ -29,16 +26,20 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html"
+            "name": "html",
+            "type": "function"
           },
           {
-            "name": "css"
+            "name": "css",
+            "type": "function"
           },
           {
-            "name": "unsafeHTML"
+            "name": "unsafeHTML",
+            "type": "function"
           },
           {
-            "name": "repeat"
+            "name": "repeat",
+            "type": "function"
           }
         ]
       },
@@ -46,13 +47,16 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement"
+            "name": "customElement",
+            "type": "function"
           },
           {
-            "name": "property"
+            "name": "property",
+            "type": "function"
           },
           {
-            "name": "state"
+            "name": "state",
+            "type": "function"
           }
         ]
       },
@@ -60,13 +64,16 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/serviceBase.js",
         "dependencies": [
           {
-            "name": "ServiceBase"
+            "name": "ServiceBase",
+            "type": "class"
           },
           {
-            "name": "IService"
+            "name": "IService",
+            "type": "interface"
           },
           {
-            "name": "IServiceMenu"
+            "name": "IServiceMenu",
+            "type": "interface"
           }
         ]
       },
@@ -74,7 +81,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabIcons.js",
         "dependencies": [
           {
-            "name": "collab_branch"
+            "name": "collab_branch",
+            "type": "constant"
           }
         ]
       },
@@ -82,7 +90,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabLibStor.js",
         "dependencies": [
           {
-            "name": "undoFile"
+            "name": "undoFile",
+            "type": "function"
           }
         ]
       },
@@ -90,7 +99,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/saveAddBranch.js",
         "dependencies": [
           {
-            "name": "initServiceSaveaddBranch"
+            "name": "initServiceSaveaddBranch",
+            "type": "function"
           }
         ]
       },
@@ -98,10 +108,12 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/libCommom.js",
         "dependencies": [
           {
-            "name": "getMyKeysBranch"
+            "name": "getMyKeysBranch",
+            "type": "function"
           },
           {
-            "name": "calculateTotalStringSize"
+            "name": "calculateTotalStringSize",
+            "type": "function"
           }
         ]
       },
@@ -109,10 +121,12 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/libProjectConfig.js",
         "dependencies": [
           {
-            "name": "getConfigProject"
+            "name": "getConfigProject",
+            "type": "function"
           },
           {
-            "name": "updateConfigProject"
+            "name": "updateConfigProject",
+            "type": "function"
           }
         ]
       },
@@ -120,62 +134,47 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabLibModel.js",
         "dependencies": [
           {
-            "name": "readProjectTypescriptAndCompile"
+            "name": "readProjectTypescriptAndCompile",
+            "type": "function"
           }
         ]
-      },
-      {
-        "ref": "/_100554_/l2/pluginCreateProjectLocalToDriver.js",
-        "dependencies": []
       }
     ]
   },
-  "asIs": {
-    "businessCapabilities": [
-      "save project files",
-      "create pull requests",
-      "create forks",
-      "sync forks",
-      "undo file changes",
-      "display file changes",
-      "handle file errors",
-      "update project configuration",
-      "fire events for UI updates",
-      "handle multi-language messages"
-    ],
-    "technicalCapabilities": [
-      "LitElement web component",
-      "custom events and listeners",
-      "dynamic rendering with lit-html",
-      "state management with decorators",
-      "asynchronous operations with async/await",
-      "integration with mls.stor and mls.events",
-      "file system operations (CRUD)",
-      "branch and fork management",
-      "i18n message switching",
-      "error handling and feedback",
-      "UI badge toggling",
-      "localStorage usage"
-    ],
-    "implementedFeatures": [
-      "save service with pull request workflow",
-      "fork and branch creation",
-      "file change listing and selection",
-      "undo file changes",
-      "error and permission handling",
-      "multi-language support (en, pt)",
-      "UI feedback and loader",
-      "event-driven updates",
-      "project and design system file validation"
-    ],
-    "constraints": [
-      "only saves if no file errors or verification is cancelled",
-      "design system file must be saved with project file if present",
-      "file size limit enforced",
-      "requires organization selection for save",
-      "fork/branch creation required for pull request",
-      "UI disables actions on error or permission block"
+  "codeInsights": {
+    "unusedImports": [
+      "css"
     ]
+  },
+  "asIs": {
+    "semantic": {
+      "generalDescription": "Service for saving project changes and managing pull requests.",
+      "businessCapabilities": [
+        "Project version control",
+        "Pull request management",
+        "File change tracking",
+        "Fork creation"
+      ],
+      "technicalCapabilities": [
+        "Git-like workflow integration",
+        "Multi-language support (i18n)",
+        "File size calculation",
+        "Conflict and error detection before saving",
+        "Undo file changes"
+      ],
+      "implementedFeatures": [
+        "Save changes to branch",
+        "Create fork",
+        "Create pull request",
+        "File history viewing",
+        "I18n support",
+        "Local project to driver migration"
+      ],
+      "constraints": [
+        "Saving only allowed if no files have errors",
+        "Comment required for pull requests",
+        "Total file size limit enforcement"
+      ]
+    }
   }
 }
-    
