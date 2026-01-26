@@ -57,7 +57,7 @@ async function beforePromptImplicit(
   const paths: string[] = mls.stor.findFilesNeedingDefsUpdate({ project: mls.actualProject || 0, level: 2 })
     .map(f => mls.stor.getKeyToFile(f))
     .filter(Boolean)
-    .slice(0, 3); // only x first 
+    .slice(0, 20); // only x first 
 
   if (paths.length < 1) throw new Error('no files to update defs');
   const inputs: mls.msg.IAMessageInputType[] = [
@@ -178,7 +178,7 @@ export const asis: mls.defs.AsIs = ${JSON.stringify(defs, null, 2)}
 
   const files = await mls.stor.getFiles({ ...fileInfo, loadContent: false });
   if (!files.ts) throw new Error(`[agentDefs] file .ts dont exists, defs: ${JSON.stringify(defs.meta)}`);
-  const params = { ...fileInfo, content: template, versionRef: '0' };
+  const params = { ...fileInfo, content: template, versionRef: '0', extension: ".defs.ts" };
   if (!files.defs) {
     await createStorFile(params);
   } else {
