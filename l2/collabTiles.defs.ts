@@ -73,32 +73,28 @@ export const asis: mls.defs.AsIs = {
             "type": "function"
           }
         ]
-      },
-      {
-        "ref": "/ _100554_/l2/collabTilesItem.js"
-      },
-      {
-        "ref": "https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.3/Sortable.min.js"
       }
     ]
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "LitElement component for collab tiles with config and drag-drop",
+      "generalDescription": "Manages tiles for dashboard configuration",
       "businessCapabilities": [
-        "Manage tiles items",
-        "Configure tile positions",
-        "Save tile configurations"
+        "Configure tiles",
+        "Enable plugins",
+        "Reorder tiles"
       ],
       "technicalCapabilities": [
-        "Uses LitElement for rendering",
-        "Integrates Sortable for drag-and-drop"
+        "Renders tiles",
+        "Implements drag and drop",
+        "Updates configuration"
       ],
       "implementedFeatures": [
-        "Renders tiles list",
-        "Opens/closes config mode",
-        "Handles drag-and-drop",
-        "Saves changes to project config"
+        "Open config",
+        "Close config",
+        "Save changes",
+        "Cancel changes",
+        "Fire plugin details event"
       ]
     }
   }
