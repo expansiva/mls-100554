@@ -1,2 +1,26 @@
-/// <mls shortName="cssHelperIndexBase" project="100554" enhancement="_blank" folder="" />
+/// <mls fileReference="_100554_/l2/cssHelperIndexBase.ts" enhancement="_blank" />
 
+// Do not change – automatically generated code. 
+
+export const asis: mls.defs.AsIs = {
+  "meta": {
+    "fileReference": "_100554_/l2/cssHelperIndexBase.ts",
+    "componentType": "other",
+    "componentScope": "editor",
+    "group": "enhancement"
+  },
+  "asIs": {
+    "semantic": {
+          "generalDescription": "TypeScript types for CSS helpers",
+      businessCapabilities: [],
+      "technicalCapabilities": [
+        "Defines TypeScript types"
+      ],
+      "implementedFeatures": [
+        "IMode type",
+        "IHelpers interface"
+      ]
+    }
+  }
+}
+    

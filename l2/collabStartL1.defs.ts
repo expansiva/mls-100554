@@ -1,2 +1,68 @@
-/// <mls shortName="collabStartL1" project="100554" enhancement="_blank" folder="" />
+/// <mls fileReference="_100554_/l2/collabStartL1.ts" enhancement="_blank" />
 
+// Do not change – automatically generated code. 
+
+export const asis: mls.defs.AsIs = {
+  "meta": {
+    "fileReference": "_100554_/l2/collabStartL1.ts",
+    "componentType": "molecule",
+    "componentScope": "appFrontEnd",
+    "languages": [
+      "en",
+      "pt"
+    ],
+    "group": "enhancement"
+  },
+  "references": {
+    "imports": [
+      {
+        "ref": "lit",
+        "dependencies": [
+          {
+            "name": "html",
+            "type": "function"
+          }
+        ]
+      },
+      {
+        "ref": "lit/decorators.js",
+        "dependencies": [
+          {
+            "name": "customElement",
+            "type": "function"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/stateLitElement.js",
+        "dependencies": [
+          {
+            "name": "StateLitElement",
+            "type": "class"
+          }
+        ]
+      }
+    ]
+  },
+  "asIs": {
+    "semantic": {
+      "generalDescription": "Module L1 - Back-End: Description and Features",
+      "businessCapabilities": [
+        "Program Server Routines",
+        "Test in a Testing Environment",
+        "Verify and Implement Database Table Layouts"
+      ],
+      "technicalCapabilities": [
+        "i18n support for English and Portuguese"
+      ],
+      "implementedFeatures": [
+        "Renders module description with lists",
+        "Renders usage flow",
+        "Displays news section",
+        "Shows banner image",
+        "Displays collab codes logo"
+      ]
+    }
+  }
+}
+    
