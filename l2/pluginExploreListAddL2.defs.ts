@@ -1,2 +1,127 @@
-/// <mls shortName="pluginExploreListAddL2" project="100554" enhancement="_blank" folder="" />
+/// <mls fileReference="_100554_/l2/pluginExploreListAddL2.ts" enhancement="_blank" />
 
+// Do not change – automatically generated code. 
+
+export const asis: mls.defs.AsIs = {
+  "meta": {
+    "fileReference": "_100554_/l2/pluginExploreListAddL2.ts",
+    "componentType": "pluginSettings",
+    "componentScope": "editor",
+    "languages": [
+      "en",
+      "pt"
+    ],
+    "group": "enhancement"
+  },
+  "references": {
+    "imports": [
+      {
+        "ref": "lit",
+        "dependencies": [
+          {
+            "name": "html"
+          }
+        ]
+      },
+      {
+        "ref": "lit/decorators.js",
+        "dependencies": [
+          {
+            "name": "customElement"
+          },
+          {
+            "name": "property"
+          },
+          {
+            "name": "query"
+          }
+        ]
+      },
+      {
+        "ref": "/_102027_/l2/utils.js",
+        "dependencies": [
+          {
+            "name": "convertFileNameToTag"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/serviceBase.js",
+        "dependencies": [
+          {
+            "name": "ServiceBase"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/collabLitElement.js",
+        "dependencies": [
+          {
+            "name": "CollabLitElement"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/pluginNewFileBase.js",
+        "dependencies": [
+          {
+            "name": "IDetails"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/collabDecorators.js",
+        "dependencies": [
+          {
+            "name": "propertyDataSource"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/collabState.js",
+        "dependencies": [
+          {
+            "name": "getState"
+          },
+          {
+            "name": "setState"
+          },
+          {
+            "name": "initState"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/libCommom.js",
+        "dependencies": [
+          {
+            "name": "loadPluginProject"
+          },
+          {
+            "name": "isNameValid"
+          }
+        ]
+      }
+    ]
+  },
+  "asIs": {
+    "semantic": {
+      "generalDescription": "Add",
+      "businessCapabilities": [
+        "Add new plugins or files to a project"
+      ],
+      "technicalCapabilities": [
+        "Renders UI with Lit",
+        "Handles input validation",
+        "Loads plugin templates"
+      ],
+      "implementedFeatures": [
+        "Project selection",
+        "Short name input with validation",
+        "Template selection from plugins",
+        "Back navigation"
+      ]
+    }
+  }
+}
+    
