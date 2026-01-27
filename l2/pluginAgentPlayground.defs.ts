@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/pluginAgentPlayground.ts",
-    "componentType": "service",
+    "componentType": "editorService",
     "componentScope": "editor",
     "group": "enhancement"
   },
@@ -15,16 +15,13 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html",
-            "type": "function"
+            "name": "html"
           },
           {
-            "name": "repeat",
-            "type": "function"
+            "name": "repeat"
           },
           {
-            "name": "unsafeHTML",
-            "type": "function"
+            "name": "unsafeHTML"
           }
         ]
       },
@@ -32,129 +29,109 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement",
-            "type": "function"
+            "name": "customElement"
           },
           {
-            "name": "property",
-            "type": "function"
+            "name": "property"
           },
           {
-            "name": "state",
-            "type": "function"
+            "name": "state"
           },
           {
-            "name": "query",
-            "type": "function"
+            "name": "query"
           }
         ]
       },
       {
-        "ref": "/ _100554_/l2/collabLitElement.js",
+        "ref": "/_100554_/l2/collabLitElement.js",
         "dependencies": [
           {
-            "name": "CollabLitElement",
-            "type": "class"
+            "name": "CollabLitElement"
           }
         ]
       },
       {
-        "ref": "/ _102025_/l2/collabMessagesHelper.js",
+        "ref": "/_102025_/l2/collabMessagesHelper.js",
         "dependencies": [
           {
-            "name": "loadChatPreferences",
-            "type": "function"
+            "name": "loadChatPreferences"
           },
           {
-            "name": "IChatPreferences",
-            "type": "interface"
+            "name": "IChatPreferences"
           },
           {
-            "name": "saveChatPreferences",
-            "type": "function"
+            "name": "saveChatPreferences"
           },
           {
-            "name": "getUserId",
-            "type": "function"
+            "name": "getUserId"
           },
           {
-            "name": "createThread",
-            "type": "function"
+            "name": "createThread"
           }
         ]
       },
       {
-        "ref": "/ _102025_/l2/collabMessagesIndexedDB.js",
+        "ref": "/_102025_/l2/collabMessagesIndexedDB.js",
         "dependencies": [
           {
-            "name": "getThreadByName",
-            "type": "function"
+            "name": "getThreadByName"
           },
           {
-            "name": "listThreads",
-            "type": "function"
+            "name": "listThreads"
           }
         ]
       },
       {
-        "ref": "/ _100554_/l2/aiAgentBase.js",
+        "ref": "/_100554_/l2/aiAgentBase.js",
         "dependencies": [
           {
-            "name": "IAgent",
-            "type": "interface"
+            "name": "IAgent"
           }
         ]
       },
       {
-        "ref": "/ _100554_/l2/aiAgentHelper.js",
+        "ref": "/_100554_/l2/aiAgentHelper.js",
         "dependencies": [
           {
-            "name": "getTemporaryContext",
-            "type": "function"
+            "name": "getTemporaryContext"
           },
           {
-            "name": "getAllSteps",
-            "type": "function"
+            "name": "getAllSteps"
           }
         ]
       },
       {
-        "ref": "/ _100554_/l2/collabDOMSync.js",
+        "ref": "/_100554_/l2/collabDOMSync.js",
         "dependencies": [
           {
-            "name": "updateHTML",
-            "type": "function"
+            "name": "updateHTML"
           }
         ]
       },
       {
-        "ref": "/ _100554_/l2/collabIcons.js",
+        "ref": "/_100554_/l2/collabIcons.js",
         "dependencies": [
           {
-            "name": "collab_trash",
-            "type": "constant"
+            "name": "collab_trash"
           }
         ]
       },
       {
-        "ref": "/ _100554_/l2/collabState.js",
+        "ref": "/_100554_/l2/collabState.js",
         "dependencies": [
           {
-            "name": "setState",
-            "type": "function"
+            "name": "setState"
           }
         ]
       },
       {
-        "ref": "/ _100554_/l2/aiAgentOrchestration.js",
+        "ref": "/_100554_/l2/aiAgentOrchestration.js",
         "dependencies": [
           {
-            "name": "loadAgent",
-            "type": "function"
+            "name": "loadAgent"
           },
           {
-            "name": "executeBeforePrompt",
-            "type": "function"
+            "name": "executeBeforePrompt"
           }
         ]
       }
@@ -162,24 +139,11 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Agent playground component for testing AI agents",
-      "businessCapabilities": [
-        "Testing AI agents",
-        "Comparing agent responses",
-        "Managing prompt groups"
-      ],
-      "technicalCapabilities": [
-        "Lit web component",
-        "State management",
-        "Drag and drop prompts"
-      ],
-      "implementedFeatures": [
-        "Prompt input",
-        "Agent execution",
-        "Result display",
-        "Thread settings",
-        "Group management"
-      ]
+      "generalDescription": "Agent Playground",
+      "businessCapabilities": [],
+      "technicalCapabilities": [],
+      "implementedFeatures": [],
+      "constraints": []
     }
   }
 }
