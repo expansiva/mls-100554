@@ -7,7 +7,8 @@ export const asis: mls.defs.AsIs = {
     "fileReference": "_100554_/l2/libCompile.ts",
     "componentType": "tool",
     "componentScope": "editor",
-    "group": "enhancement"
+    "group": "enhancement",
+    "devFidelity": "final"
   },
   "references": {
     "imports": [
@@ -39,39 +40,19 @@ export const asis: mls.defs.AsIs = {
       }
     ]
   },
-  "codeInsights": {
-    "deadCodeBlocks": [
-      "function extrairTagsCustomizadas(html: string): string[] { ... }"
-    ]
-  },
   "asIs": {
     "semantic": {
-      "generalDescription": "Library for compiling dependencies and extracting web components",
-      "businessCapabilities": [
-        "getDependenciesByHtmlFile",
-        "getDependenciesByHtml",
-        "getDependenciesByMFile"
-      ],
+      "generalDescription": "Library for compiling web component dependencies",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "extract custom tags from HTML",
-        "load enhancements",
-        "fetch tokens and CSS"
+        "Extract custom tags from HTML",
+        "Load JavaScript imports for components",
+        "Retrieve CSS tokens and global CSS"
       ],
       "implementedFeatures": [
         "getDependenciesByHtmlFile",
         "getDependenciesByHtml",
         "getDependenciesByMFile",
-        "getTagsInTypescript",
-        "getDependencies",
-        "getDependenciesFile",
-        "extrairTagsCustomizadas",
-        "loadMyNeedsToCompile",
-        "getEnhancementFromFetch",
-        "getImportUrl",
-        "getJSImportEnhancement",
-        "getJSImporMap",
-        "getJSBlank",
-        "getJS",
         "getTokens",
         "getAllWebComponentsInSource"
       ]

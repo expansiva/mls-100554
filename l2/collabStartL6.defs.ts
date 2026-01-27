@@ -19,7 +19,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html"
+            "name": "html",
+            "type": "function"
           }
         ]
       },
@@ -27,7 +28,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement"
+            "name": "customElement",
+            "type": "function"
           }
         ]
       },
@@ -35,7 +37,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/stateLitElement.js",
         "dependencies": [
           {
-            "name": "StateLitElement"
+            "name": "StateLitElement",
+            "type": "class"
           }
         ]
       }
@@ -43,23 +46,23 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Module L6 start component with dashboards and AI prompts",
+      "generalDescription": "Module L6 - Owner: Features",
       "businessCapabilities": [
-        "Project Dashboard",
-        "Application Usage Dashboard",
-        "Development Cost Dashboard",
-        "Hosting Cost Dashboard",
+        "Dashboard de Projetos: Visão geral de todos os projetos, seu status e métricas relevantes.",
+        "Dashboard do Uso do Aplicativo: Métricas de uso do aplicativo, como número de usuários ativos, funil de conversão, etc",
+        "Dashboard do Custo de Desenvolvimento: Informações financeiras relacionadas ao custo de desenvolvimento do projeto.",
+        "Dashboard do Custo de Hospedagem: Custos associados à infraestrutura e hospedagem do aplicativo.",
+        "Project Dashboard: Overview of all projects, their status, and relevant metrics.",
+        "Application Usage Dashboard: Metrics related to app usage, such as the number of active users, conversion funnel, etc.",
+        "Development Cost Dashboard: Financial information about the project’s development costs.",
+        "Hosting Cost Dashboard: Costs associated with the application’s infrastructure and hosting."
+      ],
+      "technicalCapabilities": [],
+      "implementedFeatures": [
+        "Fluxo de Uso",
+        "Exemplos de Prompts para Iniciar Projetos via IA",
         "Usage Flow",
         "Examples of Prompts to Start Projects via AI"
-      ],
-      "technicalCapabilities": [
-        "Lit web component",
-        "i18n support"
-      ],
-      "implementedFeatures": [
-        "Banner image",
-        "Details sections for about and news",
-        "Lists of modules and prompts"
       ]
     }
   }

@@ -15,7 +15,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/lessAST.js",
         "dependencies": [
           {
-            "name": "LessAst"
+            "name": "LessAst",
+            "type": "class"
           }
         ]
       },
@@ -40,25 +41,19 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "LESS CSS handler class with Monaco editor integration",
-      "businessCapabilities": [
-        "Manages LESS CSS properties and selectors",
-        "Integrates with Monaco editor for real-time updates"
-      ],
+      "generalDescription": "LessCSS class for LESS CSS manipulation",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "Parses LESS AST",
-        "Provides proxy for CSS properties",
-        "Handles state management for LESS positions"
+        "LESS AST management",
+        "Monaco editor integration",
+        "CSS property proxy"
       ],
       "implementedFeatures": [
         "setSelector",
         "getProperty",
         "setProperty",
         "refresh",
-        "setStateByLine",
-        "clearState",
-        "updateState",
-        "initStateIfNeeded"
+        "setStateByLine"
       ]
     }
   }

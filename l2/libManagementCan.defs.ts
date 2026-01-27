@@ -32,17 +32,14 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Library for managing collaborative state",
-      "businessCapabilities": [
-        "Initialize state paths",
-        "Set state values",
-        "Wait for state changes",
-        "Watch state for changes"
-      ],
+      "generalDescription": "Library for state management and watchers",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "Provides async waiting functions",
-        "Manages active watchers",
-        "Normalizes values for comparison"
+        "State initialization",
+        "State setting",
+        "State waiting",
+        "State watching",
+        "State verification"
       ],
       "implementedFeatures": [
         "initState",

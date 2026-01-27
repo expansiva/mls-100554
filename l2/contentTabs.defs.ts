@@ -50,20 +50,17 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "ContentTabs component",
+      "generalDescription": "Lit-based web component for tabbed content navigation",
       "businessCapabilities": [
-        "Display tabbed content",
-        "Handle tab selection"
+        "Provides tabbed interface for content sections"
       ],
       "technicalCapabilities": [
-        "Render navigation",
-        "Render content",
-        "Manage selected index"
+        "Renders navigation and content using Lit templates",
+        "Handles tab selection"
       ],
       "implementedFeatures": [
-        "renderNav",
-        "renderContent",
-        "handleSelect"
+        "Tab rendering",
+        "Content switching"
       ]
     }
   }

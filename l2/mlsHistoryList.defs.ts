@@ -15,13 +15,16 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html"
+            "name": "html",
+            "type": "function"
           },
           {
-            "name": "unsafeHTML"
+            "name": "unsafeHTML",
+            "type": "function"
           },
           {
-            "name": "css"
+            "name": "css",
+            "type": "function"
           }
         ]
       },
@@ -29,10 +32,12 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement"
+            "name": "customElement",
+            "type": "function"
           },
           {
-            "name": "property"
+            "name": "property",
+            "type": "function"
           }
         ]
       },
@@ -49,21 +54,20 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "MLS History List Component",
+      "generalDescription": "Lit web component for MLS history list",
       "businessCapabilities": [
-        "Display file history",
+        "Display MLS file history",
         "Handle history item selection"
       ],
       "technicalCapabilities": [
-        "Lit-based web component",
-        "Async history retrieval",
-        "Event dispatching"
+        "Fetch history from storage",
+        "Render history items with details"
       ],
       "implementedFeatures": [
-        "Loading indicator",
-        "Error display",
-        "Date offset calculations",
-        "History grouping and filtering"
+        "Load history on connect",
+        "Create JSON structure for history",
+        "Handle click events",
+        "Render HTML template"
       ]
     }
   }

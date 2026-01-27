@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/enhancementLitService.ts",
-    "componentType": "tool",
+    "componentType": "service",
     "componentScope": "editor",
     "group": "enhancement"
   },
@@ -32,7 +32,7 @@ export const asis: mls.defs.AsIs = {
           },
           {
             "name": "requires",
-            "type": "function"
+            "type": "?"
           }
         ]
       }
@@ -40,18 +40,10 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Service that re-exports and wraps Lit enhancement functions",
-      "businessCapabilities": [
-        "Re-export requires",
-        "Wrap getDefaultHtmlExamplePreview",
-        "Wrap getDesignDetails",
-        "Wrap onAfterChange",
-        "Wrap onAfterCompile"
-      ],
+      "generalDescription": "Enhancement Lit Service",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "TypeScript",
-        "Async functions",
-        "Promises"
+        "exports wrapper functions"
       ],
       "implementedFeatures": [
         "requires",

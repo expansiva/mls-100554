@@ -11,14 +11,14 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-          "generalDescription": "TypeScript types for CSS helpers",
-      businessCapabilities: [],
+      "generalDescription": "Defines types for CSS helpers",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "Defines TypeScript types"
+        "TypeScript types and interfaces"
       ],
       "implementedFeatures": [
-        "IMode type",
-        "IHelpers interface"
+        "IMode",
+        "IHelpers"
       ]
     }
   }

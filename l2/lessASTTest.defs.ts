@@ -52,32 +52,24 @@ export const asis: mls.defs.AsIs = {
       }
     ]
   },
-  "codeInsights": {
-    "deadCodeBlocks": [
-      "test1",
-      "test3",
-      "testt1",
-      "testt2"
-    ]
-  },
   "asIs": {
     "semantic": {
-      "generalDescription": "LitElement component for testing LESS AST",
-      "businessCapabilities": [
-        "testing LESS CSS AST",
-        "finding selectors by line",
-        "setting selectors",
-        "updating styles"
-      ],
+      "generalDescription": "Testing LessCSS AST functionality",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "extends LitElement",
-        "uses Monaco editor",
-        "instantiates LessCSS"
+        "parse Less files",
+        "manipulate CSS selectors and properties",
+        "manage themes"
       ],
       "implementedFeatures": [
-        "exeTest method",
-        "test2 method"
-      ]
+        "exeTest",
+        "test1",
+        "test2",
+        "test3",
+        "testt1",
+        "testt2"
+      ],
+      "constraints": []
     }
   }
 }

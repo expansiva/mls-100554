@@ -32,10 +32,11 @@ export const asis: mls.defs.AsIs = {
         ]
       },
       {
-        "ref": "/\\_100554_/l2/stateLitElement.js",
+        "ref": "/_100554_/l2/stateLitElement.js",
         "dependencies": [
           {
-            "name": "StateLitElement"
+            "name": "StateLitElement",
+            "type": "class"
           }
         ]
       }
@@ -53,11 +54,18 @@ export const asis: mls.defs.AsIs = {
         "Test and Release for Approval/Publish"
       ],
       "technicalCapabilities": [
-        "Lit web component",
-        "i18n support"
+        "Use Design System (UI)",
+        "Use Components",
+        "Use Back-End Features",
+        "Program Page Features"
       ],
       "implementedFeatures": [
-        "Render section with banner, content details, and collab marca image"
+        "Design Page in Wireframe Mode",
+        "Use Design System (UI)",
+        "Use Components",
+        "Use Back-End Features",
+        "Program Page Features",
+        "Test and Release for Approval/Publish"
       ]
     }
   }

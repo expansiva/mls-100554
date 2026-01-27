@@ -6,15 +6,18 @@ export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/pluginExploreList.ts",
     "componentType": "pluginUI",
-    "componentScope": "appFrontEnd",
+    "componentScope": "editor",
+    "group": "enhancement",
+    "devFidelity": "final",
     "languages": [
       "en",
       "pt"
-    ],
-    "group": "enhancement",
-    "devFidelity": "scaffold"
+    ]
   },
   "references": {
+    "webComponents": [
+      "plugin-explore-list-100554"
+    ],
     "imports": [
       {
         "ref": "lit",
@@ -37,7 +40,7 @@ export const asis: mls.defs.AsIs = {
           },
           {
             "name": "TemplateResult",
-            "type": "interface"
+            "type": "type"
           }
         ]
       },
@@ -164,26 +167,27 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Plugin for exploring and managing file lists",
+      "generalDescription": "Plugin for exploring file lists",
       "businessCapabilities": [
-        "File exploration",
-        "File management",
-        "Filtering and sorting",
-        "History tracking"
+        "file management",
+        "project exploration"
       ],
       "technicalCapabilities": [
-        "Lit-based web component",
-        "Event handling",
-        "Local storage integration",
-        "Dynamic rendering"
+        "list rendering",
+        "event handling",
+        "file operations"
       ],
       "implementedFeatures": [
-        "List view",
-        "Add new files",
-        "File operations",
-        "Filtering",
-        "Sorting"
-      ]
+        "list view",
+        "add file",
+        "undo",
+        "clone",
+        "rename",
+        "delete",
+        "filter",
+        "sort"
+      ],
+      "constraints": []
     }
   }
 }

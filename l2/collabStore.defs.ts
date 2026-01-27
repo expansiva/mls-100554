@@ -5,22 +5,21 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/collabStore.ts",
-    "componentType": "other",
+    "componentType": "service",
     "componentScope": "editor",
     "group": "enhancement"
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "use this state to set and increment count each access on page, increment this",
+      "generalDescription": "State for incrementing page hit counts",
       "businessCapabilities": [
-        "set and increment count",
-        "increment on each page access"
+        "Count page hits"
       ],
       "technicalCapabilities": [
-        "export const"
+        "Increment count on page access"
       ],
       "implementedFeatures": [
-        "export const COUNTHITSPAGES = 'CountHitsPages'"
+        "Export COUNTHITSPAGES constant"
       ]
     }
   }

@@ -25,33 +25,16 @@ export const asis: mls.defs.AsIs = {
   "asIs": {
     "semantic": {
       "generalDescription": "This class parses a LESS model, building an AST and converting LESS selectors into a CSS-compatible format.",
-      "businessCapabilities": [
+      "businessCapabilities": [],
+      "technicalCapabilities": [
         "Basic Selector Nesting",
         "Simple Variables",
         "Basic LESS Structure"
       ],
-      "technicalCapabilities": [
-        "Parses basic selectors, properties, and tokens",
-        "Converts LESS selectors to CSS-compatible format",
-        "Manages selector hierarchy with stack"
-      ],
       "implementedFeatures": [
-        "parse",
-        "listThemes",
-        "addTheme",
-        "deleteTheme",
-        "getThemeDescription",
-        "selectorCSS2LESS",
-        "selectorLESS2CSS",
-        "toCamelCaseProperty",
-        "toKebabCaseProperty",
-        "getProperty",
-        "saveProperty",
-        "findLastLineInSelector",
-        "findInfoByLine",
-        "findSelectorByLine",
-        "findFirstSelectorAfterRoot",
-        "insertSelector"
+        "Basic Selector Nesting",
+        "Simple Variables",
+        "Basic LESS Structure"
       ],
       "constraints": [
         "Variable Interpolation within Selectors",

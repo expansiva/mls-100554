@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/pluginCodelensServiceDetails.ts",
-    "componentType": "pluginUI",
+    "componentType": "pluginSettings",
     "componentScope": "editor",
     "languages": [
       "en",
@@ -40,7 +40,7 @@ export const asis: mls.defs.AsIs = {
         "dependencies": [
           {
             "name": "customElement",
-            "type": "?"
+            "type": "function"
           }
         ]
       },
@@ -57,18 +57,11 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Plugin Codelens Service Details",
-      "businessCapabilities": [
-        "Configure service details for plugins"
-      ],
-      "technicalCapabilities": [
-        "Uses LitElement for rendering",
-        "Supports internationalization"
-      ],
-      "implementedFeatures": [
-        "Renders service configuration examples",
-        "Displays icon, state, and custom configuration details"
-      ]
+      "generalDescription": "Service Details",
+      "businessCapabilities": [],
+      "technicalCapabilities": [],
+      "implementedFeatures": [],
+      "constraints": []
     }
   }
 }

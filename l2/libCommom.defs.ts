@@ -10,8 +10,7 @@ export const asis: mls.defs.AsIs = {
     "languages": [
       "en",
       "pt"
-    ],
-    "group": "enhancement"
+    ]
   },
   "references": {
     "imports": [
@@ -19,7 +18,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabLitElement.js",
         "dependencies": [
           {
-            "name": "getMessageKey"
+            "name": "getMessageKey",
+            "type": "function"
           }
         ]
       },
@@ -27,7 +27,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/libCompile.js",
         "dependencies": [
           {
-            "name": "getAllWebComponentsInSource"
+            "name": "getAllWebComponentsInSource",
+            "type": "function"
           }
         ]
       },
@@ -35,10 +36,12 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_102027_/l2/utils",
         "dependencies": [
           {
-            "name": "convertTagToFileName"
+            "name": "convertTagToFileName",
+            "type": "function"
           },
           {
-            "name": "convertFileNameToTag"
+            "name": "convertFileNameToTag",
+            "type": "function"
           }
         ]
       },
@@ -46,7 +49,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabImport.js",
         "dependencies": [
           {
-            "name": "collabImport"
+            "name": "collabImport",
+            "type": "function"
           }
         ]
       },
@@ -54,7 +58,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/serviceDetail.js",
         "dependencies": [
           {
-            "name": "ServiceDetail100554"
+            "name": "ServiceDetail100554",
+            "type": "class"
           }
         ]
       }
@@ -63,44 +68,35 @@ export const asis: mls.defs.AsIs = {
   "asIs": {
     "semantic": {
       "generalDescription": "Common utility library",
-      "businessCapabilities": [
-        "Retrieve project branch information",
-        "Create file paths",
-        "Generate timestamps",
-        "Format dates with i18n",
-        "Change favicon",
-        "Check local project existence",
-        "Manage local project name",
-        "Validate project names",
-        "Escape HTML",
-        "Open services in UI",
-        "Select levels",
-        "Force service instances",
-        "Load HTML files",
-        "Convert colors to hex",
-        "Get enhancement names",
-        "Load plugins",
-        "Manage project details",
-        "Calculate string sizes",
-        "Delete files",
-        "Load modules from dependencies",
-        "Find files in projects",
-        "Save opened files",
-        "Get last modules",
-        "Get base templates",
-        "Verify triple slash",
-        "Get instances",
-        "Validate names",
-        "Open elements in service details",
-        "Clear service details",
-        "Get project configs"
-      ],
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "TypeScript functions",
-        "DOM manipulation",
-        "Local storage operations",
-        "Cache management",
-        "Module loading"
+        "i18n messaging",
+        "project branch retrieval",
+        "path creation",
+        "timestamp generation",
+        "date formatting",
+        "favicon changing",
+        "project validation",
+        "HTML escaping",
+        "service opening",
+        "level selection",
+        "file loading",
+        "color conversion",
+        "enhancement name retrieval",
+        "plugin loading",
+        "project details management",
+        "string size calculation",
+        "file deletion",
+        "module loading",
+        "file finding",
+        "opened files storage",
+        "module storage",
+        "base template generation",
+        "triple slash verification",
+        "instance retrieval",
+        "name validation",
+        "service details opening",
+        "project config retrieval"
       ],
       "implementedFeatures": [
         "getMyKeysBranch",

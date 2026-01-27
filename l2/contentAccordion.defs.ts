@@ -10,15 +10,20 @@ export const asis: mls.defs.AsIs = {
     "group": "enhancement"
   },
   "references": {
+    "webComponents": [
+      "content-accordion-100554"
+    ],
     "imports": [
       {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html"
+            "name": "html",
+            "type": "function"
           },
           {
-            "name": "unsafeHTML"
+            "name": "unsafeHTML",
+            "type": "function"
           }
         ]
       },
@@ -26,10 +31,12 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement"
+            "name": "customElement",
+            "type": "function"
           },
           {
-            "name": "property"
+            "name": "property",
+            "type": "function"
           }
         ]
       },
@@ -37,7 +44,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabLitElement.js",
         "dependencies": [
           {
-            "name": "CollabLitElement"
+            "name": "CollabLitElement",
+            "type": "class"
           }
         ]
       }
@@ -45,17 +53,16 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Content Accordion Component",
-      "businessCapabilities": [
-        "Displays collapsible content sections"
-      ],
+      "generalDescription": "Content accordion component",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "Uses Lit for rendering",
-        "Custom element with properties"
+        "Renders HTML content",
+        "Handles click events",
+        "Manages selected state"
       ],
       "implementedFeatures": [
-        "Toggle functionality",
-        "Selected index property"
+        "Toggle accordion items",
+        "Render nav and content items"
       ]
     }
   }

@@ -6,7 +6,7 @@ export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/pluginCodelensCustomElement.ts",
     "componentType": "pluginUI",
-    "componentScope": "appFrontEnd",
+    "componentScope": "editor",
     "languages": [
       "en",
       "pt"
@@ -22,7 +22,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html"
+            "name": "html",
+            "type": "function"
           }
         ]
       },
@@ -30,7 +31,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement"
+            "name": "customElement",
+            "type": "function"
           }
         ]
       },
@@ -38,7 +40,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabLitElement.js",
         "dependencies": [
           {
-            "name": "CollabLitElement"
+            "name": "CollabLitElement",
+            "type": "class"
           }
         ]
       },
@@ -49,19 +52,17 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Custom element explaining @customElement decorator",
-      "businessCapabilities": [
-        "Provides educational content on Lit's @customElement"
-      ],
+      "generalDescription": "@customElement decorator explanation",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "Uses Lit for rendering",
-        "Supports internationalization",
-        "Renders code examples"
+        "custom element registration",
+        "i18n support",
+        "Lit rendering"
       ],
       "implementedFeatures": [
-        "Displays description and usage of @customElement",
-        "Shows code snippet",
-        "Includes external link"
+        "render description",
+        "usage example",
+        "link to Lit docs"
       ]
     }
   }

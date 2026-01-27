@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/collabTasks.ts",
-    "componentType": "organism",
+    "componentType": "molecule",
     "componentScope": "appFrontEnd",
     "languages": [
       "pt"
@@ -18,8 +18,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html",
-            "type": "function"
+            "name": "html"
           }
         ]
       },
@@ -27,12 +26,10 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement",
-            "type": "function"
+            "name": "customElement"
           },
           {
-            "name": "state",
-            "type": "function"
+            "name": "state"
           }
         ]
       },
@@ -49,8 +46,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabIcons.js",
         "dependencies": [
           {
-            "name": "collab_spinner_clock",
-            "type": "constant"
+            "name": "collab_spinner_clock"
           }
         ]
       }
@@ -58,20 +54,19 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Task management component with list and details views",
+      "generalDescription": "Task management web component",
       "businessCapabilities": [
-        "Display tasks in stages: EM PROGRESSO, REVIEW, PENDENTE",
-        "Switch to task details view",
-        "Navigate back to list"
+        "Task listing",
+        "Task details viewing"
       ],
       "technicalCapabilities": [
         "Lit web component",
-        "State management with @state decorators"
+        "State management"
       ],
       "implementedFeatures": [
-        "Render task list with stages",
-        "Render task details",
-        "Back button functionality"
+        "Display task list by stages",
+        "Switch to task details",
+        "Back to list"
       ]
     }
   }

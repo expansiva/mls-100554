@@ -8,8 +8,8 @@ export const asis: mls.defs.AsIs = {
     "componentType": "molecule",
     "componentScope": "appFrontEnd",
     "languages": [
-      "en",
-      "pt"
+      "en-us",
+      "pt-br"
     ],
     "group": "enhancement"
   },
@@ -56,24 +56,19 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabIcons.js",
         "dependencies": [
           {
-            "name": "collab_check",
-            "type": "constant"
+            "name": "collab_check"
           },
           {
-            "name": "collab_copy",
-            "type": "constant"
+            "name": "collab_copy"
           },
           {
-            "name": "collab_repeat",
-            "type": "constant"
+            "name": "collab_repeat"
           },
           {
-            "name": "collab_thumbs_down",
-            "type": "constant"
+            "name": "collab_thumbs_down"
           },
           {
-            "name": "collab_thumbs_up",
-            "type": "constant"
+            "name": "collab_thumbs_up"
           }
         ]
       },
@@ -90,25 +85,22 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Component for showing code differences",
+      "generalDescription": "LitElement component for code diff display with Monaco editor",
       "businessCapabilities": [
-        "show code diff",
-        "copy code",
-        "accept changes",
-        "reject changes",
-        "try again",
-        "toggle diff view"
+        "Code difference visualization",
+        "Code copying",
+        "Change acceptance or rejection"
       ],
       "technicalCapabilities": [
-        "uses LitElement",
-        "integrates Monaco editor",
-        "supports i18n"
+        "Monaco editor integration",
+        "LitElement web component",
+        "i18n support"
       ],
       "implementedFeatures": [
-        "diff editor",
-        "result editor",
-        "action buttons",
-        "CSS loading for Monaco"
+        "Diff and result view toggle",
+        "Copy to clipboard",
+        "Accept, reject, try again actions",
+        "Language indicator"
       ]
     }
   }

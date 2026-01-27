@@ -15,8 +15,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/serviceSource.js",
         "dependencies": [
           {
-            "name": "ServiceSource100554",
-            "type": "class"
+            "name": "ServiceSource100554"
           }
         ]
       },
@@ -24,8 +23,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/libCommom.js",
         "dependencies": [
           {
-            "name": "forceServiceInstance",
-            "type": "function"
+            "name": "forceServiceInstance"
           }
         ]
       },
@@ -33,8 +31,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabLibModel.js",
         "dependencies": [
           {
-            "name": "createAllModels",
-            "type": "function"
+            "name": "createAllModels"
           }
         ]
       },
@@ -42,8 +39,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabImport.js",
         "dependencies": [
           {
-            "name": "collabImport",
-            "type": "function"
+            "name": "collabImport"
           }
         ]
       }
@@ -53,14 +49,12 @@ export const asis: mls.defs.AsIs = {
     "semantic": {
       "generalDescription": "Design system base utilities",
       "businessCapabilities": [
-        "Manage design tokens",
-        "Handle asset uploads",
-        "Compile LESS to CSS"
+        "Managing design system tokens",
+        "Handling project assets"
       ],
       "technicalCapabilities": [
-        "Export functions for token manipulation",
-        "Provide asset filtering",
-        "Support LESS compilation"
+        "Compiling LESS",
+        "Serializing tokens"
       ],
       "implementedFeatures": [
         "getImages",

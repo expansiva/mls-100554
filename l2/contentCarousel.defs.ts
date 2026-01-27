@@ -50,23 +50,17 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Content carousel component with tabs and navigation",
-      "businessCapabilities": [
-        "Displays content in a carousel format",
-        "Allows selection via tabs",
-        "Provides previous and next navigation buttons"
-      ],
+      "generalDescription": "Content Carousel Component",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "Uses Lit for rendering",
-        "Manages selected index state",
-        "Renders nav and content items"
+        "Renders HTML content",
+        "Handles navigation"
       ],
       "implementedFeatures": [
-        "Tab selection handling",
-        "Previous button click handling",
-        "Next button click handling",
-        "Content rendering with unsafeHTML"
-      ]
+        "Tab navigation",
+        "Previous/Next buttons"
+      ],
+      "constraints": []
     }
   }
 }

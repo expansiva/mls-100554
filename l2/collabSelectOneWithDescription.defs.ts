@@ -11,20 +11,15 @@ export const asis: mls.defs.AsIs = {
       "en",
       "pt"
     ],
-    "group": "enhancement",
-    "devFidelity": "final"
+    "group": "enhancement"
   },
   "references": {
-    "webComponents": [
-      "collab-select-one-with-description-100554"
-    ],
     "imports": [
       {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html",
-            "type": "function"
+            "name": "html"
           }
         ]
       },
@@ -32,20 +27,16 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement",
-            "type": "function"
+            "name": "customElement"
           },
           {
-            "name": "property",
-            "type": "function"
+            "name": "property"
           },
           {
-            "name": "query",
-            "type": "function"
+            "name": "query"
           },
           {
-            "name": "queryAll",
-            "type": "function"
+            "name": "queryAll"
           }
         ]
       },
@@ -53,12 +44,10 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabDecorators.js",
         "dependencies": [
           {
-            "name": "propertyDataSource",
-            "type": "function"
+            "name": "propertyDataSource"
           },
           {
-            "name": "propertyCompositeDataSource",
-            "type": "function"
+            "name": "propertyCompositeDataSource"
           }
         ]
       },
@@ -66,8 +55,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/stateLitElement.js",
         "dependencies": [
           {
-            "name": "StateLitElement",
-            "type": "class"
+            "name": "StateLitElement"
           }
         ]
       },
@@ -75,8 +63,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabIcons.js",
         "dependencies": [
           {
-            "name": "collab_bolt",
-            "type": "constant"
+            "name": "collab_bolt"
           }
         ]
       }
@@ -84,25 +71,22 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "A select one component with hover descriptions",
+      "generalDescription": "A Lit web component for selecting one option with descriptions displayed on hover.",
       "businessCapabilities": [
-        "Allows selection of one option from a list",
-        "Displays descriptions on hover or focus"
+        "Allows users to select one option from a list with additional descriptions."
       ],
       "technicalCapabilities": [
-        "Custom Lit element",
-        "Keyboard navigation support",
-        "Event handling for blur, click, mouseover"
+        "Supports internationalization (en, pt)",
+        "Keyboard accessible (arrow keys, enter)",
+        "Mouse interactions (hover, click)",
+        "Dynamic popup positioning"
       ],
       "implementedFeatures": [
-        "Renders options list",
-        "Handles hover to show descriptions",
-        "Keyboard arrow navigation",
-        "Enter/space to select",
-        "Toggle open/close",
-        "Popup positioning calculation"
-      ],
-      "constraints": []
+        "Renders options in a list",
+        "Toggles dropdown on click",
+        "Updates description on hover/focus",
+        "Dispatches custom event on selection"
+      ]
     }
   }
 }

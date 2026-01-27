@@ -58,25 +58,17 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Vertical splitter component with variable fixed height",
-      "businessCapabilities": [
-        "Splits content into top and bottom panes",
-        "Toggles bottom pane visibility",
-        "Distributes msize to child elements"
-      ],
+      "generalDescription": "LitElement-based vertical splitter component with variable fixed height",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "LitElement custom element",
-        "Uses ResizeObserver for height changes",
-        "Manages CSS properties for layout"
+        "vertical pane splitting",
+        "dynamic height adjustment",
+        "resize observation"
       ],
       "implementedFeatures": [
-        "Toggle bottom pane on spliter click",
-        "Apply msize to panes",
-        "Observe resize on bottom pane"
-      ],
-      "constraints": [
-        "Requires msize attribute for sizing",
-        "Fixed height for bottom pane"
+        "collapsible bottom pane",
+        "resize handling",
+        "msize distribution"
       ]
     }
   }

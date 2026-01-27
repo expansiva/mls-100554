@@ -15,12 +15,10 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html",
-            "type": "function"
+            "name": "html"
           },
           {
-            "name": "css",
-            "type": "function"
+            "name": "css"
           }
         ]
       },
@@ -28,12 +26,10 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement",
-            "type": "function"
+            "name": "customElement"
           },
           {
-            "name": "property",
-            "type": "function"
+            "name": "property"
           }
         ]
       },
@@ -41,8 +37,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/stateLitElement.js",
         "dependencies": [
           {
-            "name": "StateLitElement",
-            "type": "class"
+            "name": "StateLitElement"
           }
         ]
       },
@@ -50,42 +45,21 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/designSystemBase.js",
         "dependencies": [
           {
-            "name": "getTokens",
-            "type": "function"
+            "name": "getTokens"
           },
           {
-            "name": "IDesignSystemTokens",
-            "type": "interface"
+            "name": "IDesignSystemTokens"
           }
         ]
       }
     ]
   },
-  "codeInsights": {
-    "unusedImports": [
-      "css"
-    ]
-  },
   "asIs": {
     "semantic": {
-      "generalDescription": "Visualization of design system tokens",
-      "businessCapabilities": [
-        "Displays color palette from Default theme",
-        "Renders text samples with primary and secondary backgrounds",
-        "Shows font family primary and secondary",
-        "Lists font sizes"
-      ],
-      "technicalCapabilities": [
-        "Uses Lit for rendering",
-        "Filters tokens by themeName",
-        "Maps color keys to styled divs"
-      ],
-      "implementedFeatures": [
-        "Displays colors excluding keys starting with _",
-        "Renders 'Hello world' in primary and secondary backgrounds",
-        "Displays 'Font family primary' and 'Font family secondary'",
-        "Lists font sizes 12,16,20,24,40,48,64"
-      ]
+      "generalDescription": "Visualization component for design system tokens",
+      "businessCapabilities": [],
+      "technicalCapabilities": [],
+      "implementedFeatures": []
     }
   }
 }
