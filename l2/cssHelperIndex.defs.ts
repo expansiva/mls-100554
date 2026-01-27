@@ -40,18 +40,15 @@ export const asis: mls.defs.AsIs = {
         "dependencies": [
           {
             "name": "customElement",
-            "type": "?",
-            "purpose": "decorator"
+            "type": "function"
           },
           {
             "name": "property",
-            "type": "?",
-            "purpose": "decorator"
+            "type": "function"
           },
           {
             "name": "queryAll",
-            "type": "?",
-            "purpose": "decorator"
+            "type": "function"
           }
         ]
       },
@@ -69,8 +66,7 @@ export const asis: mls.defs.AsIs = {
         "dependencies": [
           {
             "name": "propertyDataSource",
-            "type": "?",
-            "purpose": "decorator"
+            "type": "function"
           }
         ]
       },
@@ -132,23 +128,29 @@ export const asis: mls.defs.AsIs = {
       }
     ]
   },
+  "codeInsights": {
+    "unusedImports": [
+      "setState"
+    ],
+    "deadCodeBlocks": [
+      "// if (changedProperties.has('actualSelector') &&\n// this.actualProp === '' &&\n// this.actualValue === '' &&\n// this.actualSelector &&\n// (this.actualSelector.endsWith(':') || this.actualSelector.endsWith('::'))\n// ) {\n// this.avaliablePlugins = this.mergeHelpersArrays(this.avaliablePlugins, this.helpers);\n// this.helpers = this.avaliablePlugins.filter((pl) => pl.tags.includes('pseudo:*'));\n// if (this.helpers[0]) this.helpers[0].mode = 'full';\n// }"
+    ]
+  },
   "asIs": {
     "semantic": {
-      "generalDescription": "CSS Helper Index Component",
+      "generalDescription": "CSS Helper Index component",
       "businessCapabilities": [
-        "Manages CSS helpers based on properties and values",
-        "Filters and displays available plugins"
+        "Provide CSS helpers for properties and pseudo-selectors"
       ],
       "technicalCapabilities": [
-        "Uses Lit for rendering",
-        "Implements custom element with decorators",
-        "Handles state changes for CSS properties"
+        "Filter helpers by property and value",
+        "Merge helper arrays",
+        "Render helpers using Lit"
       ],
       "implementedFeatures": [
-        "Filters helpers by property and value",
-        "Merges helper arrays",
-        "Renders helper items",
-        "Supports internationalization for messages"
+        "Filtering by prop",
+        "Merging arrays",
+        "Rendering with repeat"
       ]
     }
   }
