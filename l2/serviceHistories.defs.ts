@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/serviceHistories.ts",
-    "componentType": "service",
+    "componentType": "editorService",
     "componentScope": "editor",
     "languages": [
       "en",
@@ -73,10 +73,21 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Histories",
-      "businessCapabilities": [],
-      "technicalCapabilities": [],
-      "implementedFeatures": []
+      "generalDescription": "File Histories Diff Service",
+      "businessCapabilities": [
+        "Display file history differences",
+        "Support side-by-side and inline diff modes"
+      ],
+      "technicalCapabilities": [
+        "Uses Monaco Diff Editor",
+        "Supports TypeScript, HTML, LESS languages",
+        "Integrates with MLS storage and events"
+      ],
+      "implementedFeatures": [
+        "Diff viewing",
+        "Editor mode switching",
+        "Loading and no selection states"
+      ]
     }
   }
 }
