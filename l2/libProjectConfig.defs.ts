@@ -7,31 +7,27 @@ export const asis: mls.defs.AsIs = {
     "fileReference": "_100554_/l2/libProjectConfig.ts",
     "componentType": "tool",
     "componentScope": "editor",
-    "group": "enhancement",
-    "devFidelity": "final"
+    "group": "enhancement"
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Library for project configuration",
+      "generalDescription": "Library for managing project configuration",
       "businessCapabilities": [
-        "clearLocalChanges",
-        "getConfigProject",
-        "updateConfigProject",
-        "updateConfigProjectPlugins",
-        "createConfigFile"
+        "Manage project configurations",
+        "Handle plugins",
+        "Support multiple languages"
       ],
       "technicalCapabilities": [
-        "async functions",
+        "Async file operations",
         "JSON parsing",
-        "file storage operations"
+        "Storage interactions"
       ],
       "implementedFeatures": [
         "clearLocalChanges",
         "getConfigProject",
         "updateConfigProject",
         "updateConfigProjectPlugins",
-        "createConfigFile",
-        "_createConfigFile"
+        "createConfigFile"
       ]
     }
   }
