@@ -7,8 +7,7 @@ export const asis: mls.defs.AsIs = {
     "fileReference": "_100554_/l2/designSystem.ts",
     "componentType": "other",
     "componentScope": "appFrontEnd",
-    "group": "enhancement",
-    "devFidelity": "final"
+    "group": "enhancement"
   },
   "references": {
     "imports": [
@@ -25,16 +24,14 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Design system tokens export",
-      "businessCapabilities": [
-        "Provides design tokens for themes"
-      ],
+      "generalDescription": "Exports design system tokens",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "Exports array of design tokens"
+        "Defines color, global, and typography tokens"
       ],
       "implementedFeatures": [
-        "Defines Default theme with color, global, and typography tokens",
-        "Defines Natal theme with color, global, and typography tokens"
+        "Default theme",
+        "Natal theme"
       ]
     }
   }
