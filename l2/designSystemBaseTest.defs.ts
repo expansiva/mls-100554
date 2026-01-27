@@ -68,13 +68,16 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Design System Base Test Component",
-      "businessCapabilities": [
-        "Testing design system functions"
-      ],
+      "generalDescription": "Design System Base Test",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "Extends StateLitElement",
-        "Uses Lit for rendering"
+        "getImages",
+        "getVideos",
+        "getTokens",
+        "getTokensLess",
+        "getTokensCss",
+        "addAssets",
+        "addNewTokensTheme"
       ],
       "implementedFeatures": [
         "Get Tokens",
