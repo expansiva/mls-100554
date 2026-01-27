@@ -6,8 +6,7 @@ export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/projectAST.ts",
     "componentType": "tool",
-    "componentScope": "editor",
-    "group": "enhancement"
+    "componentScope": "editor"
   },
   "references": {
     "imports": [
@@ -44,18 +43,20 @@ export const asis: mls.defs.AsIs = {
     "semantic": {
       "generalDescription": "Functions for managing project modules and configuration",
       "businessCapabilities": [
-        "Add module to project",
-        "Configure master front-end",
-        "Remove module from project"
+        "add module to project",
+        "configure master front-end",
+        "remove module from project"
       ],
       "technicalCapabilities": [
-        "Compile and post-process TypeScript models"
+        "create new file",
+        "import project config",
+        "set model value",
+        "compile and post-process"
       ],
       "implementedFeatures": [
         "addModule",
         "configureMasterFrontEnd",
-        "removeModule",
-        "getModel"
+        "removeModule"
       ]
     }
   }
