@@ -38,7 +38,13 @@ export const asis: mls.defs.AsIs = {
         ]
       },
       {
-        "ref": "/_100554_/l2/libCommom.js"
+        "ref": "/_100554_/l2/libCommom.js",
+        "dependencies": [
+          {
+            "name": "libCommom",
+            "type": "?"
+          }
+        ]
       }
     ]
   },
@@ -46,26 +52,9 @@ export const asis: mls.defs.AsIs = {
     "semantic": {
       "generalDescription": "Abstract base class for service components",
       "businessCapabilities": [],
-      "technicalCapabilities": [
-        "Manages service content, navigation, tooltips, loading states",
-        "Provides methods for service interaction"
-      ],
-      "implementedFeatures": [
-        "abstract details: IService",
-        "abstract menu: IServiceMenu",
-        "abstract onServiceClick method",
-        "getActualRef method",
-        "setError method",
-        "toogleBadge method",
-        "openMe method",
-        "showNav2Item method",
-        "openService method",
-        "setFullScreen method",
-        "selectLevel method",
-        "connectedCallback",
-        "attributeChangedCallback",
-        "updated method"
-      ]
+      "technicalCapabilities": [],
+      "implementedFeatures": [],
+      "constraints": []
     }
   }
 }
