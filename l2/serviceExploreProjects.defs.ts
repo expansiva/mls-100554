@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/serviceExploreProjects.ts",
-    "componentType": "editorService",
+    "componentType": "service",
     "componentScope": "editor",
     "languages": [
       "en",
@@ -33,19 +33,23 @@ export const asis: mls.defs.AsIs = {
         "dependencies": [
           {
             "name": "customElement",
-            "type": "function"
+            "type": "?",
+            "purpose": "decorator"
           },
           {
             "name": "property",
-            "type": "function"
+            "type": "?",
+            "purpose": "decorator"
           },
           {
             "name": "queryAll",
-            "type": "function"
+            "type": "?",
+            "purpose": "decorator"
           },
           {
             "name": "query",
-            "type": "function"
+            "type": "?",
+            "purpose": "decorator"
           }
         ]
       },
@@ -87,22 +91,24 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Service for exploring projects",
+      "generalDescription": "Service to explore and select projects",
       "businessCapabilities": [
-        "Explore projects",
-        "Select project",
-        "View history",
-        "Filter projects"
+        "explore projects",
+        "select project",
+        "view project history",
+        "filter projects"
       ],
       "technicalCapabilities": [
-        "Renders with Lit",
-        "Handles events",
-        "Manages state"
+        "render project lists",
+        "handle project selection events",
+        "manage project state",
+        "load project history"
       ],
       "implementedFeatures": [
-        "Project selection",
-        "History management",
-        "Project filtering"
+        "project history rendering",
+        "project list rendering",
+        "filtering projects",
+        "project selection"
       ]
     }
   }
