@@ -1,5 +1,120 @@
-/// <mls shortName="agentImprove" project="100554" enhancement="_blank" />
-				
-                // TODO: InDevelpoment
-                
-                
+/// <mls fileReference="_100554_/l2/agentImprove.ts" enhancement="_blank" />
+
+// Do not change – automatically generated code. 
+
+export const asis: mls.defs.AsIs = {
+  "meta": {
+    "fileReference": "_100554_/l2/agentImprove.ts",
+    "componentType": "agent",
+    "componentScope": "editor",
+    "group": "enhancement"
+  },
+  "references": {
+    "imports": [
+      {
+        "ref": "/_100554_/l2/aiAgentBase.js",
+        "dependencies": [
+          {
+            "name": "IAgent"
+          },
+          {
+            "name": "svg_agent"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/aiPrompts.js",
+        "dependencies": [
+          {
+            "name": "getPromptByHtml"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/aiAgentHelper.js",
+        "dependencies": [
+          {
+            "name": "getNextPendingStepByAgentName"
+          },
+          {
+            "name": "getNextInProgressStepByAgentName"
+          },
+          {
+            "name": "updateStepStatus"
+          },
+          {
+            "name": "getNextPendentStep"
+          },
+          {
+            "name": "updateTaskTitle"
+          },
+          {
+            "name": "appendLongTermMemory"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/aiAgentOrchestration.js",
+        "dependencies": [
+          {
+            "name": "startNewInteractionInAiTask"
+          },
+          {
+            "name": "startNewAiTask"
+          },
+          {
+            "name": "executeNextStep"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/libCommom.js",
+        "dependencies": [
+          {
+            "name": "forceServiceInstance"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/collabState.js",
+        "dependencies": [
+          {
+            "name": "setState"
+          },
+          {
+            "name": "getState"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/serviceSource.js",
+        "dependencies": [
+          {
+            "name": "ServiceSource100554"
+          }
+        ]
+      }
+    ]
+  },
+  "asIs": {
+    "semantic": {
+      "generalDescription": "Responsavel por fazer novas implmentações",
+      "businessCapabilities": [
+        "Planning",
+        "Widget improved"
+      ],
+      "technicalCapabilities": [],
+      "implementedFeatures": [
+        "createAgent",
+        "beforePrompt",
+        "afterPrompt",
+        "getPrompts",
+        "getContentByExtension",
+        "updateFile",
+        "getModel",
+        "refreshStateLock"
+      ]
+    }
+  }
+}
+    
