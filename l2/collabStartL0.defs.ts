@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/collabStartL0.ts",
-    "componentType": "page",
+    "componentType": "molecule",
     "componentScope": "appFrontEnd",
     "languages": [
       "en",
@@ -57,7 +57,9 @@ export const asis: mls.defs.AsIs = {
         "Select the current plan: enables the user to choose the subscription plan that best suits their needs and, if necessary, include billing information.",
         "Choose visual preferences: provides options to customize the tool’s appearance, such as themes, layout, and display settings."
       ],
-      "technicalCapabilities": [],
+      "technicalCapabilities": [
+        "Renders HTML with Lit"
+      ],
       "implementedFeatures": [
         "O usuário acessa o módulo L0 e tem uma visão geral dos projetos em que está envolvido.",
         "Se necessário, concede autoridades a outros membros da equipe para facilitar a colaboração.",
