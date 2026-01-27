@@ -5,41 +5,31 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/driverGithub.ts",
-    "componentType": "service",
+    "componentType": "repository",
     "componentScope": "appBackEnd",
     "group": "enhancement"
   },
   "references": {
     "imports": [
       {
-        "ref": "/_100554_/l2/driverLib.js"
+        "ref": "/_100554_/l2/driverLib.js",
+        "dependencies": []
       }
     ],
     "statesRO": [],
     "statesRW": [],
     "statesWO": []
   },
-  "codeInsights": {
-    "securityWarnings": [
-      "GitHub token stored in localStorage, potential security risk"
-    ],
-    "performanceHints": [
-      "Async operations for file processing may impact performance with large files"
-    ]
-  },
   "asIs": {
     "semantic": {
-      "generalDescription": "GitHub driver class for repository operations",
-      "businessCapabilities": [
-        "GitHub integration for file storage and version control"
-      ],
+      "generalDescription": "GitHub Driver Class",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "API calls to GitHub for CRUD operations",
-        "Token-based authentication",
-        "File content encoding/decoding"
+        "Extends mls.stor.others.DriverIOBase",
+        "Uses GitHub API",
+        "Handles file operations"
       ],
       "implementedFeatures": [
-        "init",
         "getContents",
         "setContents",
         "loadFilesInfo",
@@ -74,9 +64,8 @@ export const asis: mls.defs.AsIs = {
         "syncFork"
       ],
       "constraints": [
-        "Requires valid GitHub token",
-        "Depends on GitHub API availability",
-        "Limited to supported file types for content handling"
+        "Requires GitHub token",
+        "Async operations"
       ]
     }
   }
