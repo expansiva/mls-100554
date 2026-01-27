@@ -7,30 +7,27 @@ export const asis: mls.defs.AsIs = {
     "fileReference": "_100554_/l2/collabState.ts",
     "componentType": "tool",
     "componentScope": "editor",
-    "group": "enhancement"
+    "group": "enhancement",
+    "devFidelity": "final"
   },
   "references": {
     "statesRO": [
-      "db.products"
-    ],
-    "statesRW": [],
-    "statesWO": []
+      "db.products",
+      "ui.name"
+    ]
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Manages shared state",
-      "businessCapabilities": [
-        "State retrieval",
-        "State updates",
-        "Subscription management"
-      ],
+      "generalDescription": "Global state management module",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "getState",
-        "setState",
-        "subscribe",
-        "unsubscribe",
-        "notify",
-        "initState"
+        "State retrieval",
+        "State update",
+        "State subscription",
+        "State unsubscription",
+        "State notification",
+        "State initialization",
+        "History logging"
       ],
       "implementedFeatures": [
         "getState",
@@ -40,8 +37,7 @@ export const asis: mls.defs.AsIs = {
         "notify",
         "initState",
         "getHistory",
-        "clearHistory",
-        "getStateStatistics"
+        "clearHistory"
       ]
     }
   }
