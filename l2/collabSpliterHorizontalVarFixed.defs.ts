@@ -15,16 +15,13 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html",
-            "type": "function"
+            "name": "html"
           },
           {
-            "name": "css",
-            "type": "function"
+            "name": "css"
           },
           {
-            "name": "LitElement",
-            "type": "class"
+            "name": "LitElement"
           }
         ]
       },
@@ -32,25 +29,21 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement",
-            "type": "function"
+            "name": "customElement"
           },
           {
-            "name": "property",
-            "type": "function"
+            "name": "property"
           },
           {
-            "name": "queryAll",
-            "type": "function"
+            "name": "queryAll"
           }
         ]
       },
       {
-        "ref": "/_100554_/l2/collabIcons.js",
+        "ref": "/\\_100554_/l2/collabIcons.js",
         "dependencies": [
           {
-            "name": "collab_chevron_right",
-            "type": "constant"
+            "name": "collab_chevron_right"
           }
         ]
       }
@@ -59,21 +52,16 @@ export const asis: mls.defs.AsIs = {
   "asIs": {
     "semantic": {
       "generalDescription": "Horizontal splitter component with variable fixed width",
-      "businessCapabilities": [
-        "Splits view into left and right panes",
-        "Toggles visibility of right pane",
-        "Resizes panes based on fixed width"
-      ],
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "LitElement custom element",
-        "Handles property changes for visibility and width",
-        "Distributes slotted content"
+        "LitElement",
+        "custom properties",
+        "event handling"
       ],
       "implementedFeatures": [
-        "Toggle right pane open/close",
-        "Set fixed width in px or %",
-        "Update pane sizes on resize",
-        "Apply msize attributes to slotted elements"
+        "pane toggling",
+        "resizing",
+        "slot distribution"
       ]
     }
   }
