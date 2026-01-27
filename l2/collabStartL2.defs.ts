@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/collabStartL2.ts",
-    "componentType": "organism",
+    "componentType": "page",
     "componentScope": "appFrontEnd",
     "languages": [
       "en",
@@ -54,17 +54,8 @@ export const asis: mls.defs.AsIs = {
         "Include Component Dependencies",
         "Program Internal Components for Collab.codes"
       ],
-      "technicalCapabilities": [
-        "Lit web component",
-        "i18n support"
-      ],
-      "implementedFeatures": [
-        "Creation of visual components",
-        "Component documentation",
-        "Testing on devices",
-        "Dependency management",
-        "Internal component development"
-      ]
+      "technicalCapabilities": [],
+      "implementedFeatures": []
     }
   }
 }
