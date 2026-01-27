@@ -139,10 +139,28 @@ ai-agent-default-feedback-100554 {
         border-radius: 8px;
         padding: 10px;
         font-size: 12px;
+
+        >div{
+            display: flex;
+            gap: .5rem;
+            align-items: center;
+        }
+
+        svg {
+            height: 16px;
+            width: 16px;
+        }
+
+        .success {
+            fill: @success-color;
+        }
+
     }
-    .log-list{
+
+    .log-list {
         list-style: none;
         padding-inline-start: 0;
+
         pre {
             margin-left: @space-16;
         }
@@ -151,7 +169,7 @@ ai-agent-default-feedback-100554 {
     .trace-steps {
         margin: 6px 0 0;
         padding-left: 16px;
-        
+
     }
 
     .trace-steps li {
