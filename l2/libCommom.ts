@@ -164,6 +164,17 @@ export function getDateFormated(dt: string): string {
 
 }
 
+const iconCollabDefault = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSJ0cmFuc3BhcmVudCIgLz4KICA8dGV4dCB4PSIzMCIgeT0iNTYiIGZvbnQtZmFtaWx5PSJWZXJkYW5hIiBmb250LXNpemU9IjcyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iIzQyODVGNCI+QzwvdGV4dD4KICA8dGV4dCB4PSI0MCIgeT0iNDAiIGZvbnQtZmFtaWx5PSJWZXJkYW5hIiBmb250LXNpemU9IjM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iI0VBNDMzNSI+YzwvdGV4dD4KPC9zdmc+Cg==`;
+
+const iconCollabNotification = `data:image/svg+xml;utf8,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="60" height="60" fill="transparent"/><text x="30" y="56" font-family="Verdana" font-size="72" text-anchor="middle" font-weight="bold" fill="%234285F4">C</text><text x="40" y="40" font-family="Verdana" font-size="38" text-anchor="middle" font-weight="bold" fill="%23EA4335">c</text><circle cx="50" cy="10" r="12" fill="%23FF0000"/></svg>
+`;
+
+export function changeFavIcon(notification: boolean) {
+    const link: HTMLLinkElement | null = document.querySelector("#collabcodes_icon[rel~='icon']");
+    if (!link) return;
+    link.href = notification ? iconCollabNotification : iconCollabDefault;
+}
+
 export function checkIfHasLocalProject() {
     const hasFilePrjLocal = Object.values(mls.stor.files).find((item) => item.project === mls.stor.LOCALPROJECTNUMBER);
     return !!hasFilePrjLocal;
