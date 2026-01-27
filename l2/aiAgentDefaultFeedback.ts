@@ -4,7 +4,7 @@ import { html, TemplateResult, nothing, svg } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { getTask } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { collab_user, collab_clock_static, collab_terminal } from '/_100554_/l2/collabIcons.js';
+import { collab_user, collab_clock_static, collab_terminal, collab_play } from '/_100554_/l2/collabIcons.js';
 
 @customElement('ai-agent-default-feedback-100554')
 export class AiAgentDefaultFeedback100554 extends StateLitElement {
@@ -19,7 +19,7 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
         //this.task = await getTask('20250917143000.1001');
         //this.task = await getTask('20251205185425.1001');
         //this.task = await getTask('20251127123524.1001');
-        // this.task = await getTask('20260126134300.1001');
+        //this.task = await getTask('20260126134300.1001');
         // this.task = await getTask('20260126125152.1001');
         this.isAgentParallelMode = !!this.task?.iaCompressed?.nextSteps[0].progress;
         // console.info({ task: this.task, parallel: this.isAgentParallelMode })
@@ -49,25 +49,25 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
         );
     }
 
-    private getIconStep(status?: mls.msg.AIStepStatus) {
 
+
+
+    private getIconStep(status?: mls.msg.AIStepStatus) {
         switch (status) {
-            case 'completed': return '✅';
+            case 'completed': return html`<div class="success"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><title>45-Check</title><g id="_45-Check" data-name="45-Check"><path d="M30,15V25a5,5,0,0,1-5,5H7a5,5,0,0,1-5-5V7A5,5,0,0,1,7,2H17V0H7A7,7,0,0,0,0,7V25a7,7,0,0,0,7,7H25a7,7,0,0,0,7-7V15Z"/><path d="M7.71,13.29,6.29,14.71l7,7a1,1,0,0,0,1.41,0l16-16L29.29,4.29,14,19.59Z"/></g></svg></div>`
             case 'in_progress': return html`<div class="loader"></div>`;
             case 'failed': return '❌';
             case 'pending': return '⏳';
-            case 'waiting_after_prompt': return html`${collab_terminal}${collab_clock_static}`;
-            case 'waiting_human_input': return html`${collab_clock_static}`;
-
+            case 'waiting_after_prompt': return svg`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25"><defs><style>.cls-1{fill:#231f20}</style></defs><g id="clock_1" data-name="clock 1"><path class="cls-1" d="M12.5 1A11.5 11.5 0 1 0 24 12.5 11.51 11.51 0 0 0 12.5 1zm0 22A10.5 10.5 0 1 1 23 12.5 10.51 10.51 0 0 1 12.5 23z"/><path class="cls-1" d="M13 12.6V5.5a.5.5 0 0 0-1 0v7.32a.48.48 0 0 0 .16.36l5 4.68a.45.45 0 0 0 .34.14.5.5 0 0 0 .34-.86z"/></g></svg>`;
+            case 'waiting_human_input': return svg`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g data-name="18-Clock"><path d="M2 18a12 12 0 0 1 23.08-4.62l1.85-.77A14 14 0 0 0 16 4.14V2h1a2 2 0 0 0 2-2l-8 .06A.22.22 0 0 1 11 0H9a2 2 0 0 0 2 2h1v2.16A14 14 0 0 0 14 32v-2A12 12 0 0 1 2 18z"/><path d="M15 11h-2v7a1 1 0 0 0 .29.71l3 3 1.41-1.41-2.7-2.71zM31 27.23V24a6 6 0 0 0-5-5.91V17h-2v1.09A6 6 0 0 0 19 24v3.23A1.89 1.89 0 0 0 18 29l2-.1a.15.15 0 0 1-.15.1h2.33a3 3 0 0 0 5.63 0H32a1.89 1.89 0 0 0-1-1.77zM29 27h-8v-3a4 4 0 0 1 8 0z"/></g></svg>`;
             default: return '•';
         }
     }
 
-
     private getIconTask(status?: mls.msg.TaskStatus) {
 
         switch (status) {
-            case 'done': return '✅';
+            case 'done': return html`<div class="success"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><title>45-Check</title><g id="_45-Check" data-name="45-Check"><path d="M30,15V25a5,5,0,0,1-5,5H7a5,5,0,0,1-5-5V7A5,5,0,0,1,7,2H17V0H7A7,7,0,0,0,0,7V25a7,7,0,0,0,7,7H25a7,7,0,0,0,7-7V15Z"/><path d="M7.71,13.29,6.29,14.71l7,7a1,1,0,0,0,1.41,0l16-16L29.29,4.29,14,19.59Z"/></g></svg></div>`
             case 'in progress': return html`<div class="loader"></div>`;
             case 'failed': return '❌';
             default: return '•';
@@ -262,17 +262,8 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
 
             return html`
             <div class="log-card">
-                ${obj.title ? html`<strong>${obj.title}</strong>` : nothing}
-
-                ${Array.isArray(obj.trace)
-                    ? html`
-                        <ul class="trace-steps">
-                            ${obj.trace.map((t: string) =>
-                        html`<li>${t}</li>`
-                    )}
-                        </ul>
-                    `
-                    : html`<pre>${JSON.stringify(obj, null, 2)}</pre>`}
+                ${obj.title ? html`${this.getIconStep(obj.ok ? 'completed' : 'failed')} <strong>${obj.title}</strong>` : nothing}
+                <pre>${JSON.stringify(obj, null, 2)}</pre>
             </div>
         `;
         }

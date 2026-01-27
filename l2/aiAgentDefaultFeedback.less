@@ -22,7 +22,20 @@ ai-agent-default-feedback-100554 {
         }
 
         .icon {
+            svg {
+                height: 16px;
+                width: 16px;
+            }
+
+            .success {
+                fill: @success-color;
+            }
+
             margin-left: -8px;
+
+            .play {
+                cursor: pointer;
+            }
         }
 
 
@@ -127,10 +140,18 @@ ai-agent-default-feedback-100554 {
         padding: 10px;
         font-size: 12px;
     }
+    .log-list{
+        list-style: none;
+        padding-inline-start: 0;
+        pre {
+            margin-left: @space-16;
+        }
+    }
 
     .trace-steps {
         margin: 6px 0 0;
         padding-left: 16px;
+        
     }
 
     .trace-steps li {
