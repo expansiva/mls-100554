@@ -11,28 +11,25 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Utility library for GraphQL fetching, project branch retrieval, and base64 file conversions",
+      "generalDescription": "Utility library for GraphQL fetching, Git branch retrieval, and base64 file operations",
       "businessCapabilities": [
         "Fetch GraphQL queries",
-        "Retrieve Git branch information from project URLs",
-        "Convert base64 to blob and vice versa",
-        "Encode/decode Unicode strings"
+        "Retrieve Git repository branch information",
+        "Convert files to/from base64"
       ],
       "technicalCapabilities": [
-        "Promise-based asynchronous operations",
-        "JSON parsing and manipulation",
-        "FileReader for base64 encoding",
-        "MIME type detection"
+        "HTTP requests with fetch",
+        "Base64 encoding/decoding",
+        "MIME type detection",
+        "Local storage access"
       ],
       "implementedFeatures": [
-        "myFetchQL function",
-        "getMyKeysBranch function",
-        "getBranchCurrent function",
-        "base64ToBlob function",
-        "fileToBase64 function",
-        "base64EncodeUnicode function",
-        "base64DecodeUnicode function",
-        "getMimeType function"
+        "myFetchQL",
+        "getMyKeysBranch",
+        "base64ToBlob",
+        "fileToBase64",
+        "base64EncodeUnicode",
+        "base64DecodeUnicode"
       ]
     }
   }
