@@ -18,8 +18,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html",
-            "type": "function"
+            "name": "html"
           }
         ]
       },
@@ -27,41 +26,33 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement",
-            "type": "function"
+            "name": "customElement"
           },
           {
-            "name": "state",
-            "type": "function"
+            "name": "state"
           }
         ]
       },
       {
-        "ref": "/\\_100554_/l2/libCommom.js",
+        "ref": "/_100554_/l2/libCommom.js",
         "dependencies": [
           {
-            "name": "getInstanceByFile",
-            "type": "function"
+            "name": "getInstanceByFile"
           },
           {
-            "name": "openService",
-            "type": "function"
+            "name": "openService"
           },
           {
-            "name": "saveOpenedFile",
-            "type": "function"
+            "name": "saveOpenedFile"
           },
           {
-            "name": "getLastModule",
-            "type": "function"
+            "name": "getLastModule"
           },
           {
-            "name": "setLastModule",
-            "type": "function"
+            "name": "setLastModule"
           },
           {
-            "name": "getProjectConfig",
-            "type": "function"
+            "name": "getProjectConfig"
           }
         ]
       },
@@ -69,36 +60,51 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/stateLitElement.js",
         "dependencies": [
           {
-            "name": "StateLitElement",
-            "type": "class"
+            "name": "StateLitElement"
           }
         ]
       },
       {
         "ref": "/_100554_pluginDeleteModule"
       }
-    ]
+    ],
+    "statesRO": [],
+    "statesRW": [],
+    "statesWO": []
+  },
+  "codeInsights": {
+    "todos": [
+      "Implement add module functionality"
+    ],
+    "securityWarnings": [],
+    "unusedImports": [],
+    "deadCodeBlocks": [],
+    "accessibilityIssues": [],
+    "i18nWarnings": [],
+    "performanceHints": []
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Module selection and management component",
+      "generalDescription": "Module selector component",
       "businessCapabilities": [
-        "Select a module from a list",
+        "Select module",
         "View module details",
-        "Add new modules",
         "Filter modules"
       ],
       "technicalCapabilities": [
-        "Renders different views based on currentView state",
-        "Uses Lit for templating",
-        "Manages module state and local storage"
+        "Lit-based web component",
+        "State management",
+        "Event handling"
       ],
       "implementedFeatures": [
-        "Module list rendering",
-        "Module details view",
-        "Add module view",
-        "Error handling",
-        "Filtering functionality"
+        "Render module list",
+        "Render module details",
+        "Render error view",
+        "Render add view",
+        "Filter modules",
+        "Select module",
+        "Load last selected module",
+        "Save selected module"
       ]
     }
   }
