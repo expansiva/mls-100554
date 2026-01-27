@@ -46,7 +46,7 @@ export const asis: mls.defs.AsIs = {
         ]
       },
       {
-        "ref": "/_100554_/l2/stateLitElement.js",
+        "ref": "/\\_100554_/l2/stateLitElement.js",
         "dependencies": [
           {
             "name": "StateLitElement",
@@ -58,18 +58,16 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Tab slider component with animation",
+      "generalDescription": "LitElement component for tab slider",
       "businessCapabilities": [
-        "Tab switching"
+        "Tab navigation"
       ],
       "technicalCapabilities": [
-        "LitElement custom element",
-        "Animation handling"
+        "Animation",
+        "DOM manipulation"
       ],
       "implementedFeatures": [
-        "Active index property",
-        "Animation timer",
-        "Tab switching logic"
+        "Switch tabs with animation"
       ]
     }
   }
