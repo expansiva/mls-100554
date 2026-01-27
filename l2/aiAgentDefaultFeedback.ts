@@ -24,6 +24,7 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
         this.isAgentParallelMode = !!this.task?.iaCompressed?.nextSteps[0].progress;
         // console.info({ task: this.task, parallel: this.isAgentParallelMode })
     }
+    
 
     updated(_changedProperties: Map<PropertyKey, unknown>) {
         super.updated(_changedProperties);
@@ -262,7 +263,9 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
 
             return html`
             <div class="log-card">
-                ${obj.title ? html`${this.getIconStep(obj.ok ? 'completed' : 'failed')} <strong>${obj.title}</strong>` : nothing}
+                ${obj.title ?
+                    html`<div> ${this.getIconStep(obj.ok ? 'completed' : 'failed')} <strong>${obj.title}</strong></div>`
+                : nothing}
                 <pre>${JSON.stringify(obj, null, 2)}</pre>
             </div>
         `;
