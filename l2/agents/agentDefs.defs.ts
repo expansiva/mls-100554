@@ -6,7 +6,8 @@ export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/agents/agentDefs.ts",
     "componentType": "agent",
-    "componentScope": "editor"
+    "componentScope": "editor",
+    "group": "enhancement"
   },
   "references": {
     "imports": [
@@ -37,20 +38,9 @@ export const asis: mls.defs.AsIs = {
   "asIs": {
     "semantic": {
       "generalDescription": "Create or Update Defs",
-      "businessCapabilities": [
-        "Generate defs for files",
-        "Update defs for multiple files"
-      ],
-      "technicalCapabilities": [
-        "Uses AI for prompt generation",
-        "Manages file updates"
-      ],
-      "implementedFeatures": [
-        "beforePromptAtomic",
-        "beforePromptImplicit",
-        "beforePromptStep",
-        "afterPromptStep"
-      ]
+      "businessCapabilities": [],
+      "technicalCapabilities": [],
+      "implementedFeatures": []
     }
   }
 }

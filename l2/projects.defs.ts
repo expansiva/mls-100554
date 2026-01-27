@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/projects.ts",
-    "componentType": "page",
+    "componentType": "organism",
     "componentScope": "appFrontEnd",
     "group": "enhancement"
   },
@@ -71,26 +71,40 @@ export const asis: mls.defs.AsIs = {
       }
     ]
   },
+  "codeInsights": {
+    "todos": [
+      "In develpoment"
+    ]
+  },
   "asIs": {
     "semantic": {
-      "generalDescription": "Projects management component",
+      "generalDescription": "Projects component",
       "businessCapabilities": [
         "list projects",
         "select project",
         "view project details",
-        "add new project",
-        "archive project"
+        "archive project",
+        "add new project"
       ],
       "technicalCapabilities": [
-        "Lit web component",
-        "state management"
+        "render project lists",
+        "handle state changes",
+        "filter projects"
       ],
       "implementedFeatures": [
+        "render header",
         "render project list",
+        "render current project",
+        "render user projects",
+        "render community projects",
         "render project details",
-        "render add project",
-        "filter projects",
-        "archive confirmation"
+        "render add view",
+        "get organizations and projects",
+        "create local project item",
+        "open details",
+        "go back",
+        "confirm archive",
+        "on project click"
       ]
     }
   }

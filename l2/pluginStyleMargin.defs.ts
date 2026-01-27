@@ -22,12 +22,10 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html",
-            "type": "function"
+            "name": "html"
           },
           {
-            "name": "repeat",
-            "type": "function"
+            "name": "repeat"
           }
         ]
       },
@@ -35,20 +33,16 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement",
-            "type": "function"
+            "name": "customElement"
           },
           {
-            "name": "property",
-            "type": "function"
+            "name": "property"
           },
           {
-            "name": "query",
-            "type": "function"
+            "name": "query"
           },
           {
-            "name": "queryAll",
-            "type": "function"
+            "name": "queryAll"
           }
         ]
       },
@@ -56,8 +50,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/stateLitElement.js",
         "dependencies": [
           {
-            "name": "StateLitElement",
-            "type": "class"
+            "name": "StateLitElement"
           }
         ]
       },
@@ -65,8 +58,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabDecorators.js",
         "dependencies": [
           {
-            "name": "propertyDataSource",
-            "type": "function"
+            "name": "propertyDataSource"
           }
         ]
       },
@@ -74,12 +66,10 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabState.js",
         "dependencies": [
           {
-            "name": "setState",
-            "type": "function"
+            "name": "setState"
           },
           {
-            "name": "getState",
-            "type": "function"
+            "name": "getState"
           }
         ]
       },
@@ -87,8 +77,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabLitElement.js",
         "dependencies": [
           {
-            "name": "getMessageKey",
-            "type": "function"
+            "name": "getMessageKey"
           }
         ]
       },
@@ -96,8 +85,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/lessCSS.js",
         "dependencies": [
           {
-            "name": "ICSSState",
-            "type": "interface"
+            "name": "ICSSState"
           }
         ]
       },
@@ -111,28 +99,22 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabIcons.js",
         "dependencies": [
           {
-            "name": "collab_lock",
-            "type": "constant"
+            "name": "collab_lock"
           },
           {
-            "name": "collab_lock_open",
-            "type": "constant"
+            "name": "collab_lock_open"
           },
           {
-            "name": "collab_margin_bottom",
-            "type": "constant"
+            "name": "collab_margin_bottom"
           },
           {
-            "name": "collab_margin_top",
-            "type": "constant"
+            "name": "collab_margin_top"
           },
           {
-            "name": "collab_margin_left",
-            "type": "constant"
+            "name": "collab_margin_left"
           },
           {
-            "name": "collab_margin_right",
-            "type": "constant"
+            "name": "collab_margin_right"
           }
         ]
       }
@@ -142,18 +124,16 @@ export const asis: mls.defs.AsIs = {
     "semantic": {
       "generalDescription": "This plugin enables easy and intuitive adjustments of margins.Ideal for developers seeking precise element spacing, it streamlines the setup of inner and outer distances to ensure a consistent and well-structured layout.",
       "businessCapabilities": [
-        "adjust margins",
-        "set spacing for elements"
+        "adjusting margins of elements"
       ],
       "technicalCapabilities": [
-        "manipulate CSS margin properties",
-        "integrate with LESS CSS",
-        "provide UI for margin settings"
+        "CSS state handling",
+        "Lit rendering"
       ],
       "implementedFeatures": [
-        "margin lock feature",
-        "gallery for preset margins",
-        "input ranges for each margin side"
+        "margin locking",
+        "gallery presets",
+        "individual margin controls"
       ]
     }
   }

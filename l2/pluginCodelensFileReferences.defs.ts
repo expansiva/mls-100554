@@ -28,12 +28,10 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement",
-            "type": "function"
+            "name": "customElement"
           },
           {
-            "name": "property",
-            "type": "function"
+            "name": "property"
           }
         ]
       },
@@ -48,23 +46,19 @@ export const asis: mls.defs.AsIs = {
       }
     ]
   },
-  "codeInsights": {
-    "deadCodeBlocks": [
-      "return [];"
-    ]
-  },
   "asIs": {
     "semantic": {
-      "generalDescription": "Plugin for code lens file references",
+      "generalDescription": "Plugin for displaying file references in code lens",
       "businessCapabilities": [
         "Display file references"
       ],
       "technicalCapabilities": [
-        "Lit web component",
-        "i18n support"
+        "Renders HTML template",
+        "Handles click events",
+        "Fires file open events"
       ],
       "implementedFeatures": [
-        "Render references list",
+        "Fetch and display references",
         "Handle click to open file"
       ]
     }

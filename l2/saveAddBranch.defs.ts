@@ -15,16 +15,20 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html"
+            "name": "html",
+            "type": "function"
           },
           {
-            "name": "css"
+            "name": "css",
+            "type": "function"
           },
           {
-            "name": "repeat"
+            "name": "repeat",
+            "type": "function"
           },
           {
-            "name": "LitElement"
+            "name": "LitElement",
+            "type": "class"
           }
         ]
       },
@@ -32,18 +36,21 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement"
+            "name": "customElement",
+            "type": "function"
           },
           {
-            "name": "property"
+            "name": "property",
+            "type": "function"
           }
         ]
       },
       {
-        "ref": "/_100554_/l2/libCommom",
+        "ref": "/\\_100554_/l2/libCommom",
         "dependencies": [
           {
-            "name": "getMyKeysBranch"
+            "name": "getMyKeysBranch",
+            "type": "function"
           }
         ]
       }
@@ -51,22 +58,21 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Web component for managing repository branches and forks",
+      "generalDescription": "LitElement web component for saving and adding branches",
       "businessCapabilities": [
         "List branches",
         "List forks",
-        "Add new branch",
-        "Select branch or fork"
+        "Add new branch"
       ],
       "technicalCapabilities": [
-        "Renders UI modes for listing and adding",
-        "Interacts with driver for repository operations"
+        "Renders UI with LitElement",
+        "Handles user interactions",
+        "Calls driver methods"
       ],
       "implementedFeatures": [
-        "Branch listing with filter",
+        "Branch listing",
         "Fork listing",
-        "Add branch form with validation",
-        "Selection callbacks for branches and forks"
+        "New branch creation"
       ]
     }
   }

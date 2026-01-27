@@ -7,7 +7,8 @@ export const asis: mls.defs.AsIs = {
     "fileReference": "_100554_/l2/previewModeUtil.ts",
     "componentType": "tool",
     "componentScope": "editor",
-    "group": "enhancement"
+    "group": "enhancement",
+    "devFidelity": "final"
   },
   "references": {
     "imports": [
@@ -42,22 +43,15 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Utility functions for preview mode",
-      "businessCapabilities": [],
+      "generalDescription": "Utility functions for preview mode iframe management",
+      "businessCapabilities": [
+        "Preview mode simulation",
+        "Iframe content mounting"
+      ],
       "technicalCapabilities": [
-        "mountJSImporMap",
-        "mountCSS",
-        "mountTokens",
-        "removeOlderTokens",
-        "getIdTokens",
-        "simulateService",
-        "addFA",
-        "addTooltip",
-        "addStyleMls",
-        "addNav3",
-        "waitForComponents",
-        "functionReplaceAnchor",
-        "addJsReference"
+        "DOM manipulation",
+        "Import map injection",
+        "CSS and script addition"
       ],
       "implementedFeatures": [
         "mountJSImporMap",

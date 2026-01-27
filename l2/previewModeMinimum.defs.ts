@@ -27,19 +27,19 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "PreviewModeMinimum class for handling preview initialization",
-      "businessCapabilities": [
-        "preview mode functionality"
-      ],
+      "generalDescription": "PreviewModeMinimum class",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "mounts JavaScript, CSS, and tokens in iframe",
-        "loads scripts sequentially"
+        "Mount JS import map",
+        "Mount JS scripts",
+        "Mount CSS",
+        "Mount tokens",
+        "Simulate service"
       ],
       "implementedFeatures": [
-        "init method",
-        "mountJS method"
-      ],
-      "constraints": []
+        "init",
+        "mountJS"
+      ]
     }
   }
 }

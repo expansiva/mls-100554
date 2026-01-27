@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/serviceDashboard.ts",
-    "componentType": "editorService",
+    "componentType": "service",
     "componentScope": "editor",
     "group": "enhancement"
   },
@@ -23,7 +23,7 @@ export const asis: mls.defs.AsIs = {
           },
           {
             "name": "css",
-            "type": "function"
+            "type": "constant"
           }
         ]
       },
@@ -86,23 +86,20 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Service dashboard component for displaying plugin tiles in tabs",
+      "generalDescription": "Service Dashboard",
       "businessCapabilities": [
-        "Displays dashboard with plugin tiles categorized into Examples 1 and Examples 2"
+        "Display plugins in tiles",
+        "Switch between tabs for Example 1 and Example 2"
       ],
       "technicalCapabilities": [
-        "Uses Lit for rendering",
-        "Implements custom element",
-        "Loads and configures plugins dynamically",
-        "Handles responsive breakpoints",
-        "Manages tab switching"
+        "Load plugins from project config",
+        "Render collab-tiles-100554",
+        "Handle responsive breakpoints"
       ],
       "implementedFeatures": [
-        "Renders collab-tiles based on active tab",
-        "Loads plugins from project configuration",
-        "Sorts tiles by index",
-        "Shows about dialog",
-        "Handles service visibility and mode changes"
+        "Tab navigation",
+        "Plugin loading and sorting",
+        "Tile positioning"
       ]
     }
   }

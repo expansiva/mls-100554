@@ -75,39 +75,25 @@ export const asis: mls.defs.AsIs = {
           }
         ]
       }
-    ],
-    "webComponents": [
-      "plugin-codelens-file-references-100554"
     ]
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "ServiceDetail extends ServiceBase for plugin details",
-      "businessCapabilities": [],
+      "generalDescription": "ServiceDetail component for displaying plugin details",
+      "businessCapabilities": [
+        "Display plugin information",
+        "Handle user interactions for plugin details",
+        "Show about content for selected plugins"
+      ],
       "technicalCapabilities": [
-        "Lit element",
-        "Custom element",
-        "Event handling"
+        "Implements custom element",
+        "Manages event listeners",
+        "Dynamically loads and updates HTML content"
       ],
       "implementedFeatures": [
-        "onClickMain",
-        "showAboutThis",
-        "updateContentPluginWithElement",
-        "clear",
-        "onServiceClick",
-        "renderDefault",
-        "setEvents",
-        "onMonacoEvents",
-        "onFileActionReceived",
-        "onPluginDetails",
-        "onWidgetChanged",
-        "showPluginContent",
-        "getHtmlFromPlugin",
-        "updateContentPluginWithScripts",
-        "_updateContentPluginWithElement",
-        "setContentElement",
-        "setContentinEl",
-        "fireEvents"
+        "Plugin detail rendering",
+        "Event handling for plugin details, Monaco actions, and file actions",
+        "Menu functionality for about and mode setting"
       ]
     }
   }
