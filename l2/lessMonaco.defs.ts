@@ -21,7 +21,14 @@ export const asis: mls.defs.AsIs = {
         "updateLine",
         "finishEdit"
       ],
-      "implementedFeatures": []
+      "implementedFeatures": [
+        "getLines",
+        "insertLine",
+        "deleteLine",
+        "deleteLines",
+        "updateLine",
+        "finishEdit"
+      ]
     }
   }
 }
