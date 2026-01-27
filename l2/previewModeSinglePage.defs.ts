@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/previewModeSinglePage.ts",
-    "componentType": "editorService",
+    "componentType": "tool",
     "componentScope": "editor",
     "group": "enhancement"
   },
@@ -40,13 +40,15 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "PreviewModeSinglePage class for handling single page previews",
+      "generalDescription": "Preview mode single page class",
       "businessCapabilities": [],
       "technicalCapabilities": [
-        "Loads esbuild",
-        "Configures iframe",
-        "Bundles JavaScript",
-        "Handles caching"
+        "esbuild integration",
+        "iframe configuration",
+        "import parsing",
+        "widget detection",
+        "virtual file system",
+        "caching"
       ],
       "implementedFeatures": [
         "init",
@@ -56,8 +58,7 @@ export const asis: mls.defs.AsIs = {
         "loadEsbuild",
         "initializeEsBuild",
         "loadCache"
-      ],
-      "constraints": []
+      ]
     }
   }
 }
