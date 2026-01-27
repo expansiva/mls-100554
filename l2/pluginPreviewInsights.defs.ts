@@ -7,7 +7,6 @@ export const asis: mls.defs.AsIs = {
     "fileReference": "_100554_/l2/pluginPreviewInsights.ts",
     "componentType": "pluginUI",
     "componentScope": "appFrontEnd",
-    "group": "enhancement",
     "languages": [
       "en",
       "pt"
@@ -15,11 +14,7 @@ export const asis: mls.defs.AsIs = {
   },
   "references": {
     "webComponents": [
-      "collab-input-tag-100554",
-      "widget-defs-planning-checklist-edit-100554",
-      "widget-defs-list-edit-100554",
-      "widget-defs-object-list-edit-100554",
-      "widget-defs-plugin-list-edit-100554"
+      "widget-defs-list-edit-100554"
     ],
     "imports": [
       {
@@ -27,18 +22,6 @@ export const asis: mls.defs.AsIs = {
         "dependencies": [
           {
             "name": "html"
-          },
-          {
-            "name": "css"
-          },
-          {
-            "name": "repeat"
-          },
-          {
-            "name": "ifDefined"
-          },
-          {
-            "name": "TemplateResult"
           }
         ]
       },
@@ -68,27 +51,6 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabIcons.js",
         "dependencies": [
           {
-            "name": "collab_file_pen"
-          },
-          {
-            "name": "collab_bug_x12"
-          },
-          {
-            "name": "collab_lightbulb"
-          },
-          {
-            "name": "collab_trash"
-          },
-          {
-            "name": "collab_plus"
-          },
-          {
-            "name": "collab_triangle_exclamation"
-          },
-          {
-            "name": "collab_rectangle_list"
-          },
-          {
             "name": "collab_code"
           },
           {
@@ -104,12 +66,6 @@ export const asis: mls.defs.AsIs = {
         "dependencies": [
           {
             "name": "globalState"
-          },
-          {
-            "name": "getState"
-          },
-          {
-            "name": "initState"
           }
         ]
       },
@@ -122,6 +78,14 @@ export const asis: mls.defs.AsIs = {
         ]
       },
       {
+        "ref": "/_100554_/l2/collabLibModel.js",
+        "dependencies": [
+          {
+            "name": "createModel"
+          }
+        ]
+      },
+      {
         "ref": "/_100554_/l2/serviceSource.js",
         "dependencies": [
           {
@@ -130,29 +94,29 @@ export const asis: mls.defs.AsIs = {
         ]
       },
       {
-        "ref": "/_100554_/l2/collabInputTag.js"
-      },
-      {
-        "ref": "/_100554_/l2/widgetDefsPlanningChecklistEdit.js"
-      },
-      {
         "ref": "/_100554_/l2/widgetDefsListEdit.js"
-      },
-      {
-        "ref": "/_100554_/l2/widgetDefsObjectListEdit.js"
-      },
-      {
-        "ref": "/_100554_/l2/widgetDefsPluginListEdit"
       }
     ]
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Plugin Preview Insights",
-      "businessCapabilities": [],
-      "technicalCapabilities": [],
-      "implementedFeatures": [],
-      "constraints": []
+      "generalDescription": "Plugin for previewing insights",
+      "businessCapabilities": [
+        "Display business insights",
+        "Display technical insights",
+        "Edit settings"
+      ],
+      "technicalCapabilities": [
+        "Render tabbed interface",
+        "Load AsIs data",
+        "Save defs"
+      ],
+      "implementedFeatures": [
+        "Technical tab",
+        "Business tab",
+        "Settings tab",
+        "Save functionality"
+      ]
     }
   }
 }
