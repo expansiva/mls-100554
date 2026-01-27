@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/collabStartL5.ts",
-    "componentType": "page",
+    "componentType": "molecule",
     "componentScope": "appFrontEnd",
     "languages": [
       "en",
@@ -19,8 +19,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html",
-            "type": "function"
+            "name": "html"
           }
         ]
       },
@@ -28,8 +27,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement",
-            "type": "function"
+            "name": "customElement"
           }
         ]
       },
@@ -48,18 +46,21 @@ export const asis: mls.defs.AsIs = {
     "semantic": {
       "generalDescription": "Module L5 - Management: Description and Features",
       "businessCapabilities": [
-        "Visualização de Páginas do Projeto",
-        "Infraestrutura",
-        "Visualização de Recursos",
-        "Fluxo de Uso"
+        "Project Pages Overview",
+        "Infrastructure",
+        "Resource Overview",
+        "Usage Flow"
       ],
-      "technicalCapabilities": [
-        "Lit web component",
-        "i18n support for English and Portuguese"
-      ],
+      "technicalCapabilities": [],
       "implementedFeatures": [
-        "Rendering of module description with details and news sections",
-        "Internationalization using message objects"
+        "A Kanban board displaying all project pages categorized by status: \"Todo,\" \"Planning,\" \"In Progress,\" \"Review,\" and \"Complete.\"",
+        "A simple list view showing all project pages, offering a quick overview of ongoing development.",
+        "Allows configuration of hosting, database, plugins, external modules, and other technical options for application deployment.",
+        "Displays a list of all project contributors with metrics on their collaboration, such as completed tasks, hours worked, and more.",
+        "The user accesses the L5 module and gets an overview via dashboards and lists.",
+        "Uses the Pages Board to move pages across different statuses and track progress.",
+        "Accesses the Infrastructure section to configure technical project details.",
+        "Utilizes the Resource Overview to monitor team effectiveness and make necessary adjustments."
       ]
     }
   }
