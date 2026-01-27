@@ -25,7 +25,7 @@ export const asis: mls.defs.AsIs = {
           },
           {
             "name": "css",
-            "type": "function"
+            "type": "constant"
           },
           {
             "name": "LitElement",
@@ -76,27 +76,23 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "LitElement component for dashboard tiles items",
+      "generalDescription": "LitElement component for collaborative tiles item",
       "businessCapabilities": [
-        "Display plugin tiles",
+        "Render tiles in a dashboard",
+        "Load and display plugins",
         "Enable/disable tiles",
-        "Resize tiles via drag",
-        "Load and render plugins dynamically",
-        "Handle click to open plugin details"
+        "Resize tiles via drag"
       ],
       "technicalCapabilities": [
-        "Extends CollabLitElement",
-        "Uses LitElement for rendering",
-        "Handles drag events for resizing",
-        "Dynamically imports and creates plugin elements"
+        "Uses LitElement for web components",
+        "Implements drag and drop for resizing",
+        "Dynamically imports plugins"
       ],
       "implementedFeatures": [
-        "Loading state with animation",
-        "Conditional rendering based on edit mode and enabled status",
-        "Grid positioning",
-        "Plugin loading and preparation",
-        "Resizing logic",
-        "Enable/disable toggle"
+        "Plugin loading",
+        "Tile resizing",
+        "Enable/disable functionality",
+        "Click to open plugin details"
       ]
     }
   }
