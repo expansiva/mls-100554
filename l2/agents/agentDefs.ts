@@ -218,7 +218,7 @@ async function updateStorFile(params: { project: number, shortName: string, leve
 }
 
 const system1 = `
-<!-- modelType: codeflash -->
+<!-- modelType: code -->
 <!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) ou nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10-->
 
 You are a Senior Software Engineer at Collab.codes.
