@@ -268,7 +268,7 @@ export type Output =
     type: "flexible";
     result: AsIs;
   };
-//#endregion
+//#endregion 
 
 //#region Defs1
 export interface AsIs {
@@ -319,9 +319,9 @@ export interface AsIs {
   asIs: {
     semantic: {
       generalDescription: string; // short, like a head line
-      businessCapabilities: string[];
-      technicalCapabilities: string[];
-      implementedFeatures: string[];
+      businessCapabilities: string[]; // list all business or []
+      technicalCapabilities: string[]; // list all technical or []
+      implementedFeatures: string[]; // or []
       constraints?: string[]; // functional + non-functional constraints
     };
   }
