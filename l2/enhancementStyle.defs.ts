@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/enhancementStyle.ts",
-    "componentType": "tool",
+    "componentType": "editorService",
     "componentScope": "editor",
     "group": "enhancement"
   },
@@ -46,19 +46,18 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Style enhancement utilities for editor",
-      "businessCapabilities": [
-        "Validate style selectors",
-        "Process and format LESS code",
-        "Set styles on elements"
-      ],
+      "generalDescription": "Style enhancement module for LESS validation and processing",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "Async validation of styles",
-        "Marker error verification",
-        "CSS stylesheet creation"
+        "Validates root selectors in LESS files",
+        "Formats text in memory",
+        "Sets error markers in editor",
+        "Processes CSS without tag",
+        "Gets root selectors",
+        "Checks for comment lines",
+        "Sets styles processed"
       ],
       "implementedFeatures": [
-        "requires",
         "onAfterChange",
         "onAfterMarkersChange",
         "onAfterCompile",
