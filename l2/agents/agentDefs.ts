@@ -52,17 +52,20 @@ async function beforePromptImplicit(
   userPrompt: string,
 ): Promise<mls.msg.AgentIntent[]> {
 
-  if (userPrompt !== "update") throw new Error(`[afterPromptImplicit] Use one of this commands: "update"`)
+  let max = 20; // default max 20 files
+  const match = userPrompt.trim().match(/^update\s*(\d+)?$/i);
+  if (match) {
+    max = match[1] ? Number(match[1]) : max;
+  } else {
+    throw new Error(`[afterPromptImplicit] Use one of this commands: "update" or "update 99"`)
+  }
 
-  const paths: string[] = mls.stor.findFilesNeedingDefsUpdate({ project: mls.actualProject || 0, level: 2 })
+  const paths: string[] = mls.stor.findFilesNeedingDefsUpdate({ project: mls.actualProject || 0, level: 2, extension: ".ts", folder: "", shortName: "" }, new Date(2026, 0, 1))
     .map(f => mls.stor.getKeyToFile(f))
     .filter(Boolean)
-    .slice(0, 20); // only x first 
-
+    .slice(0, max); // only x first 
   if (paths.length < 1) throw new Error('no files to update defs');
-  const inputs: mls.msg.IAMessageInputType[] = [
-    { type: "system", content: system1 },
-  ];
+  const inputs: mls.msg.IAMessageInputType[] = [{ type: "system", content: system1 }];
 
   const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
     type: "add-message-ai",
@@ -178,7 +181,7 @@ export const asis: mls.defs.AsIs = ${JSON.stringify(defs, null, 2)}
 
   const files = await mls.stor.getFiles({ ...fileInfo, loadContent: false });
   if (!files.ts) throw new Error(`[agentDefs] file .ts dont exists, defs: ${JSON.stringify(defs.meta)}`);
-  const params = { ...fileInfo, content: template, versionRef: '0', extension: ".defs.ts" };
+  const params = { ...fileInfo, content: template, versionRef: new Date().toISOString(), extension: ".defs.ts" };
   if (!files.defs) {
     await createStorFile(params);
   } else {
@@ -196,8 +199,8 @@ async function createStorFile(params: { project: number, shortName: string, leve
     content: params.content,
     contentType: 'string',
   };
-  await mls.stor.localStor.setContent(file, fileInfo);
   file.updatedAt = new Date().toISOString();
+  await mls.stor.localStor.setContent(file, fileInfo);
   return file;
 }
 
@@ -214,11 +217,12 @@ async function updateStorFile(params: { project: number, shortName: string, leve
   } else {
     models.defs.model.setValue(params.content);
   }
+  file.isLocalVersionOutdated = false;
   file.updatedAt = new Date().toISOString();
 }
 
 const system1 = `
-<!-- modelType: codeflash -->
+<!-- modelType: code -->
 <!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) ou nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10-->
 
 You are a Senior Software Engineer at Collab.codes.
