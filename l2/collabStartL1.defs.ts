@@ -53,14 +53,16 @@ export const asis: mls.defs.AsIs = {
         "Verify and Implement Database Table Layouts"
       ],
       "technicalCapabilities": [
-        "i18n support for English and Portuguese"
+        "Developing APIs",
+        "Programming routines",
+        "Tools and processes for testing",
+        "Processes to verify and implement database table layouts"
       ],
       "implementedFeatures": [
-        "Renders module description with lists",
-        "Renders usage flow",
+        "Displays banner image",
+        "Shows collapsible details about module",
         "Displays news section",
-        "Shows banner image",
-        "Displays collab codes logo"
+        "Supports multiple languages"
       ]
     }
   }
