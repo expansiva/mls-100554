@@ -20,7 +20,7 @@ export const asis: mls.defs.AsIs = {
           },
           {
             "name": "css",
-            "type": "?"
+            "type": "function"
           },
           {
             "name": "LitElement",
@@ -50,7 +50,7 @@ export const asis: mls.defs.AsIs = {
         ]
       },
       {
-        "ref": "/_100554_/l2/collabLitElement.js",
+        "ref": "/\\_100554_/l2/collabLitElement.js",
         "dependencies": [
           {
             "name": "CollabLitElement",
@@ -65,36 +65,7 @@ export const asis: mls.defs.AsIs = {
       "generalDescription": "Test Driver",
       "businessCapabilities": [],
       "technicalCapabilities": [],
-      "implementedFeatures": [
-        "getContents",
-        "setContents",
-        "loadFilesInfo",
-        "getHistory",
-        "getHistoryContent",
-        "getUrl",
-        "getVersionFromFiles",
-        "checkBranchExistence",
-        "createNewBranch",
-        "createPullRequest",
-        "reviewPullRequest",
-        "listPullRequests",
-        "listForks",
-        "listBranches",
-        "getUserInfo",
-        "getOrganizations",
-        "createRepository",
-        "deleteRepository",
-        "createFork",
-        "renameRepository",
-        "createFileInRepo",
-        "changeVisibility",
-        "verifyRepositoryNew",
-        "verifyPermission",
-        "addVariable",
-        "updateVariable",
-        "listVariables",
-        "delVariable"
-      ]
+      "implementedFeatures": []
     }
   }
 }
