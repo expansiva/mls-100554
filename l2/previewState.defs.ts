@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/previewState.ts",
-    "componentType": "other",
+    "componentType": "editorService",
     "componentScope": "editor",
     "group": "enhancement"
   },
@@ -18,12 +18,15 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Declares global Window interface for preview editor and iframe",
+      "generalDescription": "Declares global Window interface for preview state",
       "businessCapabilities": [],
       "technicalCapabilities": [
+        "Declares global interface for preview with editor and iframe"
+      ],
+      "implementedFeatures": [
         "Global interface declaration"
       ],
-      "implementedFeatures": []
+      "constraints": []
     }
   }
 }
