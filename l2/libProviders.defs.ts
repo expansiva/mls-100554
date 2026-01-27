@@ -5,8 +5,8 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/libProviders.ts",
-    "componentType": "tool",
-    "componentScope": "editor",
+    "componentType": "other",
+    "componentScope": "appFrontEnd",
     "group": "enhancement"
   },
   "references": {
@@ -20,40 +20,30 @@ export const asis: mls.defs.AsIs = {
           }
         ]
       }
-    ],
-    "statesRO": [],
-    "statesRW": [],
-    "statesWO": []
-  },
-  "codeInsights": {
-    "securityWarnings": [
-      "Hardcoded OAuth client IDs and secrets in code"
     ]
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Library for OAuth provider login functions",
+      "generalDescription": "OAuth login providers library",
       "businessCapabilities": [
-        "Enable login via GitHub",
-        "Enable login via GitLab",
-        "Enable login via Google"
+        "OAuth authentication for GitHub",
+        "OAuth authentication for GitLab",
+        "OAuth authentication for Google"
       ],
       "technicalCapabilities": [
-        "Generate OAuth authorization URLs",
+        "Generate random state for OAuth",
+        "Redirect to OAuth URLs",
         "Check provider connection status",
-        "Provide SVG icons for providers"
+        "Render SVG icons"
       ],
       "implementedFeatures": [
-        "gitHubLogin",
-        "gitLabLogin",
-        "googleLogin",
-        "isProviderConnected",
-        "googleIcon",
-        "githubIcon",
-        "gitlabIcon",
-        "generateRandomState",
-        "verifyDisconnect",
-        "getState"
+        "gitHubLogin function",
+        "gitLabLogin function",
+        "googleLogin function",
+        "isProviderConnected function",
+        "googleIcon function",
+        "githubIcon function",
+        "gitlabIcon function"
       ]
     }
   }
