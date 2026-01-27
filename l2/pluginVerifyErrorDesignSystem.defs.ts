@@ -63,24 +63,20 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Plugin for verifying Less file compilation errors in the design system",
+      "generalDescription": "Plugin to verify and compile less files for errors",
       "businessCapabilities": [
-        "Verifying Less files for compilation errors",
-        "Displaying verification progress",
-        "Listing errors found",
-        "Canceling verification"
+        "Verify less files for compilation errors",
+        "Report errors in design system files"
       ],
       "technicalCapabilities": [
-        "Compiling Less files using preCompileLessByThemeOrDefault",
-        "Accessing project files via mls.stor",
-        "Firing events on completion"
+        "Compile less files using preCompileLessByThemeOrDefault",
+        "Render error lists with lit"
       ],
       "implementedFeatures": [
-        "prepare method to start verification",
-        "compileAll to process files",
-        "render methods for UI",
-        "progressCallback",
-        "cancelVerify"
+        "Prepare verification process",
+        "Compile all less files",
+        "Display progress and errors",
+        "Cancel verification"
       ]
     }
   }
