@@ -7,7 +7,7 @@ export const asis: mls.defs.AsIs = {
     "fileReference": "_100554_/l2/enhancementAgent.ts",
     "componentType": "agent",
     "componentScope": "editor",
-    "group": "enhancement="
+    "group": "enhancement"
   },
   "references": {
     "imports": [
@@ -15,7 +15,8 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_102027_/l2/propiertiesLit.js",
         "dependencies": [
           {
-            "name": "getPropierties"
+            "name": "getPropierties",
+            "type": "function"
           }
         ]
       }
@@ -23,13 +24,11 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Enhancement agent for injecting regions into compiled JS",
-      "businessCapabilities": [
-        "Injects source regions into JS templates",
-        "Handles compilation enhancements"
-      ],
+      "generalDescription": "Enhancement agent for injecting regions into compiled JavaScript",
+      "businessCapabilities": [],
       "technicalCapabilities": [
-        "Processes TypeScript regions",
+        "Injects regions from TypeScript into JavaScript templates",
+        "Validates region syntax",
         "Replaces placeholders in JS"
       ],
       "implementedFeatures": [
@@ -39,6 +38,12 @@ export const asis: mls.defs.AsIs = {
         "injectSourceInJs",
         "injectRegionsIntoTemplate",
         "removeRegionsIntoJS"
+      ],
+      "constraints": [
+        "Regions must not contain backticks",
+        "Regions cannot be nested",
+        "Region names must be unique",
+        "Placeholders must match existing regions"
       ]
     }
   }
