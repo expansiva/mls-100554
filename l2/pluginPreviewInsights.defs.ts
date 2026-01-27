@@ -6,7 +6,7 @@ export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/pluginPreviewInsights.ts",
     "componentType": "pluginUI",
-    "componentScope": "editor",
+    "componentScope": "appFrontEnd",
     "languages": [
       "en",
       "pt"
@@ -22,8 +22,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit",
         "dependencies": [
           {
-            "name": "html",
-            "type": "function"
+            "name": "html"
           }
         ]
       },
@@ -31,19 +30,13 @@ export const asis: mls.defs.AsIs = {
         "ref": "lit/decorators.js",
         "dependencies": [
           {
-            "name": "customElement",
-            "type": "?",
-            "purpose": "decorator"
+            "name": "customElement"
           },
           {
-            "name": "property",
-            "type": "?",
-            "purpose": "decorator"
+            "name": "property"
           },
           {
-            "name": "state",
-            "type": "?",
-            "purpose": "decorator"
+            "name": "state"
           }
         ]
       },
@@ -51,8 +44,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/stateLitElement.js",
         "dependencies": [
           {
-            "name": "StateLitElement",
-            "type": "class"
+            "name": "StateLitElement"
           }
         ]
       },
@@ -60,16 +52,13 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabIcons.js",
         "dependencies": [
           {
-            "name": "collab_code",
-            "type": "constant"
+            "name": "collab_code"
           },
           {
-            "name": "collab_file_fragment",
-            "type": "constant"
+            "name": "collab_file_fragment"
           },
           {
-            "name": "collab_file_half_dashed",
-            "type": "constant"
+            "name": "collab_file_half_dashed"
           }
         ]
       },
@@ -77,8 +66,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabState.js",
         "dependencies": [
           {
-            "name": "globalState",
-            "type": "constant"
+            "name": "globalState"
           }
         ]
       },
@@ -86,8 +74,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabImport.js",
         "dependencies": [
           {
-            "name": "collabImport",
-            "type": "function"
+            "name": "collabImport"
           }
         ]
       },
@@ -95,8 +82,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/collabLibModel.js",
         "dependencies": [
           {
-            "name": "createModel",
-            "type": "function"
+            "name": "createModel"
           }
         ]
       },
@@ -104,8 +90,7 @@ export const asis: mls.defs.AsIs = {
         "ref": "/_100554_/l2/serviceSource.js",
         "dependencies": [
           {
-            "name": "ServiceSource100554",
-            "type": "class"
+            "name": "ServiceSource100554"
           }
         ]
       },
