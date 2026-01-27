@@ -11,7 +11,7 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "Exports projectConfig with empty modules array",
+      "generalDescription": "Exports projectConfig with empty modules array.",
       "businessCapabilities": [],
       "technicalCapabilities": [],
       "implementedFeatures": []
