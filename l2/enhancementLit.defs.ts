@@ -5,7 +5,7 @@
 export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/enhancementLit.ts",
-    "componentType": "editorService",
+    "componentType": "tool",
     "componentScope": "editor",
     "group": "enhancement"
   },
@@ -58,19 +58,20 @@ export const asis: mls.defs.AsIs = {
   },
   "asIs": {
     "semantic": {
-      "generalDescription": "",
+      "generalDescription": "Lit enhancement",
       "businessCapabilities": [],
       "technicalCapabilities": [
-        "TypeScript"
+        "validateTagName",
+        "validateRender",
+        "setCodeLens",
+        "injectStyle"
       ],
       "implementedFeatures": [
-        "requires",
         "getDefaultHtmlExamplePreview",
         "getDesignDetails",
         "onAfterChange",
         "onAfterCompile"
-      ],
-      "constraints": []
+      ]
     }
   }
 }
