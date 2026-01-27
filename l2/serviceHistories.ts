@@ -1,7 +1,7 @@
 /// <mls shortName="serviceHistories" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
 
 import { html } from 'lit';
-import { customElement, query, property } from 'lit/decorators.js';
+import { customElement, query, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
 
 /// **collab_i18n_start**
@@ -28,16 +28,14 @@ export class ServiceHistories100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
 
-    private renderSideBySide = false;
-
     constructor() {
         super();
         mls.events.addEventListener([2, 5], ['HistoriesSelected' as any], (ev) => this.onSelectHistories(ev));
         mls.events.addEventListener([2], ['ToolBarSelected'], (ev) => { this.onToolbarSelected(ev); });
     }
 
-    @property({ type: String })
-    msize = '';
+    @property({ type: String }) msize = '';
+    @state() lastModeEditor : TEditorMode = 'inline';
 
     createRenderRoot() {
         return this;
@@ -59,10 +57,9 @@ export class ServiceHistories100554 extends ServiceBase {
 
     public onClickMain(op: string) {
         if (op === 'opHistories') this.showStart();
-        else if (op === 'opSide') this.showSideBySide(true);
-        else if (op === 'opOnlyOne') this.showSideBySide(false);
+        else if (op === 'opSide') this.changeEditorMode('sideBySide');
+        else if (op === 'opOnlyOne') this.changeEditorMode('inline');
         else if (this.menu.setMode) this.menu.setMode('initial');
-
     }
 
     public menu: IServiceMenu = {
@@ -139,8 +136,6 @@ export class ServiceHistories100554 extends ServiceBase {
             this.hashModified = params.hashModified;
             this.hashOriginal = params.hashOriginal;
 
-            this.renderSideBySide = false;
-
             let src2: string = '';
             if (this.hashModified === 'local') {
                 const info = this.fileInfo.getValueInfo ? await this.fileInfo.getValueInfo() : undefined;
@@ -160,9 +155,10 @@ export class ServiceHistories100554 extends ServiceBase {
 
     }
 
-    private showSideBySide(show: boolean) {
-        this.renderSideBySide = show;
+    private changeEditorMode(mode: TEditorMode) {
+        this.lastModeEditor = mode;
         this.updateEditor();
+        if (this.menu.closeMenu) this.menu.closeMenu();
         return true;
     }
 
@@ -205,7 +201,7 @@ export class ServiceHistories100554 extends ServiceBase {
         if (!this.c2 || this._ed1) return;
         const opt = {
             automaticLayout: true,
-            renderSideBySide: this.renderSideBySide
+            renderSideBySide: this.lastModeEditor === 'sideBySide'
         };
         this._ed1 = monaco.editor.createDiffEditor(this.c2, opt);
         (this.c2 as any)['mlsEditor'] = this._ed1;
@@ -215,7 +211,7 @@ export class ServiceHistories100554 extends ServiceBase {
     private updateEditor() {
         if (!this._ed1) return;
         this._ed1.updateOptions({
-            renderSideBySide: this.renderSideBySide
+            renderSideBySide: this.lastModeEditor === 'sideBySide'
         });
 
         const originalEditor = this._ed1.getOriginalEditor();
@@ -263,6 +259,8 @@ export class ServiceHistories100554 extends ServiceBase {
         `
     }
 }
+
+type TEditorMode = 'sideBySide' | 'inline';
 
 interface IHistoriesContent {
     [key: string]: string
