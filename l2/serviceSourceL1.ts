@@ -113,7 +113,7 @@ export class ServiceSource100554 extends ServiceBase {
 
             if (!stor) {
 
-                let template = getBaseTemplate({ folder, shortName, project, extension: ext });
+                let template = await getBaseTemplate({ folder, shortName, project, extension: ext });
 
                 const param: IReqCreateStorFile = {
                     project,
