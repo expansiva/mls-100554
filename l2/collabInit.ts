@@ -3,14 +3,6 @@
 import { html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import {
-    getProjectDetails,
-    setProjectDetails,
-    getLastOpenedFiles,
-    findStorFileInProjectsOrDeps,
-    getLastModule
-} from '/_100554_/l2/libCommom.js';
-
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
     if (!on1CompileMonaco) return true;
@@ -91,9 +83,10 @@ export class CollabInit extends LitElement {
         this.initCoachMark();
         this.setTheme();
         this.setTokensCss();
-        this.actualProject = this.setProjectActual();
-        this.setOrgActual(this.actualProject);
         await this.loadProjectBase();
+
+        this.actualProject = await this.setProjectActual();
+        this.setOrgActual(this.actualProject);
         await this.loadLastProject();
         await this.setLastOpenedFiles();
         await this.setDefaultFiles();
@@ -314,21 +307,30 @@ export class CollabInit extends LitElement {
      * Retrieves the last selected project ID from localStorage.
      * @returns The last selected project ID as a number, or `undefined` if not found.
      */
-    private getLastProjectSelected(): number | undefined {
+    private async getLastProjectSelected(): Promise<number | undefined> {
         if (window.traceLifeCycle) console.info('getLastProjectSelected');
-        const info = getProjectDetails();
-        const lastPrj = info ? info.project : this.baseProject;
-        setProjectDetails(lastPrj);
-        return lastPrj;
+
+        try {
+            const lib = await import('/_100554_/l2/libCommom.js');
+            if (!lib || !lib.getProjectDetails || !lib.setProjectDetails) return;
+            const info = lib.getProjectDetails();
+            const lastPrj = info ? info.project : this.baseProject;
+            lib.setProjectDetails(lastPrj);
+            return lastPrj;
+        } catch (err: any) {
+            console.error(err.message);
+            return undefined;
+        }
+
     }
 
     /**
      * Sets the actual project in the `mls` structure based on the last selected project.
      * @returns The last selected project ID as a number, or `undefined` if not found.
      */
-    private setProjectActual(): number | undefined {
+    private async setProjectActual(): Promise<number | undefined> {
         if (window.traceLifeCycle) console.info('setProjectActual');
-        const project = this.getLastProjectSelected();
+        const project = await this.getLastProjectSelected();
 
         mls.setActualProject(project === undefined || project < 0 ? 100554 : project);
         return project;
@@ -353,6 +355,11 @@ export class CollabInit extends LitElement {
     private async loadProjectBase() {
         if (window.traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
         await mls.stor.server.loadProjectInfoIfNeeded(this.baseProject);
+        const depsBaseProject = mls.l5.getProjectDependencies(this.baseProject, false);
+        const deps = [...depsBaseProject];
+        for await (let prj of deps) {
+            await mls.stor.server.loadProjectInfoIfNeeded(prj);
+        }
     }
 
     /**
@@ -375,35 +382,52 @@ export class CollabInit extends LitElement {
         initCompileMonaco(this.actualProject);
     }
 
-    private setLastOpenedFiles() {
+    private async setLastOpenedFiles() {
 
         if (!this.actualProject) return;
-        const lastFiles = getLastOpenedFiles(this.actualProject);
-        Object.entries(lastFiles).forEach(([levelStr, value]) => {
-            const level = +levelStr;
-            const actual = mls.actual[level];
-            if (!actual) return;
+        try {
+            const lib = await import('/_100554_/l2/libCommom.js');
+            if (!lib || !lib.getLastOpenedFiles) return;
 
-            if (typeof value === 'string') {
-                actual.setFullName(value);
-                return;
-            }
+            const lastFiles = lib.getLastOpenedFiles(this.actualProject);
+            Object.entries(lastFiles).forEach(([levelStr, value]) => {
+                const level = +levelStr;
+                const actual = mls.actual[level];
+                if (!actual) return;
 
-            if (level === 2 && typeof value === 'object' && value !== null) {
-                this.restoreSideFile(value.left, level, 'left', actual);
-                this.restoreSideFile(value.right, level, 'right', actual);
-            }
-        });
+                if (typeof value === 'string') {
+                    actual.setFullName(value);
+                    return;
+                }
+
+                if (level === 2 && typeof value === 'object' && value !== null) {
+                    this.restoreSideFile(value.left, level, 'left', actual);
+                    this.restoreSideFile(value.right, level, 'right', actual);
+                }
+            });
+        } catch (err: any) {
+            console.error(err.message);
+        }
+
     }
 
     private FILEL6 = 'projects';
     private FILEL5 = 'modules';
     private async setDefaultFiles() {
         if (!this.actualProject) return;
-        const defaultL6 = findStorFileInProjectsOrDeps(this.actualProject, 2, this.FILEL6, '', '.ts');
-        const defaultL5 = findStorFileInProjectsOrDeps(this.actualProject, 2, this.FILEL5, '', '.ts');
-        if (defaultL6) mls.actual[6].setFullName(`_${defaultL6.project}_${defaultL6.shortName}`);
-        if (defaultL5) mls.actual[5].setFullName(`_${defaultL5.project}_${defaultL5.shortName}`);
+
+        try {
+
+            const lib = await import('/_100554_/l2/libCommom.js');
+            if (!lib || !lib.findStorFileInProjectsOrDeps) return;
+            const defaultL6 = lib.findStorFileInProjectsOrDeps(this.actualProject, 2, this.FILEL6, '', '.ts');
+            const defaultL5 = lib.findStorFileInProjectsOrDeps(this.actualProject, 2, this.FILEL5, '', '.ts');
+            if (defaultL6) mls.actual[6].setFullName(`_${defaultL6.project}_${defaultL6.shortName}`);
+            if (defaultL5) mls.actual[5].setFullName(`_${defaultL5.project}_${defaultL5.shortName}`);
+
+        } catch (err: any) {
+            console.error(err.message);
+        }
     }
 
     private restoreSideFile(
@@ -420,11 +444,18 @@ export class CollabInit extends LitElement {
         actual[side] = file;
     }
 
-    private setLastModule() {
+    private async setLastModule() {
         if (!this.actualProject) return;
-        const modules = getLastModule();
-        if (!modules || !modules[+this.actualProject]) return;
-        mls.setActualModule(modules[+this.actualProject]);
+        try {
+            const lib = await import('/_100554_/l2/libCommom.js');
+            if (!lib || !lib.getLastModule) return;
+            const modules = lib.getLastModule();
+            if (!modules || !modules[+this.actualProject]) return;
+            mls.setActualModule(modules[+this.actualProject]);
+        } catch (err: any) {
+            console.error(err.message);
+        }
+
     }
 
     /**
