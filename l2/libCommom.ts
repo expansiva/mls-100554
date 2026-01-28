@@ -1,10 +1,6 @@
 /// <mls shortName="libCommom" project="100554" enhancement="_blank" groupName="other" />
 
 import { getMessageKey } from "/_100554_/l2/collabLitElement.js";
-import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
-import { convertTagToFileName, convertFileNameToTag } from '/_102027_/l2/utils';
-import { collabImport } from '/_100554_/l2/collabImport.js';
-import { ServiceDetail100554 } from '/_100554_/l2/serviceDetail.js';
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -211,6 +207,8 @@ function delay(ms: number) {
 
 export async function openService(service: string, position: 'left' | 'right', level: number, args?: Record<string, string>) {
 
+    const utils = await import('/_100554_/l2/utilsLit');
+
     let page = top?.document.querySelector('collab-page');
     if (!page) return;
     const toolbar = page.querySelector(`collab-nav-2[toolbarposition="${position}"]`) as HTMLElement;
@@ -225,7 +223,7 @@ export async function openService(service: string, position: 'left' | 'right', l
 
     if (itemNav3Content && args) {
         const { shortName, folder, project } = mls.l2.getPath(service);
-        const tagService = convertFileNameToTag({ shortName, folder, project });
+        const tagService = utils.convertFileNameToTag({ shortName, folder, project });
         const serviceItem = itemNav3Content.querySelector(tagService);
         if (serviceItem) {
             Object.entries(args).forEach((arg) => {
@@ -270,6 +268,9 @@ export async function forceServiceInstance(level: number, service: string) {
 
 export async function loadFileHTMLInContainer(el: HTMLElement, shortName: string, project: number) {
 
+    const libCompile = await import('/_100554_/l2/libCompile.js');
+    const utils = await import('/_100554_/l2/utilsLit');
+
     const keyFile = mls.stor.getKeyToFiles(project, 2, shortName, '', '.html');
     const storFile = mls.stor.files[keyFile];
     if (!storFile) throw new Error('File not founded');
@@ -279,11 +280,11 @@ export async function loadFileHTMLInContainer(el: HTMLElement, shortName: string
 
     el.innerHTML = '';
 
-    const allWcs = getAllWebComponentsInSource(content);
+    const allWcs = libCompile.getAllWebComponentsInSource(content);
     el.innerHTML = content;
 
     allWcs.forEach((wc) => {
-        const info = convertTagToFileName(wc);
+        const info = utils.convertTagToFileName(wc);
         if (info) {
             const script = document.createElement('script');
             script.type = 'module';
@@ -448,7 +449,7 @@ export async function loadModuleFromProjectOrDependency(name: string, folder: st
     const prj = mls.actualProject;
     if (!prj) throw new Error('Not found project actual!');
     let key = mls.stor.getKeyToFiles(prj, 2, name.trim(), folder.trim(), ext);
-    if (mls.stor.files[key]) return await await collabImport({ project: prj, shortName: name, folder: folder });
+    if (mls.stor.files[key]) return (await import('/_100554_/l2/collabImport.js')).collabImport({ project: prj, shortName: name, folder: folder });
     const info = mls.l5.getProjectDetails(prj);
 
     if (!info && prj !== mls.stor.LOCALPROJECTNUMBER) throw new Error('Not found project details from actual project!');
@@ -463,7 +464,7 @@ export async function loadModuleFromProjectOrDependency(name: string, folder: st
     });
 
     if (!mls.stor.files[key]) throw new Error('File not found in any dependency!');
-    return await await collabImport({ project: prjDep, shortName: name.trim(), folder: folder.trim() });
+    return await await (await import('/_100554_/l2/collabImport.js')).collabImport({ project: prjDep, shortName: name.trim(), folder: folder.trim() });
 }
 
 
@@ -561,8 +562,9 @@ export function setLastModule(project: number, moduleName: string) {
     }
 }
 
-export function getBaseTemplate(file: IInfoFile, enhancement: string = '_blank'): string {
+export async function getBaseTemplate(file: IInfoFile, enhancement: string = '_blank'): Promise<string> {
 
+    const utils = await import('/_100554_/l2/utilsLit');
     const { project, shortName, folder } = file;
 
     switch (file.extension) {
@@ -570,7 +572,7 @@ export function getBaseTemplate(file: IInfoFile, enhancement: string = '_blank')
 
         case ('.html'): return `<h1>${file.shortName}</h1>`;
 
-        case ('.less'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n${convertFileNameToTag({ project, shortName, folder })} {\n\n// Here your less\n\n }`;
+        case ('.less'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n${utils.convertFileNameToTag({ project, shortName, folder })} {\n\n// Here your less\n\n }`;
 
         case ('.test.ts'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n import { ICANTest, ICANIntegration, ICANSchema  } from '/_100554_/l2/tsTestAST.js';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
 
@@ -675,26 +677,26 @@ function hasInvalidCharacter(name: string): boolean {
 }
 
 export async function openElementInServiceDetails(el: HTMLElement) {
-    const serviceDetails: ServiceDetail100554 = mls.services['100554_serviceDetail_right'];
+    const serviceDetails = mls.services['100554_serviceDetail_right'];
     if (!serviceDetails) return;
     serviceDetails.openMe();
     serviceDetails.updateContentPluginWithElement(el);
 }
 
 export async function clearServiceDetails() {
-    const serviceDetails: ServiceDetail100554 = mls.services['100554_serviceDetail_right'];
+    const serviceDetails = mls.services['100554_serviceDetail_right'];
     if (!serviceDetails) return;
     serviceDetails.clear();
 }
 
 export async function getProjectConfig(project: number): Promise<IProjectConfig | undefined> {
-    const moduleProject = await collabImport({ folder: '', project, shortName: 'project', extension: '.ts' });;
+    const moduleProject = await (await import('/_100554_/l2/collabImport.js')).collabImport({ folder: '', project, shortName: 'project', extension: '.ts' });;
     if (!moduleProject) return undefined;
     return moduleProject.projectConfig;
 }
 
 export async function getProjectModuleConfig(path: string, project: number): Promise<IProjectModuleConfig | undefined> {
-    const moduleConfig = await collabImport({ folder: path, project, shortName: 'module', extension: '.ts' });
+    const moduleConfig = await (await import('/_100554_/l2/collabImport.js')).collabImport({ folder: path, project, shortName: 'module', extension: '.ts' });
     if (!moduleConfig) return undefined;
     return moduleConfig.moduleConfig;
 }

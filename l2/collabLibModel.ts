@@ -598,19 +598,19 @@ async function createStorFiles(fileBase: mls.stor.IFileInfo | undefined, ext: st
     let source = '';
     switch (ext) {
         case ('.ts'):
-            source = getBaseTemplate({ folder, shortName, project, extension: '.ts' }, '_100554_enhancementLit');
+            source = await getBaseTemplate({ folder, shortName, project, extension: '.ts' }, '_100554_enhancementLit');
             break;
         case ('.html'):
-            source = getBaseTemplate({ folder, shortName, project, extension: '.html' });
+            source = await getBaseTemplate({ folder, shortName, project, extension: '.html' });
             break;
         case ('.less'):
-            source = getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
+            source = await getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
             break;
         case ('.test.ts'):
-            source = getBaseTemplate({ folder, shortName, project, extension: '.test.ts' });
+            source = await getBaseTemplate({ folder, shortName, project, extension: '.test.ts' });
             break;
         case ('.defs.ts'):
-            source = getBaseTemplate({ folder, shortName, project, extension: '.defs.ts' });
+            source = await getBaseTemplate({ folder, shortName, project, extension: '.defs.ts' });
             break;
     }
 
