@@ -11,6 +11,7 @@ import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
 import { collab_trash } from '/_100554_/l2/collabIcons.js';
 import { setState } from '/_100554_/l2/collabState.js';
 import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
+import { openElementInServiceDetails } from '/_100554_/l2/libCommom.js';
 
 @customElement('plugin-agent-playground-100554')
 
@@ -250,7 +251,7 @@ draggable="true"
         if (typeof this.result !== 'string') return this.renderCompare();
 
         const aux = this.inError ? 'color:red' : '';
-        return html` <pre class="result" style="${aux}"> ${this.escape(this.result)} </pre > `
+        return html`<button @click=${this.openInDetails} class="action-btn" style=" width:calc(100% - 50px); margin: 1rem auto; color: var(--bg-primary-color); background: var(--active-color);">Open Details</button> <pre class="result" style="${aux}"> ${this.escape(this.result)} </pre> `
     }
 
     renderCompare() {
@@ -545,7 +546,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
             this.inError = true;
             return `[pluginAgentPlayground] [getTemporaryContext] Agent "${agentName}" error: ${e.message}\n\n${JSON.stringify(context, null, 2)}`
         }
-        try {            
+        try {
             const agent = await loadAgent(agentName);
             context.modeSingleStep = true;
             setState('playgroundAgent.modeCompare', group);
@@ -738,6 +739,42 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
     private _onCheckboxChangeJudge(e: Event) {
         const target = e.target as HTMLInputElement;
         this.activeJudge = target.checked;
+    }
+
+    private openInDetails() {
+        if (!this.result) return;
+        const obj = JSON.parse(this.extractJsonString(this.result as string));
+        if (!obj || !obj.message || !obj.task) return;
+        const messageId2 = `${obj.message.threadId}/${obj.message.createAt}`
+        const el = document.createElement('collab-messages-task-info-102025');
+        el.setAttribute('messageId', messageId2);
+        el.setAttribute('taskId', obj.task.PK);
+        (el as any)['task'] =  obj.task;
+        (el as any)['message'] = obj.message;
+        openElementInServiceDetails(el);
+        /*const task = await this.getTaskUpdate(taskId, messageId, threadId);
+        addOrUpdateTask(task);
+        this.actualTask = task;
+        this.actualMessage = message;
+
+        const messageId2 = `${this.actualThread?.thread.threadId}/${this.actualMessage?.createAt}`
+        const el = document.createElement('collab-messages-task-info-102025');
+        el.setAttribute('messageId', messageId2);
+        if (this.actualTask && this.actualTask.PK) el.setAttribute('taskId', this.actualTask.PK);
+        (el as any)['task'] = this.actualTask;
+        (el as any)['message'] = this.actualMessage;
+        openElementInServiceDetails(el);*/
+    }
+
+    private extractJsonString(input: string): string {
+        const start = input.indexOf('{');
+        const end = input.lastIndexOf('}');
+
+        if (start === -1 || end === -1 || end < start) {
+            throw new Error('JSON não encontrado na string');
+        }
+
+        return input.slice(start, end + 1);
     }
 }
 interface Iprompts {

@@ -124,10 +124,10 @@ export class ServiceSave extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean) {
         if (visible && reinit) {
-            setTimeout(()=>this.setError(''),500);
+            setTimeout(() => this.setError(''), 500);
             this.updateList();
         } else if (visible && !reinit) {
-            setTimeout(()=>this.setError(''),500);
+            setTimeout(() => this.setError(''), 500);
             this.updateList();
         }
     }
@@ -437,7 +437,6 @@ export class ServiceSave extends ServiceBase {
 
     renderItem(item: Iitem, indexP: number, indexL: number, indexM: number, index: number, forceError: boolean) {
 
-        const extension = item.text.split('.').pop();
         return html`
             <li style="padding-left: 1.1rem;" class="${item.errorLocal ? 'errorLocal' : ''}">
                 <div style="align-items: center;">
@@ -463,14 +462,14 @@ export class ServiceSave extends ServiceBase {
         if (['new', 'rename'].includes(item.file.status)) {
 
             return html`
-                <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${() => this.undoFile(item.file)}" style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 17px; display:flex; align-items:center; cursor:pointer"></span> 
+                <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${(e:any) => this.undoFile(e.target, item.file)}" style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 17px; display:flex; align-items:center; cursor:pointer"></span> 
             `;
 
         } else {
 
             return html`
             <span @click="${this.clickHistory}" .item=${item} style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 17px; display:flex; align-items:center; cursor:pointer" class="mls-gpbtnslider-item fa-regular fa-clock" title="History"></span>
-            <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${() => this.undoFile(item.file)}" style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 17px; display:flex; align-items:center; cursor:pointer"></span>
+            <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${(e:any) => this.undoFile(e.target,item.file)}" style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 17px; display:flex; align-items:center; cursor:pointer"></span>
             `;
 
         }
@@ -907,7 +906,7 @@ export class ServiceSave extends ServiceBase {
             this.isRemovedFork = false;
 
             this.loadingFeedBack = `Checking repository...`;
-            await this.fireCreateForkOrUpdate();    
+            await this.fireCreateForkOrUpdate();
             //console.info('gerou o fork');
 
             await this.fireCreateNewBranch();
@@ -1418,23 +1417,72 @@ export class ServiceSave extends ServiceBase {
 
     }
 
-    private async undoFile(storFile: mls.stor.IFileInfo) {
-        /*const params = {} as mls.events.IFileAction;
-        params.action = 'undo';
-        params.level = storFile.level;
-        params.project = storFile.project;
-        params.shortName = storFile.shortName;
-        params.extension = storFile.extension;
-        params.folder = storFile.folder;
-        params.position = this.position as ('right' | 'left');
-        (params as any).undoType = storFile.extension;
-        mls.events.fire([2], ['FileAction'], JSON.stringify(params), 0);*/
+    private async undoFile(item: HTMLElement, storFile: mls.stor.IFileInfo) {
+
         await undoFile(storFile);
-        setTimeout(async () => {
+        const el = item.closest('.open');
+        if (el) el.remove();
+        //this.itens = this.removeFileByInfoImmutable(this.itens || {}, storFile);
+        /*setTimeout(async () => {
             await this.setInfos();
-            this.backChecked();
+            //this.backChecked();
             this.requestUpdate();
-        }, 500);
+        }, 500);*/
+    }
+
+    private removeFileByInfoImmutable(
+        data: IDefItem,
+        targetFile: mls.stor.IFileInfo
+    ): IDefItem {
+        let changed = false;
+
+        const newData: IDefItem = {};
+
+        for (const levelKey in data) {
+            const level = data[levelKey];
+            let levelChanged = false;
+
+            const newLevel: IDefItemLevel = {};
+
+            for (const subLevelKey in level) {
+                const ifile = level[subLevelKey];
+                let ifileChanged = false;
+
+                const newIfile: Ifile = {};
+
+                for (const fileKey in ifile) {
+                    const items = ifile[fileKey];
+
+                    const found = items.some(
+                        item =>  item.file.shortName === targetFile.shortName && item.file.folder === targetFile.folder && item.file.level === targetFile.level
+                        // troque aqui se não for "id"
+                    );
+
+                    if (!found) {
+                        newIfile[fileKey] = items; // mantém
+                    } else {
+                        ifileChanged = true; // removido
+                        changed = true;
+                    }
+                }
+
+                if (Object.keys(newIfile).length > 0) {
+                    newLevel[subLevelKey] = ifileChanged ? newIfile : ifile;
+                } else {
+                    levelChanged = true; // subnível ficou vazio
+                    changed = true;
+                }
+            }
+
+            if (Object.keys(newLevel).length > 0) {
+                newData[levelKey] = levelChanged ? newLevel : level;
+            } else {
+                changed = true; // nível ficou vazio
+            }
+        }
+
+        // se nada mudou, retorna o mesmo objeto (referência)
+        return changed ? newData : data;
     }
 }
 

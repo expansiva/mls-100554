@@ -1,7 +1,6 @@
 /// <mls shortName="collabLibModel" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { getEnhancementName, getBaseTemplate } from '/_100554_/l2/libCommom.js';
-import { setErrorOnModel } from '/_102027_/l2/utils.js';
 import { getTokensLess, removeTokensFromSource } from '/_102027_/l2/designSystemBase.js';
 
 export async function readProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true) {
@@ -132,7 +131,7 @@ export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boo
     }
 
     const promise = (async () => {
-        if (storFile.project > 1 && storFile.project !== mls.stor.LOCALPROJECTNUMBER && storFile.project !== 102013) {
+        if (storFile.project > 1 && storFile.project !== mls.stor.LOCALPROJECTNUMBER ) {
             await mls.stor.server.loadProjectInfoIfNeeded(storFile.project);
         }
 
@@ -182,6 +181,19 @@ export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boo
         modelPromises.delete(key);
     }
 
+}
+
+export function setErrorOnModel(model: monaco.editor.ITextModel, line: number, startColumn: number, endColumn: number, message: string, severity: monaco.MarkerSeverity): void {
+    const lineIndent = getLineIndent(model, line)
+    const markerOptions = {
+        severity,
+        message,
+        startLineNumber: line,
+        startColumn: startColumn + lineIndent,
+        endLineNumber: line,
+        endColumn: endColumn + lineIndent,
+    };
+    monaco.editor.setModelMarkers(model, 'markerSource', [markerOptions]);
 }
 
 //---------AUXILIARY FUNCTIONS AND DEFINITIONS-------------
@@ -598,19 +610,19 @@ async function createStorFiles(fileBase: mls.stor.IFileInfo | undefined, ext: st
     let source = '';
     switch (ext) {
         case ('.ts'):
-            source = await getBaseTemplate({ folder, shortName, project, extension: '.ts' }, '_100554_enhancementLit');
+            source = getBaseTemplate({ folder, shortName, project, extension: '.ts' }, '_100554_enhancementLit');
             break;
         case ('.html'):
-            source = await getBaseTemplate({ folder, shortName, project, extension: '.html' });
+            source = getBaseTemplate({ folder, shortName, project, extension: '.html' });
             break;
         case ('.less'):
-            source = await getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
+            source = getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
             break;
         case ('.test.ts'):
-            source = await getBaseTemplate({ folder, shortName, project, extension: '.test.ts' });
+            source = getBaseTemplate({ folder, shortName, project, extension: '.test.ts' });
             break;
         case ('.defs.ts'):
-            source = await getBaseTemplate({ folder, shortName, project, extension: '.defs.ts' });
+            source = getBaseTemplate({ folder, shortName, project, extension: '.defs.ts' });
             break;
     }
 
@@ -636,4 +648,15 @@ async function createStorFiles(fileBase: mls.stor.IFileInfo | undefined, ext: st
 
     return file;
 
+}
+
+
+
+function getLineIndent(model: monaco.editor.ITextModel, lineNumber: number): number {
+    if (model) {
+        var lineContent = model.getLineContent(lineNumber);
+        var match = lineContent.match(/^\s*/);
+        return match ? match[0].length : 0;
+    }
+    return 0;
 }

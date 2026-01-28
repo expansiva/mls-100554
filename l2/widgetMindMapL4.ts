@@ -1,75 +1,76 @@
 /// <mls shortName="widgetMindMapL4" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html } from 'lit';
+import { html, unsafeHTML} from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { propertyDataSource, propertyCompositeDataSource } from '/_100554_/l2/collabDecorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-
-type MindMapSelected = MindMapSelectedFile | MindMapSelectedPlugin;
-
-interface MindMapSelectedBase {
-    plugin: Function; // function to get informations
-    args: string;
-}
-
-interface MindMapSelectedFile extends MindMapSelectedBase {
-    type: "file",
-    file: mls.stor.IFileInfo; // file selected , level, project, shortName, folder, extension
-    organism?: string;
-    widget?: string;
-    modelType?: mls.editor.ModelType; // .ts , .html, .less, .test.ts, .defs.ts
-}
-
-interface MindMapSelectedPlugin extends MindMapSelectedBase  {
-    type: "plugin",
-    file: mls.stor.IFileInfo; // file selected , level, project, shortName, folder, extension    
-}
-
-interface MindMapSelectedGroup extends MindMapSelectedBase {
-    type: "group",
-}
 
 
 @customElement('widget-mind-map-l4-100554')
 export class WidgetMindMapL4100554 extends StateLitElement {
 
+    @property({ type: String }) activeDescription: string | undefined;
+
     @propertyDataSource({ type: Object }) mindMapSelected: MindMapSelected | undefined;
-  
+
+    @property() mapState: MindMapData | undefined;
+
     // Allow node size configuration
     @property({ type: Number }) nodeRadius = 30;
 
     @property({ type: Object }) nodeStyles: MindMapNodeStyles = {
-        project: { fill: '#F1C40F', stroke: '#B7950B', text: '#222' },
-        group: { fill: '#3498DB', stroke: '#21618C', text: '#ddd' },
-        page: { fill: '#2ECC40', stroke: '#196F3D', text: '#333' },
-        widget: { fill: '#A569BD', stroke: '#512E5F', text: '#ddd' },
-        table: { fill: '#EB984E', stroke: '#CA6F1E', text: '#444' },
-        'state-group': { fill: '#95A5A6', stroke: '#566573', text: '#fff' },
-        state: { fill: '#E74C3C', stroke: '#922B21', text: '#444' },
+        level1: { fill: '#F1C40F', stroke: '#B7950B', text: '#222' },
+        level2: { fill: '#3498DB', stroke: '#21618C', text: '#ddd' },
+        level3: { fill: '#2ECC40', stroke: '#196F3D', text: '#333' },
+        level4: { fill: '#A569BD', stroke: '#512E5F', text: '#ddd' },
+        level5: { fill: '#EB984E', stroke: '#CA6F1E', text: '#444' },
+        level6: { fill: '#95A5A6', stroke: '#566573', text: '#fff' },
+        level7: { fill: '#E74C3C', stroke: '#922B21', text: '#444' },
         default: { fill: '#34495E', stroke: '#283747', text: '#444' }
     };
 
+    @property({ type: Array }) breadcrumb: MindMapNode[] = [];
+
     // Store node positions for hit detection
     // Store for each node: node, x, y, rect (label rectangle), isCenter
-    _nodePositions: {
+    private _nodePositions: {
         node: MindMapNode;
         rect?: { x: number, y: number, w: number, h: number };
         circle?: { x: number, y: number, r: number }; // Only for center node, optional for others
         isCenter: boolean;
     }[] = [];
 
-    _animationDelay = 500;
+    private _animationDelay = 500;
 
     render() {
         return html`
-      <div class="canvas-container" style="width:100%;height:100%;">
-        <canvas id="mindmap-canvas" style="width:100%;height:100%;display:block;cursor:pointer;"></canvas>
-      </div>
-    `;
+        <div class="breadcrumb">
+            ${this.breadcrumb.map((node, index) => html`
+            <span
+                class="crumb ${index === this.breadcrumb.length - 1 ? 'active' : ''}"
+                @click=${() => this._popToBreadcrumb(index)}
+            >
+                ${node.label}
+            </span>
+            ${index < this.breadcrumb.length - 1 ? html`<span class="sep">›</span>` : null}
+            `)}
+        </div>
+        <div class="canvas-container" style="width:100%;height:calc(100% - 400px);">
+            <canvas id="mindmap-canvas" style="width:100%;height:100%;display:block;cursor:pointer;"></canvas>
+        </div>
+        ${this.activeDescription ? html` <div class="node-description"> ${unsafeHTML(this.activeDescription)} </div> ` : null}
+        `;
     }
 
     firstUpdated() {
         this._addCanvasListeners();
+        if (this.mapState) {
+            const center = this.mapState.nodes.find(n => n.id === this.mapState!.current);
+            if (center) {
+                this.breadcrumb = [center];
+            }
+        }
+
         this.drawMindMap();
     }
 
@@ -93,11 +94,13 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         }
     }
 
-    _redrawCanvas = () => {
+    //------IMPLEMENTATION---------
+
+    private _redrawCanvas = () => {
         this.requestUpdate();
     };
 
-    _addCanvasListeners() {
+    private _addCanvasListeners() {
         const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
         if (canvas) {
             canvas.addEventListener('click', this._onCanvasClick);
@@ -105,7 +108,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         }
     }
 
-    _removeCanvasListeners() {
+    private _removeCanvasListeners() {
         const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
         if (canvas) {
             canvas.removeEventListener('click', this._onCanvasClick);
@@ -113,23 +116,35 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         }
     }
 
-    _animating: boolean = false;
-    _animatedPositions?: Record<string, { x: number, y: number, alpha: number }>;
+    private _animating: boolean = false;
+    private _animatedPositions?: Record<string, { x: number, y: number, alpha: number }>;
 
-    _onCanvasClick = (e: MouseEvent) => {
+    private _onCanvasClick = (e: MouseEvent) => {
+    
+        if (!this.mapState) return;
+
         const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top;
+        const my = e.clientY - rect.top ;
 
         const clickedId = this.getNodeIdAtPosition(mx, my);
         const item = this._nodePositions.find(p => p.node.id === clickedId);
+
+        if (item && item.node.related.length < 1) {
+            this.activeDescription = item.node.description;
+            return;
+        }
         if (item && !item.isCenter) {
             // Prepare animation
             const width = canvas.width;
             const height = canvas.height;
-            const animationMap = this.prepareAnimationMap(mapState.current, item.node.id, width, height);
+            const animationMap = this.prepareAnimationMap(this.mapState.current, item.node.id, width, height);
+
+
+            this._pushBreadcrumb(item.node);
+
 
             // Start animation
             this._animating = true;
@@ -140,9 +155,12 @@ export class WidgetMindMapL4100554 extends StateLitElement {
                     this.requestUpdate();
                 },
                 () => {
+                    if (!this.mapState) return;
                     this._animating = false;
                     this._animatedPositions = undefined;
-                    mapState.current = item.node.id;
+                    this.mapState.current = item.node.id;
+                    this.activeDescription = item.node.description;
+                    this._syncBreadcrumbWithCurrent();
                     this.requestUpdate();
                 }
             );
@@ -150,14 +168,14 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         }
     };
 
-    getNodeStyle(type: string): MindMapNodeStyle {
+    private getNodeStyle(type: string): MindMapNodeStyle {
         return this.nodeStyles[type] || this.nodeStyles.default;
     }
 
     /**
      * Returns the node id under the given mouse position, or undefined if none.
      */
-    getNodeIdAtPosition(mx: number, my: number): string | undefined {
+    private getNodeIdAtPosition(mx: number, my: number): string | undefined {
         for (const item of this._nodePositions) {
             // First test label rectangle
             if (item.rect) {
@@ -178,7 +196,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     }
 
     // Use this function for automatic relationship (two-sided)
-    getRelatedNodes(node: MindMapNode, allNodes: MindMapNode[]): MindMapNode[] {
+    private getRelatedNodes(node: MindMapNode, allNodes: MindMapNode[]): MindMapNode[] {
         const direct = node.related ?? [];
         const reverse = allNodes.filter(n =>
             n.related?.includes(node.id) && n.id !== node.id
@@ -187,8 +205,8 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         return allIds.map(id => allNodes.find(n => n.id === id)).filter(Boolean) as MindMapNode[];
     }
 
-    _hoveredNodeId?: string;
-    handleCanvasMouseMove = (e: MouseEvent) => {
+    private _hoveredNodeId?: string;
+    private handleCanvasMouseMove = (e: MouseEvent) => {
         const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
         if (!canvas) return;
 
@@ -205,8 +223,10 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         }
     };
 
-    drawMindMap(positions?: Record<string, { x: number, y: number, alpha: number }>) {
+    private drawMindMap(positions?: Record<string, { x: number, y: number, alpha: number }>) {
         requestAnimationFrame(() => {
+
+            if (!this.mapState) return;
             const container = this.renderRoot.querySelector('.canvas-container') as HTMLElement;
             const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
             if (!canvas || !container) return;
@@ -219,7 +239,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
             if (!ctx) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const { current, nodes } = mapState;
+            const { current, nodes } = this.mapState;
             let centerNode = nodes.find(n => n.id === current)!;
             let relatedNodes = this.getRelatedNodes(centerNode, nodes);
 
@@ -289,7 +309,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         });
     }
 
-    drawLabel(
+    private drawLabel(
         ctx: CanvasRenderingContext2D,
         node: MindMapNode,
         text: string,
@@ -370,7 +390,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     }
 
     // Utility for gradient color lighten
-    _brightenColor(hex: string, amt = 0.08) {
+    private _brightenColor(hex: string, amt = 0.08) {
         // Simple hex lighten, supports #RRGGBB
         let num = parseInt(hex.replace("#", ""), 16);
         let r = Math.min(255, ((num >> 16) + 255 * amt) | 0);
@@ -383,8 +403,9 @@ export class WidgetMindMapL4100554 extends StateLitElement {
  * Returns a map { nodeId: {x, y} } for each node,
  * given a center nodeId and its related nodes.
  */
-    getNodePositions(centerId: string, width: number, height: number): Record<string, { x: number, y: number }> {
-        const { nodes } = mapState;
+    private getNodePositions(centerId: string, width: number, height: number): Record<string, { x: number, y: number }> | undefined {
+        if (!this.mapState) return undefined;
+        const { nodes } = this.mapState;
         const centerNode = nodes.find(n => n.id === centerId)!;
         const relatedNodes = this.getRelatedNodes(centerNode, nodes);
 
@@ -411,13 +432,14 @@ export class WidgetMindMapL4100554 extends StateLitElement {
      * - from: start position (or undefined if node is new)
      * - to:   end position (or undefined if node disappears)
      */
-    prepareAnimationMap(
+    private prepareAnimationMap(
         fromCenterId: string, toCenterId: string,
         width: number, height: number
     ): { id: string, from?: { x: number, y: number }, to?: { x: number, y: number } }[] {
         const fromPos = this.getNodePositions(fromCenterId, width, height);
         const toPos = this.getNodePositions(toCenterId, width, height);
 
+        if (!fromPos || !toPos) return [];
         // All involved node ids (union)
         const ids = Array.from(new Set([...Object.keys(fromPos), ...Object.keys(toPos)]));
 
@@ -432,7 +454,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
      * Animates all nodes from their 'from' position to 'to' in 500ms.
      * Calls a callback on each frame with current positions.
      */
-    animateTransition(
+    private animateTransition(
         animationMap: { id: string, from?: { x: number, y: number }, to?: { x: number, y: number } }[],
         duration: number,
         drawFrame: (positions: Record<string, { x: number, y: number, alpha: number }>) => void,
@@ -473,15 +495,106 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         requestAnimationFrame(animate);
     }
 
-    onSelected?(node: MindMapNode): void;
+    private onSelected?(node: MindMapNode): void;
+
+
+
+
+    private _pushBreadcrumb(node: MindMapNode) {
+        const index = this.breadcrumb.findIndex(n => n.id === node.id);
+
+        if (index !== -1) {
+            // Já existe no breadcrumb → corta tudo depois dele
+            this.breadcrumb = this.breadcrumb.slice(0, index + 1);
+        } else {
+            // Não existe → adiciona normalmente
+            this.breadcrumb = [...this.breadcrumb, node];
+        }
+    }
+
+    private _syncBreadcrumbWithCurrent() {
+        if (!this.mapState) return;
+
+        const currentId = this.mapState.current;
+        const node = this.mapState.nodes.find(n => n.id === currentId);
+        if (!node) return;
+
+        const index = this.breadcrumb.findIndex(n => n.id === currentId);
+
+        if (index !== -1) {
+            // Usuário "voltou" para um nó já existente
+            this.breadcrumb = this.breadcrumb.slice(0, index + 1);
+        } else {
+            // Usuário foi para um nó fora do caminho atual
+            this.breadcrumb = [...this.breadcrumb, node];
+        }
+    }
+
+    private _popToBreadcrumb(index: number) {
+        const target = this.breadcrumb[index];
+        if (!target || !this.mapState) return;
+
+        const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
+        if (!canvas) return;
+
+        const animationMap = this.prepareAnimationMap(
+            this.mapState.current,
+            target.id,
+            canvas.width,
+            canvas.height
+        );
+
+        this._animating = true;
+        this.animateTransition(
+            animationMap,
+            this._animationDelay,
+            (positions) => {
+                this._animatedPositions = positions;
+                this.requestUpdate();
+            },
+            () => {
+                this._animating = false;
+                this._animatedPositions = undefined;
+                this.mapState!.current = target.id;
+                this.activeDescription = target.description;
+                this.breadcrumb = this.breadcrumb.slice(0, index + 1);
+                this.requestUpdate();
+            }
+        );
+    }
+}
+
+type MindMapSelected = MindMapSelectedFile | MindMapSelectedPlugin;
+
+interface MindMapSelectedBase {
+    plugin: Function; // function to get informations
+    args: string;
+}
+
+interface MindMapSelectedFile extends MindMapSelectedBase {
+    type: "file",
+    file: mls.stor.IFileInfo; // file selected , level, project, shortName, folder, extension
+    organism?: string;
+    widget?: string;
+    modelType?: mls.editor.ModelType; // .ts , .html, .less, .test.ts, .defs.ts
+}
+
+interface MindMapSelectedPlugin extends MindMapSelectedBase {
+    type: "plugin",
+    file: mls.stor.IFileInfo; // file selected , level, project, shortName, folder, extension    
+}
+
+interface MindMapSelectedGroup extends MindMapSelectedBase {
+    type: "group",
 }
 
 export interface MindMapNode {
     id: string;             // unique identifier
     label: string;          // label shown on the node
-    type: 'page' | 'widget' | 'table' | 'group' | 'state' | 'state-group' | 'project';
+    type: 'page' | 'widget' | 'table' | 'group' | 'state' | 'state-group' | 'project' | 'level1' | 'level2'| 'level3'| 'level4'| 'level5'| 'level6'| 'level7';
     related: string[];      // ids of related nodes
-    meta?: Record<string, any>; // optional metadata
+    meta?: Record<string, any>; // optional metadata;
+    description?: string
 }
 
 export interface MindMapData {
@@ -496,20 +609,3 @@ export interface MindMapNodeStyle {
 }
 
 export type MindMapNodeStyles = Record<string, MindMapNodeStyle>;
-
-export const mapState: MindMapData = {
-    current: 'project',
-    nodes: [
-        { id: 'project', label: 'Project', type: 'project', related: ['pages', 'widgets', 'tables', 'db'] },
-        { id: 'pages', label: 'Pages', type: 'group', related: [] },
-        { id: 'widgets', label: 'Widgets', type: 'group', related: [] },
-        { id: 'tables', label: 'Tables', type: 'group', related: [] },
-        { id: 'page-home', label: 'Home Page', type: 'page', related: ['pages', 'widget-button', 'db.product.name'] },
-        { id: 'page-login', label: 'Login Page', type: 'page', related: ['pages', 'db.product.name'] },
-        { id: 'widget-button', label: 'Button', type: 'widget', related: ['widgets'] },
-        { id: 'table-products', label: 'Products', type: 'table', related: ['tables'] },
-        { id: 'db', label: 'db', type: 'state-group', related: ['db.product'] },
-        { id: 'db.product', label: 'db.product', type: 'state-group', related: ['db', 'db.product.name', 'table-products'] },
-        { id: 'db.product.name', label: 'db.product.name', type: 'state', related: ['db.product', 'page-home', 'table-products'] }
-    ]
-};
