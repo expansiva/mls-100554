@@ -23,7 +23,6 @@ import { createModel } from '/_100554_/l2/collabLibModel.js';
 import '/_100554_/l2/collabConsole.js';
 import '/_100554_/l2/collabResultTest.js';
 import '/_100554_/l2/servicePreviewView.js';
-import '/_100554_/l2/pluginPreviewInsights.js';
 import '/_102025_/l2/collabMessagesPrompt.js';
 import '/_100554_/l2/collabSpliterVerticalVarFixed.js';
 import '/_100554_/l2/collabSpliterHorizontalVarFixed.js';
@@ -154,7 +153,6 @@ export class ServicePreview100554 extends ServiceBase {
         this._ed1?.updateOptions({ readOnly: false });
         if (index === EPreview.icPreviewD) this.preview('desktop');
         else if (index === EPreview.icPreviewM) this.preview('mobile');
-        else if (index === EPreview.icPreviewI) this.preview('insights');
         this.lastMode = index;
     }
 
@@ -196,7 +194,6 @@ export class ServicePreview100554 extends ServiceBase {
             options: [
                 { text: 'Desktop', icon: 'f390' },
                 { text: 'Mobile', icon: 'f3cf' },
-                { text: 'Insights', icon: 'f0eb' },
             ]
         },
         tools: {
@@ -646,7 +643,7 @@ export class ServicePreview100554 extends ServiceBase {
         else if (actual.size === 0) this.loading = false;
     }
 
-    private async fireCollab(agentName: string, prompt: string, fullName:string) {
+    private async fireCollab(agentName: string, prompt: string, fullName: string) {
 
         fullName = fullName ? fullName : this.page;
 
@@ -688,10 +685,8 @@ export class ServicePreview100554 extends ServiceBase {
     // -------------- IMPLEMENTS-----------------
 
     private cancelEditL3() {
-
         if (!this.menu.tools.editTextL3 || !this.menu.selectTool || this.menu.tools.editTextL3.selected === 0) return;
         this.menu.selectTool('editTextL3');
-
     }
 
     private configureButtonsRight(enabled: boolean) {
@@ -709,10 +704,8 @@ export class ServicePreview100554 extends ServiceBase {
     private async showEditorHTML2() {
         if (this.menu.setMode) {
             this.menu.setMode('page', this.monacoeditor);
-            // await this.updateComplete;
             this._ed1?.updateOptions({ readOnly: true });
             this.monacoeditor?.setAttribute('msize', this.msize);
-            // this._ed1?.layout();
         }
     }
 
@@ -757,17 +750,8 @@ export class ServicePreview100554 extends ServiceBase {
             default: mode = 'SinglePage( _100554_previewModeSinglePage)';
         }
 
-        if (this.menu?.tabs?.selected === EPreview.icPreviewI) {
-            div.innerHTML = `
-            <h3>About this content</h3>
-            <ul>
-                <li>Reference: plugin-preview-insights-100554</li>
-                <li>Level: ${this.level}</li>
-                <li>Position: ${this.position}</li>
-            </ul>
-        `;
-        } else {
-            div.innerHTML = `
+
+        div.innerHTML = `
             <h3>About this content</h3>
             <ul>
                 <li>Reference: service-preview-view-100554</li>
@@ -776,7 +760,6 @@ export class ServicePreview100554 extends ServiceBase {
                 <li>Position: ${this.position}</li>
             </ul>
         `;
-        }
 
         if (this.menu.setMode) this.menu.setMode('page', div);
         return true;
@@ -1499,38 +1482,29 @@ export class ServicePreview100554 extends ServiceBase {
         container.style.height = '100%';
 
 
-        if (mode === 'insights') {
-            const insights = document.createElement('plugin-preview-insights-100554');
-            container.appendChild(insights);
-            insights.setAttribute('page', fullName);
-            insights.setAttribute('level', this.level.toString());
-            this.configureButtonsRight(false);
+        const doc = document.createElement('service-preview-view-100554');
+        doc.setAttribute('page', fullName);
+        doc.setAttribute('level', this.level.toString());
+        doc.setAttribute('mode', mode);
+        doc.setAttribute('actualtheme', this.actualTheme);
+        doc.setAttribute('lang', this.lang);
+        doc.style.flex = '1';
+        (doc as any).father = this;
+        this.elPreview = doc;
+        container.appendChild(doc);
 
-        } else {
-            const doc = document.createElement('service-preview-view-100554');
-            doc.setAttribute('page', fullName);
-            doc.setAttribute('level', this.level.toString());
-            doc.setAttribute('mode', mode);
-            doc.setAttribute('actualtheme', this.actualTheme);
-            doc.setAttribute('lang', this.lang);
-            doc.style.flex = '1';
-            (doc as any).father = this;
-            this.elPreview = doc;
-            container.appendChild(doc);
+        const consoleEl = document.createElement('collab-console-100554');
+        consoleEl.setAttribute('mode', 'disabled');
+        consoleEl.style.display = this.enabledConsole ? 'block' : 'none';
+        container.appendChild(consoleEl);
 
-            const consoleEl = document.createElement('collab-console-100554');
-            consoleEl.setAttribute('mode', 'disabled');
-            consoleEl.style.display = this.enabledConsole ? 'block' : 'none';
-            container.appendChild(consoleEl);
+        const testResultEl = this.createTestElement();
+        container.appendChild(testResultEl);
 
-            const testResultEl = this.createTestElement();
-            container.appendChild(testResultEl);
-
-            const iframe = this.querySelector('iframe') as HTMLIFrameElement;
-            if (iframe && iframe.contentDocument) iframe.contentDocument.body.innerHTML = '';
-            this.configureButtonsRight(true);
-            mls.events.fire(3, 'WCDEventChange' as any);
-        }
+        const iframe = this.querySelector('iframe') as HTMLIFrameElement;
+        if (iframe && iframe.contentDocument) iframe.contentDocument.body.innerHTML = '';
+        this.configureButtonsRight(true);
+        mls.events.fire(3, 'WCDEventChange' as any);
 
         if (!this.previewContent) return;
         this.previewContent.innerHTML = '';
@@ -1626,7 +1600,7 @@ export class ServicePreview100554 extends ServiceBase {
             const msize = this.msize;//changedProperties.get('msize');
             if (!msize || typeof msize !== 'string' || !this.monacoeditor) return;
             this.monacoeditor.setAttribute('msize', msize);
-            
+
             if (this.pluginResultJS) {
                 this.pluginResultJS.setAttribute('msize', msize);
             }
@@ -1693,5 +1667,4 @@ interface ILanguage {
 enum EPreview {
     'icPreviewD' = 0,
     'icPreviewM' = 1,
-    'icPreviewI' = 2,
 }     
