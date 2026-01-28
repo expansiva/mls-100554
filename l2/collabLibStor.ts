@@ -47,15 +47,15 @@ export async function createAllFiles(req: IReqCreateAllFiles, needCreateModel: b
 
     const { folder, shortName, project } = req;
 
-    const template = getBaseTemplate({ folder, shortName, project, extension: '.ts' }, req.enhancement);
+    const template = await getBaseTemplate({ folder, shortName, project, extension: '.ts' }, req.enhancement);
 
-    const templateHTML = getBaseTemplate({ folder, shortName, project, extension: '.html' });
+    const templateHTML = await getBaseTemplate({ folder, shortName, project, extension: '.html' });
 
-    const templateLess = getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
+    const templateLess = await getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
 
-    const templateTest = getBaseTemplate({ folder, shortName, project, extension: '.test.ts' });
+    const templateTest = await getBaseTemplate({ folder, shortName, project, extension: '.test.ts' });
 
-    const templateDefs = getBaseTemplate({ folder, shortName, project, extension: '.defs.ts' });
+    const templateDefs = await getBaseTemplate({ folder, shortName, project, extension: '.defs.ts' });
 
     const newTSSource = req.tsSource || template;
     const newHTMLSource = req.htmlSource || templateHTML;
