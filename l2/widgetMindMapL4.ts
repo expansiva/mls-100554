@@ -1,10 +1,10 @@
 /// <mls shortName="widgetMindMapL4" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
-import { html, unsafeHTML} from 'lit';
+import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { propertyDataSource, propertyCompositeDataSource } from '/_100554_/l2/collabDecorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-
+import { convertTagToFileName } from '/_100554_/l2/utilsLit';
 
 @customElement('widget-mind-map-l4-100554')
 export class WidgetMindMapL4100554 extends StateLitElement {
@@ -19,14 +19,16 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     @property({ type: Number }) nodeRadius = 30;
 
     @property({ type: Object }) nodeStyles: MindMapNodeStyles = {
-        level1: { fill: '#F1C40F', stroke: '#B7950B', text: '#222' },
-        level2: { fill: '#3498DB', stroke: '#21618C', text: '#ddd' },
-        level3: { fill: '#2ECC40', stroke: '#196F3D', text: '#333' },
-        level4: { fill: '#A569BD', stroke: '#512E5F', text: '#ddd' },
-        level5: { fill: '#EB984E', stroke: '#CA6F1E', text: '#444' },
-        level6: { fill: '#95A5A6', stroke: '#566573', text: '#fff' },
-        level7: { fill: '#E74C3C', stroke: '#922B21', text: '#444' },
-        default: { fill: '#34495E', stroke: '#283747', text: '#444' }
+        main: { fill: '#F1C40F', stroke: '#B7950B', text: '#222' },
+        asIs:{ fill: '#3498DB', stroke: '#1F618D', text: '#ECF0F1' },
+        codeInsights: { fill: '#2ECC71', stroke: '#1D8348', text: '#1B4F72' },
+        webcomponent: { fill: '#A569BD', stroke: '#512E5F', text: '#FDFEFE' },
+        imports: { fill: '#95A5A6', stroke: '#566573', text: '#222' },
+        language: { fill: '#EB984E', stroke: '#CA6F1E', text: '#4A2C0A' },
+        attributes: { fill: '#48C9B0', stroke: '#117864', text: '#083A33' },
+        file: {    fill: '#CFE9F6',stroke: '#8CBFD9',text: '#1F3B4D'},
+        text: { fill: '#D8CFC4', stroke: '#BFAF9F', text: '#4A3F35' },
+        default: { fill: '#2C3E50', stroke: '#1B2631', text: '#ECF0F1' }
     };
 
     @property({ type: Array }) breadcrumb: MindMapNode[] = [];
@@ -38,6 +40,9 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         rect?: { x: number, y: number, w: number, h: number };
         circle?: { x: number, y: number, r: number }; // Only for center node, optional for others
         isCenter: boolean;
+        buttons?: {
+            navigate: { x: number, y: number, w: number, h: number };
+        };
     }[] = [];
 
     private _animationDelay = 500;
@@ -55,10 +60,22 @@ export class WidgetMindMapL4100554 extends StateLitElement {
             ${index < this.breadcrumb.length - 1 ? html`<span class="sep">›</span>` : null}
             `)}
         </div>
-        <div class="canvas-container" style="width:100%;height:calc(100% - 400px);">
-            <canvas id="mindmap-canvas" style="width:100%;height:100%;display:block;cursor:pointer;"></canvas>
+        <div class="mindmap-layout ${this.activeDescription ? 'has-description' : ''}">
+            
+            <div class="canvas-container">
+                <canvas id="mindmap-canvas" style="width:100%;height:100% ;display:block;cursor:pointer;"></canvas>
+            </div>
+
+            <div class="node-description">
+                <button class="back-btn" @click=${this._closeDescription}>
+                    ← Back
+                </button>
+                <div class="content">
+                    ${this.activeDescription ? unsafeHTML(this.activeDescription) : html`<p>Selecione um nó para ver detalhes.</p>`}
+                </div>
+            </div>
+            
         </div>
-        ${this.activeDescription ? html` <div class="node-description"> ${unsafeHTML(this.activeDescription)} </div> ` : null}
         `;
     }
 
@@ -93,8 +110,12 @@ export class WidgetMindMapL4100554 extends StateLitElement {
             this.drawMindMap();
         }
     }
+    private _closeDescription() {
+        this.activeDescription = undefined;
+        // O CSS cuidará do efeito de deslize de volta
+    }
 
-    //------IMPLEMENTATION---------
+    //------IMPLEMENTATION--------- 
 
     private _redrawCanvas = () => {
         this.requestUpdate();
@@ -120,50 +141,79 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     private _animatedPositions?: Record<string, { x: number, y: number, alpha: number }>;
 
     private _onCanvasClick = (e: MouseEvent) => {
-    
         if (!this.mapState) return;
 
         const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
         if (!canvas) return;
+
         const rect = canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top ;
+        const my = e.clientY - rect.top;
 
-        const clickedId = this.getNodeIdAtPosition(mx, my);
+        // 🔥 CONVERSÃO ÚNICA E CORRETA
+        const { x, y } = this.toWorldCoords(mx, my, canvas);
+
+        const clickedId = this.getNodeIdAtPosition(x, y);
         const item = this._nodePositions.find(p => p.node.id === clickedId);
 
-        if (item && item.node.related.length < 1) {
-            this.activeDescription = item.node.description;
+        if (!item) return;
+
+        /* ---------- BUTTON HIT TEST (CORRIGIDO) ---------- */
+        const hit = (item.buttons
+            ? Object.entries(item.buttons).find(([key, r]) =>
+                x >= r.x && x <= r.x + r.w &&
+                y >= r.y && y <= r.y + r.h
+            )
+            : undefined
+        );
+
+        if (hit) {
+            const [key] = hit;
+            if (key === 'details') {
+                this.openDetails(item.node);
+            } else {
+                this.openDefs(item.node);
+            }
             return;
         }
-        if (item && !item.isCenter) {
-            // Prepare animation
+
+        /* ---------- NODE CLICK ---------- */
+        if (item.node.related.length < 1) {
+            this.activeDescription = item.node.description ? item.node.description : undefined;
+            return;
+        }
+
+        if (!item.isCenter) {
             const width = canvas.width;
             const height = canvas.height;
-            const animationMap = this.prepareAnimationMap(this.mapState.current, item.node.id, width, height);
 
+            const animationMap = this.prepareAnimationMap(
+                this.mapState.current,
+                item.node.id,
+                width,
+                height
+            );
 
             this._pushBreadcrumb(item.node);
 
-
-            // Start animation
             this._animating = true;
             this.animateTransition(
-                animationMap, this._animationDelay,
+                animationMap,
+                this._animationDelay,
                 (positions) => {
                     this._animatedPositions = positions;
                     this.requestUpdate();
                 },
                 () => {
-                    if (!this.mapState) return;
                     this._animating = false;
                     this._animatedPositions = undefined;
-                    this.mapState.current = item.node.id;
-                    this.activeDescription = item.node.description;
+                    this.mapState!.current = item.node.id;
+                    this.activeDescription = item.node.description ? item.node.description : undefined;
                     this._syncBreadcrumbWithCurrent();
                     this.requestUpdate();
                 }
             );
+
             this.onSelected?.(item.node);
         }
     };
@@ -215,7 +265,8 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         const my = e.clientY - rect.top;
 
         // Use the centralized function
-        const hoveredId = this.getNodeIdAtPosition(mx, my);
+        const { x, y } = this.toWorldCoords(mx, my, canvas);
+        const hoveredId = this.getNodeIdAtPosition(x, y);
 
         if (this._hoveredNodeId !== hoveredId) {
             this._hoveredNodeId = hoveredId;
@@ -223,7 +274,220 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         }
     };
 
-    private drawMindMap(positions?: Record<string, { x: number, y: number, alpha: number }>) {
+    private toWorldCoords(mx: number, my: number, canvas: HTMLCanvasElement) {
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+
+        return {
+            x: (mx - cx) / this.zoom + cx,
+            y: (my - cy) / this.zoom + cy
+        };
+    }
+
+
+    private computeAutoZoom(
+        bounds: { minX: number; minY: number; maxX: number; maxY: number },
+        canvasWidth: number,
+        canvasHeight: number,
+        padding = 40
+    ) {
+        const contentWidth = bounds.maxX - bounds.minX + padding * 2;
+        const contentHeight = bounds.maxY - bounds.minY + padding * 2;
+
+        const scaleX = canvasWidth / contentWidth;
+        const scaleY = canvasHeight / contentHeight;
+
+        let zoom = Math.min(scaleX, scaleY);
+
+        zoom = Math.max(this.MIN_ZOOM, Math.min(this.MAX_ZOOM, zoom));
+
+        return zoom;
+    }
+
+    private zoom = .8;
+    private MIN_ZOOM = 0.6; private MAX_ZOOM = .95;
+    private drawMindMap(
+        positions?: Record<string, { x: number; y: number; alpha: number }>
+    ) {
+        requestAnimationFrame(() => {
+            if (!this.mapState) return;
+
+            const container = this.renderRoot.querySelector('.canvas-container') as HTMLElement;
+            const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
+            if (!canvas || !container) return;
+
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const { current, nodes } = this.mapState;
+            const centerNode = nodes.find(n => n.id === current)!;
+            const relatedNodes = this.getRelatedNodes(centerNode, nodes);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            const baseRadius = Math.min(canvas.width, canvas.height) * 0.33;
+            const densityFactor = Math.max(1, relatedNodes.length / 6);
+            const radius = baseRadius * densityFactor;
+
+            /* ------------------ BOUNDS (AUTO ZOOM) ------------------ */
+            let minX = Infinity;
+            let minY = Infinity;
+            let maxX = -Infinity;
+            let maxY = -Infinity;
+
+            const updateBounds = (x: number, y: number, w: number, h: number) => {
+                minX = Math.min(minX, x - w / 2);
+                minY = Math.min(minY, y - h / 2);
+                maxX = Math.max(maxX, x + w / 2);
+                maxY = Math.max(maxY, y + h / 2);
+            };
+
+            ctx.font = 'bold 13px sans-serif';
+
+            // Center node bounds
+            updateBounds(
+                centerX,
+                centerY,
+                this.nodeRadius * 2 + 40,
+                this.nodeRadius * 2 + 40
+            );
+
+            // Related nodes bounds
+            relatedNodes.forEach((node, i) => {
+                const angle = (2 * Math.PI / relatedNodes.length) * i - Math.PI / 2;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+
+                const labelWidth = ctx.measureText(node.label).width + 40;
+                const labelHeight = node.type === 'file' ? 56 : 32;
+
+                updateBounds(x, y, labelWidth, labelHeight);
+            });
+
+            // Compute zoom
+            this.zoom = this.computeAutoZoom(
+                { minX, minY, maxX, maxY },
+                canvas.width,
+                canvas.height
+            );
+
+            /* ------------------ APPLY TRANSFORM ------------------ */
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.scale(this.zoom, this.zoom);
+            ctx.translate(-canvas.width / 2, -canvas.height / 2);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            this._nodePositions = [];
+
+            /* ------------------ ANIMATION MODE ------------------ */
+            if (positions) {
+                for (const id in positions) {
+                    const node = nodes.find(n => n.id === id);
+                    if (!node) continue;
+
+                    const { x, y, alpha } = positions[id];
+                    const style = this.getNodeStyle(node.type);
+                    const isCenter = id === current;
+                    const isHovered = this._hoveredNodeId === node.id;
+
+                    ctx.globalAlpha = alpha;
+
+                    this.drawLabel(
+                        ctx,
+                        node,
+                        node.label,
+                        x,
+                        y,
+                        style.fill,
+                        style.text,
+                        style.stroke,
+                        isCenter ? 'bold 15px sans-serif' : 'bold 13px sans-serif',
+                        isHovered,
+                        isCenter
+                    );
+
+                    if (isCenter) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, this.nodeRadius, 0, 2 * Math.PI);
+                        ctx.fillStyle = style.fill;
+                        ctx.fill();
+                        ctx.strokeStyle = style.stroke;
+                        ctx.lineWidth = 3;
+                        ctx.stroke();
+                    }
+                }
+                ctx.globalAlpha = 1;
+                return;
+            }
+
+            /* ------------------ LINKS + RELATED NODES ------------------ */
+            relatedNodes.forEach((node, i) => {
+                const angle = (2 * Math.PI / relatedNodes.length) * i - Math.PI / 2;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+
+                const style = this.getNodeStyle(node.type);
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(x, y);
+                ctx.strokeStyle = style.stroke;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                const isHovered = this._hoveredNodeId === node.id;
+                this.drawLabel(
+                    ctx,
+                    node,
+                    node.label,
+                    x,
+                    y,
+                    style.fill,
+                    style.text,
+                    style.stroke,
+                    'bold 13px sans-serif',
+                    isHovered,
+                    false
+                );
+            });
+
+            /* ------------------ CENTER NODE ------------------ */
+            const centerStyle = this.getNodeStyle(centerNode.type);
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, this.nodeRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = centerStyle.fill;
+            ctx.fill();
+            ctx.strokeStyle = centerStyle.stroke;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            const isCenterHovered = this._hoveredNodeId === centerNode.id;
+            this.drawLabel(
+                ctx,
+                centerNode,
+                centerNode.label,
+                centerX,
+                centerY,
+                centerStyle.fill,
+                centerStyle.text,
+                centerStyle.stroke,
+                'bold 15px sans-serif',
+                isCenterHovered,
+                true
+            );
+        });
+    }
+    private drawMindMap_old(positions?: Record<string, { x: number, y: number, alpha: number }>) {
         requestAnimationFrame(() => {
 
             if (!this.mapState) return;
@@ -273,9 +537,19 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
-            const radius = Math.min(canvas.width, canvas.height) * 0.33;
-            const nodeRadius = this.nodeRadius;
 
+            const baseRadius = Math.min(canvas.width, canvas.height) * 0.33;
+            const densityFactor = Math.max(
+                1,
+                relatedNodes.length / 6
+            );
+            const radius = baseRadius * densityFactor;
+
+
+
+
+
+            const nodeRadius = this.nodeRadius;
             relatedNodes.forEach((node, i) => {
                 const angle = (2 * Math.PI / relatedNodes.length) * i - Math.PI / 2;
                 const x = centerX + radius * Math.cos(angle);
@@ -325,69 +599,190 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         ctx.font = font;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+
         const paddingX = 15;
         const paddingY = 8;
         const rectRadius = 12;
 
         const metrics = ctx.measureText(text);
         const textHeight = 13 + paddingY * 2;
+
+        const iconRowHeight = node.type === 'file' ? 26 : 0;
+        const totalHeight = textHeight + iconRowHeight;
+
         const textWidth = metrics.width + paddingX * 2;
 
         const rectX = x - textWidth / 2;
-        const rectY = y - textHeight / 2;
+        const rectY = y - totalHeight / 2;
 
-        // Shadow effect
+        /* ---------- Shadow ---------- */
         ctx.save();
         ctx.shadowColor = 'rgba(0,0,0,0.19)';
         ctx.shadowBlur = isHovered ? 16 : 8;
         ctx.shadowOffsetX = isHovered ? 1 : 0;
         ctx.shadowOffsetY = isHovered ? 3 : 2;
 
-        // Gradient texture for background
+        /* ---------- Gradient ---------- */
         const grad = ctx.createRadialGradient(x, y, rectRadius, x, y, textWidth);
         grad.addColorStop(0, bgColor);
-        grad.addColorStop(1, isHovered
-            ? this._brightenColor(bgColor, 0.15)
-            : this._brightenColor(bgColor, 0.75));
+        grad.addColorStop(
+            1,
+            isHovered
+                ? this._brightenColor(bgColor, 0.15)
+                : this._brightenColor(bgColor, 0.75)
+        );
 
-        // Draw rounded rectangle (background)
+        /* ---------- Rounded Rect ---------- */
         ctx.beginPath();
         ctx.moveTo(rectX + rectRadius, rectY);
         ctx.lineTo(rectX + textWidth - rectRadius, rectY);
         ctx.quadraticCurveTo(rectX + textWidth, rectY, rectX + textWidth, rectY + rectRadius);
-        ctx.lineTo(rectX + textWidth, rectY + textHeight - rectRadius);
-        ctx.quadraticCurveTo(rectX + textWidth, rectY + textHeight, rectX + textWidth - rectRadius, rectY + textHeight);
-        ctx.lineTo(rectX + rectRadius, rectY + textHeight);
-        ctx.quadraticCurveTo(rectX, rectY + textHeight, rectX, rectY + textHeight - rectRadius);
+        ctx.lineTo(rectX + textWidth, rectY + totalHeight - rectRadius);
+        ctx.quadraticCurveTo(
+            rectX + textWidth,
+            rectY + totalHeight,
+            rectX + textWidth - rectRadius,
+            rectY + totalHeight
+        );
+        ctx.lineTo(rectX + rectRadius, rectY + totalHeight);
+        ctx.quadraticCurveTo(rectX, rectY + totalHeight, rectX, rectY + totalHeight - rectRadius);
         ctx.lineTo(rectX, rectY + rectRadius);
         ctx.quadraticCurveTo(rectX, rectY, rectX + rectRadius, rectY);
         ctx.closePath();
 
-        //ctx.globalAlpha = isHovered ? 1.0 : 0.92;
         ctx.fillStyle = grad;
         ctx.fill();
 
-        //ctx.globalAlpha = 1.0;
         ctx.shadowBlur = 0;
-
-        // Draw border (stroke)
         ctx.lineWidth = 3;
         ctx.strokeStyle = strokeColor;
         ctx.stroke();
         ctx.restore();
+
+        /* ---------- Text ---------- */
+        ctx.fillStyle = textColor;
+        const textCenterY = rectY + textHeight / 2;
+
+        if (isHovered) {
+            ctx.fillText(text, x - 2, textCenterY - 2);
+        } else {
+            ctx.fillText(text, x, textCenterY);
+        }
+
+        /* ---------- Buttons (only text nodes) ---------- */
+        let buttons: {
+            navigate: { x: number; y: number; w: number; h: number };
+        } | undefined;
+
+        if (node.type === 'file') {
+            const btnSize = 18;
+
+            const buttonsY =
+                rectY + textHeight + (iconRowHeight - btnSize) / 2;
+
+            // 🔥 botão único centralizado
+            const navigateBtn = {
+                x: x - btnSize / 2,
+                y: buttonsY,
+                w: btnSize,
+                h: btnSize
+            };
+
+            this.drawIconButton(ctx, navigateBtn, '➜');
+
+            buttons = {
+                navigate: navigateBtn
+            };
+        }
+
+        /* ---------- Hit map ---------- */
         this._nodePositions.push({
             node,
-            rect: { x: rectX, y: rectY, w: textWidth, h: textHeight },
+            rect: {
+                x: rectX,
+                y: rectY,
+                w: textWidth,
+                h: totalHeight
+            },
+            buttons,
             isCenter: center
         });
-        // Draw label text
-        ctx.fillStyle = textColor;
-        if (isHovered) {
-            ctx.fillText(text, x - 2, y - 2);
-        } else {
-            ctx.fillText(text, x, y);
-        }
     }
+
+    private drawIconButton(
+        ctx: CanvasRenderingContext2D,
+        rect: { x: number, y: number, w: number, h: number },
+        icon: string
+    ) {
+        ctx.save();
+
+        ctx.fillStyle = '#2C3E50';
+        ctx.strokeStyle = '#1B2631';
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.roundRect(rect.x, rect.y, rect.w, rect.h, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ECF0F1';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(icon, rect.x + rect.w / 2, rect.y + rect.h / 2 + 0.5);
+
+        ctx.restore();
+    }
+
+    private openDetails(node: MindMapNode) {
+        this.activeDescription = node.description ? node.description : undefined;
+    }
+
+    private openDefs(node: MindMapNode) {
+
+        let name = node.label.startsWith('/') ? mls.l2.getPath(node.label.replace('/', '')) : mls.l2.getPath(node.label);
+        if (node.label.indexOf('-') > 0) {
+            name = convertTagToFileName(node.label) as any;
+        }
+
+        const start = name.shortName.indexOf('.');
+        if (start > 0) {
+            name.shortName = name.shortName.substring(0, start);
+        }
+
+        if (name.folder.indexOf('/l2') >= 0) name.folder = name.folder.replace('/l2', '');
+
+        const key = mls.stor.getKeyToFile({ ...name, extension: '.ts', level: 2 });
+        if (!mls.stor.files[key]) return;
+        this.fireEvents(mls.stor.files[key])
+
+    }
+
+    private async fireEvents(file: mls.stor.IFileInfo) {
+
+        try {
+            let name = `_${file.project}_/l2/${file.folder ? file.folder + '/' : ''}${file.shortName}`;
+            const options = {
+                shortName: undefined,
+                project: undefined,
+                htmlText: '<plugin-view-mind-map-100554 autoPrepare="true" page="' + name + '"></plugin-view-mind-map-100554>'
+            }
+            mls.events.fire(
+                mls.actualLevel as any,
+                'PluginDetails' as any,
+                JSON.stringify(options),
+                0
+            );
+
+        } catch (err: any) {
+
+            console.info(err.message || '[fireEvents]: erro open');
+        }
+
+
+    }
+
+
 
     // Utility for gradient color lighten
     private _brightenColor(hex: string, amt = 0.08) {
@@ -556,7 +951,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
                 this._animating = false;
                 this._animatedPositions = undefined;
                 this.mapState!.current = target.id;
-                this.activeDescription = target.description;
+                this.activeDescription = target.description ? target.description : undefined;;
                 this.breadcrumb = this.breadcrumb.slice(0, index + 1);
                 this.requestUpdate();
             }
@@ -584,17 +979,25 @@ interface MindMapSelectedPlugin extends MindMapSelectedBase {
     file: mls.stor.IFileInfo; // file selected , level, project, shortName, folder, extension    
 }
 
-interface MindMapSelectedGroup extends MindMapSelectedBase {
-    type: "group",
-}
+type MindMapNodeType =
+    | 'main'
+    | 'asIs'
+    | 'codeInsights'
+    | 'webcomponent'
+    | 'imports'
+    | 'language'
+    | 'attributes'
+    | 'file'
+    | 'text';
 
 export interface MindMapNode {
     id: string;             // unique identifier
     label: string;          // label shown on the node
-    type: 'page' | 'widget' | 'table' | 'group' | 'state' | 'state-group' | 'project' | 'level1' | 'level2'| 'level3'| 'level4'| 'level5'| 'level6'| 'level7';
+    type: MindMapNodeType;
     related: string[];      // ids of related nodes
     meta?: Record<string, any>; // optional metadata;
-    description?: string
+    description?: string,
+    navigate?: boolean
 }
 
 export interface MindMapData {
