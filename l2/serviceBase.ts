@@ -43,6 +43,10 @@ export abstract class ServiceBase extends StateLitElement {
         return this._nav3Service;
     }
 
+    get nav3Menu() {
+        return this.getNav3ServiceMenu();
+    }
+
     get serviceItemNav() {
         this._serviceItemNav = this.getServiceItemNav();
         return this._serviceItemNav;
@@ -151,7 +155,7 @@ export abstract class ServiceBase extends StateLitElement {
             }
         }
 
-        
+
         if (changedProperties.has('loadingFeedBack')) {
             const loadingFeedBack = changedProperties.get('loadingFeedBack');
             if (loadingFeedBack !== undefined) {
@@ -371,7 +375,7 @@ export interface IServiceMenu {
     onClickTools?: IToolsClickCallBack,
     onClickTabs?: ITabsClickCallBack,
     onClickTabsNavigation?: ITabsNavigationClickCallBack,
-    
+
     setMenuActive?: (op: string) => void
     setTabActive?: (index: number) => void,
     tabNavigate?: (index: number, oldTab: HTMLElement | undefined, newTab: HTMLElement) => void,
