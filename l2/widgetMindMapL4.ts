@@ -7,7 +7,7 @@ import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { convertTagToFileName } from '/_100554_/l2/utilsLit';
 
 @customElement('widget-mind-map-l4-100554')
-export class WidgetMindMapL4100554 extends StateLitElement {
+export class WidgetMindMapL4100554 extends StateLitElement { 
 
     @property({ type: String }) activeDescription: string | undefined;
 
