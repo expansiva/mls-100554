@@ -47,7 +47,7 @@ export class PluginViewMindMap extends PluginBaseModule {
         await this.init();
     }
 
-    //------******* IMPLEMENTATION **-----------
+    //------******* IMPLEMENTATION **----------- 
 
     private async init() {
 
@@ -75,7 +75,7 @@ export class PluginViewMindMap extends PluginBaseModule {
                 ...i,
                 related: Array.from(new Set(i.related))
             }
-            if (i.related.length <= 1 && i.id !== 'asIs') i.related = [];
+            if (i.related.length <= 1 && !['imports', 'asIs'].includes(i.id)  ) i.related = [];
             return i
 
         });
@@ -141,18 +141,18 @@ export class PluginViewMindMap extends PluginBaseModule {
         const centerNode = pushNode({
             id: centerId,
             label: input.meta.fileReference,
-            type: "level1",
+            type: "main",
             related: []
         });
 
         // ---------------- LANGUAGES ----------------
         if (Array.isArray(input.meta.languages) && input.meta.languages.length) {
-            const groupId = "languages";
+            const groupId = "language";
 
             const groupNode = pushNode({
                 id: groupId,
                 label: "Languages",
-                type: "level2",
+                type: "language",
                 related: []
             });
 
@@ -164,7 +164,7 @@ export class PluginViewMindMap extends PluginBaseModule {
                 pushNode({
                     id,
                     label: lang.toUpperCase(),
-                    type: "level3",
+                    type: "attributes",
                     related: [groupId]
                 });
 
@@ -179,7 +179,7 @@ export class PluginViewMindMap extends PluginBaseModule {
             const groupNode = pushNode({
                 id: groupId,
                 label: "Web Components",
-                type: "level2",
+                type: "webcomponent",
                 related: []
             });
 
@@ -191,8 +191,9 @@ export class PluginViewMindMap extends PluginBaseModule {
                 pushNode({
                     id,
                     label: wc,
-                    type: "level3",
-                    related: [groupId]
+                    type: "file",
+                    related: [groupId],
+                    navigate:true   
                 });
 
                 groupNode.related.push(id);
@@ -206,7 +207,7 @@ export class PluginViewMindMap extends PluginBaseModule {
             const groupNode = pushNode({
                 id: groupId,
                 label: "Imports",
-                type: "level2",
+                type: "imports",
                 related: []
             });
 
@@ -215,16 +216,25 @@ export class PluginViewMindMap extends PluginBaseModule {
             input.references.imports.forEach((imp: any) => {
                 const importId = `import:${imp.ref}`;
 
+                let text = '';
+                (imp.dependencies || []).forEach((dep: any) => {
+                    const depId = `dep:${imp.ref}:${dep.name}`;
+                    text = `${text}<li>${dep.name}</li>`
+                });
+                if( text !== '') text = `<ul>${text}</ul>`;
+
                 const importNode = pushNode({
                     id: importId,
                     label: imp.ref,
-                    type: "level4",
-                    related: [groupId]
+                    type: "file",
+                    related: [groupId],
+                    navigate: true,
+                    description: text
                 });
 
                 groupNode.related.push(importId);
 
-                (imp.dependencies || []).forEach((dep: any) => {
+                /*(imp.dependencies || []).forEach((dep: any) => {
                     const depId = `dep:${imp.ref}:${dep.name}`;
 
                     pushNode({
@@ -235,7 +245,7 @@ export class PluginViewMindMap extends PluginBaseModule {
                     });
 
                     importNode.related.push(depId);
-                });
+                });*/
             });
         }
 
@@ -247,7 +257,7 @@ export class PluginViewMindMap extends PluginBaseModule {
             const groupNode = pushNode({
                 id: groupId,
                 label: "Code Insights",
-                type: "level2",
+                type: "codeInsights",
                 related: []
             });
 
@@ -255,12 +265,13 @@ export class PluginViewMindMap extends PluginBaseModule {
 
             Object.entries(insights).forEach(([key, value]) => {
                 const sectionId = `insight:${key}`;
-                const description = this.joinStringArrayDescription(value);
+                let description = this.joinStringArrayDescription(value);
+                description = description === '<ul></ul>' ? '' : description;
 
                 pushNode({
                     id: sectionId,
                     label: key.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase()),
-                    type: "level3",
+                    type: "text",
                     related: [groupId],
                     description
                 });
@@ -279,7 +290,7 @@ export class PluginViewMindMap extends PluginBaseModule {
             const groupNode = pushNode({
                 id: groupId,
                 label: "As Is",
-                type: "level2",
+                type: "asIs",
                 related: ['asIs:semantic']
             });
 
@@ -289,7 +300,7 @@ export class PluginViewMindMap extends PluginBaseModule {
             const semanticNode = pushNode({
                 id: semanticId,
                 label: "Semantic",
-                type: "level3",
+                type: "attributes",
                 related: [groupId]
             });
 
@@ -297,12 +308,13 @@ export class PluginViewMindMap extends PluginBaseModule {
 
             Object.entries(semantic).forEach(([key, value]) => {
                 const nodeId = `asIs:semantic:${key}`;
-                const description = this.joinStringArrayDescription(value);
+                let description = this.joinStringArrayDescription(value);
+                description = description === '<ul></ul>' ? '' : description;
 
                 pushNode({
                     id: nodeId,
                     label: key.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase()),
-                    type: "level4",
+                    type: "text",
                     related: [semanticId],
                     description
                 });
@@ -312,250 +324,6 @@ export class PluginViewMindMap extends PluginBaseModule {
         }
 
         normalizeRelations();
-
-        return {
-            current: centerId,
-            nodes
-        };
-    }
-
-    private buildMindMapFromInsights_old2(input: any): MindMapData {
-        const nodes: MindMapNode[] = [];
-
-        const centerId = `service:${input.meta.fileReference}`;
-
-        // Center node
-        nodes.push({
-            id: centerId,
-            label: input.meta.fileReference,
-            type: "level1",
-            related: ["languages", "webComponents", "imports", "codeInsights", "asIs"]
-        });
-
-        // ---- Groups ----
-        const groups = ["languages", "webComponents", "imports", "codeInsights", "asIs"];
-
-        groups.forEach(g => {
-            nodes.push({
-                id: g,
-                label: g.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase()),
-                type: "level2",
-                related: []
-            });
-        });
-
-        // Link groups to center
-        groups.forEach(g =>
-            nodes.find(n => n.id === centerId)!.related.push(g)
-        );
-
-        // ---- Languages ----
-        (input.meta.languages || []).forEach((lang: string) => {
-            const id = `lang:${lang}`;
-            nodes.push({
-                id,
-                label: lang.toUpperCase(),
-                type: "level3",
-                related: ["languages"]
-            });
-
-            nodes.find(n => n.id === "languages")!.related.push(id);
-        });
-
-        // ---- Web Components ----
-        (input.references.webComponents || []).forEach((wc: string) => {
-            const id = `wc:${wc}`;
-            nodes.push({
-                id,
-                label: wc,
-                type: "level3",
-                related: ["webComponents"]
-            });
-
-            nodes.find(n => n.id === "webComponents")!.related.push(id);
-        });
-
-        // ---- Imports & Dependencies ----
-        (input.references.imports || []).forEach((imp: any) => {
-            const importId = `import:${imp.ref}`;
-
-            nodes.push({
-                id: importId,
-                label: imp.ref,
-                type: "level4",
-                related: ["imports"]
-            });
-
-            nodes.find(n => n.id === "imports")!.related.push(importId);
-
-            (imp.dependencies || []).forEach((dep: any) => {
-                const depId = `dep:${imp.ref}:${dep.name}`;
-
-                nodes.push({
-                    id: depId,
-                    label: dep.name,
-                    type: "level5",
-                    related: [importId]
-                });
-
-                const importNode = nodes.find(n => n.id === importId);
-                if (importNode) {
-                    importNode.related.push(depId);
-                }
-            });
-        });
-
-        // ---- Code Insights ----
-        const insights = input.codeInsights || {};
-        Object.entries(insights).forEach(([key, value]) => {
-            const sectionId = `insight:${key}`;
-            const description = this.joinStringArrayDescription(value);
-
-            nodes.push({
-                id: sectionId,
-                label: key.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase()),
-                type: "level3",
-                related: ["codeInsights"],
-                description
-            });
-
-            nodes.find(n => n.id === "codeInsights")!.related.push(sectionId);
-        });
-
-        // ---- As Is ----
-        const asIs = input.asIs || {};
-        const asIsId = "asIs";
-        const semantic = asIs.semantic || {};
-
-        // Subgroup: Semantic
-        const semanticId = "asIs:semantic";
-        nodes.push({
-            id: semanticId,
-            label: "Semantic",
-            type: "level3",
-            related: [asIsId]
-        });
-        nodes.find(n => n.id === asIsId)!.related.push(semanticId);
-
-        Object.entries(semantic).forEach(([key, value]) => {
-            const nodeId = `asIs:semantic:${key}`;
-            const description = this.joinStringArrayDescription(value);
-
-            nodes.push({
-                id: nodeId,
-                label: key.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase()),
-                type: "level4",
-                related: [semanticId],
-                description
-            });
-
-            const semanticNode = nodes.find(n => n.id === semanticId);
-            if (semanticNode) {
-                semanticNode.related.push(nodeId);
-            }
-        });
-
-        return {
-            current: centerId,
-            nodes
-        };
-    }
-
-    private buildMindMapFromInsights_old(input: any): MindMapData {
-        const nodes: MindMapNode[] = [];
-
-        const centerId = `service:${input.meta.fileReference}`;
-
-        // Center node
-        nodes.push({
-            id: centerId,
-            label: input.meta.fileReference,
-            type: "project",
-            related: ["languages", "webComponents", "imports"]
-        });
-
-        // ---- Groups ----
-        nodes.push({
-            id: "languages",
-            label: "Languages",
-            type: "group",
-            related: []
-        });
-
-        nodes.push({
-            id: "webComponents",
-            label: "Web Components",
-            type: "group",
-            related: []
-        });
-
-        nodes.push({
-            id: "imports",
-            label: "Imports",
-            type: "group",
-            related: []
-        });
-
-        // Link groups to center
-        ["languages", "webComponents", "imports"].forEach(g =>
-            nodes.find(n => n.id === centerId)!.related.push(g)
-        );
-
-        // ---- Languages ----
-        (input.meta.languages || []).forEach((lang: string) => {
-            const id = `lang:${lang}`;
-            nodes.push({
-                id,
-                label: lang.toUpperCase(),
-                type: "state",
-                related: ["languages"]
-            });
-
-            nodes.find(n => n.id === "languages")!.related.push(id);
-        });
-
-        // ---- Web Components ----
-        (input.references.webComponents || []).forEach((wc: string) => {
-            const id = `wc:${wc}`;
-            nodes.push({
-                id,
-                label: wc,
-                type: "widget",
-                related: ["webComponents"]
-            });
-
-            nodes.find(n => n.id === "webComponents")!.related.push(id);
-        });
-
-        // ---- Imports & Dependencies ----
-        (input.references.imports || []).forEach((imp: any) => {
-            const importId = `import:${imp.ref}`;
-
-            nodes.push({
-                id: importId,
-                label: imp.ref,
-                type: "table",
-                related: ["imports"]
-            });
-
-            nodes.find(n => n.id === "imports")!.related.push(importId);
-
-            (imp.dependencies || []).forEach((dep: any) => {
-                const depId = `dep:${imp.ref}:${dep.name}`;
-
-                nodes.push({
-                    id: depId,
-                    label: dep.name,
-                    type: "state",
-                    related: [importId]
-                });
-
-                const importNode = nodes.find(n => n.id === importId);
-                if (importNode) {
-                    importNode.related.push(depId);
-                }
-            });
-        });
 
         return {
             current: centerId,
