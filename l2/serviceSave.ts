@@ -438,9 +438,9 @@ export class ServiceSave extends ServiceBase {
     renderItem(item: Iitem, indexP: number, indexL: number, indexM: number, index: number, forceError: boolean) {
 
         return html`
-            <li style="padding-left: 1.1rem;" class="${item.errorLocal ? 'errorLocal' : ''}">
+            <li style="padding-left: 1.1rem;" class="${item.errorLocal || item.modelIsDispose ? 'errorLocal' : ''}">
                 <div style="align-items: center;">
-                    ${item.disabled || item.onlyFather || item.errorLocal || forceError
+                    ${item.disabled || item.onlyFather || item.errorLocal || forceError || item.modelIsDispose
                 ? html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
                 : html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
             }
@@ -519,20 +519,6 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
-    /*private filterOtherProject() {
-        const find = (f: number | undefined) => {
-            let i = -1;
-            this.otherProjects.forEach((prj, idx) => {
-                if (prj === f) i = idx;
-            });
-            return i;
-        }
-        let f = find(mls.actualProject);
-        if (f >= 0) this.otherProjects.splice(f, 1);
-        f = find(0);
-        if (f >= 0) this.otherProjects.splice(f, 1);
-    }*/
-
     private async init(isSetInfoProject: boolean = true) {
         this.showLoader(true);
         this.totFileSize = `${this.myMessage.msgTotFile} 0B`
@@ -581,12 +567,11 @@ export class ServiceSave extends ServiceBase {
         return true;
     }
 
-    private async setInfos() {
+    private async setInfos() { 
         try {
 
             const objProjects: any = {};
             const filesKeys = Object.keys(mls.stor.files);
-            //this.otherProjects = await mls.stor.localDB.getAllProjects();
             this.otherProjects = await this.getOtherProjects();
 
             for (const fKey of filesKeys) {
@@ -671,7 +656,15 @@ export class ServiceSave extends ServiceBase {
         new: { icon: 'fa-plus', title: 'New' }
     };
 
-    private async configItem(item: mls.stor.IFileInfo) {
+    private fromToExtension:Record<string, string> = {
+        '.ts': 'ts',
+        '.less': 'style',
+        '.html': 'html',
+        '.test.ts': 'test',
+        '.defs.ts': 'defs'
+    }
+
+    private async configItem(item: mls.stor.IFileInfo): Promise<Iitem> {
         let mountText = item.shortName + item.extension;
         let disabled = false;
         let errorLocal = false;
@@ -696,13 +689,28 @@ export class ServiceSave extends ServiceBase {
 
         if (errorLocal) span = '<span> Error: the file does not exist in the database<span>';
 
+        let modelIsDispose = false;
+        const models = mls.editor.getModels(item.project, item.shortName, item.folder, item.level);
+        const ext: any = this.fromToExtension[item.extension];
+        const model = models ? (models as any)[ext] as mls.editor.IModelBase : undefined;
+
+        if (!models || !model) {
+            modelIsDispose = true;
+            span = '<span> Error: There is no model! <span>'
+        }
+        if (models && model && model.model.isDisposed()) {
+            modelIsDispose = true;
+            span = '<span> Error: The model is invalid. <span>'
+        }
+
         return {
             file: item,
             text: mountText,
             span: span,
             onlyFather,
             disabled: disabled,
-            errorLocal
+            errorLocal,
+            modelIsDispose
         }
     }
 
@@ -1420,8 +1428,16 @@ export class ServiceSave extends ServiceBase {
     private async undoFile(item: HTMLElement, storFile: mls.stor.IFileInfo) {
 
         await undoFile(storFile);
-        const el = item.closest('.open');
-        if (el) el.remove();
+        const el = item.closest('li') as HTMLElement;
+        el.classList.add('errorLocal');
+        el.innerHTML = `<div style="align-items: center;">
+                    <input type="checkbox" onlystatusfather="false" disabled>
+                    <label>
+                        ${storFile.extension} Undo File.
+                    </label>
+                </div>`;
+        
+        //if (el) el.remove();
         //this.itens = this.removeFileByInfoImmutable(this.itens || {}, storFile);
         /*setTimeout(async () => {
             await this.setInfos();
@@ -1511,5 +1527,6 @@ interface Iitem {
     span: string;
     onlyFather: boolean,
     disabled: boolean,
-    errorLocal: boolean
+    errorLocal: boolean,
+    modelIsDispose:boolean
 }
