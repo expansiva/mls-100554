@@ -4,12 +4,14 @@ import { html, TemplateResult, nothing, svg } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { getTask } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { collab_user, collab_clock_static, collab_terminal, collab_play } from '/_100554_/l2/collabIcons.js';
+import { collab_play } from '/_100554_/l2/collabIcons.js';
+import { continuePoolingTask } from '/_100554_/l2/aiAgentOrchestration.js';
 
 @customElement('ai-agent-default-feedback-100554')
 export class AiAgentDefaultFeedback100554 extends StateLitElement {
 
     @state() task?: mls.msg.TaskData;
+    @state() message?: mls.msg.Message;
     @state() selectedStep: mls.msg.AIPayload | null = null;
     @state() selectedTraceStep: mls.msg.AIPayload | null = null;
     @state() isAgentParallelMode: boolean = false;
@@ -21,10 +23,10 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
         //this.task = await getTask('20251127123524.1001');
         //this.task = await getTask('20260126134300.1001');
         //this.task = await getTask('20260126125152.1001');
-        // this.task = await getTask('20260127122706.1001');
+        //this.task = await getTask('20260127122706.1001');
         this.isAgentParallelMode = !!this.task?.iaCompressed?.nextSteps[0].progress;
     }
-    
+
 
     updated(_changedProperties: Map<PropertyKey, unknown>) {
         super.updated(_changedProperties);
@@ -51,8 +53,6 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
     }
 
 
-
-
     private getIconStep(status?: mls.msg.AIStepStatus) {
         switch (status) {
             case 'completed': return html`<div class="success">${this.iconOk}</div>`;
@@ -60,7 +60,7 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
             case 'failed': return html`<div class="error">${this.iconError}</div>`;
             case 'pending': return html`<div class="pending">${this.iconPending}</div>`;
             case 'waiting_after_prompt': return html`<div class="waiting">${this.iconWaitingAfter}</div>`;
-            case 'waiting_human_input':  return html`<div class="waiting">${this.iconWaitingHumam}</div>`
+            case 'waiting_human_input': return html`<div class="waiting">${this.iconWaitingHumam}</div>`
             default: return '•';
         }
     }
@@ -136,10 +136,37 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
             <div class="row">
                 <span class="icon">${this.getIconTask(this.task.status)}</span>
                 <div>${this.task?.title}</div>
+                ${this.renderActions()}
             </div>
             <hr></hr>
 
         `
+    }
+    private renderActions() {
+        const task = this.task;
+        if (!task) return nothing;
+
+        const queue = task.iaCompressed?.queueFrontEnd;
+
+        if (task.status !== 'in progress' || !queue?.length)
+            return nothing;
+
+        return html`
+        <div class="actions">
+            <span
+                class="icon"
+                @click=${this.restartPoolingTask}
+            >
+                ${collab_play}
+            </span>
+        </div>
+    `;
+    }
+
+    private restartPoolingTask() {
+        if (!this.task || !this.message) return;
+        const context: mls.msg.ExecutionContext = { message: this.message, task: this.task };
+        continuePoolingTask(context);
     }
 
     private renderTaskProgress() {
@@ -265,7 +292,7 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
             <div class="log-card">
                 ${obj.title ?
                     html`<div> ${this.getIconStep(obj.ok ? 'completed' : 'failed')} <strong>${obj.title}</strong></div>`
-                : nothing}
+                    : nothing}
                 <pre>${JSON.stringify(obj, null, 2)}</pre>
             </div>
         `;
@@ -302,14 +329,6 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
         </section>
             `;
     }
-
-    private iconError2 = svg`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="256" height="256" viewBox="0 0 256 256" xml:space="preserve">
-<g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;" transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)">
-	<path d="M 24.005 66.995 c -0.256 0 -0.512 -0.098 -0.707 -0.293 c -0.391 -0.391 -0.391 -1.023 0 -1.414 l 41.99 -41.99 c 0.391 -0.391 1.023 -0.391 1.414 0 s 0.391 1.023 0 1.414 l -41.99 41.99 C 24.517 66.897 24.261 66.995 24.005 66.995 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(236,0,0); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round"/>
-	<path d="M 65.995 66.995 c -0.256 0 -0.512 -0.098 -0.707 -0.293 l -41.99 -41.99 c -0.391 -0.391 -0.391 -1.023 0 -1.414 s 1.023 -0.391 1.414 0 l 41.99 41.99 c 0.391 0.391 0.391 1.023 0 1.414 C 66.507 66.897 66.251 66.995 65.995 66.995 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(236,0,0); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round"/>
-	<path d="M 89 90 H 1 c -0.552 0 -1 -0.447 -1 -1 V 1 c 0 -0.552 0.448 -1 1 -1 h 88 c 0.553 0 1 0.448 1 1 v 88 C 90 89.553 89.553 90 89 90 z M 2 88 h 86 V 2 H 2 V 88 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(236,0,0); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round"/>
-</g>
-</svg>`;
 
     private iconError = svg`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="256" height="256" viewBox="0 0 256 256" xml:space="preserve" fill="currentColor">
 <g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;" transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)">

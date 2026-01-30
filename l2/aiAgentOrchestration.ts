@@ -15,7 +15,7 @@ import {
 } from "/_100554_/l2/aiAgentHelper.js";
 
 import { collabImport } from '/_100554_/l2/collabImport.js';
-import { getTask, getMessage, addOrUpdateTask } from '/_102025_/l2/collabMessagesIndexedDB.js';
+import { getTask, getMessage, addOrUpdateTask, addPooling, deletePooling } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { IAgent, IAgentAsync } from '/_100554_/l2/aiAgentBase.js';
 import { getUserId } from '/_102025_/l2/collabMessagesHelper.js';
 import { loadModuleFromProjectOrDependency } from '/_100554_/l2/libCommom.js';
@@ -396,6 +396,72 @@ function splitJsonAndText(input: string): { jsonText: string; rest: string } {
     return { jsonText, rest };
 }
 
+
+const MAX_HOOKS_PER_TURN = 5;
+const runningTasks = new Set<string>();
+
+export async function continuePoolingTask(context: mls.msg.ExecutionContext) {
+    const { task } = context;
+    if (!task) return;
+
+    const taskId = task.PK;
+
+    if (runningTasks.has(taskId)) {
+        console.warn('Task already in pooling');
+        return;
+    }
+
+    if (task.status !== 'in progress') throw new Error('Task not in progress');
+    const ia = task.iaCompressed;
+    if (!ia) throw new Error('Task has no AI interaction');
+    if (!ia.queueFrontEnd) throw new Error('Task has no pending hooks');
+
+    const firstStep = ia.nextSteps?.[0] as mls.msg.AIAgentStep | undefined;
+    if (!firstStep) throw new Error('No next step available');
+
+    const agentName = firstStep.agentName;
+    const agent = await loadAgent(agentName);
+    if (!agent) throw new Error(`[${agentName}] createAgent function not found`);
+
+
+    runningTasks.add(taskId);
+    await addPooling({
+        taskId,
+        userId: context.task?.owner ?? '',
+        startAt: Date.now().toString()
+    });
+
+
+    const hooksToProcess = ia.queueFrontEnd
+        .filter(h => h.type !== 'pooling')
+        .slice(0, MAX_HOOKS_PER_TURN);
+
+    const intentsFromHooks = (
+        await Promise.all(
+            hooksToProcess.map(async hook => [
+                ...(await processIntents2(agent, context, hook)),
+                ...getRemoveIntent(agent, context, hook),
+            ])
+        )
+    ).flat();
+
+    await addOrUpdateTask(task);
+    let intents = intentsFromHooks;
+
+    if (intents.length === 0) {
+        intents = await processHookPooling(agent, context);
+        if (intents.length === 0) {
+            runningTasks.delete(taskId);
+            await deletePooling(taskId);
+            return;
+        }
+    }
+
+    void processIntents(agent, context, intents);
+
+}
+
+
 async function processIntents(agent: IAgentAsync, context: mls.msg.ExecutionContext, intents: mls.msg.AgentIntent[]): Promise<void> {
     if (mls.isTraceAgent) console.log(`[processIntents] intents length: ${intents.length}`);
     const oldContextCreateAt = context.message.createAt;
@@ -412,6 +478,13 @@ async function processIntents(agent: IAgentAsync, context: mls.msg.ExecutionCont
     notifyTaskChange(context, oldContextCreateAt);
     if (!context.task?.iaCompressed) return;
 
+    runningTasks.add(ret.task.PK);
+    await addPooling({
+        taskId: ret.task.PK,
+        userId: context.task?.owner ?? '',
+        startAt: Date.now().toString()
+    });
+
     let _hooks = context.task.iaCompressed.queueFrontEnd || [];
     const hooksToProcess = _hooks
         .filter(h => h.type !== 'pooling')
@@ -423,7 +496,11 @@ async function processIntents(agent: IAgentAsync, context: mls.msg.ExecutionCont
     await addOrUpdateTask(context.task); // UI feedback, update task in indexedDB
     if (newIntents.length < 1) {
         newIntents = await processHookPooling(agent, context);
-        if (newIntents.length < 1) return; // just leave
+        if (newIntents.length < 1) {
+            runningTasks.delete(ret.task.PK);
+            await deletePooling(ret.task.PK);
+            return; // just leave
+        }
     }
     processIntents(agent, context, newIntents); // reentrance processIntents, fire and forget to fast UI feedback 
 }
@@ -451,12 +528,12 @@ async function processHookPooling(agent: IAgentAsync, context: mls.msg.Execution
 
 function getRemoveIntent(agent: IAgentAsync, context: mls.msg.ExecutionContext, hook: mls.msg.AgentHooks): mls.msg.AgentIntentRemoveHook[] {
     return [{
-    type: 'remove-hook',
-    hookSequential: hook.hookSequential,
-    threadId: context.message.threadId,
-    messageId: context.message.orderAt,
-    taskId: context.task?.PK || ''
-    }];      
+        type: 'remove-hook',
+        hookSequential: hook.hookSequential,
+        threadId: context.message.threadId,
+        messageId: context.message.orderAt,
+        taskId: context.task?.PK || ''
+    }];
 }
 async function processHookBeforePromptStep(agent: IAgentAsync, context: mls.msg.ExecutionContext, hook: mls.msg.AgentHookBeforePromptStep): Promise<mls.msg.AgentIntent[]> {
     if (!agent.beforePromptStep) throw new Error(`Agent ${agent.agentName} do not have beforePromptStep`);
