@@ -1,4 +1,4 @@
-/// <mls shortName="cssHelperIndexBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/cssHelperIndexBase.ts" enhancement="_blank" />
 
 export type IMode = 'collapsed' | 'expanded' | 'full';
 
