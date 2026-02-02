@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabSelectOneWithDescription.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/collabSelectOneWithDescription.ts" enhancement="_100554_enhancementLit" />
 
 import { html } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
