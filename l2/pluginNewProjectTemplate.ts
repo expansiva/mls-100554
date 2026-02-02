@@ -1,4 +1,4 @@
-/// <mls shortName="pluginNewProjectTemplate" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/pluginNewProjectTemplate.ts" group="other" enhancement="_100554_enhancementLit" />
 
 export const template_tsconfig = {
     ext: '.json',
