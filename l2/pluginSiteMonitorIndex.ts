@@ -1,4 +1,4 @@
-/// <mls shortName="pluginSiteMonitorIndex" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/pluginSiteMonitorIndex.ts" enhancement="_blank" />
 
 // To improve system performance, avoid using imports, as this file is loaded during initialization.
 
