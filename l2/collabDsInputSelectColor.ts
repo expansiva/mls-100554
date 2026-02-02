@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabDsInputSelectColor.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/collabDsInputSelectColor.ts" enhancement="_100554_enhancementLit" />
 
 import { html, css, repeat } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
