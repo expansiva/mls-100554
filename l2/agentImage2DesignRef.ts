@@ -1,4 +1,4 @@
-/// <mls shortName="agentImage2DesignRef" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/agentImage2DesignRef.ts" enhancement="_blank" />
 
 import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
 import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
