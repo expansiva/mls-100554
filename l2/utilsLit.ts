@@ -1,4 +1,4 @@
-/// <mls shortName="utilsLit" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/utilsLit.ts" enhancement="_blank" />
 
 // export function convertTagToFileName(tag: string): string{
 //     const regex = /(.+)-(\d+)/;
