@@ -1,4 +1,4 @@
-/// <mls shortName="testScenario1" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/testScenario1.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { IScenaryDetails } from '/_100554_/l2/collabLitElement.js'; 
 export function _100554_testScenario1_getScenaryDetails(): IScenaryDetails {
