@@ -1,4 +1,4 @@
-/// <mls shortName="aiAgentOrchestration" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/aiAgentOrchestration.ts" enhancement="_blank" />
 
 import {
     calculateStepsByFilter,
