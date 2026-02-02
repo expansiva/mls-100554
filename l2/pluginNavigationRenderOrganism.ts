@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginNavigationRenderOrganism.ts" group="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginNavigationRenderOrganism.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { html, repeat, TemplateResult, LitElement } from 'lit';
 import { customElement, state, property, query } from 'lit/decorators.js';
