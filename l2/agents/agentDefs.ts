@@ -1,4 +1,4 @@
-/// <mls shortName="agentDefs" project="100554" enhancement="_100554_enhancementAgent" folder="agents" />
+/// <mls fileReference="_100554_/l2/agents/agentDefs.ts" enhancement="_blank" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
