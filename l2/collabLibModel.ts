@@ -1,4 +1,4 @@
-/// <mls shortName="collabLibModel" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/collabLibModel.ts" enhancement="_blank" />
 
 import { getEnhancementName, getBaseTemplate } from '/_100554_/l2/libCommom.js';
 import { getTokensLess, removeTokensFromSource } from '/_102027_/l2/designSystemBase.js';
