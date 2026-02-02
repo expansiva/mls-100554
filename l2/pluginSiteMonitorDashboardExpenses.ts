@@ -1,4 +1,4 @@
-/// <mls shortName="pluginSiteMonitorDashboardExpenses" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/pluginSiteMonitorDashboardExpenses.ts" group="other" enhancement="_100554_enhancementLit" />
 
 import { html, css, svg, TemplateResult } from 'lit';
 import { query, property } from 'lit/decorators.js';
