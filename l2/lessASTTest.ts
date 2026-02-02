@@ -1,4 +1,4 @@
-/// <mls shortName="lessASTTest" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/lessASTTest.ts" group="other" enhancement="_100554_enhancementLit" />
 
 import { html, css, LitElement } from 'lit'; 
 import { customElement, property } from 'lit/decorators.js';

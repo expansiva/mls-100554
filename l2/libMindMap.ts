@@ -1,4 +1,4 @@
-/// <mls shortName="libMindMap" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/libMindMap.ts" enhancement="_blank" />
 
 
 export async function getMindMapByName(file: string): Promise<MindMapData | undefined> {

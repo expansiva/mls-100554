@@ -1,4 +1,4 @@
-/// <mls shortName="libManagementCan" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/libManagementCan.ts" group="other" enhancement="_100554_enhancementLit" />
 
 import { CollabState, GlobalState, globalState } from '/_100554_/l2/collabState.js';
 

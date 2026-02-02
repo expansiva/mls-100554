@@ -1,4 +1,4 @@
-/// <mls shortName="lessCSS" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/lessCSS.ts" enhancement="_blank" />
 
 import { LessAst } from "/_100554_/l2/lessAST.js";
 import { setState, getState, initState } from '/_100554_/l2/collabState.js';

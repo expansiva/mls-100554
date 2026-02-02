@@ -1,4 +1,4 @@
-/// <mls shortName="libCommom" project="100554" enhancement="_blank" groupName="other" />
+/// <mls fileReference="_100554_/l2/libCommom.ts" group="other" enhancement="_blank" />
 
 import { getMessageKey } from "/_100554_/l2/collabLitElement.js";
 

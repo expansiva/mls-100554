@@ -1,4 +1,4 @@
-/// <mls shortName="libCompile" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/libCompile.ts" enhancement="_blank" />
 
 
 import { getTokensCss, getGlobalCss } from '/_100554_/l2/designSystemBase.js';

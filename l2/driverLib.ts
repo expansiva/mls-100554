@@ -1,4 +1,4 @@
-/// <mls shortName="driverLib" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/driverLib.ts" group="other" enhancement="_100554_enhancementLit" />
 
 
 export function myFetchQL(info: IFetchQl): Promise<{ status: number, ret: any }> {

@@ -1,4 +1,4 @@
-/// <mls shortName="enhancementLitService" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/enhancementLitService.ts" enhancement="_blank" />
 import {
     getDesignDetails as getDesignDetailsDefault,
     getDefaultHtmlExamplePreview as getDefaultHtmlExamplePreviewDefault,

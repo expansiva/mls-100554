@@ -1,4 +1,4 @@
-/// <mls shortName="libUnsplash" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/libUnsplash.ts" group="other" enhancement="_100554_enhancementLit" />
 
 const clientId = 'UEmilNZzuDCesxf1L__2J4T18vdlj6jHMsdeFet3WTQ';
 
