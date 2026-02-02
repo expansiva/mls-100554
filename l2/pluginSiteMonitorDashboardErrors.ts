@@ -1,4 +1,4 @@
-/// <mls shortName="pluginSiteMonitorDashboardErrors" project="100554" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginSiteMonitorDashboardErrors.ts" enhancement="_100554_enhancementLit" />
 
 import { html, css, svg, TemplateResult } from 'lit';
 import { query, property } from 'lit/decorators.js';

@@ -1,4 +1,4 @@
-/// <mls shortName="pluginExamplesIndex" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/pluginExamplesIndex.ts" group="other" enhancement="_100554_enhancementLit" />
 
 import { PluginBaseIndex } from '/_100554_/l2/pluginBaseIndex.js';
 

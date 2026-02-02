@@ -1,4 +1,4 @@
-/// <mls shortName="pluginCodelensCustomElement" project="100554" enhancement="_blank" folder="" />
+/// <mls fileReference="_100554_/l2/pluginCodelensCustomElement.test.ts" enhancement="_blank" />
 
  import { ICANTest, ICANIntegration, ICANSchema  } from '/_100554_/l2/tsTestAST.js';
  export const integrations: ICANIntegration[] = [];

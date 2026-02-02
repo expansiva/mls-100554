@@ -1,4 +1,4 @@
-/// <mls shortName="pluginStyleBackground" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/pluginStyleBackground.ts" group="other" enhancement="_100554_enhancementLit" />
 
 import { html, repeat, classMap } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

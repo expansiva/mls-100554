@@ -1,4 +1,4 @@
-/// <mls shortName="pluginNewFileBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/pluginNewFileBase.ts" group="other" enhancement="_100554_enhancementLit" />
 import { openService, isNameValid } from '/_100554_/l2/libCommom.js'
 import { createAllFiles, IReqCreateAllFiles } from '/_100554_/l2/collabLibStor.js';
 

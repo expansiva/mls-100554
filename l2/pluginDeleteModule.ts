@@ -1,4 +1,4 @@
-/// <mls shortName="pluginDeleteModule" project="100554" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginDeleteModule.ts" enhancement="_100554_enhancementLit" />
 
 import { html, css, TemplateResult } from 'lit';
 import { customElement, state, property } from 'lit/decorators.js';

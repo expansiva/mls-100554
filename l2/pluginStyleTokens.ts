@@ -1,4 +1,4 @@
-/// <mls shortName="pluginStyleTokens" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/pluginStyleTokens.ts" group="other" enhancement="_100554_enhancementLit" />
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

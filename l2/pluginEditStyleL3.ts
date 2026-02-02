@@ -1,4 +1,4 @@
-/// <mls shortName="pluginEditStyleL3" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/pluginEditStyleL3.ts" group="other" enhancement="_100554_enhancementLit" />
 
 import { html, repeat } from 'lit';
 import { customElement, query, property, state } from 'lit/decorators.js';

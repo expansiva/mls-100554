@@ -1,4 +1,4 @@
-/// <mls shortName="pluginBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/pluginBase.ts" group="other" enhancement="_100554_enhancementLit" />
 
 import { html, LitElement, TemplateResult } from 'lit';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';

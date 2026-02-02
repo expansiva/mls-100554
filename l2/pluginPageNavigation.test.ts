@@ -1,3 +1,3 @@
-/// <mls shortName="pluginPageNavigation" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/pluginPageNavigation.test.ts" enhancement="_blank" />
 				
  //Test

@@ -1,4 +1,4 @@
-/// <mls shortName="pluginNewFileWebComponent" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/pluginNewFileWebComponent.test.ts" enhancement="_blank" />
 
  import { ICANTest, ICANIntegration, ICANSchema  } from '/_100554_/l2/tsTestAST.js';
  export const integrations: ICANIntegration[] = [];

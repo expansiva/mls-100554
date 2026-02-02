@@ -1,4 +1,4 @@
-/// <mls shortName="pluginOrganismProperty" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/pluginOrganismProperty.ts" enhancement="_blank" />
 
 import { html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';

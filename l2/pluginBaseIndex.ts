@@ -1,4 +1,4 @@
-/// <mls shortName="pluginBaseIndex" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/pluginBaseIndex.ts" enhancement="_blank" />
 
 export abstract class PluginBaseIndex {
 

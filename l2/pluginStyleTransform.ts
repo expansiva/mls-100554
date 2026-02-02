@@ -1,4 +1,4 @@
-/// <mls shortName="pluginStyleTransform" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/pluginStyleTransform.ts" group="other" enhancement="_100554_enhancementLit" />
 
 
 import { html, repeat } from 'lit';

@@ -1,4 +1,4 @@
-/// <mls shortName="pluginExploreListAddL3" project="100554" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginExploreListAddL3.ts" enhancement="_100554_enhancementLit" />
 
 import { html, repeat, TemplateResult } from 'lit';
 import { customElement, state, property, query } from 'lit/decorators.js';
