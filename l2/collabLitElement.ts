@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabLitElement.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/collabLitElement.ts" enhancement="_100554_enhancementLit" />
 
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/cssHelperIndex.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/cssHelperIndex.ts" enhancement="_100554_enhancementLit" />
 
 import { html, when, repeat } from 'lit';
 import { customElement, property, queryAll } from 'lit/decorators.js';
