@@ -1,4 +1,4 @@
-/// <mls shortName="collabSpliterHorizontalVarFixed" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/collabSpliterHorizontalVarFixed.ts" enhancement="_blank" />
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, queryAll } from 'lit/decorators.js';
