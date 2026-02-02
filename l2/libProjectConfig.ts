@@ -1,4 +1,4 @@
-/// <mls shortName="libProjectConfig" project="100554" enhancement="_blank" groupName="other" />
+/// <mls fileReference="_100554_/l2/libProjectConfig.ts" group="other" enhancement="_blank" />
 
 export const projectConfig: IProjectConfigCache = {};
 
