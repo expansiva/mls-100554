@@ -1,4 +1,4 @@
-/// <mls shortName="wcAuxCommand" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/wcAuxCommand.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
