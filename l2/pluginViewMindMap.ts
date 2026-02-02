@@ -1,4 +1,4 @@
-/// <mls shortName="pluginViewMindMap" project="100554" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginViewMindMap.ts" enhancement="_100554_enhancementLit" />
 
 import { svg, TemplateResult, html } from 'lit';
 import { property } from 'lit/decorators.js';
