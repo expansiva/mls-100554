@@ -1,4 +1,4 @@
-/// <mls shortName="widgetMindMapL4" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/widgetMindMapL4.test.ts" enhancement="_blank" />
 				
 import { ICANTest, ICANIntegration, ICANSchema  } from '/_100554_/l2/tsTestAST.js'; 
 
