@@ -1,4 +1,4 @@
-/// <mls shortName="testCoachMarks" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/testCoachMarks.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { CollabPageElement } from '/_100554_/l2/collabPageElement.js';
 import { customElement } from 'lit/decorators.js';

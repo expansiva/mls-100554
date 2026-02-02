@@ -1,4 +1,4 @@
-/// <mls shortName="servicePreviewL1" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/servicePreviewL1.test.ts" enhancement="_blank" />
 				
 import { ICANTest, ICANIntegration, ICANSchema  } from '/_100554_/l2/tsTestAST.js'; 
 

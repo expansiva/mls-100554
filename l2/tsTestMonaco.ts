@@ -1,4 +1,4 @@
-/// <mls shortName="tsTestMonaco" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/tsTestMonaco.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 const _editor = Symbol("ignoredProperty");
 

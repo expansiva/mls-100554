@@ -1,4 +1,4 @@
-/// <mls shortName="toolFilterFilesL2" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/toolFilterFilesL2.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { ITool, svg_tool } from '/_100554_/l2/aiAgentBase.js';
 const toolName = "toolFileFilter";

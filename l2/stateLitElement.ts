@@ -1,4 +1,4 @@
-/// <mls shortName="stateLitElement" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/stateLitElement.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { PropertyValueMap } from 'lit';

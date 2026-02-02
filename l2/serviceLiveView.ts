@@ -1,4 +1,4 @@
-/// <mls shortName="serviceLiveView" project="100554" enhancement="_100554_enhancementLitService" />
+/// <mls fileReference="_100554_/l2/serviceLiveView.ts" enhancement="_100554_enhancementLitService" />
 
 import { html, nothing, unsafeHTML } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
