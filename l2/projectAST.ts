@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/projectAST.ts" group="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/projectAST.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { createModel } from '/_100554_/l2/collabLibModel.js';
 import { collabImport } from '/_100554_/l2/collabImport.js';
