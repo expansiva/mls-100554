@@ -1,4 +1,4 @@
-/// <mls shortName="pluginBaseModule" project="100554" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginBaseModule.ts" enhancement="_100554_enhancementLit" />
 
 
 import { property } from 'lit/decorators.js';
