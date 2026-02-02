@@ -34,6 +34,9 @@ export class CollabInit extends LitElement {
 
     private actualProject: number | undefined = 0;
 
+    private depsBase: number[] = [];
+
+
     /**
      * Indicates if the user is anonymous based on the cookie loginUser
      * @returns `true` if the user is anonymous; otherwise, `false`.
@@ -342,8 +345,8 @@ export class CollabInit extends LitElement {
      */
     private setOrgActual(project: number | undefined): void {
         if (window.traceLifeCycle) console.info(`setOrgActual for project: ${project}`);
-        if (!project) return;
-        const orgIndex = mls.l5.getProjectOrgIndex(project);
+        if (!project && !this.baseProject) return;
+        const orgIndex = mls.l5.getProjectOrgIndex(project || this.baseProject);
         mls.l5.setActualOrg(orgIndex);
     }
 
@@ -355,6 +358,7 @@ export class CollabInit extends LitElement {
     private async loadProjectBase() {
         if (window.traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
         await mls.stor.server.loadProjectInfoIfNeeded(this.baseProject);
+        this.depsBase = mls.l5.getProjectDependencies(this.baseProject, false);
     }
 
     /**
