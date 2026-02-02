@@ -1,4 +1,4 @@
-/// <mls shortName="pluginStyleMargin" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/pluginStyleMargin.ts" group="other" enhancement="_100554_enhancementLit" />
 
 import { html, repeat } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
