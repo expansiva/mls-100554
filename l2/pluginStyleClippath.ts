@@ -1,4 +1,4 @@
-/// <mls shortName="pluginStyleClippath" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/pluginStyleClippath.ts" group="other" enhancement="_100554_enhancementLit" />
 
 import { html, repeat } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
