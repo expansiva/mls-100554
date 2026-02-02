@@ -1,4 +1,4 @@
-/// <mls shortName="serviceBase" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/serviceBase.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { customElement, property, state } from 'lit/decorators.js';
