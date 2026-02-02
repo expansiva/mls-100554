@@ -1,4 +1,4 @@
-/// <mls shortName="serviceDetail" project="100554" enhancement="_100554_enhancementLitService" groupName="other" />
+/// <mls fileReference="_100554_/l2/serviceDetail.ts" groupName="other" enhancement="_100554_enhancementLitService" />
 
 import { html, css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
