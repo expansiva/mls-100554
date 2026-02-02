@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabActionHelper.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/collabActionHelper.ts" enhancement="_100554_enhancementLit" />
 
 export const ambient: "RPC" | "" = "";
 
