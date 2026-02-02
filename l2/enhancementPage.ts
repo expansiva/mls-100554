@@ -1,4 +1,4 @@
-/// <mls shortName="enhancementPage" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/enhancementPage.ts" enhancement="_blank" />
 
 export const description = "Use this enhancement for pages"
 export const example = ``;
