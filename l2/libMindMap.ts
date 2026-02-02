@@ -53,6 +53,7 @@ async function _getMindMapByFile(file: mls.stor.IFileInfo): Promise<MindMapData 
 
     const src = await file.getContent() as string;
     const jsonRaw = extractJsonFromAsIs(src);
+    if (!jsonRaw) return;
     const data = buildMindMapFromInsights(jsonRaw);
     data.nodes = data.nodes.map((i) => {
 
@@ -70,7 +71,7 @@ async function _getMindMapByFile(file: mls.stor.IFileInfo): Promise<MindMapData 
 function extractJsonFromAsIs(source: string): any {
     const firstBrace = source.indexOf("{");
     if (firstBrace === -1) {
-        throw new Error("Nenhum '{' encontrado na string.");
+        return undefined
     }
 
     let depth = 0;
@@ -89,7 +90,7 @@ function extractJsonFromAsIs(source: string): any {
     }
 
     if (endIndex === -1) {
-        throw new Error("JSON malformado: não foi possível fechar '}'.");
+        throw new Error("Malformed JSON: Could not close '}'.");
     }
 
     const jsonText = source.slice(firstBrace, endIndex + 1);
@@ -97,8 +98,8 @@ function extractJsonFromAsIs(source: string): any {
     try {
         return JSON.parse(jsonText);
     } catch (e) {
-        console.error("JSON bruto extraído:\n", jsonText);
-        throw new Error("Falha ao fazer parse do JSON extraído.");
+        return undefined;
+        //throw new Error("Failed to parse extracted JSON.");
     }
 }
 
