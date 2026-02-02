@@ -351,22 +351,21 @@ export class ServiceProduct extends ServiceBase {
     private async fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): Promise<void> {
 
         try {
-            let name = `_${file.project}_/l2/${file.folder ? file.folder + '/' : ''}${file.shortName}`;
-            const options = {
-                shortName: undefined,
-                project: undefined,
-                htmlText: '<plugin-view-mind-map-100554 autoPrepare="true" page="'+name+'"></plugin-view-mind-map-100554>'
-            }
-            mls.events.fire(
-                mls.actualLevel as any,
-                'PluginDetails' as any,
-                JSON.stringify(options),
-                0
-            );
+
+            const params = {} as mls.events.IFileAction;
+
+            (params.action as any) = action;
+            params.level = file.level;
+            params.project = file.project;
+            params.shortName = file.shortName;
+            params.extension = file.extension;
+            params.folder = file.folder;
+            params.position = this.position as ('right' | 'left');
+
+            mls.events.fire([mls.actualLevel], ['FileAction'], JSON.stringify(params), timeout);
+
 
         } catch (err: any) {
-
-            this.showError('false');
             this.showError(err.message || '[fireEvents]: erro open');
         }
 
