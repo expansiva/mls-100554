@@ -1,4 +1,4 @@
-/// <mls shortName="pluginPresenterRecorder" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/pluginPresenterRecorder.test.ts" enhancement="_blank" />
 				
 import { ICANTest, ICANIntegration, ICANSchema  } from '/_100554_/l2/tsTestAST.js'; 
 
