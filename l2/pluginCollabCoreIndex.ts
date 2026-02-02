@@ -1,4 +1,4 @@
-/// <mls shortName="pluginCollabCoreIndex" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/pluginCollabCoreIndex.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { PluginBaseIndex } from '/_100554_/l2/pluginBaseIndex.js';
 
@@ -13,6 +13,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 priority: 1,
                 auth: ['*'],
                 widget: '_100554_servicePreview'
+            },
+            {
+                category: 'Services',
+                scope: ['l4ServicesRight', 'l3ServicesRight', 'l2ServicesRight'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_serviceMindMap'
             },
             {
                 category: 'Services',
