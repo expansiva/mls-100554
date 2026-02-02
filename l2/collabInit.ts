@@ -354,11 +354,7 @@ export class CollabInit extends LitElement {
      */
     private async loadProjectBase() {
         if (window.traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
-        const depsActualProject = mls.l5.getProjectDependencies(this.baseProject, false);
-        const deps = [this.baseProject, ...depsActualProject];
-        for await (let prj of deps) {
-            await mls.stor.server.loadProjectInfoIfNeeded(prj);
-        }
+        await mls.stor.server.loadProjectInfoIfNeeded(this.baseProject);
     }
 
     /**
