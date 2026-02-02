@@ -1,4 +1,4 @@
-/// <mls shortName="pluginPrototypeImprove" project="100554" enhancement="_100554_enhancementLit" groupName="other" folder="" />
+/// <mls fileReference="_100554_/l2/pluginPrototypeImprove.ts" group="other" enhancement="_100554_enhancementLit" />
 
 import { html } from 'lit';
 import { customElement, state, property } from 'lit/decorators.js';
