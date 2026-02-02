@@ -1,4 +1,4 @@
-/// <mls shortName="libProviders" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/libProviders.ts" enhancement="_blank" />
 
 import { svg } from 'lit';
 
