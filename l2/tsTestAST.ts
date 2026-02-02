@@ -1,4 +1,4 @@
-/// <mls shortName="tsTestAST" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/tsTestAST.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { MonacoDriver } from "/_100554_/l2/tsTestMonaco.js";
 
