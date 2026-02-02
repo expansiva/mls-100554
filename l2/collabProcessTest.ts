@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabProcessTest.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/collabProcessTest.ts" enhancement="_100554_enhancementLit" />
 
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
