@@ -1,4 +1,4 @@
-/// <mls shortName="serviceHistories" project="100554" enhancement="_100554_enhancementLit" groupName="service" />
+/// <mls fileReference="_100554_/l2/serviceHistories.ts" groupName="service" enhancement="_100554_enhancementLit" />
 
 import { html } from 'lit';
 import { customElement, query, property, state } from 'lit/decorators.js';
