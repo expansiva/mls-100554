@@ -34,7 +34,7 @@ export class SimpleGreeting extends CollabLitElement {
     Object.keys(mls.stor.files).forEach((key) => {
 
       const f = mls.stor.files[key];
-      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('w') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key);
+      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('u') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key);
 
 
     })
