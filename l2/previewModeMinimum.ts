@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/previewModeMinimum.ts" group="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/previewModeMinimum.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { IJSONDependence } from '/_100554_/l2/libCompile';
 import * as util from '/_100554_/l2/previewModeUtil';
