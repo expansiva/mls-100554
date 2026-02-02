@@ -1,4 +1,4 @@
-/// <mls shortName="agentPlanner1" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/agentPlanner1.ts" enhancement="_blank" />
 
 import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
 
