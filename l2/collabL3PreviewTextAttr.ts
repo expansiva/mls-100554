@@ -1,4 +1,4 @@
-/// <mls shortName="collabL3PreviewTextAttr" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/collabL3PreviewTextAttr.ts" enhancement="_blank" />
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
