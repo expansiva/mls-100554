@@ -1,4 +1,4 @@
-/// <mls shortName="collabDOMSync" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/collabDOMSync.ts" enhancement="_blank" />
 
 import {CollabLitElement} from '/_100554_/l2/collabLitElement.js'
 
