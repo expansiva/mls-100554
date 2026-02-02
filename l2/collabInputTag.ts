@@ -1,4 +1,4 @@
-/// <mls shortName="collabInputTag" project="100554" enhancement="_100554_enhancementLit" groupName="internal" />
+/// <mls fileReference="_100554_/l2/collabInputTag.ts" enhancement="_blank" />
 
 import { html, ifDefined } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';

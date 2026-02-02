@@ -1,4 +1,4 @@
-/// <mls shortName="collabSelectOneWithDescription" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/collabSelectOneWithDescription.ts" enhancement="_blank" />
 
 import { html } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';

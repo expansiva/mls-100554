@@ -1,4 +1,4 @@
-/// <mls shortName="contentCarousel" project="100554" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/contentCarousel.ts" enhancement="_blank" />
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

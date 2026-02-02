@@ -1,4 +1,4 @@
-/// <mls shortName="collabPageElement" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/collabPageElement.ts" enhancement="_blank" />
 
 import { html, PropertyValueMap, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

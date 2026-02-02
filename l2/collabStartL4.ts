@@ -1,4 +1,4 @@
-/// <mls shortName="collabStartL4" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/collabStartL4.ts" enhancement="_blank" />
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
