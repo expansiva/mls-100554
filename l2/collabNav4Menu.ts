@@ -1,4 +1,4 @@
-/// <mls shortName="collabNav4Menu" project="100554" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/collabNav4Menu.ts" enhancement="_blank" />
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
