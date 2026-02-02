@@ -1,4 +1,4 @@
-/// <mls shortName="aiAgentDefaultFeedback" project="100554" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/aiAgentDefaultFeedback.ts" enhancement="_blank" />
 
 import { html, TemplateResult, nothing, svg } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
