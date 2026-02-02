@@ -1,4 +1,4 @@
-/// <mls shortName="collabState" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/collabState.ts" enhancement="_blank" />
 
 /**
  * Returns the value for a given state key.
