@@ -1,4 +1,4 @@
-/// <mls shortName="serviceMindMap" project="100554" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/serviceMindMap.ts" enhancement="_100554_enhancementLit" />
 
 import { html, unsafeHTML, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
