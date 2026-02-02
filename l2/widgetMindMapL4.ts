@@ -5,11 +5,13 @@ import { customElement, property } from 'lit/decorators.js';
 import { propertyDataSource, propertyCompositeDataSource } from '/_100554_/l2/collabDecorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { convertTagToFileName } from '/_100554_/l2/utilsLit';
+import { MindMapSelected, MindMapData, MindMapNodeStyles, MindMapNodeStyle, MindMapNode, setMindMapVariable, getMindMapVariable, getMindMapByStorFile, getMindMapByName } from '/_100554_/l2/libMindMap.js'
 
 @customElement('widget-mind-map-l4-100554')
-export class WidgetMindMapL4100554 extends StateLitElement { 
+export class WidgetMindMapL4100554 extends StateLitElement {
 
     @property({ type: String }) activeDescription: string | undefined;
+    @property({ type: String }) currentpage: string | undefined;
 
     @propertyDataSource({ type: Object }) mindMapSelected: MindMapSelected | undefined;
 
@@ -20,17 +22,18 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
     @property({ type: Object }) nodeStyles: MindMapNodeStyles = {
         main: { fill: '#F1C40F', stroke: '#B7950B', text: '#222' },
-        asIs:{ fill: '#3498DB', stroke: '#1F618D', text: '#ECF0F1' },
+        asIs: { fill: '#3498DB', stroke: '#1F618D', text: '#ECF0F1' },
         codeInsights: { fill: '#2ECC71', stroke: '#1D8348', text: '#1B4F72' },
         webcomponent: { fill: '#A569BD', stroke: '#512E5F', text: '#FDFEFE' },
         imports: { fill: '#95A5A6', stroke: '#566573', text: '#222' },
         language: { fill: '#EB984E', stroke: '#CA6F1E', text: '#4A2C0A' },
         attributes: { fill: '#48C9B0', stroke: '#117864', text: '#083A33' },
-        file: {    fill: '#CFE9F6',stroke: '#8CBFD9',text: '#1F3B4D'},
+        file: { fill: '#CFE9F6', stroke: '#8CBFD9', text: '#1F3B4D' },
         text: { fill: '#D8CFC4', stroke: '#BFAF9F', text: '#4A3F35' },
         default: { fill: '#2C3E50', stroke: '#1B2631', text: '#ECF0F1' }
     };
 
+    @property({ type: String }) initialNode: string | undefined;
     @property({ type: Array }) breadcrumb: MindMapNode[] = [];
 
     // Store node positions for hit detection
@@ -47,18 +50,55 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
     private _animationDelay = 500;
 
+    private get visibleBreadcrumb(): {
+        nodes: MindMapNode[];
+        hasHidden: boolean;
+    } {
+        const MAX = 5;
+
+        if (this.breadcrumb.length <= MAX) {
+            return {
+                nodes: this.breadcrumb,
+                hasHidden: false
+            };
+        }
+
+        return {
+            nodes: this.breadcrumb.slice(-MAX),
+            hasHidden: true
+        };
+    }
+
     render() {
         return html`
         <div class="breadcrumb">
-            ${this.breadcrumb.map((node, index) => html`
-            <span
-                class="crumb ${index === this.breadcrumb.length - 1 ? 'active' : ''}"
-                @click=${() => this._popToBreadcrumb(index)}
-            >
-                ${node.label}
-            </span>
-            ${index < this.breadcrumb.length - 1 ? html`<span class="sep">›</span>` : null}
-            `)}
+            ${(() => {
+                const { nodes, hasHidden } = this.visibleBreadcrumb;
+
+                return html`
+                    ${hasHidden
+                        ? html`<span class="crumb ellipsis">... <span class="sep">›</span></span>`
+                        : null
+                    }
+
+                    ${nodes.map((node, index) => html`
+                        <span
+                            class="crumb ${index === nodes.length - 1 ? 'active' : ''}"
+                            @click=${() =>
+                            this._popToBreadcrumb(
+                                this.breadcrumb.indexOf(node)
+                            )
+                        }
+                        >
+                            ${node.label}
+                        </span>
+
+                        ${index < nodes.length - 1
+                            ? html`<span class="sep">›</span>`
+                            : null}
+                    `)}
+                `;
+            })()}
         </div>
         <div class="mindmap-layout ${this.activeDescription ? 'has-description' : ''}">
             
@@ -81,14 +121,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
     firstUpdated() {
         this._addCanvasListeners();
-        if (this.mapState) {
-            const center = this.mapState.nodes.find(n => n.id === this.mapState!.current);
-            if (center) {
-                this.breadcrumb = [center];
-            }
-        }
-
-        this.drawMindMap();
+        this.configureMindMap();
     }
 
     connectedCallback() {
@@ -102,20 +135,78 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         this._removeCanvasListeners();
     }
 
-    updated() {
+    updated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.updated(changedProperties);
         // If animating, use animated positions
+
+        const mapState = changedProperties.get('mapState');
+        const currentpage = changedProperties.get('currentpage');
+
+        if (mapState) {
+            const center = this.mapState?.nodes.find(n => n.id === this.mapState!.current);
+            if (center) {
+
+                const saved = getMindMapVariable();
+                const keepBreadcrumb = !currentpage || this.currentpage === currentpage;
+                console.info(keepBreadcrumb);
+                if (keepBreadcrumb && saved.length) {
+                    this.breadcrumb = saved;
+                    const index = this.breadcrumb.findIndex((i) => i.id === center.id && i.meta.fileKey === center.meta.fileKey);
+                    if (index < 0) this.breadcrumb.push(center);
+
+                    if (this.initialNode) {
+                        const indexNode = this.breadcrumb.findIndex((i) => i.id === this.initialNode);
+                        if (indexNode >= 0) this._popToBreadcrumb(indexNode)
+                    }
+
+                } else if (center) {
+                    this.activeDescription = undefined;
+                    this.breadcrumb = [center];
+
+                }
+                setMindMapVariable(this.breadcrumb);
+
+            }
+        }
+
         if (this._animating && this._animatedPositions) {
             this.drawMindMap(this._animatedPositions);
         } else {
             this.drawMindMap();
         }
     }
-    private _closeDescription() {
-        this.activeDescription = undefined;
-        // O CSS cuidará do efeito de deslize de volta
-    }
 
     //------IMPLEMENTATION--------- 
+
+    private configureMindMap() {
+
+        if (this.mapState) {
+            const center = this.mapState.nodes.find(n => n.id === this.mapState!.current);
+            if (center) {
+
+                const saved = getMindMapVariable();
+
+                if (saved.length) {
+                    this.breadcrumb = saved;
+                    const index = this.breadcrumb.findIndex((i) => i.id === center.id && i.meta.fileKey === center.meta.fileKey);
+                    if (index < 0) this.breadcrumb.push(center);
+
+                    if (this.initialNode) {
+                        const indexNode = this.breadcrumb.findIndex((i) => i.id === this.initialNode);
+                        if (indexNode >= 0) this._popToBreadcrumb(indexNode)
+                    }
+
+                } else if (center) {
+                    this.breadcrumb = [center];
+
+                }
+                setMindMapVariable(this.breadcrumb);
+
+            }
+        }
+
+        this.drawMindMap();
+    }
 
     private _redrawCanvas = () => {
         this.requestUpdate();
@@ -169,16 +260,20 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
         if (hit) {
             const [key] = hit;
-            if (key === 'details') {
-                this.openDetails(item.node);
-            } else {
+            if (key === 'navigate') {
                 this.openDefs(item.node);
             }
             return;
         }
 
+        if (item.node.type === 'file_wc') {
+            this.openDefs(item.node);
+            return;
+        }
+
         /* ---------- NODE CLICK ---------- */
         if (item.node.related.length < 1) {
+            this._pushBreadcrumb(item.node);
             this.activeDescription = item.node.description ? item.node.description : undefined;
             return;
         }
@@ -487,101 +582,6 @@ export class WidgetMindMapL4100554 extends StateLitElement {
             );
         });
     }
-    private drawMindMap_old(positions?: Record<string, { x: number, y: number, alpha: number }>) {
-        requestAnimationFrame(() => {
-
-            if (!this.mapState) return;
-            const container = this.renderRoot.querySelector('.canvas-container') as HTMLElement;
-            const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
-            if (!canvas || !container) return;
-
-            const rect = container.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const { current, nodes } = this.mapState;
-            let centerNode = nodes.find(n => n.id === current)!;
-            let relatedNodes = this.getRelatedNodes(centerNode, nodes);
-
-            this._nodePositions = [];
-
-            if (positions) { // animations
-                for (const id in positions) {
-                    const node = nodes.find(n => n.id === id);
-                    if (!node) continue;
-                    const style = this.getNodeStyle(node.type);
-                    const isCenter = id === current;
-                    const isHovered = this._hoveredNodeId === node.id;
-                    const { x, y, alpha } = positions[id];
-                    ctx.globalAlpha = alpha
-                    // draw as label
-                    this.drawLabel(ctx, node, node.label, x, y, style.fill, style.text, style.stroke, isCenter ? 'bold 15px sans-serif' : 'bold 13px sans-serif', isHovered, isCenter);
-
-                    // center node gets circle too
-                    if (isCenter) {
-                        ctx.beginPath();
-                        ctx.arc(x, y, this.nodeRadius, 0, 2 * Math.PI);
-                        ctx.fillStyle = style.fill;
-                        ctx.fill();
-                        ctx.strokeStyle = style.stroke;
-                        ctx.lineWidth = 3;
-                        ctx.stroke();
-                    }
-                }
-                return;
-            }
-
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-
-            const baseRadius = Math.min(canvas.width, canvas.height) * 0.33;
-            const densityFactor = Math.max(
-                1,
-                relatedNodes.length / 6
-            );
-            const radius = baseRadius * densityFactor;
-
-
-
-
-
-            const nodeRadius = this.nodeRadius;
-            relatedNodes.forEach((node, i) => {
-                const angle = (2 * Math.PI / relatedNodes.length) * i - Math.PI / 2;
-                const x = centerX + radius * Math.cos(angle);
-                const y = centerY + radius * Math.sin(angle);
-
-                const style = this.getNodeStyle(node.type);
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.lineTo(x, y);
-                ctx.strokeStyle = style.stroke;
-                ctx.lineWidth = 3;
-                ctx.stroke();
-
-                const isHovered = this._hoveredNodeId === node.id;
-                this.drawLabel(ctx, node, node.label, x, y, style.fill, style.text, style.stroke, 'bold 13px sans-serif', isHovered, false);
-            });
-
-            // Center node
-            const centerStyle = this.getNodeStyle(centerNode.type);
-
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, nodeRadius, 0, 2 * Math.PI);
-            ctx.fillStyle = centerStyle.fill;
-            ctx.fill();
-            ctx.strokeStyle = centerStyle.stroke;
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            const isCenterHovered = this._hoveredNodeId === centerNode.id;
-            this.drawLabel(ctx, centerNode, centerNode.label, centerX, centerY, centerStyle.fill, centerStyle.text, centerStyle.stroke, 'bold 15px sans-serif', isCenterHovered, true);
-        });
-    }
 
     private drawLabel(
         ctx: CanvasRenderingContext2D,
@@ -734,11 +734,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         ctx.restore();
     }
 
-    private openDetails(node: MindMapNode) {
-        this.activeDescription = node.description ? node.description : undefined;
-    }
-
-    private openDefs(node: MindMapNode) {
+    private async openDefs(node: MindMapNode) {
 
         let name = node.label.startsWith('/') ? mls.l2.getPath(node.label.replace('/', '')) : mls.l2.getPath(node.label);
         if (node.label.indexOf('-') > 0) {
@@ -754,8 +750,20 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
         const key = mls.stor.getKeyToFile({ ...name, extension: '.ts', level: 2 });
         if (!mls.stor.files[key]) return;
-        this.fireEvents(mls.stor.files[key])
+        this.mapState = await getMindMapByStorFile(mls.stor.files[key]);
+        this.configureMindMap();
+        //this.fireEvents(mls.stor.files[key])
 
+    }
+
+    private _closeDescription() {
+
+        const index = this.breadcrumb.length - 1;
+        this.breadcrumb = this.breadcrumb.slice(0, index);
+        setMindMapVariable(this.breadcrumb);
+        this.activeDescription = undefined;
+
+        // O CSS cuidará do efeito de deslize de volta
     }
 
     private async fireEvents(file: mls.stor.IFileInfo) {
@@ -765,7 +773,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
             const options = {
                 shortName: undefined,
                 project: undefined,
-                htmlText: '<plugin-view-mind-map-100554 autoPrepare="true" page="' + name + '"></plugin-view-mind-map-100554>'
+                htmlText: '<plugin-view-mind-map-100554 autoPrepare="true" page="' + name + '" inNavigate="true"></plugin-view-mind-map-100554>'
             }
             mls.events.fire(
                 mls.actualLevel as any,
@@ -892,54 +900,120 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
     private onSelected?(node: MindMapNode): void;
 
-
-
-
     private _pushBreadcrumb(node: MindMapNode) {
-        const index = this.breadcrumb.findIndex(n => n.id === node.id);
+
+        const fileKey = node.meta.fileKey;
+
+        const index = this.breadcrumb.findIndex(
+            b => b.id === node.id && b.meta.fileKey === fileKey
+        );
+
+        let newBreadcrumb: MindMapNode[];
 
         if (index !== -1) {
-            // Já existe no breadcrumb → corta tudo depois dele
-            this.breadcrumb = this.breadcrumb.slice(0, index + 1);
+            newBreadcrumb = this.breadcrumb.slice(0, index + 1);
         } else {
-            // Não existe → adiciona normalmente
-            this.breadcrumb = [...this.breadcrumb, node];
+            newBreadcrumb = [
+                ...this.breadcrumb,
+                node
+            ];
         }
+
+        this.breadcrumb = newBreadcrumb;
+        setMindMapVariable(newBreadcrumb);
     }
 
     private _syncBreadcrumbWithCurrent() {
         if (!this.mapState) return;
 
         const currentId = this.mapState.current;
+
         const node = this.mapState.nodes.find(n => n.id === currentId);
         if (!node) return;
 
-        const index = this.breadcrumb.findIndex(n => n.id === currentId);
+
+        const fileKey = node.meta.fileKey;
+
+        const index = this.breadcrumb.findIndex(
+            b => b.id === currentId && b.meta.fileKey === fileKey
+        );
+
+        let newBreadcrumb: MindMapNode[];
 
         if (index !== -1) {
-            // Usuário "voltou" para um nó já existente
-            this.breadcrumb = this.breadcrumb.slice(0, index + 1);
+            newBreadcrumb = this.breadcrumb.slice(0, index + 1);
         } else {
-            // Usuário foi para um nó fora do caminho atual
-            this.breadcrumb = [...this.breadcrumb, node];
+
+            newBreadcrumb = [
+                ...this.breadcrumb,
+                node
+            ];
         }
+
+        this.breadcrumb = newBreadcrumb;
+        setMindMapVariable(newBreadcrumb);
     }
 
     private _popToBreadcrumb(index: number) {
-        const target = this.breadcrumb[index];
-        if (!target || !this.mapState) return;
+        const entry = this.breadcrumb[index];
+        if (!entry) return;
 
-        const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
+        const currentFile: MindMapNode | undefined = this.mapState ? (this.mapState.nodes || []).find((i) => i.id === (this.mapState || {}).current) : {} as MindMapNode;
+
+
+        this.breadcrumb = this.breadcrumb.slice(0, index + 1);
+        setMindMapVariable(this.breadcrumb);
+
+        if (currentFile && entry.meta.fileKey === currentFile.meta.fileKey) {
+            this._navigateInsideCurrentFile(entry.id, index);
+            return;
+        }
+
+        this.openFileAndNavigate(entry);
+    }
+
+    private async openFileAndNavigate(entry: MindMapNode) {
+        this.mapState = await getMindMapByName(entry.meta.fileKey);
+        this.configureMindMap();
+
+        /*const options = {
+            shortName: undefined,
+            project: undefined,
+            htmlText: `
+            <plugin-view-mind-map-100554
+                autoPrepare="true"
+                page="${entry.meta.fileKey}"
+                initialNode="${entry.id}"
+                inNavigate="true">
+            </plugin-view-mind-map-100554>
+        `
+        };
+
+        mls.events.fire(
+            mls.actualLevel as any,
+            'PluginDetails' as any,
+            JSON.stringify(options),
+            0
+        );*/
+    }
+
+    private _navigateInsideCurrentFile(nodeId: string, breadcrumbIndex: number) {
+        if (!this.mapState) return;
+
+        const canvas = this.renderRoot.querySelector(
+            '#mindmap-canvas'
+        ) as HTMLCanvasElement;
         if (!canvas) return;
 
         const animationMap = this.prepareAnimationMap(
             this.mapState.current,
-            target.id,
+            nodeId,
             canvas.width,
             canvas.height
         );
 
         this._animating = true;
+
         this.animateTransition(
             animationMap,
             this._animationDelay,
@@ -950,65 +1024,19 @@ export class WidgetMindMapL4100554 extends StateLitElement {
             () => {
                 this._animating = false;
                 this._animatedPositions = undefined;
-                this.mapState!.current = target.id;
-                this.activeDescription = target.description ? target.description : undefined;;
-                this.breadcrumb = this.breadcrumb.slice(0, index + 1);
+
+                // 🔹 atualiza nó atual
+                this.mapState!.current = nodeId;
+
+                // 🔹 atualiza descrição
+                const node = this.mapState!.nodes.find(n => n.id === nodeId);
+                this.activeDescription = node?.description;
+
                 this.requestUpdate();
             }
         );
     }
+
+
 }
 
-type MindMapSelected = MindMapSelectedFile | MindMapSelectedPlugin;
-
-interface MindMapSelectedBase {
-    plugin: Function; // function to get informations
-    args: string;
-}
-
-interface MindMapSelectedFile extends MindMapSelectedBase {
-    type: "file",
-    file: mls.stor.IFileInfo; // file selected , level, project, shortName, folder, extension
-    organism?: string;
-    widget?: string;
-    modelType?: mls.editor.ModelType; // .ts , .html, .less, .test.ts, .defs.ts
-}
-
-interface MindMapSelectedPlugin extends MindMapSelectedBase {
-    type: "plugin",
-    file: mls.stor.IFileInfo; // file selected , level, project, shortName, folder, extension    
-}
-
-type MindMapNodeType =
-    | 'main'
-    | 'asIs'
-    | 'codeInsights'
-    | 'webcomponent'
-    | 'imports'
-    | 'language'
-    | 'attributes'
-    | 'file'
-    | 'text';
-
-export interface MindMapNode {
-    id: string;             // unique identifier
-    label: string;          // label shown on the node
-    type: MindMapNodeType;
-    related: string[];      // ids of related nodes
-    meta?: Record<string, any>; // optional metadata;
-    description?: string,
-    navigate?: boolean
-}
-
-export interface MindMapData {
-    current: string;
-    nodes: MindMapNode[];
-}
-
-export interface MindMapNodeStyle {
-    fill: string;    // Circle background color
-    stroke: string;  // Circle border color
-    text: string;    // Text color
-}
-
-export type MindMapNodeStyles = Record<string, MindMapNodeStyle>;
