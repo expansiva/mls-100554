@@ -1,4 +1,4 @@
-/// <mls shortName="enhancementStyle" project="100554" enhancement="_blank" groupName="other" />
+/// <mls fileReference="_100554_/l2/enhancementStyle.ts" group="other" enhancement="_blank" />
 
 import { convertFileNameToTag } from '/_102027_/l2/utils.js'
 import { getCssWithoutTag } from '/_102027_/l2/processCssLit.js'
