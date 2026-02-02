@@ -1,4 +1,4 @@
-/// <mls shortName="enhancementAgent" project="100554" enhancement="_blank" groupName="other" />
+/// <mls fileReference="_100554_/l2/enhancementAgent.ts" group="other" enhancement="_blank" />
 
 import { getPropierties } from '/_102027_/l2/propiertiesLit.js'
 
