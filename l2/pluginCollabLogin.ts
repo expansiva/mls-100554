@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginCollabLogin.ts" group="other" enhancement="_100554_enhancementLitService" />
+/// <mls fileReference="_100554_/l2/pluginCollabLogin.ts" groupName="other" enhancement="_100554_enhancementLitService" />
 
 import { html, css, svg, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

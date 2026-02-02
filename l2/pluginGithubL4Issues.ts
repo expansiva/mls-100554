@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginGithubL4Issues.ts" group="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginGithubL4Issues.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { html, css, svg, TemplateResult, LitElement, repeat, unsafeHTML } from 'lit';
 import { query, property, customElement } from 'lit/decorators.js';

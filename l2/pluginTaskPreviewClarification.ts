@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginTaskPreviewClarification.ts" group="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginTaskPreviewClarification.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';

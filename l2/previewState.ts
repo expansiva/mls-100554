@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/previewState.ts" group="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/previewState.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 // import {WCDToolboxMethodos} from '/_100554_/l2/wcdTypes.js';
 import { } from "/_100554_/l2/aiAgentBase";

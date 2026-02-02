@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginCodelensCustomElement.ts" group="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginCodelensCustomElement.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
