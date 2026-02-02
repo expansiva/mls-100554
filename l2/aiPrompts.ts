@@ -1,4 +1,4 @@
-/// <mls shortName="aiPrompts" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/aiPrompts.ts" enhancement="_blank" />
 
 import { ITool, IAgent } from '/_100554_/l2/aiAgentBase.js'
 import { getTokensLess } from '/_100554_/l2/designSystemBase.js';
