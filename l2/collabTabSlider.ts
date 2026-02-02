@@ -1,4 +1,4 @@
-/// <mls shortName="collabTabSlider" project="100554" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/collabTabSlider.ts" enhancement="_blank" />
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
