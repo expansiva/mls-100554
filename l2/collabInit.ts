@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabInit.ts" enhancement="_100554_enhancementLit" />
+/// <mls shortName="collabInit" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
 
 import { html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -354,7 +354,11 @@ export class CollabInit extends LitElement {
      */
     private async loadProjectBase() {
         if (window.traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
-        await mls.stor.server.loadProjectInfoIfNeeded(this.baseProject);
+        const depsActualProject = mls.l5.getProjectDependencies(this.baseProject, false);
+        const deps = [this.baseProject, ...depsActualProject];
+        for await (let prj of deps) {
+            await mls.stor.server.loadProjectInfoIfNeeded(prj);
+        }
     }
 
     /**
