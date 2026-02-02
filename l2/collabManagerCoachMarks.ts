@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabManagerCoachMarks.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/collabManagerCoachMarks.ts" enhancement="_100554_enhancementLit" />
 
 import { addCoachMark, ICoachMarks } from '/_100554_/l2/coachMarks.js';
 import {getMessageKey} from '/_100554_/l2/collabLitElement.js'
