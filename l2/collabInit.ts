@@ -83,10 +83,10 @@ export class CollabInit extends LitElement {
         this.initCoachMark();
         this.setTheme();
         this.setTokensCss();
+        await this.loadProjectBase();
 
         this.actualProject = await this.setProjectActual();
         this.setOrgActual(this.actualProject);
-        await this.loadProjectBase();
 
         await this.loadLastProject();
         await this.setLastOpenedFiles();
@@ -332,8 +332,7 @@ export class CollabInit extends LitElement {
     private async setProjectActual(): Promise<number | undefined> {
         if (window.traceLifeCycle) console.info('setProjectActual');
         const project = await this.getLastProjectSelected();
-
-        mls.setActualProject(project === undefined || project < 0 ? 100554 : project);
+        mls.setActualProject(project ? project : this.baseProject);
         return project;
     }
 
@@ -356,11 +355,6 @@ export class CollabInit extends LitElement {
     private async loadProjectBase() {
         if (window.traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
         await mls.stor.server.loadProjectInfoIfNeeded(this.baseProject);
-        const depsActualProject = mls.l5.getProjectDependencies(this.baseProject, false);
-        const deps = [this.baseProject, ...depsActualProject];
-        for await (let prj of deps) {
-            await mls.stor.server.loadProjectInfoIfNeeded(prj);
-        }
     }
 
     /**
