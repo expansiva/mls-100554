@@ -109,7 +109,7 @@ async function processOutput(moduleToBe: ModuleToBe): Promise<mls.msg.AgentInten
 }
 
 const system1 = `
-<!-- modelType: codereasoning -->
+<!-- modelType: geminiChat -->
 <!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) ou nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10, code2 (kimi 2.5) -->
 
 
@@ -165,7 +165,7 @@ Return only valid JSON in the following structure:
 export type Output =
   {
     type: "flexible";
-    result: FeatureNormalized
+    result: FeatureNormalizedByDomain
   };
 //#endregion
 
@@ -174,8 +174,13 @@ export type Output =
  * TO-BE Normalized (neutral contract)
  * ========================= */
 
+export interface FeatureNormalizedByDomain {
+  domains: Record<string, FeatureNormalized>; // key=domainId
+}
+
 export interface FeatureNormalized {
-  domains: NormalizedDomain[];
+  domainId: string;
+  description?: string;
   entities: NormalizedEntity[];
   actions: NormalizedAction[];
   states: NormalizedState[];
@@ -183,14 +188,8 @@ export interface FeatureNormalized {
   readModels?: NormalizedReadModel[];
 }
 
-export interface NormalizedDomain {
-  domainId: string;
-  description?: string;
-}
-
 export interface NormalizedEntity {
   entityId: string;
-  domainId: string;
   aggregateRoot?: boolean;
   dataShape?: DataShape;
   ownership?: EntityOwnership;
@@ -208,7 +207,6 @@ export type EntityOwnership =
 
 export interface NormalizedAction {
   actionId: string;
-  domainId: string;
   description?: string;
   kind?: "command" | "query"; // optional, default command
 }
@@ -222,7 +220,6 @@ export interface NormalizedState {
 
 export interface NormalizedEvent {
   eventId: string;
-  domainId: string;
 }
 
 export interface NormalizedReadModel {

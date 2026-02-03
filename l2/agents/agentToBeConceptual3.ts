@@ -124,6 +124,7 @@ You must:
 - Do NOT introduce technical or implementation details.
 - Do NOT remove existing capabilities unless explicitly required by a suggestion.
 - Preserve all existing rules and constraints unless a suggestion clearly extends them.
+- Apply only suggestions where yagni = "now".
 
 If the suggestions are invalid, contradictory, or not applicable to the TO-BE model, return an explicit error.
 
