@@ -4,7 +4,7 @@ import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { loadChatPreferences, IChatPreferences, saveChatPreferences, getUserId, createThread } from '/_102025_/l2/collabMessagesHelper.js';
-import { getThreadByName, listThreads } from '/_102025_/l2/collabMessagesIndexedDB.js';
+import { getThreadByName, listThreads, getTask, getMessage } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { IAgent } from '/_100554_/l2/aiAgentBase.js';
 import { getTemporaryContext, getAllSteps } from '/_100554_/l2/aiAgentHelper.js';
 import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
@@ -41,6 +41,10 @@ export class AgentTester extends CollabLitElement {
         threadMaintenance: ''
     };
 
+    @state() actualTaskInDetails?: mls.msg.TaskData;
+    @state() actualDetails?: HTMLElement;
+
+
     private inEdit = false;
 
     connectedCallback() {
@@ -51,8 +55,9 @@ export class AgentTester extends CollabLitElement {
     }
 
     disconnectedCallback() {
-        setState('preview.pausePreview', false)
+        setState('preview.pausePreview', false);
         super.disconnectedCallback();
+        
     }
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
@@ -741,7 +746,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         this.activeJudge = target.checked;
     }
 
-    private openInDetails() {
+    private async openInDetails() {
         if (!this.result) return;
         const obj = JSON.parse(this.extractJsonString(this.result as string));
         if (!obj || !obj.message || !obj.task) return;
@@ -749,21 +754,10 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         const el = document.createElement('collab-messages-task-info-102025');
         el.setAttribute('messageId', messageId2);
         el.setAttribute('taskId', obj.task.PK);
-        (el as any)['task'] =  obj.task;
+        (el as any)['task'] = obj.task;
         (el as any)['message'] = obj.message;
         openElementInServiceDetails(el);
-        /*const task = await this.getTaskUpdate(taskId, messageId, threadId);
-        addOrUpdateTask(task);
-        this.actualTask = task;
-        this.actualMessage = message;
 
-        const messageId2 = `${this.actualThread?.thread.threadId}/${this.actualMessage?.createAt}`
-        const el = document.createElement('collab-messages-task-info-102025');
-        el.setAttribute('messageId', messageId2);
-        if (this.actualTask && this.actualTask.PK) el.setAttribute('taskId', this.actualTask.PK);
-        (el as any)['task'] = this.actualTask;
-        (el as any)['message'] = this.actualMessage;
-        openElementInServiceDetails(el);*/
     }
 
     private extractJsonString(input: string): string {
