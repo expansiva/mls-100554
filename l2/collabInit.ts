@@ -83,10 +83,11 @@ export class CollabInit extends LitElement {
         this.initCoachMark();
         this.setTheme();
         this.setTokensCss();
-        await this.loadProjectBase();
 
         this.actualProject = await this.setProjectActual();
         this.setOrgActual(this.actualProject);
+        await this.loadProjectBase();
+
         await this.loadLastProject();
         await this.setLastOpenedFiles();
         await this.setDefaultFiles();
