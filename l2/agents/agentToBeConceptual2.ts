@@ -106,7 +106,7 @@ async function processOutput3(moduleToBe: Suggestions): Promise<mls.msg.AgentInt
 }
 
 const system3 = `
-<!-- modelType: codeflash -->
+<!-- modelType: geminiChat -->
 <!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) ou nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10, code2 (kimi 2.5) -->
 
 You are a senior BUSINESS Analyst with 20+ years of experience in system design, requirements analysis, and business process optimization.
@@ -148,7 +148,8 @@ export interface Suggestion {
   suggestion: string;
   customerPerception: string;
   businessImpact: string[];
-  optional: boolean; // user have to enable/sett in admin console
+  requiresConfiguration: boolean; // feature requires user setup in admin console
+  yagni: "now" | "later" | "unknown"; // YAGNI (You Ain’t Gonna Need It)
 }
 //#endregion
 
