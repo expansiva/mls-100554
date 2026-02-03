@@ -684,7 +684,7 @@ export class ServiceSave extends ServiceBase {
             disabled = true;
             onlyFather = true;
         }
-
+ 
         errorLocal = !(await mls.stor.localDB.existFile({ project: item.project, extension: item.extension, shortName: item.shortName, folder: item.folder, level: item.level }));
 
         if (errorLocal) span = '<span> Error: the file does not exist in the database<span>';
@@ -694,10 +694,6 @@ export class ServiceSave extends ServiceBase {
         const ext: any = this.fromToExtension[item.extension];
         const model = models ? (models as any)[ext] as mls.editor.IModelBase : undefined;
 
-        if (!models || !model) {
-            modelIsDispose = true;
-            span = '<span> Error: There is no model! <span>'
-        }
         if (models && model && model.model.isDisposed()) {
             modelIsDispose = true;
             span = '<span> Error: The model is invalid. <span>'
