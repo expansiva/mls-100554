@@ -1,4 +1,4 @@
-/// <mls shortName="collabInit" project="100554" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/collabInit.ts" enhancement="_100554_enhancementLit" />
 
 import { html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -28,13 +28,10 @@ export async function initCompileMonaco(project: number): Promise<boolean> {
     return true;
 }
 
-
 @customElement('collab-init-100554')
 export class CollabInit extends LitElement {
 
     private actualProject: number | undefined = 0;
-
-    private depsBase: number[] = [];
 
 
     /**
@@ -358,7 +355,11 @@ export class CollabInit extends LitElement {
     private async loadProjectBase() {
         if (window.traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
         await mls.stor.server.loadProjectInfoIfNeeded(this.baseProject);
-        this.depsBase = mls.l5.getProjectDependencies(this.baseProject, false);
+        const depsActualProject = mls.l5.getProjectDependencies(this.baseProject, false);
+        const deps = [this.baseProject, ...depsActualProject];
+        for await (let prj of deps) {
+            await mls.stor.server.loadProjectInfoIfNeeded(prj);
+        }
     }
 
     /**
