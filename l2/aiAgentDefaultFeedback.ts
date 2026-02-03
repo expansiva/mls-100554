@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/aiAgentDefaultFeedback.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/aiAgentDefaultFeedback.ts" enhancement="_100554_enhancementLit" />
 
 import { html, TemplateResult, nothing, svg } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -16,7 +16,6 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
     @state() selectedTraceStep: mls.msg.AIPayload | null = null;
     @state() isAgentParallelMode: boolean = false;
 
-
     async firstUpdated() {
         //this.task = await getTask('20250917143000.1001');
         //this.task = await getTask('20251205185425.1001');
@@ -26,7 +25,6 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
         //this.task = await getTask('20260127122706.1001');
         this.isAgentParallelMode = !!this.task?.iaCompressed?.nextSteps[0].progress;
     }
-
 
     updated(_changedProperties: Map<PropertyKey, unknown>) {
         super.updated(_changedProperties);
