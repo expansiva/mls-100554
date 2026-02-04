@@ -56,6 +56,7 @@ export async function startNewAiTask(
         context.task = ret.task;
         if (context.task.iaCompressed) {
             context.task.iaCompressed.modeSingleStep = context.modeSingleStep;
+            (context.task.iaCompressed as any).isTest = (context as any).isTest;
         }
         context.message = ret.message;
         notifyTaskChange(context, oldContextCreateAt);
@@ -135,6 +136,7 @@ export async function startNewInteractionInAiTask(agentName: string, taskTitle: 
         context.task = ret.task;
         if (context.task.iaCompressed) {
             context.task.iaCompressed.modeSingleStep = context.modeSingleStep;
+            (context.task.iaCompressed as any).isTest = (context as any).isTest;
         }
         notifyTaskChange(context);
 
@@ -185,7 +187,7 @@ const maxStepsByTask = 100;
 
 export async function executeNextStep(context: mls.msg.ExecutionContext): Promise<void> {
     if (!context || !context.message || !context.task || !context.task.iaCompressed) throw new Error("Invalid context");
-    if (context.task.status === "paused" || context.task.status === "done" || context.modeSingleStep === true) {
+    if (context.task.status === "paused" || context.task.status === "done" || context.modeSingleStep === true || (context as any).isTest === true) {
         notifyTaskChange(context);
         return;
     }
@@ -615,10 +617,11 @@ export async function getAgentContext(taskId: string): Promise<{
 
     const message: mls.msg.Message | undefined = await getMessage(messageId);
     if (!message) throw new Error(`[${agentName}](getAgentContext) Message not found: ${messageId}`)
-    const context: mls.msg.ExecutionContext = {
+    const context: mls.msg.ExecutionContext | any = {
         message,
         task,
-        modeSingleStep: task.iaCompressed?.modeSingleStep || undefined
+        modeSingleStep: task.iaCompressed?.modeSingleStep || undefined,
+        isTest: (task as any).iaCompressed?.isTest || undefined
     }
     return { context, interaction, step };
 }
