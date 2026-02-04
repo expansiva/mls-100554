@@ -1,5 +1,6 @@
 /// <mls fileReference="_100554_/l2/libMindMap.ts" enhancement="_blank" />
 
+export const allDefs: Record<string, IdefModule> = {};
 
 export async function getMindMapByName(file: string): Promise<MindMapData | undefined> {
 
@@ -29,7 +30,7 @@ export async function getMindMapByStorFile(file: mls.stor.IFileInfo): Promise<Mi
 
     if (file.extension !== '.defs.ts') {
         let { project, folder, shortName, level } = file;
-        const key = mls.stor.getKeyToFile({ project, folder, shortName, extension: '.defs.ts', level })   
+        const key = mls.stor.getKeyToFile({ project, folder, shortName, extension: '.defs.ts', level })
         if (!mls.stor.files[key]) throw new Error(`Not found mls.stor: ${key}`);
         file = mls.stor.files[key]
     }
@@ -51,57 +52,27 @@ export function getMindMapVariable(): MindMapNode[] {
 
 async function _getMindMapByFile(file: mls.stor.IFileInfo): Promise<MindMapData | undefined> {
 
-    const src = await file.getContent() as string;
-    const jsonRaw = extractJsonFromAsIs(src);
-    if (!jsonRaw) return;
-    const data = buildMindMapFromInsights(jsonRaw);
+    await loadAllDefs();
+    const key = mls.stor.getKeyToFile({ project: file.project, level: file.level, shortName: file.shortName, folder: file.folder, extension: '.defs.ts' });
+
+    if (!allDefs[key]) return;
+    const data = buildMindMapFromInsights(allDefs[key].defs);
     data.nodes = data.nodes.map((i) => {
 
         i = {
             ...i,
             related: Array.from(new Set(i.related))
         }
-        if (i.related.length <= 1 && !['imports', 'asIs'].includes(i.id)) i.related = [];
+        if (i.related.length <= 1 && !['imports', 'asIs', 'importedBy'].includes(i.id)) i.related = [];
         return i
 
     });
+
     return data;
+
 }
 
-function extractJsonFromAsIs(source: string): any {
-    const firstBrace = source.indexOf("{");
-    if (firstBrace === -1) {
-        return undefined
-    }
 
-    let depth = 0;
-    let endIndex = -1;
-
-    for (let i = firstBrace; i < source.length; i++) {
-        const char = source[i];
-
-        if (char === "{") depth++;
-        if (char === "}") depth--;
-
-        if (depth === 0) {
-            endIndex = i;
-            break;
-        }
-    }
-
-    if (endIndex === -1) {
-        throw new Error("Malformed JSON: Could not close '}'.");
-    }
-
-    const jsonText = source.slice(firstBrace, endIndex + 1);
-
-    try {
-        return JSON.parse(jsonText);
-    } catch (e) {
-        return undefined;
-        //throw new Error("Failed to parse extracted JSON.");
-    }
-}
 
 function buildMindMapFromInsights(input: any): MindMapData {
     const nodes: MindMapNode[] = [];
@@ -229,6 +200,36 @@ function buildMindMapFromInsights(input: any): MindMapData {
         });
     }
 
+    // ---------------- IMPORTED BY ----------------
+    if (Array.isArray(input.references?.importedBy) && input.references.importedBy.length) {
+        const groupId = fileKey + '_' + "importedBy";
+
+        const groupNode = pushNode({
+            id: groupId,
+            label: "ImportedBy",
+            type: "importedBy",
+            meta: { fileKey },
+            related: []
+        });
+
+        centerNode.related.push(groupId);
+
+        input.references.importedBy.forEach((wc: string) => {
+            const id = fileKey + '_' + `importedBy:${wc}`;
+
+            pushNode({
+                id,
+                label: wc,
+                type: "file_wc",
+                related: [groupId],
+                meta: { fileKey },
+                navigate: true
+            });
+
+            groupNode.related.push(id);
+        });
+    }
+
     // ---------------- CODE INSIGHTS ----------------
     const insights = input.codeInsights || {};
     if (Object.keys(insights).length) {
@@ -326,6 +327,76 @@ function joinStringArrayDescription(value: any): string | undefined {
     return undefined;
 }
 
+async function loadAllDefs(): Promise<void> { 
+
+    if (Object.keys(allDefs).length > 0) return;
+
+    const allKeys = Object.keys(mls.stor.files).filter((k) => {
+        const f = mls.stor.files[k];
+        return f.extension === '.defs.ts';
+    })
+
+    for await (const key of allKeys) {
+
+        try {
+            const f = mls.stor.files[key];
+            if (!f) return;
+            const fileName = `/_${f.project}_/l2/${f.folder ? f.folder + '/' : ''}${f.shortName}.defs.js`;
+            const m = await import(fileName);
+            if (!m || !m.asis) continue;
+            allDefs[key] = {
+                defs: m.asis,
+                file: f
+            };
+        } catch (e) {
+            continue;
+        }
+
+    }
+
+    configAdditionalInformations();
+
+}
+
+async function configAdditionalInformations() {
+
+    configiImportedBy();
+
+}
+
+function configiImportedBy() {
+
+    for  (const key of Object.keys(allDefs)) {
+
+        try {
+            const info = allDefs[key];
+            const importedBy:string[] = [];
+            const name = `/_${info.file.project}_/l2/${info.file.folder ? info.file.folder + '/' : ''}${info.file.shortName}.js`;
+
+            Object.keys(allDefs).forEach((into) => {
+
+                if (into === key) return;
+                const obj = allDefs[into];
+                if (!obj.defs.references?.imports) return;
+                let find = obj.defs.references?.imports.find((i) => i.ref === name);
+                if (find) {
+                    const nameFile = `/_${obj.file.project}_/l2/${obj.file.folder ? obj.file.folder + '/' : ''}${obj.file.shortName}.js`;
+                    importedBy.push(nameFile);
+                }
+
+            });
+
+            if (!(info.defs as any).references) (info.defs as any).references = {};
+            if (importedBy.length > 0) (info.defs as any).references.importedBy = importedBy;
+            
+        } catch (e) {
+            continue;
+        }
+
+    }
+    
+}
+
 
 export type MindMapSelected = MindMapSelectedFile | MindMapSelectedPlugin;
 
@@ -353,6 +424,7 @@ export type MindMapNodeType =
     | 'codeInsights'
     | 'webcomponent'
     | 'imports'
+    | 'importedBy' 
     | 'language'
     | 'attributes'
     | 'file'
@@ -381,3 +453,8 @@ export interface MindMapNodeStyle {
 }
 
 export type MindMapNodeStyles = Record<string, MindMapNodeStyle>;
+
+export interface IdefModule {
+    file: mls.stor.IFileInfo;
+    defs: mls.defs.AsIs;
+}
