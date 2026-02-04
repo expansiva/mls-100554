@@ -55,7 +55,7 @@ export async function startNewAiTask(
         const ret = value as mls.msg.ResponseAddMessageAI;
         context.task = ret.task;
         if (context.task.iaCompressed) {
-            context.task.iaCompressed .isTest = context.isTest;
+            context.task.iaCompressed.isTest = context.isTest;
         }
         context.message = ret.message;
         notifyTaskChange(context, oldContextCreateAt);
@@ -185,7 +185,7 @@ const maxStepsByTask = 100;
 
 export async function executeNextStep(context: mls.msg.ExecutionContext): Promise<void> {
     if (!context || !context.message || !context.task || !context.task.iaCompressed) throw new Error("Invalid context");
-    if (context.task.status === "paused" || context.task.status === "done" ||  context.isTest === true) {
+    if (context.task.status === "paused" || context.task.status === "done" || context.isTest === true) {
         notifyTaskChange(context);
         return;
     }
@@ -418,7 +418,6 @@ export async function continuePoolingTask(context: mls.msg.ExecutionContext) {
 
     const firstStep = ia.nextSteps?.[0] as mls.msg.AIAgentStep | undefined;
     if (!firstStep) throw new Error('No next step available');
-
     const agentName = firstStep.agentName;
     const agent = await loadAgent(agentName);
     if (!agent) throw new Error(`[${agentName}] createAgent function not found`);
@@ -615,10 +614,10 @@ export async function getAgentContext(taskId: string): Promise<{
 
     const message: mls.msg.Message | undefined = await getMessage(messageId);
     if (!message) throw new Error(`[${agentName}](getAgentContext) Message not found: ${messageId}`)
-    const context: mls.msg.ExecutionContext | any = {
+    const context: mls.msg.ExecutionContext = {
         message,
         task,
-        isTest: task.iaCompressed?.isTest || undefined
+        isTest: task.iaCompressed?.isTest || false
     }
     return { context, interaction, step };
 }
@@ -710,7 +709,11 @@ export async function startClarification(context: mls.msg.ExecutionContext, step
     return div;
 }
 
-export async function endClarification(clarification: ClarificationValue, action: "continue" | "cancel"): Promise<void> {
+export async function endClarification(
+    clarification: ClarificationValue,
+    action: "continue" | "cancel",
+
+): Promise<void> {
     // called after press button cancel or continue on clarification
     // call agent afterClarification
 
@@ -718,7 +721,6 @@ export async function endClarification(clarification: ClarificationValue, action
     if (!taskId) throw new Error(`[${agentName}](endClarification) Invalid call arguments, no taskId`);
     const ret = await getAgentContext(taskId);
     if (ret.step.type !== "clarification") throw new Error(`[${agentName}](endClarification)  Clarification step not not found`);
-
     if (action === "continue") {
         await executeAgentFunction(ret.context, ret.interaction, "afterClarification", clarification.stepId, clarification);
         dispatchDetailsTaskClose(taskId);
@@ -760,6 +762,131 @@ export function toLLMClarification(value: ClarificationValue) {
             ])
         )
     };
+}
+
+export async function getClarificationElement(context: mls.msg.ExecutionContext): Promise<HTMLElement> {
+
+    const task = context.task;
+    if (!task) throw new Error('Task not find');
+    const taskId = task.PK;
+    if (task.status !== 'in progress') throw new Error('Task not in progress');
+
+    const ia = task.iaCompressed;
+    if (!ia) throw new Error('Task has no AI interaction');
+    if (!ia.queueFrontEnd) throw new Error('Task has no pending hooks');
+
+    const firstStep = ia.nextSteps?.[0] as mls.msg.AIAgentStep | undefined;
+    if (!firstStep) throw new Error('No next step available');
+    const agentName = firstStep.agentName;
+    const agent: IAgentAsync | undefined = await loadAgent(agentName);
+    if (!agent) throw new Error(`[${agentName}](getClarificationElement) function not found`);
+
+    const ret = await getAgentContext(taskId)
+    if (ret.step.type !== "clarification") throw new Error(`[${agentName}](getClarificationElement) Clarification step not not found`);
+
+    const fn = agent.beforeClarificationStep;
+    if (typeof fn !== "function") throw new Error(`[${agentName}](getClarificationElement) 'beforeClarificationStep' function not found in ${agentName} `);
+
+
+    const parentId = getInteractionStepId(task, ret.step.stepId);
+    if (!parentId) throw new Error(`[${agentName}](getClarificationElement) parentId not found`);
+
+    const parentStep = getStepById(task, parentId) as mls.msg.AIAgentStep;
+    if (!parentStep) throw new Error(`[${agentName}](getClarificationElement) parentStep not found`);
+
+    return fn(agent, context, parentStep, ret.step, 0, ret.step.json);
+
+}
+
+export async function prepareClarificationElement(
+    agent: IAgent | IAgentAsync,
+    context: mls.msg.ExecutionContext,
+    stepId: number,
+    parentStepId: number,
+    intents: mls.msg.AgentIntent[],
+    clarification: ClarificationValue | Object | string,
+    widget?: string
+): Promise<HTMLElement> {
+
+    const task = context.task;
+    if (!task) throw new Error(`[${agentName}](startClarification) Invalid context.task`);
+    let clarificationValue: ClarificationValue | Object = {};
+
+    if (!widget) {
+        await import('/_100554_/l2/widgetQuestionsForClarification.js');
+        try {
+            let ret: any = clarification;
+            if (typeof clarification === "string") ret = JSON.parse(clarification || '') as any;
+            clarificationValue = {
+                taskId: task.PK,
+                stepId: 0,
+                title: ret.title,
+                legends: ret.legends || [],
+                userLanguage: ret.userLanguage || '',
+                questions: ret.questions
+            }
+        }
+        catch (e) {
+            console.error(e);
+            throw new Error(`[${agentName}](showClarification) on task: ${task.PK}, json clarification invalid`);
+        }
+    }
+
+    const div: HTMLElement = document.createElement('div');
+    const clariEl = document.createElement('widget-questions-for-clarification-100554');
+
+    clariEl.addEventListener('clarification-finish', (e) => {
+        const detail = (e as CustomEvent).detail;
+        const { value, action } = detail;
+        finishClarification(agent, stepId, parentStepId, intents, context, value, action)
+    });
+
+    (clariEl as any).value = clarificationValue;
+    clariEl.setAttribute('mode', 'new');
+    div.appendChild(clariEl);
+    return div;
+
+}
+
+export async function finishClarification(
+    agent: IAgent | IAgentAsync,
+    stepId: number,
+    parentStepId: number,
+    intents: mls.msg.AgentIntent[],
+    context: mls.msg.ExecutionContext,
+    value: string,
+    action: "continue" | "cancel"): Promise<void> {
+
+    if (action === 'cancel') {
+        const updateStatusFailed: mls.msg.AgentIntentUpdateStatus = {
+            type: 'update-status',
+            hookSequential: 0,
+            messageId: context.message.orderAt,
+            threadId: context.message.threadId,
+            taskId: context.task?.PK || '',
+            parentStepId,
+            stepId,
+            status: 'failed'
+        };
+        const intentsFailed: mls.msg.AgentIntent[] = [updateStatusFailed];
+        return processIntents(agent, context, intentsFailed);
+
+    }
+
+    if (action === 'continue') {
+        for (let intent of intents) {
+            if (intent.type !== 'add-steps') continue;
+            for (let step of intent.steps) {
+                if (step && (step as mls.msg.AIAgentStep).prompt) {
+                    const prompt = (step as mls.msg.AIAgentStep).prompt;
+                    (step as mls.msg.AIAgentStep).prompt = (prompt || '').replace('{{clarification}}', value)
+                }
+            }
+        }
+        return processIntents(agent, context, intents)
+    }
+
+
 }
 
 async function setFailedStatus(context: mls.msg.ExecutionContext, step: number) {

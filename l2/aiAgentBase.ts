@@ -1,6 +1,6 @@
 /// <mls fileReference="_100554_/l2/aiAgentBase.ts" enhancement="_blank" />
 
-import { TemplateResult } from 'lit'; 
+import { TemplateResult } from 'lit';
 
 /**
  * Agent Architecture Overview
@@ -51,7 +51,7 @@ export type IAgentLifecycle = {
   beforeBot?(context: mls.msg.ExecutionContext, msg: string, toolsBeforeSendMessage: mls.bots.ToolsBeforeSendMessage[]): Promise<Record<string, any>>;
   afterBot?(context: mls.msg.ExecutionContext, output: mls.msg.BotOutput): Promise<string>;
   replayForSupport?(task: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void>;
-  
+
   getFeedBack?(task: mls.msg.TaskData): Promise<TemplateResult>;
 }
 
@@ -85,21 +85,21 @@ export type IAgentLifecycleHooks = {
     userPrompt: string
   ): Promise<mls.msg.AgentIntent[]>
 
-/**
- * Called when the agent is invoked without a free-form user prompt.
- *
- * The user may optionally provide a command or parameters as part of the
- * agent invocation (e.g. "@@agentFix", "@@agentFix security").
- *
- * In this mode, the agent does not receive an explicit descriptive prompt.
- * Instead, the system infers the initial intent based on:
- * - the agent name
- * - optional command or parameters
- * - the current execution context
- *
- * This hook is responsible for creating a new task and returning the
- * initial orchestration intents.
- */
+  /**
+   * Called when the agent is invoked without a free-form user prompt.
+   *
+   * The user may optionally provide a command or parameters as part of the
+   * agent invocation (e.g. "@@agentFix", "@@agentFix security").
+   *
+   * In this mode, the agent does not receive an explicit descriptive prompt.
+   * Instead, the system infers the initial intent based on:
+   * - the agent name
+   * - optional command or parameters
+   * - the current execution context
+   *
+   * This hook is responsible for creating a new task and returning the
+   * initial orchestration intents.
+   */
   beforePromptImplicit?(
     agent: IAgentMeta,
     context: mls.msg.ExecutionContext,
@@ -137,6 +137,21 @@ export type IAgentLifecycleHooks = {
     step: mls.msg.AIAgentStep,
     hookSequential: number,
   ): Promise<mls.msg.AgentIntent[]>
+
+
+  /**
+   * Called after a step user call to answer clarification allowing the agent to
+   * react declaratively to the clarification result and append new intents.
+   */
+  beforeClarificationStep?(
+    agent: IAgentMeta,
+    context: mls.msg.ExecutionContext,
+    parentStep: mls.msg.AIAgentStep,
+    step: mls.msg.AIClarificationStep,
+    hookSequential: number,
+    json: any
+    ,
+  ): Promise<HTMLElement>
 
 }
 

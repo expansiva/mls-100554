@@ -3,13 +3,16 @@
 import { html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-
+import { IAgent, IAgentAsync } from '/_100554_/l2/aiAgentBase.js';
 import { ClarificationValue, endClarification } from '/_100554_/l2/aiAgentOrchestration.js';
 
 export class WidgetQuestionsForClarification100554 extends StateLitElement {
+
   @property({ type: Object }) value: ClarificationValue | null = null;
 
   @property({ type: Boolean }) readonly = false;
+
+  @property() mode: 'new' | 'old' = 'old';
 
   // Local state for editing answers
   @state()
@@ -60,6 +63,19 @@ export class WidgetQuestionsForClarification100554 extends StateLitElement {
 
   private onCancel() {
     if (this.value && !this.readonly) {
+      if (this.mode === 'new') {
+        this.dispatchEvent(
+          new CustomEvent('clarification-finish', {
+            detail: {
+              value: this.value,
+              action: 'cancel'
+            },
+            bubbles: true,
+            composed: true
+          })
+        );
+        return;
+      }
       endClarification(this.value, "cancel");
     }
   }
@@ -76,7 +92,23 @@ export class WidgetQuestionsForClarification100554 extends StateLitElement {
           ])
         )
       };
+
+      if (this.mode === 'new') {
+        this.dispatchEvent(
+          new CustomEvent('clarification-finish', {
+            detail: {
+              value: this.value,
+              action: 'continue'
+            },
+            bubbles: true,
+            composed: true
+          })
+        );
+        return;
+      }
+
       endClarification(this.value, "continue");
+
     }
   }
 
