@@ -553,8 +553,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         }
         try {
             const agent = await loadAgent(agentName);
-            context.modeSingleStep = true;
-            (context as any).isTest = true;
+            context.isTest = true;
             setState('playgroundAgent.modeCompare', group);
             if (!agent) throw new Error('Not found agent:' + agentName);
             await executeBeforePrompt(agent, context);

@@ -30,6 +30,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         attributes: { fill: '#48C9B0', stroke: '#117864', text: '#083A33' },
         file: { fill: '#CFE9F6', stroke: '#8CBFD9', text: '#1F3B4D' },
         text: { fill: '#D8CFC4', stroke: '#BFAF9F', text: '#4A3F35' },
+        importedBy: { fill: '#E6B0AA', stroke: '#C0392B', text: '#4A1E1A' },
         default: { fill: '#2C3E50', stroke: '#1B2631', text: '#ECF0F1' }
     };
 
@@ -44,7 +45,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         circle?: { x: number, y: number, r: number }; // Only for center node, optional for others
         isCenter: boolean;
         buttons?: {
-            navigate: { x: number, y: number, w: number, h: number };
+            details: { x: number, y: number, w: number, h: number };
         };
     }[] = [];
 
@@ -135,6 +136,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         this._removeCanvasListeners();
     }
 
+
     updated(changedProperties: Map<string | number | symbol, unknown>) {
         super.updated(changedProperties);
         // If animating, use animated positions
@@ -148,7 +150,6 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
                 const saved = getMindMapVariable();
                 const keepBreadcrumb = !currentpage || this.currentpage === currentpage;
-                console.info(keepBreadcrumb);
                 if (keepBreadcrumb && saved.length) {
                     this.breadcrumb = saved;
                     const index = this.breadcrumb.findIndex((i) => i.id === center.id && i.meta.fileKey === center.meta.fileKey);
@@ -166,14 +167,22 @@ export class WidgetMindMapL4100554 extends StateLitElement {
                 }
                 setMindMapVariable(this.breadcrumb);
 
+
             }
+
+
         }
+
 
         if (this._animating && this._animatedPositions) {
             this.drawMindMap(this._animatedPositions);
+
         } else {
             this.drawMindMap();
+
         }
+
+
     }
 
     //------IMPLEMENTATION--------- 
@@ -260,13 +269,19 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
         if (hit) {
             const [key] = hit;
-            if (key === 'navigate') {
-                this.openDefs(item.node);
+            if (key === 'details') {
+                this._pushBreadcrumb(item.node);
+                this.activeDescription = item.node.description ? item.node.description : undefined;
             }
             return;
         }
 
         if (item.node.type === 'file_wc') {
+            this.openDefs(item.node);
+            return;
+        }
+
+        if (item.node.type === 'file') {
             this.openDefs(item.node);
             return;
         }
@@ -404,9 +419,9 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     private drawMindMap(
         positions?: Record<string, { x: number; y: number; alpha: number }>
     ) {
+
         requestAnimationFrame(() => {
             if (!this.mapState) return;
-
             const container = this.renderRoot.querySelector('.canvas-container') as HTMLElement;
             const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
             if (!canvas || !container) return;
@@ -671,7 +686,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
         /* ---------- Buttons (only text nodes) ---------- */
         let buttons: {
-            navigate: { x: number; y: number; w: number; h: number };
+            details: { x: number; y: number; w: number; h: number };
         } | undefined;
 
         if (node.type === 'file') {
@@ -681,17 +696,17 @@ export class WidgetMindMapL4100554 extends StateLitElement {
                 rectY + textHeight + (iconRowHeight - btnSize) / 2;
 
             // 🔥 botão único centralizado
-            const navigateBtn = {
+            const detailsBtn = {
                 x: x - btnSize / 2,
                 y: buttonsY,
                 w: btnSize,
                 h: btnSize
             };
 
-            this.drawIconButton(ctx, navigateBtn, '➜');
+            this.drawIconButton(ctx, detailsBtn, '📄');
 
             buttons = {
-                navigate: navigateBtn
+                details: detailsBtn
             };
         }
 
@@ -716,16 +731,16 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     ) {
         ctx.save();
 
-        ctx.fillStyle = '#2C3E50';
-        ctx.strokeStyle = '#1B2631';
+        //ctx.fillStyle = '#2C3E50';
+        //ctx.strokeStyle = '#1B2631';
         ctx.lineWidth = 2;
 
         ctx.beginPath();
         ctx.roundRect(rect.x, rect.y, rect.w, rect.h, 6);
-        ctx.fill();
+        //ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = '#ECF0F1';
+        //ctx.fillStyle = '#ECF0F1';
         ctx.font = '12px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -750,9 +765,10 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
         const key = mls.stor.getKeyToFile({ ...name, extension: '.ts', level: 2 });
         if (!mls.stor.files[key]) return;
-        this.mapState = await getMindMapByStorFile(mls.stor.files[key]);
+        const j = await getMindMapByStorFile(mls.stor.files[key]);
+        if (!j) return;
+        this.mapState = j;
         this.configureMindMap();
-        //this.fireEvents(mls.stor.files[key])
 
     }
 
@@ -765,32 +781,6 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
         // O CSS cuidará do efeito de deslize de volta
     }
-
-    private async fireEvents(file: mls.stor.IFileInfo) {
-
-        try {
-            let name = `_${file.project}_/l2/${file.folder ? file.folder + '/' : ''}${file.shortName}`;
-            const options = {
-                shortName: undefined,
-                project: undefined,
-                htmlText: '<plugin-view-mind-map-100554 autoPrepare="true" page="' + name + '" inNavigate="true"></plugin-view-mind-map-100554>'
-            }
-            mls.events.fire(
-                mls.actualLevel as any,
-                'PluginDetails' as any,
-                JSON.stringify(options),
-                0
-            );
-
-        } catch (err: any) {
-
-            console.info(err.message || '[fireEvents]: erro open');
-        }
-
-
-    }
-
-
 
     // Utility for gradient color lighten
     private _brightenColor(hex: string, amt = 0.08) {
@@ -975,26 +965,6 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     private async openFileAndNavigate(entry: MindMapNode) {
         this.mapState = await getMindMapByName(entry.meta.fileKey);
         this.configureMindMap();
-
-        /*const options = {
-            shortName: undefined,
-            project: undefined,
-            htmlText: `
-            <plugin-view-mind-map-100554
-                autoPrepare="true"
-                page="${entry.meta.fileKey}"
-                initialNode="${entry.id}"
-                inNavigate="true">
-            </plugin-view-mind-map-100554>
-        `
-        };
-
-        mls.events.fire(
-            mls.actualLevel as any,
-            'PluginDetails' as any,
-            JSON.stringify(options),
-            0
-        );*/
     }
 
     private _navigateInsideCurrentFile(nodeId: string, breadcrumbIndex: number) {

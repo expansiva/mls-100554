@@ -9,7 +9,7 @@ import '/_100554_/l2/widgetMindMapL4.js';
 @customElement('service-mind-map-100554')
 export class ServiceMindMap100554 extends ServiceBase {
 
-    @property({ type: String }) msize = '';
+    //@property({ type: String }) msize = '';
     @property({ type: String }) dataJson: MindMapData | undefined;
     private actualFile: Record<number, mls.stor.IFileInfo> = {};
 
