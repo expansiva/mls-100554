@@ -241,6 +241,9 @@ async function _createProjectModel(project: number, contentTS: string): Promise<
         },
         saveContentInCacheIfNeed: function (): Promise<string | null> {
             throw new Error('Function not implemented.');
+        },
+        getModel: async function (): Promise<mls.editor.IModelBase | null>{
+            throw new Error('Function not implemented.');
         }
     }
     const modelsBase = await _createModel(info, ftype, contentTS)
