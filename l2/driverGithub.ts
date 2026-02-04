@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/driverGithub.ts" group="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/driverGithub.ts" groupName="other" enhancement="_100554_enhancementLit" />
 
 import * as dL from '/_100554_/l2/driverLib.js';
 
