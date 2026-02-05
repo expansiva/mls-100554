@@ -401,9 +401,9 @@ const MAX_HOOKS_PER_TURN = 5;
 const runningTasks = new Set<string>();
 
 export async function continuePoolingTask(context: mls.msg.ExecutionContext) {
+    
     const { task } = context;
     if (!task) return;
-
     const taskId = task.PK;
 
     if (runningTasks.has(taskId)) {
@@ -411,7 +411,11 @@ export async function continuePoolingTask(context: mls.msg.ExecutionContext) {
         return;
     }
 
-    if (task.status !== 'in progress') throw new Error('Task not in progress');
+    if (task.status !== 'in progress') {
+        deletePooling(taskId);
+        return;
+    }
+
     const ia = task.iaCompressed;
     if (!ia) throw new Error('Task has no AI interaction');
     if (!ia.queueFrontEnd) throw new Error('Task has no pending hooks');
@@ -421,7 +425,6 @@ export async function continuePoolingTask(context: mls.msg.ExecutionContext) {
     const agentName = firstStep.agentName;
     const agent = await loadAgent(agentName);
     if (!agent) throw new Error(`[${agentName}] createAgent function not found`);
-
 
     runningTasks.add(taskId);
     await addPooling({
