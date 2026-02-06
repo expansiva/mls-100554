@@ -2,6 +2,7 @@
 
 import { getEnhancementName, getBaseTemplate } from '/_100554_/l2/libCommom.js';
 import { getTokensLess, removeTokensFromSource } from '/_102027_/l2/designSystemBase.js';
+import { getDefsByFile } from '/_100554_/l2/libMindMap.js';
 
 export async function readProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true) {
 
@@ -258,6 +259,7 @@ async function _createModel(storFile: mls.stor.IFileInfo, ext: Extesion, content
     let haveInfo: boolean = false;
     let info: mls.stor.IFileInfoValue | null = null;
 
+    src = content || '';
     if (ext !== '.d.ts') {
 
         if (!storFile) throw new Error(`Invalid file: ${ext}`);
@@ -270,8 +272,6 @@ async function _createModel(storFile: mls.stor.IFileInfo, ext: Extesion, content
             src = haveInfo ? info?.content : await storFile.getContent();
         } else src = content;
 
-    } else {
-        src = content || '';
     }
 
     if (src instanceof Blob) throw new Error(`${ext} file must be string`);
@@ -286,22 +286,17 @@ async function _createModel(storFile: mls.stor.IFileInfo, ext: Extesion, content
     const originalProject: number | undefined = haveInfo ? info?.originalProject : undefined;
     const originalShortName: string | undefined = haveInfo ? info?.originalShortName : undefined;
 
-    let model: mls.editor.IModelBase | undefined;
-    if (ext === '.html' && storFile) model = mls.editor.createModelHTML(storFile, src);
-    else if (ext === '.ts' && storFile) model = mls.editor.createModelTS(storFile, src);
-    else if (ext === '.test.ts' && storFile) model = mls.editor.createModelTest(storFile, src);
-    else if (ext === '.defs.ts' && storFile) model = mls.editor.createModelDefs(storFile, src);
+    let model: mls.editor.IModelBase | undefined = await storFile.getOrCreateModel();
+    if (!model) throw new Error(`Model invalid`);
 
-    else if (ext === '.d.ts') model = mls.editor.createModelProjectDefinition(storFile.project, src);
-    else if (ext === '.less' && storFile) {
+    if (ext === '.less' && storFile) {
         const lessTokens = await getTokensLess(storFile.project, 'Default');
         const lineTokens = `\n\n//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
         src = removeTokensFromSource(src);
         src = src.trim().concat(lineTokens);
-        model = mls.editor.createModelStyle(storFile, src);
+        model.model.setValue(src);
     }
 
-    if (!model) throw new Error(`Model invalid`);
     if (ext !== '.d.ts') {
         model.originalCRC = originalCRC;
         model.originalProject = originalProject;
@@ -314,7 +309,9 @@ async function _createModel(storFile: mls.stor.IFileInfo, ext: Extesion, content
 }
 
 function init() {
+
     mls.events.addEventListener([1, 2], ['MonacoModelCreated' as any], onMonacoModelCreated);
+
 }
 init();
 
@@ -379,7 +376,7 @@ function _onModelChange(e: monaco.editor.IModelContentChangedEvent, activeModel:
     clearTimeout(_onChangedContent);
     _onChangedContent = window.setTimeout(async () => {
 
-        _MarkCompileNeed(storFile); // fire and forgot
+        //_MarkCompileNeed(storFile); // fire and forgot
         switch (storFile.extension) {
             case ('.ts'):
                 const ignoreChanges = (e.changes.length === 1 && e.changes[0].range.startLineNumber === 1 && e.changes[0].range.endLineNumber === 1 && e.changes[0].range.endColumn <= 2);
@@ -408,7 +405,6 @@ export async function _MarkCompileNeed(storFile: mls.stor.IFileInfo): Promise<vo
     if (storFile.extension !== ".ts") return;
     const key = mls.stor.convertFileToFileReference(storFile);
     if (compileNeedSet.has(key)) return;
-
     compileNeedSet.add(key);
     try {
         // TODO: work
@@ -416,6 +412,22 @@ export async function _MarkCompileNeed(storFile: mls.stor.IFileInfo): Promise<vo
         // look on .defs imports on all files (mind map)
         // mark modelTS.compilerResults.modelNeedCompile = true;
         // compile
+        const defs = await getDefsByFile(storFile);
+        if (!defs || !defs.references || !(defs.references as any).importedBy) return;
+        for await (let file of (defs.references as any).importedBy) {
+            if (file.startsWith('/')) file = file.replace('/', '');
+            const info = mls.stor.convertFileReferenceToFile(file);
+            const key = mls.stor.getKeyToFile({ ...info, extension: '.ts' });
+            const sf = mls.stor.files[key];
+            if (!sf) continue;
+
+            const m = await sf.getOrCreateModel() as mls.editor.IModelTS;
+            if (!m || !m.compilerResults)  continue;
+            m.compilerResults.modelNeedCompile = true;
+            mls.l2.typescript.compileAndPostProcess(m, true, true);
+
+        }
+        
     } finally {
         compileNeedSet.delete(key);
     }
