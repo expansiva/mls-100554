@@ -99,8 +99,11 @@ export class [className] extends CollabPageElement {
         }
 
         const group = this.groupName && this.groupName != 'other' ? ` groupName="${this.groupName}"` : ` groupName="page"`;
-        const folder = this.folder ? ` folder="${this.folder}"` : '';
-        const enhancement =  this.enhancement ? this.enhancement : '_blank';
+        const enhancement = this.enhancement ? this.enhancement : '_blank';
+
+        const folder = this.folder ? `${this.folder}/` : '';
+        const name = `_${this.project}_/l2/${folder}${this.shortName}.ts`
+        return `/// <mls fileReference="${name}" enhancement="${enhancement}"${group}/>\n${this.template}\n`
 
         return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${enhancement}"${group}${folder} />\n${newExample}\n`;;
     }
