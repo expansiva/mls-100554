@@ -11,7 +11,7 @@ export function setGetModels() {
         const f = mls.stor.files[k];
         if (!f) return;
 
-        f.getModel = async () => _getModel(f);
+        // f.getModel = async () => _getModel(f);
 
     });
     
@@ -53,7 +53,7 @@ export async function createStorFile(req: IReqCreateStorFile, needCreateModel: b
 
     if (needCreateModel) await createModel(file, needCompile, awaitCompile);
 
-    file.getModel = async () => _getModel(file);
+    // file.getModel = async () => _getModel(file);
 
     return file;
 
