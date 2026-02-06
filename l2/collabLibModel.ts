@@ -118,6 +118,7 @@ export async function createAllModels(storFileBase: mls.stor.IFileInfo, needComp
 
 }
 
+// todo: validate is need, and move to mls lib
 export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile: boolean = false): Promise<mls.editor.IModelBase | undefined> {
 
     let fileModels = mls.editor.getModels(storFile.project, storFile.shortName, storFile.folder, storFile.level);
@@ -131,7 +132,7 @@ export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boo
     }
 
     const promise = (async () => {
-        if (storFile.project > 1 && storFile.project !== mls.stor.LOCALPROJECTNUMBER ) {
+        if (storFile.project > 1 && storFile.project !== mls.stor.LOCALPROJECTNUMBER) {
             await mls.stor.server.loadProjectInfoIfNeeded(storFile.project);
         }
 
@@ -140,8 +141,6 @@ export async function createModel(storFile: mls.stor.IFileInfo, needCompile: boo
 
         const modelBase = await _createModel(storFile, ftype, src);
         if (!modelBase) throw new Error(`[createModel] invalid mls.editor.models for file: _${storFile.project}_${storFile.shortName}${ftype}`);
-
-        _addEventsModel(storFile, modelBase);
 
         if (needCompile && modelBase.storFile.extension.endsWith('.ts')) {
             const modelTs = modelBase as mls.editor.IModelTS;
@@ -242,7 +241,7 @@ async function _createProjectModel(project: number, contentTS: string): Promise<
         saveContentInCacheIfNeed: function (): Promise<string | null> {
             throw new Error('Function not implemented.');
         },
-        getModel: async function (): Promise<mls.editor.IModelBase | null>{
+        getOrCreateModel: async function (): Promise<mls.editor.IModelBase> {
             throw new Error('Function not implemented.');
         }
     }
@@ -314,14 +313,25 @@ async function _createModel(storFile: mls.stor.IFileInfo, ext: Extesion, content
 
 }
 
-async function _addEventsModel(storFile: mls.stor.IFileInfo, model: mls.editor.IModelTS): Promise<void> {
+function init() {
+    mls.events.addEventListener([1, 2], ['MonacoModelCreated' as any], onMonacoModelCreated);
+}
+init();
 
-    storFile.onAction = (action: mls.stor.IFileInfoAction) => _afterUpdate(storFile, model.model, mapExt[storFile.extension]);
+function onMonacoModelCreated(ev: mls.events.IEvent) {
+    console.log('onMonacoModelCreated', ev) // test
+    const storFileBase = mls.stor.convertFileReferenceToFile(ev.desc || '');
+    const key = mls.stor.getKeyToFile(storFileBase);
+    const storFile = mls.stor.files[key];
+    if (!storFile) return; // ignore, error
 
-    storFile.getValueInfo = () => _getValueInfo(model);
-
-    model.model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => _onModelChange(e, model, storFile));
-
+    storFile.getOrCreateModel().then((model: mls.editor.IModelBase) => {
+        if (!model) return;
+        // Register model events and hooks
+        storFile.onAction = (action: mls.stor.IFileInfoAction) => _afterUpdate(storFile, model.model, mapExt[storFile.extension]);
+        storFile.getValueInfo = () => _getValueInfo(model);
+        model.model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => _onModelChange(e, model, storFile));
+    });
 }
 
 async function _afterUpdate(storFile: mls.stor.IFileInfo, model: monaco.editor.ITextModel, tp: 'defs' | 'html' | 'style' | 'test' | 'ts') {
@@ -369,7 +379,7 @@ function _onModelChange(e: monaco.editor.IModelContentChangedEvent, activeModel:
     clearTimeout(_onChangedContent);
     _onChangedContent = window.setTimeout(async () => {
 
-
+        _MarkCompileNeed(storFile); // fire and forgot
         switch (storFile.extension) {
             case ('.ts'):
                 const ignoreChanges = (e.changes.length === 1 && e.changes[0].range.startLineNumber === 1 && e.changes[0].range.endLineNumber === 1 && e.changes[0].range.endColumn <= 2);
@@ -392,6 +402,24 @@ function _onModelChange(e: monaco.editor.IModelContentChangedEvent, activeModel:
 
     }, 400);
 };
+
+const compileNeedSet = new Set<string>();
+export async function _MarkCompileNeed(storFile: mls.stor.IFileInfo): Promise<void> {
+    if (storFile.extension !== ".ts") return;
+    const key = mls.stor.convertFileToFileReference(storFile);
+    if (compileNeedSet.has(key)) return;
+
+    compileNeedSet.add(key);
+    try {
+        // TODO: work
+        // todo: get all files need to compile again
+        // look on .defs imports on all files (mind map)
+        // mark modelTS.compilerResults.modelNeedCompile = true;
+        // compile
+    } finally {
+        compileNeedSet.delete(key);
+    }
+}
 
 async function _updateModelStatusHTML(modelBase: mls.editor.IModelBase, changed: boolean): Promise<void> {
 
@@ -604,40 +632,21 @@ function _dispatchEventChangedLess(position: 'left' | 'right' | 'all', storFile:
     mls.events.fire([2], ['styleChanged'] as any, JSON.stringify({ position, storFile }), 200);
 }
 
-async function createStorFiles(fileBase: mls.stor.IFileInfo | undefined, ext: string): Promise<mls.stor.IFileInfo> {
+async function createStorFiles(fileBase: mls.stor.IFileInfo | undefined, extension: string): Promise<mls.stor.IFileInfo> {
 
     if (!fileBase) throw new Error('[createStorFiles] Invalid file base!');
+    if (extension === '.ts') throw new Error('Error on createStorFiles, extension .ts invalid');
 
-    const { folder, shortName, project } = fileBase;
-
-    let source = '';
-    switch (ext) {
-        case ('.ts'):
-            source = await getBaseTemplate({ folder, shortName, project, extension: '.ts' }, '_100554_enhancementLit');
-            break;
-        case ('.html'):
-            source = await getBaseTemplate({ folder, shortName, project, extension: '.html' });
-            break;
-        case ('.less'):
-            source = await getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
-            break;
-        case ('.test.ts'):
-            source = await getBaseTemplate({ folder, shortName, project, extension: '.test.ts' });
-            break;
-        case ('.defs.ts'):
-            source = await getBaseTemplate({ folder, shortName, project, extension: '.defs.ts' });
-            break;
-    }
+    let source = await getBaseTemplate({ ...fileBase, extension });
 
     const params = {
         project: fileBase.project,
         level: fileBase.level,
         shortName: fileBase.shortName,
-        extension: ext,
+        extension: extension,
         versionRef: '0',
         folder: fileBase.folder
     };
-
     const file = await mls.stor.addOrUpdateFile(params);
     if (!file) throw new Error('[createStorFile] Invalid storFile');
 
@@ -647,10 +656,8 @@ async function createStorFiles(fileBase: mls.stor.IFileInfo | undefined, ext: st
         contentType: 'string'
     };
 
-    await mls.stor.localStor.setContent(file, fileInfo);
-
+    if (!(await mls.stor.localStor.setContent(file, fileInfo))) throw new Error('Error on save content on createStorFiles');
     return file;
-
 }
 
 
