@@ -2,12 +2,22 @@
 
 widget-mind-map-l4-100554 {
 
-    color: black;
+    color: @text-primary-color;
     display: block;
     width: 100%;
     height: 100%;
     font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     overflow-x: hidden;
+
+    .content{
+        //border-top: 1px solid @text-primary-color;
+        margin-top: .3rem;
+        padding-top: .5rem;
+    }
+
+    .disabled{
+        opacity: .5;
+    }
 
     .breadcrumb {
         display: flex;
@@ -91,8 +101,110 @@ widget-mind-map-l4-100554 {
         padding: 8px 16px;
         align-self: flex-start;
         background-color: transparent;
-        border: 1px solid rgb(172, 172, 172);
+        border: none;//1px solid rgb(172, 172, 172);
         color: @text-primary-color;
+    }
+
+    .side-menu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 260px;
+
+        background: @bg-primary-color;
+        color: @text-primary-color;
+
+        transform: translateX(-100%);
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+            box-shadow 0.35s ease;
+
+        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+        z-index: 9999;
+
+        padding-top: 60px;
+        overflow: hidden;
+    }
+
+    /* ESTADO ABERTO */
+    .side-menu.menu-open {
+        transform: translateX(0);
+        box-shadow: 6px 0 24px rgba(0, 0, 0, 0.35);
+    }
+
+    /* ITENS */
+    .menu-item {
+        padding: 16px 22px;
+        cursor: pointer;
+        font-size: 14px;
+        letter-spacing: .3px;
+
+        transition: background 0.2s ease, padding-left 0.2s ease;
+    }
+
+    .menu-item:hover {
+        background: @bg-primary-color-darker-disabled;
+        padding-left: 28px;
+    }
+
+
+    .menu {
+        cursor: pointer;
+        float: right;
+        padding: 18px 20px;
+        position: relative;
+        user-select: none;
+
+        .menu-icon {
+            background: @text-primary-color;
+            display: block;
+            height: 2px;
+            position: relative;
+            transition: background 0.2s ease-out;
+            width: 18px;
+
+            &::before,
+            &::after {
+                background: @text-primary-color;
+                content: '';
+                display: block;
+                height: 100%;
+                position: absolute;
+                transition: all 0.2s ease-out;
+                width: 100%;
+            }
+
+            &::before {
+                top: 5px;
+            }
+
+            &::after {
+                top: -5px;
+            }
+        }
+
+        .menu-btn {
+            display: none;
+
+            &:checked~.menu-icon {
+                background: transparent;
+
+                &:before {
+                    top: 0;
+                    transform: rotate(-45deg);
+                }
+
+                &:after {
+                    top: 0;
+                    transform: rotate(45deg);
+                }
+
+            }
+
+            &:hover {
+                background-color: @bg-primary-color-darker-disabled;
+            }
+        }
     }
 
 }
