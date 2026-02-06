@@ -4,6 +4,20 @@ import { convertFileNameToTag } from '/_102027_/l2/utils';
 import { createModel, createAllModels } from '/_100554_/l2/collabLibModel.js'
 import { getBaseTemplate, verifyNeedAddTripleslach } from '/_100554_/l2/libCommom.js';
 
+export function setGetModels() {
+
+    Object.keys(mls.stor.files).forEach((k) => {
+
+        const f = mls.stor.files[k];
+        if (!f) return;
+
+        f.getModel = async () => _getModel(f);
+
+    });
+    
+}
+
+
 export async function createStorFile(req: IReqCreateStorFile, needCreateModel: boolean, needCompile: boolean = true, awaitCompile: boolean = false): Promise<mls.stor.IFileInfo> {
 
     const params = {
@@ -38,6 +52,8 @@ export async function createStorFile(req: IReqCreateStorFile, needCreateModel: b
     await mls.stor.localStor.setContent(file, fileInfo);
 
     if (needCreateModel) await createModel(file, needCompile, awaitCompile);
+
+    file.getModel = async () => _getModel(file);
 
     return file;
 
@@ -133,8 +149,6 @@ export async function renameFile(storFile: mls.stor.IFileInfo, newProject: numbe
 
     let source = await storFile.getContent() as string;
     if (!source) throw new Error('[renameFile] Impossible rename this file:' + storFile.shortName);
-
-    if (storFile.extension === '.json') debugger;
 
     if (!newFolder) newFolder = storFile.folder;
 
@@ -314,13 +328,15 @@ const mapExtUndo: Record<string, keyof typeof mls.editor.models[string]> = {
 
 export function replaceTripleslashAndTag(storFile: mls.stor.IFileInfo, newProject: number, newShortName: string, newFolder: string, src: string) {
 
-    const { folder, project, shortName } = storFile;
+    const { folder, project, shortName, level, extension } = storFile;
 
     const oldTag = convertFileNameToTag({ folder, project, shortName });
     const newTag = convertFileNameToTag({ folder: newFolder, project: newProject, shortName: newShortName });
+    const fileReference = `_${newProject}_/l${level}/${newFolder ? newFolder + '/' : ''}${newShortName}${extension}`;
     const regex = new RegExp(oldTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
 
-    src = src.replace(/shortName="[^"]*"/, `shortName="${newShortName}"`).replace(/project="[^"]*"/, `project="${newProject}"`).replace(/folder="[^"]*"/, `folder="${newFolder}"`);
+
+    src = src.replace(/fileReference="[^"]*"/, `fileReference="${fileReference}"`).replace(/shortName="[^"]*"/, `shortName="${newShortName}"`).replace(/project="[^"]*"/, `project="${newProject}"`).replace(/folder="[^"]*"/, `folder="${newFolder}"`);
     return src.replace(regex, newTag);
 
 }
@@ -360,6 +376,8 @@ async function safeClone(storFile: mls.stor.IFileInfo, newProject: number, newSh
 
 async function undoFileRenamed(storFile: mls.stor.IFileInfo) {
 
+    if(!storFile.getValueInfo && (mls.stor.localDB as any).getContentInfoOrNull) storFile.getValueInfo = (mls.stor.localDB as any).getContentInfoOrNull
+
     const info = storFile.getValueInfo ? await storFile.getValueInfo() : {} as mls.stor.IFileInfoValue;
 
     if (!info.originalProject || !info.originalShortName)
@@ -385,6 +403,22 @@ async function undoFileRenamed(storFile: mls.stor.IFileInfo) {
         await mls.stor.localStor.setContent(mls.stor.files[key], { contentType: 'string', content: null });
         delete mls.stor.files[key];
     }
+}
+
+async function _getModel(f: mls.stor.IFileInfo): Promise<mls.editor.IModelBase | null> {
+
+    const {project, shortName, level, extension, folder } = f;
+    const key = mls.editor.getKeyModel(project, shortName, folder, level);
+    let models = mls.editor.models[key];
+    const ext = mapExtUndo[extension];
+    if (!models || !models[ext]) {
+        await createModel(f, false, false);
+        models = mls.editor.models[key];    
+    }
+
+    if (!models || !models[ext]) return null
+    return models[ext] as mls.editor.IModelBase; 
+
 }
 
 //---------INTERFACE---------

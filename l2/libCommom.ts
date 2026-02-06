@@ -565,18 +565,21 @@ export function setLastModule(project: number, moduleName: string) {
 export async function getBaseTemplate(file: IInfoFile, enhancement: string = '_blank'): Promise<string> {
 
     const utils = await import('/_100554_/l2/utilsLit');
-    const { project, shortName, folder } = file;
+    const { project, shortName, folder, extension } = file;
+
+    const folderString = folder ? `${folder}/` : '';
+    const name = `_${project}_/l2/${folderString}${shortName}${extension}`
 
     switch (file.extension) {
-        case ('.ts'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n// typescript new file\n`;
+        case ('.ts'): return `/// <mls fileReference="${name}" enhancement="${enhancement}"/>\n\n// typescript new file\n`;
 
         case ('.html'): return `<h1>${file.shortName}</h1>`;
 
-        case ('.less'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n${utils.convertFileNameToTag({ project, shortName, folder })} {\n\n// Here your less\n\n }`;
+        case ('.less'): return `/// <mls fileReference="${name}" enhancement="${enhancement}"/>\n\n${utils.convertFileNameToTag({ project, shortName, folder })} {\n\n// Here your less\n\n }`;
 
-        case ('.test.ts'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n import { ICANTest, ICANIntegration, ICANSchema  } from '/_100554_/l2/tsTestAST.js';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
+        case ('.test.ts'): return `/// <mls fileReference="${name}" enhancement="${enhancement}"/>\n\n import { ICANTest, ICANIntegration, ICANSchema  } from '/_100554_/l2/tsTestAST.js';\n export const integrations: ICANIntegration[] = [];\n export const tests: ICANTest[] = [];`;
 
-        case ('.defs.ts'): return `/// <mls shortName="${file.shortName}" project="${file.project}" enhancement="${enhancement}" folder="${file.folder}" />\n\n`;
+        case ('.defs.ts'): return `/// <mls fileReference="${name}" enhancement="${enhancement}"/>\n\n`;
 
         default: return '';
     }
@@ -590,7 +593,9 @@ export function verifyNeedAddTripleslach(info: mls.cbe.IPath, src: string, exten
     if (enhancement === '_blank' && extension === '.ts') enhancement = '_100554_enhancementLit';
     if (enhancement === '_blank' && extension === '.less') enhancement = '_100554_enhancementStyle';
 
-    const triple = `/// <mls shortName="${info.shortName}" project="${info.project}" enhancement="${enhancement}" folder="${info.folder}" />\n`;
+    const folder = info.folder ? `${info.folder}/` : '';
+    const name = `_${info.project}_/l2/${folder}${info.shortName}${extension}`
+    const triple = `/// <mls fileReference="${name}" enhancement="${enhancement}"/>\n`
 
     if (src.startsWith('/// <mls ')) return src;
     return triple + src;

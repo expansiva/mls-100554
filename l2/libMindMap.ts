@@ -333,7 +333,7 @@ async function loadAllDefs(): Promise<void> {
 
     const allKeys = Object.keys(mls.stor.files).filter((k) => {
         const f = mls.stor.files[k];
-        return f.extension === '.defs.ts';
+        return f.extension === '.defs.ts' && f.level === 2;
     })
 
     for await (const key of allKeys) {

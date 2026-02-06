@@ -10,6 +10,12 @@ import { MindMapSelected, MindMapData, MindMapNodeStyles, MindMapNodeStyle, Mind
 @customElement('widget-mind-map-l4-100554')
 export class WidgetMindMapL4100554 extends StateLitElement {
 
+    private contentHeight = 0;
+    private offsetY = 0;
+    private isListMode = false;
+    private LIST_THRESHOLD = 15;
+
+    @property({ type: Boolean }) menuOpen = false;
     @property({ type: String }) activeDescription: string | undefined;
     @property({ type: String }) currentpage: string | undefined;
 
@@ -71,8 +77,38 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     }
 
     render() {
+
+        if (this.activeDescription) this.menuOpen = false;
+
+        return html`
+        ${this.renderBreadcrumb()}
+        <div class="mindmap-layout ${this.activeDescription ? 'has-description' : ''}">
+            ${this.renderMenu()}
+            <div class="canvas-container">
+                <canvas id="mindmap-canvas" style="width:100%;height:100% ;display:block;cursor:pointer;"></canvas>
+            </div>
+
+            <div class="node-description">
+                <div class="content">
+                    ${this.activeDescription ? unsafeHTML(this.activeDescription) : html`<p>Selecione um nó para ver detalhes.</p>`}
+                </div>
+            </div>
+            
+        </div>
+        `;
+    }
+
+    renderBreadcrumb() {//← 
         return html`
         <div class="breadcrumb">
+        
+            <label class="menu" style="display:${this.activeDescription? 'none' : ''}">
+                <input class="menu-btn" type="checkbox" .checked=${this.menuOpen} @click=${this._toggleMenu}/>					
+                <span class="menu-icon"></span>
+            </label>
+            <button class="back-btn" @click=${this._closeDescription} style="width:58px; height:38px;display:${this.activeDescription? '' : 'none'}">
+                <svg xmlns="http://www.w3.org/2000/svg" style="fill:var(--text-primary-color)" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M128 192L305.6 192C304.6 197.2 304 202.5 304 208L304 224L128 224C119.2 224 112 216.8 112 208C112 199.2 119.2 192 128 192zM352 208C352 190.3 366.3 176 384 176L408 176C474.3 176 528 229.7 528 296L528 344C528 396.5 494.3 441.1 447.3 457.4C447.8 454.3 448 451.2 448 448C448 428 438.8 410.1 424.4 398.3C429.3 389.3 432 378.9 432 368C432 352.9 426.7 339 418 328C426.8 317 432 303.1 432 288L432 248C432 234.7 421.3 224 408 224C394.7 224 384 234.7 384 248L384 288C384 296.8 376.8 304 368 304C359.2 304 352 296.8 352 288L352 208zM384 128L384 128C366 128 349.4 134 336 144L128 144C92.7 144 64 172.7 64 208C64 243.3 92.7 272 128 272L210 272C208.7 277.1 208 282.5 208 288C208 313.3 222.7 335.2 244 345.6C241.4 352.6 240 360.1 240 368C240 388 249.2 405.9 263.6 417.7C258.7 426.7 256 437.1 256 448C256 483.3 284.7 512 320 512L408 512C500.8 512 576 436.8 576 344L576 296C576 203.2 500.8 128 408 128L384 128zM320 464C311.2 464 304 456.8 304 448C304 439.2 311.2 432 320 432L384 432C392.8 432 400 439.2 400 448C400 456.8 392.8 464 384 464L320 464zM304 288C304 293.5 304.7 298.9 306 304L272 304C263.2 304 256 296.8 256 288C256 279.2 263.2 272 272 272L304 272L304 288zM328 352L368 352C376.8 352 384 359.2 384 368C384 376.8 376.8 384 368 384L304 384C295.2 384 288 376.8 288 368C288 359.2 295.2 352 304 352L328 352z"/></svg>
+            </button>
             ${(() => {
                 const { nodes, hasHidden } = this.visibleBreadcrumb;
 
@@ -101,23 +137,15 @@ export class WidgetMindMapL4100554 extends StateLitElement {
                 `;
             })()}
         </div>
-        <div class="mindmap-layout ${this.activeDescription ? 'has-description' : ''}">
-            
-            <div class="canvas-container">
-                <canvas id="mindmap-canvas" style="width:100%;height:100% ;display:block;cursor:pointer;"></canvas>
-            </div>
 
-            <div class="node-description">
-                <button class="back-btn" @click=${this._closeDescription}>
-                    ← Back
-                </button>
-                <div class="content">
-                    ${this.activeDescription ? unsafeHTML(this.activeDescription) : html`<p>Selecione um nó para ver detalhes.</p>`}
-                </div>
-            </div>
-            
-        </div>
         `;
+    }
+
+    renderMenu() {
+        return html`
+        <div class="side-menu ${this.menuOpen ? 'menu-open' : ''}">
+            ${this.pluginsMenu.map((item) =>  html`<div class="menu-item" @click=${() => this._openScenario(item)}>${item.label}</div>`)}
+        </div>`;
     }
 
     firstUpdated() {
@@ -241,6 +269,8 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     private _animatedPositions?: Record<string, { x: number, y: number, alpha: number }>;
 
     private _onCanvasClick = (e: MouseEvent) => {
+        this.fromMenu = false;
+        this.menuOpen = false;
         if (!this.mapState) return;
 
         const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
@@ -440,6 +470,14 @@ export class WidgetMindMapL4100554 extends StateLitElement {
             const centerNode = nodes.find(n => n.id === current)!;
             const relatedNodes = this.getRelatedNodes(centerNode, nodes);
 
+            this.isListMode = relatedNodes.length > this.LIST_THRESHOLD;
+            if (this.isListMode) {
+                this.zoom = 1;
+                canvas.addEventListener('wheel', this._onWheel, { passive: false });
+                this.drawListLayout(ctx, canvas, centerNode, relatedNodes);
+                return;
+            }
+
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
 
@@ -594,6 +632,89 @@ export class WidgetMindMapL4100554 extends StateLitElement {
                 'bold 15px sans-serif',
                 isCenterHovered,
                 true
+            );
+        });
+    }
+
+    private _onWheel = (e: WheelEvent) => {
+        if (!this.isListMode) return;
+
+        e.preventDefault();
+
+        this.offsetY -= e.deltaY * 0.6;
+
+        const canvas = this.renderRoot.querySelector('#mindmap-canvas') as HTMLCanvasElement;
+        const viewHeight = canvas.height;
+
+        const minOffset = viewHeight - this.contentHeight - 40;
+        const maxOffset = 40;
+
+        this.offsetY = Math.max(minOffset, Math.min(maxOffset, this.offsetY));
+
+        this.requestUpdate();
+    };
+
+    private drawListLayout(
+        ctx: CanvasRenderingContext2D,
+        canvas: HTMLCanvasElement,
+        centerNode: MindMapNode,
+        relatedNodes: MindMapNode[]
+    ) {
+
+        const gap = 80;
+        const centerX = canvas.width / 2;
+        const startY = 120 + this.offsetY;
+        const centerY = startY - gap;
+        const totalItems = relatedNodes.length + 1; // + centro
+
+        this._nodePositions = [];
+        this.contentHeight = totalItems * gap + 120;
+
+        const centerStyle = this.getNodeStyle(centerNode.type);
+
+
+        // ---------- VERTICAL SPINE LINE ----------
+        const firstY = centerY;
+        const lastY = startY + (relatedNodes.length - 1) * gap;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, firstY);
+        ctx.lineTo(centerX, lastY);
+        ctx.strokeStyle = '#999'; // pode usar uma cor do seu style depois
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // centro fixo no topo
+        this.drawLabel(
+            ctx,
+            centerNode,
+            centerNode.label,
+            centerX,
+            centerY,
+            centerStyle.fill,
+            centerStyle.text,
+            centerStyle.stroke,
+            'bold 15px sans-serif',
+            this._hoveredNodeId === centerNode.id,
+            true
+        );
+
+        relatedNodes.forEach((node, i) => {
+            const y = startY + i * gap;
+            const style = this.getNodeStyle(node.type);
+
+            this.drawLabel(
+                ctx,
+                node,
+                node.label,
+                centerX,
+                y,
+                style.fill,
+                style.text,
+                style.stroke,
+                'bold 13px sans-serif',
+                this._hoveredNodeId === node.id,
+                false
             );
         });
     }
@@ -772,14 +893,30 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
     }
 
+    private _toggleMenu = () => {
+        this.menuOpen = !this.menuOpen;
+    };
+
+    private fromMenu = false;
+    private _openScenario(item:{ label: string, html: string, file: string }) {
+        this.fromMenu = true;
+        import(item.file);
+        this.activeDescription = item.html;
+        this.menuOpen = false;
+    }
+
     private _closeDescription() {
 
+        if (this.fromMenu) {
+            this.fromMenu = false;
+            this.activeDescription = undefined;
+            return;
+        }
         const index = this.breadcrumb.length - 1;
         this.breadcrumb = this.breadcrumb.slice(0, index);
         setMindMapVariable(this.breadcrumb);
         this.activeDescription = undefined;
 
-        // O CSS cuidará do efeito de deslize de volta
     }
 
     // Utility for gradient color lighten
@@ -945,6 +1082,9 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     }
 
     private _popToBreadcrumb(index: number) {
+
+        this.fromMenu = false;
+
         const entry = this.breadcrumb[index];
         if (!entry) return;
 
@@ -964,6 +1104,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
     private async openFileAndNavigate(entry: MindMapNode) {
         this.mapState = await getMindMapByName(entry.meta.fileKey);
+        if (this.mapState) this.mapState.current = entry.id;
         this.configureMindMap();
     }
 
@@ -1006,6 +1147,17 @@ export class WidgetMindMapL4100554 extends StateLitElement {
             }
         );
     }
+
+
+    private pluginsMenu = [
+        {
+            label: 'Find in files',
+            html: `<plugin-project-find-files-100554></plugin-project-find-files-100554>`,
+            file: '/_100554_/l2/pluginProjectFindFiles.js'
+        }
+
+
+    ]
 
 
 }

@@ -74,10 +74,10 @@ export class PluginNewFileBlank extends StateLitElement {
     private getTemplate(): string {
 
         const group = this.groupName && this.groupName != 'other' ? ` groupName="${this.groupName}"` : '';
-        const folder = this.folder ? ` folder="${this.folder}"` : '';
         const enhancement = '_blank';
-        
-        return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${enhancement}"${group}${folder} />\n${this.template}\n`;;
+        const folder = this.folder ? `${this.folder}/` : '';
+        const name = `_${this.project}_/l2/${folder}${this.shortName}.ts`
+        return `/// <mls fileReference="${name}" enhancement="${enhancement}"${group}/>\n${this.template}\n`
     }
 
     private async handleAddFile() {
