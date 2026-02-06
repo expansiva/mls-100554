@@ -2,6 +2,14 @@
 
 export const allDefs: Record<string, IdefModule> = {};
 
+export async function getDefsByFile(file: mls.stor.IFileInfo): Promise<mls.defs.AsIs | undefined>{
+
+    await loadAllDefs();
+    const key = mls.stor.getKeyToFile({...file, extension:'.defs.ts'});
+    return allDefs[key] ? allDefs[key].defs : undefined;
+
+}
+
 export async function getMindMapByName(file: string): Promise<MindMapData | undefined> {
 
     try {
