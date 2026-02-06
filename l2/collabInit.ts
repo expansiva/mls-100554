@@ -2,6 +2,7 @@
 
 import { html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { setGetModels } from '/_100554_/l2/collabLibStor.js';
 
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
@@ -84,7 +85,7 @@ export class CollabInit extends LitElement {
         this.setTheme();
         this.setTokensCss();
         await this.loadProjectBase();
-
+        setGetModels();
         this.actualProject = await this.setProjectActual();
         this.setOrgActual(this.actualProject);
 
