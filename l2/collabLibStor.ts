@@ -4,19 +4,6 @@ import { convertFileNameToTag } from '/_102027_/l2/utils';
 import { createModel, createAllModels } from '/_100554_/l2/collabLibModel.js'
 import { getBaseTemplate, verifyNeedAddTripleslach } from '/_100554_/l2/libCommom.js';
 
-export function setGetModels() {
-
-    Object.keys(mls.stor.files).forEach((k) => {
-
-        const f = mls.stor.files[k];
-        if (!f) return;
-
-        // f.getModel = async () => _getModel(f);
-
-    });
-    
-}
-
 
 export async function createStorFile(req: IReqCreateStorFile, needCreateModel: boolean, needCompile: boolean = true, awaitCompile: boolean = false): Promise<mls.stor.IFileInfo> {
 
@@ -403,22 +390,6 @@ async function undoFileRenamed(storFile: mls.stor.IFileInfo) {
         await mls.stor.localStor.setContent(mls.stor.files[key], { contentType: 'string', content: null });
         delete mls.stor.files[key];
     }
-}
-
-async function _getModel(f: mls.stor.IFileInfo): Promise<mls.editor.IModelBase | null> {
-
-    const {project, shortName, level, extension, folder } = f;
-    const key = mls.editor.getKeyModel(project, shortName, folder, level);
-    let models = mls.editor.models[key];
-    const ext = mapExtUndo[extension];
-    if (!models || !models[ext]) {
-        await createModel(f, false, false);
-        models = mls.editor.models[key];    
-    }
-
-    if (!models || !models[ext]) return null
-    return models[ext] as mls.editor.IModelBase; 
-
 }
 
 //---------INTERFACE---------
