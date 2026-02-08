@@ -1,4 +1,4 @@
-/// <mls shortName="agentToBeConceptual2" project="100554" enhancement="_blank" folder="agents" />
+/// <mls fileReference="_100554_/l2/agents/agentToBeConceptual2" enhancement="_100554_enhancementAgent" /> 
 
  import { ICANTest, ICANIntegration, ICANSchema  } from '/_100554_/l2/tsTestAST.js';
  export const integrations: ICANIntegration[] = [];
