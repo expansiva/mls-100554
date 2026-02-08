@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/agents/agentDefs.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/agents/agentDefs" enhancement="_100554_enhancementAgent"/>
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
@@ -218,11 +218,12 @@ async function updateStorFile(params: { project: number, shortName: string, leve
     models.defs.model.setValue(params.content);
   }
   file.isLocalVersionOutdated = false;
+  file.status = 'changed';
   file.updatedAt = new Date().toISOString();
 }
 
 const system1 = `
-<!-- modelType: code -->
+<!-- modelType: code2 -->
 <!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) ou nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10-->
 
 You are a Senior Software Engineer at Collab.codes.
