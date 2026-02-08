@@ -1,11 +1,11 @@
-/// <mls shortName="agentToBeConceptual3" project="100554" enhancement="_100554_enhancementAgent" folder="agents" />
+/// <mls fileReference="_100554_/l2/agents/agentToBeConceptual3" enhancement="_100554_enhancementAgent"/>
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { outputPrompt, Output, ModuleToBe } from '/_100554_/l2/agents/agentToBeConceptual.js';
 
 export function createAgent(): IAgentAsync {
   return {
-    agentName: "agentToBeConceptual3",
+    agentName: "agentToBeConceptual3", 
     agentProject: 100554,
     agentFolder: "agents",
     agentDescription: "Apply suggestions",
@@ -109,9 +109,14 @@ async function processOutput4(moduleToBe: ModuleToBe): Promise<mls.msg.AgentInte
 
 }
 
+/**
+"t1, grok-code-fast-1, 17s, $0.0070, 8.7/10",
+"t2, gpt-5.2, 60s, $0.0800, 8.3/10, **json formatting issues**",
+"t3, gemini-2.5-pro, 68s, $0.0291, 7.6/10"
+ */
 const system3 = `
-<!-- modelType: codereasoning -->
-<!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) ou nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10, code2 (kimi 2.5) -->
+<!-- modelType: code -->
+<!-- modelTypeList: geminiChat ?/10 , code (grok) ?/10, deepseekchat ?/10, codeflash (gemini) ?/10, deepseekreasoner ?/10, mini (4.1) ou nano (openai) ?/10, codeinstruct (4.1) ?/10, codereasoning(gpt5) ?/10, code2 (kimi 2.5) ?/10 -->
 
 You are a senior BUSINESS Analyst with 20+ years of experience in system design, requirements analysis, and business process optimization.
 
