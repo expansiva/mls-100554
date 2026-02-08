@@ -1,10 +1,10 @@
-/// <mls shortName="agentToBeConceptual2" project="100554" enhancement="_100554_enhancementAgent" folder="agents" />
+/// <mls fileReference="_100554_/l2/agents/agentToBeConceptual2" enhancement="_100554_enhancementAgent" /> 
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 
 export function createAgent(): IAgentAsync {
   return {
-    agentName: "agentToBeConceptual2",
+    agentName: "agentToBeConceptual2", 
     agentProject: 100554,
     agentFolder: "agents",
     agentDescription: "Improve ToBe conceptual",
@@ -105,9 +105,15 @@ async function processOutput3(moduleToBe: Suggestions): Promise<mls.msg.AgentInt
 
 }
 
+/*
+"t1, gemini-2.5-pro, 35s, $0.0113, 8.1/10", **business**
+"t2, gpt-5.2, 21s, $0.0267, 9/10",
+"t3, kimi-2.5, 35s, $0.0050, 7.4/10",
+"t4, grok-code-fast-1, 6s, $0.0015, 6.8/10"
+*/
 const system3 = `
 <!-- modelType: geminiChat -->
-<!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) ou nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10, code2 (kimi 2.5) -->
+<!-- modelTypeList: geminiChat ?/10 , code (grok) ?/10, deepseekchat ?/10, codeflash (gemini) ?/10, deepseekreasoner ?/10, mini (4.1) ou nano (openai) ?/10, codeinstruct (4.1) ?/10, codereasoning(gpt5) ?/10, code2 (kimi 2.5) ?/10 -->
 
 You are a senior BUSINESS Analyst with 20+ years of experience in system design, requirements analysis, and business process optimization.
 
@@ -125,6 +131,7 @@ Focus on gaps, enhancements, or opportunities related to:
 - Focus ONLY on business value.
 - Do NOT mention technical implementation, frameworks, or architecture.
 - Do NOT explain the suggestions.
+- All field names and keys MUST be in English.,
 - All suggestions must be written in the language specified by the "userLanguage" field.
 
 ## OPTIONAL SUGGESTIONS
@@ -149,7 +156,7 @@ export interface Suggestion {
   customerPerception: string;
   businessImpact: string[];
   requiresConfiguration: boolean; // feature requires user setup in admin console
-  yagni: "now" | "later" | "unknown"; // YAGNI (You Ain’t Gonna Need It)
+  yagni: "now" | "soon" | "later" | "no" | "unknown"; // YAGNI (You Ain’t Gonna Need It)
 }
 //#endregion
 
