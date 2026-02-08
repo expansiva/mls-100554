@@ -1,13 +1,13 @@
-/// <mls fileReference="_100554_/l2/agents/agentToBeConceptual2" enhancement="_100554_enhancementAgent" /> 
+/// <mls fileReference="_100554_/l2/agents/agentUserJourney" enhancement="_100554_enhancementAgent"/>
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 
 export function createAgent(): IAgentAsync {
   return {
-    agentName: "agentToBeConceptual2", 
+    agentName: "agentUserJourney", 
     agentProject: 100554,
     agentFolder: "agents",
-    agentDescription: "Improve ToBe conceptual",
+    agentDescription: "Generate User Journeys",
     visibility: "private",
     beforePromptImplicit,
     afterPromptStep
@@ -29,7 +29,7 @@ async function beforePromptImplicit(
       agentName: agent.agentName,
       inputAI: [{
         type: "system",
-        content: system3
+        content: system1
       }, {
         type: "human",
         content: userPrompt
@@ -53,13 +53,13 @@ async function afterPromptStep(
 ): Promise<mls.msg.AgentIntent[]> {
   if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
 
-  const payload = (step.interaction?.payload?.[0]) as Output3 || undefined;
+  const payload = (step.interaction?.payload?.[0]) as Output || undefined;
   if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
   let status: mls.msg.AIStepStatus = 'completed';
   let intents: mls.msg.AgentIntent[] = [];
   try {
     const output = payload.result;
-    intents = await processOutput3(output as Suggestions);
+    intents = await processOutput(output as UserJourneyMap);
   } catch (e) {
     console.error(e);
     status = 'failed';
@@ -80,9 +80,9 @@ async function afterPromptStep(
 
 }
 
-async function processOutput3(moduleToBe: Suggestions): Promise<mls.msg.AgentIntent[]> {
+async function processOutput(moduleToBe: UserJourneyMap): Promise<mls.msg.AgentIntent[]> {
 
-  console.log("=== Suggestions")
+  console.log("=== User journeys")
   console.log(JSON.stringify(moduleToBe, null, 2));
 
   const inTest = true; // todo: define
@@ -106,36 +106,20 @@ async function processOutput3(moduleToBe: Suggestions): Promise<mls.msg.AgentInt
 }
 
 /*
-"t1, gemini-2.5-pro, 35s, $0.0113, 8.1/10", **business**
-"t2, gpt-5.2, 21s, $0.0267, 9/10",
-"t3, kimi-2.5, 35s, $0.0050, 7.4/10",
-"t4, grok-code-fast-1, 6s, $0.0015, 6.8/10"
+"t1, grok-code-fast-1, 6s, $0.0013, 6.2/10",
+"t2, gpt-5.2, 42s, $0.0377, 8.9/10",
+"t3, gemini-2.5-pro, 35s, $0.0094, 7.4/10"
 */
-const system3 = `
-<!-- modelType: geminiChat -->
+const system1 = `
+<!-- modelType: codereasoning -->
 <!-- modelTypeList: geminiChat ?/10 , code (grok) ?/10, deepseekchat ?/10, codeflash (gemini) ?/10, deepseekreasoner ?/10, mini (4.1) ou nano (openai) ?/10, codeinstruct (4.1) ?/10, codereasoning(gpt5) ?/10, code2 (kimi 2.5) ?/10 -->
 
 You are a senior BUSINESS Analyst with 20+ years of experience in system design, requirements analysis, and business process optimization.
 
-Your task is to review a generated TO-BE conceptual model and identify between 1 and 20 business improvements.
+Your task is to describe all user and admin journeys based on the user's initial prompt.
 
-Focus on gaps, enhancements, or opportunities related to:
-- Business capabilities
-- Policies and rules
-- Customer experience
-- Revenue, retention, or operational efficiency
-
-## CRITICAL INSTRUCTIONS
-- Each suggestion MUST be a short, business-focused command (imperative form).
-- Keep each suggestion under 250 characters.
-- Focus ONLY on business value.
-- Do NOT mention technical implementation, frameworks, or architecture.
-- Do NOT explain the suggestions.
-- All field names and keys MUST be in English.,
-- All suggestions must be written in the language specified by the "userLanguage" field.
-
-## OPTIONAL SUGGESTIONS
-- Some suggestions may represent OPTIONAL or CONFIGURABLE capabilities that can be enabled or disabled by the client via an admin interface.
+Limit the journeys to interactions that are visible or meaningful at the website or admin UI level.
+Do NOT include platform infrastructure or internal technical operations.
 
 ## Output format
 You must return the object strictly as JSON
@@ -143,20 +127,19 @@ You must return the object strictly as JSON
 `
 
 //#region OutputSection
-export type Output3 =
+export type Output =
   {
     type: "flexible";
-    result: Suggestions;
+    result: UserJourneyMap;
   };
-export interface Suggestions {
-  suggestions: Suggestion[];
+export interface UserJourneyMap {
+  journeys: Journey[];
+  considerations: string[]; // optional
 }
-export interface Suggestion {
-  suggestion: string;
-  customerPerception: string;
-  businessImpact: string[];
-  requiresConfiguration: boolean; // feature requires user setup in admin console
-  yagni: "now" | "soon" | "later" | "no" | "unknown"; // YAGNI (You Ain’t Gonna Need It)
+export interface Journey {
+  persona: string;
+  goal: string;
+  journey: string[];
 }
 //#endregion
 

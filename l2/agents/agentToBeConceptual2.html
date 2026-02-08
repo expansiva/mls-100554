@@ -1,586 +1,71 @@
-<plugin-agent-playground-100554  style="display:none"> <promptcustom type="memory" group="A"> ## user mission
+<plugin-agent-playground-100554  style="display:none"> <promptcustom type="memory" group="A"> ## tobe conceptual
 ```json
 {
+  "meta": {
     "userLanguage": "pt",
-    "title": "Clarification 1/2",
-    "userPrompt": "criar site petShop , linguagem br, para executar no brasil , não permitir adoção",
-    "questions": {
-      "roles": {
-        "type": "open",
-        "question": "Quais são os principais papéis ou tipos de usuários que interagirão com este site? Por exemplo, clientes que compram produtos, administradores do pet shop, etc.",
-        "answer": "Eu imagino que os principais usuários serão os clientes que querem comprar produtos para seus pets e os administradores do pet shop para gerenciar o conteúdo e os produtos."
-      },
-      "publicTarget": {
-        "type": "open",
-        "question": "Qual é o público-alvo principal deste site? São donos de pets em geral, ou um nicho específico (ex: donos de cães, donos de gatos, etc.)?",
-        "answer": "O público-alvo são donos de pets em geral."
-      },
-      "tone": {
-        "type": "open",
-        "question": "Qual tom você gostaria que o site tivesse? Por exemplo, amigável e acolhedor, profissional e informativo, divertido e descontraído?",
-        "answer": "Gostaria de um tom amigável, acolhedor e informativo, que transmita confiança e carinho pelos animais."
-      },
-      "languages": {
-        "type": "open",
-        "question": "Você mencionou 'linguagem br'. Confirma que o site deve ser apenas em Português do Brasil?",
-        "answer": "Sim, confirmo que o site deve ser exclusivamente em Português do Brasil."
-      },
-      "moduleName": {
-        "type": "open",
-        "question": "Sugiro o nome 'petShop' para este novo módulo. Você gostaria de outro nome ou este está bom?",
-        "answer": "Sim, 'petShop' parece um bom nome para o módulo."
-      },
-      "openQuestion1": {
-        "type": "open",
-        "question": "Tem preferências de estilo?",
-        "answer": "quero um site no estilo matriz, cores verde, animações, etc"
-      },
-      "openQuestion2": {
-        "type": "open",
-        "question": "quais são as funcionalidades adicionais que você espera que este site ofereça?",
-        "answer": "catálogo de produtos bem organizado com busca e filtros, informações sobre a loja (endereço, contato), talvez uma seção de blog com dicas para pets e um formulário de contato, alem do agendamento, produtos, etc."
-      },
-      "openQuestion3": {
-        "type": "open",
-        "question": "Há alguma preferência específica de design, cores, ou elementos de marca que você já tenha em mente para este site?",
-        "answer": "Ainda não tenho detalhes de design, mas gostaria de algo que remeta a cuidado e alegria, talvez com cores claras e imagens de pets felizes. A marca ainda está em desenvolvimento."
-      }
-    },
-    "legends": [
-      "Esta é a primeira clarificação",
-      "antes de criar algo"
-    ]
-  }
-
-```
-
-
-## Module ToBe 
-```json
-{
+    "userPrompt": "criar site petShop , linguagem br, para executar no brasil\nnão gerar agendamento serviços, e não permitir adoção\ncriar site modelo matriz"
+  },
   "ontology": {
     "entities": {
-      "Product": {
-        "description": "Produto disponível para venda no pet shop",
+      "User": {
+        "description": "Usuário do site (cliente ou membro da equipe do pet shop) com permissões para navegar ou administrar conteúdo.",
         "fields": {
-          "id": {
-            "type": "string",
-            "required": true
+          "userId": {
+            "type": "string"
           },
-          "name": {
+          "role": {
             "type": "string",
-            "required": true
-          },
-          "description": {
-            "type": "string",
-            "required": true
-          },
-          "price": {
-            "type": "number",
-            "required": true,
-            "constraints": "Valor em BRL, maior que zero"
-          },
-          "category": {
-            "type": "string",
-            "required": true,
             "values": [
-              "alimentacao",
-              "higiene",
-              "acessorios",
-              "brinquedos",
-              "saude",
-              "camas-e-casas",
-              "transporte",
-              "vestuario",
-              "outros"
+              "customer",
+              "staff"
             ]
           },
-          "petType": {
-            "type": "string[]",
-            "required": true,
-            "values": [
-              "cachorro",
-              "gato",
-              "passaro",
-              "peixe",
-              "roedor",
-              "reptil",
-              "outros"
-            ]
-          },
-          "images": {
-            "type": "string[]",
-            "required": true,
-            "constraints": "URLs das imagens do produto"
-          },
-          "stock": {
-            "type": "number",
-            "required": true,
-            "constraints": "Quantidade em estoque, mínimo 0"
-          },
-          "active": {
-            "type": "boolean",
-            "required": true
-          },
-          "createdAt": {
-            "type": "datetime",
-            "required": true
-          },
-          "updatedAt": {
-            "type": "datetime",
-            "required": true
-          }
-        },
-        "rules": [
-          "rule-product-stock",
-          "rule-price-brl"
-        ]
-      },
-      "Category": {
-        "description": "Categoria de produtos do pet shop",
-        "fields": {
-          "id": {
-            "type": "string",
-            "required": true
-          },
           "name": {
             "type": "string",
-            "required": true
-          },
-          "slug": {
-            "type": "string",
-            "required": true
-          },
-          "description": {
-            "type": "string",
             "required": false
-          },
-          "icon": {
-            "type": "string",
-            "required": false
-          },
-          "active": {
-            "type": "boolean",
-            "required": true
-          }
-        }
-      },
-      "Customer": {
-        "description": "Cliente do pet shop que compra produtos",
-        "fields": {
-          "id": {
-            "type": "string",
-            "required": true
-          },
-          "name": {
-            "type": "string",
-            "required": true
           },
           "email": {
             "type": "string",
-            "required": true,
-            "constraints": "Email válido e único"
-          },
-          "phone": {
-            "type": "string",
-            "required": true,
-            "constraints": "Telefone brasileiro válido"
-          },
-          "cpf": {
-            "type": "string",
-            "required": false,
-            "constraints": "CPF válido"
-          },
-          "addresses": {
-            "type": "Address[]",
             "required": false
-          },
-          "createdAt": {
-            "type": "datetime",
-            "required": true
           }
         },
         "rules": [
-          "rule-lgpd-compliance"
-        ]
-      },
-      "Address": {
-        "description": "Endereço de entrega do cliente",
-        "fields": {
-          "id": {
-            "type": "string",
-            "required": true
-          },
-          "street": {
-            "type": "string",
-            "required": true
-          },
-          "number": {
-            "type": "string",
-            "required": true
-          },
-          "complement": {
-            "type": "string",
-            "required": false
-          },
-          "neighborhood": {
-            "type": "string",
-            "required": true
-          },
-          "city": {
-            "type": "string",
-            "required": true
-          },
-          "state": {
-            "type": "string",
-            "required": true,
-            "values": [
-              "AC",
-              "AL",
-              "AP",
-              "AM",
-              "BA",
-              "CE",
-              "DF",
-              "ES",
-              "GO",
-              "MA",
-              "MT",
-              "MS",
-              "MG",
-              "PA",
-              "PB",
-              "PR",
-              "PE",
-              "PI",
-              "RJ",
-              "RN",
-              "RS",
-              "RO",
-              "RR",
-              "SC",
-              "SP",
-              "SE",
-              "TO"
-            ]
-          },
-          "zipCode": {
-            "type": "string",
-            "required": true,
-            "constraints": "CEP brasileiro válido (8 dígitos)"
-          },
-          "isDefault": {
-            "type": "boolean",
-            "required": true
-          }
-        }
-      },
-      "Order": {
-        "description": "Pedido de compra realizado pelo cliente",
-        "fields": {
-          "id": {
-            "type": "string",
-            "required": true
-          },
-          "customerId": {
-            "type": "string",
-            "required": true
-          },
-          "items": {
-            "type": "OrderItem[]",
-            "required": true
-          },
-          "status": {
-            "type": "string",
-            "required": true,
-            "values": [
-              "pendente",
-              "confirmado",
-              "em-preparacao",
-              "enviado",
-              "entregue",
-              "cancelado"
-            ]
-          },
-          "shippingAddress": {
-            "type": "Address",
-            "required": true
-          },
-          "subtotal": {
-            "type": "number",
-            "required": true
-          },
-          "shippingCost": {
-            "type": "number",
-            "required": true
-          },
-          "total": {
-            "type": "number",
-            "required": true
-          },
-          "paymentMethod": {
-            "type": "string",
-            "required": true,
-            "values": [
-              "pix",
-              "cartao-credito",
-              "cartao-debito",
-              "boleto"
-            ]
-          },
-          "paymentStatus": {
-            "type": "string",
-            "required": true,
-            "values": [
-              "pendente",
-              "aprovado",
-              "recusado",
-              "estornado"
-            ]
-          },
-          "createdAt": {
-            "type": "datetime",
-            "required": true
-          },
-          "updatedAt": {
-            "type": "datetime",
-            "required": true
-          }
-        },
-        "rules": [
-          "rule-order-validation",
-          "rule-price-brl"
-        ]
-      },
-      "OrderItem": {
-        "description": "Item individual dentro de um pedido",
-        "fields": {
-          "productId": {
-            "type": "string",
-            "required": true
-          },
-          "productName": {
-            "type": "string",
-            "required": true
-          },
-          "quantity": {
-            "type": "number",
-            "required": true,
-            "constraints": "Mínimo 1"
-          },
-          "unitPrice": {
-            "type": "number",
-            "required": true
-          },
-          "totalPrice": {
-            "type": "number",
-            "required": true
-          }
-        }
-      },
-      "Appointment": {
-        "description": "Agendamento de serviços do pet shop",
-        "fields": {
-          "id": {
-            "type": "string",
-            "required": true
-          },
-          "customerId": {
-            "type": "string",
-            "required": true
-          },
-          "petName": {
-            "type": "string",
-            "required": true
-          },
-          "petType": {
-            "type": "string",
-            "required": true,
-            "values": [
-              "cachorro",
-              "gato",
-              "passaro",
-              "peixe",
-              "roedor",
-              "reptil",
-              "outros"
-            ]
-          },
-          "service": {
-            "type": "string",
-            "required": true,
-            "values": [
-              "banho",
-              "tosa",
-              "banho-e-tosa",
-              "consulta-veterinaria",
-              "vacinacao",
-              "hospedagem"
-            ]
-          },
-          "date": {
-            "type": "date",
-            "required": true
-          },
-          "time": {
-            "type": "time",
-            "required": true
-          },
-          "status": {
-            "type": "string",
-            "required": true,
-            "values": [
-              "agendado",
-              "confirmado",
-              "em-andamento",
-              "concluido",
-              "cancelado"
-            ]
-          },
-          "notes": {
-            "type": "string",
-            "required": false
-          },
-          "createdAt": {
-            "type": "datetime",
-            "required": true
-          }
-        },
-        "rules": [
-          "rule-appointment-scheduling"
-        ]
-      },
-      "BlogPost": {
-        "description": "Artigo do blog com dicas para pets",
-        "fields": {
-          "id": {
-            "type": "string",
-            "required": true
-          },
-          "title": {
-            "type": "string",
-            "required": true
-          },
-          "slug": {
-            "type": "string",
-            "required": true
-          },
-          "content": {
-            "type": "string",
-            "required": true
-          },
-          "excerpt": {
-            "type": "string",
-            "required": true
-          },
-          "coverImage": {
-            "type": "string",
-            "required": true
-          },
-          "author": {
-            "type": "string",
-            "required": true
-          },
-          "tags": {
-            "type": "string[]",
-            "required": false
-          },
-          "petTypes": {
-            "type": "string[]",
-            "required": false,
-            "values": [
-              "cachorro",
-              "gato",
-              "passaro",
-              "peixe",
-              "roedor",
-              "reptil",
-              "outros",
-              "todos"
-            ]
-          },
-          "published": {
-            "type": "boolean",
-            "required": true
-          },
-          "publishedAt": {
-            "type": "datetime",
-            "required": false
-          },
-          "createdAt": {
-            "type": "datetime",
-            "required": true
-          },
-          "updatedAt": {
-            "type": "datetime",
-            "required": true
-          }
-        }
-      },
-      "ContactMessage": {
-        "description": "Mensagem enviada pelo formulário de contato",
-        "fields": {
-          "id": {
-            "type": "string",
-            "required": true
-          },
-          "name": {
-            "type": "string",
-            "required": true
-          },
-          "email": {
-            "type": "string",
-            "required": true
-          },
-          "phone": {
-            "type": "string",
-            "required": false
-          },
-          "subject": {
-            "type": "string",
-            "required": true
-          },
-          "message": {
-            "type": "string",
-            "required": true
-          },
-          "status": {
-            "type": "string",
-            "required": true,
-            "values": [
-              "novo",
-              "lido",
-              "respondido",
-              "arquivado"
-            ]
-          },
-          "createdAt": {
-            "type": "datetime",
-            "required": true
-          }
-        },
-        "rules": [
-          "rule-lgpd-compliance"
+          "rule_lang_ptbr_only",
+          "rule_roles_customer_staff"
         ]
       },
       "StoreInfo": {
-        "description": "Informações da loja física e contato",
+        "description": "Informações institucionais e de operação da loja (unidade).",
         "fields": {
-          "id": {
-            "type": "string",
-            "required": true
+          "storeId": {
+            "type": "string"
           },
           "name": {
-            "type": "string",
-            "required": true
+            "type": "string"
           },
           "address": {
-            "type": "Address",
-            "required": true
+            "type": "string"
+          },
+          "city": {
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "type": "string",
+            "required": false
+          },
+          "country": {
+            "type": "string",
+            "values": [
+              "BR"
+            ]
+          },
+          "businessHours": {
+            "type": "string"
           },
           "phone": {
             "type": "string",
-            "required": true
+            "required": false
           },
           "whatsapp": {
             "type": "string",
@@ -588,549 +73,465 @@
           },
           "email": {
             "type": "string",
-            "required": true
-          },
-          "workingHours": {
-            "type": "WorkingHours[]",
-            "required": true
-          },
-          "socialMedia": {
-            "type": "SocialMedia",
             "required": false
           },
-          "aboutUs": {
-            "type": "string",
-            "required": true
-          },
-          "missionVision": {
+          "mapLink": {
             "type": "string",
             "required": false
           }
-        }
+        },
+        "rules": [
+          "rule_brazil_target"
+        ]
       },
-      "WorkingHours": {
-        "description": "Horário de funcionamento por dia da semana",
+      "Product": {
+        "description": "Produto exibido no site com detalhes e categorização.",
         "fields": {
-          "dayOfWeek": {
-            "type": "string",
-            "required": true,
-            "values": [
-              "segunda",
-              "terca",
-              "quarta",
-              "quinta",
-              "sexta",
-              "sabado",
-              "domingo"
-            ]
-          },
-          "openTime": {
-            "type": "time",
-            "required": false
-          },
-          "closeTime": {
-            "type": "time",
-            "required": false
-          },
-          "closed": {
-            "type": "boolean",
-            "required": true
-          }
-        }
-      },
-      "SocialMedia": {
-        "description": "Links de redes sociais da loja",
-        "fields": {
-          "instagram": {
-            "type": "string",
-            "required": false
-          },
-          "facebook": {
-            "type": "string",
-            "required": false
-          },
-          "youtube": {
-            "type": "string",
-            "required": false
-          },
-          "tiktok": {
-            "type": "string",
-            "required": false
-          }
-        }
-      },
-      "Admin": {
-        "description": "Administrador do sistema pet shop",
-        "fields": {
-          "id": {
-            "type": "string",
-            "required": true
+          "productId": {
+            "type": "string"
           },
           "name": {
-            "type": "string",
-            "required": true
+            "type": "string"
           },
-          "email": {
+          "description": {
             "type": "string",
-            "required": true
+            "required": false
           },
-          "role": {
+          "categoryId": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "required": false,
+            "constraints": "Opcional, caso o site exiba preços."
+          },
+          "currency": {
             "type": "string",
-            "required": true,
+            "required": false,
             "values": [
-              "super-admin",
-              "admin",
-              "editor"
+              "BRL"
             ]
           },
-          "active": {
-            "type": "boolean",
-            "required": true
+          "images": {
+            "type": "string[]",
+            "required": false
           },
-          "createdAt": {
-            "type": "datetime",
-            "required": true
+          "isActive": {
+            "type": "boolean"
+          },
+          "sku": {
+            "type": "string",
+            "required": false
+          }
+        },
+        "rules": [
+          "rule_no_service_booking",
+          "rule_no_adoption"
+        ]
+      },
+      "ProductCategory": {
+        "description": "Categoria de produtos para navegação e organização do catálogo.",
+        "fields": {
+          "categoryId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "required": false
+          },
+          "parentCategoryId": {
+            "type": "string",
+            "required": false
+          },
+          "isActive": {
+            "type": "boolean"
           }
         }
+      },
+      "ContentPage": {
+        "description": "Página de conteúdo gerenciável (ex: sobre, políticas, informações).",
+        "fields": {
+          "pageId": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "isPublished": {
+            "type": "boolean"
+          }
+        },
+        "rules": [
+          "rule_tone_friendly_informative"
+        ]
+      },
+      "ContactMessage": {
+        "description": "Mensagem enviada pelo formulário de contato.",
+        "fields": {
+          "messageId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "required": false
+          },
+          "subject": {
+            "type": "string",
+            "required": false
+          },
+          "message": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "constraints": "ISO-8601"
+          }
+        }
+      },
+      "BlogPost": {
+        "description": "Post do blog com dicas e notícias sobre pets.",
+        "fields": {
+          "postId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "excerpt": {
+            "type": "string",
+            "required": false
+          },
+          "body": {
+            "type": "string"
+          },
+          "coverImage": {
+            "type": "string",
+            "required": false
+          },
+          "tags": {
+            "type": "string[]",
+            "required": false
+          },
+          "publishedAt": {
+            "type": "string",
+            "required": false,
+            "constraints": "ISO-8601; ausente quando rascunho."
+          },
+          "isPublished": {
+            "type": "boolean"
+          }
+        },
+        "rules": [
+          "rule_tone_friendly_informative"
+        ]
+      },
+      "Branding": {
+        "description": "Configuração de identidade visual reutilizável para o site modelo matriz.",
+        "fields": {
+          "brandingId": {
+            "type": "string"
+          },
+          "logoUrl": {
+            "type": "string"
+          },
+          "primaryColors": {
+            "type": "string[]",
+            "constraints": "Deve incluir tons de verde e azul."
+          },
+          "accentColors": {
+            "type": "string[]",
+            "constraints": "Deve incluir detalhes em amarelo."
+          },
+          "styleNotes": {
+            "type": "string",
+            "required": false
+          }
+        },
+        "rules": [
+          "rule_branding_colors",
+          "rule_design_clean_modern_responsive",
+          "rule_template_matrix_replicable"
+        ]
       }
     }
   },
   "rules": {
-    "rule-no-adoption": {
+    "rule_lang_ptbr_only": {
       "kind": "policy",
-      "description": "O sistema NÃO deve permitir funcionalidades de adoção de animais. Nenhuma entidade, capability ou interface deve oferecer ou mencionar adoção.",
+      "description": "Todo o site deve estar disponível apenas em português (Brasil).",
       "scope": [
         "global"
       ],
       "acceptanceCriteria": [
-        "Nenhuma menção a adoção em qualquer parte do sistema",
-        "Nenhum formulário ou fluxo de adoção",
-        "Nenhuma entidade relacionada a animais para adoção"
+        "Não oferecer seletor de idioma.",
+        "Todo texto de UI e conteúdo padrão deve estar em pt-BR."
       ]
     },
-    "rule-brazil-only": {
+    "rule_brazil_target": {
+      "kind": "domain",
+      "description": "O site é destinado a operação e público no Brasil.",
+      "scope": [
+        "global",
+        "StoreInfo"
+      ],
+      "acceptanceCriteria": [
+        "Endereço e informações devem suportar contexto brasileiro (ex: BR/BRL quando aplicável)."
+      ]
+    },
+    "rule_roles_customer_staff": {
       "kind": "platform",
-      "description": "O sistema é exclusivo para operação no Brasil, com idioma Português do Brasil e conformidade com regulamentações brasileiras.",
+      "description": "Existem dois tipos principais de usuários: clientes e equipe do pet shop, sendo a equipe responsável por gerenciar conteúdo.",
       "scope": [
-        "global"
+        "User",
+        "cap_manage_content"
       ],
       "acceptanceCriteria": [
-        "Toda interface em Português do Brasil",
-        "Formatação de moeda em BRL (R$)",
-        "Formatação de datas no padrão brasileiro (DD/MM/AAAA)",
-        "CEP, CPF, telefone em formatos brasileiros",
-        "Conformidade com LGPD"
+        "Usuários do tipo customer acessam navegação pública.",
+        "Usuários do tipo staff podem criar/editar/publicar conteúdo e catálogo conforme permissões."
       ]
     },
-    "rule-lgpd-compliance": {
+    "rule_no_service_booking": {
       "kind": "policy",
-      "description": "Todos os dados pessoais devem ser tratados em conformidade com a Lei Geral de Proteção de Dados (LGPD) do Brasil.",
+      "description": "O site não deve oferecer agendamento de serviços.",
       "scope": [
-        "Customer",
-        "ContactMessage"
-      ],
-      "acceptanceCriteria": [
-        "Consentimento explícito para coleta de dados",
-        "Possibilidade de exclusão de dados pessoais",
-        "Transparência sobre uso dos dados",
-        "Armazenamento seguro de dados sensíveis"
-      ]
-    },
-    "rule-price-brl": {
-      "kind": "domain",
-      "description": "Todos os preços devem ser em Reais (BRL) e seguir formatação brasileira.",
-      "scope": [
+        "global",
         "Product",
-        "Order"
+        "cap_catalog_browse"
       ],
       "acceptanceCriteria": [
-        "Valores sempre em BRL",
-        "Formatação com R$ e vírgula como separador decimal",
-        "Duas casas decimais obrigatórias"
+        "Não existir fluxo, páginas ou CTAs de agendamento.",
+        "Não coletar dados com finalidade de marcar horário/serviço."
       ]
     },
-    "rule-product-stock": {
-      "kind": "domain",
-      "description": "Produtos só podem ser vendidos se houver estoque disponível.",
-      "scope": [
-        "Product",
-        "Order"
-      ],
-      "acceptanceCriteria": [
-        "Verificar estoque antes de confirmar pedido",
-        "Atualizar estoque após venda",
-        "Não permitir quantidade negativa"
-      ]
-    },
-    "rule-order-validation": {
-      "kind": "domain",
-      "description": "Pedidos devem ser validados antes de confirmação.",
-      "scope": [
-        "Order"
-      ],
-      "acceptanceCriteria": [
-        "Validar dados do cliente",
-        "Validar endereço de entrega",
-        "Validar disponibilidade de produtos",
-        "Calcular frete corretamente"
-      ]
-    },
-    "rule-appointment-scheduling": {
-      "kind": "domain",
-      "description": "Agendamentos devem respeitar horários de funcionamento e disponibilidade.",
-      "scope": [
-        "Appointment"
-      ],
-      "acceptanceCriteria": [
-        "Verificar horário de funcionamento",
-        "Evitar conflitos de horário",
-        "Permitir cancelamento com antecedência",
-        "Enviar confirmação ao cliente"
-      ]
-    },
-    "rule-visual-style-matrix": {
-      "kind": "platform",
-      "description": "O visual do site deve seguir estilo inspirado em Matrix com cores verdes, animações e efeitos visuais modernos, mantendo tom amigável e acolhedor.",
+    "rule_no_adoption": {
+      "kind": "policy",
+      "description": "O site não deve permitir adoção de animais.",
       "scope": [
         "global"
       ],
       "acceptanceCriteria": [
-        "Paleta de cores predominantemente verde",
-        "Animações suaves e modernas",
-        "Efeitos visuais que remetem ao estilo Matrix",
-        "Manter legibilidade e acessibilidade",
-        "Imagens de pets felizes",
-        "Transmitir cuidado e alegria"
+        "Não existir seção/funcionalidade de adoção.",
+        "Não existir formulários ou CTAs relacionados a adoção."
+      ]
+    },
+    "rule_template_matrix_replicable": {
+      "kind": "platform",
+      "description": "O site deve ser um modelo matriz replicável/adaptável para futuras unidades/franquias mantendo identidade visual e estrutura padrão.",
+      "scope": [
+        "global",
+        "Branding",
+        "StoreInfo",
+        "cap_template_configuration"
+      ],
+      "acceptanceCriteria": [
+        "Estrutura de páginas e componentes deve ser reutilizável.",
+        "Dados de unidade (endereço/horários/contato) devem ser configuráveis sem alterar a estrutura.",
+        "Branding deve ser parametrizável (logo/cores)."
+      ]
+    },
+    "rule_tone_friendly_informative": {
+      "kind": "policy",
+      "description": "O tom de comunicação deve ser amigável, acolhedor e informativo, transmitindo confiança e carinho pelos animais.",
+      "scope": [
+        "ContentPage",
+        "BlogPost",
+        "global"
+      ],
+      "acceptanceCriteria": [
+        "Textos devem evitar linguagem agressiva ou excessivamente técnica sem explicação.",
+        "Conteúdo deve reforçar cuidado e bem-estar animal."
+      ]
+    },
+    "rule_branding_colors": {
+      "kind": "policy",
+      "description": "A identidade visual deve usar paleta definida: tons de verde e azul, com detalhes em amarelo, e incluir o logo fornecido.",
+      "scope": [
+        "Branding",
+        "global"
+      ],
+      "acceptanceCriteria": [
+        "Aplicar cores principais verde/azul e acentos amarelos nos componentes.",
+        "Exibir logo em áreas previstas (ex: cabeçalho/rodapé)."
+      ]
+    },
+    "rule_design_clean_modern_responsive": {
+      "kind": "platform",
+      "description": "O design deve ser limpo, moderno e responsivo.",
+      "scope": [
+        "global"
+      ],
+      "acceptanceCriteria": [
+        "Layout deve adaptar para mobile/tablet/desktop.",
+        "Componentes devem manter legibilidade e usabilidade em telas pequenas."
+      ]
+    },
+    "rule_essential_features": {
+      "kind": "domain",
+      "description": "Funcionalidades essenciais: catálogo de produtos (categorias e detalhes), informações da loja (endereço e horário), seção de contato e blog opcional com dicas/notícias.",
+      "scope": [
+        "global"
+      ],
+      "acceptanceCriteria": [
+        "Disponibilizar navegação por categorias e página de detalhe de produto.",
+        "Disponibilizar página/área com endereço e horário.",
+        "Disponibilizar formulário/canais de contato.",
+        "Incluir blog como funcionalidade prevista (pode ser habilitada)."
       ]
     }
   },
   "capabilities": {
-    "catalog-management": {
-      "description": "Gerenciamento completo do catálogo de produtos com busca, filtros e organização por categorias",
+    "cap_catalog_browse": {
+      "description": "Navegação pública do catálogo de produtos com categorias e páginas de detalhe.",
       "usesRules": [
-        "rule-price-brl",
-        "rule-product-stock",
-        "rule-brazil-only"
+        "rule_lang_ptbr_only",
+        "rule_no_service_booking",
+        "rule_no_adoption",
+        "rule_essential_features",
+        "rule_design_clean_modern_responsive"
       ],
       "actions": [
         {
-          "actionId": "list-products",
-          "description": "Listar produtos com paginação, filtros e busca"
+          "actionId": "listCategories",
+          "description": "Listar categorias ativas."
         },
         {
-          "actionId": "search-products",
-          "description": "Buscar produtos por nome, descrição ou categoria"
+          "actionId": "listProductsByCategory",
+          "description": "Listar produtos por categoria com filtros básicos."
         },
         {
-          "actionId": "filter-products",
-          "description": "Filtrar produtos por categoria, tipo de pet, faixa de preço"
-        },
-        {
-          "actionId": "view-product-details",
-          "description": "Visualizar detalhes completos de um produto"
-        },
-        {
-          "actionId": "create-product",
-          "description": "Criar novo produto (admin)"
-        },
-        {
-          "actionId": "update-product",
-          "description": "Atualizar informações de produto (admin)"
-        },
-        {
-          "actionId": "delete-product",
-          "description": "Remover produto do catálogo (admin)"
-        },
-        {
-          "actionId": "manage-categories",
-          "description": "Gerenciar categorias de produtos (admin)"
+          "actionId": "viewProductDetail",
+          "description": "Exibir detalhes do produto e imagens."
         }
       ]
     },
-    "shopping-cart": {
-      "description": "Carrinho de compras para clientes adicionarem e gerenciarem produtos antes da compra",
+    "cap_store_information": {
+      "description": "Exibição de informações sobre a loja (endereço, horário de funcionamento e contatos).",
       "usesRules": [
-        "rule-product-stock",
-        "rule-price-brl"
+        "rule_lang_ptbr_only",
+        "rule_brazil_target",
+        "rule_essential_features",
+        "rule_design_clean_modern_responsive"
       ],
       "actions": [
         {
-          "actionId": "add-to-cart",
-          "description": "Adicionar produto ao carrinho"
+          "actionId": "viewAboutStore",
+          "description": "Exibir informações institucionais da loja/unidade."
         },
         {
-          "actionId": "update-cart-item",
-          "description": "Atualizar quantidade de item no carrinho"
+          "actionId": "viewBusinessHours",
+          "description": "Exibir horários de funcionamento."
         },
         {
-          "actionId": "remove-from-cart",
-          "description": "Remover item do carrinho"
-        },
-        {
-          "actionId": "view-cart",
-          "description": "Visualizar carrinho com resumo de valores"
-        },
-        {
-          "actionId": "clear-cart",
-          "description": "Limpar todo o carrinho"
+          "actionId": "viewContactChannels",
+          "description": "Exibir telefone/WhatsApp/e-mail e link de mapa (se configurado)."
         }
       ]
     },
-    "checkout": {
-      "description": "Processo de finalização de compra com pagamento e entrega",
+    "cap_contact": {
+      "description": "Seção de contato para envio de mensagens ao pet shop.",
       "usesRules": [
-        "rule-order-validation",
-        "rule-price-brl",
-        "rule-lgpd-compliance",
-        "rule-brazil-only"
+        "rule_lang_ptbr_only",
+        "rule_essential_features",
+        "rule_design_clean_modern_responsive"
       ],
       "actions": [
         {
-          "actionId": "start-checkout",
-          "description": "Iniciar processo de checkout"
+          "actionId": "submitContactMessage",
+          "description": "Enviar mensagem via formulário de contato."
         },
         {
-          "actionId": "select-shipping-address",
-          "description": "Selecionar ou cadastrar endereço de entrega"
-        },
-        {
-          "actionId": "calculate-shipping",
-          "description": "Calcular frete para o endereço selecionado"
-        },
-        {
-          "actionId": "select-payment-method",
-          "description": "Selecionar método de pagamento"
-        },
-        {
-          "actionId": "process-payment",
-          "description": "Processar pagamento do pedido"
-        },
-        {
-          "actionId": "confirm-order",
-          "description": "Confirmar e finalizar pedido"
+          "actionId": "viewContactConfirmation",
+          "description": "Exibir confirmação de envio e próximos passos."
         }
       ]
     },
-    "order-management": {
-      "description": "Gerenciamento de pedidos para clientes e administradores",
+    "cap_blog": {
+      "description": "Blog com dicas e notícias sobre pets para conteúdo informativo.",
       "usesRules": [
-        "rule-order-validation",
-        "rule-price-brl"
+        "rule_lang_ptbr_only",
+        "rule_tone_friendly_informative",
+        "rule_essential_features",
+        "rule_design_clean_modern_responsive"
       ],
+      "isOptional": true,
       "actions": [
         {
-          "actionId": "list-customer-orders",
-          "description": "Listar pedidos do cliente"
+          "actionId": "listBlogPosts",
+          "description": "Listar posts publicados."
         },
         {
-          "actionId": "view-order-details",
-          "description": "Visualizar detalhes de um pedido"
-        },
-        {
-          "actionId": "track-order",
-          "description": "Acompanhar status de entrega"
-        },
-        {
-          "actionId": "cancel-order",
-          "description": "Cancelar pedido (se permitido)"
-        },
-        {
-          "actionId": "list-all-orders",
-          "description": "Listar todos os pedidos (admin)"
-        },
-        {
-          "actionId": "update-order-status",
-          "description": "Atualizar status do pedido (admin)"
+          "actionId": "viewBlogPost",
+          "description": "Exibir post individual por slug."
         }
       ]
     },
-    "appointment-scheduling": {
-      "description": "Agendamento de serviços como banho, tosa e consultas veterinárias",
+    "cap_manage_content": {
+      "description": "Administração pela equipe para gerenciar páginas, catálogo e blog (quando habilitado).",
       "usesRules": [
-        "rule-appointment-scheduling",
-        "rule-brazil-only"
+        "rule_roles_customer_staff",
+        "rule_lang_ptbr_only",
+        "rule_template_matrix_replicable"
       ],
       "actions": [
         {
-          "actionId": "view-available-slots",
-          "description": "Visualizar horários disponíveis para agendamento"
+          "actionId": "createUpdatePublishPages",
+          "description": "Criar/editar/publicar páginas de conteúdo."
         },
         {
-          "actionId": "book-appointment",
-          "description": "Agendar serviço para o pet"
+          "actionId": "createUpdateActivateProducts",
+          "description": "Criar/editar/ativar/desativar produtos."
         },
         {
-          "actionId": "view-my-appointments",
-          "description": "Visualizar meus agendamentos"
+          "actionId": "createUpdateActivateCategories",
+          "description": "Criar/editar/ativar/desativar categorias."
         },
         {
-          "actionId": "cancel-appointment",
-          "description": "Cancelar agendamento"
+          "actionId": "createUpdatePublishBlogPosts",
+          "description": "Criar/editar/publicar posts do blog (se habilitado)."
         },
         {
-          "actionId": "reschedule-appointment",
-          "description": "Reagendar serviço"
-        },
-        {
-          "actionId": "manage-appointments",
-          "description": "Gerenciar todos os agendamentos (admin)"
+          "actionId": "manageStoreInfo",
+          "description": "Atualizar endereço, horários e contatos da unidade."
         }
       ]
     },
-    "blog": {
-      "description": "Blog com dicas e conteúdo informativo sobre cuidados com pets",
+    "cap_template_configuration": {
+      "description": "Configuração do modelo matriz para replicação em outras unidades/franquias, incluindo branding e dados da unidade.",
       "usesRules": [
-        "rule-brazil-only"
+        "rule_template_matrix_replicable",
+        "rule_branding_colors",
+        "rule_design_clean_modern_responsive"
       ],
       "actions": [
         {
-          "actionId": "list-blog-posts",
-          "description": "Listar artigos do blog com filtros"
+          "actionId": "configureBranding",
+          "description": "Configurar logo e paleta (verde/azul com detalhes em amarelo)."
         },
         {
-          "actionId": "view-blog-post",
-          "description": "Visualizar artigo completo"
-        },
-        {
-          "actionId": "filter-by-pet-type",
-          "description": "Filtrar artigos por tipo de pet"
-        },
-        {
-          "actionId": "search-blog",
-          "description": "Buscar artigos por palavra-chave"
-        },
-        {
-          "actionId": "create-blog-post",
-          "description": "Criar novo artigo (admin)"
-        },
-        {
-          "actionId": "update-blog-post",
-          "description": "Editar artigo existente (admin)"
-        },
-        {
-          "actionId": "publish-blog-post",
-          "description": "Publicar ou despublicar artigo (admin)"
-        },
-        {
-          "actionId": "delete-blog-post",
-          "description": "Remover artigo (admin)"
-        }
-      ]
-    },
-    "store-info": {
-      "description": "Informações sobre a loja física, contato e horários de funcionamento",
-      "usesRules": [
-        "rule-brazil-only"
-      ],
-      "actions": [
-        {
-          "actionId": "view-store-info",
-          "description": "Visualizar informações da loja"
-        },
-        {
-          "actionId": "view-working-hours",
-          "description": "Visualizar horários de funcionamento"
-        },
-        {
-          "actionId": "view-location-map",
-          "description": "Visualizar localização no mapa"
-        },
-        {
-          "actionId": "update-store-info",
-          "description": "Atualizar informações da loja (admin)"
-        }
-      ]
-    },
-    "contact": {
-      "description": "Formulário de contato para clientes enviarem mensagens e dúvidas",
-      "usesRules": [
-        "rule-lgpd-compliance",
-        "rule-brazil-only"
-      ],
-      "actions": [
-        {
-          "actionId": "send-contact-message",
-          "description": "Enviar mensagem pelo formulário de contato"
-        },
-        {
-          "actionId": "list-contact-messages",
-          "description": "Listar mensagens recebidas (admin)"
-        },
-        {
-          "actionId": "view-contact-message",
-          "description": "Visualizar mensagem (admin)"
-        },
-        {
-          "actionId": "reply-contact-message",
-          "description": "Responder mensagem (admin)"
-        },
-        {
-          "actionId": "archive-contact-message",
-          "description": "Arquivar mensagem (admin)"
-        }
-      ]
-    },
-    "customer-account": {
-      "description": "Gerenciamento de conta do cliente com perfil, endereços e histórico",
-      "usesRules": [
-        "rule-lgpd-compliance",
-        "rule-brazil-only"
-      ],
-      "actions": [
-        {
-          "actionId": "register-customer",
-          "description": "Cadastrar nova conta de cliente"
-        },
-        {
-          "actionId": "login",
-          "description": "Fazer login na conta"
-        },
-        {
-          "actionId": "logout",
-          "description": "Fazer logout"
-        },
-        {
-          "actionId": "view-profile",
-          "description": "Visualizar perfil"
-        },
-        {
-          "actionId": "update-profile",
-          "description": "Atualizar dados do perfil"
-        },
-        {
-          "actionId": "manage-addresses",
-          "description": "Gerenciar endereços de entrega"
-        },
-        {
-          "actionId": "request-data-deletion",
-          "description": "Solicitar exclusão de dados (LGPD)"
-        }
-      ]
-    },
-    "admin-dashboard": {
-      "description": "Painel administrativo para gerenciamento geral do pet shop",
-      "usesRules": [
-        "rule-brazil-only"
-      ],
-      "actions": [
-        {
-          "actionId": "view-dashboard",
-          "description": "Visualizar dashboard com métricas"
-        },
-        {
-          "actionId": "view-sales-reports",
-          "description": "Visualizar relatórios de vendas"
-        },
-        {
-          "actionId": "manage-admins",
-          "description": "Gerenciar usuários administradores"
-        },
-        {
-          "actionId": "manage-settings",
-          "description": "Gerenciar configurações do sistema"
+          "actionId": "configureUnitData",
+          "description": "Configurar dados de cada unidade (endereço/horários/contatos) sem alterar a estrutura."
         }
       ]
     }
   }
 }
+
 ``` </promptcustom> </plugin-agent-playground-100554>

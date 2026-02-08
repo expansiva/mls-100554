@@ -1,10 +1,10 @@
-/// <mls shortName="agentToBeConceptual" project="100554" enhancement="_100554_enhancementAgent" folder="agents" />
+/// <mls fileReference="_100554_/l2/agents/agentToBeConceptual" enhancement="_100554_enhancementAgent" /> 
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 
 export function createAgent(): IAgentAsync {
   return {
-    agentName: "agentToBeConceptual",
+    agentName: "agentToBeConceptual", 
     agentProject: 100554,
     agentFolder: "agents",
     agentDescription: "Create New ToBe Conceptual",
@@ -106,13 +106,19 @@ async function processToBe(moduleToBe: ModuleToBe): Promise<mls.msg.AgentIntent[
 
 }
 
+/**
+  "t1, gemini-2.5-flash, 4/10",
+  "t2, gemini-2.5-pro, 7/10",
+  "t3, gpt-5.2, 9/10",
+  "t4, kimi-2.5, 8.5/10"
+ */
 const system2 = `
-<!-- modelType: claude -->
-<!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) ou nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10, code2 (kimi 2.5) -->
+<!-- modelType: codereasoning -->
+<!-- modelTypeList: geminiChat (2.5 pro) 7/10 , code (grok) ?/10, deepseekchat ?/10, codeflash (gemini) 4/10, deepseekreasoner ?/10, mini (4.1) ou nano (openai) ?/10, codeinstruct (4.1) ?/10, codereasoning(gpt5) 9/10, code2 (kimi 2.5) 8.5/10 -->
 
 You are a Senior Software Engineer at Collab.codes, with 25 years of hands-on experience building scalable, maintainable systems in production environments. You have led architecture decisions, code reviews, and refactors in multiple companies, always prioritizing clean design, performance, security, and long-term maintainability over quick hacks.
 
-You will receive a user request to create a new module, followed by a clarification section containing questions and answers that provide additional context, constraints, requirements, or refinements to the original request.
+You will receive a user request ("userPrompt") to create a new module, followed by a clarification section containing questions and answers that provide additional context, constraints, requirements, or refinements to the original request.
 
 Task:
 Generate an ToBeFactual JSON object that strictly follows the provided JSON schema.
@@ -136,6 +142,9 @@ const constraints = [
   'Output MUST be valid JSON only.',
   'NO indentation, NO newlines except when strictly required by JSON syntax.',
   'NO extra spaces or whitespace.',
+  "All field names and keys MUST be in English.",
+  "All descriptions and string values MUST be written in the language specified by the 'userLanguage' field.",
+  "All relevant information provided by the user in their answers MUST be converted into explicit 'rules' in the output. Always summarize and register them as clear, permanent rules."
 ];
 //#endregion
 
@@ -152,6 +161,11 @@ export type Output =
 
 //#region Defs1
 export interface ModuleToBe {
+  meta: {
+    userLanguage: string;
+    userPromptOriginal: string;
+    userPromptFinal: string; // Final consolidated prompt, merging relevant clarification answers
+  };
   ontology?: OntologyDefinition;
   rules?: RulesRegistry;
   capabilities?: CapabilityMap;
