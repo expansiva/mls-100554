@@ -1,2 +1,2 @@
-/// <mls shortName="agentCreateTokens" project="100554" enhancement="_blank" folder="" />
+/// <mls fileReference="_100554_/l2/agentCreateTokens.defs.ts" enhancement="_blank" />
 
