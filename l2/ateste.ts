@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/ateste.js" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/ateste.ts" enhancement="_100554_enhancementLit" />
 
 import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
@@ -35,7 +35,7 @@ export class SimpleGreeting extends CollabLitElement {
     Object.keys(mls.stor.files).forEach((key) => {
 
       const f = mls.stor.files[key];
-      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('m') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key);
+      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('a') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key);
 
 
     })
@@ -75,15 +75,20 @@ export class SimpleGreeting extends CollabLitElement {
   async changeSource(file: mls.stor.IFileInfo): Promise<string> {
 
     try {
+
       if (!file) throw new Error(`[beforePromptStep] invalid args, file dont exists`)
       const source = (await file.getContent()) as string | null;
       if (typeof source !== 'string' || !source) throw new Error(`[beforePromptAtomic] invalid source`)
 
       const array = source.split("\n");
       if (!array) return '';
-
       const fileReference = mls.stor.convertFileToFileReference(file);
-      if (!array[0].includes('fileReference') || array[0].includes('groupName')) {
+      if (array[0].includes('fileReference')) {
+        const tp = this.parseXMLTripleSlash(array[0]).variables;
+        if (tp.fileReference.indexOf(file.extension) > 0) return '';
+        array[0] = `/// <mls fileReference="${fileReference}" enhancement="${tp.enhancement || "_blank"}" />`
+
+      } else if (!array[0].includes('fileReference') || array[0].includes('groupName')) {
         const tp = this.parseXMLTripleSlash(array[0]).variables;
         array[0] = `/// <mls fileReference="${fileReference}" enhancement="${tp.enhancement || "_blank"}" />`
       } else {
@@ -101,16 +106,11 @@ export class SimpleGreeting extends CollabLitElement {
     if (!line.startsWith('/// <')) throw new Error('line must start with "/// <" (triple slash and xml');
     const tagName = 'mls'
     const requiredVars = ['enhancement', 'fileReference'];
-    const optionalVars = ['author', 'groupName'];
+    const optionalVars = ['author', 'groupName', 'project', 'folder', 'shortName'];
     const res = this.parseXML(line.substring(3).trim());
     if (typeof res === 'string') throw new Error(`invalid triple slash: ${res}`);
     if (res.tagName !== tagName) throw new Error(`invalid tag name: '${res.tagName}', use '${tagName}'`);
-    requiredVars.forEach((varName) => {
-      if (!res.variables[varName]) throw new Error(`missing required variable: "${varName}"`);
-    });
-    for (const varName in res.variables) {
-      if (!requiredVars.includes(varName) && !optionalVars.includes(varName)) throw new Error(`invalid variable name: "${varName}"`);
-    }
+
     return res;
   }
 
