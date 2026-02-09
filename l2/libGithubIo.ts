@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/libGithubIo.ts" groupName="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/libGithubIo.ts" enhancement="_100554_enhancementLit" />
 
 export async function addIssueInProject(req: IReq, idProject: string, idIssue: string): Promise<string | undefined> {
 
