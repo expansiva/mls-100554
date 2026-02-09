@@ -163,7 +163,7 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
 
     private restartPoolingTask() {
         if (!this.task || !this.message) return;
-        const context: mls.msg.ExecutionContext = { message: this.message, task: this.task };
+        const context: mls.msg.ExecutionContext = { message: this.message, task: this.task, isTest:false };
         continuePoolingTask(context);
     }
 
