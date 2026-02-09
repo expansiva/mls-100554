@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/agents/agentNewModule" enhancement="_100554_enhancementAgent"/>
+/// <mls fileReference="_100554_/l2/agents/agentNewModule.ts" enhancement="_100554_enhancementAgent" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { getAgentStepByAgentName } from "/_100554_/l2/aiAgentHelper.js";
