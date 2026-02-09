@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginSystemPrivacyPolicy.ts" groupName="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginSystemPrivacyPolicy.ts" enhancement="_100554_enhancementLit" />
 
 import { html, unsafeHTML, svg, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

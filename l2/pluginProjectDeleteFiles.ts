@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginProjectDeleteFiles.ts" groupName="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginProjectDeleteFiles.ts" enhancement="_100554_enhancementLit" />
 
 import { html, svg, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';

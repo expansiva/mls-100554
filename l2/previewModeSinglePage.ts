@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/previewModeSinglePage.ts" groupName="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/previewModeSinglePage.ts" enhancement="_100554_enhancementLit" />
 
 import { IJSONDependence } from '/_100554_/l2/libCompile.js';
 import { setErrorOnModel, convertTagToFileName } from '/_102027_/l2/utils.js';

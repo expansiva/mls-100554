@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginProjectRunTest.ts" groupName="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginProjectRunTest.ts" enhancement="_100554_enhancementLit" />
 
 import { html, css, svg, TemplateResult, repeat, LitElement } from 'lit';
 import { query, property } from 'lit/decorators.js';

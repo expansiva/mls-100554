@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginProjectIndex.ts" groupName="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginProjectIndex.ts" enhancement="_100554_enhancementLit" />
 
 // To improve system performance, avoid using imports, as this file is loaded during initialization.
 
