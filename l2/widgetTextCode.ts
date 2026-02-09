@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/widgetTextCode.ts" groupName="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/widgetTextCode.ts" enhancement="_100554_enhancementLit" />
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
