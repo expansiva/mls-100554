@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginCollabCoreIndex.ts" groupName="other" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginCollabCoreIndex.ts" enhancement="_100554_enhancementLit" />
 
 import { PluginBaseIndex } from '/_100554_/l2/pluginBaseIndex.js';
 
