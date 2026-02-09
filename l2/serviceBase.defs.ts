@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/serviceBase.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/serviceBase.defs.ts" enhancement="_blank" />
 
 // Do not change – automatically generated code. 
 
