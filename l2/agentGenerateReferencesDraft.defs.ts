@@ -1,2 +1,2 @@
-/// <mls shortName="agentGenerateReferencesDraft" project="100554" enhancement="_blank" folder="" />
+/// <mls fileReference="_100554_/l2/agentGenerateReferencesDraft.defs.ts" enhancement="_blank" />
 
