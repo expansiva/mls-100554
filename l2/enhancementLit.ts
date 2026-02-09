@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/enhancementLit.ts" groupName="other" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/enhancementLit.ts" enhancement="_blank" />
 
 import { convertFileNameToTag } from '/_102027_/l2/utils.js'
 import { getPropierties } from '/_102027_/l2/propiertiesLit.js'
