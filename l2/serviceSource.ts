@@ -4,10 +4,8 @@ import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_100554_/l2/serviceBase.js';
 import { formatHtml, sync } from '/_100554_/l2/collabDOMSync.js';
-
 import { removeTokensFromSource } from '/_102027_/l2/libCompileStyle.js';
 import { getTokensLess } from '/_102027_/l2/designSystemBase.js';
-
 import { LessCSS } from "/_100554_/l2/lessCSS.js";
 import { initState, getState } from '/_100554_/l2/collabState.js';
 import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
