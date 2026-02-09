@@ -13,6 +13,7 @@ export class SimpleGreeting extends CollabLitElement {
   @state() current = 0;
   @state() tot = 0;
 
+
   render() {
     return html` 
     <div>
@@ -34,7 +35,7 @@ export class SimpleGreeting extends CollabLitElement {
     Object.keys(mls.stor.files).forEach((key) => {
 
       const f = mls.stor.files[key];
-      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('a') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key);
+      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('m') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key);
 
 
     })
@@ -47,6 +48,7 @@ export class SimpleGreeting extends CollabLitElement {
       if (!f) continue;
 
       let newSource = await this.changeSource(f);
+
 
       if (!newSource || !this.teste) {
         if (this.teste) this.teste.value = 'Nada';
@@ -82,9 +84,11 @@ export class SimpleGreeting extends CollabLitElement {
 
       const fileReference = mls.stor.convertFileToFileReference(file);
       if (!array[0].includes('fileReference') || array[0].includes('groupName')) {
-        const tp = mls.common.tripleslash.parseXMLTripleSlash(array[0]).variables;
+        const tp = this.parseXMLTripleSlash(array[0]).variables;
         array[0] = `/// <mls fileReference="${fileReference}" enhancement="${tp.enhancement || "_blank"}" />`
-      } 
+      } else {
+        return '';
+      }
 
       return array.join("\n");
     } catch (e) {
@@ -93,6 +97,47 @@ export class SimpleGreeting extends CollabLitElement {
 
   }
 
+  private parseXMLTripleSlash(line: string): ITripleSlash {
+    if (!line.startsWith('/// <')) throw new Error('line must start with "/// <" (triple slash and xml');
+    const tagName = 'mls'
+    const requiredVars = ['enhancement', 'fileReference'];
+    const optionalVars = ['author', 'groupName'];
+    const res = this.parseXML(line.substring(3).trim());
+    if (typeof res === 'string') throw new Error(`invalid triple slash: ${res}`);
+    if (res.tagName !== tagName) throw new Error(`invalid tag name: '${res.tagName}', use '${tagName}'`);
+    requiredVars.forEach((varName) => {
+      if (!res.variables[varName]) throw new Error(`missing required variable: "${varName}"`);
+    });
+    for (const varName in res.variables) {
+      if (!requiredVars.includes(varName) && !optionalVars.includes(varName)) throw new Error(`invalid variable name: "${varName}"`);
+    }
+    return res;
+  }
+
+  private parseXML(str: string): string | ITripleSlash {
+    const regex = /<(\w+)((?:\s+\w+(?:\s*=\s*(?:"[^"]*"|'[^']*'))?)*)\s*\/?>/;
+    const match = str.match(regex);
+    if (!match) return "XML invalid: use ex: <mls variable='text' />";
+    const tagName2 = match[1];
+    const variables: ITripleSlashVariables = {};
+    const attributes = match[2].match(/\w+(?:\s*=\s*(?:"[^"]*"|'[^']*'))?/g) || [];
+    for (let i = 0; i < attributes.length; i++) {
+      const [name, value] = attributes[i].split('=');
+      variables[(name || '?')] = value ? value.replace(/(^['"]|['"]$)/g, '') : '';
+    }
+    const text = str.replace(match[0], "").trim();
+    if (text) return `XML text invalid: '${text}' use ex: <mls variable='text' />`;
+    return { tagName: tagName2, variables };
+  }
+
 }
 
+export interface ITripleSlashVariables {
+  [key: string]: string;
+}
+
+export interface ITripleSlash {
+  tagName: string;
+  variables: ITripleSlashVariables;
+}
 
