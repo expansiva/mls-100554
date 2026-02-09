@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabL3PreviewText.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/collabL3PreviewText.defs.ts" enhancement="_blank" />
 
 // Do not change – automatically generated code. 
 
