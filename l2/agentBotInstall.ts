@@ -38,7 +38,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
     const agent = await loadAgent(shortName);
     if (!agent) throw new Error(`[${agentName}] beforePrompt: Invalid Agent, check projectID and shortName: _${projectId}_${shortName}`);
     if (!agent.installBot) throw new Error(`[${agentName}] beforePrompt: Invalid Agent, is not a Bot: _${projectId}_${shortName}, ${JSON.stringify(agent)}`);
-    notifyMessageSendChange({ message: context.message, task: undefined });
+    //notifyMessageSendChange({ message: context.message, task: undefined });
     const rc = await agent.installBot(context);
     if (!rc) throw new Error(`[${agentName}] beforePrompt: Agent not instaled, error`);
     return;

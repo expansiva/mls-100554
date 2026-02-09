@@ -316,7 +316,7 @@ function init() {
 init();
 
 function onMonacoModelCreated(ev: mls.events.IEvent) {
-    console.log('onMonacoModelCreated', ev) // test
+    // console.log('onMonacoModelCreated', ev) // test
     const storFileBase = mls.stor.convertFileReferenceToFile(ev.desc || '');
     const key = mls.stor.getKeyToFile(storFileBase);
     const storFile = mls.stor.files[key];

@@ -401,7 +401,7 @@ const MAX_HOOKS_PER_TURN = 5;
 const runningTasks = new Set<string>();
 
 export async function continuePoolingTask(context: mls.msg.ExecutionContext) {
-
+    
     const { task } = context;
     if (!task) return;
     const taskId = task.PK;
@@ -466,10 +466,7 @@ export async function continuePoolingTask(context: mls.msg.ExecutionContext) {
 
 async function processIntents(agent: IAgentAsync, context: mls.msg.ExecutionContext, intents: mls.msg.AgentIntent[]): Promise<void> {
     if (mls.isTraceAgent) console.log(`[processIntents] intents length: ${intents.length}`);
-
     const oldContextCreateAt = context.message.createAt;
-    const isAddMessageAI = intents.find((intent) => intent.type === 'add-message-ai');
-
     const value = await mls.api.msgApplyIntents({
         userId: context.message.senderId,
         intents
@@ -480,7 +477,7 @@ async function processIntents(agent: IAgentAsync, context: mls.msg.ExecutionCont
 
     context.task = ret.task;
     if (ret.message) context.message = ret.message;
-    notifyTaskChange(context, isAddMessageAI ? oldContextCreateAt : undefined);
+    notifyTaskChange(context, oldContextCreateAt);
     if (!context.task?.iaCompressed) return;
 
     runningTasks.add(ret.task.PK);

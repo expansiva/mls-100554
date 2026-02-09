@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/ateste.js" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_100554_/l2/ateste.js" enhancement="_100554_enhancementLit" />
 
 import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
@@ -34,7 +34,7 @@ export class SimpleGreeting extends CollabLitElement {
     Object.keys(mls.stor.files).forEach((key) => {
 
       const f = mls.stor.files[key];
-      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('u') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key);
+      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('a') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key);
 
 
     })
@@ -81,9 +81,9 @@ export class SimpleGreeting extends CollabLitElement {
       if (!array) return '';
 
       const fileReference = mls.stor.convertFileToFileReference(file);
-      if (!array[0].includes('fileReference')) {
+      if (!array[0].includes('fileReference') || array[0].includes('groupName')) {
         const tp = mls.common.tripleslash.parseXMLTripleSlash(array[0]).variables;
-        array[0] = `/// <mls fileReference="${fileReference}"${tp.groupName ? ' groupName="' + tp.groupName + '"' : ''} enhancement="${tp.enhancement || "_blank"}" />`
+        array[0] = `/// <mls fileReference="${fileReference}" enhancement="${tp.enhancement || "_blank"}" />`
       } 
 
       return array.join("\n");

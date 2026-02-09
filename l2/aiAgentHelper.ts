@@ -164,7 +164,8 @@ export const getTemporaryContext = (threadId: string, userId: string, prompt: st
       createAt: "",
       senderId: userId,
       content: prompt.trim(),
-    }
+    },
+    isTest:false
   };
   return context;
 };

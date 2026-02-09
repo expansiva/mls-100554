@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 //import { CollabLitElement } from '/_100554_/l2/l2/collabLitElement.js';
 //import { CollabLitElement } from './l2/collabLitElement'
-// colocar no console: mls.modePreview = 'minimum'
+// colocar no console: mls.modePreview = 'minimum' 
 
 const message_pt = {
     hello: 'Hello world!'

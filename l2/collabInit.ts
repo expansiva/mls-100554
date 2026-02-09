@@ -86,8 +86,8 @@ export class CollabInit extends LitElement {
         await this.loadProjectBase();
         this.actualProject = await this.setProjectActual();
         this.setOrgActual(this.actualProject);
-
         await this.loadLastProject();
+        await this.setEventsModel();
         await this.setLastOpenedFiles();
         await this.setDefaultFiles();
         await this.setLastModule();
@@ -98,6 +98,14 @@ export class CollabInit extends LitElement {
         this.setEvents();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
 
+    }
+
+    private async setEventsModel() {
+        try {
+            await import('/_100554_/l2/collabLibModel.js')
+        } catch (e) {
+            
+        }
     }
 
     private setEvents() {
