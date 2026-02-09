@@ -83,12 +83,9 @@ export class SimpleGreeting extends CollabLitElement {
       if (!array) return '';
 
       const fileReference = mls.stor.convertFileToFileReference(file);
-      const tp = this.parseXMLTripleSlash(array[0]).variables;
-      if (tp && tp.fileReference && tp.fileReference.indexOf(file.extension) < 0) {
-        array[0] = `/// <mls fileReference="${fileReference}" enhancement="${tp.enhancement || "_blank"}" />`
-      }else
+    
       if (!array[0].includes('fileReference') || array[0].includes('groupName')) {
-        
+        const tp = this.parseXMLTripleSlash(array[0]).variables;
         array[0] = `/// <mls fileReference="${fileReference}" enhancement="${tp.enhancement || "_blank"}" />`
       } else {
         return '';

@@ -355,6 +355,10 @@ async function _afterUpdate(storFile: mls.stor.IFileInfo, model: monaco.editor.I
 
 async function _getValueInfo(activeModel: mls.editor.IModelBase): Promise<mls.stor.IFileInfoValue> {
 
+    if (!activeModel || activeModel.model.isDisposed()) {
+        return await (mls.stor.localDB as any).getContentInfoOrNull(activeModel.storFile);
+    }
+
     let content = activeModel.model.getValue();
     if (activeModel.storFile.extension === '.less') {
         content = removeTokensFromSource(content);
