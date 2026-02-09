@@ -35,7 +35,7 @@ export class SimpleGreeting extends CollabLitElement {
     Object.keys(mls.stor.files).forEach((key) => {
 
       const f = mls.stor.files[key];
-      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('m') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key);
+      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('d') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key); 
 
 
     })
@@ -83,8 +83,12 @@ export class SimpleGreeting extends CollabLitElement {
       if (!array) return '';
 
       const fileReference = mls.stor.convertFileToFileReference(file);
+      const tp = this.parseXMLTripleSlash(array[0]).variables;
+      if (tp && tp.fileReference && tp.fileReference.indexOf(file.extension) < 0) {
+        array[0] = `/// <mls fileReference="${fileReference}" enhancement="${tp.enhancement || "_blank"}" />`
+      }else
       if (!array[0].includes('fileReference') || array[0].includes('groupName')) {
-        const tp = this.parseXMLTripleSlash(array[0]).variables;
+        
         array[0] = `/// <mls fileReference="${fileReference}" enhancement="${tp.enhancement || "_blank"}" />`
       } else {
         return '';
@@ -105,12 +109,12 @@ export class SimpleGreeting extends CollabLitElement {
     const res = this.parseXML(line.substring(3).trim());
     if (typeof res === 'string') throw new Error(`invalid triple slash: ${res}`);
     if (res.tagName !== tagName) throw new Error(`invalid tag name: '${res.tagName}', use '${tagName}'`);
-    requiredVars.forEach((varName) => {
+    /*requiredVars.forEach((varName) => {
       if (!res.variables[varName]) throw new Error(`missing required variable: "${varName}"`);
     });
     for (const varName in res.variables) {
       if (!requiredVars.includes(varName) && !optionalVars.includes(varName)) throw new Error(`invalid variable name: "${varName}"`);
-    }
+    }*/
     return res;
   }
 
