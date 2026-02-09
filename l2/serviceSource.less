@@ -1,5 +1,6 @@
 /// <mls fileReference="_100554_/l2/serviceSource.less" enhancement="enhancementStyle" />
 
+
 collab-nav-3-service[data-service="_100554_serviceSource"] {
 
     .tabs li {
@@ -8,6 +9,10 @@ collab-nav-3-service[data-service="_100554_serviceSource"] {
 
         &:not(.active) svg {
             filter: grayscale(100%) brightness(100%) opacity(90%);
+        }
+
+        &[data-key="0"]:not(.active) svg path {
+            fill: @text-primary-color-lighter !important;
         }
     }
 
@@ -18,7 +23,7 @@ collab-nav-3-service[data-service="_100554_serviceSource"] {
         fill: currentColor;
     }
 
-    .tabs li[data-key="0"] svg{
+    .tabs li[data-key="0"] svg {
         width: 20px !important;
         height: 20px !important;
     }
