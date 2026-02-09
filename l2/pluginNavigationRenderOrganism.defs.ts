@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginNavigationRenderOrganism.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/pluginNavigationRenderOrganism.defs.ts" enhancement="_blank" />
 
 // Do not change – automatically generated code. 
 
