@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginAgentPlayground.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/pluginAgentPlayground.defs.ts" enhancement="_blank" />
 
 // Do not change – automatically generated code. 
 

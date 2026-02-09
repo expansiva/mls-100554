@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginSystemPrivacyPolicy.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/pluginSystemPrivacyPolicy.defs.ts" enhancement="_blank" />
 
 // Do not change – automatically generated code. 
 

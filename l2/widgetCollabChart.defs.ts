@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/widgetCollabChart.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/widgetCollabChart.defs.ts" enhancement="_blank" />
 
 // Do not change – automatically generated code. 
 

@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/tsTestMonaco.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/tsTestMonaco.defs.ts" enhancement="_blank" />
 
 // Do not change – automatically generated code. 
 

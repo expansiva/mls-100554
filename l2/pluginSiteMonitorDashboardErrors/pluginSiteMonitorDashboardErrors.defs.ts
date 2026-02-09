@@ -1,4 +1,4 @@
-/// <mls shortName="pluginSiteMonitorDashboardErrors" project="100554" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/pluginSiteMonitorDashboardErrors/pluginSiteMonitorDashboardErrors.defs.ts" enhancement="_blank" />
 
 // Do not change – automatically generated code.
 
