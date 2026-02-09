@@ -56,7 +56,7 @@ const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> =
         data = mls.common.safeParseArgs(pp) as IDataPrompt;
         if (!('page' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing page and prompt`);
         let inputs = [];
-        if (context.modeSingleStep) inputs = await getPromptsTest(data);
+        if (context.isTest) inputs = await getPromptsTest(data);
         else inputs = await getPrompts(data);
 
         await startNewAiTask(
