@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/agents/agentDefs" enhancement="_100554_enhancementAgent"/>
+/// <mls fileReference="_100554_/l2/agents/agentDefs.ts" enhancement="_100554_enhancementAgent" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
