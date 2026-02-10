@@ -1267,72 +1267,6 @@ export class ServiceSource100554 extends ServiceBase {
         return monaco.Uri.parse(`file://server/_${storFile.project}_${storFile.folder ? storFile.folder + '_' : ''}${storFile.shortName}${ftype}`);
     }
 
-    private async createModel(project: number, shortName: string, ext: '.ts' | '.d.ts' | '.html' | '.less' | '.test.ts' | '.defs.ts', content?: string): Promise<mls.editor.IModelBase | undefined> {
-
-        try {
-
-            let src: string | Blob | null | undefined = undefined;
-            let haveInfo: boolean = false;
-            let info: mls.stor.IFileInfoValue | null = null;
-            let storFile: mls.stor.IFileInfo | undefined;
-
-            if (ext !== '.d.ts') {
-                const keyToFile = mls.stor.getKeyToFiles(project, 2, shortName, '', ext);
-                storFile = mls.stor.files[keyToFile];
-                if (!storFile) throw new Error(`Invalid file: ${ext}`);
-                if (storFile.project !== 0) {
-                    info = storFile.getValueInfo ? await storFile.getValueInfo() : null;
-                    haveInfo = !!info && !!info.content;
-                }
-                if (!content) {
-                    src = haveInfo ? info?.content : await storFile.getContent();
-                } else src = content;
-
-            } else {
-                src = content || '';
-            }
-
-            if (src instanceof Blob) throw new Error(`${ext} file must be string`);
-            if (!src) throw new Error(`${ext} file is undefined`);
-
-            let originalCRC = haveInfo ? info?.originalCRC : mls.common.crc.crc32(src).toString(16);
-
-            if (ext === '.less') {
-                originalCRC = mls.common.crc.crc32(removeTokensFromSource(src)).toString(16)
-            }
-
-            const originalProject: number | undefined = haveInfo ? info?.originalProject : undefined;
-            const originalShortName: string | undefined = haveInfo ? info?.originalShortName : undefined;
-
-            let model: mls.editor.IModelBase | undefined;
-            if (ext === '.html' && storFile) model = mls.editor.createModelHTML(storFile, src);
-            else if (ext === '.ts' && storFile) model = mls.editor.createModelTS(storFile, src);
-            else if (ext === '.test.ts' && storFile) model = mls.editor.createModelTest(storFile, src);
-            else if (ext === '.defs.ts' && storFile) model = mls.editor.createModelDefs(storFile, src);
-
-            else if (ext === '.d.ts') model = mls.editor.createModelProjectDefinition(project, src);
-            else if (ext === '.less' && storFile) {
-                const lessTokens = await getTokensLess(project, 'Default');
-                const lineTokens = `\n\n//Start Less Tokens\n${lessTokens}\n//End Less Tokens\n`;
-                src = removeTokensFromSource(src);
-                src = src.trim().concat(lineTokens);
-                model = mls.editor.createModelStyle(storFile, src);
-            }
-
-            if (!model) throw new Error(`Model invalid`);
-            if (ext !== '.d.ts') {
-                model.originalCRC = originalCRC;
-                model.originalProject = originalProject;
-                model.originalShortName = originalShortName;
-            }
-
-            (model as any).needFormat = true;
-            return model;
-        } catch (e: any) {
-            this.setError(e.message);
-        }
-    }
-
     private setModelConfEditor() {
         if (!this._ed1 || !this.mConfEditor) return;
         const src = this.getConfEditorToTypescript();
@@ -1342,9 +1276,10 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private async createModelConf(src: string) {
+
         if (mls.istrace) console.log(`ServiceSource, createModelConf_${this.position}, ${!!this.mConfEditor}`);
         if (this.mConfEditor) return;
-        const shortName = this.confE + '_service_source.confEditor';
+        const shortName = this.confE + '_service_source_confEditor';
         const level = 2;
         const project = 0;
         const extension = '.ts';
@@ -1356,7 +1291,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (model) {
             this.mConfEditor = model;
         } else {
-            const modelBase = await this.createModel(project, shortName, '.ts', src);
+            const modelBase =  mls.editor.createModelTS(storFile, src);
             if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}.ts`);
             model = modelBase.model;
             this.mConfEditor = model;
@@ -1420,7 +1355,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
     private getConfEditorToTypescript(): string {
-        return `/// <mls shortName="config_monaco_editor" project="0" enhancement="_blank" />
+        return `/// <mls fileReference="_100554_/l2/config_monaco_editor.ts" enhancement="_blank" />
 		
 mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE], null, 2) + ';\n';
     }
