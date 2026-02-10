@@ -4,7 +4,7 @@ import { convertFileNameToTag } from '/_102027_/l2/utils.js'
 import { getPropierties } from '/_102027_/l2/propiertiesLit.js'
 import { validateTagName, validateRender } from '/_102027_/l2/validateLit.js';
 import { setCodeLens } from '/_102027_/l2/codeLensLit.js';
-import { injectStyle } from '/_102027_/l2/processCssLit.js'
+import { injectStyle, injectStyleAction } from '/_102027_/l2/processCssLit.js'
 
 export const requires: mls.l2.enhancement.IRequire[] = [
     {
@@ -79,3 +79,8 @@ export const onAfterCompile = async (modelTS: mls.editor.IModelTS): Promise<void
     await injectStyle(modelTS, 'Default', '_100554_enhancementLit');
     return;
 }
+
+export const onAfterCompileAction = async (sourceJS: string, sourceTS: string, css?: { sourceLess: string, sourceTokens: string }): Promise<string> => {
+    return await injectStyleAction(sourceJS, sourceTS, css?.sourceLess || '', css?.sourceTokens || '', 'Default', '_100554_enhancementLit');
+}
+
