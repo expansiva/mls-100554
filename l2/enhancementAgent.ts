@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/enhancementAgent.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/enhancementAgent.ts"  enhancement="_blank" />
 
 import { getPropierties } from '/_102027_/l2/propiertiesLit.js'
 
@@ -22,6 +22,10 @@ export const onAfterCompile = async (modelTS: mls.editor.IModelTS): Promise<void
     await injectSourceInJs(modelTS);
 }
 
+export const onAfterCompileAction = async (sourceJS: string, sourceTS: string): Promise<string> => {
+    return injectSourceInJsAction(sourceJS, sourceTS);
+}
+
 /** 
  * search for regions on source TS, change .js references ex
  * const var1 = `xxx [[region1]]`
@@ -42,6 +46,13 @@ async function injectSourceInJs(modelTS: mls.editor.IModelTS): Promise<void> {
     const url = await mls.stor.cache.addIfNeed({ project, folder, shortName, version, content: sourceJS, extension });
     modelTS.compilerResults.trace.push(`enhancementAgent, updated JS, cache url:${url}`)
 }
+
+async function injectSourceInJsAction(js: string, ts: string): Promise<string> {
+    let sourceJS = removeRegionsIntoJS(js);
+    sourceJS = injectRegionsIntoTemplate({ sourceTS: ts, sourceJS, warnUnusedRegions: true });
+    return sourceJS;
+}
+
 
 /**
  * Replaces [[REGION_NAME]] placeholders in the template with the actual content
