@@ -1291,7 +1291,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (model) {
             this.mConfEditor = model;
         } else {
-            const modelBase =  mls.editor.createModelTS(storFile, src);
+            const modelBase =  await mls.editor.createModelTS(storFile, src);
             if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}.ts`);
             model = modelBase.model;
             this.mConfEditor = model;
