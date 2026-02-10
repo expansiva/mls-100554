@@ -103,9 +103,7 @@ export class [className] extends CollabPageElement {
 
         const folder = this.folder ? `${this.folder}/` : '';
         const name = `_${this.project}_/l2/${folder}${this.shortName}.ts`
-        return `/// <mls fileReference="${name}" enhancement="${enhancement}"${group}/>\n${this.template}\n`
-
-        return `/// <mls shortName="${this.shortName}" project="${this.project}" enhancement="${enhancement}"${group}${folder} />\n${newExample}\n`;;
+        return `/// <mls fileReference="${name}" enhancement="${enhancement}"${group}/>\n${newExample}\n`
     }
 
     private getTemplateHTML(): string {

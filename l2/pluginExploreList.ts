@@ -502,7 +502,9 @@ export class PluginExploreList extends PluginBaseModule {
             <li @click="${this.clickOptOpen}" class="${file.shortName === actualL2 && file.folder === actualL2Folder ? 'selected' : ''}" style="${style}${auxValidProject}" .myFile=${file} .nameFilter="${nameFilter}" ?disabled=${!validProject}>
                 <div class="elContent">
                     <info-item>
-                        <span class="groupHiddenListIcon" @click="${this.clickGroupHidden}">
+                        <span class="classClick" @click="${this.clickGroupHidden}">
+                            <span class="groupHiddenListIcon" >
+                        </span>
                         </span>
                         <span class="spanFileName ${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
                         <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion + auxHtml}"></div>
