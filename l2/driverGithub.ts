@@ -604,6 +604,200 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
+	public async buildFileGroups(
+		files: mls.stor.IFileInfo[],
+		maxSizeBytes: number = 800 * 1024
+	): Promise<{ type: 'single' | 'group'; files: mls.stor.IFileInfo[] }[]> {
+
+		const groups: mls.stor.IFileInfo[][] = [];
+		const singles: mls.stor.IFileInfo[][] = [];
+
+		let currentGroup: mls.stor.IFileInfo[] = [];
+		let currentSize = 0;
+
+		const flushGroup = () => {
+			if (currentGroup.length) {
+				groups.push(currentGroup);
+				currentGroup = [];
+				currentSize = 0;
+			}
+		};
+
+		for (const file of files) {
+
+			// 🔥 DELETE nunca conta tamanho, sempre vai pro group
+			if (file.status === 'deleted') {
+				currentGroup.push(file);
+				continue;
+			}
+
+			// pega conteúdo REAL que vai subir
+			let cont = await this.verifyAndGetContent(file);
+
+			if (typeof cont !== 'string') {
+				cont = await dL.fileToBase64(cont as File);
+				[, cont] = cont.split('base64,');
+			} else {
+				cont = dL.base64EncodeUnicode(cont);
+			}
+
+			const size = new Blob([cont]).size;
+
+			// 🔥 arquivo grande → vira single
+			if (size > maxSizeBytes) {
+				flushGroup();
+				singles.push([file]);
+				continue;
+			}
+
+			// 🔥 se estourar o grupo atual, fecha ele
+			if (currentSize + size > maxSizeBytes) {
+				flushGroup();
+			}
+
+			currentGroup.push(file);
+			currentSize += size;
+		}
+
+		flushGroup();
+
+		// monta o retorno: groups primeiro, depois singles
+		const result: { type: 'single' | 'group'; files: mls.stor.IFileInfo[] }[] = [];
+
+		for (const g of groups) {
+			result.push({ type: 'group', files: g });
+		}
+
+		for (const s of singles) {
+			result.push({ type: 'single', files: s });
+		}
+
+		return result;
+	}
+
+	private async *processFiles(
+		project: number,
+		files: mls.stor.IFileInfo[],
+		coments: string
+	): AsyncGenerator<string, any[], void> {
+
+		this.verifyMKey();
+
+		const info = await dL.getMyKeysBranch(project, true);
+		const fileGroups = await this.buildFileGroups(files);
+		let contGroup = 1;
+
+		const results: any[] = [];
+
+		for (const groupItem of fileGroups) {
+
+			// ================= GROUP (GraphQL batch) =================
+			if (groupItem.type === 'group') {
+
+				yield `start group-${contGroup} (${groupItem.files.length} files)`;
+
+				try {
+
+					await this.setContents2(groupItem.files, `group-${contGroup}`);
+
+					yield `success group-${contGroup}`;
+
+					results.push({
+						type: 'group',
+						files: groupItem.files,
+						status: 'fulfilled'
+					});
+
+				} catch (err: any) {
+
+					yield `error group`;
+
+					throw new Error(err?.message || err);
+				}
+
+				contGroup++;
+				continue;
+			}
+
+			// ================= SINGLE (REST save/delete) =================
+			for (const file of groupItem.files) {
+
+				const folderAux = file.folder === "" || file.folder.endsWith("/") ? "" : "/";
+				const extAux = file.extension.startsWith(".") ? "" : ".";
+				const levelPath = file.level === 0 ? "" : `l${file.level}/`;
+
+				const path =
+					levelPath +
+					file.folder.replace(/\\/g, "/") +
+					folderAux +
+					file.shortName +
+					extAux +
+					file.extension;
+
+				const fileName = `${file.folder ? file.folder + '/' : ''}${file.shortName}${file.extension}`;
+
+				yield `start: ${fileName}`;
+
+				try {
+
+					// -------- DELETE --------
+					if (file.status === 'deleted') {
+
+						await this.deleteFile({
+							token: mKey,
+							owner: info.owner,
+							repo: info.repo,
+							branch: info.branch,
+							path,
+							message: `delete: ${path}`
+						});
+
+					} else {
+
+						// -------- UPDATE / NEW / RENAME --------
+						let cont = await this.verifyAndGetContent(file);
+
+						if (typeof cont !== "string") {
+							cont = await dL.fileToBase64(cont as File);
+							[, cont] = cont.split("base64,");
+						} else {
+							cont = dL.base64EncodeUnicode(cont);
+						}
+
+						await this.saveFile({
+							token: mKey,
+							owner: info.owner,
+							repo: info.repo,
+							branch: info.branch,
+							path,
+							content: cont,
+							message: `save: ${path}`,
+							file
+						});
+					}
+
+					yield `success: ${fileName}`;
+
+					results.push({
+						type: 'single',
+						file,
+						status: 'fulfilled'
+					});
+
+				} catch (err: any) {
+
+					yield `error: ${fileName}`;
+
+					throw new Error(
+						`Error in file ${file.shortName}: ${err?.message || err}`
+					);
+				}
+			}
+		}
+
+		return results;
+	} 
+
 	//-------------IO----------------
 
 
@@ -697,142 +891,6 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			}
 		);
 		return true;
-	}
-
-	private async *processFiles(
-		project: number,
-		files: mls.stor.IFileInfo[],
-		coments: string
-	): AsyncGenerator<String, any[], void> {
-
-		const parallelLimit = 1;
-		this.verifyMKey();
-
-		const info = await dL.getMyKeysBranch(project, true);
-
-		const expandedTasks: {
-			type: "update" | "delete";
-			path: string;
-			originalFile: mls.stor.IFileInfo;
-		}[] = [];
-
-		// ----- 1) EXPANSÃO -----
-		for (const file of files) {
-			const folderAux = file.folder === "" || file.folder.endsWith("/") ? "" : "/";
-			const extAux = file.extension.startsWith(".") ? "" : ".";
-			const levelPath = file.level === 0 ? "" : `l${file.level}/`;
-
-			const newPath =
-				levelPath +
-				file.folder.replace(/\\/g, "/") +
-				folderAux +
-				file.shortName +
-				extAux +
-				file.extension;
-
-			if (file.status === "deleted") {
-				expandedTasks.push({ type: "delete", path: newPath, originalFile: file });
-				continue;
-			}
-
-			if (file.status === "new" || file.status === "changed") {
-				expandedTasks.push({ type: "update", path: newPath, originalFile: file });
-				continue;
-			}
-
-			if (file.status === "renamed") {
-				const oldInfo = await (file.getValueInfo?.() ?? undefined);
-				if (!oldInfo) continue;
-
-				const oldPath =
-					levelPath +
-					file.folder.replace(/\\/g, "/") +
-					folderAux +
-					oldInfo.originalShortName +
-					extAux +
-					file.extension;
-
-				expandedTasks.push({ type: "delete", path: oldPath, originalFile: file });
-				expandedTasks.push({ type: "update", path: newPath, originalFile: file });
-				continue;
-			}
-
-			throw new Error(`Status invalid: ${file.status}`);
-		}
-
-
-		// ----- 2) FUNÇÕES ADIADAS -----
-		const deferredTasks: (() => Promise<any>)[] = expandedTasks.map(task => {
-			return async () => {
-				if (task.type === "delete") {
-					return this.deleteFile({
-						token: mKey,
-						owner: info.owner,
-						repo: info.repo,
-						branch: info.branch,
-						path: task.path,
-						message: `delete: ${task.path}`
-					});
-				}
-
-				let cont = await this.verifyAndGetContent(task.originalFile);
-
-				if (typeof cont !== "string") {
-					cont = await dL.fileToBase64(cont as File);
-					[, cont] = cont.split("base64,");
-				} else {
-					cont = dL.base64EncodeUnicode(cont);
-				}
-
-				return this.saveFile({
-					token: mKey,
-					owner: info.owner,
-					repo: info.repo,
-					branch: info.branch,
-					path: task.path,
-					content: cont,
-					message: `save: ${task.path}`,
-					file: task.originalFile
-				});
-			};
-		});
-
-		// ----- 3) EXECUÇÃO EM BATCHES -----
-		const results: any[] = [];
-
-		for (let i = 0; i < deferredTasks.length; i += parallelLimit) {
-
-			const batchFns = deferredTasks.slice(i, i + parallelLimit);
-
-			for (let j = 0; j < batchFns.length; j++) {
-				const idx = i + j;
-				const task = expandedTasks[idx];
-
-				const fileName = `${task.originalFile.folder ? task.originalFile.folder + '/' : ''}${task.originalFile.shortName}${task.originalFile.extension}`
-
-				yield `start: ${fileName}`;
-
-				try {
-					const value = await batchFns[j]();
-
-					results.push({ file: task.originalFile, status: "fulfilled", value });
-
-					yield `success: ${fileName}`;
-
-				} catch (err) {
-					results.push({ file: task.originalFile, status: "rejected", reason: err });
-
-					yield `error: ${fileName}`;
-
-					// 🔥 para tudo
-					throw new Error(
-						`Error in file ${task.originalFile.shortName}: ${(err as any)?.message || err}`
-					);
-				}
-			}
-		}
-
-		return results;
 	}
 
 	private async processFilesOld(project: number, files: mls.stor.IFileInfo[], coments: string) {
