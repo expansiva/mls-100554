@@ -4,7 +4,7 @@ import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
-
+ 
 @customElement('ateste-100554')
 export class SimpleGreeting extends CollabLitElement {
   //test

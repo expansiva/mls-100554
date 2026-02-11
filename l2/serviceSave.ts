@@ -573,7 +573,6 @@ export class ServiceSave extends ServiceBase {
             const objProjects: any = {};
             const filesKeys = Object.keys(mls.stor.files);
             this.otherProjects = await this.getOtherProjects();
-
             for (const fKey of filesKeys) {
                 const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
                 if (!file ||
@@ -613,6 +612,7 @@ export class ServiceSave extends ServiceBase {
         dt.forEach((i) => {
 
             const file = mls.stor.localDB.parseKeyToFile(i);
+            if (!file || file.project === 0) return;
             const name = `${file.folder ? file.folder + '/' : ''}${file.shortName}`
             if (info[file.project]) {
 
@@ -1005,7 +1005,7 @@ export class ServiceSave extends ServiceBase {
                         currentFile++;
                         aux = '';
                     }
-                    father.loadingFeedBack = `TOTAL (${currentFile}/${arrSet.length})<br>${aux}`;
+                    father.loadingFeedBack = `FILES(${arrSet.length})<br>${aux}`;
 
                 },
                 configurable: true
