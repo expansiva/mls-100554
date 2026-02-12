@@ -432,12 +432,14 @@ export type MindMapNodeType =
     | 'codeInsights'
     | 'webcomponent'
     | 'imports'
-    | 'importedBy' 
+    | 'importedBy'
     | 'language'
     | 'attributes'
     | 'file'
     | 'file_wc'
-    | 'text';
+    | 'text'
+    | 'findFile'
+    | 'findFile_item';
 
 export interface MindMapNode {
     id: string;             // unique identifier

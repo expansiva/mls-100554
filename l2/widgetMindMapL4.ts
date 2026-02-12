@@ -18,6 +18,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     @property({ type: Boolean }) menuOpen = false;
     @property({ type: String }) activeDescription: string | undefined;
     @property({ type: String }) currentpage: string | undefined;
+    @property({ type: String }) showbreadcrumb: string | undefined;
 
     @propertyDataSource({ type: Object }) mindMapSelected: MindMapSelected | undefined;
 
@@ -37,6 +38,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         file: { fill: '#CFE9F6', stroke: '#8CBFD9', text: '#1F3B4D' },
         text: { fill: '#D8CFC4', stroke: '#BFAF9F', text: '#4A3F35' },
         importedBy: { fill: '#E6B0AA', stroke: '#C0392B', text: '#4A1E1A' },
+        findFile: { fill: '#A569BD', stroke: '#512E5F', text: '#FDFEFE' },
         default: { fill: '#2C3E50', stroke: '#1B2631', text: '#ECF0F1' }
     };
 
@@ -81,7 +83,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         if (this.activeDescription) this.menuOpen = false;
 
         return html`
-        ${this.renderBreadcrumb()}
+        ${this.showbreadcrumb === 'off' ? '' : this.renderBreadcrumb()}
         <div class="mindmap-layout ${this.activeDescription ? 'has-description' : ''}">
             ${this.renderMenu()}
             <div class="canvas-container">
@@ -102,11 +104,11 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         return html`
         <div class="breadcrumb">
         
-            <label class="menu" style="display:${this.activeDescription? 'none' : ''}">
+            <label class="menu" style="display:${this.activeDescription ? 'none' : ''}">
                 <input class="menu-btn" type="checkbox" .checked=${this.menuOpen} @click=${this._toggleMenu}/>					
                 <span class="menu-icon"></span>
             </label>
-            <button class="back-btn" @click=${this._closeDescription} style="width:58px; height:38px;display:${this.activeDescription? '' : 'none'}">
+            <button class="back-btn" @click=${this._closeDescription} style="width:58px; height:38px;display:${this.activeDescription ? '' : 'none'}">
                 <svg xmlns="http://www.w3.org/2000/svg" style="fill:var(--text-primary-color)" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M128 192L305.6 192C304.6 197.2 304 202.5 304 208L304 224L128 224C119.2 224 112 216.8 112 208C112 199.2 119.2 192 128 192zM352 208C352 190.3 366.3 176 384 176L408 176C474.3 176 528 229.7 528 296L528 344C528 396.5 494.3 441.1 447.3 457.4C447.8 454.3 448 451.2 448 448C448 428 438.8 410.1 424.4 398.3C429.3 389.3 432 378.9 432 368C432 352.9 426.7 339 418 328C426.8 317 432 303.1 432 288L432 248C432 234.7 421.3 224 408 224C394.7 224 384 234.7 384 248L384 288C384 296.8 376.8 304 368 304C359.2 304 352 296.8 352 288L352 208zM384 128L384 128C366 128 349.4 134 336 144L128 144C92.7 144 64 172.7 64 208C64 243.3 92.7 272 128 272L210 272C208.7 277.1 208 282.5 208 288C208 313.3 222.7 335.2 244 345.6C241.4 352.6 240 360.1 240 368C240 388 249.2 405.9 263.6 417.7C258.7 426.7 256 437.1 256 448C256 483.3 284.7 512 320 512L408 512C500.8 512 576 436.8 576 344L576 296C576 203.2 500.8 128 408 128L384 128zM320 464C311.2 464 304 456.8 304 448C304 439.2 311.2 432 320 432L384 432C392.8 432 400 439.2 400 448C400 456.8 392.8 464 384 464L320 464zM304 288C304 293.5 304.7 298.9 306 304L272 304C263.2 304 256 296.8 256 288C256 279.2 263.2 272 272 272L304 272L304 288zM328 352L368 352C376.8 352 384 359.2 384 368C384 376.8 376.8 384 368 384L304 384C295.2 384 288 376.8 288 368C288 359.2 295.2 352 304 352L328 352z"/></svg>
             </button>
             ${(() => {
@@ -144,7 +146,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     renderMenu() {
         return html`
         <div class="side-menu ${this.menuOpen ? 'menu-open' : ''}">
-            ${this.pluginsMenu.map((item) =>  html`<div class="menu-item" @click=${() => this._openScenario(item)}>${item.label}</div>`)}
+            ${this.pluginsMenu.map((item) => html`<div class="menu-item" @click=${() => this._openScenario(item)}>${item.label}</div>`)}
         </div>`;
     }
 
@@ -308,6 +310,11 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
         if (item.node.type === 'file_wc') {
             this.openDefs(item.node);
+            return;
+        }
+
+        if (item.node.type === 'findFile_item') {
+            this.openFile(item.node);
             return;
         }
 
@@ -898,7 +905,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     };
 
     private fromMenu = false;
-    private _openScenario(item:{ label: string, html: string, file: string }) {
+    private _openScenario(item: { label: string, html: string, file: string }) {
         this.fromMenu = true;
         import(item.file);
         this.activeDescription = item.html;
@@ -1146,6 +1153,40 @@ export class WidgetMindMapL4100554 extends StateLitElement {
                 this.requestUpdate();
             }
         );
+    }
+
+    private async openFile(node: MindMapNode) {
+
+        const info = mls.stor.convertFileReferenceToFile(node.label);
+        const key = mls.stor.getKeyToFile(info);
+        const file = mls.stor.files[key];
+        if (!file) return;
+
+        try {
+
+            const params = {} as mls.events.IFileAction;
+
+            await file.getOrCreateModel();
+
+            (params.action as any) = 'open';
+            params.level = file.level;
+            params.project = file.project;
+            params.shortName = file.shortName;
+            params.extension = file.extension;
+            params.folder = file.folder;
+            params.position = 'left';
+
+            let name = `_${file.project}_${file.shortName}`;
+            if (file.folder) name = `_${file.project}_${file.folder}/${file.shortName}`;
+            mls.actual[2].setFullName(name);
+            mls.actual[2]['left'] = file
+
+            mls.events.fire([mls.actualLevel], ['FileAction'], JSON.stringify(params), 0);
+
+        } catch (err: any) {
+
+        }
+
     }
 
 

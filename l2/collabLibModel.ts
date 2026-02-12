@@ -584,6 +584,7 @@ function _getPosition(modeIld: string, tp: 'ts' | 'html' | 'defs' | 'style' | 't
 
 async function _checkSameContent(modelBase: mls.editor.IModelBase, storFile: mls.stor.IFileInfo) {
 
+    if (modelBase.originalCRC === undefined) setOriginalCrc(modelBase);
     let sameContent: boolean = modelBase.originalCRC === mls.common.crc.crc32(modelBase.model.getValue()).toString(16);
     if (modelBase.storFile.extension === '.less') {
         sameContent = modelBase.originalCRC === mls.common.crc.crc32(removeTokensFromSource(modelBase.model.getValue()).trim()).toString(16);
@@ -598,6 +599,21 @@ async function _checkSameContent(modelBase: mls.editor.IModelBase, storFile: mls
         if (storFile.status !== 'renamed' && (storFile.status !== 'new')) storFile.status = 'changed';
         storFile.updatedAt = new Date().toISOString();
         await mls.stor.localStor.setContent(storFile, await _getValueInfo(modelBase));
+    }
+}
+
+function setOriginalCrc(model: mls.editor.IModelBase) {
+
+    let originalCRC =  mls.common.crc.crc32(model.model.getValue()).toString(16);
+
+    if (model.storFile.extension === '.less') {
+        originalCRC = mls.common.crc.crc32(removeTokensFromSource(model.model.getValue()).trim()).toString(16)
+    }
+
+    if (model.storFile.extension !== '.d.ts') {
+        model.originalCRC = originalCRC;
+        model.originalProject = model.storFile.project;
+        model.originalShortName = model.storFile.shortName;
     }
 }
 
