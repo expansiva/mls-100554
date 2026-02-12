@@ -1,11 +1,10 @@
 /// <mls fileReference="_100554_/l2/pluginProjectFindFiles.ts" enhancement="_100554_enhancementLit" />
 
-import { html, css, svg, TemplateResult } from 'lit';
-import { query, property } from 'lit/decorators.js';
+import { html, svg, TemplateResult } from 'lit';
+import { property } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
-import { getDateFormated } from '/_100554_/l2/libCommom.js';
-import { getConfigProject } from '/_100554_/l2/libProjectConfig.js';
-import * as icons from '/_100554_/l2/collabIcons.js';
+import { MindMapData } from '/_100554_/l2/libMindMap.js'
+import '/_100554_/l2/widgetMindMapL4.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -37,17 +36,27 @@ export class PluginProjectFindFiles extends PluginBaseModule {
     private usingRegex: boolean = false;
     private progressValue: number = 0;
 
+    @property() mode: 'list' | 'map' = 'list';
+    @property({ type: String }) dataJson: MindMapData | undefined;
+
+    async updated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.updated(changedProperties);
+        const propMode = changedProperties.get('mode');
+        if (propMode) {
+            this.dataJson = undefined;
+            this.configMode();
+        }
+    }
+
     render(): TemplateResult {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        this.style.display = 'block';
-        this.style.width = '100%';
-        this.style.height = '100%';
         if (this.scope !== "dashboard") return html``;
         return html`
             <div class="plugin-container">
                 ${this.renderHeader()}
                 ${this.renderBody()}
+                ${this.mode === 'list' ? this.renderList() : this.renderMap()}
             </div>
         `;
     }
@@ -64,29 +73,57 @@ export class PluginProjectFindFiles extends PluginBaseModule {
     renderBody(): TemplateResult {
         return html`
             <div class="body">
-                <label for="fileType">${this.msg.lblChoice}</label>
-                <select name="fileType">
-                    <option value=".ts">.ts - typescript</option>
-                    <option value=".html">.html - page</option>
-                    <option value=".less">.less - style</option>
-                </select>
-
-                <div style="margin-top: 10px;">
-                    <label for="searchText">${this.msg.lblSearch}</label>
-                    <input name="searchText" type="text" />
-                    <button @click="${this.onSearch}">${this.msg.btnSearch}</button>
+                <div class="form-group" style="width:15%; min-width:140px">
+                    <label for="fileType">${this.msg.lblChoice}</label>
+                    <select name="fileType">
+                        <option value=".ts">.ts - typescript</option>
+                        <option value=".html">.html - page</option>
+                        <option value=".less">.less - style</option>
+                    </select>
                 </div>
+                <div class="form-group" style="width:55%; min-width:200px">
+                    <label for="searchText">${this.msg.lblSearch}</label>
+                    <input name="searchText" type="text"  autocomplete="off"/>    
+                </div>
+                <div class="view-toggle">
+                    <button class="btn is-active" @click=${this.changeMode} mode="list" data-view="list" title="List view">
+                        <!-- Ícone lista -->
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
 
+                    <button class="btn" data-view="mindmap" @click=${this.changeMode} mode="map" title="Mindmap view">
+                        <!-- Ícone mindmap -->
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="6" r="2" fill="currentColor"/>
+                        <circle cx="6" cy="18" r="2" fill="currentColor"/>
+                        <circle cx="18" cy="18" r="2" fill="currentColor"/>
+                        <path d="M12 8v4M10 14l-4 2M14 14l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <button @click="${this.onSearch}" class="btn-primary"  style="width:10%; min-width:80px">${this.msg.btnSearch}</button>
+            </div>
+            <div class="progress-section">
                 <progress value="${this.progressValue}" max="100"></progress>
-                <p>${this.msg.lblTotal} ${this.matchedFiles.length}, regex:${this.usingRegex}</p>
-                <ul>
-                    ${this.matchedFiles
-                .slice()
-                .sort((a, b) => a.localeCompare(b))
-                .map(file => html`<li>${file}</li>`)}
-                </ul>
+                <p class="result-info">${this.msg.lblTotal} ${this.matchedFiles.length}, regex:${this.usingRegex}</p>
             </div>
         `;
+    }
+
+    renderList() {
+        return html`
+
+            <ul class="results-list">
+                ${this.matchedFiles.slice().sort((a, b) => a.localeCompare(b)).map(file => html`<li @click="${this.openFile}">${file}</li>`)}
+            </ul>
+        `
+    }
+
+    renderMap() {
+        if (!this.dataJson) return html``;
+        return html`<widget-mind-map-l4-100554 .mapState=${this.dataJson} showbreadcrumb="off"></widget-mind-map-l4-100554>`
     }
 
     async onSearch() {
@@ -139,6 +176,117 @@ export class PluginProjectFindFiles extends PluginBaseModule {
         });
 
         await Promise.all(promises);
+    }
+
+    changeMode(e: MouseEvent) {
+        const el = e.target as HTMLElement;
+        if (!el) return;
+
+        const father = el.closest('.view-toggle');
+        if (!father) return;
+
+        const remove = father.querySelector('.is-active')
+        const add = document.querySelector('.btn:not(.is-active)');
+        if (!remove || !add) return;
+        remove.classList.remove('is-active');
+        add.classList.add('is-active');
+
+        this.mode = add.getAttribute('mode') as any | 'list';
+    }
+
+    configMode() {
+        const center = 'findFiles'
+        const js = {
+            current: center,
+            nodes: [] as any[]
+        }
+
+        const main = {
+            id: center,
+            label: "Find Files",
+            type: "findFile",
+            meta: {
+                fileKey: "findFiles"
+            },
+            related: [] as any[]
+        }
+
+        js.nodes.push(main); 
+
+        this.matchedFiles.slice().sort((a, b) => a.localeCompare(b)).forEach((i) => {
+
+            if (!mls.stor.files[i]) return;
+            const id = center + '_' + i;
+            main.related.push(id);
+
+            const item = {
+                id,
+                label: mls.stor.convertFileToFileReference(mls.stor.files[i]),
+                type: "findFile_item",
+                related: [],
+                meta: {
+                    fileKey: "findFiles"
+                },
+                navigate: true
+            }
+
+            js.nodes.push(item);
+        });
+
+
+        this.dataJson = js;
+
+    }
+
+
+    openFile(e: MouseEvent) {
+    
+        const el = e.target as HTMLElement;
+        if (!el) return;
+
+        const li = el.closest('li');
+        if (!li) return;
+
+        const key = li.innerText;
+
+        const f = mls.stor.files[key];
+        if (!f) return;
+
+        this.fireEvents('open', f);
+    }
+
+
+    async fireEvents(action: string, file: mls.stor.IFileInfo,  timeout: number = 0) {
+
+        try {
+
+            const params = {} as mls.events.IFileAction;
+
+            await file.getOrCreateModel();
+
+            (params.action as any) = action;
+            params.level = file.level;
+            params.project = file.project;
+            params.shortName = file.shortName;
+            params.extension = file.extension;
+            params.folder = file.folder;
+            params.position = 'left';
+
+            if (['open'].includes(action)) {
+
+                let name = `_${file.project}_${file.shortName}`;
+                if (file.folder) name = `_${file.project}_${file.folder}/${file.shortName}`;
+                mls.actual[2].setFullName(name);
+                mls.actual[2]['left'] = file
+
+            }
+
+            mls.events.fire([mls.actualLevel], ['FileAction'], JSON.stringify(params), timeout);
+
+        } catch (err: any) {
+
+        }
+
     }
 
 }
