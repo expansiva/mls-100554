@@ -1,0 +1,770 @@
+<plugin-agent-playground-100554  style="display:none"> <promptcustom type="memory" group="A"> ## user journey
+```json
+{
+  "journeys": [
+    {
+      "persona": "Visitante (novo cliente) via Google/Instagram",
+      "goal": "Conhecer o pet shop e decidir se é confiável antes de comprar",
+      "journey": [
+        "Acessa a Home do petShopSite (visual Matrix) e vê proposta de valor (produtos, serviços, entrega/retirada, diferenciais)",
+        "Seleciona a unidade (se houver mais de uma) ou confirma a unidade sugerida por localização",
+        "Navega para “Sobre o Pet Shop” para ver história, equipe, políticas, fotos e avaliações/depoimentos",
+        "Consulta “Como funciona” (entrega, retirada, prazos, formas de pagamento, trocas)",
+        "Abre “Contato” e visualiza canais (WhatsApp, telefone, e-mail, endereço, mapa, horários)",
+        "Decide seguir para “Loja/Produtos” ou iniciar contato pelo WhatsApp para tirar dúvidas"
+      ]
+    },
+    {
+      "persona": "Cliente (comprador) orientado a produto",
+      "goal": "Encontrar rapidamente um produto e comprar",
+      "journey": [
+        "Acessa “Loja/Produtos” pelo menu ou busca interna",
+        "Usa busca e filtros (categoria, marca, porte/idade do pet, faixa de preço, disponibilidade, promoção)",
+        "Abre página do produto (fotos, descrição, indicação, composição, modo de uso, variações, estoque, avaliação)",
+        "Escolhe variação (tamanho/sabor) e quantidade",
+        "Vê opções de entrega/retirada (prazo e custo) com base no CEP",
+        "Adiciona ao carrinho e visualiza resumo (itens, frete, descontos, total)",
+        "Segue para checkout como convidado ou entra/cria conta",
+        "Preenche dados (nome, CPF opcional/necessário, endereço, contato) e seleciona forma de pagamento",
+        "Confirma pedido e recebe tela de sucesso com número do pedido e próximos passos",
+        "Recebe acesso a “Meus pedidos” para acompanhar status e histórico"
+      ]
+    },
+    {
+      "persona": "Cliente recorrente (fiel à unidade)",
+      "goal": "Recomprar itens frequentes com poucos cliques",
+      "journey": [
+        "Faz login",
+        "Acessa “Meus pedidos” e seleciona “Comprar novamente”",
+        "Revisa itens e substituições (se algum estiver indisponível)",
+        "Confirma endereço/retirada e pagamento preferidos",
+        "Finaliza pedido e acompanha status"
+      ]
+    },
+    {
+      "persona": "Cliente (dono de pet) buscando conteúdo e orientação",
+      "goal": "Aprender e receber recomendações relevantes para o pet",
+      "journey": [
+        "Acessa “Conteúdos/Dicas” (blog/guia) a partir da Home",
+        "Filtra por tema (alimentação, saúde, higiene, adestramento) e por tipo de pet (cão/gato/outros)",
+        "Lê um artigo e vê recomendações de produtos relacionados",
+        "Salva/compartilha conteúdo e adiciona produtos recomendados ao carrinho",
+        "Se necessário, inicia conversa pelo “Fale conosco/WhatsApp” a partir do conteúdo"
+      ]
+    },
+    {
+      "persona": "Cliente sensível a preço",
+      "goal": "Encontrar promoções e economizar",
+      "journey": [
+        "Acessa “Promoções” pelo menu ou banner da Home",
+        "Filtra promoções por categoria/marca e ordena por maior desconto",
+        "Abre produto em promoção e valida regras (vigência, limites, cupons, combos)",
+        "Adiciona itens ao carrinho e aplica cupom (se disponível)",
+        "Finaliza compra e confirma economia no resumo do pedido"
+      ]
+    },
+    {
+      "persona": "Cliente que precisa de atendimento",
+      "goal": "Tirar dúvidas, solicitar ajuda ou resolver problema com pedido",
+      "journey": [
+        "Clica em “Contato” ou atalho flutuante de atendimento",
+        "Escolhe canal (WhatsApp, formulário, telefone, e-mail) e assunto (dúvida, pedido, troca/devolução, reclamação)",
+        "Preenche formulário com dados e anexa evidências (opcional)",
+        "Envia mensagem e vê confirmação com prazo estimado de resposta",
+        "Acompanha respostas pelo canal escolhido e/ou área “Mensagens/Atendimentos” (se logado)"
+      ]
+    },
+    {
+      "persona": "Cliente logado (acompanhamento)",
+      "goal": "Acompanhar status do pedido e obter informações pós-compra",
+      "journey": [
+        "Faz login e acessa “Meus pedidos”",
+        "Seleciona um pedido e visualiza status (em separação, enviado, pronto para retirada, concluído)",
+        "Consulta detalhes (itens, pagamento, endereço, rastreio/retirada, notas e políticas)",
+        "Solicita suporte (troca/devolução) diretamente a partir do pedido",
+        "Avalia produto/experiência (se habilitado) após conclusão"
+      ]
+    },
+    {
+      "persona": "Equipe do pet shop (operador de catálogo)",
+      "goal": "Cadastrar e manter produtos atualizados",
+      "journey": [
+        "Acessa o Admin (painel) com login",
+        "Entra em “Produtos” e vê lista com busca, filtros e status (ativo/inativo, estoque baixo)",
+        "Cadastra novo produto (nome, categoria, descrição, imagens, marca, variações, preço, SKU, estoque, visibilidade)",
+        "Define regras comerciais (promoção, preço por unidade, limite por compra, frete/retirada elegíveis)",
+        "Publica o produto e valida visualização no site",
+        "Edita produtos existentes e desativa itens descontinuados"
+      ]
+    },
+    {
+      "persona": "Equipe do pet shop (gestor de promoções)",
+      "goal": "Criar e publicar promoções e cupons",
+      "journey": [
+        "Acessa Admin &gt; “Promoções/Cupons”",
+        "Cria promoção (tipo: percentual/valor fixo/combos/frete, público-alvo, vigência, regras)",
+        "Seleciona produtos/categorias elegíveis e define limites (uso por cliente, mínimo de compra)",
+        "Pré-visualiza banners/etiquetas de vitrine e publica",
+        "Monitora desempenho básico (uso do cupom, pedidos com desconto) e ajusta regras"
+      ]
+    },
+    {
+      "persona": "Equipe do pet shop (conteudista/marketing)",
+      "goal": "Publicar conteúdos informativos e páginas institucionais",
+      "journey": [
+        "Acessa Admin &gt; “Conteúdos/Páginas”",
+        "Cria/edita páginas (Sobre, Políticas, Como funciona, FAQ) com editor",
+        "Publica artigos (título, texto, imagens, tags, categorias, SEO básico) e associa produtos relacionados",
+        "Agenda publicação (se disponível) e revisa como aparece no site",
+        "Atualiza banners da Home e chamadas para ação (CTA)"
+      ]
+    },
+    {
+      "persona": "Equipe do pet shop (atendimento)",
+      "goal": "Gerenciar mensagens e solicitações de clientes",
+      "journey": [
+        "Acessa Admin &gt; “Mensagens/Atendimentos”",
+        "Visualiza fila por status (novo, em atendimento, pendente, concluído) e por canal",
+        "Abre conversa/solicitação, registra resposta e define próximo passo",
+        "Associa atendimento a um pedido/cliente (quando aplicável)",
+        "Finaliza atendimento com motivo e etiqueta (para relatórios simples)"
+      ]
+    },
+    {
+      "persona": "Administrador (dono/rede de pet shops)",
+      "goal": "Configurar uma nova unidade a partir do modelo base",
+      "journey": [
+        "Acessa Admin com perfil de administrador",
+        "Entra em “Unidades/Lojas” e seleciona “Criar nova unidade”",
+        "Escolhe “Criar a partir do modelo base” (template do petShopSite) e define nome, slug/domínio (se aplicável), CNPJ/razão social",
+        "Configura dados da unidade (endereço, horários, canais, áreas atendidas, retirada/entrega)",
+        "Seleciona catálogo padrão (copiar produtos/conteúdos) ou iniciar vazio",
+        "Configura identidade visual (logo, cores/variantes do tema Matrix, banners) e revisa preview",
+        "Define permissões de equipe (operador, marketing, atendimento) para a nova unidade",
+        "Publica a unidade e valida navegação no site com seletor de unidade"
+      ]
+    },
+    {
+      "persona": "Administrador (governança do modelo base)",
+      "goal": "Manter o template e padrões do site para todas as unidades",
+      "journey": [
+        "Acessa Admin &gt; “Modelo Base/Template”",
+        "Edita componentes padrão (layout, menu, rodapé, páginas institucionais padrão, blocos de Home)",
+        "Define padrões de conteúdo (categorias, tags, campos obrigatórios de produto, políticas)",
+        "Revisa pré-visualização do modelo e publica atualização do template",
+        "Acompanha quais unidades estão “sincronizadas” ou com exceções (override) e decide aplicar ou não"
+      ]
+    }
+  ],
+  "considerations": [
+    "Seleção de unidade deve ser clara (antes da compra) para evitar confusão de estoque, prazos e contato.",
+    "Visual Matrix precisa manter legibilidade e acessibilidade (contraste, tamanhos de fonte, modo claro opcional).",
+    "Checkout deve ser simples e confiável para público brasileiro (dados essenciais e linguagem acolhedora).",
+    "Conteúdo institucional (trocas, entrega, privacidade) deve ser fácil de encontrar e consistente por unidade.",
+    "Admin deve separar claramente: catálogo, conteúdo, promoções e atendimento; com permissões por função."
+  ]
+
+}
+```
+
+
+## To Be Conceptual
+```json
+{
+  "meta": {
+    "userLanguage": "pt",
+    "userPrompt": "criar site petShop , linguagem br, para executar no brasil\nnão gerar agendamento serviços, e não permitir adoção\ncriar site modelo matriz"
+  },
+  "ontology": {
+    "entities": {
+      "User": {
+        "description": "Usuário do site (cliente ou membro da equipe do pet shop) com permissões para navegar ou administrar conteúdo.",
+        "fields": {
+          "userId": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "values": [
+              "customer",
+              "staff"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "type": "string",
+            "required": false
+          }
+        },
+        "rules": [
+          "rule_lang_ptbr_only",
+          "rule_roles_customer_staff"
+        ]
+      },
+      "StoreInfo": {
+        "description": "Informações institucionais e de operação da loja (unidade).",
+        "fields": {
+          "storeId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "type": "string",
+            "required": false
+          },
+          "country": {
+            "type": "string",
+            "values": [
+              "BR"
+            ]
+          },
+          "businessHours": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "required": false
+          },
+          "whatsapp": {
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "type": "string",
+            "required": false
+          },
+          "mapLink": {
+            "type": "string",
+            "required": false
+          }
+        },
+        "rules": [
+          "rule_brazil_target"
+        ]
+      },
+      "Product": {
+        "description": "Produto exibido no site com detalhes e categorização.",
+        "fields": {
+          "productId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "required": false
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "required": false,
+            "constraints": "Opcional, caso o site exiba preços."
+          },
+          "currency": {
+            "type": "string",
+            "required": false,
+            "values": [
+              "BRL"
+            ]
+          },
+          "images": {
+            "type": "string[]",
+            "required": false
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "sku": {
+            "type": "string",
+            "required": false
+          },
+          "brand": {
+            "type": "string",
+            "required": false
+          },
+          "targetAnimal": {
+            "type": "string[]",
+            "required": false,
+            "constraints": "Ex: Cão, Gato"
+          },
+          "targetAge": {
+            "type": "string[]",
+            "required": false,
+            "constraints": "Ex: Filhote, Adulto, Sênior"
+          },
+          "specialNeeds": {
+            "type": "string[]",
+            "required": false,
+            "constraints": "Ex: Castrado, Obesidade, Renal"
+          },
+          "availabilityStatus": {
+            "type": "string",
+            "required": false,
+            "values": [
+              "in_stock",
+              "on_request",
+              "out_of_stock"
+            ],
+            "constraints": "Status de disponibilidade do produto."
+          },
+          "isFeatured": {
+            "type": "boolean",
+            "required": false,
+            "constraints": "Indica se o produto está em destaque ou promoção."
+          }
+        },
+        "rules": [
+          "rule_no_service_booking",
+          "rule_no_adoption"
+        ]
+      },
+      "ProductCategory": {
+        "description": "Categoria de produtos para navegação e organização do catálogo.",
+        "fields": {
+          "categoryId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "required": false
+          },
+          "parentCategoryId": {
+            "type": "string",
+            "required": false
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ContentPage": {
+        "description": "Página de conteúdo gerenciável (ex: sobre, políticas, informações).",
+        "fields": {
+          "pageId": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "isPublished": {
+            "type": "boolean"
+          }
+        },
+        "rules": [
+          "rule_tone_friendly_informative"
+        ]
+      },
+      "ContactMessage": {
+        "description": "Mensagem enviada pelo formulário de contato.",
+        "fields": {
+          "messageId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "required": false
+          },
+          "subject": {
+            "type": "string",
+            "required": false
+          },
+          "message": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "constraints": "ISO-8601"
+          }
+        }
+      },
+      "BlogPost": {
+        "description": "Post do blog com dicas e notícias sobre pets.",
+        "fields": {
+          "postId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "excerpt": {
+            "type": "string",
+            "required": false
+          },
+          "body": {
+            "type": "string"
+          },
+          "coverImage": {
+            "type": "string",
+            "required": false
+          },
+          "tags": {
+            "type": "string[]",
+            "required": false
+          },
+          "publishedAt": {
+            "type": "string",
+            "required": false,
+            "constraints": "ISO-8601; ausente quando rascunho."
+          },
+          "isPublished": {
+            "type": "boolean"
+          }
+        },
+        "rules": [
+          "rule_tone_friendly_informative"
+        ]
+      },
+      "Branding": {
+        "description": "Configuração de identidade visual reutilizável para o site modelo matriz.",
+        "fields": {
+          "brandingId": {
+            "type": "string"
+          },
+          "logoUrl": {
+            "type": "string"
+          },
+          "primaryColors": {
+            "type": "string[]",
+            "constraints": "Deve incluir tons de verde e azul."
+          },
+          "accentColors": {
+            "type": "string[]",
+            "constraints": "Deve incluir detalhes em amarelo."
+          },
+          "styleNotes": {
+            "type": "string",
+            "required": false
+          }
+        },
+        "rules": [
+          "rule_branding_colors",
+          "rule_design_clean_modern_responsive",
+          "rule_template_matrix_replicable"
+        ]
+      }
+    }
+  },
+  "rules": {
+    "rule_lang_ptbr_only": {
+      "kind": "policy",
+      "description": "Todo o site deve estar disponível apenas em português (Brasil).",
+      "scope": [
+        "global"
+      ],
+      "acceptanceCriteria": [
+        "Não oferecer seletor de idioma.",
+        "Todo texto de UI e conteúdo padrão deve estar em pt-BR."
+      ]
+    },
+    "rule_brazil_target": {
+      "kind": "domain",
+      "description": "O site é destinado a operação e público no Brasil.",
+      "scope": [
+        "global",
+        "StoreInfo"
+      ],
+      "acceptanceCriteria": [
+        "Endereço e informações devem suportar contexto brasileiro (ex: BR/BRL quando aplicável)."
+      ]
+    },
+    "rule_roles_customer_staff": {
+      "kind": "platform",
+      "description": "Existem dois tipos principais de usuários: clientes e equipe do pet shop, sendo a equipe responsável por gerenciar conteúdo.",
+      "scope": [
+        "User",
+        "cap_manage_content"
+      ],
+      "acceptanceCriteria": [
+        "Usuários do tipo customer acessam navegação pública.",
+        "Usuários do tipo staff podem criar/editar/publicar conteúdo e catálogo conforme permissões."
+      ]
+    },
+    "rule_no_service_booking": {
+      "kind": "policy",
+      "description": "O site não deve oferecer agendamento de serviços.",
+      "scope": [
+        "global",
+        "Product",
+        "cap_catalog_browse"
+      ],
+      "acceptanceCriteria": [
+        "Não existir fluxo, páginas ou CTAs de agendamento.",
+        "Não coletar dados com finalidade de marcar horário/serviço."
+      ]
+    },
+    "rule_no_adoption": {
+      "kind": "policy",
+      "description": "O site não deve permitir adoção de animais.",
+      "scope": [
+        "global"
+      ],
+      "acceptanceCriteria": [
+        "Não existir seção/funcionalidade de adoção.",
+        "Não existir formulários ou CTAs relacionados a adoção."
+      ]
+    },
+    "rule_template_matrix_replicable": {
+      "kind": "platform",
+      "description": "O site deve ser um modelo matriz replicável/adaptável para futuras unidades/franquias mantendo identidade visual e estrutura padrão.",
+      "scope": [
+        "global",
+        "Branding",
+        "StoreInfo",
+        "cap_template_configuration"
+      ],
+      "acceptanceCriteria": [
+        "Estrutura de páginas e componentes deve ser reutilizável.",
+        "Dados de unidade (endereço/horários/contato) devem ser configuráveis sem alterar a estrutura.",
+        "Branding deve ser parametrizável (logo/cores)."
+      ]
+    },
+    "rule_tone_friendly_informative": {
+      "kind": "policy",
+      "description": "O tom de comunicação deve ser amigável, acolhedor e informativo, transmitindo confiança e carinho pelos animais.",
+      "scope": [
+        "ContentPage",
+        "BlogPost",
+        "global"
+      ],
+      "acceptanceCriteria": [
+        "Textos devem evitar linguagem agressiva ou excessivamente técnica sem explicação.",
+        "Conteúdo deve reforçar cuidado e bem-estar animal."
+      ]
+    },
+    "rule_branding_colors": {
+      "kind": "policy",
+      "description": "A identidade visual deve usar paleta definida: tons de verde e azul, com detalhes em amarelo, e incluir o logo fornecido.",
+      "scope": [
+        "Branding",
+        "global"
+      ],
+      "acceptanceCriteria": [
+        "Aplicar cores principais verde/azul e acentos amarelos nos componentes.",
+        "Exibir logo em áreas previstas (ex: cabeçalho/rodapé)."
+      ]
+    },
+    "rule_design_clean_modern_responsive": {
+      "kind": "platform",
+      "description": "O design deve ser limpo, moderno e responsivo.",
+      "scope": [
+        "global"
+      ],
+      "acceptanceCriteria": [
+        "Layout deve adaptar para mobile/tablet/desktop.",
+        "Componentes devem manter legibilidade e usabilidade em telas pequenas."
+      ]
+    },
+    "rule_essential_features": {
+      "kind": "domain",
+      "description": "Funcionalidades essenciais: catálogo de produtos (categorias e detalhes), informações da loja (endereço e horário), seção de contato e blog opcional com dicas/notícias.",
+      "scope": [
+        "global"
+      ],
+      "acceptanceCriteria": [
+        "Disponibilizar navegação por categorias e página de detalhe de produto.",
+        "Disponibilizar página/área com endereço e horário.",
+        "Disponibilizar formulário/canais de contato.",
+        "Incluir blog como funcionalidade prevista (pode ser habilitada)."
+      ]
+    }
+  },
+  "capabilities": {
+    "cap_catalog_browse": {
+      "description": "Navegação pública do catálogo de produtos com categorias e páginas de detalhe.",
+      "usesRules": [
+        "rule_lang_ptbr_only",
+        "rule_no_service_booking",
+        "rule_no_adoption",
+        "rule_essential_features",
+        "rule_design_clean_modern_responsive"
+      ],
+      "actions": [
+        {
+          "actionId": "listCategories",
+          "description": "Listar categorias ativas."
+        },
+        {
+          "actionId": "listProductsByCategory",
+          "description": "Listar produtos por categoria com filtros avançados (animal, marca, idade, necessidade especial)."
+        },
+        {
+          "actionId": "viewProductDetail",
+          "description": "Exibir detalhes do produto, imagens e status de disponibilidade."
+        }
+      ]
+    },
+    "cap_store_information": {
+      "description": "Exibição de informações sobre a loja (endereço, horário de funcionamento e contatos).",
+      "usesRules": [
+        "rule_lang_ptbr_only",
+        "rule_brazil_target",
+        "rule_essential_features",
+        "rule_design_clean_modern_responsive"
+      ],
+      "actions": [
+        {
+          "actionId": "viewAboutStore",
+          "description": "Exibir informações institucionais da loja/unidade."
+        },
+        {
+          "actionId": "viewBusinessHours",
+          "description": "Exibir horários de funcionamento."
+        },
+        {
+          "actionId": "viewContactChannels",
+          "description": "Exibir telefone/WhatsApp/e-mail e link de mapa (se configurado)."
+        }
+      ]
+    },
+    "cap_contact": {
+      "description": "Seção de contato para envio de mensagens ao pet shop.",
+      "usesRules": [
+        "rule_lang_ptbr_only",
+        "rule_essential_features",
+        "rule_design_clean_modern_responsive"
+      ],
+      "actions": [
+        {
+          "actionId": "submitContactMessage",
+          "description": "Enviar mensagem via formulário de contato."
+        },
+        {
+          "actionId": "viewContactConfirmation",
+          "description": "Exibir confirmação de envio e próximos passos."
+        }
+      ]
+    },
+    "cap_blog": {
+      "description": "Blog com dicas e notícias sobre pets para conteúdo informativo.",
+      "usesRules": [
+        "rule_lang_ptbr_only",
+        "rule_tone_friendly_informative",
+        "rule_essential_features",
+        "rule_design_clean_modern_responsive"
+      ],
+      "isOptional": true,
+      "actions": [
+        {
+          "actionId": "listBlogPosts",
+          "description": "Listar posts publicados."
+        },
+        {
+          "actionId": "viewBlogPost",
+          "description": "Exibir post individual por slug."
+        }
+      ]
+    },
+    "cap_view_promotions": {
+      "description": "Exibição de uma seção dedicada a produtos em promoção ou destaque.",
+      "usesRules": [
+        "rule_design_clean_modern_responsive"
+      ],
+      "isOptional": true,
+      "actions": [
+        {
+          "actionId": "viewFeaturedProducts",
+          "description": "Exibir uma lista de produtos marcados como destaque na página inicial ou em uma seção dedicada."
+        }
+      ]
+    },
+    "cap_whatsapp_consultation": {
+      "description": "Permite que o cliente inicie uma conversa via WhatsApp para consultar a disponibilidade de um produto.",
+      "usesRules": [
+        "rule_brazil_target"
+      ],
+      "isOptional": true,
+      "actions": [
+        {
+          "actionId": "consultProductOnWhatsApp",
+          "description": "Iniciar conversa no WhatsApp a partir da página de um produto específico, pré-populando a mensagem com o nome do produto."
+        }
+      ]
+    },
+    "cap_manage_content": {
+      "description": "Administração pela equipe para gerenciar páginas, catálogo e blog (quando habilitado).",
+      "usesRules": [
+        "rule_roles_customer_staff",
+        "rule_lang_ptbr_only",
+        "rule_template_matrix_replicable"
+      ],
+      "actions": [
+        {
+          "actionId": "createUpdatePublishPages",
+          "description": "Criar/editar/publicar páginas de conteúdo."
+        },
+        {
+          "actionId": "createUpdateActivateProducts",
+          "description": "Criar/editar/ativar/desativar produtos, incluindo seus atributos de filtro, status de disponibilidade e se está em destaque."
+        },
+        {
+          "actionId": "createUpdateActivateCategories",
+          "description": "Criar/editar/ativar/desativar categorias."
+        },
+        {
+          "actionId": "createUpdatePublishBlogPosts",
+          "description": "Criar/editar/publicar posts do blog (se habilitado)."
+        },
+        {
+          "actionId": "manageStoreInfo",
+          "description": "Atualizar endereço, horários e contatos da unidade."
+        },
+        {
+          "actionId": "manageFilterOptions",
+          "description": "Gerenciar os valores disponíveis para os filtros de produto (ex: marcas, necessidades especiais)."
+        }
+      ]
+    },
+    "cap_template_configuration": {
+      "description": "Configuração do modelo matriz para replicação em outras unidades/franquias, incluindo branding e dados da unidade.",
+      "usesRules": [
+        "rule_template_matrix_replicable",
+        "rule_branding_colors",
+        "rule_design_clean_modern_responsive"
+      ],
+      "actions": [
+        {
+          "actionId": "configureBranding",
+          "description": "Configurar logo e paleta (verde/azul com detalhes em amarelo)."
+        },
+        {
+          "actionId": "configureUnitData",
+          "description": "Configurar dados de cada unidade (endereço/horários/contatos) sem alterar a estrutura."
+        }
+      ]
+    }
+  }
+}
+``` </promptcustom> </plugin-agent-playground-100554>
