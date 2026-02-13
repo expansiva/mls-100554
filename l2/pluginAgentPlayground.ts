@@ -4,7 +4,7 @@ import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { loadChatPreferences, IChatPreferences, saveChatPreferences, getUserId, createThread } from '/_102025_/l2/collabMessagesHelper.js';
-import { getThreadByName, listThreads, getTask, getMessage } from '/_102025_/l2/collabMessagesIndexedDB.js';
+import { getThreadByName, listThreads, getTask, getMessage, addMessage } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { IAgent } from '/_100554_/l2/aiAgentBase.js';
 import { getTemporaryContext, getAllSteps } from '/_100554_/l2/aiAgentHelper.js';
 import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
@@ -57,7 +57,7 @@ export class AgentTester extends CollabLitElement {
     disconnectedCallback() {
         setState('preview.pausePreview', false);
         super.disconnectedCallback();
-        
+
     }
 
     async firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
@@ -547,6 +547,15 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         let context;
         try {
             context = getTemporaryContext(threadId, userId, '@@' + agentName + ' ' + message);
+            const now = new Date();
+            const formattedDate = now.getFullYear().toString()
+                + String(now.getMonth() + 1).padStart(2, '0')
+                + String(now.getDate()).padStart(2, '0')
+                + String(now.getHours() + 3).padStart(2, '0')
+                + String(now.getMinutes()).padStart(2, '0')
+                + String(now.getSeconds()).padStart(2, '0')
+                + "." + Math.floor(1000 + Math.random() * 9000);
+            if (!context.message.createAt) context.message.createAt = formattedDate;
         } catch (e: any) {
             this.inError = true;
             return `[pluginAgentPlayground] [getTemporaryContext] Agent "${agentName}" error: ${e.message}\n\n${JSON.stringify(context, null, 2)}`
@@ -557,6 +566,8 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
             setState('playgroundAgent.modeCompare', group);
             if (!agent) throw new Error('Not found agent:' + agentName);
             await executeBeforePrompt(agent, context);
+            if (context.message) await addMessage({ ...context.message, footers: [] })
+            console.info(context);
             setState('playgroundAgent.modeCompare', undefined);
             return `[pluginAgentPlayground] Agent "${agentName}" responded:\n${JSON.stringify(context, null, 2)}`;
         } catch (e: any) {
@@ -564,6 +575,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
             return `[pluginAgentPlayground] Agent "${agentName}" error: ${e.message}\n\n${JSON.stringify(context, null, 2)}`
         }
     }
+
 
     private escapeAngleBrackets(input: string): string {
         return input
@@ -756,6 +768,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         el.setAttribute('taskId', obj.task.PK);
         (el as any)['task'] = obj.task;
         (el as any)['message'] = obj.message;
+        (el as any)['restartPooling'] = true;
         openElementInServiceDetails(el);
 
     }

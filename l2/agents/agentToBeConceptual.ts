@@ -4,12 +4,13 @@ import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 
 export function createAgent(): IAgentAsync {
   return {
-    agentName: "agentToBeConceptual", 
+    agentName: "agentToBeConceptual",
     agentProject: 100554,
     agentFolder: "agents",
     agentDescription: "Create New ToBe Conceptual",
     visibility: "private",
     beforePromptImplicit,
+    beforePromptStep,
     afterPromptStep
   };
 }
@@ -21,8 +22,8 @@ async function beforePromptImplicit(
 ): Promise<mls.msg.AgentIntent[]> {
 
   if (!userPrompt || userPrompt.length < 5) throw new Error('invalid prompt');
-
   const inTest = true; // todo: resolve
+
   const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
     type: "add-message-ai",
     request: {
@@ -45,6 +46,35 @@ async function beforePromptImplicit(
 
 }
 
+async function beforePromptStep(
+  agent: IAgentMeta,
+  context: mls.msg.ExecutionContext,
+  parentStep: mls.msg.AIAgentStep,
+  step: mls.msg.AIAgentStep,
+  hookSequential: number,
+  args?: string
+): Promise<mls.msg.AgentIntent[]> {
+
+  console.info(`BeforePromptStep ${agent.agentName}`);
+  console.info(`${args}`);
+
+  if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
+
+  const continueIntent: mls.msg.AgentIntentPromptReady = {
+    type: "prompt_ready",
+    args,
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    hookSequential,
+    parentStepId: parentStep.stepId,
+    humanPrompt: args || '',
+    systemPrompt: system2.replace("{{outputPrompt}}", outputPrompt)
+  }
+
+  return [continueIntent];
+}
+
 async function afterPromptStep(
   agent: IAgentMeta,
   context: mls.msg.ExecutionContext,
@@ -61,9 +91,10 @@ async function afterPromptStep(
   if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
   let status: mls.msg.AIStepStatus = 'completed';
   let intents: mls.msg.AgentIntent[] = [];
+
   try {
     const output = payload.result;
-    intents = await processToBe(output as ModuleToBe);
+    intents = await processToBe(context, output as ModuleToBe);
   } catch (e) {
     console.error(e);
     status = 'failed';
@@ -79,30 +110,35 @@ async function afterPromptStep(
     stepId: step.stepId,
     status
   };
-  return [... intents, updateStatus];
+  return [...intents, updateStatus];
 
 }
 
-async function processToBe(moduleToBe: ModuleToBe): Promise<mls.msg.AgentIntent[]> {
+async function processToBe(context: mls.msg.ExecutionContext, moduleToBe: ModuleToBe): Promise<mls.msg.AgentIntent[]> {
 
   console.log("=== processToBe")
   console.log(JSON.stringify(moduleToBe, null, 2));
 
-  const step: mls.msg.AIPayload = {
-    type: 'agent',
-    stepId: 0,
-    interaction: null,
-    status: 'pending',
-    nextSteps: [],
-    agentName: "agentToBeConceptual2",
-    prompt: "",
-    rags: null,
+  const newStep: mls.msg.AgentIntentAddStep = {
+    type: "add-step",
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    parentStepId: 1,
+    step:
+    {
+      type: 'agent',
+      stepId: 0,
+      interaction: null,
+      status: 'waiting_human_input',
+      nextSteps: [],
+      agentName: "agentToBeConceptual2",
+      prompt: JSON.stringify(moduleToBe, null, 2),
+      rags: null,
+    }
   };
-  // const rc: mls.msg.AgentIntentAddSteps = {
-  //   type: 'add-steps',
-  //   steps: [step]
-  // }
-  return [];
+
+  return [newStep];
 
 }
 

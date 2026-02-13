@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/agents/agentDefs.ts" enhancement="_100554_enhancementAgent" />
+/// <mls fileReference="_100554_/l2/agents/agentDefs" enhancement="_100554_enhancementAgent"/>
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
@@ -52,7 +52,7 @@ async function beforePromptImplicit(
   userPrompt: string,
 ): Promise<mls.msg.AgentIntent[]> {
 
-  let max = 20; // default max 20 files
+  let max = 10; // default max 20 files
   const match = userPrompt.trim().match(/^update\s*(\d+)?$/i);
   if (match) {
     max = match[1] ? Number(match[1]) : max;
@@ -65,6 +65,8 @@ async function beforePromptImplicit(
     .filter(Boolean)
     .slice(0, max); // only x first 
   if (paths.length < 1) throw new Error('no files to update defs');
+
+
   const inputs: mls.msg.IAMessageInputType[] = [{ type: "system", content: system1 }];
 
   const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
@@ -98,8 +100,8 @@ async function beforePromptStep(
   if (!args) throw new Error(`[beforePromptStep] args invalid`)
   const file = mls.stor.files[args];
 
-  const continueParallel: mls.msg.AgentIntentContinueParallelStep = {
-    type: "continue-parallel-step",
+  const continueParallel: mls.msg.AgentIntentPromptReady = {
+    type: "prompt_ready",
     args,
     messageId: context.message.orderAt,
     threadId: context.message.threadId,
@@ -172,7 +174,7 @@ async function updateDefs(defs: AsIs): Promise<void> {
   let fileInfo = mls.stor.convertFileReferenceToFile(fileReference);
   if (!fileReference || fileInfo.project < 1) throw new Error(`Invalid step in update defs, incorrect meta fileRecerence: ${fileReference}`);
 
-  const template = `/// <mls fileReference="${defs.meta.fileReference}" enhancement="_blank" />
+  const template = `/// <mls fileReference="${defs.meta.fileReference.replace('.ts', '.defs.ts')}" enhancement="_blank" />
 
 // Do not change – automatically generated code. 
 
@@ -209,17 +211,11 @@ async function updateStorFile(params: { project: number, shortName: string, leve
   if (!file) throw new Error('[agentDefs] Invalid storFile');
   const path = mls.stor.getKeyToFile(params);
   console.log(`[agentDefs] updating file: ${path}`);
-  const models = mls.editor.getModels(params.project, params.shortName, params.folder, params.level);
-  if (!models || !models.defs) {
-    const modelDefs = await createModel(file, false, false);
-    if (!modelDefs) throw new Error('[agentDefs] model .defs not created');
-    modelDefs.model.setValue(params.content);
-  } else {
-    models.defs.model.setValue(params.content);
-  }
-  file.isLocalVersionOutdated = false;
-  file.status = 'changed';
-  file.updatedAt = new Date().toISOString();
+  console.log(`[agentDefs] updating content: ${params.content}`);
+
+  const modelDefs = await file.getOrCreateModel();
+  modelDefs.model.setValue(params.content);
+
 }
 
 const system1 = `

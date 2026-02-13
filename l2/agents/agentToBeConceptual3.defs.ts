@@ -6,7 +6,8 @@ export const asis: mls.defs.AsIs = {
   "meta": {
     "fileReference": "_100554_/l2/agents/agentToBeConceptual3.ts",
     "componentType": "agent",
-    "componentScope": "editor"
+    "componentScope": "editor",
+    "devFidelity": "scaffold"
   },
   "references": {
     "imports": [
@@ -44,59 +45,51 @@ export const asis: mls.defs.AsIs = {
   },
   "codeInsights": {
     "todos": [
-      "define inTest flag - currently hardcoded to true",
-      "uncomment add-steps intent implementation"
+      "define"
     ],
-    "securityWarnings": [],
-    "unusedImports": [],
     "deadCodeBlocks": [
-      "const step: mls.msg.AIPayload = {...}",
-      "// const rc: mls.msg.AgentIntentAddSteps = {...}",
-      "return [];"
-    ],
-    "accessibilityIssues": [],
-    "i18nWarnings": [],
-    "performanceHints": []
+      "const rc: mls.msg.AgentIntentAddSteps = { type: 'add-steps', steps: [step] }",
+      "t1, grok-code-fast-1, 17s, $0.0070, 8.7/10",
+      "t2, gpt-5.2, 60s, $0.0800, 8.3/10, **json formatting issues**",
+      "t3, gemini-2.5-pro, 68s, $0.0291, 7.6/10"
+    ]
   },
-  "auth": {},
   "asIs": {
     "semantic": {
-      "generalDescription": "AI agent that applies user suggestions to update an existing TO-BE conceptual business model",
+      "generalDescription": "Agent that applies suggestions to update TO-BE conceptual models",
       "businessCapabilities": [
-        "Apply user suggestions to TO-BE conceptual model",
-        "Validate suggestions relevance and applicability",
-        "Translate suggestions into concrete entity/rule/capability changes",
-        "Mark optional/configurable features with isOptional flag",
-        "Preserve existing rules and constraints",
-        "Filter suggestions by yagni = now criteria",
-        "Return explicit errors for invalid or contradictory suggestions"
+        "UPDATE an existing TO-BE conceptual model by applying a list of user-provided suggestions",
+        "Apply ONLY suggestions that are relevant to the TO-BE model",
+        "Translate each valid suggestion into concrete changes in entities, rules, or capabilities",
+        "Mark related capability with isOptional = true when suggestion represents optional or configurable feature",
+        "Preserve all existing rules and constraints unless a suggestion clearly extends them",
+        "Apply only suggestions where yagni = \"now\"",
+        "Return explicit error if suggestions are invalid, contradictory, or not applicable"
       ],
       "technicalCapabilities": [
-        "Agent lifecycle management with before/after prompt hooks",
-        "System prompt injection with dynamic outputPrompt placeholder",
-        "AI message orchestration with system and human message types",
-        "Step status management (completed/failed)",
-        "Test mode conditional logic",
-        "Output processing and error handling",
-        "Sequential hook execution tracking"
+        "Process AI agent steps with beforePromptImplicit hook",
+        "Process AI agent steps with beforePromptStep hook",
+        "Process AI agent steps with afterPromptStep hook",
+        "Generate agent intents for adding AI messages",
+        "Generate agent intents for prompt ready status",
+        "Generate agent intents for updating step status",
+        "Parse and validate flexible output results",
+        "Validate prompt inputs for minimum length"
       ],
       "implementedFeatures": [
-        "Agent creation with metadata (name, project, folder, description, visibility)",
-        "Input validation (minimum prompt length)",
-        "System prompt template with business analyst persona",
-        "Dynamic prompt placeholder replacement",
-        "Test mode flag for development",
-        "Step status update intent generation",
-        "Error handling with status failure propagation",
-        "Payload type validation (flexible vs result)",
-        "Process output placeholder with JSON logging"
+        "beforePromptImplicit hook implementation",
+        "beforePromptStep hook implementation",
+        "afterPromptStep hook implementation",
+        "System prompt injection for business analyst role",
+        "Output processing via processOutput4 function",
+        "Test mode detection via inTest flag"
       ],
       "constraints": [
-        "No technical or implementation details in output",
-        "Do not remove existing capabilities unless explicitly required",
-        "Only apply suggestions where yagni = now",
-        "Must return explicit error for invalid suggestions",
-        "Test mode disables step advancement (stepId === 1 clears intents)"
+        "Only apply suggestions where yagni = \"now\"",
+        "Do not introduce technical or implementation details",
+        "Do not remove existing capabilities unless explicitly required by a suggestion",
+        "Preserve all existing rules and constraints unless a suggestion clearly extends them",
+        "Minimum prompt length of 5 characters"
       ]
     }
   }

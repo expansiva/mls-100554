@@ -1,15 +1,18 @@
 /// <mls fileReference="_100554_/l2/agents/agentToBeConceptual2.ts" enhancement="_100554_enhancementAgent" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
+import { finishClarification } from "/_100554_/l2/aiAgentOrchestration.js";
 
 export function createAgent(): IAgentAsync {
   return {
-    agentName: "agentToBeConceptual2", 
+    agentName: "agentToBeConceptual2",
     agentProject: 100554,
     agentFolder: "agents",
     agentDescription: "Improve ToBe conceptual",
     visibility: "private",
     beforePromptImplicit,
+    beforePromptStep,
+    beforeClarificationStep,
     afterPromptStep
   };
 }
@@ -44,6 +47,35 @@ async function beforePromptImplicit(
 
 }
 
+async function beforePromptStep(
+  agent: IAgentMeta,
+  context: mls.msg.ExecutionContext,
+  parentStep: mls.msg.AIAgentStep,
+  step: mls.msg.AIAgentStep,
+  hookSequential: number,
+  args?: string
+): Promise<mls.msg.AgentIntent[]> {
+
+  console.info(`BeforePromptStep ${agent.agentName}`);
+  console.info(`${args}`);
+
+  if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
+
+  const continueIntent: mls.msg.AgentIntentPromptReady = {
+    type: "prompt_ready",
+    args,
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    hookSequential,
+    parentStepId: parentStep.stepId,
+    humanPrompt: args || '',
+    systemPrompt: system3
+  }
+
+  return [continueIntent];
+}
+
 async function afterPromptStep(
   agent: IAgentMeta,
   context: mls.msg.ExecutionContext,
@@ -53,17 +85,24 @@ async function afterPromptStep(
 ): Promise<mls.msg.AgentIntent[]> {
   if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
 
-  const payload = (step.interaction?.payload?.[0]) as Output3 || undefined;
-  if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
+  const payload = (step.interaction?.payload?.[0]);
+  if (payload?.type !== 'clarification' || !payload.json) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
+  console.log("afterPrompt", payload.json);
+  return [];
+
+}
+
+async function beforeClarificationStep(
+  agent: IAgentMeta,
+  context: mls.msg.ExecutionContext,
+  parentStep: mls.msg.AIAgentStep,
+  step: mls.msg.AIClarificationStep,
+  hookSequential: number,
+  json: any
+): Promise<HTMLElement> {
+
+  if (!context.task) throw new Error(`[beforeClarificationStep] invalid task: undefined`)
   let status: mls.msg.AIStepStatus = 'completed';
-  let intents: mls.msg.AgentIntent[] = [];
-  try {
-    const output = payload.result;
-    intents = await processOutput3(output as Suggestions);
-  } catch (e) {
-    console.error(e);
-    status = 'failed';
-  }
 
   const updateStatus: mls.msg.AgentIntentUpdateStatus = {
     type: 'update-status',
@@ -75,33 +114,70 @@ async function afterPromptStep(
     stepId: step.stepId,
     status
   };
-  return [];
-  // return [...intents, updateStatus];
 
-}
-
-async function processOutput3(moduleToBe: Suggestions): Promise<mls.msg.AgentIntent[]> {
-
-  console.log("=== Suggestions")
-  console.log(JSON.stringify(moduleToBe, null, 2));
-
-  const inTest = true; // todo: define
-  if (inTest) return [];
-  const step: mls.msg.AIPayload = {
-    type: 'agent',
-    stepId: 0,
-    interaction: null,
-    status: 'pending',
-    nextSteps: [],
-    agentName: "agentToBeConceptual3",
-    prompt: "",
-    rags: null,
+  const updateStatusAgent: mls.msg.AgentIntentUpdateStatus = {
+    type: 'update-status',
+    hookSequential,
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    parentStepId: 1,
+    stepId: parentStep.stepId,
+    status: 'completed'
   };
-  // const rc: mls.msg.AgentIntentAddSteps = {
-  //   type: 'add-steps',
-  //   steps: [step]
-  // }
-  return [];
+
+  const newStep: mls.msg.AgentIntentAddStep = {
+    type: "add-step",
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    parentStepId: 1,
+    step:
+    {
+      type: 'agent',
+      stepId: 0,
+      interaction: null,
+      status: 'waiting_human_input',
+      nextSteps: [],
+      agentName: "agentToBeConceptual3",
+      prompt: "{{clarification}}",
+      rags: null,
+    }
+  };
+
+  const intentsToClarification: mls.msg.AgentIntent[] = [newStep, updateStatusAgent, updateStatus];
+
+  await import('/_100554_/l2/agents/agentToBeConceptual2Clarification.js');
+  const clariEl = document.createElement('agents--agent-to-be-conceptual2-clarification-100554');
+  (clariEl as any).suggestions = json.suggestions;
+  (clariEl as any).toBe = JSON.parse(parentStep.prompt || '');
+
+  clariEl.addEventListener('clarification-finish', (e: Event) => {
+    const { detail } = e as CustomEvent<{ value: unknown; action: "continue" | "cancel" }>;
+    const { value, action } = detail;
+    const normalizedValue = `
+## Module ToBe
+\`\`\`json
+    ${parentStep.prompt}
+\`\`\`
+
+## Suggestions
+\`\`\`json
+    ${JSON.stringify(value, null, 2)}
+\`\`\`
+  `
+    finishClarification(
+      agent,
+      step.stepId,
+      parentStep.stepId,
+      intentsToClarification,
+      context,
+      normalizedValue,
+      action
+    );
+  });
+
+  return clariEl;
 
 }
 
@@ -145,9 +221,10 @@ You must return the object strictly as JSON
 //#region OutputSection
 export type Output3 =
   {
-    type: "flexible";
-    result: Suggestions;
-  };
+    type: "clarification";
+    json: Suggestions;
+  }
+
 export interface Suggestions {
   suggestions: Suggestion[];
 }

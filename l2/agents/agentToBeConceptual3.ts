@@ -5,12 +5,13 @@ import { outputPrompt, Output, ModuleToBe } from '/_100554_/l2/agents/agentToBeC
 
 export function createAgent(): IAgentAsync {
   return {
-    agentName: "agentToBeConceptual3", 
+    agentName: "agentToBeConceptual3",
     agentProject: 100554,
     agentFolder: "agents",
     agentDescription: "Apply suggestions",
     visibility: "private",
     beforePromptImplicit,
+    beforePromptStep,
     afterPromptStep
   };
 }
@@ -46,6 +47,33 @@ async function beforePromptImplicit(
 
 }
 
+async function beforePromptStep(
+  agent: IAgentMeta,
+  context: mls.msg.ExecutionContext,
+  parentStep: mls.msg.AIAgentStep,
+  step: mls.msg.AIAgentStep,
+  hookSequential: number,
+  args?: string
+): Promise<mls.msg.AgentIntent[]> {
+
+  if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
+
+  const continueIntent: mls.msg.AgentIntentPromptReady = {
+    type: "prompt_ready",
+    args,
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    hookSequential,
+    parentStepId: parentStep.stepId,
+    humanPrompt: args || '',
+    systemPrompt: system3.replace("{{outputPrompt}}", outputPrompt)
+  }
+
+  return [continueIntent];
+}
+
+
 async function afterPromptStep(
   agent: IAgentMeta,
   context: mls.msg.ExecutionContext,
@@ -67,7 +95,8 @@ async function afterPromptStep(
     console.error(e);
     status = 'failed';
   }
-  if (step.stepId === 1) intents = []; // test mode do not advance
+
+  if (context.isTest) return [];
 
   const updateStatus: mls.msg.AgentIntentUpdateStatus = {
     type: 'update-status',
@@ -79,6 +108,18 @@ async function afterPromptStep(
     stepId: step.stepId,
     status
   };
+
+  const updateStatusRoot: mls.msg.AgentIntentUpdateStatus = {
+    type: 'update-status',
+    hookSequential,
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    parentStepId: 0,
+    stepId: 1,
+    status
+  };
+
   return [...intents, updateStatus];
 
 }

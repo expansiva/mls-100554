@@ -293,6 +293,7 @@ export class ServiceDetail100554 extends ServiceBase {
             el.id = element.tagName.toLowerCase();
         }
         el.style.display = 'block';
+        el.style.height = '100%';
         this.setContentElement(el, element);
 
     }

@@ -21,10 +21,27 @@ ai-agent-default-feedback-100554 {
             margin: 4px 0;
         }
 
+        .notification-badge {
+            position: absolute;
+            top: -7px;
+            right: -3px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 0.1em 0.1em;
+            font-weight: bold;
+            line-height: 1;
+            min-width: 1em;
+            text-align: center;
+            font-size: 10px;
+        }
+
         .icon {
+            position: relative;
             svg {
                 height: 16px;
                 width: 16px;
+                fill: currentColor;
             }
 
             .success {
@@ -48,8 +65,9 @@ ai-agent-default-feedback-100554 {
             }
         }
 
-        .actions{
+        .actions {
             margin-left: auto;
+
             .icon {
                 cursor: pointer;
             }
