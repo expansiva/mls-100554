@@ -1,12 +1,12 @@
-/// <mls fileReference="_100554_/l2/agents/agentNewModule.ts" enhancement="_100554_enhancementAgent" />
+/// <mls fileReference="_100554_/l2/agents/agentNewModule" enhancement="_100554_enhancementAgent"/>
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
-import { getAgentStepByAgentName } from "/_100554_/l2/aiAgentHelper.js";
+import { getAgentStepByAgentName, getNextStepIdAvaliable } from "/_100554_/l2/aiAgentHelper.js";
 import { prepareClarificationElement } from "/_100554_/l2/aiAgentOrchestration.js";
 
 export function createAgent(): IAgentAsync {
   return {
-    agentName: "agentNewModule", 
+    agentName: "agentNewModule",
     agentProject: 100554,
     agentFolder: "agents",
     agentDescription: "Create New Module on current project",
@@ -42,7 +42,7 @@ async function beforePromptImplicit(
       }, {
         type: "human",
         content: userPrompt
-      }],
+        }],
       taskTitle: `New module`,
       threadId: context.message.threadId,
       userMessage: context.message.content,
@@ -68,7 +68,6 @@ async function afterPromptStep(
   }
   if (payload?.type !== 'clarification' || !payload.json) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
   console.log("afterPrompt", payload.json);
-
   return [];
 
 }
@@ -82,8 +81,10 @@ async function beforeClarificationStep(
   json: any
 ): Promise<HTMLElement> {
 
+  if (!context.task) throw new Error(`[beforeClarificationStep] invalid task: undefined`)
+
   let status: mls.msg.AIStepStatus = 'completed';
-  
+
   const updateStatus: mls.msg.AgentIntentUpdateStatus = {
     type: 'update-status',
     hookSequential,
@@ -95,21 +96,27 @@ async function beforeClarificationStep(
     status
   };
 
-  // const newStep: mls.msg.AgentIntentAddSteps = {
-  //   type: "add-steps",
-  //   steps: [{
-  //     type: 'agent',
-  //     stepId: 0,
-  //     interaction: null,
-  //     status: 'pending',
-  //     nextSteps: [],
-  //     agentName: "agentToBeConceptual",
-  //     prompt: "{{clarification}}", // response 
-  //     rags: null,
-  //   }]
-  // };
+  const newStep: mls.msg.AgentIntentAddStep = {
+    type: "add-step",
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    parentStepId: 1,
+    step:
+    {
+      type: 'agent',
+      stepId: 0,
+      interaction: null,
+      stepTitle: 'Teste step title 2',
+      status: 'waiting_human_input',
+      nextSteps: [],
+      agentName: "agentToBeConceptual",
+      prompt: "{{clarification}}",
+      rags: null,
+    }
+  };
 
-  const intentsToClarification: mls.msg.AgentIntent[] = [updateStatus];
+  const intentsToClarification: mls.msg.AgentIntent[] = [newStep, updateStatus];
   const div = await prepareClarificationElement(agent, context, step.stepId, parentStep.stepId, intentsToClarification, json);
   return div;
 

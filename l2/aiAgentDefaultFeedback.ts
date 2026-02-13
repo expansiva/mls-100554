@@ -4,9 +4,9 @@ import { html, TemplateResult, nothing, svg } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { getTask } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { collab_play } from '/_100554_/l2/collabIcons.js';
-import { continuePoolingTask } from '/_100554_/l2/aiAgentOrchestration.js';
-
+import { collab_play, collab_pause, collab_bell } from '/_100554_/l2/collabIcons.js';
+import { continuePoolingTask, pauseOrContinueTask } from '/_100554_/l2/aiAgentOrchestration.js';
+import { getNextPendentStep } from "/_100554_/l2/aiAgentHelper.js";
 @customElement('ai-agent-default-feedback-100554')
 export class AiAgentDefaultFeedback100554 extends StateLitElement {
 
@@ -23,6 +23,10 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
         //this.task = await getTask('20260126134300.1001');
         //this.task = await getTask('20260126125152.1001');
         //this.task = await getTask('20260127122706.1001');
+        //this.task = await getTask('20260212124748.1001');
+
+        //console.info(this.task);
+
         this.isAgentParallelMode = !!this.task?.iaCompressed?.nextSteps[0].progress;
     }
 
@@ -63,12 +67,22 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
         }
     }
 
-    private getIconTask(status?: mls.msg.TaskStatus) {
+    private getIconTask(status?: string) {
 
-        switch (status) {
+        if (!this.task) return '';
+        let _status = status;
+        const step = getNextPendentStep(this.task);
+        if (step && step.type === "clarification") _status = 'clarification';
+        switch (_status) {
             case 'done': return html`<div class="success">${this.iconOk}</div>`
             case 'in progress': return html`<div class="loader"></div>`;
             case 'failed': return html`<div class="error">${this.iconError}</div>`;
+            case 'paused': return html`<div class="paused">${this.iconTaskPaused}</div>`
+            case 'clarification': return html`
+                <span class="icon-wrapper">
+                    ${collab_bell}
+                    <span class="notification-badge">1</span>
+                </span>`;
             default: return '•';
         }
     }
@@ -85,14 +99,14 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
         const children = this.getChildren(step);
         const hasChildren = children.length > 0;
 
-        if (step.type === 'flexible' || step.type === 'result') {
+        if (step.type === 'flexible' || step.type === 'result' || (step.type === 'clarification' && step.status === 'completed')) {
             return html`
-            ${hasChildren
+             ${hasChildren
                     ? children.map((s: mls.msg.AIPayload) =>
                         this.renderStep(s, depth)
                     )
                     : nothing}
-            `
+             `
         }
 
         return html`
@@ -140,30 +154,37 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
 
         `
     }
+
     private renderActions() {
         const task = this.task;
         if (!task) return nothing;
 
         const queue = task.iaCompressed?.queueFrontEnd;
 
-        if (task.status !== 'in progress' || !queue?.length)
-            return nothing;
+        const showRestart = task.status === 'in progress' && !queue?.length;
+        const showPause = task.status === 'in progress';
+        const showContinue = task.status === 'paused';
+
+        // ${showRestart ? html`<span class="icon" @click=${this.restartPoolingTask} >${collab_play} </span>` : nothing}
 
         return html`
         <div class="actions">
-            <span
-                class="icon"
-                @click=${this.restartPoolingTask}
-            >
-                ${collab_play}
-            </span>
+            ${showPause || showContinue ? html`<span class="icon" @click=${() => { this.pauseOrContinueTask(showPause ? 'paused' : 'continue') }} >${showPause ? collab_pause : collab_play} </span>` : nothing}
+            
+            
         </div>
     `;
     }
 
+    private pauseOrContinueTask(action: "paused" | "continue") {
+        if (!this.task || !this.message) return;
+        const context: mls.msg.ExecutionContext = { message: this.message, task: this.task, isTest: false };
+        pauseOrContinueTask('user request', context, action)
+    }
+
     private restartPoolingTask() {
         if (!this.task || !this.message) return;
-        const context: mls.msg.ExecutionContext = { message: this.message, task: this.task, isTest:false };
+        const context: mls.msg.ExecutionContext = { message: this.message, task: this.task, isTest: false };
         continuePoolingTask(context);
     }
 
@@ -360,6 +381,37 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
 </g>
 </svg>`;
 
+
+    private iconTaskPaused = svg`
+        <svg xmlns="http://www.w3.org/2000/svg"
+            width="256"
+            height="256"
+            viewBox="0 0 256 256"
+            fill="currentColor">
+
+            <g
+                style="stroke: none; stroke-width: 0; fill: none;"
+                transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)">
+
+                <!-- contorno externo (idêntico ao pending) -->
+                <rect
+                    x="0"
+                    y="0"
+                    width="90"
+                    height="90"
+                    rx="25"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="6"
+                />
+
+                <!-- pause -->
+                <rect x="30" y="24" width="8" height="42" rx="2" fill="currentColor"/>
+                <rect x="52" y="24" width="8" height="42" rx="2" fill="currentColor"/>
+
+            </g>
+        </svg>
+    `;
 
 
     private iconOk = svg`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><title>45-Check</title><g id="_45-Check" data-name="45-Check"><path d="M30,15V25a5,5,0,0,1-5,5H7a5,5,0,0,1-5-5V7A5,5,0,0,1,7,2H17V0H7A7,7,0,0,0,0,7V25a7,7,0,0,0,7,7H25a7,7,0,0,0,7-7V15Z"/><path d="M7.71,13.29,6.29,14.71l7,7a1,1,0,0,0,1.41,0l16-16L29.29,4.29,14,19.59Z"/></g></svg></div>`

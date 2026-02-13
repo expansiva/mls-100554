@@ -11,7 +11,8 @@ import {
     notifyTaskChange,
     dispatchDetailsTaskClose,
     updateTaskTitle,
-    getNextStepIdAvaliable
+    getNextStepIdAvaliable,
+    getRootAgent,
 } from "/_100554_/l2/aiAgentHelper.js";
 
 import { collabImport } from '/_100554_/l2/collabImport.js';
@@ -101,7 +102,6 @@ export async function startNewAiTaskAsync(
         notifyTaskChange(context, oldContextCreateAt);
 
         if (mls.isTraceAgent) console.log(JSON.stringify(context, null, 2));
-        //await afterPrompt(context);
 
     } catch (error: any) {
         onError(context, 1, error.message, oldContextCreateAt);
@@ -401,7 +401,7 @@ const MAX_HOOKS_PER_TURN = 5;
 const runningTasks = new Set<string>();
 
 export async function continuePoolingTask(context: mls.msg.ExecutionContext) {
-    
+
     const { task } = context;
     if (!task) return;
     const taskId = task.PK;
@@ -433,7 +433,6 @@ export async function continuePoolingTask(context: mls.msg.ExecutionContext) {
         startAt: Date.now().toString()
     });
 
-
     const hooksToProcess = ia.queueFrontEnd
         .filter(h => h.type !== 'pooling')
         .slice(0, MAX_HOOKS_PER_TURN);
@@ -442,7 +441,7 @@ export async function continuePoolingTask(context: mls.msg.ExecutionContext) {
         await Promise.all(
             hooksToProcess.map(async hook => [
                 ...(await processIntents2(agent, context, hook)),
-                ...getRemoveIntent(agent, context, hook),
+                ...getRemoveIntent(context, hook),
             ])
         )
     ).flat();
@@ -451,7 +450,7 @@ export async function continuePoolingTask(context: mls.msg.ExecutionContext) {
     let intents = intentsFromHooks;
 
     if (intents.length === 0) {
-        intents = await processHookPooling(agent, context);
+        intents = await processHookPooling(context);
         if (intents.length === 0) {
             runningTasks.delete(taskId);
             await deletePooling(taskId);
@@ -460,54 +459,108 @@ export async function continuePoolingTask(context: mls.msg.ExecutionContext) {
     }
 
     void processIntents(agent, context, intents);
-
 }
 
+const taskControllers = new Map<string, AbortController>();
 
-async function processIntents(agent: IAgentAsync, context: mls.msg.ExecutionContext, intents: mls.msg.AgentIntent[]): Promise<void> {
+async function processIntents(
+    agent: IAgentAsync,
+    context: mls.msg.ExecutionContext,
+    intents: mls.msg.AgentIntent[]
+): Promise<void> {
+
     if (mls.isTraceAgent) console.log(`[processIntents] intents length: ${intents.length}`);
+    const messageId = context.message.createAt;
+    if (!messageId) return;
+
+    taskControllers.get(messageId)?.abort();
+    const controller = new AbortController();
+    taskControllers.set(messageId, controller);
+    const signal = controller.signal;
+
+    try {
+        await _processIntents(agent, context, intents, signal);
+    }
+    finally {
+        if (taskControllers.get(messageId) === controller) {
+            taskControllers.delete(messageId);
+        }
+    }
+}
+
+async function _processIntents(
+    agent: IAgentAsync,
+    context: mls.msg.ExecutionContext,
+    intents: mls.msg.AgentIntent[],
+    signal: AbortSignal
+): Promise<void> {
+
+    if (signal.aborted) return;
+
     const oldContextCreateAt = context.message.createAt;
+    const isAddMessageAI = intents.some(i => i.type === 'add-message-ai');
+
     const value = await mls.api.msgApplyIntents({
         userId: context.message.senderId,
         intents
     });
-    if (!value) throw new Error(`[${agentName}](startNewAiTask) Error on return msgApplyIntents`);
-    if (value.statusCode !== 200) throw new Error(`[${agentName}](startNewAiTask) Error on msgApplyIntents: ${value.msg || ''})`);
-    const ret = value as mls.msg.ResponseApplyIntents;
 
+    if (!value) throw new Error(`[${agentName}] Error on msgApplyIntents`);
+    if (value.statusCode !== 200) throw new Error(`[${agentName}] Error: ${value.msg || ''}`);
+    if (signal.aborted) return;
+
+    const ret = value as mls.msg.ResponseApplyIntents;
     context.task = ret.task;
     if (ret.message) context.message = ret.message;
-    notifyTaskChange(context, oldContextCreateAt);
-    if (!context.task?.iaCompressed) return;
+    notifyTaskChange(context, isAddMessageAI ? oldContextCreateAt : undefined);
 
+    if (!context.task?.iaCompressed) return;
     runningTasks.add(ret.task.PK);
+
     await addPooling({
         taskId: ret.task.PK,
         userId: context.task?.owner ?? '',
         startAt: Date.now().toString()
     });
 
+    if (signal.aborted) return;
+
     let _hooks = context.task.iaCompressed.queueFrontEnd || [];
     const hooksToProcess = _hooks
         .filter(h => h.type !== 'pooling')
-        .slice(0, 5); // max 5 hooks by turn
+        .slice(0, 5);
+
     let newIntents: mls.msg.AgentIntent[] = [];
-    for (const hook of hooksToProcess) {
-        newIntents.push(...await processIntents2(agent, context, hook), ...getRemoveIntent(agent, context, hook));
+
+    for await (const hook of hooksToProcess) {
+        let agentToExecute: IAgentAsync | undefined = agent;
+        const agentByHookStep = getStepById(context.task, hook.stepId);
+        if (agentByHookStep && agentByHookStep.type === "agent" && agent.agentName !== (agentByHookStep as mls.msg.AIAgentStep).agentName) {
+            agentToExecute = await loadAgent((agentByHookStep as mls.msg.AIAgentStep).agentName);
+        }
+        if (!agentToExecute) throw new Error(`[${agentName}](startNewAiTask) Invalid agent in hook step`);
+        agent = agentToExecute;
+        newIntents.push(...await processIntents2(agentToExecute, context, hook), ...getRemoveIntent(context, hook));
     }
+
     await addOrUpdateTask(context.task); // UI feedback, update task in indexedDB
+    if (signal.aborted) return;
+
     if (newIntents.length < 1) {
-        newIntents = await processHookPooling(agent, context);
+        newIntents = await processHookPooling(context);
         if (newIntents.length < 1) {
             runningTasks.delete(ret.task.PK);
             await deletePooling(ret.task.PK);
             return; // just leave
         }
     }
-    processIntents(agent, context, newIntents); // reentrance processIntents, fire and forget to fast UI feedback 
+
+    await _processIntents(agent, context, newIntents, signal); // reentrance processIntents, fire and forget to fast UI feedback 
 }
 
+
 async function processIntents2(agent: IAgentAsync, context: mls.msg.ExecutionContext, hook: mls.msg.AgentHooks): Promise<mls.msg.AgentIntent[]> {
+
     try {
         if (hook.type === "beforePromptStep") return await processHookBeforePromptStep(agent, context, hook);
         if (hook.type === "afterPromptStep") return await processHookAfterPromptStep(agent, context, hook);
@@ -518,17 +571,24 @@ async function processIntents2(agent: IAgentAsync, context: mls.msg.ExecutionCon
     }
 }
 
-async function processHookPooling(agent: IAgentAsync, context: mls.msg.ExecutionContext): Promise<mls.msg.AgentIntentRemoveHook[]> {
+async function processHookPooling(context: mls.msg.ExecutionContext): Promise<mls.msg.AgentIntentRemoveHook[]> {
     const hook: mls.msg.AgentHookPooling | undefined = (context.task?.iaCompressed?.queueFrontEnd.find(f => f.type === 'pooling')) as mls.msg.AgentHookPooling;
-    if (!hook || !hook.afterMs || hook.afterMs < 1000) return [];
+    let inClarification: boolean = false;
+    if (context.task) {
+        const step = getNextPendentStep(context.task);
+        inClarification = !!step && step.type === "clarification";
+    }
+
+    if (!hook || !hook.afterMs || hook.afterMs < 1000 || context.task?.status === 'paused' || inClarification || context.isTest) return [];
+    //if (!hook || !hook.afterMs || hook.afterMs < 1000) return [];
     return new Promise((resolve, reject) => {
         setTimeout(() => {
-            resolve(getRemoveIntent(agent, context, hook));
+            resolve(getRemoveIntent(context, hook));
         }, hook.afterMs);
     });
 }
 
-function getRemoveIntent(agent: IAgentAsync, context: mls.msg.ExecutionContext, hook: mls.msg.AgentHooks): mls.msg.AgentIntentRemoveHook[] {
+function getRemoveIntent(context: mls.msg.ExecutionContext, hook: mls.msg.AgentHooks): mls.msg.AgentIntentRemoveHook[] {
     return [{
         type: 'remove-hook',
         hookSequential: hook.hookSequential,
@@ -537,6 +597,7 @@ function getRemoveIntent(agent: IAgentAsync, context: mls.msg.ExecutionContext, 
         taskId: context.task?.PK || ''
     }];
 }
+
 async function processHookBeforePromptStep(agent: IAgentAsync, context: mls.msg.ExecutionContext, hook: mls.msg.AgentHookBeforePromptStep): Promise<mls.msg.AgentIntent[]> {
     if (!agent.beforePromptStep) throw new Error(`Agent ${agent.agentName} do not have beforePromptStep`);
     if (!context.task) throw new Error('[processHookBeforePromptStep] invalid task');
@@ -778,18 +839,14 @@ export async function getClarificationElement(context: mls.msg.ExecutionContext)
     if (!ia) throw new Error('Task has no AI interaction');
     if (!ia.queueFrontEnd) throw new Error('Task has no pending hooks');
 
-    const firstStep = ia.nextSteps?.[0] as mls.msg.AIAgentStep | undefined;
-    if (!firstStep) throw new Error('No next step available');
-    const agentName = firstStep.agentName;
-    const agent: IAgentAsync | undefined = await loadAgent(agentName);
-    if (!agent) throw new Error(`[${agentName}](getClarificationElement) function not found`);
-
     const ret = await getAgentContext(taskId)
     if (ret.step.type !== "clarification") throw new Error(`[${agentName}](getClarificationElement) Clarification step not not found`);
 
+    const agent: IAgentAsync | undefined = await loadAgent(ret.interaction.agentName);
+    if (!agent) throw new Error(`[${agentName}](getClarificationElement) function not found`);
     const fn = agent.beforeClarificationStep;
-    if (typeof fn !== "function") throw new Error(`[${agentName}](getClarificationElement) 'beforeClarificationStep' function not found in ${agentName} `);
 
+    if (typeof fn !== "function") throw new Error(`[${agentName}](getClarificationElement) 'beforeClarificationStep' function not found in ${agentName} `);
 
     const parentId = getInteractionStepId(task, ret.step.stepId);
     if (!parentId) throw new Error(`[${agentName}](getClarificationElement) parentId not found`);
@@ -808,40 +865,54 @@ export async function prepareClarificationElement(
     parentStepId: number,
     intents: mls.msg.AgentIntent[],
     clarification: ClarificationValue | Object | string,
-    widget?: string
 ): Promise<HTMLElement> {
 
     const task = context.task;
     if (!task) throw new Error(`[${agentName}](startClarification) Invalid context.task`);
     let clarificationValue: ClarificationValue | Object = {};
 
-    if (!widget) {
-        await import('/_100554_/l2/widgetQuestionsForClarification.js');
-        try {
-            let ret: any = clarification;
-            if (typeof clarification === "string") ret = JSON.parse(clarification || '') as any;
-            clarificationValue = {
-                taskId: task.PK,
-                stepId: 0,
-                title: ret.title,
-                legends: ret.legends || [],
-                userLanguage: ret.userLanguage || '',
-                questions: ret.questions
-            }
-        }
-        catch (e) {
-            console.error(e);
-            throw new Error(`[${agentName}](showClarification) on task: ${task.PK}, json clarification invalid`);
+    await import('/_100554_/l2/widgetQuestionsForClarification.js');
+    try {
+        let ret: any = clarification;
+        if (typeof clarification === "string") ret = JSON.parse(clarification || '') as any;
+        clarificationValue = {
+            taskId: task.PK,
+            stepId: 0,
+            title: ret.title,
+            legends: ret.legends || [],
+            userLanguage: ret.userLanguage || '',
+            questions: ret.questions
         }
     }
+    catch (e) {
+        console.error(e);
+        throw new Error(`[${agentName}](showClarification) on task: ${task.PK}, json clarification invalid`);
+    }
+
 
     const div: HTMLElement = document.createElement('div');
     const clariEl = document.createElement('widget-questions-for-clarification-100554');
 
-    clariEl.addEventListener('clarification-finish', (e) => {
-        const detail = (e as CustomEvent).detail;
+    clariEl.addEventListener('clarification-finish', (e: Event) => {
+
+        const { detail } = e as CustomEvent<{ value: unknown; action: "continue" | "cancel" }>;
         const { value, action } = detail;
-        finishClarification(agent, stepId, parentStepId, intents, context, value, action)
+        const normalizedValue =
+            value == null
+                ? ''
+                : typeof value === 'object'
+                    ? JSON.stringify(value)
+                    : String(value);
+
+        finishClarification(
+            agent,
+            stepId,
+            parentStepId,
+            intents,
+            context,
+            normalizedValue,
+            action
+        );
     });
 
     (clariEl as any).value = clarificationValue;
@@ -873,22 +944,56 @@ export async function finishClarification(
         };
         const intentsFailed: mls.msg.AgentIntent[] = [updateStatusFailed];
         return processIntents(agent, context, intentsFailed);
-
     }
 
     if (action === 'continue') {
-        for (let intent of intents) {
-            if (intent.type !== 'add-steps') continue;
-            for (let step of intent.steps) {
-                if (step && (step as mls.msg.AIAgentStep).prompt) {
-                    const prompt = (step as mls.msg.AIAgentStep).prompt;
-                    (step as mls.msg.AIAgentStep).prompt = (prompt || '').replace('{{clarification}}', value)
-                }
-            }
+        const intentAddStep = intents.find((step) => step.type === 'add-step') as mls.msg.AgentIntentAddStep;
+        if (!intentAddStep) return;
+
+        const agentStep = (intentAddStep.step as mls.msg.AIAgentStep)
+        if (agentStep.prompt) {
+            const prompt = agentStep.prompt;
+            agentStep.prompt = (prompt || '').replace('{{clarification}}', value)
         }
-        return processIntents(agent, context, intents)
+
+        const newAgent = await loadAgent(agentStep.agentName);
+        if (!newAgent) throw new Error(`(pauseOrContinueTask) Agent not found`);
+        await processIntents(newAgent, context, intents);
+
     }
 
+}
+
+export async function pauseOrContinueTask(
+    reason: string,
+    context: mls.msg.ExecutionContext,
+    action: "paused" | "continue"
+): Promise<void> {
+
+    const task = context.task;
+    if (!task) throw new Error(`(pauseOrContinueTask) task not found`);
+
+    const ia = task.iaCompressed;
+    if (!ia) throw new Error('(pauseOrContinueTask) Task has no AI interaction');
+
+    if (['todo', 'done'].includes(task.status)) throw new Error(`(pauseOrContinueTask) cannot change task with status "${task.status}". Only tasks in "paused" or "continued" state can be modified.`);
+
+    if (task.status === 'paused' && action === 'paused') throw new Error(`(pauseOrContinueTask) task already paused`);
+
+    const intentPauseOrContinue: mls.msg.AgentIntentPauseOrContinue = {
+        type: 'pause-or-continue',
+        messageId: context.message.orderAt,
+        threadId: context.message.threadId,
+        taskId: context.task?.PK || '',
+        reason,
+    };
+
+    const intents: mls.msg.AgentIntent[] = [intentPauseOrContinue];
+    const agentRoot = getRootAgent(task)
+    if (!agentRoot) throw new Error('(pauseOrContinueTask) Task has no AI agentRoot');
+    const agent = await loadAgent(agentRoot.agentName);
+    if (!agent) throw new Error(`(pauseOrContinueTask) Agent not found`);
+    processIntents(agent, context, intents);
 
 }
 
@@ -913,31 +1018,6 @@ async function onError(context: mls.msg.ExecutionContext, stepId: number, messag
     }
 }
 
-// Types for the JSON structure
-export interface ClarificationValue {
-    taskId: string;
-    stepId: number;
-    title: string;
-    userLanguage: string;
-    questions: ClarificationQuestions;
-    legends: string[];
-}
-
-export interface ClarificationQuestions {
-    [key: string]: Question;
-}
-
-export interface Question {
-    type: 'open' | 'select' | 'boolean' | 'MoSCoW' | 'range';
-    question: string;
-    answer?: string | boolean;
-    options?: QuestionOption[];
-}
-
-export interface QuestionOption {
-    id: string;
-    label: string;
-}
 
 /**
  * agentName, ex: 'agentXX1' or '_100554_/l2/agents/agentXX1'
@@ -985,4 +1065,31 @@ async function getAgentInstanceByName(agentNameOrPath: string): Promise<IAgent |
         };
     }
     return undefined;
+}
+
+
+// Types for the JSON structure
+export interface ClarificationValue {
+    taskId: string;
+    stepId: number;
+    title: string;
+    userLanguage: string;
+    questions: ClarificationQuestions;
+    legends: string[];
+}
+
+export interface ClarificationQuestions {
+    [key: string]: Question;
+}
+
+export interface Question {
+    type: 'open' | 'select' | 'boolean' | 'MoSCoW' | 'range';
+    question: string;
+    answer?: string | boolean;
+    options?: QuestionOption[];
+}
+
+export interface QuestionOption {
+    id: string;
+    label: string;
 }
