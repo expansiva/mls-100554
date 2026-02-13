@@ -84,16 +84,16 @@ export class ServiceMindMap100554 extends ServiceBase {
 
     private setEvents() {
 
-        mls.events.addEventListener([2, 4], ['FileAction'], this.onMLSFileAction.bind(this));
+        mls.events.addEventListener([2, 4], ['FileAction'] as any, this.onMLSFileActionMindmap.bind(this));
 
 
     }
 
-    private async onMLSFileAction(ev: mls.events.IEvent): Promise<void> {
+    private async onMLSFileActionMindmap(ev: mls.events.IEvent): Promise<void> {
 
         try {
 
-            if (![2, 4].includes(ev.level) || (ev.type !== 'FileAction') || !ev.desc) return;
+            if (![2, 4].includes(ev.level) || (ev.type !== 'FileAction' as any) || !ev.desc) return;
             const fileAction = JSON.parse(ev.desc) as mls.events.IFileAction;
 
             const eventsValid = ['open'];

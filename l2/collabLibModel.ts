@@ -325,6 +325,8 @@ function onMonacoModelCreated(ev: mls.events.IEvent) {
     storFile.getOrCreateModel().then((model: mls.editor.IModelBase) => {
         if (!model) return;
         // Register model events and hooks
+
+        if (model.originalCRC === undefined) setOriginalCrc(model);
         storFile.onAction = (action: mls.stor.IFileInfoAction) => _afterUpdate(storFile, model.model, mapExt[storFile.extension]);
         storFile.getValueInfo = () => _getValueInfo(model);
         model.model.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => _onModelChange(e, model, storFile));
@@ -584,8 +586,10 @@ function _getPosition(modeIld: string, tp: 'ts' | 'html' | 'defs' | 'style' | 't
 
 async function _checkSameContent(modelBase: mls.editor.IModelBase, storFile: mls.stor.IFileInfo) {
 
-    if (modelBase.originalCRC === undefined) setOriginalCrc(modelBase);
     let sameContent: boolean = modelBase.originalCRC === mls.common.crc.crc32(modelBase.model.getValue()).toString(16);
+    
+    //if (modelBase.originalCRC === undefined) setOriginalCrc(modelBase);
+
     if (modelBase.storFile.extension === '.less') {
         sameContent = modelBase.originalCRC === mls.common.crc.crc32(removeTokensFromSource(modelBase.model.getValue()).trim()).toString(16);
     };

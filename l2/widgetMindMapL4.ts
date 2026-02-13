@@ -14,6 +14,7 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     private offsetY = 0;
     private isListMode = false;
     private LIST_THRESHOLD = 15;
+    private _canvasDirtyWhileHidden = false;
 
     @property({ type: Boolean }) menuOpen = false;
     @property({ type: String }) activeDescription: string | undefined;
@@ -170,9 +171,13 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     updated(changedProperties: Map<string | number | symbol, unknown>) {
         super.updated(changedProperties);
         // If animating, use animated positions
-
         const mapState = changedProperties.get('mapState');
         const currentpage = changedProperties.get('currentpage');
+
+        if (this.activeDescription && mapState) {
+            this._canvasDirtyWhileHidden = true;
+            return;
+        }
 
         if (mapState) {
             const center = this.mapState?.nodes.find(n => n.id === this.mapState!.current);
@@ -203,7 +208,6 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
         }
 
-
         if (this._animating && this._animatedPositions) {
             this.drawMindMap(this._animatedPositions);
 
@@ -218,6 +222,8 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     //------IMPLEMENTATION--------- 
 
     private configureMindMap() {
+
+        if (this.activeDescription) return;
 
         if (this.mapState) {
             const center = this.mapState.nodes.find(n => n.id === this.mapState!.current);
@@ -917,6 +923,11 @@ export class WidgetMindMapL4100554 extends StateLitElement {
         if (this.fromMenu) {
             this.fromMenu = false;
             this.activeDescription = undefined;
+            if (this._canvasDirtyWhileHidden) {
+                this._canvasDirtyWhileHidden = false;
+                this._syncBreadcrumbWithCurrent();
+                this.drawMindMap();
+            }
             return;
         }
         const index = this.breadcrumb.length - 1;
@@ -1192,12 +1203,16 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
     private pluginsMenu = [
         {
+            label: 'Question architectures',
+            html: `<plugin-question-architecture-100554></plugin-question-architecture-100554>`,
+            file: '/_100554_/l2/pluginQuestionArchitecture.js'
+        },
+        {
             label: 'Find in files',
             html: `<plugin-project-find-files-100554></plugin-project-find-files-100554>`,
             file: '/_100554_/l2/pluginProjectFindFiles.js'
-        }
-
-
+        },
+        
     ]
 
 
