@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/agents/agentUserJourney.ts" enhancement="_100554_enhancementAgent" />
+/// <mls fileReference="_100554_/l2/agents/agentToBeUserJourney.ts" enhancement="_100554_enhancementAgent" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 
@@ -135,11 +135,27 @@ export type Output =
 export interface UserJourneyMap {
   journeys: Journey[];
   considerations: string[]; // optional
+  suggestions: Suggestion[];
 }
 export interface Journey {
   persona: string;
   goal: string;
   journey: string[];
+}
+export interface Suggestion {
+  suggestion: string;
+  customerPerception: string;
+  businessImpact?: (
+    | "customer_experience"
+    | "revenue"
+    | "operational_efficiency"
+    | "maintainability"
+    | "scalability"
+    | string // others
+  )[];
+  confidence?: number; // 0.0 to 1.0
+  requiresConfiguration: boolean; // feature requires user setup in admin console
+  yagni: "now" | "soon" | "later" | "no" | "unknown"; // YAGNI (You Ain’t Gonna Need It)
 }
 //#endregion
 
