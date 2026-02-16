@@ -199,6 +199,7 @@ export type Output =
 export interface ModuleToBe {
   meta: {
     userLanguage: string;
+    moduleName: string;
     userPromptOriginal: string;
     userPromptFinal: string; // Final consolidated prompt, merging relevant clarification answers
   };

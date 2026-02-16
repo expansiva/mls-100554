@@ -1,0 +1,47 @@
+/// <mls fileReference="_100554_/l2/agents/agentToBePages.defs.ts" enhancement="_blank" />
+
+// Do not change – automatically generated code. 
+
+export const asis: mls.defs.AsIs = {
+  "meta": {
+    "fileReference": "_100554_/l2/agents/agentDefs.ts",
+    "componentType": "agent",
+    "componentScope": "editor",
+    "group": "enhancement"
+  },
+  "references": {
+    "imports": [
+      {
+        "ref": "/_100554_/l2/aiAgentBase.js",
+        "dependencies": [
+          {
+            "name": "IAgentAsync",
+            "type": "interface"
+          },
+          {
+            "name": "IAgentMeta",
+            "type": "interface"
+          }
+        ]
+      },
+      {
+        "ref": "/_100554_/l2/collabLibModel.js",
+        "dependencies": [
+          {
+            "name": "createModel",
+            "type": "function"
+          }
+        ]
+      }
+    ]
+  },
+  "asIs": {
+    "semantic": {
+      "generalDescription": "Create or Update Defs",
+      "businessCapabilities": [],
+      "technicalCapabilities": [],
+      "implementedFeatures": []
+    }
+  }
+}
+    
