@@ -12,8 +12,6 @@ type SuggestionItem = Suggestion & {
     custom?: boolean;
 };
 
-type SortMode = 'default' | 'status';
-
 type Editors = {
     rules: monaco.editor.IStandaloneCodeEditor | undefined,
     entities: monaco.editor.IStandaloneCodeEditor | undefined,

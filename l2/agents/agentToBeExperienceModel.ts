@@ -1,15 +1,18 @@
 /// <mls fileReference="_100554_/l2/agents/agentToBeExperienceModel.ts" enhancement="_100554_enhancementAgent" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
+import { ModuleToBe } from '/_100554_/l2/agents/agentToBeConceptual.js';
+import { getPayloadToBeConceptual3 } from '/_100554_/l2/agents/agentToBeConceptual3.js';
 
 export function createAgent(): IAgentAsync {
   return {
-    agentName: "agentToBeExperienceModel", 
+    agentName: "agentToBeExperienceModel",
     agentProject: 100554,
     agentFolder: "agents",
     agentDescription: "Generate Experience Model",
     visibility: "private",
     beforePromptImplicit,
+    beforePromptStep,
     afterPromptStep
   };
 }
@@ -44,6 +47,35 @@ async function beforePromptImplicit(
 
 }
 
+async function beforePromptStep(
+  agent: IAgentMeta,
+  context: mls.msg.ExecutionContext,
+  parentStep: mls.msg.AIAgentStep,
+  step: mls.msg.AIAgentStep,
+  hookSequential: number,
+  args?: string
+): Promise<mls.msg.AgentIntent[]> {
+
+  if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
+
+  console.info(`BeforePromptStep ${agent.agentName}`);
+  console.info(`${args}`);
+
+  const continueIntent: mls.msg.AgentIntentPromptReady = {
+    type: "prompt_ready",
+    args,
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    hookSequential,
+    parentStepId: parentStep.stepId,
+    humanPrompt: args || '',
+    systemPrompt: system1
+  }
+
+  return [continueIntent];
+}
+
 async function afterPromptStep(
   agent: IAgentMeta,
   context: mls.msg.ExecutionContext,
@@ -52,14 +84,18 @@ async function afterPromptStep(
   hookSequential: number,
 ): Promise<mls.msg.AgentIntent[]> {
   if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
+  if (!context.task) throw new Error(`[afterPromptStep] invalid task: undefined`);
 
   const payload = (step.interaction?.payload?.[0]) as Output || undefined;
-  if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
+  if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`);
+
   let status: mls.msg.AIStepStatus = 'completed';
   let intents: mls.msg.AgentIntent[] = [];
   try {
     const output = payload.result;
-    intents = await processOutput(output as ExperienceModel);
+    const toBe = getPayloadToBeConceptual3(context);
+    if (!toBe) throw new Error(`[afterPromptStep] invalid moduleToBe: ${payload}`);
+    intents = await processOutputToBeExperienceModel(context, toBe, output as ExperienceModel);
   } catch (e) {
     console.error(e);
     status = 'failed';
@@ -75,33 +111,61 @@ async function afterPromptStep(
     stepId: step.stepId,
     status
   };
-  return [];
-  // return [...intents, updateStatus];
+  return [...intents, updateStatus];
 
 }
 
-async function processOutput(experienceModel: ExperienceModel): Promise<mls.msg.AgentIntent[]> {
+async function processOutputToBeExperienceModel(context: mls.msg.ExecutionContext, moduleToBe: ModuleToBe, experienceModel: ExperienceModel): Promise<mls.msg.AgentIntent[]> {
 
-  console.log("=== User journeys")
+  console.log("processOutputToBeExperienceModel === User journeys")
   console.log(JSON.stringify(experienceModel, null, 2));
 
-  const inTest = true; // todo: define
-  if (inTest) return [];
-  const step: mls.msg.AIPayload = {
-    type: 'agent',
-    stepId: 0,
-    interaction: null,
-    status: 'pending',
-    nextSteps: [],
-    agentName: "agentToBeConceptual3",
-    prompt: "",
-    rags: null,
+  if (context.isTest) return [];
+  const capabilities = moduleToBe.capabilities;
+  if (!capabilities) return [];
+
+  const capabilities2 = Object.keys(capabilities).map((cap) => {
+    const capData = capabilities[cap];
+    return {
+      capabilityId: cap,
+      description: capData.description,
+      isOptional: capData.isOptional,
+      impliesUI: capData.actions
+    }
+  });
+
+  console.info({ capabilities2 })
+
+  const newStep: mls.msg.AgentIntentAddStep = {
+    type: "add-step",
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    parentStepId: 1,
+    step:
+    {
+      type: 'agent',
+      stepId: 0,
+      interaction: null,
+      status: 'waiting_human_input',
+      nextSteps: [],
+      agentName: "agentToBePages",
+      prompt: `
+## Experience Model
+\`\`\`json
+${JSON.stringify(experienceModel)}
+\`\`\`
+
+## Capabilities Summary
+\`\`\`json
+${JSON.stringify(capabilities2)}
+\`\`\`
+    `,
+      rags: null,
+    }
   };
-  // const rc: mls.msg.AgentIntentAddSteps = {
-  //   type: 'add-steps',
-  //   steps: [step]
-  // }
-  return [];
+
+  return [newStep];
 
 }
 
