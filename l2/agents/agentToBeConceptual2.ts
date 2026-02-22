@@ -56,10 +56,10 @@ async function beforePromptStep(
   args?: string
 ): Promise<mls.msg.AgentIntent[]> {
 
+  if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
+
   console.info(`BeforePromptStep ${agent.agentName}`);
   console.info(`${args}`);
-
-  if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
 
   const continueIntent: mls.msg.AgentIntentPromptReady = {
     type: "prompt_ready",
@@ -98,10 +98,58 @@ async function beforeClarificationStep(
   parentStep: mls.msg.AIAgentStep,
   step: mls.msg.AIClarificationStep,
   hookSequential: number,
-  json: any
+  json: Suggestions
 ): Promise<HTMLElement> {
 
   if (!context.task) throw new Error(`[beforeClarificationStep] invalid task: undefined`)
+
+  const intentsToClarification: mls.msg.AgentIntent[] = processOutputToBeConceptual2(agent, context, parentStep, step, hookSequential, json);
+  await import('/_100554_/l2/agents/agentToBeConceptual2Clarification.js');
+  const clariEl = document.createElement('agents--agent-to-be-conceptual2-clarification-100554');
+  (clariEl as any).suggestions = json.suggestions;
+  (clariEl as any).toBe = JSON.parse(parentStep.prompt || '');
+
+  clariEl.addEventListener('clarification-finish', (e: Event) => {
+    const { detail } = e as CustomEvent<{ value: unknown; action: "continue" | "cancel" }>;
+    const { value, action } = detail;
+    const normalizedValue = `
+## Module ToBe
+\`\`\`json
+    ${parentStep.prompt}
+\`\`\`
+
+## Suggestions
+\`\`\`json
+    ${JSON.stringify(value, null, 2)}
+\`\`\`
+  `
+    finishClarification(
+      agent,
+      step.stepId,
+      parentStep.stepId,
+      intentsToClarification,
+      context,
+      normalizedValue,
+      action
+    );
+  });
+
+  return clariEl;
+
+}
+
+function processOutputToBeConceptual2(
+  agent: IAgentMeta,
+  context: mls.msg.ExecutionContext,
+  parentStep: mls.msg.AIAgentStep,
+  step: mls.msg.AIClarificationStep,
+  hookSequential: number,
+  suggestions: Suggestions
+): mls.msg.AgentIntent[] {
+
+  console.log("processOutputToBeConceptual2 === Suggestions")
+  console.log(JSON.stringify(suggestions, null, 2));
+
   let status: mls.msg.AIStepStatus = 'completed';
 
   const updateStatus: mls.msg.AgentIntentUpdateStatus = {
@@ -140,44 +188,14 @@ async function beforeClarificationStep(
       status: 'waiting_human_input',
       nextSteps: [],
       agentName: "agentToBeConceptual3",
-      prompt: "{{clarification}}",
+      prompt: `[${agent.agentName}] {{clarification}}`,
       rags: null,
     }
   };
 
-  const intentsToClarification: mls.msg.AgentIntent[] = [newStep, updateStatusAgent, updateStatus];
+  const intents: mls.msg.AgentIntent[] = [newStep, updateStatusAgent, updateStatus];
+  return intents;
 
-  await import('/_100554_/l2/agents/agentToBeConceptual2Clarification.js');
-  const clariEl = document.createElement('agents--agent-to-be-conceptual2-clarification-100554');
-  (clariEl as any).suggestions = json.suggestions;
-  (clariEl as any).toBe = JSON.parse(parentStep.prompt || '');
-
-  clariEl.addEventListener('clarification-finish', (e: Event) => {
-    const { detail } = e as CustomEvent<{ value: unknown; action: "continue" | "cancel" }>;
-    const { value, action } = detail;
-    const normalizedValue = `
-## Module ToBe
-\`\`\`json
-    ${parentStep.prompt}
-\`\`\`
-
-## Suggestions
-\`\`\`json
-    ${JSON.stringify(value, null, 2)}
-\`\`\`
-  `
-    finishClarification(
-      agent,
-      step.stepId,
-      parentStep.stepId,
-      intentsToClarification,
-      context,
-      normalizedValue,
-      action
-    );
-  });
-
-  return clariEl;
 
 }
 

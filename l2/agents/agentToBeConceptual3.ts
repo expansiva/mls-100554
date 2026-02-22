@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/agents/agentToBeConceptual3.ts" enhancement="_100554_enhancementAgent" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
+import { getAllAgentStepByAgentName } from '/_100554_/l2/aiAgentHelper.js';
 import { outputPrompt, Output, ModuleToBe } from '/_100554_/l2/agents/agentToBeConceptual.js';
 
 export function createAgent(): IAgentAsync {
@@ -58,6 +59,9 @@ async function beforePromptStep(
 
   if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
 
+  console.info(`BeforePromptStep ${agent.agentName}`);
+  console.info(`${args}`);
+
   const continueIntent: mls.msg.AgentIntentPromptReady = {
     type: "prompt_ready",
     args,
@@ -73,7 +77,6 @@ async function beforePromptStep(
   return [continueIntent];
 }
 
-
 async function afterPromptStep(
   agent: IAgentMeta,
   context: mls.msg.ExecutionContext,
@@ -88,9 +91,14 @@ async function afterPromptStep(
   if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
   let status: mls.msg.AIStepStatus = 'completed';
   let intents: mls.msg.AgentIntent[] = [];
+
+  if (context.isTest) return [];
+
   try {
     const output = payload.result;
-    intents = await processOutput4(output as ModuleToBe);
+    const prompt = step.prompt || '';
+    const info = extractInfoFromPrompt(prompt)
+    intents = await processOutputToBeConceptual3(info.agentName || '', context, output as ModuleToBe);
   } catch (e) {
     console.error(e);
     status = 'failed';
@@ -109,44 +117,96 @@ async function afterPromptStep(
     status
   };
 
-  const updateStatusRoot: mls.msg.AgentIntentUpdateStatus = {
-    type: 'update-status',
-    hookSequential,
-    messageId: context.message.orderAt,
-    threadId: context.message.threadId,
-    taskId: context.task?.PK || '',
-    parentStepId: 0,
-    stepId: 1,
-    status
-  };
-
   return [...intents, updateStatus];
 
 }
 
-async function processOutput4(moduleToBe: ModuleToBe): Promise<mls.msg.AgentIntent[]> {
+async function processOutputToBeConceptual3(fromAgent: string, context: mls.msg.ExecutionContext, moduleToBe: ModuleToBe): Promise<mls.msg.AgentIntent[]> {
 
-  console.log("=== ModuleToBe")
+  console.log("processOutputToBeConceptual3 === ModuleToBe");
+  console.log({ fromAgent });
   console.log(JSON.stringify(moduleToBe, null, 2));
 
-  const inTest = true; // todo: define
-  if (inTest) return [];
+  if (!fromAgent) throw new Error(`[processOutputToBeConceptual3] invalid fromAgent: ${fromAgent}`)
 
-  const step: mls.msg.AIPayload = {
-    type: 'agent',
-    stepId: 0,
-    interaction: null,
-    status: 'pending',
-    nextSteps: [],
-    agentName: "agentNewModule5",
-    prompt: "",
-    rags: null,
-  };
-  // const rc: mls.msg.AgentIntentAddSteps = {
-  //   type: 'add-steps',
-  //   steps: [step]
-  // }
+  if (context.isTest) return [];
+  if (fromAgent === 'agentToBeUserJourney') {
+    const newStep: mls.msg.AgentIntentAddStep = {
+      type: "add-step",
+      messageId: context.message.orderAt,
+      threadId: context.message.threadId,
+      taskId: context.task?.PK || '',
+      parentStepId: 1,
+      step:
+      {
+        type: 'agent',
+        stepId: 0,
+        interaction: null,
+        status: 'waiting_human_input',
+        nextSteps: [],
+        agentName: "agentToBeExperienceModel",
+        prompt: JSON.stringify(moduleToBe),
+        rags: null,
+      }
+    };
+    return [newStep];
+  }
+
+  if (fromAgent === 'agentToBeConceptual2') {
+    const newStep: mls.msg.AgentIntentAddStep = {
+      type: "add-step",
+      messageId: context.message.orderAt,
+      threadId: context.message.threadId,
+      taskId: context.task?.PK || '',
+      parentStepId: 1,
+      step:
+      {
+        type: 'agent',
+        stepId: 0,
+        interaction: null,
+        status: 'waiting_human_input',
+        nextSteps: [],
+        agentName: "agentToBeUserJourney",
+        prompt: moduleToBe.meta.userPromptFinal,
+        rags: null,
+      }
+    };
+    return [newStep];
+  }
+
   return [];
+
+
+}
+
+export function getPayloadToBeConceptual3(context: mls.msg.ExecutionContext): ModuleToBe | undefined {
+
+  if (!context.task) return undefined;
+  const agentName = 'agentToBeConceptual3'
+  const agentSteps = getAllAgentStepByAgentName(context.task, agentName); // Only one agent execution must exist in this task
+  if (!agentSteps) throw new Error(`[${agentName}] [getPayload] no agent found`);
+  const lastConceptual = agentSteps ? agentSteps[agentSteps.length - 1] : undefined;
+  if (!lastConceptual) throw new Error(`[afterPromptStep] no find agent:${agentName} with moduleTobe in actual task`);
+  console.info({ lastConceptual })
+  const resultStep = lastConceptual.interaction?.payload?.[0];
+  if (!resultStep || resultStep.type !== "flexible" || !resultStep.result) throw new Error(`[${agentName}] [getPayload] No step clarification found for this agent.`);
+  let payload3: ModuleToBe | string = resultStep.result;
+  if (typeof payload3 === "string") payload3 = JSON.parse(payload3) as ModuleToBe;
+  return payload3;
+}
+
+function extractInfoFromPrompt(text: string) {
+
+  const match = text.match(/^\[([^\]]+)\]\s*([\s\S]*)$/);
+
+  const agentName = match?.[1];
+  const prompt = match?.[2];
+
+  return {
+    agentName,
+    prompt
+  }
+
 
 }
 
@@ -156,7 +216,7 @@ async function processOutput4(moduleToBe: ModuleToBe): Promise<mls.msg.AgentInte
 "t3, gemini-2.5-pro, 68s, $0.0291, 7.6/10"
  */
 const system3 = `
-<!-- modelType: code -->
+<!-- modelType: codereasoning -->
 <!-- modelTypeList: geminiChat ?/10 , code (grok) ?/10, deepseekchat ?/10, codeflash (gemini) ?/10, deepseekreasoner ?/10, mini (4.1) ou nano (openai) ?/10, codeinstruct (4.1) ?/10, codereasoning(gpt5) ?/10, code2 (kimi 2.5) ?/10 -->
 
 You are a senior BUSINESS Analyst with 20+ years of experience in system design, requirements analysis, and business process optimization.

@@ -60,6 +60,7 @@ async function beforePromptStep(
 
   if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
 
+
   const continueIntent: mls.msg.AgentIntentPromptReady = {
     type: "prompt_ready",
     args,
@@ -164,13 +165,14 @@ Generate an ToBeFactual JSON object that strictly follows the provided JSON sche
 
 {{outputPrompt}}
 
-[[Defs1]]
 `
 
 export const outputPrompt = `
 ## Output format
 You must return the object strictly as JSON
 [[OutputSection]]
+
+[[Defs1]]
 `;
 
 //#region Constraints
