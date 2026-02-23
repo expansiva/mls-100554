@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "target": "es2022",
-        "module": "ES2022",
+        "target": "es2020",
+        "module": "ES2020",
         "esModuleInterop": true,
         "outDir": "./preBuild/",
         "rootDir": "./project",
@@ -49,4 +49,5 @@
         "l2/*.ts"
     ]
 }
+
 
