@@ -170,7 +170,7 @@ jobs:
 export const template_l2Project = {
     ext: '.ts',
     template: `
-/// <mls shortName="project" project="[project]" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_[project]_/l2/project.ts" enhancement="_100554_enhancementLit" />
 
 export const projectConfig = {
     masterFrontEnd: {
@@ -191,7 +191,7 @@ export const projectConfig = {
 export const template_coreIndex = {
     ext: '.ts',
     template: `
-    /// <mls shortName="pluginCollabCoreIndex" project="[project]" enhancement="_100554_enhancementLit" groupName="other" />
+    /// <mls fileReference="_[project]_/l2/pluginCollabCoreIndex.ts" enhancement="_100554_enhancementLit" />
 
 import { PluginBaseIndex } from '/_100554_/l2/pluginBaseIndex.js';
 
@@ -627,7 +627,7 @@ export default new PluginCollabCoreIndex();
 export const template_ds = {
     ext: '.ts',
     template: `
-/// <mls shortName="designSystem" project="[project]" enhancement="_100554_enhancementLit" groupName="other" />
+/// <mls fileReference="_[project]_/l2/designSystem.ts" enhancement="_100554_enhancementLit" />
 
 import { IDesignSystemTokens } from '/_100554_/l2/designSystemBase.js';
 

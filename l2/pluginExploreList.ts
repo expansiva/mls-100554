@@ -291,7 +291,7 @@ export class PluginExploreList extends PluginBaseModule {
         <div class="groupHeader">
             <header class="toolbar">
                 <div class="toolbar__left">
-                    <input name="projectFilter" class="toolbar__search" type="text" placeholder="Filter" autocomplete="off" @input="${this.filterLiChange}">
+                    <input name="projectFilter" class="toolbar__search" type="search" placeholder="Filter" autocomplete="off" @input="${this.filterLiChange}">
                 </div>
 
                 <div class="toolbar__center">
@@ -503,8 +503,10 @@ export class PluginExploreList extends PluginBaseModule {
                 <div class="elContent">
                     <info-item>
                         <span class="classClick" @click="${this.clickGroupHidden}">
-                            <span class="groupHiddenListIcon" >
-                        </span>
+                           <span class="groupHiddenListIcon" >
+                               <svg xmlns='http://www.w3.org/2000/svg' style='height: 21px;' viewBox='0 0 128 512' ><path style='fill:var(--text-primary-color)' d='M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z' fill='rgb(66,65,65,1)'/></svg>
+                           </span>
+                       </span>
                         </span>
                         <span class="spanFileName ${file.status === 'deleted' ? 'fileDeleted' : ''}">${name}</span>
                         <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion + auxHtml}"></div>

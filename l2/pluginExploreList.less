@@ -204,50 +204,7 @@ plugin-explore-list-100554 {
             }
         }
     }
-
-    /*.groupHiddenList {
-        border-radius: 4px;
-        padding: .3rem;
-        transition: all 0.5s;
-        cursor: pointer;
-        display: inline-block; //flex!important;
-        z-index: 9;
-        height: .7rem;
-        box-sizing: initial;
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 512'><path d='M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z' fill='rgb(66,65,65,1)'/></svg>");
-        background-repeat: no-repeat;
-        background-position-y: center;
-
-        &::before {
-            content: ' ';
-            width: 23px;
-            height: 19px;
-            position: absolute;
-            left: 2px;
-        }
-
-        .mls-gpbtnslider-item {
-            display: none;
-            transition: 0.5s;
-            margin-left: 1rem;
-            z-index: 10;
-
-            &:hover {
-                color: @active-color;
-            }
-        }
-
-        &.activegpbtnslider {
-            padding-right: 24px;
-            padding-left: 8px;
-        }
-
-        &.activegpbtnslider .mls-gpbtnslider-item {
-            display: inherit;
-            text-align: center;
-            float: left;
-        }
-    }*/
+    
     .classClick {
         position: absolute;
         left: 0px;
@@ -259,9 +216,6 @@ plugin-explore-list-100554 {
     }
 
     .groupHiddenListIcon {
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 512'><path d='M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z' fill='rgb(66,65,65,1)'/></svg>");
-        background-repeat: no-repeat;
-        background-position-y: center;
         width: 8px;
         height: 21px;
         display: block;
@@ -276,11 +230,15 @@ plugin-explore-list-100554 {
         border-top: 1px solid #c4c4c4;
     }
 
+    .mls-gpbtnslider-item{
+        color: @text-primary-color; 
+    }
+
     .groupHiddenList .mls-gpbtnslider-item {
         display: block;
         transition: 0.5s;
         z-index: 10;
-        color: #444343;
+        color: @text-primary-color;
         border-bottom: 1px solid #c7c4c4;
         padding: .2rem;
         font-size: 13px;
