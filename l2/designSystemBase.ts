@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/designSystemBase.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/designSystemBase.ts" enhancement="_blank" />
 
 export const acceptedImages = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".webp"];
 export const acceptedVideos = [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v"]
