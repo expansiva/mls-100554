@@ -32,7 +32,12 @@ export class ServiceDetail100554 extends ServiceBase {
         tooltip: 'Detail',
         visible: true,
         widget: '_100554_serviceDetail',
-        level: [1, 2, 3, 4, 5, 6, 7]
+        level: [1, 2, 3, 4, 5, 6, 7],
+        customConfiguration: {
+            7: {
+                visible: false
+            }
+        }
     }
 
     public onClickMain(op: string) {
@@ -68,7 +73,7 @@ export class ServiceDetail100554 extends ServiceBase {
     public clear() {
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
         Array.from(this.contentPlugin.children).forEach((i) => {
-            if((i as any).level !== mls.actualLevel)(i as HTMLElement).style.display = "none";
+            if ((i as any).level !== mls.actualLevel) (i as HTMLElement).style.display = "none";
         });
     }
 
@@ -157,8 +162,8 @@ export class ServiceDetail100554 extends ServiceBase {
 
     render() {
         return this.renderDefault();
-        
-    } 
+
+    }
 
     renderDefault() {
         return html`<div style="overflow:auto;height: calc(100% - 2rem);padding:1rem" id="contentPlugin"></div>`;
@@ -171,7 +176,7 @@ export class ServiceDetail100554 extends ServiceBase {
         mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['PluginDetails'], (ev) => this.onPluginDetails(ev));
         mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
         mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
-        
+
     }
 
     private onMonacoEvents(ev: mls.events.IEvent): void {
@@ -214,10 +219,10 @@ export class ServiceDetail100554 extends ServiceBase {
 
     private onPluginDetails(ev: mls.events.IEvent) {
         if (!ev.desc) throw new Error('Error on PluginDetails event, invalid desc');
+        if (ev.level !== this.level) return;
         this.openMe();
         if (this.menu && this.menu.closeMenu) this.menu.closeMenu();
         const data: mls.events.IPluginDetail = JSON.parse(ev.desc);
-
         this.showPluginContent(data);
     }
 
