@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "target": "es2020",
-        "module": "ES2020",
+        "target": "es2022",
+        "module": "ES2022",
         "esModuleInterop": true,
         "outDir": "./preBuild/",
         "rootDir": "./project",
@@ -22,6 +22,15 @@
             ],
             "lit/decorators.js": [
                 "./project/_100554_/l2/litDecorators.ts"
+            ],
+            "/_100554_/*": [
+                "./project/_100554_/*"
+            ],
+            "/_102027_/*": [
+                "./project/_102027_/*"
+            ],
+            "/_102025_/*": [
+                "./project/_102025_/*"
             ]
         },
         "lib": [
@@ -40,3 +49,4 @@
         "l2/*.ts"
     ]
 }
+
