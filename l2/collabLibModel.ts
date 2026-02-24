@@ -39,7 +39,7 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
         const actual = await mls.stor.localDB.readPrjInfo(prj);
         if (actual && actual.indexModules && actual.indexModules !== '') {
             promises.push(_createProjectModel(prj, actual.indexModules));
-        }
+        } 
     }
 
     if (mls.istrace) console.time('creating models');
@@ -73,7 +73,7 @@ export async function readProjectTypescriptAndCompileL1(project: number, shortNa
     await Promise.all(promises);
     if (mls.istrace) console.timeEnd('creating models L1');
 
-}
+} 
 
 export async function createAllModels(storFileBase: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile: boolean = false, createStorIfNeed: boolean = true): Promise<mls.editor.IModels | undefined> {
 
@@ -243,9 +243,10 @@ async function _createProjectModel(project: number, contentTS: string): Promise<
             throw new Error('Function not implemented.');
         },
         getOrCreateModel: async function (): Promise<mls.editor.IModelBase> {
-            throw new Error('Function not implemented.');
+            return await mls.editor.createModelProjectDefinition(project, contentTS) 
         }
     }
+
     const modelsBase = await _createModel(info, ftype, contentTS)
     if (!modelsBase) throw new Error(`invalid mls.editor.models for file: _${info.project}_.d.ts`);
 

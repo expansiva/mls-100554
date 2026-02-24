@@ -3,7 +3,7 @@
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { propertyDataSource, propertyCompositeDataSource } from '/_100554_/l2/collabDecorators.js';
-import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js'; 
 import { convertTagToFileName } from '/_100554_/l2/utilsLit';
 import { MindMapSelected, MindMapData, MindMapNodeStyles, MindMapNodeStyle, MindMapNode, setMindMapVariable, getMindMapVariable, getMindMapByStorFile, getMindMapByName } from '/_100554_/l2/libMindMap.js'
 
@@ -1211,6 +1211,11 @@ export class WidgetMindMapL4100554 extends StateLitElement {
             label: 'Find in files',
             html: `<plugin-project-find-files-100554></plugin-project-find-files-100554>`,
             file: '/_100554_/l2/pluginProjectFindFiles.js'
+        },
+        {
+            label: 'Code insights',
+            html: `<plugin-code-insights-100554></plugin-code-insights-100554>`,
+            file: '/_100554_/l2/pluginCodeInsights.js'
         },
         
     ]
