@@ -63,7 +63,7 @@ Você deve retornar um array de objetos no formato JSON. Cada objeto representa 
 }
 
 
-function getAgentsList(): string {
+export function getAgentsList(): IAgentList[] {
 
     const listAgents = [
         { agent: 'agentGeneratePrototype', description: 'planejamento para a criação de novos projetos, sites ou criação de uma nova página' },
@@ -74,10 +74,16 @@ function getAgentsList(): string {
         { agent: 'agentGenerateDefs', description: 'criação e atualização do arquivo definition.' },
     ]
 
-    return `Agentes disponíveis:\n${listAgents.map((item) => `•	${item.agent}:${item.description}`).join('\n')}`
+    return listAgents;
 }
 
-function getRagsList(): string {
+export async function getToolsList(): Promise<IToolList[]> {
+    const listTools:IToolList[] = []
+    return listTools;
+}
+
+
+export function getRagsList(): string {
     return `
 - rag1: base de conhecimento de suporte geral.
 - rag2: base de conhecimento da empresa (documentação interna).`
@@ -91,11 +97,6 @@ export async function systemToolsAvailable(): Promise<mls.msg.IAMessageInputType
     };
 }
 
-
-async function getToolsList(): Promise<string> {
-    const tolls = await getListFilesStart('tool');
-    return tolls.join('\n');
-}
 
 export async function getListFilesStart(start: 'widget' | 'tool' | 'agent'): Promise<string[]> {
 
@@ -260,4 +261,15 @@ export async function getSource(dt: mls.stor.IFileInfo): Promise<string | null> 
     const rc = (await mls.stor.files[keyFile].getContent()) as string | null;
     return rc
 }
+
+interface IAgentList {
+    agent: string;
+    description: string;
+}
+
+interface IToolList {
+    tool: string;
+    description: string;
+}
+
 

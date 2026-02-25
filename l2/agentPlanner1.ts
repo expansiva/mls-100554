@@ -1,119 +1,204 @@
-/// <mls fileReference="_100554_/l2/agentPlanner1.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/agentPlanner1.ts" enhancement="_100554_enhancementAgent" />
 
-import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
-
-import {
-    getNextPendingStepByAgentName,
-    getNextInProgressStepByAgentName,
-    calculateStepsStatistics,
-    updateStepStatus,
-    getStepById,
-    updateTaskTitle,
-    notifyTaskChange
-} from "/_100554_/l2/aiAgentHelper.js";
+import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 
 import {
-    systemAgentsAvailable,
-    systemRagsAvailable,
-    systemToolsAvailable,
-    addRAGAdditionalInformation,
-    getPromptByHtml
+    getAgentsList,
+    getRagsList,
+    getToolsList,
 } from "/_100554_/l2/aiPrompts.js";
 
-
-import {
-    startNewAiTask,
-    executeNextStep,
-    startNewInteractionInAiTask,
-} from "/_100554_/l2/aiAgentOrchestration.js";
-
-const agentName = "agentPlanner1";
-
-export function createAgent(): IAgent {
+export function createAgent(): IAgentAsync {
     return {
-        agentName,
-        avatar_url: svg_agent,
-        agentDescription: "first agent for general prompts",
-        visibility: "private",
-        async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
-            return _beforePrompt(context);
-        },
-        async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
-            return _afterPrompt(context);
-        },
-        async beforeClarification(context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> {
-            return _beforeClarification(context, stepId);
-        }
-    }
-};
-
-const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-    const taskTitle = "Planning";
-    if (!context || !context.message) throw new Error("Invalid context");
-    if (!context.task) {
-        // using temporary context, create a new task
-        const inputs = await getPrompts(context.message.content, null);
-        await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
-    } else {
-        const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
-        if (!step) {
-            throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
-        }
-        context = await updateStepStatus(context, step.stepId, "in_progress");
-        const inputs = await getPrompts(step.prompt, step.rags);
-        await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
-    }
-}
-
-const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-
-    if (!context || !context.message || !context.task) throw new Error("Invalid context");
-    const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    const { flexible, result } = calculateStepsStatistics([step], true);
-    if (flexible > 0) throw new Error(`[${agentName}] afterPrompt: error, Flexible step found.`);
-    context =  await updateStepStatus(context, step.stepId, "completed");
-    await executeNextStep(context);
-
-}
-
-const _beforeClarification = async (context: mls.msg.ExecutionContext, stepId: number): Promise<HTMLDivElement | null> => {
-    if (!context.task) throw new Error("[_beforeClarification] Invalid context.task");
-    const step = getStepById(context.task, stepId) as mls.msg.AIClarificationStep;
-    if (!step) throw new Error(`[_beforeClarification] Invalid step: ${stepId} on task: ${context.task.PK}`);
-    const msg = `Invalid return from agent: ${agentName} not supported return of type clarification`
-    await updateStepStatus(context, stepId, 'failed', msg);
-    const task = await updateTaskTitle(context.task, msg);
-    context.task = task;
-    notifyTaskChange(context);
-    const element = prepareHtmlClarification();
-    return element;
-}
-
-function prepareHtmlClarification(
-): HTMLDivElement {
-    const div: HTMLDivElement = document.createElement('div');
-    div.innerHTML = `Invalid return from LLM, ${agentName} don't use payload of type Clarification, please try again!`;
-    return div;
-}
-
-export async function getPrompts(prompt: string | undefined, rags: string[] | null): Promise<mls.msg.IAMessageInputType[]> {
-    if (!prompt || prompt.length < 3) throw new Error("Invalid Prompt");
-
-    const agents = systemAgentsAvailable();
-    const ragsA = systemRagsAvailable();
-    const tools = await systemToolsAvailable();
-
-    const data = {
-        mode: '<!-- modelType: code -->', // cost
-        agentsAvailable: agents.content,
-        ragsAvailable: ragsA.content,
-        toolsAvailable: tools.content,
-        humanPrompt: prompt
+        agentName: "agentPlanner1",
+        agentProject: 100554,
+        agentFolder: "",
+        agentDescription: "First agent for general prompts",
+        visibility: "public",
+        beforePromptImplicit,
+        afterPromptStep
     };
-    const prompts = await getPromptByHtml({ project: 100554, shortName: 'agentPlanner1', folder: '', data })
-
-    addRAGAdditionalInformation(rags, prompts);
-
-    return prompts;
 }
+
+async function beforePromptImplicit(
+    agent: IAgentMeta,
+    context: mls.msg.ExecutionContext,
+    userPrompt: string,
+): Promise<mls.msg.AgentIntent[]> {
+
+    if (!userPrompt || userPrompt.length < 5) throw new Error('invalid prompt');
+
+    const system = await prepareSystemPrompt()
+
+    const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
+        type: "add-message-ai",
+        request: {
+            action: 'addMessageAI',
+            agentName: agent.agentName,
+            inputAI: [{
+                type: "system",
+                content: system,
+            }, {
+                type: "human",
+                content: context.message.content
+            }],
+            taskTitle: `New module`,
+            threadId: context.message.threadId,
+            userMessage: context.message.content,
+        }
+    };
+    return [addMessageAI];
+
+}
+
+async function afterPromptStep(
+    agent: IAgentMeta,
+    context: mls.msg.ExecutionContext,
+    parentStep: mls.msg.AIAgentStep,
+    step: mls.msg.AIAgentStep,
+    hookSequential: number,
+): Promise<mls.msg.AgentIntent[]> {
+
+    if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
+
+    const payload = (step.interaction?.payload?.[0]);
+    if (!payload || !payload.type) throw new Error(`Payload invalid`);
+    if (!['agent', 'tool', 'result'].includes(payload?.type)) throw new Error(`Payload type invalid: ${payload?.type}`);
+
+    let status: mls.msg.AIStepStatus = 'completed';
+    let intents: mls.msg.AgentIntent[] = [];
+
+    if (payload.type === 'tool') {
+        throw new Error(`Payload type tool not prepared yet`);
+    }
+
+    if (payload.type === 'agent') {
+        const newStep: mls.msg.AgentIntentAddStep = {
+            type: "add-step",
+            messageId: context.message.orderAt,
+            threadId: context.message.threadId,
+            taskId: context.task?.PK || '',
+            parentStepId: 1,
+            step:
+            {
+                type: 'agent',
+                stepId: 0,
+                interaction: null,
+                status: 'waiting_human_input',
+                nextSteps: [],
+                agentName: payload.agentName,
+                prompt: payload.prompt,
+                rags: payload.rags,
+            }
+        };
+
+        intents.push(newStep);
+    }
+
+    if (payload.type === 'result') {
+        const updateStatusAgent: mls.msg.AgentIntentUpdateStatus = {
+            type: 'update-status',
+            hookSequential,
+            messageId: context.message.orderAt,
+            threadId: context.message.threadId,
+            taskId: context.task?.PK || '',
+            parentStepId: 1,
+            stepId: parentStep.stepId,
+            status: 'completed'
+        };
+        intents.push(updateStatusAgent);
+    }
+
+    const updateStatus: mls.msg.AgentIntentUpdateStatus = {
+        type: 'update-status',
+        hookSequential,
+        messageId: context.message.orderAt,
+        threadId: context.message.threadId,
+        taskId: context.task?.PK || '',
+        parentStepId: parentStep.stepId,
+        stepId: step.stepId,
+        status
+    };
+
+    intents = [...intents, updateStatus];
+    return intents;
+
+}
+
+async function prepareSystemPrompt(): Promise<string> {
+
+    let system: string = system1;
+    system = system1.replace('{{agentsAvaliables}}', getAgentsList().join('\n'));
+    system = system1.replace('{{ragsAvaliables}}', getRagsList());
+    system = system1.replace('{{toolsAvaliables}}', (await getToolsList()).join('\n'));
+    return system;
+
+}
+
+const system1 = `
+<!-- modelType: codeflash -->
+<!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) or nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10, code2 (kimi 2.5) -->
+
+You are a coordinator of agents and tools responsible for executing tasks based on the user's prompt.  
+Your only goal at this moment is to classify the type of action required from the prompt.
+
+RULES:
+1. Return **exactly one subtask** of one of the following types: 'agent' or 'result'.
+2. If the prompt is vague, ambiguous, or does not contain enough information to decide between 'agent' or 'result', return a 'result' with an invalid prompt message.
+4. Use 'result' when the system can **respond directly to the user** without involving agents.
+5. Use 'agent' when the task requires **active action or execution by an agent or an external tool**.
+   - In this case, include the original user prompt in the 'prompt' field.
+6. Do not modify the content of the original prompt.
+7. Do not elaborate responses or explain your choices — only classify.
+
+EXAMPLES:
+User: "Create a landing page for a fitness product"  
+Response: Agent
+
+User: "What is the capital of Germany?"  
+Response: Result
+
+User: "Help me"  
+Response: Result
+
+
+## Available Agents
+{{agentsAvaliables}}
+
+## Available RAGs
+{{ragsAvaliables}}
+
+## Available Tools
+{{toolsAvaliables}}
+
+
+## Output format
+Return only valid JSON in the following structure:
+
+[[OutputSection1]]
+
+`
+
+//#region OutputSection1
+export type Output1 =
+    {
+        type: "result";
+        result: string
+    } |
+
+    {
+        type: "agent",
+        agentName: string,
+        title: string,
+        prompt: string,
+        rags: string[] | null
+    } |
+    {
+        type: "agent",
+        agentName: string,
+        title: string,
+        prompt: string,
+        rags: string[] | null
+    }
+
+//#endregion
