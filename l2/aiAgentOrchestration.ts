@@ -564,10 +564,26 @@ async function processIntents2(agent: IAgentAsync, context: mls.msg.ExecutionCon
     try {
         if (hook.type === "beforePromptStep") return await processHookBeforePromptStep(agent, context, hook);
         if (hook.type === "afterPromptStep") return await processHookAfterPromptStep(agent, context, hook);
+        if (hook.type === "beforeTool") return await processHookBeforeTool(agent, context, hook);
+
         throw new Error(`not implemented processIntents process hooks, type:${hook.type}`);
     } catch (e: any) {
-        console.error(`error processing taskid:${context.task?.PK}, hook:${hook.type}, message:${e.message || e} `)
-        return [];
+
+        console.error(`error processing taskid:${context.task?.PK}, hook:${hook.type}, message:${e.message || e} `);
+        if (!context.task) return [];
+        const step = getStepById(context.task, hook.stepId) as mls.msg.AIAgentStep;
+        const parentStep = getStepById(context.task, (hook as mls.msg.AgentHookAfterPromptStep).parentStepId) as mls.msg.AIAgentStep;
+        const updateStatusFailed: mls.msg.AgentIntentUpdateStatus = {
+            type: 'update-status',
+            hookSequential: 0,
+            messageId: context.message.orderAt,
+            threadId: context.message.threadId,
+            taskId: context.task?.PK || '',
+            parentStepId: parentStep.stepId,
+            stepId: step.stepId,
+            status: 'failed'
+        };
+        return [updateStatusFailed];
     }
 }
 
@@ -599,6 +615,7 @@ function getRemoveIntent(context: mls.msg.ExecutionContext, hook: mls.msg.AgentH
 }
 
 async function processHookBeforePromptStep(agent: IAgentAsync, context: mls.msg.ExecutionContext, hook: mls.msg.AgentHookBeforePromptStep): Promise<mls.msg.AgentIntent[]> {
+
     if (!agent.beforePromptStep) throw new Error(`Agent ${agent.agentName} do not have beforePromptStep`);
     if (!context.task) throw new Error('[processHookBeforePromptStep] invalid task');
     const step = getStepById(context.task, hook.stepId) as mls.msg.AIAgentStep;
@@ -610,10 +627,65 @@ async function processHookBeforePromptStep(agent: IAgentAsync, context: mls.msg.
 
 async function processHookAfterPromptStep(agent: IAgentAsync, context: mls.msg.ExecutionContext, hook: mls.msg.AgentHookAfterPromptStep): Promise<mls.msg.AgentIntent[]> {
     if (!agent.afterPromptStep) throw new Error(`Agent ${agent.agentName} do not have afterPromptStep`);
-    if (!context.task) throw new Error('[processHookBeforePromptStep] invalid task');
+    if (!context.task) throw new Error('[processHookAfterPromptStep] invalid task');
     const step = getStepById(context.task, hook.stepId) as mls.msg.AIAgentStep;
     const parentStep = getStepById(context.task, hook.parentStepId) as mls.msg.AIAgentStep;
     return await agent.afterPromptStep(agent, context, parentStep, step, hook.hookSequential);
+}
+
+async function processHookBeforeTool(agent: IAgentAsync, context: mls.msg.ExecutionContext, hook: mls.msg.AgentHookBeforeTool): Promise<mls.msg.AgentIntent[]> {
+
+    let intents: mls.msg.AgentIntent[] = [];
+
+    if (!context.task) throw new Error('[processHookBeforeTool] invalid task');
+    const step = getStepById(context.task, hook.stepId) as mls.msg.AIToolStep;
+    const parentStep = getStepById(context.task, hook.parentStepId) as mls.msg.AIAgentStep;
+    if (!step || !parentStep) throw new Error('[processHookBeforeTool] invalid stepId or parentStepId');
+    const rc = await executeTool(step.toolName, step.args);
+
+    if (typeof rc.result !== "string") throw new Error(`Tool ${step.toolName} did not return a string`);
+    const existResults = rc.result.length > 0;
+    if (existResults) {
+
+        const stepInteraction = getStepById(context.task, parentStep.stepId);
+        if (!stepInteraction || stepInteraction.type !== 'agent') throw new Error('Interaction must be type: agent');
+        const oldPrompt = stepInteraction.interaction?.input.find((item) => item.type === 'human');
+
+        const newStep: mls.msg.AgentIntentAddStep = {
+            type: "add-step",
+            messageId: context.message.orderAt,
+            threadId: context.message.threadId,
+            taskId: context.task?.PK || '',
+            parentStepId: parentStep.stepId,
+            step:
+            {
+                type: 'agent',
+                stepId: 0,
+                interaction: null,
+                status: 'waiting_human_input',
+                nextSteps: [],
+                agentName: stepInteraction.agentName,
+                prompt: `${oldPrompt?.content} \n\n Response from tool ${step.toolName}: ${rc.result} `,
+                rags: null,
+            }
+        };
+
+        intents.push(newStep);
+    }
+
+    const updateStatus: mls.msg.AgentIntentUpdateStatus = {
+        type: 'update-status',
+        hookSequential: 0,
+        messageId: context.message.orderAt,
+        threadId: context.message.threadId,
+        taskId: context.task?.PK || '',
+        parentStepId: parentStep.stepId,
+        stepId: step.stepId,
+        status: 'completed'
+    };
+
+    return [...intents, updateStatus]
+
 }
 
 async function executeAgentFunction(context: mls.msg.ExecutionContext, step: mls.msg.AIAgentStep, functionName: string, stepId: number, args?: object): Promise<any> {
