@@ -4,15 +4,12 @@ import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_100554_/l2/serviceBase.js';
 import { formatHtml, sync } from '/_100554_/l2/collabDOMSync.js';
-import { removeTokensFromSource } from '/_102027_/l2/libCompileStyle.js';
-import { getTokensLess } from '/_102027_/l2/designSystemBase.js';
 import { LessCSS } from "/_100554_/l2/lessCSS.js";
 import { initState, getState } from '/_100554_/l2/collabState.js';
 import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
 import { collab_html, collab_typescript, collab_less, collab_fileTest, collab_file_code } from '/_100554_/l2/collabIcons.js';
-import { createAgent } from '/_100554_/l2/agentFix.js';
 import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
-import { getUserId, createThread } from '/_102025_/l2/collabMessagesHelper.js';
+import { getUserId, createThread, addMessage } from '/_102025_/l2/collabMessagesHelper.js';
 import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate } from '/_100554_/l2/libCommom.js';
 import { readProjectTypescriptAndCompile, createModel } from '/_100554_/l2/collabLibModel.js';
 import { IReqCreateStorFile, createStorFile } from '/_100554_/l2/collabLibStor.js';
@@ -191,12 +188,12 @@ export class ServiceSource100554 extends ServiceBase {
 
         }
 
-    } 
+    }
 
-    private async createModelIfNeedWithOutActiveModel(project:number, folder:string,shortName:string, ext: string) {
+    private async createModelIfNeedWithOutActiveModel(project: number, folder: string, shortName: string, ext: string) {
 
         try {
-            
+
             const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, ext);
             let stor = mls.stor.files[key];
 
@@ -208,7 +205,7 @@ export class ServiceSource100554 extends ServiceBase {
                     project,
                     shortName,
                     folder,
-                    level:2,
+                    level: 2,
                     extension: ext,
                     source: template,
                     status: 'new'
@@ -296,15 +293,15 @@ export class ServiceSource100554 extends ServiceBase {
             this.saveViewState();
             return;
         }
-        
+
         await this.initMonaco();
         if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icTs);
         await this.updateComplete;
         this.updatedMSizeEditor();
 
-        if ( mls.actual[2][this.position]) {
+        if (mls.actual[2][this.position]) {
             this.openActualL2(this.position);
-        }else if (!this.activeModels && this.position === 'left') this.openLastFile(this.level, this.position);
+        } else if (!this.activeModels && this.position === 'left') this.openLastFile(this.level, this.position);
 
         if (this.editorEl) {
             const bgEl = this.editorEl.querySelector('.monaco-editor-background');
@@ -319,7 +316,7 @@ export class ServiceSource100554 extends ServiceBase {
     }
 
 
-    private async openActualL2( position: 'left' | 'right') {
+    private async openActualL2(position: 'left' | 'right') {
 
         this.loading = true;
         const storFile = mls.actual[2][position];
@@ -335,7 +332,7 @@ export class ServiceSource100554 extends ServiceBase {
             await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.html');
 
             models = mls.editor.getModels(project, shortName, folder);
-        }       
+        }
         if (!models) return;
         this.activeModels = models;
         await readProjectTypescriptAndCompile(project, '', true)
@@ -1142,7 +1139,6 @@ export class ServiceSource100554 extends ServiceBase {
 
         const page = this.getActualL2File();
         if (!page) return;
-        //const pref = loadChatPreferences();
 
         const modeBy = {
             'icTs': 'typescript',
@@ -1153,11 +1149,6 @@ export class ServiceSource100554 extends ServiceBase {
         }
 
         const data = { page, prompt: 'Fix errors in files', position: this.position, mode: modeBy[this.mode] }
-        /*if (!pref.threadMaintenance) {
-            this.setError('Please configure your maintenance thread at: CollabMessage > Settings > Chat Preferences');
-            return;
-        }*/
-
         let thread = await getThreadByName(page);
         if (!thread) {
             thread = await createThread(page, [], 'company');
@@ -1166,14 +1157,11 @@ export class ServiceSource100554 extends ServiceBase {
         if (!thread) return `Error: Not found thread: ${page}`;
 
         const userId = getUserId();
-        //const threadId = pref.threadMaintenance;
         const threadId = thread.threadId;
         if (!userId) return;
         this.lockEditorForFile(page);
         this.toogleOverlayLoading(true, 'Executing agent Fix...');
-        const context = getTemporaryContext(threadId, userId, '@@ agentFix ' + JSON.stringify(data));
-        const agent = createAgent();
-        await agent.beforePrompt(context);
+        await addMessage(threadId, '@@agentFix ' + JSON.stringify(data))
 
     }
 
@@ -1291,7 +1279,7 @@ export class ServiceSource100554 extends ServiceBase {
         if (model) {
             this.mConfEditor = model;
         } else {
-            const modelBase =  await mls.editor.createModelTS(storFile, src);
+            const modelBase = await mls.editor.createModelTS(storFile, src);
             if (!modelBase) throw new Error(`invalid mls.editor.models for file: _${project}_${shortName}.ts`);
             model = modelBase.model;
             this.mConfEditor = model;
@@ -1617,7 +1605,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.html');
 
             models = mls.editor.getModels(project, shortName, folder);
-        }        
+        }
         if (!models) return;
         this.activeModels = models;
         await readProjectTypescriptAndCompile(actualProject, '', true)
