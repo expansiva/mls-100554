@@ -4,8 +4,6 @@ import { updateMessage, getMessage, getThreadByName } from '/_102025_/l2/collabM
 import { getUserId, createThread } from '/_102025_/l2/collabMessagesHelper.js';
 import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
 import { openService } from '/_100554_/l2/libCommom.js';
-import { IAgent } from '/_100554_/l2/aiAgentBase.js';
-import { collabImport } from '/_100554_/l2/collabImport.js';
 
 /**
  * Helper function to collect all steps from a task in a flat array
@@ -162,16 +160,26 @@ export const calculateStepsByFilter = (task: mls.msg.TaskData, filter: Record<st
 
 export const getTemporaryContext = (threadId: string, userId: string, prompt: string): mls.msg.ExecutionContext => {
   // create temporary context
+
+  const now = new Date();
+  const formattedDate = now.getFullYear().toString()
+    + String(now.getMonth() + 1).padStart(2, '0')
+    + String(now.getDate()).padStart(2, '0')
+    + String(now.getHours() + 3).padStart(2, '0')
+    + String(now.getMinutes()).padStart(2, '0')
+    + String(now.getSeconds()).padStart(2, '0')
+    + "." + Math.floor(1000 + Math.random() * 9000);
+
   const context: mls.msg.ExecutionContext = {
     task: undefined,
     message: {
       threadId: threadId,
       orderAt: "",
-      createAt: "",
+      createAt: formattedDate,
       senderId: userId,
       content: prompt.trim(),
     },
-    isTest:false
+    isTest: false
   };
   return context;
 };
@@ -433,9 +441,9 @@ export async function openCollabMessage(file: mls.stor.IFileInfo) {
     return;
   }
 
-  
+
   mls.events.fire([mls.actualLevel], 'collabMessages' as any, JSON.stringify({ threadId: threadId, type: 'thread-open' }));
-  
+
 
 }
 
