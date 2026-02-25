@@ -1,116 +1,146 @@
-/// <mls fileReference="_100554_/l2/agentFix.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/agentFix.ts" enhancement="_100554_enhancementAgent" />
 
-import { IAgent } from '/_100554_/l2/aiAgentBase.js';
-import {
-    getNextPendingStepByAgentName,
-    getNextInProgressStepByAgentName,
-    updateStepStatus,
-    getNextFlexiblePendingStep,
-    updateTaskTitle,
-    appendLongTermMemory,
-} from "/_100554_/l2/aiAgentHelper.js";
-import { startNewInteractionInAiTask, startNewAiTask, executeNextStep } from "/_100554_/l2/aiAgentOrchestration.js";
-import { forceServiceInstance } from '/_100554_/l2/libCommom.js';
+import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { getState, setState } from '/_100554_/l2/collabState.js';
 import { ServiceSource100554 } from '/_100554_/l2/serviceSource.js';
-import { createAllModels } from '/_100554_/l2/collabLibModel.js';
 
-const agentName = "agentFix";
-
-export function createAgent(): IAgent {
+export function createAgent(): IAgentAsync {
     return {
-        agentName,
+        agentName: "agentFix",
+        agentProject: 100554,
+        agentFolder: "",
         avatar_url: svgFixBug,
-        agentDescription: "Responsavel por corrigir erros",
+        agentDescription: "Fix source file based on compile errors",
         visibility: "public",
-        scope: ["l2_preview"],
-        async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
-            return _beforePrompt(context);
-        },
-        async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
-            return _afterPrompt(context);
-        },
-        async replayForSupport(context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> {
-            return _replayForSupport(context, payload);
+        beforePromptImplicit,
+        afterPromptStep,
+    };
+}
+
+
+async function beforePromptImplicit(
+    agent: IAgentMeta,
+    context: mls.msg.ExecutionContext,
+    userPrompt: string,
+): Promise<mls.msg.AgentIntent[]> {
+
+    if (!userPrompt || userPrompt.length < 5) throw new Error('invalid prompt');
+    let data: IDataPrompt | undefined;
+
+    let pp = context.message.content
+        .replace(`@@ ${agent.agentName}`, '')
+        .replace(`@@${agent.agentName}`, '').trim()
+        .replace(`@@Fix`, '')
+        .replace(`@@_100554_/l2/agentFix`, '');
+
+    data = mls.common.safeParseArgs(pp) as IDataPrompt;
+    if (!('page' in data) || !('prompt' in data)) throw new Error(`[${agent.agentName}] beforePrompt: Invalid prompt structure missing page and prompt`);
+    data = consistDataParams(data, agent.agentName);
+
+    const system = await prepareSystemPrompt(data)
+
+    const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
+        type: "add-message-ai",
+        request: {
+            action: 'addMessageAI',
+            agentName: agent.agentName,
+            inputAI: [{
+                type: "system",
+                content: system,
+            }, {
+                type: "human",
+                content: data.prompt
+            }],
+            taskTitle: `New module`,
+            threadId: context.message.threadId,
+            userMessage: context.message.content,
+            longTermMemory: { 'page': `${data.page}`, 'position': data.position, "mode": data.mode },
         }
+    };
+    return [addMessageAI];
+
+}
+
+async function afterPromptStep(
+    agent: IAgentMeta,
+    context: mls.msg.ExecutionContext,
+    parentStep: mls.msg.AIAgentStep,
+    step: mls.msg.AIAgentStep,
+    hookSequential: number,
+): Promise<mls.msg.AgentIntent[]> {
+    if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
+
+    const payload = (step.interaction?.payload?.[0]) as Output1 || undefined;
+    if (payload?.type !== "flexible") {
+        throw new Error(`Payload type invalid: ${payload?.type} must be flexible`);
     }
-};
+    if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
 
-const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-
-    const taskTitle = "Planning";
-
-    if (!context || !context.message) throw new Error("Invalid context");
-    if (!context.task) {
-        let data: IDataPrompt | undefined;
-        try {
-            let pp = context.message.content
-                .replace(`@@ ${agentName}`, '')
-                .replace(`@@${agentName}`, '').trim()
-                .replace(`@@Fix`, '');
-
-            data = mls.common.safeParseArgs(pp) as IDataPrompt;
-            if (!('page' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing page and prompt`);
-            data = consistDataParams(data);
-
-            const inputs = await getPrompts(data);
-            await startNewAiTask(
-                agentName,
-                taskTitle,
-                context.message.content,
-                context.message.threadId,
-                context.message.senderId,
-                inputs,
-                context,
-                _afterPrompt,
-                { 'page': `${data.page}`, 'position': data.position, "mode": data.mode }
-            ).catch((err) => { throw new Error(err.message) });
-
-        } catch (err) {
-            if (data) refreshStateLock(data.page, data.position, false);
-        }
-        return;
+    let status: mls.msg.AIStepStatus = 'completed';
+    try {
+        const result = payload.result;
+        await updateFiles(context, result);
+    } catch (e) {
+        console.error(e);
+        status = 'failed';
     }
 
-
-
-    const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
-    context = await updateStepStatus(context, step.stepId, "in_progress");
-    if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
-
-    let data: IDataPrompt = mls.common.safeParseArgs(step.prompt) as IDataPrompt;
-    if (!('page' in data) || !('prompt' in data)) throw new Error(`[${agentName}] beforePrompt: Invalid prompt structure missing page and prompt`);
-    data = consistDataParams(data);
-    await appendLongTermMemory(context, { 'page': `${data.page}`, 'position': data.position, "mode": data.mode });
-
-    const inputs = await getPrompts(data);
-    await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId).catch((err) => {
-        refreshStateLock(data.page, data.position, false);
-    });
+    const updateStatus: mls.msg.AgentIntentUpdateStatus = {
+        type: 'update-status',
+        hookSequential,
+        messageId: context.message.orderAt,
+        threadId: context.message.threadId,
+        taskId: context.task?.PK || '',
+        parentStepId: parentStep.stepId,
+        stepId: step.stepId,
+        status
+    };
+    return [updateStatus];
 
 }
 
-const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+export async function updateFiles(context: mls.msg.ExecutionContext, result: IDataResult): Promise<void> {
 
-    if (!context || !context.message || !context.task) throw new Error("Invalid context");
-    const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    context = await updateFile(context);
-    context = await updateStepStatus(context, step.stepId, "completed");
+    const modeMemory = context.task?.iaCompressed?.longMemory['mode'];
+    const pageMemory = context.task?.iaCompressed?.longMemory['page'];
+    const positionMemory = context.task?.iaCompressed?.longMemory['position'];
+    if (!pageMemory) throw new Error(`[updateFile]: invalid pageMemory`);
 
-    if (!context.task) throw new Error("Invalid context task");
-    context.task = await updateTaskTitle(context.task, "Widget fixed");
-    await executeNextStep(context);
+    const info = mls.l2.getPath(pageMemory);
+    const mode = modeMemory;
+    const contentHTML = result.html ? result.html : undefined;
+    const contentTS = result.ts ? result.ts : undefined;
+    const contentLess = result.less ? result.less : undefined;
+    const position = positionMemory || 'left';
+    const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
+    if (!serviceSource) throw new Error('Not found service source instance');
+
+    if (contentTS) {
+        const modelTs = await getModelByExtension(pageMemory, 'ts') as mls.editor.IModelTS;
+        serviceSource.setValueInModeKeepingUndo(modelTs.model, contentTS, false);
+        (modelTs.model as any).needFormat = true;
+
+    }
+
+    if (contentHTML) {
+        const modelHtml = await getModelByExtension(pageMemory, 'html') as mls.editor.IModelHTML;
+        serviceSource.setValueInModeKeepingUndo(modelHtml.model, contentHTML, false);
+        (modelHtml.model as any).needFormat = true;
+    }
+
+    if (contentLess) {
+        const modelLess = await getModelByExtension(pageMemory, 'less') as mls.editor.IModelStyle;
+        serviceSource.setValueInModeKeepingUndo(modelLess.model, contentLess, false);
+        (modelLess.model as any).needFormat = true;
+    }
+
+    refreshStateLock(pageMemory, position, false);
+    serviceSource.formatMonaco();
 
 }
 
-const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> => {
-    console.info('_replayForSupport');
-    return;
-}
 
-function consistDataParams(data: IDataPrompt): IDataPrompt {
+function consistDataParams(data: IDataPrompt, agentName: string): IDataPrompt {
 
     if (!('page' in data) || !data.page) throw new Error(`[${agentName}] getPrompts: No 'page' in data prompt.`);
     if (!('position' in data) || !data.position) throw new Error(`[${agentName}] getPrompts: No 'position' in data prompt.`);
@@ -120,301 +150,110 @@ function consistDataParams(data: IDataPrompt): IDataPrompt {
     return data;
 }
 
-async function getPrompts(data: IDataPrompt): Promise<mls.msg.IAMessageInputType[]> {
+async function prepareSystemPrompt(data: IDataPrompt): Promise<string> {
 
-    const prompts: mls.msg.IAMessageInputType[] = [];
-    prompts.push(systemMainInstruction());
-    prompts.push(systemTaskInstruction());
-    prompts.push(systemRulesInstruction());
-    prompts.push(systemRulesTripleSlash());
-    prompts.push(systemKnownErrors());
-
-    if (data.mode === 'typescript') {
-        prompts.push(await systemDefinitionTypescript(data));
-        prompts.push(await systemImportsDefinitionTs(data));
-        prompts.push(await systemDefinitionErrorsTs(data));
-    }
-
-    if (data.mode === 'html') {
-        prompts.push(await systemDefinitionHTML(data));
-    }
-
-    if (data.mode === 'less') {
-        prompts.push(await systemDefinitionLess(data));
-        prompts.push(await systemDefinitionErrorsLess(data));
-    }
-
-    prompts.push(await systemDefinitionDefs(data));
-    prompts.push(systemOutInstruction());
-    prompts.push(systemUserInstruction(data));
-    return prompts;
-}
-
-
-function systemMainInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `<!-- modelType: code -->
-Você é um agente especializado em corrigir erros de componentes web desenvolvidos com o framework Lit. Você receberá um arquivo typescript ou html ou less, e um json de definição(estilo metadata com informaçoes gerais):
-- Arquivo '.ts' com a lógica do componente
-- Arquivo '.html' com a pagina em que o componente esta sendo usado.
-- Arquivo '.less' com os estilos
-`
-    }
-}
-
-function systemTaskInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `##Task
-
-O arquivo do source seria fornecido, juntamente com um resumo dos erros encontrados no arquivo. Sua tarefa é:
-
-1. Ver os erros e identificar quais alterações precisam ser realizadas
-2. Executar apenas as alterações necessárias
-3. Retornar somente os arquivos que você modificou
-`
-    }
-}
-
-function systemRulesInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `##Rules
-Regras que devem ser respeitadas na atualização dos arquivos.
-
-1. Não se deve remover ou renomear atributos sem a solicitação do usuario
-2. Não se deve adicionar novos tokens no less
-3. *Não remover*, a primeira linha com tripleslash ex: /// <mls shortName="xxx" project="yyy" enhancement="yyy" groupName="zzzz" />
-4. Não alterar o valor dos itens do tripleslash(shortName,project,enhancement,groupName)
-`
-    }
-}
-
-
-function systemRulesTripleSlash(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `##Rules
-Os arquivos .ts e .less tem como controle a primeira linha sendo um tripleslash. Essa linha é obrigatória, não remover.
-- Os atributos válidos são : shortName,project,enhancement,groupName.
-- Corrigir o nome dos atributos se necessário.
-- Não adicionar novos atributos.
-- Não alterar o value dos atributos
-- O value deverá ser sempre entre aspas duplas "" ex: /// <mls shortName="xxx" project="yyy" enhancement="yyy" groupName="zzzz" />
-
-`
-    }
-}
-
-function systemKnownErrors(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `##Erros conhecidos
-Segue erros conhecidos e como solucionar:
-
-1. Erro na tipagem do *repeat* no lit: is not assignable to parameter of type 'RepeatFunction'.
-    *Erro de tipagem:*
-        \${repeat(
-                this.history,
-                item => item.shortName,
-                file, index => this.render(file, index, true)
-        )}
-    *Correção do erro:* => A função repeat espera 3 parametros( array: unknown[], func?: RepeatFunction | undefined, func2?: RepeatFunction | undefined), para corrigir o erro de tipagem, é necessario tipar func e func2, conforme exemplo abaixo:
-
-        func1: tipar como: as ()=> string
-        func2: tipar como: as ()=> TemplateResult<1
-
-        \${repeat(
-            this.history,
-            ((item: mls.stor.IFileInfo) => item.shortName as ()=> string ),
-            ((file: mls.stor.IFileInfo, index: any) => this.renderLiItem(file, index, true)) as ()=> TemplateResult<1>)
-        }
-
-2. Erros de nomes de tokens Less: 
-ex margin: @space-4   =>  NameError: variable @space-4 is undefined
-Nesse caso analisar e utilizar um token existente ou não usar os tokens nessa situação
-`
-    }
-}
-
-async function systemDefinitionDefs(data: IDataPrompt): Promise<mls.msg.IAMessageInputType> {
-
-    try {
-        const content = await getContentByExtension(data.page, 'defs');
-        if (!content) return { type: 'system', content: '' };
-        return {
-            type: 'system',
-            content: `## JSON DE DEFINITIONS \n\n ${content}`
-        }
-    } catch (e: any) {
-        throw new Error(`[${agentName}][systemDefinitionDefs]: ${e.message}`);
-    }
+    let system: string = system1;
+    system = await systemTypescript(data, system, data.mode === 'typescript');
+    system = await systemHTML(data, system, data.mode === 'html');
+    system = await systemLess(data, system, data.mode === 'less');
+    system = await systemDefs(data, system);
+    return system;
 
 }
 
-async function systemDefinitionTypescript(data: IDataPrompt): Promise<mls.msg.IAMessageInputType> {
+async function systemTypescript(data: IDataPrompt, system: string, isTs: boolean): Promise<string> {
 
-    try {
-        const content = await getContentByExtension(data.page, 'ts');
-        if (!content) throw new Error(`[${agentName}][systemDefinitionTypescript]: not found content:` + data.page);
-        return {
-            type: 'system',
-            content: `## DEFINIÇÕES DO TYPESCRIPT \n\n ${content}`
-        }
-    } catch (e: any) {
-        throw new Error(`[${agentName}][systemDefinitionTypescript]: ${e.message}`);
+    if (!isTs) {
+        system = system.replace("{{typescriptSource}}", '');
+        system = system.replace("{{typescriptImportsDefinition}}", '');
+        system = system.replace("{{typescriptCompileErrors}}", '');
+        system = system.replace("{{typescriptMonacoErrors}}", '');
+        system = system.replace("{{typescriptMonacoWarnings}}", '');
+        return system;
     }
+
+    const content = await getContentByExtension(data.page, 'ts');
+    const modelTs = await getModelByExtension(data.page, 'ts') as mls.editor.IModelTS;
+    const imports = modelTs.compilerResults?.imports || [];
+    const defs = await getDefinitonsByImports(imports);
+    const str = defs.map((def) => ` **importName: ${def.importName}**\n${def.definition}`)
+    const markersTs = modelTs ? monaco.editor.getModelMarkers({ resource: modelTs.model.uri }) : [];
+    const errors = modelTs.compilerResults?.errors || [];
+    const errorsMonaco = markersTs.filter(marker => marker.severity === monaco.MarkerSeverity.Error);
+    const warningsMonaco = markersTs.filter(marker => marker.severity === monaco.MarkerSeverity.Warning);
+
+    system = system.replace("{{typescriptSource}}", content);
+    system = system.replace("{{typescriptImportsDefinition}}", str.join('\n'));
+    system = system.replace("{{typescriptCompileErrors}}", JSON.stringify(errors));
+    system = system.replace("{{typescriptMonacoErrors}}", JSON.stringify(errorsMonaco));
+    system = system.replace("{{typescriptMonacoWarnings}}", JSON.stringify(warningsMonaco));
+    return system;
+
 
 }
 
-async function systemDefinitionHTML(data: IDataPrompt): Promise<mls.msg.IAMessageInputType> {
-
-    try {
-        const content = await getContentByExtension(data.page, 'html');
-        if (!content) throw new Error(`[${agentName}][systemDefinitionHTML]: not found content:` + data.page);
-        return {
-            type: 'system',
-            content: `## DEFINIÇÕES DO HTML \n\n ${content}`
-        }
-    } catch (e: any) {
-        throw new Error(`[${agentName}][systemDefinitionHTML]: ${e.message}`);
+async function systemHTML(data: IDataPrompt, system: string, isHtml: boolean): Promise<string> {
+    if (!isHtml) {
+        system = system.replace("{{htmlSource}}", '');
+        return system;
     }
+    const content = await getContentByExtension(data.page, 'html');
+    system = system.replace("{{htmlSource}}", content);
+    return system;
+}
+
+async function systemLess(data: IDataPrompt, system: string, isStyle: boolean): Promise<string> {
+
+    if (!isStyle) {
+        system = system.replace("{{lessSource}}", '');
+        system = system.replace("{{lessCompileErrors}}", '');
+        system = system.replace("{{lessMonacoErrors}}", '');
+        system = system.replace("{{lessMonacoWarnings}}", '');
+        return system;
+    }
+
+    const content = await getContentByExtension(data.page, 'less');
+    const modelStyle = await getModelByExtension(data.page, 'less') as mls.editor.IModelStyle;
+
+    const markersStyle = modelStyle ? monaco.editor.getModelMarkers({ resource: modelStyle.model.uri }) : [];
+    await mls.l2.less.compileStyle(modelStyle);
+    const errors = modelStyle.styleResults?.errors || [];
+    const errorsMonaco = markersStyle.filter(marker => marker.severity === monaco.MarkerSeverity.Error);
+    const warningsMonaco = markersStyle.filter(marker => marker.severity === monaco.MarkerSeverity.Warning);
+
+    system = system.replace("{{lessSource}}", content);
+    system = system.replace("{{lessCompileErrors}}", JSON.stringify(errors));
+    system = system.replace("{{lessMonacoErrors}}", JSON.stringify(errorsMonaco));
+    system = system.replace("{{lessMonacoWarnings}}", JSON.stringify(warningsMonaco));
+    return system;
 
 }
 
-async function systemDefinitionLess(data: IDataPrompt): Promise<mls.msg.IAMessageInputType> {
-
-    try {
-        const content = await getContentByExtension(data.page, 'style');
-        if (!content) throw new Error(`[${agentName}][systemDefinitionLess]: not found content:` + data.page);
-        return {
-            type: 'system',
-            content: `## DEFINIÇÕES DO LESS \n\n ${content}`
-        }
-    } catch (e: any) {
-        throw new Error(`[${agentName}][systemDefinitionLess]: ${e.message}`);
-    }
-
+async function systemDefs(data: IDataPrompt, system: string): Promise<string> {
+    const content = await getContentByExtension(data.page, 'defs');
+    system = system.replace("{{defsSource}}", content);
+    return system;
 }
 
-async function systemDefinitionErrorsTs(data: IDataPrompt): Promise<mls.msg.IAMessageInputType> {
-
-    try {
-        const models = getModelByDataPage(data.page);
-        if (!models || !models.ts) throw new Error(`[${agentName}][systemDefinitionErrorsTs]: not found models for file:` + data.page);
-        const markersTs = models.ts ? monaco.editor.getModelMarkers({ resource: models.ts.model.uri }) : [];
-        const errors = models.ts.compilerResults?.errors || [];
-        const errorsMonaco = markersTs.filter(marker => marker.severity === monaco.MarkerSeverity.Error);
-        const warningsMonaco = markersTs.filter(marker => marker.severity === monaco.MarkerSeverity.Warning);
-
-        return {
-            type: 'system',
-            content: `
-## DEFINIÇÕES DE ERROS DE COMPILAÇÃO TYPESCRIPT \n\n ${JSON.stringify(errors)} \n\n
-## DEFINIÇÕES DE ERROS DO MONACO TYPESCRIPT  \n\n ${JSON.stringify(errorsMonaco)} \n\n 
-## DEFINIÇÕES DE WARNINGS DO MONACO TYPESCRIPT  \n\n ${JSON.stringify(warningsMonaco)} \n\n 
-`
-        }
-    } catch (e: any) {
-        throw new Error(`[${agentName}][systemDefinitionErrorsTs]: ${e.message}`);
-    }
-
-}
-
-async function systemImportsDefinitionTs(data: IDataPrompt): Promise<mls.msg.IAMessageInputType> {
-
-    try {
-
-        const models = getModelByDataPage(data.page)
-        if (!models || !models.ts) throw new Error(`[${agentName}][systemImportsDefinitionTs]: not found models for file:` + data.page);
-        const imports = models.ts.compilerResults?.imports || [];
-
-        const defs = await getDefinitonsByImports(imports, data.position);
-        const str = defs.map((def) => ` **importName: ${def.importName}**\n${def.definition}`)
-
-        return {
-            type: 'system',
-            content: ` ## IMPORTS DEFINITIONS \n\n ${str.join('\n')}
-`
-        }
-    } catch (e: any) {
-        throw new Error(`[${agentName}][systemImportsDefinitionTs]: ${e.message}`);
-    }
-
-}
-
-async function systemDefinitionErrorsLess(data: IDataPrompt): Promise<mls.msg.IAMessageInputType> {
-
-    try {
-        const models = getModelByDataPage(data.page)
-        if (!models || !models.style) throw new Error(`[${agentName}][systemDefinitionErrorsLess]: not found models for file:` + data.page);
-        const markersStyle = models.style ? monaco.editor.getModelMarkers({ resource: models.style.model.uri }) : [];
-
-        await mls.l2.less.compileStyle(models.style);
-
-        const errors = models.style.styleResults?.errors || [];
-        const errorsMonaco = markersStyle.filter(marker => marker.severity === monaco.MarkerSeverity.Error);
-        const warningsMonaco = markersStyle.filter(marker => marker.severity === monaco.MarkerSeverity.Warning);
-
-        return {
-            type: 'system',
-            content: `
-## DEFINIÇÕES DE ERROS DE COMPILAÇÃO LESS \n\n ${JSON.stringify(errors)} \n\n
-## DEFINIÇÕES DE ERROS DO MONACO LESS  \n\n ${JSON.stringify(errorsMonaco)} \n\n 
-## DEFINIÇÕES DE WARNINGS DO MONACO LESS  \n\n ${JSON.stringify(warningsMonaco)} \n\n 
-`
-        }
-    } catch (e: any) {
-        throw new Error(`[${agentName}][systemDefinitionErrorsLess]: ${e.message}`);
-    }
-
-}
-
-function systemOutInstruction(): mls.msg.IAMessageInputType {
-    return {
-        type: 'system',
-        content: `## Formato de saida:
-\`\`\` json
-{
-    "type": "flexible",
-    "result": { 
-        html: string, 
-        ts: string, 
-        less: string, 
-    }
-  }
-\`\`\`
-`
-    }
-}
-
-function systemUserInstruction(data: IDataPrompt): mls.msg.IAMessageInputType {
-    return {
-        type: 'human',
-        content: `##Solicitação do usuário:
-
-${JSON.stringify(data)}
-`
-    }
-}
-
-async function getContentByExtension(fullName: string, ext: 'html' | 'ts' | 'style' | 'defs') {
+async function getContentByExtension(fullName: string, ext: 'html' | 'ts' | 'less' | 'defs') {
     const info = mls.l2.getPath(fullName);
-    try {
-        const models = getModel(info);
-        if (!models) throw new Error(`[${agentName}][getContentByExtension]:Not found models for file:` + fullName);
-        if (!models[ext]) return '';
-        return models[ext]?.model.getValue();
-    } catch (e: any) {
-        throw new Error(`[${agentName}][getContentByExtension]: ${e.message}`);
-    }
+    const storFileKey = mls.stor.getKeyToFile({ ...info, extension: `.${ext}`, level: 2 });
+    const storFile = mls.stor.files[storFileKey];
+    if (!storFile) return '';
+    const models = await storFile.getOrCreateModel();
+    return models.model.getValue();
 }
 
-async function getDefinitonsByImports(imports: string[], position: 'left' | 'right') {
+async function getModelByExtension(fullName: string, ext: 'html' | 'ts' | 'less' | 'defs') {
+    const info = mls.l2.getPath(fullName);
+    const storFileKey = mls.stor.getKeyToFile({ ...info, extension: `.${ext}`, level: 2 });
+    const storFile = mls.stor.files[storFileKey];
+    if (!storFile) return '';
+    const models = await storFile.getOrCreateModel();
+    return models
+}
 
-    const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
-    if (!serviceSource) throw new Error('Not found service source instance');
+async function getDefinitonsByImports(imports: string[]) {
 
     const definitionsData: { importName: string, definition: string }[] = [];
     for await (let importName of imports) {
@@ -424,11 +263,10 @@ async function getDefinitonsByImports(imports: string[], position: 'left' | 'rig
         const keyToStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, iPath.folder, '.ts');
         const storFile = mls.stor.files[keyToStorFile];
         if (!storFile) continue;
-        await createAllModels(storFile, true, false, false);
-        const models = mls.editor.models[fullPath];
-        if (!models || !models.ts) continue;
-        await mls.l2.typescript.compileAndPostProcess(models.ts, false, false);
-        const definition = models.ts.compilerResults?.prodDTS || '';
+        const modelTs = await storFile.getOrCreateModel() as mls.editor.IModelTS;
+        if (!modelTs) continue;
+        await mls.l2.typescript.compileAndPostProcess(modelTs, false, false);
+        const definition = modelTs.compilerResults?.prodDTS || '';
         if (definition) {
             definitionsData.push({
                 definition,
@@ -440,91 +278,6 @@ async function getDefinitonsByImports(imports: string[], position: 'left' | 'rig
 
     return definitionsData;
 
-
-}
-
-
-function getModel(info: { project: number, shortName: string, folder: string }): mls.editor.IModels | undefined {
-    const key = mls.editor.getKeyModel(info.project, info.shortName, info.folder, mls.actualLevel);
-    return mls.editor.models[key];
-}
-
-async function updateFile(context: mls.msg.ExecutionContext) {
-
-
-    if (!context || !context.task) throw new Error('Not found context to updateFile');
-    const step = getNextFlexiblePendingStep(context.task);
-
-    if (!step || step.type !== 'flexible') throw new Error('Invalid step in updateFile');
-    const result: IDataResult = step.result;
-
-    if (!result) throw new Error('Not found "result"');
-
-    await forceServiceInstance(2, '_100554_serviceSource');
-
-    const modeMemory = context.task?.iaCompressed?.longMemory['mode'];
-    const pageMemory = context.task?.iaCompressed?.longMemory['page'];
-    const positionMemory = context.task?.iaCompressed?.longMemory['position'];
-    if (!pageMemory) throw new Error(`[${agentName}][updateFile]: invalid pageMemory`);
-
-    const info = mls.l2.getPath(pageMemory);
-    const mode = modeMemory;
-    const contentHTML = result.html ? result.html : undefined;
-    const contentTS = result.ts ? result.ts : undefined;
-    const contentLess = result.less ? result.less : undefined;
-    const position = positionMemory || 'left';
-    const serviceSource: ServiceSource100554 = getState(`serviceSource.${position}.service`);
-    if (!serviceSource) throw new Error('Not found service source instance');
-
-    const models = getModel(info);
-    if (!models) throw new Error('Not found model:' + agentName)
-
-    if (contentHTML && models.html && mode === 'html') {
-        serviceSource.setValueInModeKeepingUndo(models.html.model, contentHTML, false);
-        (models.html.model as any).needFormat = true;
-    }
-
-    if (contentTS && models.ts && mode === 'typescript') {
-        serviceSource.setValueInModeKeepingUndo(models.ts.model, contentTS, false);
-        (models.ts.model as any).needFormat = true;
-    }
-
-    if (contentLess && models.style && mode === 'less') {
-        serviceSource.setValueInModeKeepingUndo(models.style.model, contentLess, false);
-        (models.style.model as any).needFormat = true;
-    }
-
-    refreshStateLock(pageMemory, position, false);
-    serviceSource.formatMonaco();
-
-    context = await updateStepStatus(context, step.stepId, "completed");
-    return context;
-
-}
-
-function extractBaseComponentName(input: string): string {
-    const match = input.match(/^(.*?)(?:-base-\d+)?$/);
-    return match ? match[1] : input;
-}
-
-function extractComponentMarkdown(md: string, componentName: string): string | null {
-
-    const pattern = new RegExp(`(## ${componentName}\\n(?:.+\\n)*?)(?=\\n## |$)`, 'gm');
-    const match = md.match(pattern);
-
-    if (match) {
-        const lines = match[0].split('##');
-        return lines && lines[1] ? lines[1].trim() : '';
-    }
-
-    return '';
-}
-
-function getModelByDataPage(fullName: string) {
-    const info = mls.l2.getPath(fullName);
-    const models = getModel(info);
-    return models;
-
 }
 
 function refreshStateLock(page: string, position: string, value: boolean) {
@@ -533,6 +286,145 @@ function refreshStateLock(page: string, position: string, value: boolean) {
     newMap.set(page, value);
     setState(`serviceSource.${position}.lockMap`, newMap);
 }
+
+
+
+const system1 = `
+<!-- modelType: codeflash -->
+<!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) or nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10, code2 (kimi 2.5) -->
+
+You are an agent specialized in fixing errors in web components developed with the Lit framework.  
+You will receive a TypeScript, HTML, or LESS file, along with a JSON definition (style metadata with general information):
+
+- A '.ts' file containing the component logic  
+- A '.html' file where the component is being used  
+- A '.less' file with the styles  
+
+The source file will be provided together with a summary of the errors found in the file. Your task is to:
+
+1. Review the errors and identify which changes need to be made  
+2. Apply only the necessary changes  
+3. Return only the files that you modified  
+
+Rules that must be respected when updating the files:
+
+1. Do not remove or rename attributes unless explicitly requested by the user  
+2. Do not add new tokens in the LESS file  
+3. *Do not remove* the first line with the triple-slash, e.g.:  
+   /// <mls fileReference="_100554_/l2/agentFix.ts" enhancement="_blank" />
+4. Do not change the values of the triple-slash items (fileReference, enhancement)
+
+The .ts and .less files are controlled by the first line being a triple-slash. This line is mandatory and must not be removed.
+- Valid attributes are: fileReference, enhancement  
+- Fix attribute names if necessary  
+- Do not add new attributes  
+- Do not change attribute values  
+- Attribute values must always be wrapped in double quotes "", e.g.:  
+  /// <mls fileReference="xxx" enhancement="yyy" />
+
+## Known Errors
+Below are known errors and how to solve them:
+
+1. Typing error in Lit's *repeat*:  
+   "is not assignable to parameter of type 'RepeatFunction'."
+
+   *Typing error example:*
+   \${repeat(
+        this.history,
+        item => item.shortName,
+        file, index => this.render(file, index, true)
+   )}
+
+   *Error fix:*  
+   The repeat function expects 3 parameters  
+   (array: unknown[], func?: RepeatFunction | undefined, func2?: RepeatFunction | undefined).  
+   To fix the typing error, you must explicitly type func and func2, as shown below:
+
+   - func1: type as: as () => string  
+   - func2: type as: as () => TemplateResult<1>  
+
+   \${repeat(
+        this.history,
+        ((item: mls.stor.IFileInfo) => item.shortName as () => string),
+        ((file: mls.stor.IFileInfo, index: any) =>
+            this.renderLiItem(file, index, true)
+        ) as () => TemplateResult<1>
+   )}
+
+2. LESS token name errors:  
+   Example:  
+   margin: @space-4   => NameError: variable @space-4 is undefined  
+
+   In this case, analyze and use an existing token or avoid using tokens in this situation.
+
+## FILE TYPESCRIPT
+### Source
+{{typescriptSource}}
+
+### Imports Definitions
+{{typescriptImportsDefinition}}
+
+### Compilation Errors
+{{typescriptCompileErrors}}
+
+### Monaco Errors
+{{typescriptMonacoErrors}}
+
+### Monaco Warnings
+{{typescriptMonacoWarnings}}
+
+----------
+
+## FILE HTML
+### Source
+{{HtmlSource}}
+
+----------
+
+## FILE LESS
+### Source
+{{LessSource}}
+
+### LESS Compilation Errors
+{{lessCompileErrors}}
+
+### LESS Monaco Errors
+{{lessMonacoErrors}}
+
+### LESS Monaco Warnings
+{{lessMonacoWarnings}}
+
+## FILE DEFINITIONS JSON
+{{defsSource}}
+
+## Output format
+Return only valid JSON in the following structure:
+
+[[OutputSection1]]
+
+`;
+
+//#region OutputSection1
+export type Output1 =
+    {
+        type: "flexible";
+        result: IDataResult
+    }
+
+interface IDataResult {
+    html: string,
+    ts: string,
+    less: string,
+}
+//#endregion
+
+interface IDataPrompt {
+    page: string,
+    prompt: string,
+    position: 'left' | 'right',
+    mode: 'typescript' | 'html' | 'less'
+}
+
 
 const svgFixBug = `<svg fill="#000000" height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
 	 viewBox="0 0 512.602 512.602" xml:space="preserve">
@@ -563,16 +455,3 @@ const svgFixBug = `<svg fill="#000000" height="800px" width="800px" version="1.1
 		</g>
 </g>
 </svg>`
-
-interface IDataResult {
-    html: string,
-    ts: string,
-    less: string,
-}
-
-interface IDataPrompt {
-    page: string,
-    prompt: string,
-    position: 'left' | 'right',
-    mode: 'typescript' | 'html' | 'less'
-}

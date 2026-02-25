@@ -24,7 +24,7 @@ export function createTool(): ITool {
         description: "Filtra uma lista de arquivos com base em critérios como extensão, nome, erro, status, entre outros.",
         argsSchema: {
             filters: {
-                type: "array",
+                type: "object",
                 description: "Lista de filtros a aplicar nos arquivos.",
                 items: {
                     type: "object",
