@@ -117,7 +117,6 @@ async function afterPromptStep(
     if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
 
     let status: mls.msg.AIStepStatus = 'completed';
-    console.info(payload.result)
 
     try {
         if (!context.isTest) {
@@ -148,13 +147,10 @@ async function afterPromptStep(
 
 export async function updateFiles(context: mls.msg.ExecutionContext, result: IDataResult): Promise<void> {
 
-    const modeMemory = context.task?.iaCompressed?.longMemory['mode'];
     const pageMemory = context.task?.iaCompressed?.longMemory['page'];
     const positionMemory = context.task?.iaCompressed?.longMemory['position'];
     if (!pageMemory) throw new Error(`[updateFile]: invalid pageMemory`);
 
-    const info = mls.l2.getPath(pageMemory);
-    const mode = modeMemory;
     const contentHTML = result.html ? result.html : undefined;
     const contentTS = result.ts ? result.ts : undefined;
     const contentLess = result.less ? result.less : undefined;

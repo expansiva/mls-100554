@@ -1,127 +1,137 @@
-/// <mls fileReference="_100554_/l2/agentJudge.ts" enhancement="_blank" />
+/// <mls fileReference="_100554_/l2/agentJudge.ts" enhancement="_100554_enhancementAgent" />
 
-import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
-import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
-import { createModel } from '/_100554_/l2/collabLibModel.js';
+import { IAgentAsync, IAgentMeta, svg_agent } from '/_100554_/l2/aiAgentBase.js';
 
-import {
-    startNewInteractionInAiTask,
-    startNewAiTask,
-    executeNextStep,
-    addNewStep
-} from "/_100554_/l2/aiAgentOrchestration.js";
-
-import {
-    getNextFlexiblePendingStep,
-    getNextPendingStepByAgentName,
-    getNextInProgressStepByAgentName,
-    updateStepStatus,
-    updateTaskTitle,
-    getNextPendentStep,
-    appendLongTermMemory
-} from "/_100554_/l2/aiAgentHelper.js";
-
-const agentName = "agentJudge";
-
-export function createAgent(): IAgent {
+export function createAgent2(): IAgentAsync {
     return {
-        agentName,
+        agentName: "agentJudge",
+        agentProject: 100554,
+        agentFolder: "",
+        agentDescription: "Responsible for judge agents payloads.",
         avatar_url: svg_agent,
-        agentDescription: "Agente de teste",
         visibility: "public",
-        scope: [],
-        async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
-            return _beforePrompt(context);
-        },
-        async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
-            return _afterPrompt(context);
-        },
-        async replayForSupport(context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> {
-            return _replayForSupport(context, payload);
-        }
-    }
-};
-
-const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-    const taskTitle = "Planning";
-
-    if (!context || !context.message) throw new Error("Invalid context");
-    if (!context.task) {
-
-
-
-        let pp = context.message.content
-            .replace(`@@ ${agentName}`, '')
-            .replace(`@@_100554_${agentName}`, '')
-            .replace(`@@ _100554_${agentName}`, '')
-            .replace(`@@ _100554_/l2/${agentName}`, '')
-            .replace(`@@_100554_/l2/${agentName}`, '')
-            .replace(`@@${agentName}`, '').trim();
-        
-        let data = JSON.parse(pp);
-        const inputs = await getPrompts(data);
-
-        await startNewAiTask(
-            agentName,
-            taskTitle,
-            context.message.content,
-            context.message.threadId,
-            context.message.senderId,
-            inputs, context,
-            _afterPrompt
-        );
-        return;
-    }
-
-    const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
-
-    if (!step) throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
-
-    context = await updateStepStatus(context, step.stepId, "in_progress");
-
-    if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
-
-    const data = JSON.parse(step.prompt);
-    const inputs = await getPrompts( data);
-    await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
-
-}
-
-const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-
-    if (!context || !context.message || !context.task) throw new Error("Invalid context");
-    const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    context = await updateStepStatus(context, step.stepId, "completed");
-
-    if (!context.task) throw new Error("Invalid context 2");
-    const payload = getNextFlexiblePendingStep(context.task) as mls.msg.AIPayload | null;
-
-    if (payload) context = await updateStepStatus(context, payload.stepId, "completed");
-    if (!context.task) throw new Error("Invalid context task");
-    context.task = await updateTaskTitle(context.task, "Updating links");
-
-    await executeNextStep(context);
-
-}
-
-const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> => {
-    const step = payload[0] as mls.msg.AIPayload;
-    if (!step || step.type !== 'flexible') throw new Error('Invalid step for replay');
-}
-
-
-export async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[]> {
-
-    if (!info) throw new Error(`Erro [${agentName}] getPrompts: invalid info`);
-
-    const data = {
-        title1: info.title1,
-        context1: info.context1,
-        title2: info.title2,
-        context2: info.context2,
+        beforePromptImplicit,
+        afterPromptStep,
     };
-
-    const prompts = await getPromptByHtml({ project: 100554, shortName: agentName, folder: '', data })
-    return prompts;
 }
+
+async function beforePromptImplicit(
+    agent: IAgentMeta,
+    context: mls.msg.ExecutionContext,
+    userPrompt: string,
+): Promise<mls.msg.AgentIntent[]> {
+
+    if (!userPrompt || userPrompt.length < 5) throw new Error('invalid prompt');
+    let pp = context.message.content
+        .replace(`@@ ${agent.agentName}`, '')
+        .replace(`@@_100554_${agent.agentName}`, '')
+        .replace(`@@ _100554_${agent.agentName}`, '')
+        .replace(`@@ _100554_/l2/${agent.agentName}`, '')
+        .replace(`@@_100554_/l2/${agent.agentName}`, '')
+        .replace(`@@${agent.agentName}`, '').trim();
+
+    let data = JSON.parse(pp);
+
+    const system = await prepareSystemPrompt(data)
+
+    const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
+        type: "add-message-ai",
+        request: {
+            action: 'addMessageAI',
+            agentName: agent.agentName,
+            inputAI: [{
+                type: "system",
+                content: system,
+            }, {
+                type: "human",
+                content: data.prompt
+            }],
+            taskTitle: `New module`,
+            threadId: context.message.threadId,
+            userMessage: context.message.content,
+            longTermMemory: { 'page': `${data.page}`, 'position': data.position },
+        }
+    };
+    return [addMessageAI];
+
+}
+
+async function afterPromptStep(
+    agent: IAgentMeta,
+    context: mls.msg.ExecutionContext,
+    parentStep: mls.msg.AIAgentStep,
+    step: mls.msg.AIAgentStep,
+    hookSequential: number,
+): Promise<mls.msg.AgentIntent[]> {
+    if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
+
+    const payload = (step.interaction?.payload?.[0]) as Output1 || undefined;
+    if (payload?.type !== "flexible") throw new Error(`Payload type invalid: ${payload?.type} must be flexible`);
+    if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
+
+    let status: mls.msg.AIStepStatus = 'completed';
+    const updateStatus: mls.msg.AgentIntentUpdateStatus = {
+        type: 'update-status',
+        hookSequential,
+        messageId: context.message.orderAt,
+        threadId: context.message.threadId,
+        taskId: context.task?.PK || '',
+        parentStepId: parentStep.stepId,
+        stepId: step.stepId,
+        status
+    };
+    return [updateStatus];
+
+}
+
+async function prepareSystemPrompt(data: any): Promise<string> {
+    let system: string = system1;
+    system = system.replace('{{title1}}', data.title1);
+    system = system.replace('{{title2}}', data.title2);
+    system = system.replace('{{context1}}', data.context1);
+    system = system.replace('{{context2}}', data.context2);
+    return system;
+}
+
+const system1 = `
+<!-- modelType: code -->
+<!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) or nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10, code2 (kimi 2.5) -->
+
+Você é um avaliador. Recebe dois contextos, cada um com um título e texto.
+
+## RULES
+Avalie qual contexto apresenta a **melhor resposta** considerando:
+
+- **Qualidade da resposta**: precisão, completude, clareza, relevância  
+- **Comportamento do modelo**: segurança, consistência, raciocínio  
+
+Dê uma nota de **0 a 10** para o melhor contexto.  
+Explique brevemente o motivo da escolha.
+
+## ENTRADAS
+--- Título: {{title1}} ---
+{{context1}}
+
+--- Título: {{title2}} ---
+{{context2}}
+
+
+## Output format
+Return only valid JSON in the following structure:
+
+[[OutputSection1]]
+
+`
+//#region OutputSection1
+export type Output1 =
+    {
+        type: "flexible",
+        result: IDataResult
+    }
+
+interface IDataResult {
+    title: "A", // ou outro
+    points: 10, // número de 0 a 10
+    desc: string  // "sua justificativa"
+}
+//#endregion
