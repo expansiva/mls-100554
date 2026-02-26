@@ -4,7 +4,7 @@
         "module": "ES2020",
         "esModuleInterop": true,
         "outDir": "./preBuild/",
-        "rootDir": "./project",
+        "rootDir": "./project/_100554_",
         "strict": true,
         "removeComments": false,
         "noUnusedParameters": false,
@@ -33,7 +33,7 @@
         ]
     },
     "include": [
-        "project/**/*",
+        "project/_100554_/**/*",
         "monaco.d.ts",
         "mls.d.ts"
     ],
@@ -43,6 +43,7 @@
         "l2/*.ts"
     ]
 }
+
 
 
 
