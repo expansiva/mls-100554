@@ -1,6 +1,6 @@
 /// <mls fileReference="_100554_/l2/pluginSiteMonitorDashboardErrors/pluginSiteMonitorDashboardErrors.defs.ts" enhancement="_blank" />
 
-// Do not change – automatically generated code.
+// Do not change – automatically generated code. 
 
 export const defs: mls.l4.BaseDefs = {
   "meta": {
