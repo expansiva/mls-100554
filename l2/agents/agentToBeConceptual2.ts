@@ -3,6 +3,7 @@
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { finishClarification } from "/_100554_/l2/aiAgentOrchestration.js";
 
+
 export function createAgent(): IAgentAsync {
   return {
     agentName: "agentToBeConceptual2",
@@ -58,9 +59,6 @@ async function beforePromptStep(
 
   if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
 
-  console.info(`BeforePromptStep ${agent.agentName}`);
-  console.info(`${args}`);
-
   const continueIntent: mls.msg.AgentIntentPromptReady = {
     type: "prompt_ready",
     args,
@@ -87,7 +85,7 @@ async function afterPromptStep(
 
   const payload = (step.interaction?.payload?.[0]);
   if (payload?.type !== 'clarification' || !payload.json) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
-  console.log("afterPrompt", payload.json);
+
   return [];
 
 }

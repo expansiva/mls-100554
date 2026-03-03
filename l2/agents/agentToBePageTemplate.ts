@@ -5,7 +5,7 @@
 
 import { html, HTMLTemplateResult, when, repeat, classMap, styleMap, ifDefined } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { beInvoke, BeInvoke, readLocal, savelocal, generateId, pluginInvoke } from '/_100554_/l2/agents/collabAuraPageCommon.js';
 
 import { getState, setState, subscribe, unsubscribe, initState } from '/_100554_/l2/collabState.js';
@@ -80,8 +80,13 @@ const messages: { [key: string]: MessageType } = {
  */
 /* LLM_REMOVE_END */
 
+
+/*
+## Web Component tag rule
+`kebab-case(folder)--kebab-case(component)-(project)` => ex: 'agents--agent-to-be-page-template-100554'
+*/
 @customElement('agents--agent-to-be-page-template-100554')
-export class Page1 extends CollabLitElement {
+export class Page1 extends StateLitElement {
 
     /**
      * =========================================================================
@@ -90,9 +95,6 @@ export class Page1 extends CollabLitElement {
      */
 
     private msg: MessageType = messages['en'];
-
-    @property({ type: String })
-    msize = '';
 
     /* LLM_REMOVE_START */
     /**
@@ -115,10 +117,10 @@ export class Page1 extends CollabLitElement {
     }
 
     /**
-     * Called when component is attached to DOM
+     * Called when component first updated
      * This is the main initialization entrypoint
      */
-    async connectedCallback() {
+    async firstUpdated(_changedProperties: Map<PropertyKey, unknown>) {
 
         super.connectedCallback();
 
@@ -264,6 +266,9 @@ export class Page1 extends CollabLitElement {
 
     render(): HTMLTemplateResult {
 
+        const lang = this.getMessageKey(messages);
+        this.msg = messages[lang];
+
         const loading = getState(pageState.ui.loading);
 
         if (loading)
@@ -276,10 +281,10 @@ export class Page1 extends CollabLitElement {
 
                 Example:
 
-                <user-list-organism
+                <user-list-organism-100554
                     .users=$ {getState(States.users)}
                 >
-                </user-list-organism>
+                </user-list-organism-100554>
 
             -->
 
@@ -416,23 +421,23 @@ export enum Consistency { "empty", "stale", "fresh", "loading", "error" };
  */
 
 export const pageState = {
-  ui: {
-    loading: "ui.page1.loading",
-    error: "ui.page1.error"
-  },
-  user: {
-    name: "ui.page1.name",
-    consistency: "ui.page1.userConsistency",
-    requestId: "ui.page1.userRequestId",
+    ui: {
+        loading: "ui.page1.loading",
+        error: "ui.page1.error"
+    },
+    user: {
+        name: "ui.page1.name",
+        consistency: "ui.page1.userConsistency",
+        requestId: "ui.page1.userRequestId",
 
-    events: {
-      update: "ui.page1.updateUser"
+        events: {
+            update: "ui.page1.updateUser"
+        }
+    },
+    order: {
+        consistency: "ui.page1.orderConsistency",
+        requestId: "ui.page1.orderRequestId"
     }
-  },
-  order: {
-    consistency: "ui.page1.orderConsistency",
-    requestId: "ui.page1.orderRequestId"
-  }
 } as const;
 
 // page1 = name of this page, exemplo

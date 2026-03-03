@@ -1,7 +1,10 @@
 /// <mls fileReference="_100554_/l2/agents/agentToBePages.ts" enhancement="_100554_enhancementAgent" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
-import { getAgentStepByAgentName } from '/_100554_/l2/aiAgentHelper.js';
+import { getAgentStepByAgentName, getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
+import { executeBeforePrompt, loadAgent } from '/_100554_/l2/aiAgentOrchestration.js';
+import { saveModuleToBe } from '/_100554_/l2/moduleToBeAST.js';
+import { getPayloadToBeConceptual3 } from '/_100554_/l2/agents/agentToBeConceptual3.js';
 
 export function createAgent(): IAgentAsync {
         return {
@@ -23,10 +26,7 @@ async function beforePromptImplicit(
 ): Promise<mls.msg.AgentIntent[]> {
 
         if (!userPrompt) throw new Error('invalid prompt');
-
-        if (userPrompt === 'test') {
-                userPrompt = userPromptTest
-        }
+        if (userPrompt === 'test') userPrompt = userPromptTest
 
         const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
                 type: "add-message-ai",
@@ -60,10 +60,6 @@ async function beforePromptStep(
 ): Promise<mls.msg.AgentIntent[]> {
 
         if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
-
-        console.info(`BeforePromptStep ${agent.agentName}`);
-        console.info(`${args}`);
-
         const continueIntent: mls.msg.AgentIntentPromptReady = {
                 type: "prompt_ready",
                 args,
@@ -92,14 +88,9 @@ async function afterPromptStep(
         const payload = (step.interaction?.payload?.[0]) as Output || undefined;
         if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
         let status: mls.msg.AIStepStatus = 'completed';
-        let intents: mls.msg.AgentIntent[] = [];
-        try {
-                const output = payload.result;
-                intents = await processOutputToBePages(context, output as ToBePages, step);
-        } catch (e) {
-                console.error(e);
-                status = 'failed';
-        }
+
+        const output = payload.result;
+        processOutputToBePages(context, output as ToBePages, step);
 
         const updateStatus: mls.msg.AgentIntentUpdateStatus = {
                 type: 'update-status',
@@ -111,8 +102,8 @@ async function afterPromptStep(
                 stepId: step.stepId,
                 status
         };
-        //return [updateStatus];
-        return [...intents, updateStatus];
+
+        return [updateStatus];
 
 }
 
@@ -120,34 +111,18 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
 
         console.log("processOutputToBePages === toBePages");
         console.log({ toBePages });
-
         if (context.isTest) return [];
 
-        const paths = toBePages.pages.map((page) => page.pageName).slice(0, 2);
-
-        const newStep: mls.msg.AgentIntentAddStep = {
-                type: "add-step",
-                messageId: context.message.orderAt,
-                threadId: context.message.threadId,
-                taskId: context.task?.PK || '',
-                parentStepId: step.stepId,
-                step:
-                {
-                        type: 'agent',
-                        stepId: 0,
-                        interaction: null,
-                        status: 'waiting_human_input',
-                        nextSteps: [],
-                        agentName: "agentToBePage",
-                        rags: null,
-                },
-                executionMode: {
-                        type: 'parallel',
-                        args: paths,
-                }
-        };
-
-        return [newStep];
+        const toBe = getPayloadToBeConceptual3(context);
+        if(!toBe) throw new Error(`[processOutputToBePages] invalid toBe: undefined`)
+        await saveModuleToBe(mls.actualProject as number, toBe.meta.moduleName, undefined, toBePages);
+        const nextAgentInNewTask = 'agentToBePage'
+        const prompt = `@@agentToBePage ${JSON.stringify({ toBePages, moduleName: toBe?.meta.moduleName || '' })}`
+        const agent = await loadAgent(nextAgentInNewTask);
+        if (!agent) throw new Error(`[processOutputToBePages] invalid agent: ${nextAgentInNewTask}`)
+        const context2 = getTemporaryContext(context.message.threadId, context.message.senderId, prompt)
+        await executeBeforePrompt(agent, context2)
+        return [];
 
 }
 
@@ -265,7 +240,6 @@ export interface Organism {
         // Used only when the organism contains a complex form that benefits from semantic grouping.
 }
 //#endregion
-
 
 
 const userPromptTest = `

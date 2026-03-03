@@ -1481,7 +1481,6 @@ export class ServicePreview100554 extends ServiceBase {
         container.style.flexDirection = 'column';
         container.style.height = '100%';
 
-
         const doc = document.createElement('service-preview-view-100554');
         doc.setAttribute('page', fullName);
         doc.setAttribute('level', this.level.toString());

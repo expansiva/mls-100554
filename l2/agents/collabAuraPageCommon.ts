@@ -2,37 +2,66 @@
 
 /**
  * =============================================================================
- * BACKEND CONTRACT
+ * BACKEND BRIDGE (REAL + MOCK)
  * =============================================================================
  */
 
-export interface BeInvoke {
-    invoke(
-        routine: string,
-        params: any
-    ): Promise<any>;
-}
+const isMockMode = true;
 
-export async function beInvoke(routine: string, requestId: number, params: any): Promise<any> {
-    return {
-        requestId: requestId,
-        error: 'not implemented'
+const localCache = new Map<string, any>();
+
+export async function beInvoke(
+  routine: string,
+  requestId: number,
+  params: any
+): Promise<any> {
+
+  if (isMockMode) {
+
+    const handler = (globalThis as any).__BE_DRIVER__?.invoke
+    if (!handler) {
+      return { requestId, error: "Mock not implemented: " + routine };
     }
-}
 
-export async function pluginInvoke(pluginRef: string, params: any): Promise<any> {
-    console.log('error, plugin not found ' + pluginRef)
-    return null;
+    await delay(50);
+    const result = await handler(routine, params, requestId);
+    return {
+      requestId,
+      ...result
+    };
+  }
+
+  // 🔴 Aqui entraria o backend real
+  return {
+    requestId,
+    error: "Real backend not implemented"
+  };
 }
 
 export async function readLocal(routine: string, params: any): Promise<any> {
-    return undefined;
+  const key = buildCacheKey(routine, params);
+  return localCache.get(key);
 }
 
-export async function savelocal(routine: string, params: any, result: any): Promise<void> {
-
+export async function savelocal(
+  routine: string,
+  params: any,
+  result: any
+): Promise<void> {
+  const key = buildCacheKey(routine, params);
+  localCache.set(key, result);
 }
 
 export function generateId(): number {
-    return 1;
+  return Date.now();
 }
+
+function buildCacheKey(routine: string, params: any) {
+  return routine + "::" + JSON.stringify(params ?? {});
+}
+
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+

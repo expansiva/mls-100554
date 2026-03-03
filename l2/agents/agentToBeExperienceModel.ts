@@ -4,6 +4,7 @@ import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { ModuleToBe } from '/_100554_/l2/agents/agentToBeConceptual.js';
 import { getPayloadToBeConceptual3 } from '/_100554_/l2/agents/agentToBeConceptual3.js';
 
+
 export function createAgent(): IAgentAsync {
   return {
     agentName: "agentToBeExperienceModel",
@@ -57,9 +58,6 @@ async function beforePromptStep(
 ): Promise<mls.msg.AgentIntent[]> {
 
   if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
-
-  console.info(`BeforePromptStep ${agent.agentName}`);
-  console.info(`${args}`);
 
   const continueIntent: mls.msg.AgentIntentPromptReady = {
     type: "prompt_ready",
@@ -133,8 +131,6 @@ async function processOutputToBeExperienceModel(context: mls.msg.ExecutionContex
       impliesUI: capData.actions
     }
   });
-
-  console.info({ capabilities2 })
 
   const newStep: mls.msg.AgentIntentAddStep = {
     type: "add-step",

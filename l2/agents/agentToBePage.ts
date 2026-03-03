@@ -3,8 +3,11 @@
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { systemExperienceConstraints } from '/_100554_/l2/agents/agentToBePages.js';
 import { ModuleToBe } from '/_100554_/l2/agents/agentToBeConceptual.js';
-import { getPayloadToBeConceptual3 } from '/_100554_/l2/agents/agentToBeConceptual3.js';
-import { getPayloadToBePages, ToBePages } from '/_100554_/l2/agents/agentToBePages.js';
+import { ToBePages } from '/_100554_/l2/agents/agentToBePages.js';
+import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
+
+import { executeBeforePrompt, loadAgent } from '/_100554_/l2/aiAgentOrchestration.js';
+import { getModuleToBeInfo } from '/_100554_/l2/moduleToBeAST.js';
 
 const templateReference = "_100554_/l2/agents/agentToBePageTemplate.ts";
 const templateReferenceTest = "_100554_/l2/agents/agentToBePageTemplate.test.ts";
@@ -30,15 +33,27 @@ async function beforePromptImplicit(
 
   if (!userPrompt) throw new Error('invalid prompt');
 
-  let toBePages: ToBePages = {
-    pages: []
-  };
+  let data: {
+    toBePages: ToBePages | undefined,
+    moduleToBe: ModuleToBe | undefined,
+    moduleName: string | undefined,
+  } = { moduleName: undefined, moduleToBe: undefined, toBePages: undefined };
 
-  if (userPrompt === 'test') toBePages = pagesForTest;
-  else toBePages = JSON.parse(userPrompt);
+  if (userPrompt.startsWith('test')) {
+    const match = userPrompt.match(/^\S+\s+(\S+)$/);
+    const moduleName = match ? match[1] : null;
+    if (!moduleName) throw new Error(`[getInfoModuleToBe] invalid module name: ${moduleName}`);
+    data = await getInfoModuleToBe(context, moduleName);
+  } else {
+    const dataFromPrompt = JSON.parse(userPrompt);
+    data.toBePages = dataFromPrompt.moduleToBe;
+    data.moduleName = dataFromPrompt.moduleName;
+  }
 
-  const paths = toBePages.pages.map((page) => page.pageName).slice(0, 1);
+  if (!data.moduleToBe || !data.toBePages) throw new Error(`[${agent.agentName}] [beforePromptStep] invalid moduleToBe/toBePages`);
+  if (!data.moduleName) throw new Error(`[${agent.agentName}] [beforePromptStep] invalid moduleName: undefined`);
 
+  const paths = data.toBePages.pages.map((page) => page.pageName).slice(0, 1);
   const templatePage: string = await loadTemplate(templateReference);
   const templateTest: string = await loadTemplate(templateReferenceTest);
 
@@ -60,7 +75,7 @@ async function beforePromptImplicit(
       taskTitle: agent.agentDescription,
       threadId: context.message.threadId,
       userMessage: context.message.content,
-      longTermMemory: {},
+      longTermMemory: { 'moduleName': data.moduleName },
     },
     executionMode: {
       type: 'parallel',
@@ -81,26 +96,15 @@ async function beforePromptStep(
 ): Promise<mls.msg.AgentIntent[]> {
 
   if (!args) throw new Error(`[beforePromptStep] args invalid`);
-  let toBePages: ToBePages | undefined;
-  let moduleToBe: ModuleToBe | undefined;
 
-  console.info({ args });
+  const moduleName = context.task?.iaCompressed?.longMemory['moduleName'];
+  if (!moduleName) throw new Error(`[getInfoModuleToBe] invalid module name: ${moduleName}`);
 
-  try {
-    toBePages = getPayloadToBePages(context);
-    moduleToBe = getPayloadToBeConceptual3(context);
-  } catch (err) {
-    toBePages = pagesForTest;
-    moduleToBe = toBeConceptualTest;
-  }
+  const { moduleToBe, toBePages } = await getInfoModuleToBe(context, moduleName);
 
   if (!toBePages || !moduleToBe) throw new Error(`[${agent.agentName}] [beforePromptStep] no toBePages/moduleToBe found`);
 
-  // if(!toBePages) throw new Error(`[${agent.agentName}] [beforePromptStep] no toBePages found`);
-  // const toBeConceptual = toBeConceptualTest;
-
   const actualPage = toBePages.pages.find((page) => page.pageName === args)
-
   console.info({ toBePages, actualPage, moduleToBe, args });
 
   const continueParallel: mls.msg.AgentIntentPromptReady = {
@@ -134,15 +138,18 @@ async function afterPromptStep(
   step: mls.msg.AIAgentStep,
   hookSequential: number,
 ): Promise<mls.msg.AgentIntent[]> {
+
+
   if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
 
   const payload = (step.interaction?.payload?.[0]) as Output || undefined;
   if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
   let status: mls.msg.AIStepStatus = 'completed';
   let intents: mls.msg.AgentIntent[] = [];
+  const output = payload.result;
+
   try {
-    const output = payload.result;
-    intents = await processOutput(context, output as ImplementPages);
+    intents = await processOutputToBePage(agent, context, parentStep, step, hookSequential, output as ImplementPages);
   } catch (e) {
     console.error(e);
     status = 'failed';
@@ -158,7 +165,7 @@ async function afterPromptStep(
     stepId: step.stepId,
     status
   };
-  return [...intents, updateStatus];
+  return [updateStatus];
 
 }
 
@@ -171,7 +178,14 @@ async function loadTemplate(fileReference: string): Promise<string> {
   return templatePage;
 }
 
-async function processOutput(context: mls.msg.ExecutionContext, implementPages: ImplementPages): Promise<mls.msg.AgentIntent[]> {
+async function processOutputToBePage(
+  agent: IAgentMeta,
+  context: mls.msg.ExecutionContext,
+  parentStep: mls.msg.AIAgentStep,
+  step: mls.msg.AIAgentStep,
+  hookSequential: number,
+  implementPages: ImplementPages
+): Promise<mls.msg.AgentIntent[]> {
 
   console.log("=== Page ");
   console.info(implementPages)
@@ -179,39 +193,109 @@ async function processOutput(context: mls.msg.ExecutionContext, implementPages: 
 
   if (context.isTest) return [];
 
-  await updateFiles(implementPages);
-
-  const step: mls.msg.AIPayload = {
-    type: 'agent',
-    stepId: 0,
-    interaction: null,
-    status: 'pending',
-    nextSteps: [],
-    agentName: "agentToBeConceptual3",
-    prompt: "",
-    rags: null,
-  };
-  // const rc: mls.msg.AgentIntentAddSteps = {
-  //   type: 'add-steps',
-  //   steps: [step]
-  // }
+  const pageFileInfo = await updateFiles(context, implementPages);
+  executeNewTask(context, implementPages, pageFileInfo)
   return [];
 
 }
 
-async function updateFiles(implementPages: ImplementPages): Promise<void> {
+async function createStorFilesOrganism(context: mls.msg.ExecutionContext, organisms: OrganismToCreate[]) {
+
+  const moduleName = context.task?.iaCompressed?.longMemory['moduleName'];
+  if (!moduleName) throw new Error(`[getInfoModuleToBe] invalid module name: ${moduleName}`);
+  const { moduleToBe } = await getInfoModuleToBe(context, moduleName);
+  if (!moduleToBe) return;
+
+  for (let organism of organisms) {
+    const params = {
+      level: 2,
+      content: `/// <mls fileReference="_${mls.actualProject}_/l2/${moduleToBe.meta.moduleName}/${organism.organismName}.ts" enhancement="_blank" />
+
+/* Organism definition: ${organism.organismName}
+
+${JSON.stringify(organism, null, 2)}
+
+*/
+     `,
+      extension: '.ts',
+      folder: moduleToBe.meta.moduleName,
+      project: mls.actualProject as number,
+      shortName: organism.organismName,
+      versionRef: new Date().toISOString()
+    }
+
+    const stor = await createStorFile(params);
+    const modelTs: mls.editor.IModelTS = await stor.getOrCreateModel();
+    await mls.l2.typescript.compileAndPostProcess(modelTs, true, true);
+
+  }
+}
+
+async function getInfoModuleToBe(context: mls.msg.ExecutionContext, moduleName: string) {
+
+  let toBePages: ToBePages | undefined;
+  let moduleToBe: ModuleToBe | undefined;
+  const data = await getModuleToBeInfo(mls.actualProject as number, moduleName);
+  console.info({ data })
+  if (!data.ok) {
+    console.info('Using test toBe info')
+    toBePages = pagesForTest;
+    moduleToBe = toBeConceptualTest;
+  } else {
+    toBePages = data.toBePages;
+    moduleToBe = data.toBe;
+  }
+
+  return {
+    toBePages,
+    moduleToBe,
+    moduleName
+  }
+
+}
+
+async function executeNewTask(context: mls.msg.ExecutionContext, implementPages: ImplementPages, pageFileInfo: mls.stor.IFileInfoBase) {
+
+  const nextAgentInNewTask = 'agentToBePageDefs'
+  const agentNew = await loadAgent(nextAgentInNewTask);
+  if (!agentNew) throw new Error(`[processOutputToBePage] invalid agent: ${nextAgentInNewTask}`)
+  const context2 = getTemporaryContext(context.message.threadId, context.message.senderId, `@@agentToBePageDefs ${JSON.stringify(implementPages)}`)
+  // executeBeforePrompt(agentNew, context2)
+
+  const nextAgentInNewTask2 = 'agentToBeOrganism'
+  const agentNew2 = await loadAgent(nextAgentInNewTask2);
+  if (!agentNew2) throw new Error(`[processOutputToBePage] invalid agent: ${nextAgentInNewTask2}`);
+  
+  const moduleName = context.task?.iaCompressed?.longMemory['moduleName'];
+  if (!moduleName) throw new Error(`[getInfoModuleToBe] invalid module name: ${moduleName}`);
+
+  const data = {
+    pageFileInfo,
+    organismsToCreate: implementPages.organismsToCreate,
+    moduleName
+  }
+
+  console.info({organismsToCreate: implementPages.organismsToCreate})
+  const prompt = `@@agentToBeOrganism ${JSON.stringify(data)}`
+  const context3 = getTemporaryContext(context.message.threadId, context.message.senderId, prompt);
+  executeBeforePrompt(agentNew2, context3);
+
+}
+
+async function updateFiles(context: mls.msg.ExecutionContext, implementPages: ImplementPages): Promise<mls.stor.IFileInfoBase> {
 
   const fileReference = implementPages?.pageSource?.join("\n").trim().split('\n')[0];
   const tripleSlash = mls.common.tripleslash.parseXMLTripleSlash(fileReference);
   let fileInfo = mls.stor.convertFileReferenceToFile(tripleSlash.variables['fileReference']);
   if (!fileReference || fileInfo.project < 1) throw new Error(`Invalid step in create file, incorrect meta fileRecerence: ${fileReference}`);
 
+  await createStorFilesOrganism(context, implementPages.organismsToCreate);
   const paramsTs = { ...fileInfo, content: implementPages?.pageSource?.join("\n"), versionRef: new Date().toISOString(), extension: ".ts" };
   const paramsTestTs = { ...fileInfo, content: implementPages?.testSource?.join("\n"), versionRef: new Date().toISOString(), extension: ".test.ts" };
 
   await createStorFile(paramsTs);
   await createStorFile(paramsTestTs);
-
+  return fileInfo;
 
 }
 
@@ -451,7 +535,12 @@ export interface ImplementPages {
 export interface OrganismToCreate {
 
   organismName: string;
-  // Must be prefixed with the pageName in camelCase.
+  // organismName MUST be exactly the same identifier used in the import path.
+  // Do NOT generate, concatenate, infer or modify this value.
+  // Copy it verbatim from the import filename.
+  // Example:
+  // import '/_100554_/l2/advocacy/advocacyFooterOrganism.js'
+  // organismName: 'advocacyFooterOrganism'
 
   imports: string[];
   // List of modules or types the organism must import.
@@ -508,12 +597,6 @@ export interface PluginMethod {
 }
 
 //#endregion
-
-
-
-
-
-
 
 
 const pagesForTest: ToBePages = {
