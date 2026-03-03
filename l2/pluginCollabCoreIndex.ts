@@ -346,6 +346,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 widget: '_100554_pluginProjectRunTest'
             },
             {
+                category: 'Helpers',
+                scope: ['l5Project'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginCollabPublish'
+            },
+            {
                 category: 'Profile',
                 scope: ['l5UserSettings'],
                 priority: 1,
