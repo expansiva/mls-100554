@@ -3,6 +3,9 @@
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { getAllAgentStepByAgentName } from '/_100554_/l2/aiAgentHelper.js';
 import { outputPrompt, Output, ModuleToBe } from '/_100554_/l2/agents/agentToBeConceptual.js';
+import { addModule, configureMasterFrontEnd } from '/_100554_/l2/projectAST.js';
+import { saveModuleToBe } from '/_100554_/l2/moduleToBeAST.js';
+
 
 export function createAgent(): IAgentAsync {
   return {
@@ -58,9 +61,6 @@ async function beforePromptStep(
 ): Promise<mls.msg.AgentIntent[]> {
 
   if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
-
-  console.info(`BeforePromptStep ${agent.agentName}`);
-  console.info(`${args}`);
 
   const continueIntent: mls.msg.AgentIntentPromptReady = {
     type: "prompt_ready",
@@ -131,6 +131,7 @@ async function processOutputToBeConceptual3(fromAgent: string, context: mls.msg.
 
   if (context.isTest) return [];
   if (fromAgent === 'agentToBeUserJourney') {
+    await configModule(context);
     const newStep: mls.msg.AgentIntentAddStep = {
       type: "add-step",
       messageId: context.message.orderAt,
@@ -179,6 +180,24 @@ async function processOutputToBeConceptual3(fromAgent: string, context: mls.msg.
 
 }
 
+async function configModule(context: mls.msg.ExecutionContext) {
+  const moduleTobe: ModuleToBe | undefined = await getPayloadToBeConceptual3(context);
+  if (!moduleTobe) return;
+  const auraStart = '_102020_start';
+  const auraBuild = '_102020_build';
+  const auraLiveView = '_102020_collabAuraLiveView';
+  const project: number = mls.actualProject as number;
+  const moduleName: string = moduleTobe.meta.moduleName;
+  const res = await addModule(project, moduleName, true);
+  if (!res.ok) throw new Error(`[configModule](addModule) ${res.message}`)
+  const res2 = await configureMasterFrontEnd(project, auraStart, auraBuild, auraLiveView);
+  if (!res2.ok) throw new Error(`[configModule](configureMasterFrontEnd) ${res.message}`)
+  const res3 = await saveModuleToBe(project, moduleTobe.meta.moduleName, moduleTobe, undefined);
+  if (!res3.ok) throw new Error(`[configModule](saveToBe) ${res.message}`)
+
+
+}
+
 export function getPayloadToBeConceptual3(context: mls.msg.ExecutionContext): ModuleToBe | undefined {
 
   if (!context.task) return undefined;
@@ -187,7 +206,6 @@ export function getPayloadToBeConceptual3(context: mls.msg.ExecutionContext): Mo
   if (!agentSteps) throw new Error(`[${agentName}] [getPayload] no agent found`);
   const lastConceptual = agentSteps ? agentSteps[agentSteps.length - 1] : undefined;
   if (!lastConceptual) throw new Error(`[afterPromptStep] no find agent:${agentName} with moduleTobe in actual task`);
-  console.info({ lastConceptual })
   const resultStep = lastConceptual.interaction?.payload?.[0];
   if (!resultStep || resultStep.type !== "flexible" || !resultStep.result) throw new Error(`[${agentName}] [getPayload] No step clarification found for this agent.`);
   let payload3: ModuleToBe | string = resultStep.result;

@@ -15,6 +15,7 @@ export function createAgent(): IAgentAsync {
   };
 }
 
+
 async function beforePromptImplicit(
   agent: IAgentMeta,
   context: mls.msg.ExecutionContext,
@@ -55,11 +56,7 @@ async function beforePromptStep(
   args?: string
 ): Promise<mls.msg.AgentIntent[]> {
 
-  console.info(`BeforePromptStep ${agent.agentName}`);
-  console.info(`${args}`);
-
   if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
-
 
   const continueIntent: mls.msg.AgentIntentPromptReady = {
     type: "prompt_ready",
@@ -95,7 +92,7 @@ async function afterPromptStep(
 
   try {
     const output = payload.result;
-    intents = await processToBe(context, output as ModuleToBe);
+    intents = await processToBeConceptual(context, output as ModuleToBe);
   } catch (e) {
     console.error(e);
     status = 'failed';
@@ -115,9 +112,9 @@ async function afterPromptStep(
 
 }
 
-async function processToBe(context: mls.msg.ExecutionContext, moduleToBe: ModuleToBe): Promise<mls.msg.AgentIntent[]> {
+async function processToBeConceptual(context: mls.msg.ExecutionContext, moduleToBe: ModuleToBe): Promise<mls.msg.AgentIntent[]> {
 
-  console.log("=== processToBe")
+  console.log("=== processToBeConceptual")
   console.log(JSON.stringify(moduleToBe, null, 2));
 
   const newStep: mls.msg.AgentIntentAddStep = {

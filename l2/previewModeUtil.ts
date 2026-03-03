@@ -62,7 +62,7 @@ export function removeOlderTokens(ifr: HTMLIFrameElement, file: mls.stor.IFileIn
 }
 
 export function getIdTokens(file: mls.stor.IFileInfo) {
-    if (!file ) return 'ds_tokens';
+    if (!file) return 'ds_tokens';
     const { project } = file
     return '_' + project + '_ds_tokens';
 }
@@ -174,7 +174,7 @@ export function waitForComponents(context: Window, componentNames: string[]) {
 }
 
 var originalPath: mls.cbe.IPath | undefined;
-function functionReplaceAnchor(e:MouseEvent) {
+function functionReplaceAnchor(e: MouseEvent) {
 
     e.stopPropagation();
     e.preventDefault();
@@ -204,7 +204,7 @@ function functionReplaceAnchor(e:MouseEvent) {
         name = arrayName[1];
         folder = arrayName[0];
     }
-    
+
     const key = mls.stor.getKeyToFiles(info.project, 2, name, folder, '.ts');
 
     if (!mls.stor.files[key]) return;
@@ -220,6 +220,7 @@ function functionReplaceAnchor(e:MouseEvent) {
 
     mls.events.fire([mls.actualLevel], ['FileAction'], JSON.stringify(params), 0);
 }
+
 
 export function addJsReference(ifr: HTMLIFrameElement, level: string) {
 
@@ -285,6 +286,13 @@ export function addJsReference(ifr: HTMLIFrameElement, level: string) {
                     return matchingRules;
                 };
 
+                (window)['originalDefine'] = customElements.define.bind(customElements);
+                    customElements.define = (name, constructor, options) => {
+                    if (!customElements.get(name)) {
+                        return (window)['originalDefine'](name, constructor, options);
+                    }
+                };
+
                 document.addEventListener('click', (e) => {
                     const a = e.target.closest('a');
                     if (a) {
@@ -292,7 +300,7 @@ export function addJsReference(ifr: HTMLIFrameElement, level: string) {
                     }
                 });
     `;
-    if(ifr.contentWindow) (ifr.contentWindow as any).functionReplaceAnchor = functionReplaceAnchor;
+    if (ifr.contentWindow) (ifr.contentWindow as any).functionReplaceAnchor = functionReplaceAnchor;
     ifr.contentDocument?.body.appendChild(s);
 }
 

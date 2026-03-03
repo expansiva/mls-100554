@@ -17,6 +17,7 @@ export function createAgent(): IAgentAsync {
   };
 }
 
+
 async function beforePromptAtomic(
   agent: IAgentMeta,
   context: mls.msg.ExecutionContext,
@@ -147,7 +148,7 @@ async function afterPromptStep(
 
 }
 
-async function getSource(file: mls.stor.IFileInfo): Promise<string> {
+export async function getSource(file: mls.stor.IFileInfo): Promise<string> {
   // change first line to new pattern
   if (!file) throw new Error(`[beforePromptStep] invalid args, file dont exists`)
   const source = (await file.getContent()) as string | null;
@@ -169,7 +170,7 @@ END_CODE
 `
 }
 
-async function updateDefs(defs: AsIs): Promise<void> {
+export async function updateDefs(defs: AsIs): Promise<void> {
   const fileReference: string = defs?.meta?.fileReference || "";
   let fileInfo = mls.stor.convertFileReferenceToFile(fileReference);
   if (!fileReference || fileInfo.project < 1) throw new Error(`Invalid step in update defs, incorrect meta fileRecerence: ${fileReference}`);
@@ -218,7 +219,7 @@ async function updateStorFile(params: { project: number, shortName: string, leve
 
 }
 
-const system1 = `
+export const system1 = `
 <!-- modelType: code2 -->
 <!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) ou nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10-->
 
