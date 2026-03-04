@@ -369,7 +369,7 @@ async function _getValueInfo(activeModel: mls.editor.IModelBase): Promise<mls.st
         content = removeTokensFromSource(content);
     }
 
-    const file = activeModel.storFile.inLocalStorage ?  await mls.stor.localDB.readFile({
+    /*const file = activeModel.storFile.inLocalStorage ?  await mls.stor.localDB.readFile({
         project: activeModel.storFile.project,
         level: activeModel.storFile.level,
         shortName: activeModel.storFile.shortName,
@@ -383,6 +383,14 @@ async function _getValueInfo(activeModel: mls.editor.IModelBase): Promise<mls.st
         originalShortName: file ? file.info.originalShortName : undefined,
         originalProject: file ? file.info.originalProject : undefined,
         originalFolder: file ? file.info.originalFolder : undefined,
+        originalCRC: activeModel.originalCRC
+    };*/
+
+    const rc: mls.stor.IFileInfoValue = {
+        content,
+        contentType: 'string',
+        originalShortName: activeModel.originalShortName ,
+        originalProject: activeModel.originalProject,
         originalCRC: activeModel.originalCRC
     };
     return rc;
