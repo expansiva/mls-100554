@@ -13,6 +13,7 @@ export function createAgent(): IAgentAsync {
         avatar_url: svgReview,
         visibility: "public",
         beforePromptImplicit,
+        beforePromptStep,
         afterPromptStep,
     };
 }
@@ -59,6 +60,36 @@ async function beforePromptImplicit(
     };
     return [addMessageAI];
 
+}
+
+async function beforePromptStep(
+    agent: IAgentMeta,
+    context: mls.msg.ExecutionContext,
+    parentStep: mls.msg.AIAgentStep,
+    step: mls.msg.AIAgentStep,
+    hookSequential: number,
+    args?: string
+): Promise<mls.msg.AgentIntent[]> {
+
+    if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
+    let data: IDataPrompt | undefined;
+    data = mls.common.safeParseArgs(args) as IDataPrompt;
+    const mode = data.mode ? data.mode : 'all';
+    const system = await prepareSystemPrompt(data, mode)
+
+    const continueIntent: mls.msg.AgentIntentPromptReady = {
+        type: "prompt_ready",
+        args,
+        messageId: context.message.orderAt,
+        threadId: context.message.threadId,
+        taskId: context.task?.PK || '',
+        hookSequential,
+        parentStepId: parentStep.stepId,
+        humanPrompt: args || '',
+        systemPrompt: system
+    }
+
+    return [continueIntent];
 }
 
 async function prepareSystemPrompt(data: IDataPrompt, mode: string): Promise<string> {
