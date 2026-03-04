@@ -98,6 +98,12 @@ async function afterPromptStep(
     const nexts = payload.result as INextsAgents[];
     const nextsIntents: mls.msg.AgentIntent[] = [];
     for (let agent of nexts) {
+      const prompt = {
+        page: agent.page,
+        prompt: agent.title,
+        position: agent.position,
+        mode: agent.mode
+      }
       const newStep: mls.msg.AgentIntentAddStep = {
         type: "add-step",
         messageId: context.message.orderAt,
@@ -112,7 +118,7 @@ async function afterPromptStep(
           nextSteps: [],
           agentName: agent.agentName,
           rags: null,
-          prompt: agent.prompt
+          prompt: JSON.stringify(prompt)
         }
       };
 
@@ -320,7 +326,10 @@ interface INextsAgents {
   type: "agent",
   agentName: string,
   title: string,
-  prompt: string, // sempre seguir o padrão da seção **Modelo de Prompt**
+  prompt: string,
+  page: string,
+  position: string,
+  mode: "typescript" | "less" | "html"
 }
 //#endregion
 
