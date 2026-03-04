@@ -39,7 +39,7 @@ export async function readProjectTypescriptAndCompile(project: number, shortName
         const actual = await mls.stor.localDB.readPrjInfo(prj);
         if (actual && actual.indexModules && actual.indexModules !== '') {
             promises.push(_createProjectModel(prj, actual.indexModules));
-        } 
+        }
     }
 
     if (mls.istrace) console.time('creating models');
@@ -73,7 +73,7 @@ export async function readProjectTypescriptAndCompileL1(project: number, shortNa
     await Promise.all(promises);
     if (mls.istrace) console.timeEnd('creating models L1');
 
-} 
+}
 
 export async function createAllModels(storFileBase: mls.stor.IFileInfo, needCompile: boolean = true, awaitCompile: boolean = false, createStorIfNeed: boolean = true): Promise<mls.editor.IModels | undefined> {
 
@@ -243,7 +243,7 @@ async function _createProjectModel(project: number, contentTS: string): Promise<
             throw new Error('Function not implemented.');
         },
         getOrCreateModel: async function (): Promise<mls.editor.IModelBase> {
-            return await mls.editor.createModelProjectDefinition(project, contentTS) 
+            return await mls.editor.createModelProjectDefinition(project, contentTS)
         }
     }
 
@@ -286,6 +286,7 @@ async function _createModel(storFile: mls.stor.IFileInfo, ext: Extesion, content
 
     const originalProject: number | undefined = haveInfo ? info?.originalProject : undefined;
     const originalShortName: string | undefined = haveInfo ? info?.originalShortName : undefined;
+    const originalFolder: string | undefined = haveInfo ? info?.originalFolder : undefined;
 
     let model: mls.editor.IModelBase | undefined = await storFile.getOrCreateModel();
     if (!model) throw new Error(`Model invalid`);
@@ -302,6 +303,7 @@ async function _createModel(storFile: mls.stor.IFileInfo, ext: Extesion, content
         model.originalCRC = originalCRC;
         model.originalProject = originalProject;
         model.originalShortName = originalShortName;
+        (model as any).originalFolder = originalFolder;
     }
 
     (model as any).needFormat = true;
@@ -366,11 +368,21 @@ async function _getValueInfo(activeModel: mls.editor.IModelBase): Promise<mls.st
     if (activeModel.storFile.extension === '.less') {
         content = removeTokensFromSource(content);
     }
+
+    const file = await mls.stor.localDB.readFile({
+        project: activeModel.storFile.project,
+        level: activeModel.storFile.level,
+        shortName: activeModel.storFile.shortName,
+        extension: activeModel.storFile.extension,
+        folder: activeModel.storFile.folder,
+    });
+
     const rc: mls.stor.IFileInfoValue = {
         content,
         contentType: 'string',
-        originalShortName: activeModel.originalShortName,
-        originalProject: activeModel.originalProject,
+        originalShortName: file ? file.info.originalShortName : undefined,
+        originalProject: file ? file.info.originalProject : undefined,
+        originalFolder: file ? file.info.originalFolder : undefined,
         originalCRC: activeModel.originalCRC
     };
     return rc;
@@ -429,12 +441,12 @@ export async function _MarkCompileNeed(storFile: mls.stor.IFileInfo): Promise<vo
             if (!sf) continue;
 
             const m = await sf.getOrCreateModel() as mls.editor.IModelTS;
-            if (!m || !m.compilerResults)  continue;
+            if (!m || !m.compilerResults) continue;
             m.compilerResults.modelNeedCompile = true;
             mls.l2.typescript.compileAndPostProcess(m, true, true);
 
         }
-        
+
     } finally {
         compileNeedSet.delete(key);
     }
@@ -588,7 +600,7 @@ function _getPosition(modeIld: string, tp: 'ts' | 'html' | 'defs' | 'style' | 't
 async function _checkSameContent(modelBase: mls.editor.IModelBase, storFile: mls.stor.IFileInfo) {
 
     let sameContent: boolean = modelBase.originalCRC === mls.common.crc.crc32(modelBase.model.getValue()).toString(16);
-    
+
     //if (modelBase.originalCRC === undefined) setOriginalCrc(modelBase);
 
     if (modelBase.storFile.extension === '.less') {
@@ -609,7 +621,7 @@ async function _checkSameContent(modelBase: mls.editor.IModelBase, storFile: mls
 
 function setOriginalCrc(model: mls.editor.IModelBase) {
 
-    let originalCRC =  mls.common.crc.crc32(model.model.getValue()).toString(16);
+    let originalCRC = mls.common.crc.crc32(model.model.getValue()).toString(16);
 
     if (model.storFile.extension === '.less') {
         originalCRC = mls.common.crc.crc32(removeTokensFromSource(model.model.getValue()).trim()).toString(16)
@@ -617,8 +629,8 @@ function setOriginalCrc(model: mls.editor.IModelBase) {
 
     if (model.storFile.extension !== '.d.ts') {
         model.originalCRC = originalCRC;
-        model.originalProject = model.storFile.project;
-        model.originalShortName = model.storFile.shortName;
+        //model.originalProject = model.storFile.project;
+        //model.originalShortName = model.storFile.shortName;
     }
 }
 

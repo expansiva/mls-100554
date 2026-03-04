@@ -295,7 +295,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				if (!info) continue;
 
-				const fileNameOld = `${auxLevelPath}` + f.folder.replace(/\\/g, '/') + aux + info.originalShortName + f.extension;
+				const fileNameOld = `${auxLevelPath}` + (info.originalFolder || '').replace(/\\/g, '/') + aux + info.originalShortName + f.extension;
 
 				add = await this.setContentAddFile(f, path, add);
 				del.push({ path: fileNameOld });
@@ -910,7 +910,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		// ----- 1) EXPANSÃO -----
 		for (const file of files) {
-			const folderAux = file.folder === "" || file.folder.endsWith("/") ? "" : "/";
+			let folderAux = file.folder === "" || file.folder.endsWith("/") ? "" : "/";
 			const extAux = file.extension.startsWith(".") ? "" : ".";
 			const levelPath = file.level === 0 ? "" : `l${file.level}/`;
 
@@ -933,12 +933,15 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			}
 
 			if (file.status === "renamed") {
+				
 				const oldInfo = await (file.getValueInfo?.() ?? undefined);
 				if (!oldInfo) continue;
 
+				folderAux = oldInfo.originalFolder === "" || (oldInfo.originalFolder || '').endsWith("/") ? "" : "/";
+
 				const oldPath =
 					levelPath +
-					file.folder.replace(/\\/g, "/") +
+					(oldInfo.originalFolder || '').replace(/\\/g, "/") +
 					folderAux +
 					oldInfo.originalShortName +
 					extAux +
