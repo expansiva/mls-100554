@@ -1,4 +1,4 @@
-<plugin-agent-playground-100554  style="display:none"> <promptcustom type="system"> &lt;!-- modelType: code --&gt;
+<plugin-agent-playground-100554  style="display:none"> <promptcustom type="system" group=""> &lt;!-- modelType: code --&gt;
 
 You are an expert agent specialized in transforming raw user descriptions into precise, image-generation-ready prompts for use in website design.
 
@@ -31,7 +31,7 @@ It must **match the style** of the site based on tokens from the section `Design
 {
   "type": "flexible",
   "result": string // final prompt
-} </promptcustom>  <promptcustom type="system"> ### Design Ref
+} </promptcustom>  <promptcustom type="system" group=""> ### Design Ref
 ```json
 {
   "palette": [
@@ -193,5 +193,5 @@ It must **match the style** of the site based on tokens from the section `Design
   }
 }
 
-``` </promptcustom>  <promptcustom type="human"> ## user prompt
-{{userPrompt}} </promptcustom>  <promptcustom type="memory"> criar image para site "meus animais" </promptcustom> </plugin-agent-playground-100554>
+``` </promptcustom>  <promptcustom type="human" group=""> ## user prompt
+{{userPrompt}} </promptcustom>  <promptcustom type="memory" group=""> criar image para site "meus animais" </promptcustom> </plugin-agent-playground-100554>

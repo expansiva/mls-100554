@@ -109,18 +109,7 @@ async function afterPromptStep(
         intents.push(updateStatusAgent);
     }
 
-    const updateStatus: mls.msg.AgentIntentUpdateStatus = {
-        type: 'update-status',
-        hookSequential,
-        messageId: context.message.orderAt,
-        threadId: context.message.threadId,
-        taskId: context.task?.PK || '',
-        parentStepId: parentStep.stepId,
-        stepId: step.stepId,
-        status
-    };
-
-    intents = [...intents, updateStatus];
+    intents = [...intents];
     return intents;
 
 }
