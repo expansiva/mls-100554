@@ -325,7 +325,7 @@ export class PluginEditStyleL3 extends PluginBaseModule {
             this.modelDest?.setValue(newLess);
             if (this.modelBase && this.modelBase.ts && this.modelBase.style) {
                 //mls.events.fireFileAction('editorChanged', this.modelBase.style.storFile, 'left', 0);
-                mls.events.fire([3], ['styleChanged'] as any, JSON.stringify({ position: 'left', storFile: this.modelBase.style.storFile }));
+                //mls.events.fire([3], ['styleChanged'] as any, JSON.stringify({ position: 'left', storFile: this.modelBase.style.storFile }));
             }
         }, 500)
 
@@ -339,6 +339,13 @@ export class PluginEditStyleL3 extends PluginBaseModule {
         for (const prop of Object.keys(this.lessAst.rules)) {
             const vl = this.lessAst.rules[prop];
             if (vl) this.lessAstDest.setRule(prop, vl);
+        }
+
+        if (this.lessAstDest.rules) {
+            for (const prop of Object.keys(this.lessAstDest.rules)) {
+                const vl = this.lessAst.rules[prop];
+                if (!vl) this.lessAstDest.setRule(prop, '');
+            }
         }
     }
 

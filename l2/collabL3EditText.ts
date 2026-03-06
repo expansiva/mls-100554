@@ -6,7 +6,7 @@ import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { initState } from '/_100554_/l2/collabState.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
 import '/_100554_/l2/collabL3PreviewText.js';
-import '/_100554_/l2/collabL3PreviewTextAttr.js';
+import '/_100554_/l2/collabL3PreviewTextAttr.js'; 
 import '/_100554_/l2/collabL3PreviewTextI18n.js';
 
 
@@ -47,10 +47,16 @@ export class CollabL3EditText extends CollabLitElement {
 
     private getBaseI18n() {
 
-        const info = (top as any)?.mls.actual[2].left
+        const info = mls.l2.getPath(mls.actual[mls.actualLevel].getFullName())
         if (!info) return;
 
-        const models = (top as any)?.mls.editor.getModels(info.project, info.shortName);
+        const storKey = mls.stor.getKeyToFile({ ...info, extension: '.ts', level: 2 });
+        const stor = mls.stor.files[storKey];
+
+        if (!stor) return;
+
+        const models = (top as any)?.mls.editor.getModels(stor.project, stor.shortName, stor.folder, stor.level);
+
         if (!models || !models.ts) return;
 
         const allTxt = models.ts.model.getValue() as string;
@@ -67,6 +73,7 @@ export class CollabL3EditText extends CollabLitElement {
     }
 
     private process(root: HTMLElement): IInfoEditLe {
+
         const inner: Record<string, { old_v: string, new_v: string, ori: string, textNode: Text, tag: string }> = {};
         const attr: Record<string, { old_v: string, new_v: string, attr: string, ori: string, textNode: Text }> = {};
         const i18n: Record<string, { key: string, old_v: string, new_v: string, textNode: Text[] }> = {};
