@@ -137,7 +137,7 @@ export async function renameFile(storFile: mls.stor.IFileInfo, newProject: numbe
     let source = await storFile.getContent() as string;
     if (!source) throw new Error('[renameFile] Impossible rename this file:' + storFile.shortName);
 
-    if (!newFolder) newFolder = storFile.folder;
+    //if (!newFolder) newFolder = storFile.folder;
 
     source = replaceTripleslashAndTag(storFile, newProject, newShortName, newFolder, source);
 

@@ -674,11 +674,15 @@ export class PluginExploreList extends PluginBaseModule {
         spanFileName.setAttribute('contentEditable', 'true');
 
         const oldValue = spanFileName.innerText;
+
+        if (this.modeView === 1) spanFileName.innerText = mfile.folder ? mfile.folder + '/' + mfile.shortName : mfile.shortName;
+
         li.onclick = () => { };
 
         spanFileName.onkeydown = (event: KeyboardEvent) => {
 
             if (event.key === "Enter") {
+            
                 event.preventDefault();
 
                 let name = spanFileName.innerText.trim();
@@ -688,6 +692,12 @@ export class PluginExploreList extends PluginBaseModule {
                     const split1 = name.split('/');
                     name = split1.pop() || '';
                     folder = split1.join('/');
+                }
+
+                if (name === mfile.shortName && folder === mfile.folder) {
+                    spanFileName.removeAttribute('contentEditable');
+                    this.changeList();
+                    return;
                 }
 
                 const param = { project: mfile.project.toString(), name, folder, mode: 'rename' };
