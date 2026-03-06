@@ -28,6 +28,51 @@ export class LessAST {
     public setRule(property: string, value: string): void {
         if (!this.selected) throw new Error("Nenhum seletor selecionado.");
         this.reparse();
+
+        const blk = this.blocks.get(this.selected);
+        if (!blk) throw new Error(`Seletor '${this.selected}' não encontrado.`);
+
+        const lines = this.model.getValue().split(/\r?\n/);
+        const propRegex = new RegExp(`^\\s*${this.escape(property)}\\s*:\\s*(.*?);?\\s*$`);
+
+        let propLineIdx: number | null = null;
+
+        for (let i = blk.start + 1; i < blk.end; i++) {
+            const noComments = this.stripComments(lines[i]);
+            if (propRegex.test(noComments)) {
+                propLineIdx = i;
+                break;
+            }
+        }
+
+        // 🔥 se valor vazio → remover propriedade
+        if (!value || value.trim() === "") {
+            if (propLineIdx !== null) {
+                lines.splice(propLineIdx, 1);
+                this.model.setValue(lines.join("\n"));
+            }
+            return;
+        }
+
+        const indentMatch = lines[blk.start].match(/^(\s*)/);
+        const indent = (indentMatch ? indentMatch[1] : "") + "    ";
+
+        const newLine = `${indent}${property}: ${value};`;
+
+        if (propLineIdx !== null) {
+            // substitui
+            lines[propLineIdx] = newLine;
+        } else {
+            // adiciona
+            lines.splice(blk.start + 1, 0, newLine);
+        }
+
+        this.model.setValue(lines.join("\n"));
+    }
+
+    public setRule_old(property: string, value: string): void {
+        if (!this.selected) throw new Error("Nenhum seletor selecionado.");
+        this.reparse();
         const blk = this.blocks.get(this.selected);
         if (!blk) throw new Error(`Seletor '${this.selected}' não encontrado.`);
 

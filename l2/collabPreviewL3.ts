@@ -99,7 +99,7 @@ export class CollabPreviewL3 extends CollabLitElement {
 
         const rect = el.getBoundingClientRect();
         this.elOverlayHover.style.display = 'block';
-        this.elOverlayHover.style.top = `${rect.top + window.scrollY}px`;
+        this.elOverlayHover.style.top = `${(rect.top  + window.scrollY) - 8 }px`;
         this.elOverlayHover.style.left = `${rect.left + window.scrollX}px`;
         this.elOverlayHover.style.width = `${rect.width}px`;
         this.elOverlayHover.style.height = `${rect.height}px`;
@@ -116,7 +116,7 @@ export class CollabPreviewL3 extends CollabLitElement {
 
         const rect = el.getBoundingClientRect();
         this.elOverlaySelected.style.display = 'block';
-        this.elOverlaySelected.style.top = `${rect.top + window.scrollY}px`;
+        this.elOverlaySelected.style.top = `${(rect.top  + window.scrollY) - 8}px`;
         this.elOverlaySelected.style.left = `${rect.left + window.scrollX}px`;
         this.elOverlaySelected.style.width = `${rect.width }px`;
         this.elOverlaySelected.style.height = `${rect.height}px`;
