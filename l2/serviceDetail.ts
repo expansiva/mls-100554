@@ -218,8 +218,9 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     private onPluginDetails(ev: mls.events.IEvent) {
+        
         if (!ev.desc) throw new Error('Error on PluginDetails event, invalid desc');
-        if (ev.level !== this.level) return;
+        //if (ev.level !== this.level) return;
         this.openMe();
         if (this.menu && this.menu.closeMenu) this.menu.closeMenu();
         const data: mls.events.IPluginDetail = JSON.parse(ev.desc);
