@@ -6,9 +6,14 @@
  * =============================================================================
  */
 
-const isMockMode = true;
+export interface BeInvoke {
+    invoke(
+        routine: string,
+        params: any
+    ): Promise<any>;
+}
 
-const localCache = new Map<string, any>();
+const isMockMode = true;
 
 export async function beInvoke(
   routine: string,
@@ -31,7 +36,6 @@ export async function beInvoke(
     };
   }
 
-  // 🔴 Aqui entraria o backend real
   return {
     requestId,
     error: "Real backend not implemented"
@@ -39,8 +43,7 @@ export async function beInvoke(
 }
 
 export async function readLocal(routine: string, params: any): Promise<any> {
-  const key = buildCacheKey(routine, params);
-  return localCache.get(key);
+
 }
 
 export async function savelocal(
@@ -48,16 +51,16 @@ export async function savelocal(
   params: any,
   result: any
 ): Promise<void> {
-  const key = buildCacheKey(routine, params);
-  localCache.set(key, result);
+
+}
+
+export async function pluginInvoke(pluginRef: string, params: any): Promise<any> {
+    console.log('error, plugin not found ' + pluginRef)
+    return null;
 }
 
 export function generateId(): number {
   return Date.now();
-}
-
-function buildCacheKey(routine: string, params: any) {
-  return routine + "::" + JSON.stringify(params ?? {});
 }
 
 function delay(ms: number) {

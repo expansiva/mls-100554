@@ -90,7 +90,7 @@ async function afterPromptStep(
         let status: mls.msg.AIStepStatus = 'completed';
 
         const output = payload.result;
-        processOutputToBePages(context, output as ToBePages, step);
+        const intents = await processOutputToBePages(context, output as ToBePages, step);
 
         const updateStatus: mls.msg.AgentIntentUpdateStatus = {
                 type: 'update-status',
@@ -103,7 +103,7 @@ async function afterPromptStep(
                 status
         };
 
-        return [updateStatus];
+        return [...intents, updateStatus];
 
 }
 
@@ -114,8 +114,42 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
         if (context.isTest) return [];
 
         const toBe = getPayloadToBeConceptual3(context);
-        if(!toBe) throw new Error(`[processOutputToBePages] invalid toBe: undefined`)
+        if (!toBe) throw new Error(`[processOutputToBePages] invalid toBe: undefined`)
+
+        /*
+        const paths = toBePages.pages.map((page) => page.pageName).slice(0, 1);
+        const parentStepId = step.stepId;
+        const newStep: mls.msg.AgentIntentAddStep = {
+                type: "add-step",
+                messageId: context.message.orderAt,
+                threadId: context.message.threadId,
+                taskId: context.task?.PK || '',
+                parentStepId: 1,
+                step:
+                {
+                        type: 'agent',
+                        stepId: 0,
+                        interaction: null,
+                        status: 'waiting_human_input',
+                        nextSteps: [],
+                        agentName: "agentToBePage",
+                        prompt: `[agentToBePages] ${JSON.stringify({ toBePages, moduleName: 'petShop' })}`,
+                        rags: null,
+                },
+                executionMode: {
+                        type: 'parallel',
+                        args: paths
+                }
+        };
+
+        return [newStep];
+
+        */
+
+
+        // add new step not working, save toBe in l2 and starting new task
         await saveModuleToBe(mls.actualProject as number, toBe.meta.moduleName, undefined, toBePages);
+
         const nextAgentInNewTask = 'agentToBePage'
         const prompt = `@@agentToBePage ${JSON.stringify({ toBePages, moduleName: toBe?.meta.moduleName || '' })}`
         const agent = await loadAgent(nextAgentInNewTask);
@@ -124,7 +158,10 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
         await executeBeforePrompt(agent, context2)
         return [];
 
+
 }
+
+
 
 export function getPayloadToBePages(context: mls.msg.ExecutionContext): ToBePages | undefined {
 
