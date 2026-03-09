@@ -64,8 +64,6 @@ async function afterPromptStep(
 
     let status: mls.msg.AIStepStatus = 'completed';
 
-    console.info({result: payload.result});
-
     let intents: mls.msg.AgentIntent[] = [];
     const newStep: mls.msg.AgentIntentAddStep = {
         type: "add-step",
