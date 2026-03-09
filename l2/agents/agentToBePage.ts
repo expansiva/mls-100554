@@ -39,31 +39,27 @@ async function beforePromptImplicit(
     moduleName: string | undefined,
   } = { moduleName: undefined, moduleToBe: undefined, toBePages: undefined };
 
+
+
+   // ex: @@agentToBePage test petShop => read toBe from file l2/petShop/moduleToBe, previously generated in the agent agentToBePages
+
   if (userPrompt.startsWith('test')) {
     const match = userPrompt.match(/^\S+\s+(\S+)$/);
     const moduleName = match ? match[1] : null;
     if (!moduleName) throw new Error(`[getInfoModuleToBe] invalid module name: ${moduleName}`);
     data = await getInfoModuleToBe(context, moduleName);
   } else {
-    const dataFromPrompt = JSON.parse(userPrompt);
-    data.toBePages = dataFromPrompt.moduleToBe;
-    data.moduleName = dataFromPrompt.moduleName;
+    data = await getInfoModuleToBe(context, userPrompt);
   }
 
   if (!data.moduleToBe || !data.toBePages) throw new Error(`[${agent.agentName}] [beforePromptStep] invalid moduleToBe/toBePages`);
   if (!data.moduleName) throw new Error(`[${agent.agentName}] [beforePromptStep] invalid moduleName: undefined`);
 
   const paths = data.toBePages.pages.map((page) => page.pageName).slice(0, 1);
-  const templatePage: string = await loadTemplate(templateReference);
-  const templateTest: string = await loadTemplate(templateReferenceTest);
 
   const inputs: mls.msg.IAMessageInputType[] = [{
     type: "system",
-    content: system1
-      .replace("{{systemExperienceConstraints}}", systemExperienceConstraints)
-      .replace("{{systemSkillAura}}", systemSkillAura)
-      .replace("{{templatePage}}", templatePage)
-      .replace("{{templateTest}}", templateTest)
+    content: await getSystem()
   }];
 
   const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
@@ -82,6 +78,7 @@ async function beforePromptImplicit(
       args: paths
     }
   };
+
   return [addMessageAI];
 
 }
@@ -97,11 +94,29 @@ async function beforePromptStep(
 
   if (!args) throw new Error(`[beforePromptStep] args invalid`);
 
+  const info = extractInfoFromPrompt(args);
+
+  if (info.agentName === 'agentToBePages') {
+
+    const continueParallel1: mls.msg.AgentIntentPromptReady = {
+      type: "prompt_ready",
+      args,
+      messageId: context.message.orderAt,
+      threadId: context.message.threadId,
+      taskId: context.task?.PK || '',
+      hookSequential,
+      parentStepId: parentStep.stepId,
+      humanPrompt: '',
+      systemPrompt: await getSystem()
+    }
+    return [continueParallel1];
+
+  }
+
   const moduleName = context.task?.iaCompressed?.longMemory['moduleName'];
   if (!moduleName) throw new Error(`[getInfoModuleToBe] invalid module name: ${moduleName}`);
 
   const { moduleToBe, toBePages } = await getInfoModuleToBe(context, moduleName);
-
   if (!toBePages || !moduleToBe) throw new Error(`[${agent.agentName}] [beforePromptStep] no toBePages/moduleToBe found`);
 
   const actualPage = toBePages.pages.find((page) => page.pageName === args)
@@ -199,6 +214,20 @@ async function processOutputToBePage(
 
 }
 
+function extractInfoFromPrompt(text: string) {
+
+  const match = text.match(/^\[([^\]]+)\]\s*([\s\S]*)$/);
+
+  const agentName = match?.[1];
+  const prompt = match?.[2];
+
+  return {
+    agentName,
+    prompt
+  }
+
+}
+
 async function createStorFilesOrganism(context: mls.msg.ExecutionContext, organisms: OrganismToCreate[]) {
 
   const moduleName = context.task?.iaCompressed?.longMemory['moduleName'];
@@ -236,7 +265,7 @@ async function getInfoModuleToBe(context: mls.msg.ExecutionContext, moduleName: 
   let toBePages: ToBePages | undefined;
   let moduleToBe: ModuleToBe | undefined;
   const data = await getModuleToBeInfo(mls.actualProject as number, moduleName);
-  console.info({ data })
+
   if (!data.ok) {
     console.info('Using test toBe info')
     toBePages = pagesForTest;
@@ -256,16 +285,20 @@ async function getInfoModuleToBe(context: mls.msg.ExecutionContext, moduleName: 
 
 async function executeNewTask(context: mls.msg.ExecutionContext, implementPages: ImplementPages, pageFileInfo: mls.stor.IFileInfoBase) {
 
+
+  // create page defs
   const nextAgentInNewTask = 'agentToBePageDefs'
   const agentNew = await loadAgent(nextAgentInNewTask);
   if (!agentNew) throw new Error(`[processOutputToBePage] invalid agent: ${nextAgentInNewTask}`)
   const context2 = getTemporaryContext(context.message.threadId, context.message.senderId, `@@agentToBePageDefs ${JSON.stringify(implementPages)}`)
-  // executeBeforePrompt(agentNew, context2)
+  // executeBeforePrompt(agentNew, context2) 
 
+
+  // new task to create page organism
   const nextAgentInNewTask2 = 'agentToBeOrganism'
   const agentNew2 = await loadAgent(nextAgentInNewTask2);
   if (!agentNew2) throw new Error(`[processOutputToBePage] invalid agent: ${nextAgentInNewTask2}`);
-  
+
   const moduleName = context.task?.iaCompressed?.longMemory['moduleName'];
   if (!moduleName) throw new Error(`[getInfoModuleToBe] invalid module name: ${moduleName}`);
 
@@ -275,7 +308,7 @@ async function executeNewTask(context: mls.msg.ExecutionContext, implementPages:
     moduleName
   }
 
-  console.info({organismsToCreate: implementPages.organismsToCreate})
+  console.info({ organismsToCreate: implementPages.organismsToCreate })
   const prompt = `@@agentToBeOrganism ${JSON.stringify(data)}`
   const context3 = getTemporaryContext(context.message.threadId, context.message.senderId, prompt);
   executeBeforePrompt(agentNew2, context3);

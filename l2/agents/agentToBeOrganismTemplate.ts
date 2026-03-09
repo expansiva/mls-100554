@@ -20,10 +20,23 @@
 // LLM must add clear and concise comments to improve code readability for humans.
 // LLM must replace fileReference to new organism name 
 // LLM must add clear and concise comments to improve code readability for humans. 
-import { html, HTMLTemplateResult, classMap, ifDefined } from 'lit'; // import lit and all directives always from 'lit'
+import {
+    html,
+    HTMLTemplateResult,
+    classMap,
+    ifDefined,
+    repeat,
+    until,
+    choose,
+    guard,
+    keyed,
+    live,
+    ref
+} from 'lit'; // import lit and all directives always from 'lit'
+
 import { customElement, property, state } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { getState, setState } from '/_100554_/l2/collabState.js';
+import { getState, setState, subscribe, unsubscribe, initState } from '/_100554_/l2/collabState.js';
 
 // getState(key: string): any ... 
 // setState(key: string, value: any): void
@@ -47,13 +60,11 @@ import { getState, setState } from '/_100554_/l2/collabState.js';
 
 /**
  * =============================================================================
- * I18N SECTION
+ * I18N SECTION - 
  * =============================================================================
  */
+
 /// **collab_i18n_start**
-const message_pt = {
-    loading: 'Carregando...',
-};
 const message_en = {
     loading: 'Loading...',
 };
@@ -61,7 +72,7 @@ type MessageType = typeof message_en;
 
 const messages: Record<string, MessageType> = {
     en: message_en,
-    pt: message_pt
+    /// add more languagues if requested 
 };
 /// **collab_i18n_end**
 
@@ -83,8 +94,7 @@ export class UserProfileOrganism extends StateLitElement {
      * Reading pageState is allowed, but delayed.
      */
 
-    @property({ type: Object })
-    user!: {
+    private user!: {
         name: string;
         consistency: string;
     };
@@ -118,18 +128,7 @@ export class UserProfileOrganism extends StateLitElement {
     firstUpdated(_changedProperties: Map<PropertyKey, unknown>): void {
         super.firstUpdated(_changedProperties);
         // SAFE ACCESS: pageState is guaranteed to be initialized at this point.
-
-        // Optional:
-        // subscribe(this.subs, this);
-        /*
-        this.subs = [
-            this.pageState.xxx.yyy
-        ];
-        subscribe(this.subs, this);
-        */
-
-
-        // initialize local snapshot
+        void this.initSubscriptions();
     }
 
     disconnectedCallback(): void {
@@ -146,6 +145,15 @@ export class UserProfileOrganism extends StateLitElement {
         // update local UI state only
         this.syncFromState(_key, _value);
 
+    }
+
+    private initSubscriptions() {
+
+    /* subscribe(this.subs, this);
+       this.subs = [ this.pageState.xxx];
+       subscribe(this.subs, this);
+    */
+    
     }
 
     private syncFromState(_key?: string, _value?: any): void {

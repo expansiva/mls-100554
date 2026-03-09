@@ -9,14 +9,16 @@ import {
     appendLongTermMemory,
     getStepById,
     notifyTaskChange,
+    notifyThreadChange,
     dispatchDetailsTaskClose,
     updateTaskTitle,
     getNextStepIdAvaliable,
     getRootAgent,
+
 } from "/_100554_/l2/aiAgentHelper.js";
 
 import { collabImport } from '/_100554_/l2/collabImport.js';
-import { getTask, getMessage, addOrUpdateTask, addPooling, deletePooling } from '/_102025_/l2/collabMessagesIndexedDB.js';
+import { getTask, getMessage, addOrUpdateTask, addPooling, deletePooling, updateThreadPendingTasks } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { IAgent, IAgentAsync } from '/_100554_/l2/aiAgentBase.js';
 import { getUserId } from '/_102025_/l2/collabMessagesHelper.js';
 import { loadModuleFromProjectOrDependency } from '/_100554_/l2/libCommom.js';
@@ -184,11 +186,13 @@ const maxCostByTask = 1.01; // 1.01 USD
 const maxStepsByTask = 100;
 
 export async function executeNextStep(context: mls.msg.ExecutionContext): Promise<void> {
+
     if (!context || !context.message || !context.task || !context.task.iaCompressed) throw new Error("Invalid context");
     if (context.task.status === "paused" || context.task.status === "done" || context.isTest === true) {
         notifyTaskChange(context);
         return;
     }
+
     const step = getNextPendentStep(context.task);
     if (!step) {
         notifyTaskChange(context);
@@ -593,9 +597,15 @@ async function processHookPooling(context: mls.msg.ExecutionContext): Promise<ml
     if (context.task) {
         const step = getNextPendentStep(context.task);
         inClarification = !!step && step.type === "clarification";
+        if (inClarification) {
+            const threadId = context.message.threadId;
+            const taskId = context.task.PK;
+            const thread = await updateThreadPendingTasks(threadId, taskId);
+            notifyThreadChange(thread);
+        }
     }
 
-    if (!hook || !hook.afterMs || hook.afterMs < 1000 || context.task?.status === 'paused' || inClarification || context.isTest) return [];
+    if (!hook || !hook.afterMs || hook.afterMs < 1000 || context.task?.status === 'paused' || inClarification) return [];
     //if (!hook || !hook.afterMs || hook.afterMs < 1000) return [];
     return new Promise((resolve, reject) => {
         setTimeout(() => {
@@ -1003,6 +1013,11 @@ export async function finishClarification(
     value: string,
     action: "continue" | "cancel"): Promise<void> {
 
+    if (context.task) {
+        const thread = await updateThreadPendingTasks(context.message.threadId, context.task.PK);
+        notifyThreadChange(thread);
+    }
+
     if (action === 'cancel') {
         const updateStatusFailed: mls.msg.AgentIntentUpdateStatus = {
             type: 'update-status',
@@ -1019,6 +1034,7 @@ export async function finishClarification(
     }
 
     if (action === 'continue') {
+
         const intentAddStep = intents.find((step) => step.type === 'add-step') as mls.msg.AgentIntentAddStep;
         if (!intentAddStep) return;
 

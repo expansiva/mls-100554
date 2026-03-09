@@ -567,7 +567,6 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
             if (!agent) throw new Error('Not found agent:' + agentName);
             await executeBeforePrompt(agent, context);
             if (context.message) await addMessage({ ...context.message, footers: [] })
-            console.info(context);
             setState('playgroundAgent.modeCompare', undefined);
             return `[pluginAgentPlayground] Agent "${agentName}" responded:\n${JSON.stringify(context, null, 2)}`;
         } catch (e: any) {
@@ -769,6 +768,8 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         (el as any)['task'] = obj.task;
         (el as any)['message'] = obj.message;
         (el as any)['restartPooling'] = true;
+        (el as any)['isTest'] = true;
+
         openElementInServiceDetails(el);
 
     }
