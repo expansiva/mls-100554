@@ -35,7 +35,7 @@ export class SimpleGreeting extends CollabLitElement {
     Object.keys(mls.stor.files).forEach((key) => {
 
       const f = mls.stor.files[key];
-      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('w') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key); 
+      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('a') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key); 
 
 
     })
@@ -86,7 +86,9 @@ export class SimpleGreeting extends CollabLitElement {
     
       if (!array[0].includes('fileReference') || array[0].includes('groupName')) {
         const tp = this.parseXMLTripleSlash(array[0]).variables;
-        array[0] = `/// <mls fileReference="${fileReference}" enhancement="${tp.enhancement || "_blank"}" />`
+        if (tp.enhancement === '_blank') return '';
+        let enhancement = '_102020_/l2/enhancementAura';
+        array[0] = `/// <mls fileReference="${fileReference}" enhancement="${enhancement}" />`
       } else {
         return '';
       }
