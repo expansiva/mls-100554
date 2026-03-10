@@ -4,7 +4,7 @@ import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from '/_100554_/l2/libCommom.js';
-import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, IReqCreateStorFile, createStorFile } from '/_100554_/l2/collabLibStor.js';
+import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, undoFile, IReqCreateStorFile, createStorFile } from '/_100554_/l2/collabLibStor.js';
 import { createAllModels, createModel, readProjectTypescriptAndCompile, readProjectTypescriptAndCompileL1 } from '/_100554_/l2/collabLibModel.js';
 import { ServiceBase } from '/_100554_/l2/serviceBase.js';
 import { isNameValid } from '/_100554_/l2/libCommom.js';
@@ -92,13 +92,15 @@ export class PluginExploreList extends PluginBaseModule {
 
     @property() levelFiles: number = 2;
 
-    @property() project: number = -1; // -1: noFilter; 0: all project
+    @property() project: number = -1; 
+
+    @property() projectLabel: string = '1';
 
     @property() filterProject: number = -1; // -1: noFilter; 0: all project
 
     @property() modeView: number = 0; // 0: alphabetical; 1: folder
 
-    @property() projectLabel: string = '1';
+    @property() hiddenFiles: boolean = false; 
 
     @property() errorAux: string = '';
 
@@ -107,6 +109,8 @@ export class PluginExploreList extends PluginBaseModule {
     @property({ type: Array }) history: mls.stor.IFileInfo[] = [];
 
     @queryAll('li') lis: HTMLElement[] | undefined;
+
+    
 
     constructor() {
         super();
@@ -253,6 +257,7 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
     renderModeList() {
+        
         return html`
             <div class="contentServiceList scroll-custom">
                 ${this.renderHeader()}
@@ -296,13 +301,15 @@ export class PluginExploreList extends PluginBaseModule {
 
                 <div class="toolbar__center">
                     <div class="toolbar__radio-group">
-                        <label @click="${this.clickRadioProjectActual}" title="project">
-                            <input type="radio" name="${this.position + mls.actualLevel}project" value="${this.projectLabel}" ?checked=${this.filterProject !== 0} />
-                            <span class="${this.filterProject !== 0 ? 'checked' : ''}">${this.projectLabel}</span>
-                        </label>
-                        <label @click="${this.clickRadioProject0}" title="all project">
-                            <input type="radio" name="${this.position + mls.actualLevel}project" value="0" ?checked=${this.filterProject === 0} />
-                            <span class="${this.filterProject === 0 ? 'checked' : ''}">${this.msg.localProject}</span>
+                        <select @change=${this.changeSelectProject} .value="${this.filterProject}">
+                            ${this.myDep.map((p) => html`<option value="${p}">${p}</option>`)}
+                            <option value="0">${this.msg.localProject}</option>
+                        </select>
+                        <label  title="Hidden Files">
+                            <input type="checkbox"  ?checked=${this.hiddenFiles} @click=${this.changeHiddenFiles} /> 
+                            <span class="${this.hiddenFiles ? 'checked' : ''}">
+                            <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M192 64C156.7 64 128 92.7 128 128L128 384L512 384L512 234.5C512 217.5 505.3 201.2 493.3 189.2L386.7 82.7C374.7 70.7 358.5 64 341.5 64L192 64zM453.5 240L360 240C346.7 240 336 229.3 336 216L336 122.5L453.5 240zM128 416L128 480L192 480L192 416L128 416zM192 576L192 512L128 512C128 547.3 156.7 576 192 576zM224 576L304 576L304 512L224 512L224 576zM336 576L416 576L416 512L336 512L336 576zM448 576C483.3 576 512 547.3 512 512L448 512L448 576zM512 416L448 416L448 480L512 480L512 416z"/></svg>
+                            </span>
                         </label>
                     </div>
 
@@ -513,10 +520,10 @@ export class PluginExploreList extends PluginBaseModule {
                     </info-item>
                     <div class="groupHiddenList">
                         <span class="mls-gpbtnslider-item" title="${this.msg.undo}" @click="${this.clickOptUndo}"><span class="fa fa-undo"></span> Undo</span>
-                        <span class="mls-gpbtnslider-item" title="${this.msg.clone}" @click="${this.clickOptClone}"><span class=" fa fa-clone"></span> Clone</span>
-                        <span class="mls-gpbtnslider-item" title="${this.msg.rename}" @click="${this.clickOptRename}"><span class=" fa fa-file-pen"></span> Rename</span>
+                        <span class="mls-gpbtnslider-item" title="${this.msg.clone}" @click="${this.clickOptClone}" style="display:${this.hiddenFiles ? 'none' : ''}"><span class=" fa fa-clone"></span> Clone</span>
+                        <span class="mls-gpbtnslider-item" title="${this.msg.rename}" @click="${this.clickOptRename}" style="display:${this.hiddenFiles ? 'none' : ''}"><span class=" fa fa-file-pen"></span> Rename</span>
                         <span class="mls-gpbtnslider-item" title="${this.msg.delete}" @click="${this.clickOptDel}"><span class=" fa fa-trash"></span> Delete</span>
-                        <span class="mls-gpbtnslider-item" title="${this.msg.security}" @click="${this.clickOptOpenSecurity}"><span class=" fa-solid fa-shield-halved"></span> Security</span> 
+                        <span class="mls-gpbtnslider-item" title="${this.msg.security}" @click="${this.clickOptOpenSecurity}" style="display:${this.hiddenFiles ? 'none' : ''}"><span class=" fa-solid fa-shield-halved"></span> Security</span> 
                     </div>
                     
                 </div>
@@ -544,12 +551,15 @@ export class PluginExploreList extends PluginBaseModule {
 
     private getAllName(file: mls.stor.IFileInfo, isHistory = false): string {
         let name = '';
+    
         const folder = file.folder ? file.folder : '';
         if (this.modeView === 0 && this.filterProject === 0) {
             name = '_' + file.project + '_' + folder + '/' + file.shortName
-        } else if (this.modeView === 0 && this.filterProject > 0) {
+        } else if (this.modeView === 0 && this.filterProject === mls.actualProject) {
             name = folder ? folder + '/' + file.shortName : file.shortName;
-        } else {
+        } else if (this.filterProject !== mls.actualProject) {
+            name = file.project+'_'+(folder ? folder + '/' + file.shortName : file.shortName);
+        }else {
             name = file.shortName;
         }
 
@@ -581,7 +591,11 @@ export class PluginExploreList extends PluginBaseModule {
             if (['project', 'designSystem'].includes(mfile.shortName) && mfile.folder === '' && mfile.status === 'new') {
                 throw new Error(`This action cannot be performed on this file at this time.`);
             }
-            await undoAllFiles(mfile);
+
+            if (this.hiddenFiles) {
+                await undoFile(mfile);
+            } else await undoAllFiles(mfile);
+
             this.closeAllMenus();
             this.changeList();
         } catch (err: any) {
@@ -599,7 +613,11 @@ export class PluginExploreList extends PluginBaseModule {
             if (['project', 'designSystem'].includes(mfile.shortName) && mfile.folder === '') {
                 throw new Error(`The file ${mfile.shortName} cannot be deleted.`);
             }
-            await deleteAllFiles(mfile)
+
+            if (this.hiddenFiles) {
+                mfile.status = 'deleted';
+            } else await deleteAllFiles(mfile);
+
             this.closeAllMenus();
             this.changeList();
         } catch (err: any) {
@@ -622,6 +640,12 @@ export class PluginExploreList extends PluginBaseModule {
 
         const mfile = this.getMyFileInElement(e.target as HTMLElement);
         if (!mfile) return;
+
+        if (this.hiddenFiles) {
+            this.fireEventsDetails(mfile);
+            return;
+        }
+
         this.setHistory(mfile);
         //if (mls.actualLevel != 1) selectLevel(2);
         this.fireEvents('open', mfile, {});
@@ -796,6 +820,23 @@ export class PluginExploreList extends PluginBaseModule {
 
     }
 
+    private fireEventsDetails(stor: mls.stor.IFileInfo) {
+        const key = mls.stor.getKeyToFile(stor);
+
+        const options = {
+            shortName: undefined,
+            project: undefined,
+            htmlText: '<plugin-view-file-100554 nameFile="'+key+'"></plugin-view-file-100554>'
+        }
+
+        mls.events.fire(
+            mls.actualLevel as any,
+            'PluginDetails' as any,
+            JSON.stringify(options),
+            0
+        );
+    }
+
     private async fireEvents(action: string, file: mls.stor.IFileInfo, info: any, timeout: number = 0): Promise<void> {
 
         try {
@@ -939,11 +980,11 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.error = 0;
         this.setLastFilter();
         const prjs = mls.l5.getProjectDetails(this.project)?.prj_dependencies || []
-        this.myDep = [...prjs];
-        this.myDep.push(this.project);
+        this.myDep = [this.project, ...prjs];
         this.projectLabel = this.project.toString();
         this.fireEventLoadProject();
         await this.getFiles();
+
 
     }
 
@@ -1024,6 +1065,30 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.error = 0;
         this.filterProject = 0;
         this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
+        await this.getFiles();
+
+    }
+
+    private async changeSelectProject(e: any) {
+
+        this.info.tot = 0;
+        this.info.version = 0;
+        this.info.storage = 0;
+        this.info.error = 0;
+        this.filterProject = +e.target.value;
+        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
+        await this.getFiles();
+
+    }
+
+    private async changeHiddenFiles(e: any) {
+
+        this.info.tot = 0;
+        this.info.version = 0;
+        this.info.storage = 0;
+        this.info.error = 0;
+        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
+        this.hiddenFiles = !this.hiddenFiles;
         await this.getFiles();
 
     }
@@ -1172,12 +1237,17 @@ export class PluginExploreList extends PluginBaseModule {
         if (
             !this.myDep.includes(sf.project) ||
             sf.level !== lv ||
-            sf.extension !== ext
+            (sf.extension !== ext && !this.hiddenFiles)
         ) return false;
 
-        if (this.filterProject === mls.actualProject && sf.project !== this.filterProject) return false;
+        if (this.filterProject !== 0 && this.filterProject !== sf.project) return false;
 
-        if (this.filterProject === -1 && sf.project !== mls.actualProject) return false;
+        const keyTs = mls.stor.getKeyToFile({ ...sf, extension: '.ts' });
+        if (this.hiddenFiles && mls.stor.files[keyTs]) return false; 
+
+        //if (this.filterProject === mls.actualProject && sf.project !== this.filterProject) return false;
+
+        //if (this.filterProject === -1 && sf.project !== mls.actualProject) return false;
 
         /*if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
             return false;
@@ -1206,7 +1276,7 @@ export class PluginExploreList extends PluginBaseModule {
 
             const sf = mls.stor.files[i];
             if (!this.validFileByLevel(sf)) continue;
-
+    
             const keyHtml = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.html');
             const keyStyle = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.less');
             const keyTestFile = mls.stor.getKeyToFiles(sf.project, sf.level, sf.shortName, sf.folder, '.test.ts');
