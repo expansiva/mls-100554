@@ -432,6 +432,7 @@ export class PluginGenerateDist extends PluginBaseModule {
         if (this.myState.modeLang === 'noLang') {
             await this.publishMyPages();
             await this.publishMyAssets();
+            await this.createVersionFile();
         } else {
             await this.addLog(`This language mode not implemented(${this.myState.modeLang})`, 'ERROR');
         }
@@ -498,7 +499,7 @@ export class PluginGenerateDist extends PluginBaseModule {
                 level: 2,
                 extension: '.html',
                 source: content,
-                status: 'changed'
+                status: 'new'
 
             }
 
@@ -525,14 +526,52 @@ export class PluginGenerateDist extends PluginBaseModule {
         return html;
     }
 
+    private async createVersionFile() {
+
+        await this.addLog(`Creating version file...`, 'INFO');
+
+        let project = mls.actualProject || 0;
+        let level = 2;
+        let shortName = 'version';
+        let extension = '.json';
+        let folder = 'dist';
+        let content = `{"html":"${this.myState.newVersion}"}`
+
+
+
+        const key = mls.stor.getKeyToFile({ project, level, shortName, extension, folder });
+        const stor = mls.stor.files[key];
+
+        if (!stor) {
+            const param: IReqCreateStorFile = {
+                project,
+                folder,
+                shortName,
+                level,
+                extension,
+                source: content,
+                status: 'new'
+
+            }
+
+            const info = await createStorFile(param, false, false, false);
+            return;
+
+        } 
+
+        const m = await stor.getOrCreateModel();
+        if (m) m.model.setValue(content);
+
+    }
+
 
     private async publishMyAssets() {
 
         let assets: mls.stor.IFileInfo[] = [];
 
-        this.publishAssets(this.myState.assets[0]);
-
-
+        for await (const f of this.myState.assets) {
+            await this.publishAssets(f)
+        }
 
     }
 
@@ -566,7 +605,7 @@ export class PluginGenerateDist extends PluginBaseModule {
             const file = await mls.stor.addOrUpdateFile(params);
             if (!file) throw new Error('[createStorFile] Invalid storFile');
 
-            file.status = 'changed';
+            file.status = 'new';
 
 
             const fileInfo: mls.stor.IFileInfoValue = {

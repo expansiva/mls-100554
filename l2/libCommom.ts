@@ -588,7 +588,7 @@ export async function getBaseTemplate(file: IInfoFile, enhancement: string = '_b
 
 export function verifyNeedAddTripleslach(info: mls.cbe.IPath, src: string, extension: string, enhancement: string = '_blank'): string {
 
-    if (extension === '.html') return src;
+    if ( !['.ts', '.defs.ts', '.test.ts', '.less'].includes(extension)) return src;
 
     if (enhancement === '_blank' && extension === '.ts') enhancement = '_100554_enhancementLit';
     if (enhancement === '_blank' && extension === '.less') enhancement = '_100554_enhancementStyle';
