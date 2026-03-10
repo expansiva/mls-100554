@@ -321,6 +321,17 @@ export function notifyThreadChange(thread: mls.msg.Thread): void {
   scopeWindow.dispatchEvent(event);
 }
 
+export function notifyMessageChange( message: mls.msg.Message): void {
+  const scopeWindow = window?.top ? window.top : window;
+  const event = new CustomEvent('message-change', {
+    detail: message,
+    bubbles: true,
+    composed: true
+  });
+  scopeWindow.dispatchEvent(event);
+}
+
+
 export function notifyThreadCreate(thread: mls.msg.Thread): void {
   const scopeWindow = window?.top ? window.top : window;
   const event = new CustomEvent('thread-create', {
