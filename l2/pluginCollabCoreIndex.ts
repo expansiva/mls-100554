@@ -350,7 +350,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l5Project'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginCollabPublish'
+                widget: '_100554_pluginGenerateDist'
             },
             {
                 category: 'Profile',

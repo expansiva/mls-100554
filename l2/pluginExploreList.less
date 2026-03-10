@@ -102,7 +102,7 @@ plugin-explore-list-100554 {
                 label {
                     position: relative;
 
-                    input[type="radio"] {
+                    input[type="radio"], input[type="checkbox"] {
                         display: none;
                     }
 
@@ -139,6 +139,19 @@ plugin-explore-list-100554 {
                         border-color: @bg-secondary-color-darker-disabled;
                         font-weight: 600;
                     }
+                }
+
+                select {
+                    display: inline-block;
+                    padding: 0.3rem 0.3rem;
+                    border: 1px solid @grey-color;
+                    border-radius: 4px;
+                    background: @bg-primary-color;
+                    cursor: pointer;
+                    font-size: 0.8rem;
+                    line-height: 1;
+                    transition: all 0.2s ease;
+
                 }
             }
 
@@ -204,7 +217,7 @@ plugin-explore-list-100554 {
             }
         }
     }
-    
+
     .classClick {
         position: absolute;
         left: 0px;
@@ -230,8 +243,8 @@ plugin-explore-list-100554 {
         border-top: 1px solid #c4c4c4;
     }
 
-    .mls-gpbtnslider-item{
-        color: @text-primary-color; 
+    .mls-gpbtnslider-item {
+        color: @text-primary-color;
     }
 
     .groupHiddenList .mls-gpbtnslider-item {
