@@ -744,7 +744,7 @@ export class ServiceSource100554 extends ServiceBase {
         this.toogleOverlayLoading(true, 'Executing agent Fix...');
         const context = getTemporaryContext(threadId, userId, '@@ agentFix ' + JSON.stringify(data));
         const agent = createAgent();
-        await agent.beforePrompt(context);
+        //await agent.beforePrompt(context);
 
     }
 
@@ -865,8 +865,8 @@ export class ServiceSource100554 extends ServiceBase {
 
             let model: mls.editor.IModelBase | undefined;
 
-            if (ext === '.ts' && storFile) model = mls.editor.createModelTS(storFile, src);
-            else if (ext === '.defs.ts' && storFile) model = mls.editor.createModelDefs(storFile, src);
+            if (ext === '.ts' && storFile) model = await mls.editor.createModelTS(storFile, src);
+            else if (ext === '.defs.ts' && storFile) model = await mls.editor.createModelDefs(storFile, src);
 
             if (!model) throw new Error(`Model invalid`);
 
