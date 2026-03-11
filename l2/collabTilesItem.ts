@@ -4,6 +4,7 @@ import { html, css, LitElement, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from '/_102027_/l2/utils';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { getPath } from '/_102027_/l2/utils.js';
 
 
 @customElement('collab-tiles-item-100554')
@@ -116,7 +117,8 @@ export class CollabTilesItem extends CollabLitElement {
 
     private async loadingPlugin() {
 
-        const infoPathPlugin = mls.l2.getPath(this.plugin);
+        const infoPathPlugin = getPath(this.plugin);
+        if (!infoPathPlugin) throw new Error('[loadingPlugin] Not found path:' + this.plugin);
         await import('/' + `_${infoPathPlugin.project}_/l2/${infoPathPlugin.shortName}`);
         const tag = convertFileNameToTag(infoPathPlugin);
         this.elPlugin = document.createElement(tag);

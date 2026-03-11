@@ -18,6 +18,7 @@ import { TsTestAst } from '/_100554_/l2/tsTestAST.js';
 import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
 import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
+import { getPath } from '/_102027_/l2/utils.js';
 
 
 import '/_100554_/l2/collabConsole.js';
@@ -561,7 +562,9 @@ export class ServicePreview100554 extends ServiceBase {
 
         this.loading = true;
 
-        const { project, shortName, folder } = mls.l2.getPath(this.page);
+        const info = getPath(this.page);
+        if (!info) throw new Error('[handleSend] Not found path:' + this.page);
+        const { project, shortName, folder } = info;
         const fullName = `_${project}_/l2/${folder ? folder + '/' : ''} ${shortName}`;
 
         if (opt.agentName === 'agentReview') {
@@ -1407,7 +1410,8 @@ export class ServicePreview100554 extends ServiceBase {
             }
 
             mls.actual[2].setFullName(lp);
-            const infoLast = mls.l2.getPath(lp);
+            const infoLast = getPath(lp);
+            if (!infoLast) throw new Error('[previewL2] Not found path:' + lp);
             const key = mls.stor.getKeyToFiles(infoLast.project, 2, infoLast.shortName, infoLast.folder, '.ts');
 
             if (!mls.stor.files[key]) {

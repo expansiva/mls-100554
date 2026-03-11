@@ -4,7 +4,7 @@ import { html, nothing, unsafeHTML } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
 import { openService, getProjectConfig, getProjectModuleConfig } from '/_100554_/l2/libCommom.js';
-import { convertFileNameToTag } from '/_102027_/l2/utils.js';
+import { convertFileNameToTag, getPath } from '/_102027_/l2/utils.js';
 import '/_100554_/l2/collabNav4Menu.js';
 
 /// **collab_i18n_start**
@@ -78,7 +78,7 @@ export class ServiceLiveView100554 extends ServiceBase {
                 const actual7 = mls.actual[7];
                 if (!actual7 || !actual7.project) return;
                 const fullName = mls.actual[7].getFullName();
-                const info = mls.l2.getPath(fullName);
+                const info = getPath(fullName);
                 this.loading = true;
                 await this.liveView.init(info.project, info.shortName, info.folder);
                 this.loading = false;
@@ -92,9 +92,13 @@ export class ServiceLiveView100554 extends ServiceBase {
         super.connectedCallback();
         const moduleConfig = await getProjectConfig(mls.actualProject as number);
         if (!moduleConfig || !moduleConfig.masterFrontEnd) return;
-        const infoLiveView = mls.l2.getPath(moduleConfig.masterFrontEnd.liveView);
-        const infoBuild = mls.l2.getPath(moduleConfig.masterFrontEnd.build);
-        const infoStart = mls.l2.getPath(moduleConfig.masterFrontEnd.start);
+        const infoLiveView = getPath(moduleConfig.masterFrontEnd.liveView);
+        const infoBuild = getPath(moduleConfig.masterFrontEnd.build);
+        const infoStart = getPath(moduleConfig.masterFrontEnd.start);
+
+        if (!infoLiveView) throw new Error('[connectedCallback] Not found path:' + moduleConfig.masterFrontEnd.liveView);
+        if (!infoBuild) throw new Error('[connectedCallback 2] Not found path:' + moduleConfig.masterFrontEnd.build);
+        if (!infoStart) throw new Error('[connectedCallback 3] Not found path:' + moduleConfig.masterFrontEnd.start);
 
         const storFileLiveView = mls.stor.files[mls.stor.getKeyToFiles(infoLiveView.project, 2, infoLiveView.shortName, infoLiveView.folder, '.ts')];
         const storFileBuild = mls.stor.files[mls.stor.getKeyToFiles(infoBuild.project, 2, infoBuild.shortName, infoBuild.folder, '.ts')];
@@ -105,7 +109,8 @@ export class ServiceLiveView100554 extends ServiceBase {
         if (storFileStart) this.startInstance = await import(`/${moduleConfig.masterFrontEnd.start}`);
 
         if (moduleConfig.masterBackEnd && moduleConfig.masterBackEnd.start) {
-            const infoBuildBE = mls.l2.getPath(moduleConfig.masterBackEnd.start);
+            const infoBuildBE = getPath(moduleConfig.masterBackEnd.start);
+            if (!infoBuildBE) throw new Error('[connectedCallback 4] Not found path:' + moduleConfig.masterBackEnd.start);
             const storFileStartBE = mls.stor.files[mls.stor.getKeyToFiles(infoBuildBE.project, 2, infoBuildBE.shortName.replace('.js', '').replace('.ts', ''), infoBuildBE.folder.replace('/l2', ''), '.ts')];
             if (storFileStartBE) this.startServerInstance = await import(`/${moduleConfig.masterBackEnd.start}`);
         }
@@ -149,7 +154,8 @@ export class ServiceLiveView100554 extends ServiceBase {
 
             // openService('_100554_serviceCollabMessages', 'left', 7, { mode: 'Apps ' });
             const fullName = mls.actual[7].getFullName();
-            const info = mls.l2.getPath(fullName);
+            const info = getPath(fullName);
+            if (!info) throw new Error('[updated] Not found path:' + fullName);
             this.liveView.setAttribute('mode', 'develpoment');
             await this.liveView.updatedCompleted;
 

@@ -5,6 +5,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { initState } from '/_100554_/l2/collabState.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
+import { getPath } from '/_102027_/l2/utils.js';
+
 import '/_100554_/l2/collabL3PreviewText.js';
 import '/_100554_/l2/collabL3PreviewTextAttr.js'; 
 import '/_100554_/l2/collabL3PreviewTextI18n.js';
@@ -47,7 +49,7 @@ export class CollabL3EditText extends CollabLitElement {
 
     private getBaseI18n() {
 
-        const info = mls.l2.getPath(mls.actual[mls.actualLevel].getFullName())
+        const info = getPath(mls.actual[mls.actualLevel].getFullName())
         if (!info) return;
 
         const storKey = mls.stor.getKeyToFile({ ...info, extension: '.ts', level: 2 });
@@ -268,7 +270,7 @@ export class CollabL3EditText extends CollabLitElement {
 
             if (!this.json) return;
             const { project, path } = mls.actual[mls.actualLevel];
-            const info = mls.l2.getPath(`_${project}_${path}`)
+            const info = getPath(`_${project}_${path}`)
             if (!info) return;
 
             let models = mls.editor.getModels(info.project, info.shortName, info.folder);

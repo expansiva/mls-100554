@@ -3,6 +3,7 @@
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { getState, setState } from '/_100554_/l2/collabState.js';
 import { ServiceSource100554 } from '/_100554_/l2/serviceSource.js';
+import { getPath } from '/_102027_/l2/utils.js';
 
 export function createAgent(): IAgentAsync {
     return {
@@ -170,7 +171,8 @@ export async function updateFiles(context: mls.msg.ExecutionContext, result: IDa
 }
 
 async function getContentByExtension(fullName: string, ext: 'html' | 'ts' | 'less' | 'defs') {
-    const info = mls.l2.getPath(fullName);
+    const info = getPath(fullName);
+    if (!info) throw new Error('[getContentByExtension] Not found path:' + fullName);
     const storFileKey = mls.stor.getKeyToFile({ ...info, extension: `.${ext}`, level: 2 });
     const storFile = mls.stor.files[storFileKey];
     if (!storFile) return '';
@@ -179,7 +181,8 @@ async function getContentByExtension(fullName: string, ext: 'html' | 'ts' | 'les
 }
 
 async function getModelByExtension(fullName: string, ext: 'html' | 'ts' | 'less' | 'defs') {
-    const info = mls.l2.getPath(fullName);
+    const info = getPath(fullName);
+    if (!info) throw new Error('[getModelByExtension] Not found path:' + fullName);
     const storFileKey = mls.stor.getKeyToFile({ ...info, extension: `.${ext}`, level: 2 });
     const storFile = mls.stor.files[storFileKey];
     if (!storFile) return '';

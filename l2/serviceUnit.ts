@@ -7,6 +7,7 @@ import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
 import { convertTagToFileName, convertFileNameToTag } from '/_102027_/l2/utils.js';
 import { loadPluginProject } from '/_100554_/l2/libCommom.js';
 import('/_100554_/l2/collabPanel.js');
+import { getPath } from '/_102027_/l2/utils.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -235,7 +236,9 @@ export class ServiceUnit extends ServiceBase {
         if (!details) return;
         const div = details.querySelector('div');
         if (!div || div.childElementCount > 0) return;
-        const { folder, project, shortName } = mls.l2.getPath(details.data.widget);
+        const info = getPath(details.data.widget);
+        if (!info) throw new Error('[handleDetailExplorieClick] Not found path:' + details.data.widget);
+        const { folder, project, shortName } = info;
         await import(`/_${project}_/l2/${shortName}`);
         const pluginTag = convertFileNameToTag({ project, shortName, folder });
         const pluginEl = document.createElement(pluginTag);

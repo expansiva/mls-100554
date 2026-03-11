@@ -3,6 +3,7 @@
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { getState, setState } from '/_100554_/l2/collabState.js';
 import { ServiceSource100554 } from '/_100554_/l2/serviceSource.js';
+import { getPath } from '/_102027_/l2/utils.js';
 
 export function createAgent(): IAgentAsync {
     return {
@@ -106,7 +107,7 @@ export async function updateFiles(context: mls.msg.ExecutionContext, result: IDa
     const positionMemory = context.task?.iaCompressed?.longMemory['position'];
     if (!pageMemory) throw new Error(`[updateFile]: invalid pageMemory`);
 
-    const info = mls.l2.getPath(pageMemory);
+    const info = getPath(pageMemory);
     const mode = modeMemory;
     const contentHTML = result.html ? result.html : undefined;
     const contentTS = result.ts ? result.ts : undefined;
@@ -236,7 +237,8 @@ async function systemDefs(data: IDataPrompt, system: string): Promise<string> {
 }
 
 async function getContentByExtension(fullName: string, ext: 'html' | 'ts' | 'less' | 'defs') {
-    const info = mls.l2.getPath(fullName);
+    const info = getPath(fullName);
+    if (!info) throw new Error('[getContentByExtension] not found path:' + fullName);
     const storFileKey = mls.stor.getKeyToFile({ ...info, extension: `.${ext}`, level: 2 });
     const storFile = mls.stor.files[storFileKey];
     if (!storFile) return '';
@@ -245,7 +247,8 @@ async function getContentByExtension(fullName: string, ext: 'html' | 'ts' | 'les
 }
 
 async function getModelByExtension(fullName: string, ext: 'html' | 'ts' | 'less' | 'defs') {
-    const info = mls.l2.getPath(fullName);
+    const info = getPath(fullName);
+    if (!info) throw new Error('[getModelByExtension] not found path:' + fullName);
     const storFileKey = mls.stor.getKeyToFile({ ...info, extension: `.${ext}`, level: 2 });
     const storFile = mls.stor.files[storFileKey];
     if (!storFile) return '';
@@ -259,7 +262,8 @@ async function getDefinitonsByImports(imports: string[]) {
     for await (let importName of imports) {
         if (!importName.startsWith('./')) continue;
         const fullPath = importName.replace('./', '');
-        const iPath = mls.l2.getPath(fullPath);
+        const iPath = getPath(fullPath);
+        if (!iPath) throw new Error('[getDefinitonsByImports] not found path:' + fullPath);
         const keyToStorFile = mls.stor.getKeyToFiles(iPath.project, 2, iPath.shortName, iPath.folder, '.ts');
         const storFile = mls.stor.files[keyToStorFile];
         if (!storFile) continue;

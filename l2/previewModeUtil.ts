@@ -1,7 +1,7 @@
 /// <mls fileReference="_100554_/l2/previewModeUtil.ts" enhancement="_100554_enhancementLit" />
 
 import { IJSONDependence } from '/_100554_/l2/libCompile';
-import { convertFileNameToTag } from '/_102027_/l2/utils';
+import { convertFileNameToTag, getPath } from '/_102027_/l2/utils';
 import { ServiceBase } from '/_100554_/l2/serviceBase'
 
 export function mountJSImporMap(info: IJSONDependence, ifr: HTMLIFrameElement): void {
@@ -173,7 +173,7 @@ export function waitForComponents(context: Window, componentNames: string[]) {
     return Promise.all(promises);
 }
 
-var originalPath: mls.cbe.IPath | undefined;
+var originalPath: mls.stor.IFileInfoBase | undefined;
 function functionReplaceAnchor(e: MouseEvent) {
 
     e.stopPropagation();
@@ -182,7 +182,7 @@ function functionReplaceAnchor(e: MouseEvent) {
 
     const acutalName = mls.actual[mls.actualLevel].getFullName();
     if (!acutalName) return;
-    const info = mls.l2.getPath(acutalName);
+    const info = getPath(acutalName);
     if (!info) return;
     if (!originalPath) originalPath = info; // guarda 1 pagina do module
 

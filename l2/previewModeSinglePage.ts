@@ -1,7 +1,7 @@
 /// <mls fileReference="_100554_/l2/previewModeSinglePage.ts" enhancement="_100554_enhancementLit" />
 
 import { IJSONDependence } from '/_100554_/l2/libCompile.js';
-import { setErrorOnModel, convertTagToFileName } from '/_102027_/l2/utils.js';
+import { setErrorOnModel, convertTagToFileName, getPath } from '/_102027_/l2/utils.js';
 import * as util from '/_100554_/l2/previewModeUtil.js';
 
 export class PreviewModeSinglePage {
@@ -103,7 +103,9 @@ export class PreviewModeSinglePage {
 
                         if (!(/_(\d+)_/.test(path))) {
 
-                            const info = mls.l2.getPath(args.importer.replace('/l2/', '').replace('/', ''));
+                            const info = getPath(args.importer.replace('/l2/', '').replace('/', ''));
+
+                            if (!info) throw new Error('[virtualFsPlugin] Not found path:' + args.importer.replace('/l2/', '').replace('/', ''));
 
                             if (!info.project) info.project = mls.actualProject as number;
 
@@ -267,8 +269,8 @@ export class PreviewModeSinglePage {
 
                         if (!(/_(\d+)_/.test(path))) {
 
-                            const info = mls.l2.getPath(args.importer.replace('/l2/', '').replace('/', ''));
-
+                            const info = getPath(args.importer.replace('/l2/', '').replace('/', ''));
+                            if (!info) throw new Error('[virtualFsPlugin 2] Not found path:' + args.importer.replace('/l2/', '').replace('/', ''));
                             if (!info.project) info.project = mls.actualProject as number;
 
                             if (path.indexOf(`_${info.project}_`) < 0) {
@@ -468,7 +470,8 @@ export class PreviewModeSinglePage {
         let needCompile = false;
         this.json.importsJs.forEach((i: string) => {
             const name = i.startsWith('/') ? i.replace('/', '') : i;
-            const f = mls.l2.getPath(name);
+            const f = getPath(name);
+            if (!f) throw new Error('[loadCache] Not found path:' + name);
             const key = mls.stor.getKeyToFiles(f.project, 2, f.shortName, f.folder, '.ts');
             if (mls.stor.files[key] && mls.stor.files[key].inLocalStorage) {
                 needCompile = true;

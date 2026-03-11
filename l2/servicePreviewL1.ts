@@ -3,6 +3,7 @@ import { html, css, unsafeHTML } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { getDependenciesByHtmlFile, IJSONDependence } from '/_100554_/l2/libCompile.js';
 import { IService, IServiceMenu, IToolbarContent, ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { getPath } from '/_102027_/l2/utils.js';
 import "/_100554_/l2/servicePreviewL1ListServer.js";
 
 import { openService, getProjectConfig } from '/_100554_/l2/libCommom.js';
@@ -92,7 +93,8 @@ export class ServicePreviewL1100554 extends ServiceBase {
         super.connectedCallback();
         const moduleConfig = await getProjectConfig(mls.actualProject as number);
         if (!moduleConfig || !moduleConfig.masterBackEnd) return;
-        const info = mls.l2.getPath(moduleConfig.masterBackEnd.serverView)
+        const info = getPath(moduleConfig.masterBackEnd.serverView)
+        if (!info) throw new Error('[connectedCallback] Not found path:' + moduleConfig.masterBackEnd.serverView);
         await import(`/${moduleConfig.masterBackEnd.serverView}`);
         this.startInstance = await import(`/${moduleConfig.masterBackEnd.start}`);
         await this.startInstance.start(mls.actualProject, 'none');

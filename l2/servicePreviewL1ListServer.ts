@@ -4,6 +4,7 @@ import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
 import { IJSONDependence } from '/_100554_/l2/libCompile.js';
+import { getPath } from '/_102027_/l2/utils.js';
 import "/_100554_/l2/collabConsoleL1.js";
 
 @customElement('service-preview-l1-list-server-100554')
@@ -361,7 +362,8 @@ export class ServicePreviewL1ListServer extends CollabLitElement {
 
         if (!iframe.contentDocument) return;
 
-        const info = mls.l2.getPath(path);
+        const info = getPath(path);
+        if (!info) throw new Error('[setHTml] Not found path:' + path);
         const key = mls.stor.getKeyToFiles(info.project, 1, info.shortName, info.folder, '.ts');
         if (!mls.stor.files[key]) throw new Error('[setHTml]: Not found stor');
 

@@ -5,6 +5,7 @@ import { customElement, query, property, state } from 'lit/decorators.js';
 import { convertFileNameToTag } from '/_102027_/l2/utils.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { LessAST } from "/_100554_/l2/pluginEditStyleAST.js";
+import { getPath } from '/_102027_/l2/utils.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -138,7 +139,9 @@ export class PluginEditStyleL3 extends PluginBaseModule {
 
     private async openFile() {
 
-        const path = mls.l2.getPath(mls.actual[3].getFullName());
+        const path = getPath(mls.actual[3].getFullName());
+        if (!path) throw new Error('[openFile] Not found path:' + mls.actual[3].getFullName());
+
         const key = mls.stor.getKeyToFiles(path.project, 2, path.shortName, path.folder, '.ts');
         const file = mls.stor.files[key];
 
@@ -217,7 +220,8 @@ export class PluginEditStyleL3 extends PluginBaseModule {
         if (!cssText) {
 
             const { project, path } = mls.actual[3];
-            const info = mls.l2.getPath(`_${project}_${path}`);
+            const info = getPath(`_${project}_${path}`);
+            if (!info) throw new Error('[setContent] Not found path:' + `_${project}_${path}`);
             const nameTag = convertFileNameToTag(info);
             cssText += `
             ${nameTag}{

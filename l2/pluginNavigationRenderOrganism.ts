@@ -10,6 +10,8 @@ import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { CollabPreviewL3 } from '/_100554_/l2/collabPreviewL3.js';
 import { ServiceBase } from '/_100554_/l2/serviceBase.js';
 
+import { getPath } from '/_102027_/l2/utils.js';
+
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -334,7 +336,8 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
         const scope = window.preview?.iframe?.contentDocument?.body;
         if (!scope) return ret;
 
-        const infoFile = mls.l2.getPath(mls.actual[3].getFullName());
+        const infoFile = getPath(mls.actual[3].getFullName());
+        if (!infoFile) throw new Error('[getComponents] Not found path:' + mls.actual[3].getFullName());
         const tag = convertFileNameToTag(infoFile);
 
         const root = scope.querySelector(tag) as LitElement;

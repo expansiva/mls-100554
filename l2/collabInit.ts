@@ -439,11 +439,16 @@ export class CollabInit extends LitElement {
         actual: any
     ) {
         if (!filename) return;
-        const path = mls.l2.getPath(filename);
+        const path = this.getPath(filename);
+        if (!path) throw new Error('[restoreSideFile] Not found path:' + filename);
         const key = mls.stor.getKeyToFiles(path.project, level, path.shortName, path.folder, '.ts');
         const file = mls.stor.files[key];
         if (!file) return;
         actual[side] = file;
+    }
+
+    private getPath(fileName: string) {
+        return mls.actual[0].setFullName(fileName).getStorFileBase()
     }
 
     private async setLastModule() {

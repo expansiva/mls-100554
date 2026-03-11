@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
 import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
-import { convertTagToFileName, convertFileNameToTag } from '/_102027_/l2/utils.js';
+import { convertTagToFileName, convertFileNameToTag, getPath } from '/_102027_/l2/utils.js';
 
 @customElement('service-detail-100554')
 export class ServiceDetail100554 extends ServiceBase {
@@ -221,7 +221,9 @@ export class ServiceDetail100554 extends ServiceBase {
 
     private onWidgetChanged() {
         if (this.widget) {
-            const { project, shortName, folder } = mls.l2.getPath(this.widget);
+            const path = getPath(this.widget);
+            if (!path) throw new Error('[onWidgetChanged] Not found path:' + this.widget);
+            const { project, shortName, folder } = path;
             const tag = convertFileNameToTag({ project, shortName, folder });
             const info: mls.events.IPluginDetail = {
                 project,
@@ -241,7 +243,8 @@ export class ServiceDetail100554 extends ServiceBase {
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
 
         this.plugin = info;
-        const storBase = mls.actual[0].setFullName(`_${info.project}_/${info.shortName}`).getStorFileBase();
+        const storBase = getPath(`_${info.project}_/${info.shortName}`);
+        if (!storBase) throw new Error('[showPluginContent] Not found path:' + `_${info.project}_/${info.shortName}`);
 
         const plugin = info.htmlText ? 'any' : `_${storBase.project}_${storBase.folder ? storBase.folder + '/' : ''}${storBase.shortName}`;
 

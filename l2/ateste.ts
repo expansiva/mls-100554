@@ -1,11 +1,11 @@
-/// <mls fileReference="_100554_/l2/ateste.js" enhancement="_100554_enhancementLit" />
-
-import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';
-import { customElement, property, state, query } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'; 
-
+/// <mls fileReference="_100554_/l2/ateste.js" enhancement="_100554_/l2/enhancementLit"/>
  
-@customElement('ateste-100554')
+import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';   
+import { customElement, property, state, query } from 'lit/decorators.js';  
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';  
+ 
+ 
+@customElement('ateste-100554') 
 export class SimpleGreeting extends CollabLitElement {
   //test
   @query('#teste') teste: HTMLTextAreaElement | undefined;

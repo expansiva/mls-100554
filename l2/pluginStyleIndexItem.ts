@@ -4,7 +4,8 @@ import { html, unsafeHTML } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { IHelpers } from '/_100554_/l2/cssHelperIndexBase.js';
-import { convertFileNameToTag } from '/_102027_/l2/utils.js';
+import { convertFileNameToTag, getPath } from '/_102027_/l2/utils.js';
+
 
 import {
     collab_heart,
@@ -95,7 +96,9 @@ export class PluginStyleIndexItem extends CollabLitElement {
         }
 
         if (container.childElementCount === 0) {
-            const { folder, project, shortName } = mls.l2.getPath(help.widget)
+            const info = getPath(help.widget);
+            if (!info) throw new Error('[openPlugin] Not found path:' + help.widget);
+            const { folder, project, shortName } = info;
             const tag = convertFileNameToTag({ project, shortName, folder });
             this.pluginEl = document.createElement(tag);
             this.pluginEl.setAttribute('state', `{{ less.${this.position} }}`);
