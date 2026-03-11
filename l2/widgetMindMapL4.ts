@@ -6,6 +6,7 @@ import { propertyDataSource, propertyCompositeDataSource } from '/_100554_/l2/co
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js'; 
 import { convertTagToFileName } from '/_100554_/l2/utilsLit';
 import { MindMapSelected, MindMapData, MindMapNodeStyles, MindMapNodeStyle, MindMapNode, setMindMapVariable, getMindMapVariable, getMindMapByStorFile, getMindMapByName } from '/_100554_/l2/libMindMap.js'
+import { getPath } from '/_102027_/l2/utils.js';
 
 @customElement('widget-mind-map-l4-100554')
 export class WidgetMindMapL4100554 extends StateLitElement {
@@ -885,11 +886,12 @@ export class WidgetMindMapL4100554 extends StateLitElement {
 
     private async openDefs(node: MindMapNode) {
 
-        let name = node.label.startsWith('/') ? mls.l2.getPath(node.label.replace('/', '')) : mls.l2.getPath(node.label);
+        let name = node.label.startsWith('/') ? getPath(node.label.replace('/', '')) : getPath(node.label);
         if (node.label.indexOf('-') > 0) {
             name = convertTagToFileName(node.label) as any;
         }
 
+        if (!name) throw new Error('[openDefs] Not found path:' );
         const start = name.shortName.indexOf('.');
         if (start > 0) {
             name.shortName = name.shortName.substring(0, start);
