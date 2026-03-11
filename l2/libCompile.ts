@@ -2,7 +2,7 @@
 
 
 import { getTokensCss, getGlobalCss } from '/_100554_/l2/designSystemBase.js';
-import { convertFileNameToTag, convertTagToFileName } from '/_100554_/l2/utilsLit';
+import { convertFileNameToTag, convertTagToFileName, getPath} from '/_102027_/l2/utils';
 
 export const getDependenciesByHtmlFile = (file: mls.stor.IFileInfo, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
@@ -81,7 +81,7 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
         myModules,
     );
 
-    let tokens: string | undefined = await getTokens({ project, shortName, folder }, theme);
+    let tokens: string | undefined = await getTokens({ project, shortName, folder } as mls.stor.IFileInfoBase, theme);
     return {
         file: filename,
         wcComponents: tags,
@@ -114,7 +114,7 @@ async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, h
         myModules,
     );
 
-    let tokens: string | undefined = await getTokens({ project, shortName, folder }, theme);
+    let tokens: string | undefined = await getTokens({ project, shortName, folder } as mls.stor.IFileInfoBase, theme);
     let globalCss: string | undefined = await getGlobalCss(project, theme);
 
     return {
@@ -213,7 +213,7 @@ async function loadMyNeedsToCompile(
         const { project, shortName, folder } = info;
         if (!project || !shortName) return;
 
-        const ipath = { project, shortName: shortName, folder: f ? f.folder : folder };
+        const ipath = { project, shortName: shortName, folder: f ? f.folder : folder } as mls.stor.IFileInfoBase;
         const enhacementName = await getEnhancementFromFetch(ipath);
         if (!enhacementName) throw new Error('enhacementName not valid');
         if (enhacementName === '_blank') {
@@ -223,9 +223,9 @@ async function loadMyNeedsToCompile(
 
         if (!myModules[enhacementName]) {
 
-            const info = mls.l2.getPath(enhacementName)
-            const ipathenhacement = { project: info.project, shortName: info.shortName, folder: info.folder };
-            const mModule = await mls.l2.enhancement.getEnhancementModule(ipathenhacement);
+            const info = getPath(enhacementName);
+            if (!info) throw new Error('[] Not found path:' + enhacementName);
+            const mModule = await mls.l2.enhancement.getEnhancementModule(info);
 
             myModules[enhacementName] = {
                 jsMap: false,
@@ -263,7 +263,7 @@ async function loadMyNeedsToCompile(
 
 async function getEnhancementFromFetch(file: { project: number, shortName: string, folder: string }) {
 
-    const url = getImportUrl(file);
+    const url = getImportUrl(file as mls.stor.IFileInfoBase);
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
@@ -285,7 +285,7 @@ async function getEnhancementFromFetch(file: { project: number, shortName: strin
 
 }
 
-function getImportUrl(info: mls.cbe.IPath): string {
+function getImportUrl(info: mls.stor.IFileInfoBase): string {
     let url = `/_${info.project}_/l2/${info.shortName}`;
     if (info.folder) {
         url = `/_${info.project}_/l2/${info.folder}/${info.shortName}`
@@ -325,13 +325,13 @@ async function getJSImporMap(myImportsMap: string[], enhacementName: string, myM
 
 }
 
-async function getJSBlank(myImports: string[],mfile: mls.cbe.IPath) {
+async function getJSBlank(myImports: string[],mfile: mls.stor.IFileInfoBase) {
     let key = getImportUrl(mfile);
     if (myImports.includes(key)) return;
     myImports.push(key);
 }
 
-async function getJS(myImports: string[], enhacementName: string, mfile: mls.cbe.IPath, myModules: any) {
+async function getJS(myImports: string[], enhacementName: string, mfile: mls.stor.IFileInfoBase, myModules: any) {
     if (!myModules[enhacementName]) throw new Error('Enhacement not found ');
     let key = getImportUrl(mfile);
     if (myImports.includes(key)) return;
@@ -339,7 +339,7 @@ async function getJS(myImports: string[], enhacementName: string, mfile: mls.cbe
 }
 
 
-export async function getTokens(mfile: mls.cbe.IPath, theme: string) {
+export async function getTokens(mfile: mls.stor.IFileInfoBase, theme: string) {
 
     try {
         const tokens = await getTokensCss(mfile.project, theme);

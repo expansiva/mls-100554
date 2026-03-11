@@ -1,5 +1,7 @@
 /// <mls fileReference="_100554_/l2/libMindMap.ts" enhancement="_blank" />
 
+import { getPath } from '/_102027_/l2/utils.js';
+
 export const allDefs: Record<string, IdefModule> = {};
 
 export async function getAllDefs(): Promise<Record<string, IdefModule>>{
@@ -21,7 +23,7 @@ export async function getMindMapByName(file: string): Promise<MindMapData | unde
 
         if (!file) throw new Error(`Not found file: ${file}`);
 
-        const info = mls.l2.getPath(file);
+        const info = getPath(file);
         if (!info || !info.shortName) return;
         let { project, folder, shortName } = info;
         folder = folder.replace('/l2', '').trim();

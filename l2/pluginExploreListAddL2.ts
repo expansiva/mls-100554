@@ -9,6 +9,7 @@ import { IDetails } from "/_100554_/l2/pluginNewFileBase.js";
 import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
 import { getState, setState, initState } from '/_100554_/l2/collabState.js';
 import { loadPluginProject, isNameValid } from '/_100554_/l2/libCommom.js';
+import { getPath } from '/_102027_/l2/utils.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -185,13 +186,17 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
             return;
         }
 
-        const info = mls.l2.getPath(`_${project}_${target.value}`);
+        const info = getPath(`_${project}_${target.value}`);
+        if (!info) throw new Error('[] Not found path:' + `_${project}_${target.value}`);
         setState('l2.addFile.folder', info.folder);
         setState('l2.addFile.shortName', info.shortName);
     }
 
     private handleClickTemplate(plugin: IPlugins) {
-        const { project, shortName, folder } = mls.l2.getPath(plugin.widget);
+        const info = getPath(plugin.widget);
+        if (!info) throw new Error('[] Not found path:' + plugin.widget);
+
+        const { project, shortName, folder } = info;
         const tag = convertFileNameToTag({ project, shortName, folder });
         const options = {
             shortName,

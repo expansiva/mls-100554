@@ -9,6 +9,7 @@ import { selectLevel, openService } from '/_100554_/l2/libCommom.js';
 import { formatHtml, setValueInModeKeepingUndo } from '/_100554_/l2/collabDOMSync.js';
 import { CollabPreviewL4 } from '/_100554_/l2/collabPreviewL4.js';
 import { openCollabMessage } from '/_100554_/l2/aiAgentHelper.js';
+import { getPath } from '/_102027_/l2/utils.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -248,7 +249,9 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
     }
 
     private getActualFileL4() {
-        const { folder, project, shortName } = mls.l2.getPath(`_${mls.actual[4].project}_${mls.actual[4].path}`);
+        const info = getPath(`_${mls.actual[4].project}_${mls.actual[4].path}`);
+        if (!info) throw new Error('[getActualFileL4] Not found path:' + `_${mls.actual[4].project}_${mls.actual[4].path}`);
+        const { folder, project, shortName } = info;
 
         if (!project || !shortName) return undefined;
 
@@ -687,7 +690,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
     private goToL2(e: MouseEvent, item: IInfoElChildren) {
         if (!item.el) return;
-        const fileInfo = mls.l2.getPath(mls.actual[4].getFullName());
+        const fileInfo = getPath(mls.actual[4].getFullName());
         if (!fileInfo) return;
         const { folder, project, shortName } = fileInfo;
 

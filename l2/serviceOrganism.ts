@@ -4,7 +4,7 @@ import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
 import { loadPluginProject, forceServiceInstance } from '/_100554_/l2/libCommom.js';
-import { convertFileNameToTag } from '/_102027_/l2/utils.js';
+import { convertFileNameToTag, getPath } from '/_102027_/l2/utils.js';
 import { readProjectTypescriptAndCompile } from '/_100554_/l2/collabLibModel.js';
 
 import { PluginEditStyleL3 } from '/_100554_/l2/pluginEditStyleL3.js';
@@ -311,13 +311,17 @@ export class ServiceOrganism100554 extends ServiceBase {
         const plgStlpName = plgStyle[0] ? plgStyle[0].widget : '';
 
         if (plgNavName) {
-            const { folder, project, shortName } = mls.l2.getPath(plgNavName);
+            const info = getPath(plgNavName);
+            if (!info) throw new Error('[loadPlugins] Not found path:' + plgNavName);
+            const { folder, project, shortName } = info;
             await import(`/_${project}_/l2/${shortName}`);
             this.pluginNav = convertFileNameToTag({ project, shortName, folder });
         }
 
         if (plgStlpName) {
-            const { folder, project, shortName } = mls.l2.getPath(plgStlpName);
+            const info2 = getPath(plgStlpName);
+            if (!info2) throw new Error('[loadPlugins 2] Not found path:' + plgStlpName);
+            const { folder, project, shortName } = info2;  
             await import(`/_${project}_/l2/${shortName}`);
             this.pluginStyle = convertFileNameToTag({ project, shortName, folder });
         }

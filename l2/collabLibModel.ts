@@ -2,6 +2,7 @@
 
 import { getEnhancementName, getBaseTemplate } from '/_100554_/l2/libCommom.js';
 import { getTokensLess, removeTokensFromSource } from '/_102027_/l2/designSystemBase.js';
+import { getPath} from '/_102027_/l2/utils.js';
 import { getDefsByFile } from '/_100554_/l2/libMindMap.js';
 
 export async function readProjectTypescriptAndCompile(project: number, shortName: string, needCompile: boolean = true) {
@@ -552,7 +553,8 @@ async function _updateModelStatusTS(modelBase: mls.editor.IModelBase, changed: b
 
         const enhacementName = await getEnhancementName({ project, shortName, folder, level: 2 }).catch((e) => undefined);
         if (enhacementName && enhacementName !== "_blank") {
-            const path = mls.l2.getPath(enhacementName);
+            const path = getPath(enhacementName);
+            if(!path) throw new Error('[_updateModelStatusTS] Not found path:'+ enhacementName)
             const enhancementInstance: mls.l2.enhancement.IEnhancementInstance | undefined = await mls.l2.enhancement.getEnhancementModule(path).catch((e) => { console.error('Error on getEnhancementModule: ' + e.message); return undefined });
             if (enhancementInstance) await enhancementInstance.onAfterChange(modelBase);
         }

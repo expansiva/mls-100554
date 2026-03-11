@@ -7,6 +7,7 @@ import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
 import { isNameValid } from '/_100554_/l2/libCommom.js';
 import { createStorFile, IReqCreateStorFile } from '/_100554_/l2/collabLibStor.js';
+import { getPath } from '/_102027_/l2/utils.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -124,8 +125,6 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
             this.error = this.msg.invalidName
             return;
         }
-
-        const info = mls.l2.getPath(`_${project}_${target.value}`);
     }
 
     //--------------- IMPLEMENTS----------------
@@ -169,7 +168,8 @@ export class ServiceListFilesAdd100554 extends CollabLitElement {
                 return;
             }
 
-            const info = mls.l2.getPath(`_${project}_${name}`);
+            const info = getPath(`_${project}_${name}`);
+            if (!info) throw new Error('[createFile] Not found path:' + `_${project}_${name}`);
 
             this.showLoad(true);
 

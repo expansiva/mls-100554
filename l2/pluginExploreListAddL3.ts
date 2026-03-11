@@ -10,7 +10,6 @@ import { collabImport } from '/_100554_/l2/collabImport.js'
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { ServiceBase } from '/_100554_/l2/serviceBase.js';  
 
-
 /// **collab_i18n_start**
 const message_pt = {
     noItens: 'Nenhum item foi encontrado!'
@@ -59,9 +58,6 @@ export class PluginExploreListAddL3 extends PluginBaseModule {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg>
             </button>
         `;
-
-        const { project, path } = mls.actual[3];
-        const info = mls.l2.getPath(`_${project}_${path}`);
 
         return html`
             ${this.renderHeader('Add', btn, 'left')}

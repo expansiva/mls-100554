@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/libCommom.ts" enhancement="_blank" />
 
 import { getMessageKey } from "/_100554_/l2/collabLitElement.js";
+import { getPath } from '/_102027_/l2/utils.js';
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -222,7 +223,9 @@ export async function openService(service: string, position: 'left' | 'right', l
     const itemNav3Content = page.querySelector(`collab-nav-3-service[data-service="${service}"]`) as HTMLElement;
 
     if (itemNav3Content && args) {
-        const { shortName, folder, project } = mls.l2.getPath(service);
+        const info = getPath(service);
+        if(!info) throw new Error('[openService] Not found path:' + service);
+        const { shortName, folder, project } = info;
         const tagService = utils.convertFileNameToTag({ shortName, folder, project });
         const serviceItem = itemNav3Content.querySelector(tagService);
         if (serviceItem) {

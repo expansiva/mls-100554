@@ -5,7 +5,7 @@ import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_100554_/l2/serviceBase.js';
 import { collab_user } from '/_100554_/l2/collabIcons.js';
 import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
-import { convertTagToFileName, convertFileNameToTag } from '/_102027_/l2/utils.js';
+import { convertTagToFileName, convertFileNameToTag, getPath } from '/_102027_/l2/utils.js';
 import { loadPluginProject } from '/_100554_/l2/libCommom.js';
 import('/_100554_/l2/collabPanel.js');
 
@@ -369,7 +369,9 @@ export class ServiceProject100554 extends ServiceBase {
         if (!details) return;
         const div = details.querySelector('div');
         if (!div || div.childElementCount > 0) return;
-        const { folder, project, shortName } = mls.l2.getPath(details.data.widget);
+        const info = getPath(details.data.widget);
+        if (!info) throw new Error('[] Not found path:' + details.data.widget);
+        const { folder, project, shortName } = info;
         await import(`/_${project}_/l2/${shortName}`);
         const pluginTag = convertFileNameToTag({ project, shortName, folder });
         const pluginEl = document.createElement(pluginTag);

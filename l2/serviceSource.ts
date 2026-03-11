@@ -14,7 +14,7 @@ import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate } fro
 import { readProjectTypescriptAndCompile, createModel } from '/_100554_/l2/collabLibModel.js';
 import { IReqCreateStorFile, createStorFile } from '/_100554_/l2/collabLibStor.js';
 import { getThreadByName } from '/_102025_/l2/collabMessagesIndexedDB.js';
-
+import { getPath } from '/_102027_/l2/utils.js';
 import { CollabSpliterVerticalVarFixed100554 } from '/_100554_/l2/collabSpliterVerticalVarFixed.js';
 import '/_100554_/l2/collabSpliterVerticalVarFixed.js';
 import '/_100554_/l2/collabSpliterHorizontalVarFixed.js';
@@ -1590,7 +1590,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
             return;
         }
 
-        const { project, shortName, folder } = mls.l2.getPath(lastL2ByPosition);
+        const info = getPath(lastL2ByPosition);
+        if (!info) throw new Error('[] Not found path:' + lastL2ByPosition);
+        const { project, shortName, folder } = info;
         const keyStorFile = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.ts');
         const storFile = mls.stor.files[keyStorFile];
         if (!storFile) {

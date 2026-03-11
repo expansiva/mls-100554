@@ -5,6 +5,7 @@ import { customElement, state, query } from 'lit/decorators.js';
 import { executeAgentByFile } from '/_100554_/l2/aiAgentHelper.js'
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { getPath } from '/_102027_/l2/utils.js';
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -54,7 +55,8 @@ export class PluginOrganisAdd extends CollabLitElement {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         const { project, path } = mls.actual[3];
-        const info = mls.l2.getPath(`_${project}_${path}`);
+        const info = getPath(`_${project}_${path}`);
+        if (!info) throw new Error('[render] Not found path:' + `_${project}_${path}`);
 
         return html`
             <div class="form-container">
@@ -101,7 +103,8 @@ export class PluginOrganisAdd extends CollabLitElement {
 
             const path = mls.actual[3].getFullName();
             if (!path) throw new Error('Not found path');
-            const info = mls.l2.getPath(path);
+            const info = getPath(path);
+            if (!info) throw new Error('[createFile] Not found path:' + path);
 
             const key = mls.stor.getKeyToFiles(info.project, 2, info.shortName, info.folder, '.ts');
             if (!mls.stor.files[key]) throw new Error('Not found storFile');

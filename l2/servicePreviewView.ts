@@ -3,7 +3,7 @@
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getDependenciesByHtmlFile, getTokens, IJSONDependence } from '/_100554_/l2/libCompile.js';
-import { convertFileNameToTag } from '/_102027_/l2/utils.js';
+import { convertFileNameToTag, getPath } from '/_102027_/l2/utils.js';
 import { createModel } from '/_100554_/l2/collabLibModel.js';
 import { getBaseTemplate } from '/_100554_/l2/libCommom.js';
 import { createStorFile, IReqCreateStorFile } from '/_100554_/l2/collabLibStor.js';
@@ -272,7 +272,7 @@ export class ServicePreviewView extends StateLitElement {
             if (window.preview.iframe.contentDocument !== null) window.preview.iframe.contentDocument.head.appendChild(newStyle);
             if (oldStyle) oldStyle.remove();
         }
-        const tokens = await getTokens({ project, shortName, folder }, this.actualtheme)
+        const tokens = await getTokens({ project, shortName, folder } as mls.stor.IFileInfoBase, this.actualtheme)
         this.mountTokens(tokens || '');
         this.stylechanged = 'false';
 
@@ -460,7 +460,8 @@ export class ServicePreviewView extends StateLitElement {
 
         if (!this.page || this.page === '') throw new Error(this.msg.pageNotDefined);
 
-        const info = mls.l2.getPath(this.page);
+        const info = getPath(this.page);
+        if (!info) throw new Error('[setMyFile] Not found path:' + this.page);
 
 
         const key = mls.stor.getKeyToFiles(
