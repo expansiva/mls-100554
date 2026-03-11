@@ -338,10 +338,15 @@ export async function loadPluginProject(project: number, scope: string, onlyEnab
     await mls.plugin.loadAll(BaseProject, false);
     const base = mls.plugin.getAllMenuActions(BaseProject, { scope: scope } as any);
 
-    await mls.plugin.loadAll(project, false);
-    const user = mls.plugin.getAllMenuActions(project, { scope: scope } as any);
+    const deps = mls.l5.getProjectDependencies(project, false);
+    let userMenuActions: mls.plugin.MenuAction[] = [];
+    for (let dep of [project, ...deps]) {
+        await mls.plugin.loadAll(dep, false);
+        const actionsMenu = mls.plugin.getAllMenuActions(dep, { scope: scope } as any);
+        userMenuActions = [...userMenuActions, ...actionsMenu]
+    }
 
-    const i = [...base, ...user];
+    const i = [...base, ...userMenuActions];
 
     return Array.from(
         new Map(i.map(obj => [JSON.stringify(obj), obj])).values()
@@ -586,9 +591,9 @@ export async function getBaseTemplate(file: IInfoFile, enhancement: string = '_b
 
 }
 
-export function verifyNeedAddTripleslach(info: mls.cbe.IPath, src: string, extension: string, enhancement: string = '_blank'): string {
+export function verifyNeedAddTripleslach(info: mls.stor.IFileInfoBase, src: string, extension: string, enhancement: string = '_blank'): string {
 
-    if ( !['.ts', '.defs.ts', '.test.ts', '.less'].includes(extension)) return src;
+    if (!['.ts', '.defs.ts', '.test.ts', '.less'].includes(extension)) return src;
 
     if (enhancement === '_blank' && extension === '.ts') enhancement = '_100554_enhancementLit';
     if (enhancement === '_blank' && extension === '.less') enhancement = '_100554_enhancementStyle';

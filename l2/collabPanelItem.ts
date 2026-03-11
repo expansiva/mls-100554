@@ -3,7 +3,7 @@
 import { html, css, LitElement, repeat, unsafeHTML } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertTagToFileName, convertFileNameToTag } from '/_102027_/l2/utils';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'; 
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 @customElement('collab-panel-item-100554')
 export class CollabPanelItem extends CollabLitElement {
@@ -17,14 +17,8 @@ export class CollabPanelItem extends CollabLitElement {
 
     //---------COMPONENT-------------
 
-    createRenderRoot() {
-        return this;
-    }
-
     firstUpdated() {
-
         this.setMyInfo();
-
     }
 
     render() {
@@ -80,7 +74,7 @@ export class CollabPanelItem extends CollabLitElement {
 
         if (this.mode === 'tag') {
 
-            const infoPathWidget = mls.l2.getPath(this.widget);
+            const infoPathWidget = mls.actual[0].setFullName(this.widget).getStorFileBase();
             const tag = convertFileNameToTag(infoPathWidget);
             options.htmlText = `<${tag}></${tag}>`
         }
@@ -96,8 +90,8 @@ export class CollabPanelItem extends CollabLitElement {
 
     private async setMyInfo() {
         if (!this.widget) return;
-        const file = mls.l2.getPath(this.widget);
-        const modulePlugin = await import('/' + `_${file.project}_/l2/${file.shortName}`);
+        const file = mls.actual[0].setFullName(this.widget).getStorFileBase();
+        const modulePlugin = await import('/' + `_${file.project}_/l2/${file.folder ? file.folder + '/' : ''}${file.shortName}`);
         this.myInfo = modulePlugin.pluginData;
         this.setAttribute('loading', '');
 

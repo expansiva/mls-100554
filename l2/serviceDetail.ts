@@ -101,12 +101,9 @@ export class ServiceDetail100554 extends ServiceBase {
             let el = e.target as HTMLElement;
 
             if (el.tagName.toLocaleLowerCase() === 'button' || (el.parentElement && el.parentElement.tagName.toLocaleLowerCase() === 'button')) {
-
                 const keyFile = mls.stor.getKeyToFiles(this.plugin.project, 2, this.plugin.shortName, '', '.ts');
                 const storFile = mls.stor.files[keyFile];
-
                 if (!storFile) return;
-
                 this.selectLevel(2)
                 this.fireEvents('open', storFile, {});
             }
@@ -117,11 +114,6 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
-
-        if (!visible && this.contentPlugin) {
-            //Array.from(this.contentPlugin.children).forEach((i) => (i as HTMLElement).style.display = "none");
-
-        }
 
         if (!this.contentPlugin) return;
         Array.from(this.contentPlugin.children).forEach((child) => {
@@ -218,7 +210,7 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     private onPluginDetails(ev: mls.events.IEvent) {
-        
+
         if (!ev.desc) throw new Error('Error on PluginDetails event, invalid desc');
         //if (ev.level !== this.level) return;
         this.openMe();
@@ -241,6 +233,7 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     private async showPluginContent(info: mls.events.IPluginDetail) {
+
         // show htmlText or plugin html
         if (!info.project || !info.shortName) {
             if (!info.htmlText) throw new Error(`Error on PluginDetails events, invalid data: ${info.project} ${info.shortName}`);
@@ -248,35 +241,40 @@ export class ServiceDetail100554 extends ServiceBase {
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
 
         this.plugin = info;
-        const plugin = info.htmlText ? 'any' : `_${info.project}_${info.shortName}`;
-        const content: string = info.htmlText ? info.htmlText : await this.getHtmlFromPlugin(info);
+        const storBase = mls.actual[0].setFullName(`_${info.project}_/${info.shortName}`).getStorFileBase();
+
+        const plugin = info.htmlText ? 'any' : `_${storBase.project}_${storBase.folder ? storBase.folder + '/' : ''}${storBase.shortName}`;
+
+        const content: string = info.htmlText ? info.htmlText : await this.getHtmlFromPlugin(storBase);
         this.updateContentPluginWithScripts(plugin, content, (info as any).arguments);
     }
 
-    private async getHtmlFromPlugin(info: mls.events.IPluginDetail): Promise<string> {
-        const keyFile = mls.stor.getKeyToFiles(info.project, 2, info.shortName, '', '.html');
+    private async getHtmlFromPlugin(info: mls.stor.IFileInfoBase): Promise<string> {
+        const keyFile = mls.stor.getKeyToFiles(info.project, 2, info.shortName, info.folder, '.html');
         const storFile = mls.stor.files[keyFile];
         if (!storFile) return 'Not found storFile:' + JSON.stringify(info);
         const content = await storFile.getContent();
-        if (typeof content !== 'string') return `Error on content of _${info.project}_${info.shortName}`;
+        if (typeof content !== 'string') return `Error on content of ${keyFile}`;
         return content;
     }
 
     private updateContentPluginWithScripts(ori: string, content: string, args: any): void {
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
 
+        const ori1 = ori.replace(/\//g, '--')
+
         Array.from(this.contentPlugin.children).forEach((i) => (i as HTMLElement).style.display = "none");
 
-        let el = this.contentPlugin.querySelector('#' + ori + mls.actualLevel) as HTMLElement;
+        let el = this.contentPlugin.querySelector('#' + ori1 + mls.actualLevel) as HTMLElement;
 
         if (!el) {
             el = document.createElement('div');
-            el.id = ori + mls.actualLevel;
+            el.id = ori1 + mls.actualLevel;
             this.setContentinEl(el, content, args);
             return;
         }
 
-        if (ori === 'any') {
+        if (ori1 === 'any') {
             el.innerHTML = '';
             this.setContentinEl(el, content, args);
             el.style.display = '';
@@ -305,6 +303,7 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     private setContentElement(el: HTMLElement, elementToAdd: HTMLElement) {
+
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
         const allWcs = getAllWebComponentsInSource(elementToAdd.outerHTML);
         el.innerHTML = '';
@@ -314,7 +313,7 @@ export class ServiceDetail100554 extends ServiceBase {
                 const script = document.createElement('script');
                 script.type = 'module';
                 script.id = `_${info.project}_${info.shortName}`;
-                script.src = (`/_${info.project}_${info.shortName}`);
+                script.src = (`/_${info.project}_${info.folder ? info.folder + '/' : ''}${info.shortName}`);
                 el.appendChild(script)
             }
         });
@@ -336,7 +335,7 @@ export class ServiceDetail100554 extends ServiceBase {
                 const script = document.createElement('script');
                 script.type = 'module';
                 script.id = `_${info.project}_${info.shortName}`;
-                script.src = (`/_${info.project}_${info.shortName}`);
+                script.src = (`/_${info.project}_${info.folder ? info.folder + '/' : ''}${info.shortName}`);
                 el.appendChild(script)
             }
         });
@@ -385,3 +384,4 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
 }
+
