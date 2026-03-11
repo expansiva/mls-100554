@@ -8,7 +8,6 @@ import { ImplementPages } from '/_100554_/l2/agents/agentToBePage.js';
 @customElement('ateste3-100554')
 export class Ateste3100554 extends StateLitElement {
 
-
     render() {
         return html`<button @click=${this.test}> Teste</button>`;
     }
