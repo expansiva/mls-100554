@@ -3,9 +3,10 @@ import {
     getDesignDetails as getDesignDetailsDefault,
     getDefaultHtmlExamplePreview as getDefaultHtmlExamplePreviewDefault,
     onAfterChange as onAfterChangeDefault,
-    onAfterCompile as onAfterCompileDefault,
     requires as requiresDefault,
 } from '/_100554_/l2/enhancementLit.js';
+
+import { injectStyle ,injectStyleAction } from '/_102027_/l2/processCssLit.js'
 
 export const requires = requiresDefault;
 
@@ -22,5 +23,10 @@ export const onAfterChange = async (modelTS: mls.editor.IModelTS): Promise<void>
 };
 
 export const onAfterCompile = async (modelTS: mls.editor.IModelTS): Promise<void> => {
-    return onAfterCompileDefault(modelTS);
+    await injectStyle(modelTS, 'Default', '_100554_enhancementLitService');
+    return;
+}
+
+export const onAfterCompileAction = async (sourceJS: string, sourceTS: string, css?: { sourceLess: string, sourceTokens: string }): Promise<string> => {
+    return await injectStyleAction(sourceJS, sourceTS, css?.sourceLess || '', css?.sourceTokens || '', 'Default', '_100554_enhancementLitService');
 }
