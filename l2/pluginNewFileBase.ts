@@ -20,8 +20,24 @@ export function changeWidget(source: string, project: number, shortname: string)
     return outputString;
 }
 
+export function changeShortName(source: string, shortname: string): string {
+    const outputString = source.replace(/\[shortName\]/g, shortname);
+    return outputString;
+}
+
+
 export function changeTagName(source: string, tagName: string): string {
     const outputString = source.replace(/\[tagName\]/g, tagName);
+    return outputString;
+}
+
+export function changeProject(source: string, project: number): string {
+    const outputString = source.replace(/\[project\]/g, project.toString());
+    return outputString;
+}
+
+export function changeFolder(source: string, folder: string): string {
+    const outputString = source.replace(/\[folder\]/g, folder);
     return outputString;
 }
 

@@ -112,7 +112,7 @@ export class [className] extends ServiceBase {
 }`;
 
 
-    private enhancement: string = `_100554_enhancementLitService`;
+    private enhancement: string = `_100554_/l2/enhancementLitService.js`;
 
     private groupName: string = `other`;
 

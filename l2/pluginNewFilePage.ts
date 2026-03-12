@@ -83,7 +83,7 @@ export class [className] extends CollabPageElement {
 `;
 
 
-    private enhancement: string = `_100554_enhancementLit`;
+    private enhancement: string = `_100554_/l2/enhancementLit.ts`;
 
     private groupName: string = `other`;
 
