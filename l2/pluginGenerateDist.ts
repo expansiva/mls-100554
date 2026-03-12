@@ -10,6 +10,7 @@ import { PreviewModeSinglePage } from '/_100554_/l2/previewModeSinglePage.js';
 
 /// **collab_i18n_start**
 const message_pt = {
+    clickInPublish: "Clique no botão 'publicar' para iniciar a publicação.",
     step1: "Configuração",
     step2: "Selecionar Páginas",
     step3: "Log de Geração",
@@ -31,10 +32,12 @@ const message_pt = {
     addNewBranch: "Criando nova branch...",
     savingFiles: "Salvando arquivos...",
     savingAssets: "Salvando recursos...",
-    creatingPullRequest: "Criando pull request..."
+    creatingPullRequest: "Criando pull request...",
+    publishFinish: "Finalizar"
 }
 
 const message_en = {
+    clickInPublish: "Click the 'publish' button to start publishing.",
     step1: "Configuration",
     step2: "Select Pages",
     step3: "Generate Log",
@@ -56,7 +59,8 @@ const message_en = {
     addNewBranch: "Creating new branch...",
     savingFiles: "Saving files...",
     savingAssets: "Saving assets...",
-    creatingPullRequest: "Creating pull request..."
+    creatingPullRequest: "Creating pull request...",
+    publishFinish: "Finish"
 };
 
 type MessageType = typeof message_en;
@@ -106,6 +110,7 @@ export class PluginGenerateDist extends PluginBaseModule {
     @state() pages: mls.stor.IFileInfo[] = [];
 
     @state() inPublish: boolean = false;
+    @state() clickedPublish: boolean = false;
     @state() logs: string[] = [];
     @query('#logBox') logBox: HTMLElement | undefined;
 
@@ -265,9 +270,12 @@ export class PluginGenerateDist extends PluginBaseModule {
                 </div>
                 <div class="actions">
                     <button @click=${() => this.next(2)} class="secondary" ?disabled=${this.inPublish}>${this.msg.back}</button>
-                    <button @click=${this.startPublish} class="publish-btn ${this.inPublish ? 'loading' : ''}">
+                    <button @click=${this.startPublish} class="publish-btn ${this.inPublish ? 'loading' : ''}" style="display:${this.clickedPublish ? 'none' : ''}">
                         <span class="btn-text">${this.msg.publish}</span>
                         <span class="loader"></span>
+                    </button>
+                    <button @click=${this.fineshedPublish} class="publish-btn" style="display:${!this.clickedPublish ? 'none' : ''}">
+                        <span class="btn-text">${this.msg.publishFinish}</span>
                     </button>
                 </div>
             </div>
@@ -350,7 +358,7 @@ export class PluginGenerateDist extends PluginBaseModule {
             }
 
             if (scenary === 3) {
-                this.logs = [];
+                this.logs = [`<div class="log-line log-info">[INFO] ${this.msg.clickInPublish}</div>`];
                 this.completed = [1, 2];
             }
 
@@ -413,6 +421,7 @@ export class PluginGenerateDist extends PluginBaseModule {
     //---------------------------------------------------------
 
     private async startPublish() {
+        if (this.inPublish) return;
         this.inPublish = true;
         await this.addLog(`${this.msg.startPublish} (${this.myState.pages.length} pages)...`, 'INFO');
 
@@ -423,7 +432,31 @@ export class PluginGenerateDist extends PluginBaseModule {
         }
 
         await this.addLog(this.msg.publishCompleted, 'SUCCESS');
-        this.inPublish = false;
+
+        setTimeout(() => {
+            this.clickedPublish = true;
+            this.inPublish = false;
+
+        }, 500);
+    }
+
+    private fineshedPublish() {
+
+        this.clickedPublish = false;
+
+        this.myState = {
+            mode: '',
+            newVersion: '',
+            modeLang: '',
+            languages: [],
+            folders: { ori: '', dest: '' },
+            pages: [],
+            assets: [],
+            actualtheme: 'Default'
+        };
+
+        this.next(1);
+
     }
 
     private async modeVersion() {
@@ -557,7 +590,7 @@ export class PluginGenerateDist extends PluginBaseModule {
             const info = await createStorFile(param, false, false, false);
             return;
 
-        } 
+        }
 
         const m = await stor.getOrCreateModel();
         if (m) m.model.setValue(content);
