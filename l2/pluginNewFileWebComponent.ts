@@ -64,8 +64,6 @@ export class PluginNewFileWebComponent extends StateLitElement {
 
     @property() loading: boolean = false;
 
-    @property() aimActionSuggest: string = '_100554_aimActionAddIca';
-
     private service = this.closest('service-detail-100554') as ServiceBase;
 
     private template: string = `
@@ -84,7 +82,7 @@ export class PluginNewFileWebComponent extends StateLitElement {
  }`;
 
 
-    private enhancement: string = `_100554_enhancementLit`;
+    private enhancement: string = `_100554_/l2/enhancementLit.ts`;
 
     private groupName: string = `other`;
 
