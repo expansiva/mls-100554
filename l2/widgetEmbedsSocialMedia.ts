@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/widgetEmbedsSocialMedia.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/widgetEmbedsSocialMedia.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, css, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
