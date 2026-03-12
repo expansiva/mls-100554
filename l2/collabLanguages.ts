@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabLanguages.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/collabLanguages.ts" enhancement="_100554_/l2/enhancementLit" />
 export const languages: ICollabLanguage[] = [
     { "name": "Abkhazian", "code": "ab" },
     { "name": "Afar", "code": "aa" },

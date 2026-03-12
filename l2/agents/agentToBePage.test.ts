@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/agents/agentToBePage.test.ts" enhancement="_100554_enhancementAgent" />
+/// <mls fileReference="_100554_/l2/agents/agentToBePage.test.ts" enhancement="_100554_/l2/enhancementLit" />
 
  import { ICANTest, ICANIntegration, ICANSchema  } from '/_100554_/l2/tsTestAST.js';
  export const integrations: ICANIntegration[] = [];

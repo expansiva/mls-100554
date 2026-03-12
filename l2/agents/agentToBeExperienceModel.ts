@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/agents/agentToBeExperienceModel.ts" enhancement="_100554_enhancementAgent" />
+/// <mls fileReference="_100554_/l2/agents/agentToBeExperienceModel.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { ModuleToBe } from '/_100554_/l2/agents/agentToBeConceptual.js';

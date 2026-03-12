@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabStartL6.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/collabStartL6.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';

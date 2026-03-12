@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabImport.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/collabImport.ts" enhancement="_100554_/l2/enhancementLit" />
 
 interface CollabImportOptions {
     project: number;
