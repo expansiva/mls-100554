@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabTiles.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/collabTiles.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, css, LitElement, repeat } from 'lit';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
