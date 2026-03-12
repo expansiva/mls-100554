@@ -20,6 +20,24 @@ export function mountJSImporMap(info: IJSONDependence, ifr: HTMLIFrameElement): 
 
 }
 
+export function mountLinks(info: IJSONDependence, ifr: HTMLIFrameElement): void {
+
+    try {
+        if (info.importsLinks.length <= 0 || !ifr.contentDocument) return;
+        for (let link of info.importsLinks) {
+            const linkRef = document.createElement('link');
+            linkRef.href = link.ref;
+            linkRef.rel = link.rel;
+            ifr.contentDocument.head.appendChild(linkRef);
+        }
+
+    } catch (e: any) {
+        console.info('Error mountJSImporMap: ' + e.message);
+        return;
+    }
+
+}
+
 export function mountCSS(ifr: HTMLIFrameElement): void {
     try {
         if (!ifr.contentDocument) return;
