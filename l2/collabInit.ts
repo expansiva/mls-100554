@@ -299,7 +299,9 @@ export class CollabInit extends LitElement {
 
         const collabNav1 = document.querySelector('collab-nav-1') as IHTMLCollabNav1;
         if (!collabNav1) return;
-        if (avatarUrl) collabNav1.changeIconToImage(7, avatarUrl, { text: language, img: this.flags[language] });
+        //if (avatarUrl) collabNav1.changeIconToImage(7, avatarUrl, { text: language, img: this.flags[language] });
+        if (avatarUrl) collabNav1.changeIconToImage(7, avatarUrl);
+
         const state = isAnonymous ? 'anonymous' : 'enabled';
         if (window.traceLifeCycle) console.info(`setting: status collab-nav-1 : ${state}`);
         collabNav1.services = services;
