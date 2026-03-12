@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginCodeInsights.ts" enhancement="_100554_enhancementLit"/>
+/// <mls fileReference="_100554_/l2/pluginCodeInsights.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, svg, TemplateResult } from 'lit';
 import { state } from 'lit/decorators.js';

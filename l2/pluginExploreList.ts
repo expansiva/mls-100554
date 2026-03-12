@@ -1,7 +1,7 @@
-/// <mls fileReference="_100554_/l2/pluginExploreList.ts" enhancement="_100554_enhancementLit" />
-
+/// <mls fileReference="_100554_/l2/pluginExploreList.ts" enhancement="_100554_/l2/enhancementLit" /> 
+  
 import { html, css, svg, repeat, TemplateResult } from 'lit';
-import { property, queryAll } from 'lit/decorators.js';
+import { property, queryAll } from 'lit/decorators.js';  
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from '/_100554_/l2/libCommom.js';
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, undoFile, IReqCreateStorFile, createStorFile } from '/_100554_/l2/collabLibStor.js';

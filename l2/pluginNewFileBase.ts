@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginNewFileBase.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginNewFileBase.ts" enhancement="_100554_/l2/enhancementLit" />
 import { openService, isNameValid } from '/_100554_/l2/libCommom.js'
 import { createAllFiles, IReqCreateAllFiles } from '/_100554_/l2/collabLibStor.js';
 

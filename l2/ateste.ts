@@ -1,6 +1,6 @@
 /// <mls fileReference="_100554_/l2/ateste.js" enhancement="_100554_/l2/enhancementLit"/>
  
-import { html, when, repeat, classMap, styleMap, ifDefined } from 'lit';   
+import { html, when, repeat, classMap, styleMap, ifDefined, LitElement } from 'lit';   
 import { customElement, property, state, query } from 'lit/decorators.js';  
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';  
  
@@ -32,10 +32,10 @@ export class SimpleGreeting extends CollabLitElement {
     let itens: string[] = [];
     let erros: string[] = [];
 
-    Object.keys(mls.stor.files).forEach((key) => {
+    Object.keys(mls.stor.files).forEach((key) => { 
 
       const f = mls.stor.files[key];
-      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('a') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key); 
+      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('s') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key); 
 
 
     })
@@ -84,10 +84,10 @@ export class SimpleGreeting extends CollabLitElement {
 
       const fileReference = mls.stor.convertFileToFileReference(file);
     
-      if (!array[0].includes('fileReference') || array[0].includes('groupName')) {
+      if (array[0].includes('fileReference')) {
         const tp = this.parseXMLTripleSlash(array[0]).variables;
         if (tp.enhancement === '_blank') return '';
-        let enhancement = '_102020_/l2/enhancementAura';
+        let enhancement = '_100554_/l2/enhancementLit';//'_102027_/l2/enhancementLit'; // '_102020_/l2/enhancementAura'
         array[0] = `/// <mls fileReference="${fileReference}" enhancement="${enhancement}" />`
       } else {
         return '';
