@@ -2,7 +2,7 @@
 
 
 import { getTokensCss, getGlobalCss } from '/_100554_/l2/designSystemBase.js';
-import { convertFileNameToTag, convertTagToFileName, getPath} from '/_102027_/l2/utils';
+import { convertFileNameToTag, convertTagToFileName, getPath } from '/_102027_/l2/utils';
 
 export const getDependenciesByHtmlFile = (file: mls.stor.IFileInfo, html: string, theme: string, withCss: boolean = false): Promise<IJSONDependence> => {
     return new Promise<IJSONDependence>(async (resolve, reject) => {
@@ -65,6 +65,7 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
 
     const myImportsMap: string[] = [];
     const myImports: string[] = [];
+    const myLinks: { ref: string, rel: string }[] = [];
     const myErrors: { tag: string, error: string }[] = [];
     const myModules = {};
     let tags = extrairTagsCustomizadas(html);
@@ -77,6 +78,7 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
         tags,
         myImportsMap,
         myImports,
+        myLinks,
         myErrors,
         myModules,
     );
@@ -87,6 +89,7 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
         wcComponents: tags,
         importsMap: myImportsMap,
         importsJs: myImports,
+        importsLinks: myLinks,
         globalCss: '',
         tokens,
         errors: myErrors
@@ -99,7 +102,9 @@ async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, h
 
     const myImportsMap: string[] = [];
     const myImports: string[] = [];
+    const myLinks: { ref: string, rel: string }[] = [];
     const myErrors: { tag: string, error: string }[] = [];
+
     const myModules = {};
     let tags = extrairTagsCustomizadas(html);
 
@@ -110,6 +115,7 @@ async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, h
         tags,
         myImportsMap,
         myImports,
+        myLinks,
         myErrors,
         myModules,
     );
@@ -122,6 +128,7 @@ async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, h
         wcComponents: tags,
         importsMap: myImportsMap,
         importsJs: myImports,
+        importsLinks: myLinks,
         globalCss,
         tokens,
         errors: myErrors
@@ -199,6 +206,7 @@ async function loadMyNeedsToCompile(
     tags: string[],
     myImportsMap: string[],
     myImports: string[],
+    myLinks: { ref: string, rel: string }[],
     myErrors: { tag: string, error: string }[],
     myModules: any,
 ) {
@@ -236,8 +244,9 @@ async function loadMyNeedsToCompile(
 
         await getJSImporMap(myImportsMap, enhacementName, myModules);
         await getJSImportEnhancement(myImports, enhacementName, myModules);
-
         await getJS(myImports, enhacementName, ipath, myModules);
+        await getLinks(myLinks, enhacementName, ipath, myModules);
+
 
     } catch (e: any) {
 
@@ -252,6 +261,7 @@ async function loadMyNeedsToCompile(
                 tags,
                 myImportsMap,
                 myImports,
+                myLinks,
                 myErrors,
                 myModules,
             );
@@ -325,7 +335,7 @@ async function getJSImporMap(myImportsMap: string[], enhacementName: string, myM
 
 }
 
-async function getJSBlank(myImports: string[],mfile: mls.stor.IFileInfoBase) {
+async function getJSBlank(myImports: string[], mfile: mls.stor.IFileInfoBase) {
     let key = getImportUrl(mfile);
     if (myImports.includes(key)) return;
     myImports.push(key);
@@ -336,6 +346,19 @@ async function getJS(myImports: string[], enhacementName: string, mfile: mls.sto
     let key = getImportUrl(mfile);
     if (myImports.includes(key)) return;
     myImports.push(key);
+}
+
+async function getLinks(myLinks: { ref: string, rel: string }[], enhacementName: string, mfile: mls.stor.IFileInfoBase, myModules: any) {
+    if (!myModules[enhacementName]) throw new Error('Enhacement not found ');
+
+    const mmodule = myModules[enhacementName].mModule as mls.l2.enhancement.IEnhancementInstance;
+    if (!mmodule || !mmodule.requires) return;
+    const aRequire = mmodule.requires;
+
+    aRequire.forEach((i: any) => {
+        if (i.type !== 'link') return;
+        myLinks.push({ rel: i.rel, ref: i.ref });
+    });
 }
 
 
@@ -363,6 +386,7 @@ export interface IJSONDependence {
     wcComponents: string[],
     importsMap: string[],
     importsJs: string[],
+    importsLinks: { ref: string, rel: string }[],
     tokens: string | undefined,
     globalCss: string,
     errors: { tag: string, error: string }[]
