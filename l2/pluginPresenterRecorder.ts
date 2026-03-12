@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginPresenterRecorder.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginPresenterRecorder.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, css, svg, TemplateResult, LitElement } from 'lit';
 import { property, customElement } from 'lit/decorators.js';

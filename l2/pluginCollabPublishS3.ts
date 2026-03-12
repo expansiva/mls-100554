@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginCollabPublishS3.ts" enhancement="_100554_enhancementLit"/>
+/// <mls fileReference="_100554_/l2/pluginCollabPublishS3.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, svg, TemplateResult, unsafeHTML } from 'lit';
 import { state, query } from 'lit/decorators.js';

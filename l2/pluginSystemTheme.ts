@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginSystemTheme.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginSystemTheme.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, css, svg, TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';

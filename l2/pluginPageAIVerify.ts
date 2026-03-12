@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginPageAIVerify.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginPageAIVerify.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';

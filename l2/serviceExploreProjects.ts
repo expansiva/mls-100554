@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/serviceExploreProjects.ts" enhancement="_100554_enhancementLitService" />
+/// <mls fileReference="_100554_/l2/serviceExploreProjects.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, css } from 'lit';
 import { customElement, property, queryAll, query } from 'lit/decorators.js';

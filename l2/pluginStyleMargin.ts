@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginStyleMargin.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginStyleMargin.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, repeat } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';

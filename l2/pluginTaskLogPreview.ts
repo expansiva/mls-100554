@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginTaskLogPreview.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginTaskLogPreview.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';

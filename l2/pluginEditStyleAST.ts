@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/pluginEditStyleAST.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginEditStyleAST.ts" enhancement="_100554_/l2/enhancementLit" />
 
 type Block = { start: number; end: number };
 
