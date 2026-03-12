@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/agents/agentToBePageTemplate.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/agents/agentToBePageTemplate.ts" enhancement="_100554_/l2/enhancementLit" />
 
 // LLM must replace fileReference to new page name
 // LLM must add clear and concise comments to improve code readability for humans.

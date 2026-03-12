@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/collabDecorators.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/collabDecorators.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { PropertyDeclaration } from 'lit';
 import { property } from 'lit/decorators.js';

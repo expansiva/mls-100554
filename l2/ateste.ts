@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/ateste.js" enhancement="_100554_/l2/enhancementLit"/>
+/// <mls fileReference="_100554_/l2/ateste.ts" enhancement="_100554_/l2/enhancementLit" />
  
 import { html, when, repeat, classMap, styleMap, ifDefined, LitElement } from 'lit';   
 import { customElement, property, state, query } from 'lit/decorators.js';  
@@ -34,8 +34,8 @@ export class SimpleGreeting extends CollabLitElement {
 
     Object.keys(mls.stor.files).forEach((key) => { 
 
-      const f = mls.stor.files[key];
-      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('s') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key); 
+      const f = mls.stor.files[key]; // s, p, a,c
+      if (f && f.level === 2 && f.shortName.toLocaleLowerCase().startsWith('c') && f.project === mls.actualProject && !['.html'].includes(f.extension)) itens.push(key); 
 
 
     })
