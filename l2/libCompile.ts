@@ -357,7 +357,7 @@ async function getLinks(myLinks: { ref: string, rel: string }[], enhacementName:
 
     aRequire.forEach((i: any) => {
         if (i.type !== 'link') return;
-        myLinks.push({ rel: i.rel, ref: i.ref });
+        myLinks.push({ rel: i.args, ref: i.ref });
     });
 }
 
