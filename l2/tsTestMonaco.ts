@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/tsTestMonaco.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_100554_/l2/tsTestMonaco.ts" enhancement="_100554_/l2/enhancementLit" />
 
 const _editor = Symbol("ignoredProperty");
 
