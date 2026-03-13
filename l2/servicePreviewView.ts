@@ -8,11 +8,14 @@ import { createModel } from '/_100554_/l2/collabLibModel.js';
 import { getBaseTemplate } from '/_100554_/l2/libCommom.js';
 import { createStorFile, IReqCreateStorFile } from '/_100554_/l2/collabLibStor.js';
 
+
 import { compileStyleUsingStorFile } from '/_102027_/l2/libCompileStyle.js';
 
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { PreviewModeSinglePage } from '/_100554_/l2/previewModeSinglePage.js';
 import { PreviewModeMinimum } from '/_100554_/l2/previewModeMinimum.js';
+import { PreviewModeBase } from '/_102027_/l2/previewBase.js';
+
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -278,7 +281,11 @@ export class ServicePreviewView extends StateLitElement {
 
     }
 
-    private load(): void {
+    private injected = false;
+    private async load() {
+
+        if (this.injected) return;
+        this.injected = true;
 
         this.showLoader(true);
         const iframe = this.querySelector('iframe') as HTMLIFrameElement;
@@ -288,9 +295,8 @@ export class ServicePreviewView extends StateLitElement {
             base.href = document.baseURI;
             head.appendChild(base);
         }
-        this.init(iframe);
+        await this.init(iframe);
         window.preview.iframe = iframe;
-
         const collabConsole = this.parentElement?.querySelector('collab-console-100554') as HTMLElement;
         (collabConsole as any).scope = iframe.contentWindow;
 
@@ -340,7 +346,7 @@ export class ServicePreviewView extends StateLitElement {
                 return;
             }
 
-            await this.setHTml(iframe);
+            await this.setHtml(iframe);
             iframe.style.display = '';
             const html = iframe.contentDocument?.querySelector('html');
 
@@ -543,11 +549,32 @@ export class ServicePreviewView extends StateLitElement {
 
     }
 
-    private async setHTml(iframe: HTMLIFrameElement) {
+    private async setHtml(iframe: HTMLIFrameElement) {
+
+        if (!iframe.contentDocument || !this.file) return;
+        this.isService = this.checkIfIsService();
+
+
+
+        const previewModuleName = await this.getPreviewConfigByProject(this.file.project);
+        if (previewModuleName) {
+            await this.modeByProjectConfig(iframe, previewModuleName)
+        } else {
+            await this.setHtml2(iframe)
+        }
+
+        mls.events.fire(
+            mls.actualLevel as any,
+            'FineshPreview' as any,
+            JSON.stringify({}),
+            0
+        );
+    }
+
+    private async setHtml2(iframe: HTMLIFrameElement) {
 
         if (!iframe.contentDocument || !this.file) return;
         let txt = await this.setHtmlByLevel()
-        this.isService = this.checkIfIsService()
         this.lastHTML = txt;
 
         (iframe.contentDocument.body as any)['service'] = this.father;
@@ -573,16 +600,24 @@ export class ServicePreviewView extends StateLitElement {
             case 'singlePage': await this.modeSinglePage(ret, iframe); break;
             default: await this.modeMinimum(ret, iframe); break;
         }
-
         this.addGlobalCss(ret.globalCss);
 
-        mls.events.fire(
-            mls.actualLevel as any,
-            'FineshPreview' as any,
-            JSON.stringify({}),
-            0
-        );
 
+    }
+
+    private async getPreviewConfigByProject(project: number): Promise<string | undefined> {
+        if (!project) return;
+        const url = `/_${project}_/l2/project.js`
+        try {
+            const modulePrj = await import(url);
+            if (!modulePrj || !modulePrj.projectConfig || !modulePrj.projectConfig.masterFrontEnd || !modulePrj.projectConfig.masterFrontEnd.preview) return;
+
+            return modulePrj.projectConfig.masterFrontEnd.preview;
+
+        } catch (err) {
+            console.error('no find project config');
+            return;
+        }
     }
 
     private async setHtmlByLevel(): Promise<string> {
@@ -616,6 +651,15 @@ export class ServicePreviewView extends StateLitElement {
         await c.init();
     }
 
+    private async modeByProjectConfig(iframe: HTMLIFrameElement, previewModuleName: string) {
+
+        const module = await import(previewModuleName);
+        const PreviewModule = module.default ?? Object.values(module)[0];
+        if (!PreviewModule || !this.file) return;
+        const c: PreviewModeBase = new PreviewModule(iframe, this.level, this.isService, this.file);
+        await c.init();
+
+    }
 
 
     private addGlobalCss(globalCss: string) {
@@ -762,14 +806,13 @@ export class ServicePreviewView extends StateLitElement {
         info.push(s);
         info = [... new Set(info)];
         this.setTesting(info)
-        console.info('salvou' + JSON.stringify(info));
 
         setTimeout(() => {
 
             info = this.getTesting();
             info = this.removerTesting(info, s);
             this.setTesting(info)
-            console.info('removeu' + JSON.stringify(info));
+
 
         }, 20000)
     }
