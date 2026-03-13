@@ -157,8 +157,7 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
   }
 
   getRedirectLink() {
-    if (this.origin === 'https://collab.codes') return 'https://on.collab.codes';
-    if (this.origin === 'https://on.collab.codes') return 'https://on.collab.codes';
+    return this.origin;
   }
 
   googleLogin() {
