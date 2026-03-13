@@ -1,6 +1,8 @@
 /// <mls fileReference="_100554_/l2/pluginCollabLogin.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, svg, TemplateResult } from 'lit';
+import { collab_chevron_left, collab_arrows_up_down_left_right } from '/_100554_/l2/collabIcons';
+
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 
 /// **collab_i18n_start**
@@ -9,6 +11,7 @@ const message_pt = {
   title1: 'Bem vindo!',
   title2: 'no',
   title3: 'Collab Codes!',
+  backButton: 'Voltar',
   google_canSignIn: 'Continuar com o Google',
   google_canDisconnect: 'Desconectar do Google',
   google_canAdd: 'Adicionar Google',
@@ -35,6 +38,7 @@ const message_en = {
   title1: 'Welcome!',
   title2: ' at ',
   title3: 'Collab Codes!',
+  backButton: 'Back',
   google_canSignIn: 'Sign in with Google',
   google_canDisconnect: 'Disconnect from Google',
   google_canAdd: 'Add Google',
@@ -77,6 +81,8 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
     this.msg = messages[lang];
 
     return html`
+    ${this.renderBackButton()}
+
     <div class="login-container">
       ${this.renderTitle()}
       ${this.renderDivider(this.msg.or1)}
@@ -88,6 +94,14 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
       ${this.renderFooter()}
     </div>
   `;
+  }
+
+  renderBackButton() {
+    return html`
+    <div class="login-back-button">
+      <i @click=${this.onBackButtonClick}title=${this.msg.backButton}>${collab_chevron_left}</i>
+    </div>
+    `
   }
 
   renderTitle() {
@@ -214,6 +228,11 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
     const array = new Uint8Array(16);
     crypto.getRandomValues(array);
     return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  }
+
+  onBackButtonClick() {
+    const spliter = document.querySelector('collab-spliter');
+    if (spliter) (spliter as any).setFullScreen(7, 'right');
   }
 
   LogoffIcon() {
