@@ -99,7 +99,7 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
   renderBackButton() {
     return html`
     <div class="login-back-button">
-      <i @click=${this.onBackButtonClick}title=${this.msg.backButton}>${collab_chevron_left}</i>
+      <i @click=${this.onBackButtonClick} title=${this.msg.backButton}>${collab_chevron_left}</i>
     </div>
     `
   }
@@ -232,7 +232,7 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
 
   onBackButtonClick() {
     const spliter = document.querySelector('collab-spliter');
-    if (spliter) (spliter as any).setFullScreen(7, 'right');
+    if (spliter) (spliter as any).setFullScreen(7, 'left');
   }
 
   LogoffIcon() {
