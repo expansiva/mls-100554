@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/agentFix.ts" enhancement="_100554_/l2/enhancementLit" />
+/// <mls fileReference="_100554_/l2/agentFix.ts" enhancement="_100554_/l2/enhancementAgent" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { getState, setState } from '/_100554_/l2/collabState.js';

@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2/agents/agentToBeOrganismTemplate.ts" enhancement="_100554_/l2/enhancementLit" />
+/// <mls fileReference="_100554_/l2/agents/agentToBeOrganismTemplate.ts" enhancement="_100554_/l2/enhancementAgent" />
 
 // =============================================================================
 // ORGANISM TEMPLATE — EXECUTION-SAFE CONTRACT
