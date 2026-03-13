@@ -1,7 +1,6 @@
 /// <mls fileReference="_100554_/l2/pluginCollabLogin.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, css, svg, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { html, svg, TemplateResult } from 'lit';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 
 /// **collab_i18n_start**
@@ -70,6 +69,8 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
 
   private msg: MessageType = messages['en'];
   private googleState = '';
+
+  private origin = window.location.origin;
 
   render() {
     const lang = this.getMessageKey(messages);
@@ -158,7 +159,7 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
   googleLogin() {
     if (this.verifyDisconnect('google')) return;
     const clientid = '870551353501-mk6renhaoi3h2tt75n9n5ihudeot8e46.apps.googleusercontent.com';
-    const urlBack = 'https://collab.codes?source=google';
+    const urlBack = `${this.origin}?source=google`;
     const access_type: 'online' | 'offline' = 'offline';
     const responseType = 'code';
     const scope = 'profile email';
@@ -173,7 +174,7 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
   gitHubLogin() {
     if (this.verifyDisconnect('github')) return;
     const clientId = 'Ov23liz6csr4BVqknUlF';
-    const redirectUri = encodeURIComponent('https://collab.codes?source=github');
+    const redirectUri = encodeURIComponent(`${this.origin}?source=github`);
     //const scope = 'repo read:user user:email';
     const scope = [
       'repo',         // Access to repositories (includes issues)
@@ -191,7 +192,7 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
   gitLabLogin() {
     if (this.verifyDisconnect('gitlab')) return;
     const clientId = '2569db7a06cbd602e6215d850484bdb8bbb6cdace59717015827fd53ed61c565';
-    const redirectUri = encodeURIComponent('https://collab.codes?source=gitlab');
+    const redirectUri = encodeURIComponent(`${this.origin}?source=gitlab`);
     const scope = 'read_user api';
     const state = this.generateRandomState();
     localStorage.setItem('pluginCollabLogin', state)
