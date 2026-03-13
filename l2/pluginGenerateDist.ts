@@ -6,7 +6,8 @@ import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { getAllDefs } from '/_100554_/l2/libMindMap.js';
 import { getDependenciesByHtmlFile } from '/_100554_/l2/libCompile.js';
 import { createStorFile, IReqCreateStorFile } from '/_100554_/l2/collabLibStor.js';
-import { PreviewModeSinglePage } from '/_100554_/l2/previewModeSinglePage.js';
+import {  getPath, convertFileNameToTag } from '/_102027_/l2/utils.js';
+//import { PreviewModeSinglePage } from '/_100554_/l2/previewModeSinglePage.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -511,8 +512,10 @@ export class PluginGenerateDist extends PluginBaseModule {
 
             let json = await getDependenciesByHtmlFile(stor, contentHTML, this.myState.actualtheme, true);
 
-            const js = await this.modeSinglePage(json, stor);
-            const content = this.mounHTML(json, js, contentHTML);
+            //const js = await this.modeSinglePage(json, stor);
+            const js = await this.buildJs(json, stor);
+            const content = await this.mounHTML(json, js, contentHTML);
+
 
             let auxFolder = this.myState.folders.dest.endsWith('/') ? this.myState.folders.dest : this.myState.folders.dest + '/';
 
@@ -547,17 +550,177 @@ export class PluginGenerateDist extends PluginBaseModule {
 
     }
 
-    private mounHTML(json: any, js: String, contentHTML: string) {
+    private async buildJs(json: any, stor: mls.stor.IFileInfo) {
 
+        await this.loadEsbuild();
+        let allImports = [...new Set(json.importsJs.filter((i:string) => i.startsWith('/')))];
+
+        const virtualFsPlugin = {
+            name: 'virtual-fs',
+            setup(build: any) {
+
+                build.onResolve({ filter: /.*/ }, (args: any) => {
+
+                    
+                    if ((args.path.startsWith("/") || args.path.startsWith("./") || args.path.startsWith("../")) &&
+                        !args.importer.startsWith("https://") ) {
+
+                        const url = new URL(args.path, 'file:' + args.importer);
+                        let path = url.pathname;
+
+                        if (!(/_(\d+)_/.test(path))) {
+
+                            const info = getPath(args.importer.replace('/l2/', '').replace('/', ''));
+
+                            if (!info) throw new Error('[virtualFsPlugin] Not found path:' + args.importer.replace('/l2/', '').replace('/', ''));
+
+                            if (!info.project) info.project = mls.actualProject as number;
+
+                            if (path.indexOf(`_${info.project}_`) < 0) {
+                                path = url.pathname.replace('/', `/_${info.project}_`)
+                            }
+                        }
+
+                        return { path, namespace: 'virtual' };
+
+                    }
+
+                    return null;
+                });
+
+                build.onLoad({ filter: /.*/, namespace: 'virtual' }, async (args: any) => {
+                    try {
+
+                        let path = args.path;
+
+                        const res = await fetch(path);
+                        if (!res.ok) throw new Error(`Error get ${args.path}`);
+
+                        const text = await res.text();
+                        return { contents: text, loader: 'js' };
+
+                    } catch (e: any) {
+                        console.info('erro:' + args.path);
+                        return {
+                            contents: '',
+                            loader: 'js',
+                            warnings: [{
+                                text: e.message, notes: [
+                                    { text: 'build-error' }
+                                ]
+                            }]
+                        }
+                    }
+
+                });
+            },
+        };
+
+        const virtualEntryPath = "virtual-entry.js";
+        const virtualEntryContent = allImports.map(path => `import "${path}";`).join("\n");
+
+        const result = await this.esbuild.build({
+            stdin: {
+                contents: virtualEntryContent,
+                resolveDir: "/",
+                sourcefile: virtualEntryPath,
+                loader: "js"
+            },
+            bundle: true,
+            minify: true,
+            format: "esm",
+            sourcemap: false,
+            write: false,
+            plugins: [virtualFsPlugin]
+        });
+
+        return result.outputFiles[0].text;
+
+    }
+
+    private esbuild: any;
+    private async loadEsbuild() {
+
+        if ((mls as any).esbuild) {
+            this.esbuild = (mls as any).esbuild;
+        } else if (!(mls as any).esbuildInLoad) await this.initializeEsBuild();
+
+    }
+
+    private async initializeEsBuild() {
+
+        (mls as any).esbuildInLoad = true;
+        const url = 'https://unpkg.com/esbuild-wasm@0.14.54/esm/browser.min.js';
+        if (!this.esbuild) {
+            this.esbuild = await import(url);
+            await this.esbuild.initialize({
+                wasmURL: "https://unpkg.com/esbuild-wasm@0.14.54/esbuild.wasm"
+            });
+            (mls as any).esbuild = this.esbuild;
+            (mls as any).esbuildInLoad = false
+
+        }
+
+    } 
+
+    private async mounHTML(json: any, js: String, contentHTML: string) {
+
+        const css = await this.getCss(json);
         let html = `
-            ${contentHTML}
-            <script>
-                ${js}
-            </script>    
+            <html>
+            <head>
+                ${json.importsLinks.map((i: any) => { return `<link ref="${i.ref}" rel="${i.rel}"/>` })}
+                ${css}
+            </head>
+            <body>
+                ${contentHTML}
+                <script type=>
+                    ${js}
+                </script> 
+                ${json.importsJs.map((i:string) => { if (i.startsWith('/')) {return ''} else return `<script src="${i}"></script>`})}
+                
+            </body> 
+            </html>  
         `
 
         return html;
     }
+
+    private async getCss(json: any) {
+
+        let css = json.tokens || '';
+
+        for await (const js of json.importsJs) {
+
+            if (!js.startsWith('/')) continue;
+            const path = getPath(js.replace('/', ''));
+            if (!path) continue;
+
+            const k = mls.stor.getKeyToFile({ ...path, level: 2, extension: '.less' });
+            const s = mls.stor.files[k];
+
+            if (!s) continue;
+
+            const src = await s.getContent() as string;
+
+            const less = await mls.l2.less.compile(src);
+            const tag = convertFileNameToTag(s);
+            if (!less) continue;
+
+            css = `
+            ${css}
+            ${less.replace(new RegExp(tag, 'g'), '')}
+            `;
+
+            
+        }
+
+        return `<style>${css}</style>`
+
+        
+    }
+
+
 
     private async createVersionFile() {
 
@@ -660,12 +823,12 @@ export class PluginGenerateDist extends PluginBaseModule {
 
     }
 
-    private async modeSinglePage(json: any, file: mls.stor.IFileInfo) {
+    /*private async modeSinglePage(json: any, file: mls.stor.IFileInfo) {
         if (!file) return;
         const c = new PreviewModeSinglePage(json, document.createElement('div') as HTMLIFrameElement, '2', false, file, undefined);
         const outBuild = await c.buildJS([]);
         return outBuild.outputFiles[0].text
-    }
+    }*/
 
     private async addLog(msg: string, tp: 'INFO' | 'SUCCESS' | 'ERROR') {
 
