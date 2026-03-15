@@ -58,16 +58,17 @@ async function beforePromptStep(
 ): Promise<mls.msg.AgentIntent[]> {
 
   if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
+  if (!context.task?.PK) throw new Error(`(${agent.agentName})[beforePromptStep] args taskId`);
 
   const continueIntent: mls.msg.AgentIntentPromptReady = {
     type: "prompt_ready",
     args,
     messageId: context.message.orderAt,
     threadId: context.message.threadId,
-    taskId: context.task?.PK || '',
+    taskId: context.task?.PK,
     hookSequential,
     parentStepId: parentStep.stepId,
-    humanPrompt: args || '',
+    humanPrompt: args,
     systemPrompt: system1
   }
 
@@ -82,7 +83,7 @@ async function afterPromptStep(
   hookSequential: number,
 ): Promise<mls.msg.AgentIntent[]> {
   if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
-  if (!context.task) throw new Error(`[afterPromptStep] invalid task: undefined`);
+  if (!context.task || !context.task?.PK) throw new Error(`[afterPromptStep] invalid task: undefined`);
 
   const payload = (step.interaction?.payload?.[0]) as Output || undefined;
   if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`);
@@ -93,7 +94,7 @@ async function afterPromptStep(
     const output = payload.result;
     const toBe = getPayloadToBeConceptual3(context);
     if (!toBe) throw new Error(`[afterPromptStep] invalid moduleToBe: ${payload}`);
-    intents = await processOutputToBeExperienceModel(context, toBe, output as ExperienceModel);
+    intents = await processOutputToBeExperienceModel(context, toBe, output as ExperienceModel, parentStep);
   } catch (e) {
     console.error(e);
     status = 'failed';
@@ -104,7 +105,7 @@ async function afterPromptStep(
     hookSequential,
     messageId: context.message.orderAt,
     threadId: context.message.threadId,
-    taskId: context.task?.PK || '',
+    taskId: context.task?.PK,
     parentStepId: parentStep.stepId,
     stepId: step.stepId,
     status
@@ -113,14 +114,11 @@ async function afterPromptStep(
 
 }
 
-async function processOutputToBeExperienceModel(context: mls.msg.ExecutionContext, moduleToBe: ModuleToBe, experienceModel: ExperienceModel): Promise<mls.msg.AgentIntent[]> {
-
-  console.log("processOutputToBeExperienceModel === User journeys")
-  console.log(JSON.stringify(experienceModel, null, 2));
+async function processOutputToBeExperienceModel(context: mls.msg.ExecutionContext, moduleToBe: ModuleToBe, experienceModel: ExperienceModel, parentStep: mls.msg.AIAgentStep): Promise<mls.msg.AgentIntent[]> {
 
   if (context.isTest) return [];
   const capabilities = moduleToBe.capabilities;
-  if (!capabilities) return [];
+  if (!capabilities) throw new Error(`[afterPromptStep] invalid stack, no capabilities`);
 
   const capabilities2 = Object.keys(capabilities).map((cap) => {
     const capData = capabilities[cap];
@@ -137,7 +135,7 @@ async function processOutputToBeExperienceModel(context: mls.msg.ExecutionContex
     messageId: context.message.orderAt,
     threadId: context.message.threadId,
     taskId: context.task?.PK || '',
-    parentStepId: 1,
+    parentStepId: parentStep.stepId,
     step:
     {
       type: 'agent',
@@ -160,7 +158,6 @@ ${JSON.stringify(capabilities2)}
       rags: null,
     }
   };
-
   return [newStep];
 
 }
@@ -200,7 +197,7 @@ export interface ExperienceModel {
 }
 export interface ExperienceScreen {
   screenId: string;
-  actor: "customer" | "staff";
+  actor: "customer" | "staff" | "admin";
   screenType: "page" | "dashboard" | "login" | "editor" | "settings";
   isEntryPoint?: boolean;
   purpose: string;
@@ -209,7 +206,7 @@ export interface ExperienceScreen {
 }
 export interface Journey {
   journeyId: string;
-  actor: "customer" | "staff";
+  actor: "customer" | "staff" | "admin";
   supportsCapabilities: string[];
   steps: JourneyStep[];
 }
