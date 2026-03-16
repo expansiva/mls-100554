@@ -1,67 +1,21 @@
 /// <mls fileReference="_100554_/l2/pluginGenerateDist.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, svg, TemplateResult, unsafeHTML } from 'lit';
-import { state, query } from 'lit/decorators.js';
+import { html, svg, TemplateResult, unsafeHTML} from 'lit';
+import { state } from 'lit/decorators.js';
+import { convertFileNameToTag } from '/_102027_/l2/utils.js'
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
-import { getAllDefs } from '/_100554_/l2/libMindMap.js';
-import { getDependenciesByHtmlFile } from '/_100554_/l2/libCompile.js';
-import { createStorFile, IReqCreateStorFile } from '/_100554_/l2/collabLibStor.js';
-import {  getPath, convertFileNameToTag } from '/_102027_/l2/utils.js';
-//import { PreviewModeSinglePage } from '/_100554_/l2/previewModeSinglePage.js';
 
 /// **collab_i18n_start**
 const message_pt = {
-    clickInPublish: "Clique no botão 'publicar' para iniciar a publicação.",
-    step1: "Configuração",
-    step2: "Selecionar Páginas",
-    step3: "Log de Geração",
-    continue: "Continuar",
-    back: "Voltar",
-    publish: "Publicar",
-    alertTitle: "⚠️ Atenção",
-    alertOnlySelected: "Apenas as páginas selecionadas neste passo serão atualizadas.",
-    alertNotSelected: "Páginas não selecionadas não serão atualizadas após a conclusão.",
-    alertReview: "Recomendamos revisar cuidadosamente as páginas selecionadas antes de continuar.",
-    errorLanguage: "É preciso selecionar pelo menos uma linguagem!",
-    errorPage: "É preciso selecionar pelo menos uma página!",
-    startPublish: "Iniciando processo de publicação",
-    publishCompleted: "Publicação concluída!",
-    startingPublishLanguage: "Iniciando publicação da linguagem:",
-    compilingPage: "Compilando página:",
-    startingSaveDist: "Iniciando salvamento do dist",
-    checkingFork: "Verificando fork...",
-    addNewBranch: "Criando nova branch...",
-    savingFiles: "Salvando arquivos...",
-    savingAssets: "Salvando recursos...",
-    creatingPullRequest: "Criando pull request...",
-    publishFinish: "Finalizar"
+    msg1: "Nenhum build configurado para este projeto.",
+    msg2: "Não encontrado modulo informado:",
+    msg3: "Não foi possível carregar o plugin:",
 }
 
 const message_en = {
-    clickInPublish: "Click the 'publish' button to start publishing.",
-    step1: "Configuration",
-    step2: "Select Pages",
-    step3: "Generate Log",
-    continue: "Continue",
-    back: "Back",
-    publish: "Publish",
-    alertTitle: "⚠️ Attention",
-    alertOnlySelected: "Only selected pages will be updated.",
-    alertNotSelected: "Unselected pages will not be updated after completion.",
-    alertReview: "We recommend carefully reviewing selected pages before continuing.",
-    errorLanguage: "You must select at least one language!",
-    errorPage: "You must select at least one page!",
-    startPublish: "Starting publish process",
-    publishCompleted: "Publish completed!",
-    startingPublishLanguage: "Starting publish language:",
-    compilingPage: "Compiling page:",
-    startingSaveDist: "Starting save dist",
-    checkingFork: "Checking fork...",
-    addNewBranch: "Creating new branch...",
-    savingFiles: "Saving files...",
-    savingAssets: "Saving assets...",
-    creatingPullRequest: "Creating pull request...",
-    publishFinish: "Finish"
+    msg1: "No build configured for this project.",
+    msg2: "The specified module was not found:",
+    msg3: "The plugin could not be loaded:",
 };
 
 type MessageType = typeof message_en;
@@ -74,47 +28,9 @@ const messages: { [key: string]: MessageType } = {
 
 export class PluginGenerateDist extends PluginBaseModule {
 
-    private myState: IStatePlugin = {
-        mode: '',
-        newVersion: '',
-        modeLang: '',
-        languages: [],
-        folders: { ori: '', dest: '' },
-        pages: [],
-        assets: [],
-        actualtheme: 'Default'
-    };
-
     private msg: MessageType = messages['en'];
-    private publishModeOptions = [
-        {
-            value: "versioned-folder",
-            label: "Versioned Folder",
-            description: "Each deploy is published in its own folder, such as /version/123/."
-        },
-        {
-            value: "hashed-assets",
-            label: "Hashed Assets",
-            description: "Stable paths with generated asset names, such as app.[hash].js."
-        }
-    ];
-
-
-    @state() completed: number[] = [];
-    @state() current: number = 1;
-
-    @state() mode: string = 'versioned-folder';
-    @state() newVersion: string = this.getLocalDateTime();
-    @state() modeLang: string = 'noLang';
-    @state() folders = { ori: 'www', dest: 'dist' };
-    @state() languages: ILanguage[] = [];
-    @state() pages: mls.stor.IFileInfo[] = [];
-
-    @state() inPublish: boolean = false;
-    @state() clickedPublish: boolean = false;
-    @state() logs: string[] = [];
-    @query('#logBox') logBox: HTMLElement | undefined;
-
+    @state() error = '';
+    @state() tag = '';
 
     firstUpdated() {
         this.init();
@@ -129,13 +45,20 @@ export class PluginGenerateDist extends PluginBaseModule {
 
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
+        return html` ${this.tag ? this.renderTag() :this.renderDefault()} `;
+    }
+
+    renderTag() {
+        console.info(this.tag)
+        return unsafeHTML(`<${this.tag}></${this.tag}>`);
+    }
+
+    renderDefault(): TemplateResult {
         return html`
-        <div class="agent-box">
-            ${this.renderHeader()}
-            ${this.renderWizard()}
-            ${this.renderScenary()}
-            
-        </div> 
+            <div class="agent-box"> 
+                ${this.renderHeader()}
+                ${this.error ? this.error : ''}
+            </div> 
         `;
     }
 
@@ -148,745 +71,69 @@ export class PluginGenerateDist extends PluginBaseModule {
         `;
     }
 
-    renderWizard() {
-        return html`
-            <div class="steps">
-                <div class="step ${this.completed.includes(1) ? 'completed' : ''} ${this.current == 1 ? 'active' : ''}">
-                    <div class="circle">1</div>
-                    <span>${this.msg.step1}</span>
-                </div>
-                <div class="step ${this.completed.includes(2) ? 'completed' : ''} ${this.current == 2 ? 'active' : ''}">
-                    <div class="circle">2</div>
-                    <span>${this.msg.step2}</span>
-                </div>
-                <div class="step ${this.completed.includes(3) ? 'completed' : ''} ${this.current == 3 ? 'active' : ''}">
-                    <div class="circle">3</div>
-                    <span>${this.msg.step3}</span>
-                </div>
-            </div>
-        `
-    }
-
-    renderScenary() {
-
-        switch (this.current) {
-            case (1): return this.renderScenary1();
-            case (2): return this.renderScenary2();
-            case (3): return this.renderScenary3();
-        }
-
-    }
-
-    renderScenary1() {
-        return html`
-            <div class="content">
-                <fieldset>
-                    <legend>Folder</legend>
-                    <div class="field">
-                        <label>Folder origin</label>
-                        <input value="www" @change=${(e: any) => this.folders.dest = e.target.value}></input>
-                    </div>
-                    <div class="field">
-                        <label>Folder destiny</label>
-                        <input value="dist" disabled></input>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend>Mode Build</legend>
-                    <div class="field">
-                        <label>Mode</label>
-                        <select @change=${(e: any) => this.mode = e.target.value}>
-                            <option value="versioned-folder">Versioned Folder</option>
-                            <option value="hashed-assets">Hashed Assets</option>
-                        </select>
-                    </div>
-                    <div class="description">
-                        ${this.publishModeOptions.find((f) => f.value === this.mode)?.description}
-                    </div>
-                    <div class="field" style="display:${this.mode === 'versioned-folder' ? '' : 'none'}">
-                        <label>New version</label>
-                        <input value="${this.newVersion}"  disabled></input>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend>Mode Language</legend>
-                    <div class="field">
-                        <label>Mode</label>
-                        <select @change=${(e: any) => this.modeLang = e.target.value}>
-                            <option value="noLang">No language</option>
-                            <option value="useLang">Use language</option>
-                        </select>
-                    </div>
-                    ${this.modeLang === 'useLang' ? this.renderLang() : ''}
-                </fieldset>
-
-                <div class="actions">
-                    <button @click=${() => this.next(2)}>${this.msg.continue}</button>
-                </div>
-            
-            </div>
-
-        `
-    }
-
-    renderLang() {
-        return html`
-        <div class="grid" style="margin-top:1rem">
-            ${this.languages.map((l) =>
-            html`
-                <label class="card" for="${l.name}">
-                    <input type="checkbox" .info=${l} id="${l.name}"> ${l.name} <small>(path: "${l.path}")</small>
-                </label>`
-        )}
-
-        </div>`
-    }
-
-    renderScenary2() {
-        return html`
-            <div class="content"> 
-                <div class="grid">
-                    ${this.pages.map((p) => html`
-                        <label class="card" for="${p.shortName}">
-                            <input type="checkbox" .info=${p} id="${p.shortName}" checked> ${p.folder ? p.folder + '/' + p.shortName : p.shortName}
-                        </label>`
-        )}
-                </div>
-                <div class="actions">
-                    <button @click=${() => this.next(1)} class="secondary">${this.msg.back}</button>
-                    <button @click=${() => this.next(3)}>${this.msg.continue}</button>
-                </div>
-            </div>
-
-        `
-    }
-
-    renderScenary3() {
-        return html`
-            <div class="content"> 
-                <div class="log-box" id="logBox">
-                    ${this.logs.map((p) => unsafeHTML(p))}
-                </div>
-                <div class="actions">
-                    <button @click=${() => this.next(2)} class="secondary" ?disabled=${this.inPublish}>${this.msg.back}</button>
-                    <button @click=${this.startPublish} class="publish-btn ${this.inPublish ? 'loading' : ''}" style="display:${this.clickedPublish ? 'none' : ''}">
-                        <span class="btn-text">${this.msg.publish}</span>
-                        <span class="loader"></span>
-                    </button>
-                    <button @click=${this.fineshedPublish} class="publish-btn" style="display:${!this.clickedPublish ? 'none' : ''}">
-                        <span class="btn-text">${this.msg.publishFinish}</span>
-                    </button>
-                </div>
-            </div>
-
-        `
-    }
-
     //-------IMPLEMENTATION-------
 
     private async init() {
 
-        await this.getLanguages();
-        await this.getPages();
-        this.getAssets();
+        const buildModuleName = await this.getBuildByProject(mls.actualProject || 0);
 
-    }
+        if (!buildModuleName) {
+            this.error = this.msg.msg1;
+            return;
+        }
+        const hasExtension = this.hasExtension(buildModuleName);
+        const fTs = hasExtension ? buildModuleName : buildModuleName + '.ts';
 
-    private async getLanguages() {
 
-        const info = await mls.l5.getProjectConf(mls.actualProject || 0);
-        this.languages = info.languages;
-
-    }
-
-    private async getPages() {
-
-        const allItens = await getAllDefs();
-        const pages: mls.stor.IFileInfo[] = [];
-        Object.keys(allItens).forEach((key: string) => {
-
-            if (!allItens) return;
-            const item = allItens[key];
-            if (item.defs.meta.componentType === 'page') {
-                const stor = mls.stor.files[key.replace('.defs', '')];
-                if (stor && stor.project === mls.actualProject) pages.push(stor);
-            }
-
-        })
-
-        this.pages = pages;
-
-    }
-
-    private getAssets() {
-
-        const assets: mls.stor.IFileInfo[] = [];
-        Object.keys(mls.stor.files).forEach((key) => {
-
-            const stor = mls.stor.files[key];
-            if (stor.project === mls.actualProject && stor.level === 2 && stor.folder.startsWith(this.myState.folders.ori)) {
-                const defsKey = mls.stor.getKeyToFile({ ...stor, extension: '.defs.ts' });
-                if (mls.stor.files[defsKey]) return;
-                assets.push(stor);
-            }
-
-        });
-
-        this.myState.assets = assets;
-
-    }
-
-    private next(scenary: number) {
+        const info = mls.stor.convertFileReferenceToFile(fTs);
+        const k = mls.stor.getKeyToFile(info);
+        const s = mls.stor.files[k];
+        if (!s) {
+            this.error = this.msg.msg2 + fTs;
+            return;
+        }
 
         try {
 
-            if (this.current === 1) {
-                this.isValid1()
-            }
-
-            if (this.current === 2 && scenary > 2) {
-                this.isValid2()
-            }
-
-            if (scenary === 1) {
-                this.completed = [];
-            }
-
-            if (scenary === 2) {
-                this.completed = [1];
-            }
-
-            if (scenary === 3) {
-                this.logs = [`<div class="log-line log-info">[INFO] ${this.msg.clickInPublish}</div>`];
-                this.completed = [1, 2];
-            }
-
-            this.current = scenary;
-
-        } catch (e: any) {
-            alert(e && e.message ? e.message : 'Error invalid step');
-        }
-
-    }
-
-    private isValid1() {
-
-        if (!this.mode) throw new Error('Select a mode');
-        this.myState.mode = this.mode;
-
-        if (this.mode === 'versioned-folder' && !this.newVersion) throw new Error('Fill a new version');
-        this.myState.newVersion = this.newVersion;
-
-        if (!this.modeLang) throw new Error('Select a language mode');
-        this.myState.modeLang = this.modeLang;
-
-        if (this.modeLang === 'useLang') {
-            const els = this.querySelectorAll('input:checked');
-            if (els.length < 1) throw new Error(this.msg.errorLanguage);
-            const infos: ILanguage[] = [];
-            els.forEach((el: any) => {
-                if (el.info) infos.push(el.info);
-            });
-
-            if (infos.length < 1) throw new Error(this.msg.errorLanguage);
-
-            this.myState.languages = infos;
-        }
-
-        if (this.folders.dest === '') throw new Error('Fill a folder dest');
-        if (this.folders.ori === '') throw new Error('Fill a folder ori');
-
-        this.myState.folders.dest = this.folders.dest;
-        this.myState.folders.ori = this.folders.ori;
-
-
-    }
-
-    private isValid2() {
-        const els = this.querySelectorAll('input:checked');
-        if (els.length < 1) throw new Error(this.msg.errorPage);
-        const infos: mls.stor.IFileInfo[] = [];
-        els.forEach((el: any) => {
-            if (el.info) infos.push(el.info);
-        });
-
-        if (infos.length < 1) throw new Error(this.msg.errorPage);
-        this.myState.pages = infos;
-
-    }
-
-    //---------------------------------------------------------
-    //---------------------GENERATE DIST-----------------------
-    //---------------------------------------------------------
-
-    private async startPublish() {
-        if (this.inPublish) return;
-        this.inPublish = true;
-        await this.addLog(`${this.msg.startPublish} (${this.myState.pages.length} pages)...`, 'INFO');
-
-        switch (this.myState.mode) {
-            case ('versioned-folder'): await this.modeVersion(); break;
-            case ('hashed-assets'): await this.modeHash(); break;
-            default: await this.addLog(`This mode not implemented(${this.myState.mode})`, 'ERROR');
-        }
-
-        await this.addLog(this.msg.publishCompleted, 'SUCCESS');
-
-        setTimeout(() => {
-            this.clickedPublish = true;
-            this.inPublish = false;
-
-        }, 500);
-    }
-
-    private fineshedPublish() {
-
-        this.clickedPublish = false;
-
-        this.myState = {
-            mode: '',
-            newVersion: '',
-            modeLang: '',
-            languages: [],
-            folders: { ori: '', dest: '' },
-            pages: [],
-            assets: [],
-            actualtheme: 'Default'
-        };
-
-        this.next(1);
-
-    }
-
-    private async modeVersion() {
-
-
-        if (this.myState.modeLang === 'noLang') {
-            await this.publishMyPages();
-            await this.publishMyAssets();
-            await this.createVersionFile();
-        } else {
-            await this.addLog(`This language mode not implemented(${this.myState.modeLang})`, 'ERROR');
-        }
-
-
-
-    }
-
-    private async modeHash() {
-        await this.addLog(`In development...`, 'ERROR');
-    }
-
-    private async publishMyPages(lang: ILanguage | undefined = undefined) {
-
-        let pages: mls.stor.IFileInfo[] = [];
-
-        for await (const stor of this.myState.pages) {
-            const p = await this.publishPage(stor, lang);
-            if (p) {
-                pages.push(p);
-            }
-        }
-
-        return pages;
-
-    }
-
-    private async publishPage(stor: mls.stor.IFileInfo, lang: ILanguage | undefined = undefined): Promise<mls.stor.IFileInfo | undefined> {
-        try {
-
-            await this.addLog(`Compiling page: ${stor.folder ? stor.folder + '/' + stor.shortName : stor.shortName}`, 'INFO');
-
-            let { project, shortName, folder } = stor;
-
-            const keyHTML = mls.stor.getKeyToFiles(project, 2, shortName, folder, '.html');
-
-            if (!mls.stor.files[keyHTML]) {
-                await this.addLog(`Not found html page: ${stor.folder ? stor.folder + '/' + stor.shortName : stor.shortName}`, 'ERROR');
-                return undefined;
-            }
-
-            const contentHTML = await mls.stor.files[keyHTML].getContent() as string;
-
-            let json = await getDependenciesByHtmlFile(stor, contentHTML, this.myState.actualtheme, true);
-
-            //const js = await this.modeSinglePage(json, stor);
-            const js = await this.buildJs(json, stor);
-            const content = await this.mounHTML(json, js, contentHTML);
-
-
-            let auxFolder = this.myState.folders.dest.endsWith('/') ? this.myState.folders.dest : this.myState.folders.dest + '/';
-
-            folder = folder.replace(this.myState.folders.ori, '');
-
-            if (this.myState.mode === 'versioned-folder') {
-                auxFolder += this.myState.newVersion;
-            } else {
-                await this.addLog(`This mode not implemented(${this.myState.mode})`, 'ERROR');
-                return undefined;
-            }
-
-            const param: IReqCreateStorFile = {
-                project,
-                folder: folder.startsWith('/') ? auxFolder + folder : auxFolder + '/' + folder,
-                shortName,
-                level: 2,
-                extension: '.html',
-                source: content,
-                status: 'new'
-
-            }
-
-            const info = await createStorFile(param, false, false, false);
-            return info;
-
-        } catch (e: any) {
-            console.info(e)
-            return undefined;
-        }
-
-
-    }
-
-    private async buildJs(json: any, stor: mls.stor.IFileInfo) {
-
-        await this.loadEsbuild();
-        let allImports = [...new Set(json.importsJs.filter((i:string) => i.startsWith('/')))];
-
-        const virtualFsPlugin = {
-            name: 'virtual-fs',
-            setup(build: any) {
-
-                build.onResolve({ filter: /.*/ }, (args: any) => {
-
-                    
-                    if ((args.path.startsWith("/") || args.path.startsWith("./") || args.path.startsWith("../")) &&
-                        !args.importer.startsWith("https://") ) {
-
-                        const url = new URL(args.path, 'file:' + args.importer);
-                        let path = url.pathname;
-
-                        if (!(/_(\d+)_/.test(path))) {
-
-                            const info = getPath(args.importer.replace('/l2/', '').replace('/', ''));
-
-                            if (!info) throw new Error('[virtualFsPlugin] Not found path:' + args.importer.replace('/l2/', '').replace('/', ''));
-
-                            if (!info.project) info.project = mls.actualProject as number;
-
-                            if (path.indexOf(`_${info.project}_`) < 0) {
-                                path = url.pathname.replace('/', `/_${info.project}_`)
-                            }
-                        }
-
-                        return { path, namespace: 'virtual' };
-
-                    }
-
-                    return null;
-                });
-
-                build.onLoad({ filter: /.*/, namespace: 'virtual' }, async (args: any) => {
-                    try {
-
-                        let path = args.path;
-
-                        const res = await fetch(path);
-                        if (!res.ok) throw new Error(`Error get ${args.path}`);
-
-                        const text = await res.text();
-                        return { contents: text, loader: 'js' };
-
-                    } catch (e: any) {
-                        console.info('erro:' + args.path);
-                        return {
-                            contents: '',
-                            loader: 'js',
-                            warnings: [{
-                                text: e.message, notes: [
-                                    { text: 'build-error' }
-                                ]
-                            }]
-                        }
-                    }
-
-                });
-            },
-        };
-
-        const virtualEntryPath = "virtual-entry.js";
-        const virtualEntryContent = allImports.map(path => `import "${path}";`).join("\n");
-
-        const result = await this.esbuild.build({
-            stdin: {
-                contents: virtualEntryContent,
-                resolveDir: "/",
-                sourcefile: virtualEntryPath,
-                loader: "js"
-            },
-            bundle: true,
-            minify: true,
-            format: "esm",
-            sourcemap: false,
-            write: false,
-            plugins: [virtualFsPlugin]
-        });
-
-        return result.outputFiles[0].text;
-
-    }
-
-    private esbuild: any;
-    private async loadEsbuild() {
-
-        if ((mls as any).esbuild) {
-            this.esbuild = (mls as any).esbuild;
-        } else if (!(mls as any).esbuildInLoad) await this.initializeEsBuild();
-
-    }
-
-    private async initializeEsBuild() {
-
-        (mls as any).esbuildInLoad = true;
-        const url = 'https://unpkg.com/esbuild-wasm@0.14.54/esm/browser.min.js';
-        if (!this.esbuild) {
-            this.esbuild = await import(url);
-            await this.esbuild.initialize({
-                wasmURL: "https://unpkg.com/esbuild-wasm@0.14.54/esbuild.wasm"
-            });
-            (mls as any).esbuild = this.esbuild;
-            (mls as any).esbuildInLoad = false
-
-        }
-
-    } 
-
-    private async mounHTML(json: any, js: String, contentHTML: string) {
-
-        const css = await this.getCss(json);
-        let html = `
-            <html>
-            <head>
-                ${json.importsLinks.map((i: any) => { return `<link ref="${i.ref}" rel="${i.rel}"/>` })}
-                ${css}
-            </head>
-            <body>
-                ${contentHTML}
-                <script type=>
-                    ${js}
-                </script> 
-                ${json.importsJs.map((i:string) => { if (i.startsWith('/')) {return ''} else return `<script src="${i}"></script>`})}
-                
-            </body> 
-            </html>  
-        `
-
-        return html;
-    }
-
-    private async getCss(json: any) {
-
-        let css = json.tokens || '';
-
-        for await (const js of json.importsJs) {
-
-            if (!js.startsWith('/')) continue;
-            const path = getPath(js.replace('/', ''));
-            if (!path) continue;
-
-            const k = mls.stor.getKeyToFile({ ...path, level: 2, extension: '.less' });
-            const s = mls.stor.files[k];
-
-            if (!s) continue;
-
-            const src = await s.getContent() as string;
-
-            const less = await mls.l2.less.compile(src);
+            const hasBar = buildModuleName.startsWith('/');
+            const fIm = hasBar ? buildModuleName : '/' + buildModuleName;
+            await import(fIm);
             const tag = convertFileNameToTag(s);
-            if (!less) continue;
+            this.tag = tag;
 
-            css = `
-            ${css}
-            ${less.replace(new RegExp(tag, 'g'), '')}
-            `;
-
+            
+        } catch (e) {
+            this.error = this.msg.msg3 + buildModuleName;
+            return;
             
         }
 
-        return `<style>${css}</style>`
-
-        
-    }
-
-
-
-    private async createVersionFile() {
-
-        await this.addLog(`Creating version file...`, 'INFO');
-
-        let project = mls.actualProject || 0;
-        let level = 2;
-        let shortName = 'version';
-        let extension = '.json';
-        let folder = 'dist';
-        let content = `{"html":"${this.myState.newVersion}"}`
-
-
-
-        const key = mls.stor.getKeyToFile({ project, level, shortName, extension, folder });
-        const stor = mls.stor.files[key];
-
-        if (!stor) {
-            const param: IReqCreateStorFile = {
-                project,
-                folder,
-                shortName,
-                level,
-                extension,
-                source: content,
-                status: 'new'
-
-            }
-
-            const info = await createStorFile(param, false, false, false);
-            return;
-
-        }
-
-        const m = await stor.getOrCreateModel();
-        if (m) m.model.setValue(content);
 
     }
 
-
-    private async publishMyAssets() {
-
-        let assets: mls.stor.IFileInfo[] = [];
-
-        for await (const f of this.myState.assets) {
-            await this.publishAssets(f)
-        }
-
+    private hasExtension(str: string) {
+        const filename: string = str.split('/').pop() || '';
+        return /\.[^./]+$/.test(filename);
     }
 
-    private async publishAssets(stor: mls.stor.IFileInfo): Promise<mls.stor.IFileInfo | undefined> {
+    private async getBuildByProject(project: number): Promise<string | undefined> {
+        if (!project) return;
+        const url = `/_${project}_/l2/project.js`
         try {
+            const modulePrj = await import(url);
+            if (!modulePrj || !modulePrj.projectConfig || !modulePrj.projectConfig.masterFrontEnd || !modulePrj.projectConfig.masterFrontEnd.generateDist) return;
 
-            await this.addLog(`Create assets: ${stor.folder ? stor.folder + '/' + stor.shortName : stor.shortName}`, 'INFO');
+            return modulePrj.projectConfig.masterFrontEnd.generateDist;
 
-            let { project, shortName, folder } = stor;
-
-            let auxFolder = this.myState.folders.dest.endsWith('/') ? this.myState.folders.dest : this.myState.folders.dest + '/';
-
-            folder = folder.replace(this.myState.folders.ori, '');
-
-            if (this.myState.mode === 'versioned-folder') {
-                auxFolder += this.myState.newVersion;
-            } else {
-                await this.addLog(`This mode not implemented(${this.myState.mode})`, 'ERROR');
-                return undefined;
-            }
-
-            const params = {
-                project,
-                folder: folder.startsWith('/') ? auxFolder + folder : auxFolder + '/' + folder,
-                shortName,
-                level: 2,
-                extension: stor.extension,
-                versionRef: '0',
-            };
-
-            const file = await mls.stor.addOrUpdateFile(params);
-            if (!file) throw new Error('[createStorFile] Invalid storFile');
-
-            file.status = 'new';
-
-
-            const fileInfo: mls.stor.IFileInfoValue = {
-                content: await stor.getContent(),
-                contentType: 'blob'
-            };
-
-            await mls.stor.localStor.setContent(file, fileInfo);
-
-            await mls.stor.cache.addIfNeed({ ...file, content: fileInfo.content, contentType: fileInfo.contentType, version: '0' })
-
-            return file;
-
-        } catch (e: any) {
-            console.info(e)
-            return undefined;
-        }
-
-
-    }
-
-    /*private async modeSinglePage(json: any, file: mls.stor.IFileInfo) {
-        if (!file) return;
-        const c = new PreviewModeSinglePage(json, document.createElement('div') as HTMLIFrameElement, '2', false, file, undefined);
-        const outBuild = await c.buildJS([]);
-        return outBuild.outputFiles[0].text
-    }*/
-
-    private async addLog(msg: string, tp: 'INFO' | 'SUCCESS' | 'ERROR') {
-
-        let str = '';
-        if (tp === 'INFO') {
-            str = `<div class="log-line log-info">[INFO] ${msg}</div>`
-        } else if (tp === 'SUCCESS') {
-            str = `<div class="log-line log-success">[SUCCESS] ${msg}</div>`
-        } else if (tp === 'ERROR') {
-            str = `<div class="log-line log-error">[ERROR] ${msg}</div>`
-        } else {
-            str = `<div class="log-line">[MESSAGE] ${msg}</div>`
-        }
-
-        this.logs = [...this.logs, str]; // IMPORTANTE: nova referência
-        await this.waitRender();         // 🔥 deixa o browser pintar
-
-        if (this.logBox) {
-            this.logBox.scrollTop = this.logBox.scrollHeight;
+        } catch (err) {
+            console.error('no find project config');
+            return;
         }
     }
 
-    private getLocalDateTime() {
-        const now = new Date()
-        const pad = (n: any) => String(n).padStart(2, '0')
-        const year = now.getFullYear()
-        const month = pad(now.getMonth() + 1)
-        const day = pad(now.getDate())
-        const hour = pad(now.getHours())
-        const min = pad(now.getMinutes())
-        const sec = pad(now.getSeconds())
-
-        return `${year}${month}${day}${hour}${min}${sec}`
-    }
-
-
-    private async waitRender() {
-        await new Promise(requestAnimationFrame);
-    }
 
 }
 
-interface ILanguage {
-    language: string,
-    name: string,
-    path: string
-}
-
-interface IStatePlugin {
-    mode: string,
-    newVersion: string,
-    modeLang: string,
-    languages: ILanguage[],
-    folders: { ori: string, dest: string }
-    pages: mls.stor.IFileInfo[],
-    assets: mls.stor.IFileInfo[],
-    actualtheme: string
-}
 
 if (!customElements.get('plugin-generate-dist-100554')) {
     customElements.define('plugin-generate-dist-100554', PluginGenerateDist);

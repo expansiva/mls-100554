@@ -1325,12 +1325,12 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					return;
 				}
 
-				const ret = await retFetch.json();
+				/*const ret = await retFetch.json();
 
 				if (ret && ret.message) {
 					reject(new Error(ret.message));
 					return;
-				}
+				}*/
 
 				resolve(true);
 
