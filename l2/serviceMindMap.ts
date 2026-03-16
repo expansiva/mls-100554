@@ -132,7 +132,7 @@ export class ServiceMindMap100554 extends ServiceBase {
 
     renderDefault() {
         const currentPage = this.actualFile[mls.actualLevel] ? this.actualFile[mls.actualLevel].shortName : "unknown" ;
-        if (!this.dataJson) return html`No valid defs found in this ${currentPage}`;
+        //if (!this.dataJson) return html`No valid defs found in this ${currentPage}`;
         
         return html`<widget-mind-map-l4-100554 .mapState=${this.dataJson} currentpage="${currentPage}"></widget-mind-map-l4-100554>`
     }
