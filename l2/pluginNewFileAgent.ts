@@ -71,7 +71,7 @@ export class PluginNewFileBlank extends StateLitElement {
   private getTemplate(): string {
 
     const folder = this.folder ? `${this.folder}` : '';
-    const name = `_${this.project}_/l2/${folder}${this.shortName}.ts`;
+    const name = `_${this.project}_/l2/${folder}/${this.shortName}.ts`;
     const template = templates[this.templateType];
 
     let newExample = template;
