@@ -1,8 +1,8 @@
 /// <mls fileReference="_100554_/l2/serviceUnit.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html } from 'lit'; 
+import { html } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_100554_/l2/serviceBase.js'; 
+import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_100554_/l2/serviceBase.js';
 import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
 import { convertTagToFileName, convertFileNameToTag } from '/_102027_/l2/utils.js';
 import { loadPluginProject } from '/_100554_/l2/libCommom.js';
@@ -39,7 +39,7 @@ export class ServiceUnit extends ServiceBase {
 
     @query('#projectDiv') projectDiv: HTMLDivElement | undefined;
 
-    @query('details') firstDetails: HTMLDetailsExplore | undefined;
+    @query('.details') firstDetails: HTMLDetailsExplore | undefined;
 
     @queryAll('.plugin-container') allContainers: HTMLDivElement[] | undefined;
 
@@ -114,7 +114,7 @@ export class ServiceUnit extends ServiceBase {
 
         switch (this.activeTab) {
             case 'Explore':
-                name = 'plugin-explore-list-100554';
+                name = this.explories[0].widget;
                 break;
             default:
                 name = 'nothing selected';
@@ -128,7 +128,7 @@ export class ServiceUnit extends ServiceBase {
                 <li>Level: ${this.level}</li>
                 <li>Position: ${this.position}</li>
             </ul>
-		
+    	
 
         `;
 
@@ -179,11 +179,14 @@ export class ServiceUnit extends ServiceBase {
     }
 
     private renderExplore() {
-
+        if (this.explories.length === 1) {
+            return html`<div class="details" .data=${this.explories[0]} @click=${this.handleDetailExplorieClick}><div class="plugin-container"></div></div>`;
+        }
+    
         return html`<div>
                 ${this.explories.map((explorie, index) => {
             return html`
-                <details ?open=${index === 0} .data=${explorie} @click=${this.handleDetailExplorieClick}>
+                <details class="details" ?open=${index === 0} .data=${explorie} @click=${this.handleDetailExplorieClick}>
                     <summary>${explorie.category}</summary>
                     <div class="plugin-container"></div>
                 </details>
@@ -232,7 +235,7 @@ export class ServiceUnit extends ServiceBase {
 
     private async handleDetailExplorieClick(e: MouseEvent) {
         const target = e.target as HTMLElement;
-        const details = target.closest('details') as HTMLDetailsExplore;
+        const details = target.closest('.details') as HTMLDetailsExplore;
         if (!details) return;
         const div = details.querySelector('div');
         if (!div || div.childElementCount > 0) return;

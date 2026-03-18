@@ -1,12 +1,11 @@
 /// <mls fileReference="_100554_/l2/agentTeste.ts" enhancement="_blank" />
 
-import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js'; 
 import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
-import { createModel } from '/_100554_/l2/collabLibModel.js';
 
 import {
-    startNewInteractionInAiTask,
-    startNewAiTask,
+    startNewInteractionInAiTask, 
+    startNewAiTask, 
     executeNextStep,
     addNewStep
 } from "/_100554_/l2/aiAgentOrchestration.js";

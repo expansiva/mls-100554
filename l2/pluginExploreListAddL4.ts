@@ -2,7 +2,7 @@
 
 import { html, repeat, TemplateResult } from 'lit';
 import { customElement, state, property, query } from 'lit/decorators.js';
-import { createAllFiles, IReqCreateAllFiles } from '/_100554_/l2/collabLibStor.js';
+import { createAllFiles, IReqCreateAllFiles } from '/_102027_/l2/libStor.js';
 import { getTemplateImport } from '/_100554_/l2/pluginNewFileBase.js';
 import { convertFileNameToTag } from '/_102027_/l2/utils.js';
 import { getInstanceByFile, isNameValid } from '/_100554_/l2/libCommom.js';

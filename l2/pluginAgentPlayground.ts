@@ -12,6 +12,7 @@ import { collab_trash } from '/_100554_/l2/collabIcons.js';
 import { setState } from '/_100554_/l2/collabState.js';
 import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
 import { openElementInServiceDetails } from '/_100554_/l2/libCommom.js';
+import "/_100554_/l2/docMd.js";
 
 @customElement('plugin-agent-playground-100554')
 
@@ -199,6 +200,9 @@ ${this.renderButonAdd()}
     renderPrompt(prompt: Iprompts, idx: number) {
         if (this.actualGrup && this.actualGrup !== prompt.group) return html``;
         let pp = this.escape(prompt.content.trim());
+        let content = prompt.type === 'doc' ? '<doc-md-100554>' + this.escape(prompt.content.trim()) + '</doc-md-100554>' : this.escape(prompt.content.trim());
+        content = prompt.type !== 'doc' ? content : unsafeHTML(content) as any;
+
         return html`
 <details class="prompt ${prompt.type}" ?open=${prompt.openDetail}
 @dragover=${(e: DragEvent) => this.handleDragOver(e, idx, e.currentTarget as HTMLElement)}
@@ -223,7 +227,7 @@ ${pp.substring(0, 50)}...
 </div>
 </summary>
 <div>
-<pre class="content" contenteditable="true" @blur="${(e: InputEvent) => this.promptEvent(e, idx)}" @paste=${this.handlePaste}>${pp}</pre>
+<pre class="content" contenteditable="${prompt.type !== 'doc' ? 'true' : 'false'}" @blur="${(e: InputEvent) => this.promptEvent(e, idx)}" @paste=${this.handlePaste}>${content}</pre>
 </div>
 </details>
 `;
@@ -248,6 +252,7 @@ draggable="true"
 <option value="human">Human</option>
 <option value="ai">AI</option>
 <option value="memory">Memory</option>
+<option value="doc">Doc</option>
 </select>
 `
     }
