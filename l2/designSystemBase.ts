@@ -3,12 +3,12 @@
 export const acceptedImages = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".webp"];
 export const acceptedVideos = [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v"]
 
-export async function getImages(project: number): Promise<mls.stor.IFileInfo[]> {
+export async function getImages(project: number): Promise<mls.stor.IFileInfo[]> {  
     const folder = 'assets';
     const imagesFiles = Object.values(mls.stor.files).filter((file) => {
         return file.project === project && file.folder === folder && acceptedImages.includes(file.extension);
     });
-    return imagesFiles || [];
+    return imagesFiles || [];  
 }
 
 export async function getVideos(project: number): Promise<mls.stor.IFileInfo[]> {
@@ -173,7 +173,7 @@ async function serializeTokens(project: number, tokens: IDesignSystemTokens[]) {
     const serviceSource = mls.services['100554_serviceSource_left'];
     if (!serviceSource) throw new Error('Service source is not instancied');
 
-    const libModel = await import('/_100554_/l2/collabLibModel.js');
+    const libModel = await import('/_102027_/l2/libModel.js');
     const models = await libModel.createAllModels(storFile);
     if (!models || !models.ts) throw new Error(`Invalid models for file: ${project}_designSystem`);
     const newCode = replaceTokensBlock(models.ts.model.getValue(), `\n${content}\n`);

@@ -5,7 +5,7 @@ import { customElement, state, property } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { removeModule } from '/_100554_/l2/projectAST.js';
 import { removeTokensTheme } from '/_100554_/l2/designSystemBase.js';
-import { deleteFile } from '/_100554_/l2/collabLibStor.js'
+import { deleteFile } from '/_102027_/l2/libStor.js'
 
 /// **collab_i18n_start**
 const message_pt = {

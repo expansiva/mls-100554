@@ -102,7 +102,7 @@ export class CollabInit extends LitElement {
 
     private async setEventsModel() {
         try {
-            await import('/_100554_/l2/collabLibModel.js')
+            await import('/_102027_/l2/libModel.js')
         } catch (e) {
             
         }

@@ -1,6 +1,6 @@
 /// <mls fileReference="_100554_/l2/pluginNewFileBase.ts" enhancement="_100554_/l2/enhancementLit" />
 import { openService, isNameValid } from '/_100554_/l2/libCommom.js'
-import { createAllFiles, IReqCreateAllFiles } from '/_100554_/l2/collabLibStor.js';
+import { createAllFiles, IReqCreateAllFiles } from '/_102027_/l2/libStor.js';
 
 export interface IDetails {
     title: string,

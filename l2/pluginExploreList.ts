@@ -4,10 +4,11 @@ import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from '/_100554_/l2/libCommom.js';
-import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, undoFile, IReqCreateStorFile, createStorFile } from '/_100554_/l2/collabLibStor.js';
-import { createAllModels, createModel, readProjectTypescriptAndCompile, readProjectTypescriptAndCompileL1 } from '/_100554_/l2/collabLibModel.js';
+import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, undoFile, IReqCreateStorFile, createStorFile } from '/_102027_/l2/libStor.js';
+import { createAllModels, createModel, readProjectTypescriptAndCompile, readProjectTypescriptAndCompileL1 } from '/_102027_/l2/libModel.js';
 import { ServiceBase } from '/_100554_/l2/serviceBase.js';
 import { isNameValid } from '/_100554_/l2/libCommom.js';
+import '/_100554_/l2/collabInputSearch.js';
 
 /// **collab_i18n_start**
 
@@ -28,6 +29,10 @@ const message_pt = {
     rename: "renomear",
     delete: "excluir",
     security: 'segurança',
+    components: 'Componente',
+    others: 'Outros',
+    orderName: 'Ordenar por nome',
+    orderFolder: 'Ordenar por pasta'
 }
 
 const message_en = {
@@ -47,6 +52,10 @@ const message_en = {
     rename: 'rename',
     delete: "delete",
     security: 'security',
+    components: 'Component',
+    others: 'Others',
+    orderName: 'Sort by name',
+    orderFolder: 'Sort by folder'
 }
 
 type MessageType = typeof message_en;
@@ -296,37 +305,29 @@ export class PluginExploreList extends PluginBaseModule {
         <div class="groupHeader">
             <header class="toolbar">
                 <div class="toolbar__left">
-                    <input name="projectFilter" class="toolbar__search" type="search" placeholder="Filter" autocomplete="off" @input="${this.filterLiChange}">
-                </div>
-
-                <div class="toolbar__center">
+                    <collab-input-search-100554 @input="${this.filterLiChange}"> </collab-input-search-100554>
                     <div class="toolbar__radio-group">
                         <select @change=${this.changeSelectProject} .value="${this.filterProject}">
                             ${this.myDep.map((p) => html`<option value="${p}">${p}</option>`)}
                             <option value="0">${this.msg.localProject}</option>
                         </select>
-                        <label  title="Hidden Files">
-                            <input type="checkbox"  ?checked=${this.hiddenFiles} @click=${this.changeHiddenFiles} /> 
-                            <span class="${this.hiddenFiles ? 'checked' : ''}">
-                            <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M192 64C156.7 64 128 92.7 128 128L128 384L512 384L512 234.5C512 217.5 505.3 201.2 493.3 189.2L386.7 82.7C374.7 70.7 358.5 64 341.5 64L192 64zM453.5 240L360 240C346.7 240 336 229.3 336 216L336 122.5L453.5 240zM128 416L128 480L192 480L192 416L128 416zM192 576L192 512L128 512C128 547.3 156.7 576 192 576zM224 576L304 576L304 512L224 512L224 576zM336 576L416 576L416 512L336 512L336 576zM448 576C483.3 576 512 547.3 512 512L448 512L448 576zM512 416L448 416L448 480L512 480L512 416z"/></svg>
-                            </span>
-                        </label>
+                        <select @change=${this.changeHiddenFiles} .value="comp">
+                            <option value="comp">${this.msg.components}</option>
+                            <option value="other">${this.msg.others}</option>
+                        </select>
+                        <select @change=${this.changeModeOrder} .value="0">
+                            <option value="0">${this.msg.orderName}</option>
+                            <option value="1">${this.msg.orderFolder}</option>
+                        </select>
+
+                        <button class="toolbar__add-button" title="new file" @click="${this.showAdd}">+</button>
+                        
                     </div>
 
-                    <div class="toolbar__radio-group">
-                        <label @click="${this.clickRadioSortAlph}" title="sort alphabetical">
-                            <input type="radio" name="${this.position + mls.actualLevel}group"  value="alphabetical" ?checked=${this.modeView === 0} />
-                            <span class="${this.modeView === 0 ? 'checked' : ''}">
-                            <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 576 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M183.6 469.6C177.5 476.2 169 480 160 480s-17.5-3.8-23.6-10.4l-88-96c-11.9-13-11.1-33.3 2-45.2s33.3-11.1 45.2 2L128 365.7 128 64c0-17.7 14.3-32 32-32s32 14.3 32 32l0 301.7 32.4-35.4c11.9-13 32.2-13.9 45.2-2s13.9 32.2 2 45.2l-88 96zM320 320c0-17.7 14.3-32 32-32l128 0c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9L429.3 416l50.7 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-128 0c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9L402.7 352 352 352c-17.7 0-32-14.3-32-32zM416 32c12.1 0 23.2 6.8 28.6 17.7l64 128 16 32c7.9 15.8 1.5 35-14.3 42.9s-35 1.5-42.9-14.3L460.2 224l-88.4 0-7.2 14.3c-7.9 15.8-27.1 22.2-42.9 14.3s-22.2-27.1-14.3-42.9l16-32 64-128C392.8 38.8 403.9 32 416 32zM395.8 176l40.4 0L416 135.6 395.8 176z"/></svg>
-                            </span>
-                        </label>
-                        <label @click="${this.clickRadioSortFolder}" title="sort folder">
-                            <input type="radio" name="${this.position + mls.actualLevel}group" value="folder" ?checked=${this.modeView !== 0} />
-                            <span class="${this.modeView !== 0 ? 'checked' : ''}">
-                            <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 576 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32l0 96L0 384c0 35.3 28.7 64 64 64l192 0 0-64L64 384l0-224 192 0 0-64L64 96l0-64zM288 192c0 17.7 14.3 32 32 32l224 0c17.7 0 32-14.3 32-32l0-128c0-17.7-14.3-32-32-32l-98.7 0c-8.5 0-16.6-3.4-22.6-9.4L409.4 9.4c-6-6-14.1-9.4-22.6-9.4L320 0c-17.7 0-32 14.3-32 32l0 160zm0 288c0 17.7 14.3 32 32 32l224 0c17.7 0 32-14.3 32-32l0-128c0-17.7-14.3-32-32-32l-98.7 0c-8.5 0-16.6-3.4-22.6-9.4l-13.3-13.3c-6-6-14.1-9.4-22.6-9.4L320 288c-17.7 0-32 14.3-32 32l0 160z"/></svg></span>
-                        </label>
-                    </div>
-                    <button class="toolbar__add-button" title="new file" @click="${this.showAdd}">+</button>
+                </div>
+
+                <div class="toolbar__center">
+                    
                 </div>
             </header>
             <div class="groupInfo">
@@ -412,7 +413,8 @@ export class PluginExploreList extends PluginBaseModule {
 
             return html`
                 <li class="headerTitle" style="display:flex; justify-content: space-between;">${key} 
-                    <span style="cursor:pointer;z-index: 99;display: flex;" title="delete all this folder" @click=${() => { this.delAllByFolders(key) }}><svg style="width:15px; cursor:pointer; z-index:-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M512 512L128 512C92.7 512 64 483.3 64 448L64 160C64 124.7 92.7 96 128 96L266.7 96C280.5 96 294 100.5 305.1 108.8L343.5 137.6C349 141.8 355.8 144 362.7 144L512 144C547.3 144 576 172.7 576 208L576 448C576 483.3 547.3 512 512 512zM248 304C234.7 304 224 314.7 224 328C224 341.3 234.7 352 248 352L392 352C405.3 352 416 341.3 416 328C416 314.7 405.3 304 392 304L248 304z"/></svg></span>
+                
+                    <span style="cursor:pointer;z-index: 99;display: flex;" title="delete all this folder" @click=${() => { this.delAllByFolders(key) }}><svg xmlns="http://www.w3.org/2000/svg" style="width:15px; cursor:pointer; z-index:-1" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z"/></svg></span>
                 </li>
                 ${this.renderFolder2(folders[key])}
             `
@@ -1090,9 +1092,14 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.storage = 0;
         this.info.error = 0;
         this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
-        this.hiddenFiles = !this.hiddenFiles;
+        this.hiddenFiles = e.target.value === 'other';
         await this.getFiles();
 
+    }
+
+    private async changeModeOrder(e: any) {
+        this.modeView = e.target.value === '0' ? 0 : 1;
+        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
     }
 
     private clickRadioProjectActual(e: MouseEvent): void {

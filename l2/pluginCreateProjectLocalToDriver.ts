@@ -4,7 +4,7 @@ import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { gitHubLogin, gitLabLogin, isProviderConnected, gitlabIcon, githubIcon } from '/_100554_/l2/libProviders.js';
-import { replaceTripleslashAndTag, createStorFile, IReqCreateStorFile } from '/_100554_/l2/collabLibStor.js';
+import { replaceTripleslashAndTag, createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
 import { getLocalProjectName, isValidProjectName, setProjectDetails, deleteLastOpenedFiles
  } from '/_100554_/l2/libCommom.js';
 

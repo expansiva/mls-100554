@@ -69,9 +69,12 @@ plugin-explore-list-100554 {
             background-color: @bg-primary-color;
             gap: 1rem;
 
+
             &__left {
                 flex: 1; // faz o input ocupar todo o espaço restante
                 display: flex;
+                gap:.5rem;
+                flex-wrap: wrap; 
             }
 
             &__search {
@@ -98,6 +101,7 @@ plugin-explore-list-100554 {
             &__radio-group {
                 display: flex;
                 gap: 0.3rem;
+                flex-wrap: wrap;
 
                 label {
                     position: relative;
@@ -151,6 +155,7 @@ plugin-explore-list-100554 {
                     font-size: 0.8rem;
                     line-height: 1;
                     transition: all 0.2s ease;
+                    color: @text-primary-color;
 
                 }
             }
@@ -165,13 +170,13 @@ plugin-explore-list-100554 {
                 font-size: 0.9rem;
                 border: none;
                 border-radius: 6px;
-                background-color: @grey-color-darker;
+                background-color:  @bg-primary-color-disabled;
                 color: @text-primary-color;
                 cursor: pointer;
                 transition: background-color 0.2s ease;
 
                 &:hover {
-                    background-color: @bg-primary-color-disabled;
+                    background-color: @grey-color-darker;
                 }
 
             }

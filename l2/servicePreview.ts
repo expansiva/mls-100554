@@ -17,7 +17,7 @@ import { CollabState } from '/_100554_/l2/collabState.js';
 import { TsTestAst } from '/_100554_/l2/tsTestAST.js';
 import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
 import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
-import { createModel } from '/_100554_/l2/collabLibModel.js';
+import { createModel } from '/_102027_/l2/libModel.js';
 import { getPath } from '/_102027_/l2/utils.js';
 
 
