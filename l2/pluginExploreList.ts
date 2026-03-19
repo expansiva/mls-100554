@@ -29,8 +29,8 @@ const message_pt = {
     rename: "renomear",
     delete: "excluir",
     security: 'segurança',
-    components: 'Componente',
-    others: 'Outros',
+    components: 'Filtrar por Componente',
+    others: 'Filtrar por Outros arquivos',
     orderName: 'Ordenar por nome',
     orderFolder: 'Ordenar por pasta'
 }
@@ -52,8 +52,8 @@ const message_en = {
     rename: 'rename',
     delete: "delete",
     security: 'security',
-    components: 'Component',
-    others: 'Others',
+    components: 'Filter by Component',
+    others: 'Filter by Other Files',
     orderName: 'Sort by name',
     orderFolder: 'Sort by folder'
 }
