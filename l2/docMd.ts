@@ -23,7 +23,6 @@ export class DocMd extends CollabLitElement {
     }
 
     render() {
-        console.info(this._html)
         return html`
             <div class="preview">${unsafeHTML(this._html)}</div>
 
