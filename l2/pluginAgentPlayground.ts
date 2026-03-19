@@ -200,7 +200,7 @@ ${this.renderButonAdd()}
     renderPrompt(prompt: Iprompts, idx: number) {
         if (this.actualGrup && this.actualGrup !== prompt.group) return html``;
         let pp = this.escape(prompt.content.trim());
-        let content = prompt.type === 'doc' ? '<doc-md-100554>' + this.escape(prompt.content.trim()) + '</doc-md-100554>' : this.escape(prompt.content.trim());
+        let content = prompt.type === 'doc' ? '<doc-md-100554 class="stl1">' + this.escape(prompt.content.trim()) + '</doc-md-100554>' : this.escape(prompt.content.trim());
         content = prompt.type !== 'doc' ? content : unsafeHTML(content) as any;
 
         return html`
