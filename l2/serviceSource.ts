@@ -10,7 +10,7 @@ import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
 import { collab_html, collab_typescript, collab_less, collab_fileTest, collab_file_code } from '/_100554_/l2/collabIcons.js';
 import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
 import { getUserId, createThread, addMessage } from '/_102025_/l2/collabMessagesHelper.js';
-import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate } from '/_100554_/l2/libCommom.js';
+import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate } from '/_102027_/l2/libCommom.js';
 import { readProjectTypescriptAndCompile, createModel } from '/_102027_/l2/libModel.js';
 import { IReqCreateStorFile, createStorFile } from '/_102027_/l2/libStor.js';
 import { getThreadByName } from '/_102025_/l2/collabMessagesIndexedDB.js';
