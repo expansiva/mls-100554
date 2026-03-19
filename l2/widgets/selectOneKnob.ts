@@ -14,8 +14,6 @@ export class SelectOneKnobWidget extends StateLitElement {
   @property({ type: Boolean, reflect: true }) disabled = false;
   @property({ type: Boolean, reflect: true }) selected = false;
 
-  @property({ type: String }) label = '';
-
   @state() private _focused = false;
 
   // --- drag state ---
@@ -34,6 +32,14 @@ export class SelectOneKnobWidget extends StateLitElement {
   // --- computed ---
   private get _hasValue(): boolean {
     return this.value !== null && this.value !== undefined;
+  }
+
+  private get _rotation(): number {
+    if (!this._hasValue) return -135;
+    const range = this.max - this.min;
+    const normalized = ((this.value! - this.min) / range);
+    // arco de -135deg até +135deg (270deg total)
+    return -135 + normalized * 270;
   }
 
   private get _tickCount(): number {
@@ -86,7 +92,6 @@ export class SelectOneKnobWidget extends StateLitElement {
     }
     if (e.key === 'Escape') {
       this._cancelDigitInput();
-      this.selected = false;
       (this.renderRoot as HTMLElement).blur?.();
       return;
     }
@@ -109,7 +114,7 @@ export class SelectOneKnobWidget extends StateLitElement {
 
       if (this._digitTimeout) clearTimeout(this._digitTimeout);
       this._digitTimeout = setTimeout(() => {
-        
+
         if (!isNaN(parsed) && parsed >= this.min && parsed <= this.max) {
           this._setValue(parsed);
         }
@@ -148,7 +153,6 @@ export class SelectOneKnobWidget extends StateLitElement {
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
       if (!this._dragging) {
-        this.selected = true;
         (this.querySelector('[data-knob-root]') as HTMLElement)?.focus();
       }
       this._dragging = false;
@@ -170,15 +174,19 @@ export class SelectOneKnobWidget extends StateLitElement {
   private _onFocus() {
     if (this.disabled) return;
     this._focused = true;
-    this.selected = true;
     this.dispatchEvent(new CustomEvent('knob-focus', { bubbles: true, composed: false }));
   }
 
   private _onBlur() {
     this._focused = false;
-    this.selected = false;
     this._cancelDigitInput();
     this.dispatchEvent(new CustomEvent('knob-blur', { bubbles: true, composed: false }));
+  }
+
+  private _onClick() {
+    this.selected = !this.selected;
+    this.requestUpdate();
+    this.dispatchEvent(new CustomEvent('knob-click', { bubbles: true, composed: false }));
   }
 
   // --- ticks ---
@@ -215,7 +223,6 @@ export class SelectOneKnobWidget extends StateLitElement {
         data-knob-root
         tabindex="${this.disabled ? -1 : 0}"
         role="spinbutton"
-        aria-label="${this.label}"
         aria-valuenow="${this._hasValue ? this.value : ''}"
         aria-valuemin="${this.min}"
         aria-valuemax="${this.max}"
@@ -225,6 +232,7 @@ export class SelectOneKnobWidget extends StateLitElement {
         @wheel="${this._onWheel}"
         @focus="${this._onFocus}"
         @blur="${this._onBlur}"
+        @click=${this._onClick}
       >
         <div class="knob__ticks-ring">
           ${this._renderTicks()}
@@ -232,6 +240,7 @@ export class SelectOneKnobWidget extends StateLitElement {
 
         <div
           class="knob__body"
+          style="transform: rotate(${this._rotation}deg)"
         >
           <div class="knob__indicator"></div>
         </div>
