@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property, queryAll, query } from 'lit/decorators.js';
-import { setProjectDetails, getProjectDetails } from '/_100554_/l2/libCommom.js';
+import { setProjectDetails, getProjectDetails } from '/_102027_/l2/libCommom.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
 //import './_100554_pluginCreateNewProject'
 

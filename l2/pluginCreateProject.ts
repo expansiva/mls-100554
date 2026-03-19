@@ -8,7 +8,7 @@ import { createConfigFile } from '/_100554_/l2/libProjectConfig.js';
 import { createModel } from '/_102027_/l2/libModel.js';
 import { addMessage, createThread } from '/_102025_/l2/collabMessagesHelper.js';
 import { getThreadByName } from '/_102025_/l2/collabMessagesIndexedDB.js';
-import { setProjectDetails, checkIfHasLocalProject, setLocalProjectName, isValidProjectName } from '/_100554_/l2/libCommom.js';
+import { setProjectDetails, checkIfHasLocalProject, setLocalProjectName, isValidProjectName } from '/_102027_/l2/libCommom.js';
 
 import {
   template_ds,

@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { setProjectDetails, checkIfHasLocalProject, getLocalProjectName } from '/_100554_/l2/libCommom.js';
+import { setProjectDetails, checkIfHasLocalProject, getLocalProjectName } from '/_102027_/l2/libCommom.js';
 import './_100554_pluginCreateProject'
  
 @customElement('projects-100554')

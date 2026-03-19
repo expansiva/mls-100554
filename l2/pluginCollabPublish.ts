@@ -3,10 +3,10 @@
 import { html, svg, TemplateResult, unsafeHTML } from 'lit';
 import { state, query } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
-import { getAllDefs, IdefModule } from '/_100554_/l2/libMindMap.js';
-import { getDependenciesByHtmlFile } from '/_100554_/l2/libCompile.js';
+import { getAllDefs, IdefModule } from '/_102027_/l2/libMindMap.js';
+import { getDependenciesByHtmlFile } from '/_102027_/l2/libCompile.js';
 import { PreviewModeSinglePage } from '/_100554_/l2/previewModeSinglePage.js'; 
-import { getMyKeysBranch } from '/_100554_/l2/libCommom.js';
+import { getMyKeysBranch } from '/_102027_/l2/libCommom.js';
 import { getConfigProject, updateConfigProject } from '/_100554_/l2/libProjectConfig.js';
 
 /// **collab_i18n_start**

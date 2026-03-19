@@ -6,7 +6,7 @@ import { ServiceBase, IService, IServiceMenu } from '/_100554_/l2/serviceBase.js
 import { collab_branch } from '/_100554_/l2/collabIcons.js';
 import { undoFile } from '/_102027_/l2/libStor.js';
 import { initServiceSaveaddBranch } from '/_100554_/l2/saveAddBranch.js';
-import { getMyKeysBranch, calculateTotalStringSize } from '/_100554_/l2/libCommom.js';
+import { getMyKeysBranch, calculateTotalStringSize } from '/_102027_/l2/libCommom.js';
 import { getConfigProject, updateConfigProject } from '/_100554_/l2/libProjectConfig.js';
 import { readProjectTypescriptAndCompile } from '/_102027_/l2/libModel.js';
 import '/_100554_/l2/pluginCreateProjectLocalToDriver.js';

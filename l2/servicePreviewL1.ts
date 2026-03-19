@@ -1,12 +1,11 @@
 /// <mls fileReference="_100554_/l2/servicePreviewL1.ts" enhancement="_100554_/l2/enhancementLit" />
 import { html, css, unsafeHTML } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { getDependenciesByHtmlFile, IJSONDependence } from '/_100554_/l2/libCompile.js';
 import { IService, IServiceMenu, IToolbarContent, ServiceBase } from '/_100554_/l2/serviceBase.js';
 import { getPath } from '/_102027_/l2/utils.js';
 import "/_100554_/l2/servicePreviewL1ListServer.js";
 
-import { openService, getProjectConfig } from '/_100554_/l2/libCommom.js';
+import { openService, getProjectConfig } from '/_102027_/l2/libCommom.js';
 import { convertFileNameToTag } from '/_102027_/l2/utils.js';
 
 /// **collab_i18n_start**

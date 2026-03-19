@@ -275,7 +275,7 @@ export class CollabInit extends LitElement {
 
         if (window.traceLifeCycle) console.info('setting: tokens');
         try {
-            const module = await import('/_100554_/l2/designSystemBase.js');
+            const module = await import('/_102027_/l2/designSystemBase.js');
             if (!module || !module.getTokensCss || typeof module.getTokensCss !== 'function') return;
             const tokensCss = await module.getTokensCss(this.baseProject, 'Default');
             const style = document.createElement('style');
@@ -321,7 +321,7 @@ export class CollabInit extends LitElement {
         if (window.traceLifeCycle) console.info('getLastProjectSelected');
 
         try {
-            const lib = await import('/_100554_/l2/libCommom.js');
+            const lib = await import('/_102027_/l2/libCommom.js');
             if (!lib || !lib.getProjectDetails || !lib.setProjectDetails) return;
             const info = lib.getProjectDetails();
             const lastPrj = info ? info.project : this.baseProject;
@@ -390,7 +390,7 @@ export class CollabInit extends LitElement {
 
         if (!this.actualProject) return;
         try {
-            const lib = await import('/_100554_/l2/libCommom.js');
+            const lib = await import('/_102027_/l2/libCommom.js');
             if (!lib || !lib.getLastOpenedFiles) return;
 
             const lastFiles = lib.getLastOpenedFiles(this.actualProject);
@@ -422,7 +422,7 @@ export class CollabInit extends LitElement {
 
         try {
 
-            const lib = await import('/_100554_/l2/libCommom.js');
+            const lib = await import('/_102027_/l2/libCommom.js');
             if (!lib || !lib.findStorFileInProjectsOrDeps) return;
             const defaultL6 = lib.findStorFileInProjectsOrDeps(this.actualProject, 2, this.FILEL6, '', '.ts');
             const defaultL5 = lib.findStorFileInProjectsOrDeps(this.actualProject, 2, this.FILEL5, '', '.ts');
@@ -456,7 +456,7 @@ export class CollabInit extends LitElement {
     private async setLastModule() {
         if (!this.actualProject) return;
         try {
-            const lib = await import('/_100554_/l2/libCommom.js');
+            const lib = await import('/_102027_/l2/libCommom.js');
             if (!lib || !lib.getLastModule) return;
             const modules = lib.getLastModule();
             if (!modules || !modules[+this.actualProject]) return;

@@ -3,9 +3,9 @@
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IServiceMenu, IOptions } from '/_100554_/l2/serviceBase.js';
-import { getTokens } from '/_100554_/l2/designSystemBase.js';
+import { getTokens } from '/_102027_/l2/designSystemBase.js';
 import { getConfigProject } from '/_100554_/l2/libProjectConfig.js';
-import { createPath, getLastOpenedFiles, OpenedFileL2 } from '/_100554_/l2/libCommom.js';
+import { createPath, getLastOpenedFiles, OpenedFileL2 } from '/_102027_/l2/libCommom.js';
 import { collabImport } from '/_100554_/l2/collabImport.js';
 
 import { createThread, getUserId } from '/_102025_/l2/collabMessagesHelper.js';

@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { getDependenciesByHtmlFile, getTokens, IJSONDependence } from '/_100554_/l2/libCompile.js';
 import { convertFileNameToTag, getPath } from '/_102027_/l2/utils.js';
 import { createModel } from '/_102027_/l2/libModel.js';
-import { getBaseTemplate } from '/_100554_/l2/libCommom.js';
+import { getBaseTemplate } from '/_102027_/l2/libCommom.js';
 import { createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
 
 

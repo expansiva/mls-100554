@@ -6,7 +6,7 @@ import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { gitHubLogin, gitLabLogin, isProviderConnected, gitlabIcon, githubIcon } from '/_100554_/l2/libProviders.js';
 import { replaceTripleslashAndTag, createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
 import { getLocalProjectName, isValidProjectName, setProjectDetails, deleteLastOpenedFiles
- } from '/_100554_/l2/libCommom.js';
+ } from '/_102027_/l2/libCommom.js';
 
 import {
   collab_arrows_rotate

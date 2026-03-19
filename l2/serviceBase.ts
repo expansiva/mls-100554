@@ -2,7 +2,7 @@
 
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { customElement, property, state } from 'lit/decorators.js';
-import * as libCommom from '/_100554_/l2/libCommom.js';
+import * as libCommom from '/_102027_/l2/libCommom.js';
 
 @customElement('service-base-100554')
 export abstract class ServiceBase extends StateLitElement {

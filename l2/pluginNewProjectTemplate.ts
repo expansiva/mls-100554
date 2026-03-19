@@ -627,9 +627,9 @@ export default new PluginCollabCoreIndex();
 export const template_ds = {
     ext: '.ts',
     template: `
-/// <mls fileReference="_[project]_/l2/designSystem.ts" enhancement="_100554_enhancementLit" />
+/// <mls fileReference="_[project]_/l2/designSystem.ts" enhancement="_102027_/l2/enhancementLit" />
 
-import { IDesignSystemTokens } from '/_100554_/l2/designSystemBase.js';
+import { IDesignSystemTokens } from '/_102027_/l2/designSystemBase.js';
 
 export const tokens: IDesignSystemTokens[] = [
     {

@@ -3,9 +3,9 @@
 import { html, svg, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
-import { getListNewFilesToDeleteByFolder, deleteAllFilesLocal } from '/_100554_/l2/libCommom.js';
+import { getListNewFilesToDeleteByFolder, deleteAllFilesLocal } from '/_102027_/l2/libCommom.js';
 import { removeModule } from '/_100554_/l2/projectAST.js';
-import { removeTokensTheme } from '/_100554_/l2/designSystemBase.js';
+import { removeTokensTheme } from '/_102027_/l2/designSystemBase.js';
 
 /// **collab_i18n_start**
 const message_pt = {

@@ -3,7 +3,7 @@
 import { html, css, unsafeHTML, repeat } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
-import { selectLevel, openService, saveOpenedFile } from '/_100554_/l2/libCommom.js';
+import { selectLevel, openService, saveOpenedFile } from '/_102027_/l2/libCommom.js';
 import "/_100554_/l2/pluginPrototypeImprove.js";
 import "/_100554_/l2/pluginExploreList.js";
 import "/_100554_/l2/pluginPageNavigation.js";
@@ -254,7 +254,7 @@ export class ServicePage100554 extends ServiceBase {
 
     }
 
-    private onOpenL3(info: mls.cbe.IPath) {
+    private onOpenL3(info: mls.stor.IFileInfoBase) {
         if (!info.folder || !info.project || !info.shortName) return;
         const { folder, project, shortName } = info;
         const fullName = folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`;

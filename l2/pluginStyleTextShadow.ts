@@ -7,7 +7,7 @@ import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
 import { setState, getState } from '/_100554_/l2/collabState.js';
 import { getMessageKey } from '/_100554_/l2/collabLitElement.js';
 import { ICSSState } from '/_100554_/l2/lessCSS.js';
-import { convertColorToHex } from '/_100554_/l2/libCommom.js';
+import { convertColorToHex } from '/_102027_/l2/libCommom.js';
 import '/_100554_/l2/collabDsInputSelectColor.js';
 import '/_100554_/l2/collabDsInputRange.js';
 import '/_100554_/l2/collabDsInputSelectColor.js';

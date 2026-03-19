@@ -2,9 +2,9 @@
 
 import { html, css, svg, TemplateResult, LitElement, repeat, unsafeHTML } from 'lit';
 import { query, property, customElement } from 'lit/decorators.js';
-import { getMyKeysBranch } from '/_100554_/l2/libCommom.js';
+import { getMyKeysBranch } from '/_102027_/l2/libCommom.js';
 import * as gitIO from '/_100554_/l2/libGithubIo.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'; 
+import { CollabLitElement } from '/_102027_/l2/collabLitElement.js'; 
 
 export const pluginData: mls.plugin.IPluginData = {
     title: "GitHub Issues",

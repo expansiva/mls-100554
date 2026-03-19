@@ -11,7 +11,7 @@ import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
 import { collab_trash } from '/_100554_/l2/collabIcons.js';
 import { setState } from '/_100554_/l2/collabState.js';
 import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
-import { openElementInServiceDetails } from '/_100554_/l2/libCommom.js';
+import { openElementInServiceDetails } from '/_102027_/l2/libCommom.js';
 import "/_100554_/l2/docMd.js";
 
 @customElement('plugin-agent-playground-100554')
