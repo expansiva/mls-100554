@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { getTokens, IDesignSystemTokens } from '/_100554_/l2/designSystemBase.js';
+import { getTokens, IDesignSystemTokens } from '/_102027_/l2/designSystemBase.js';
 
 @customElement('collab-tokens-visualization-100554')
 export class CollabTokensVisuzalization100554 extends StateLitElement {

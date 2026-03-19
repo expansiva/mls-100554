@@ -21,7 +21,7 @@ import { collabImport } from '/_100554_/l2/collabImport.js';
 import { getTask, getMessage, addOrUpdateTask, addPooling, deletePooling, updateThreadPendingTasks } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { IAgent, IAgentAsync } from '/_100554_/l2/aiAgentBase.js';
 import { getUserId } from '/_102025_/l2/collabMessagesHelper.js';
-import { loadModuleFromProjectOrDependency } from '/_100554_/l2/libCommom.js';
+import { loadModuleFromProjectOrDependency } from '/_102027_/l2/libCommom.js';
 
 const agentName = 'aiAgentOrchestration';
 

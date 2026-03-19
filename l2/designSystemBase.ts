@@ -167,7 +167,7 @@ async function serializeTokens(project: number, tokens: IDesignSystemTokens[]) {
     const storFile = mls.stor.files[key];
     if (!storFile) return;
 
-    const libCommon = await import('/_100554_/l2/libCommom.js');
+    const libCommon = await import('/_102027_/l2/libCommom.js');
     await libCommon.forceServiceInstance(2, '_100554_serviceSource');
 
     const serviceSource = mls.services['100554_serviceSource_left'];

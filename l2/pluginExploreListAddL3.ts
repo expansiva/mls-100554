@@ -4,9 +4,9 @@ import { html, repeat, TemplateResult } from 'lit';
 import { customElement, state, property, query } from 'lit/decorators.js';
 import { createAllFiles, IReqCreateAllFiles } from '/_102027_/l2/libStor.js';
 import { convertFileNameToTag } from '/_102027_/l2/utils.js';
-import { getInstanceByFile, isNameValid } from '/_100554_/l2/libCommom.js';
+import { getInstanceByFile, isNameValid } from '/_102027_/l2/libCommom.js';
 import { executeAgentByFile } from '/_100554_/l2/aiAgentHelper.js'
-import { collabImport } from '/_100554_/l2/collabImport.js'
+import { collabImport } from '/_102027_/l2/collabImport.js'
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { ServiceBase } from '/_100554_/l2/serviceBase.js';  
 

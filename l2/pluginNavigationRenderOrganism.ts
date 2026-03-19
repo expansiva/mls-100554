@@ -4,7 +4,7 @@ import { html, repeat, TemplateResult, LitElement } from 'lit';
 import { customElement, state, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag, convertTagToFileName } from '/_102027_/l2/utils.js';
 import { collab_trash, collab_pencil, collab_bars, collab_info } from '/_100554_/l2/collabIcons.js';
-import { openService } from '/_100554_/l2/libCommom.js';
+import { openService } from '/_102027_/l2/libCommom.js';
 import { openCollabMessage } from '/_100554_/l2/aiAgentHelper.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { CollabPreviewL3 } from '/_100554_/l2/collabPreviewL3.js';

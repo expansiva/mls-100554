@@ -2,7 +2,7 @@
 
 import { html, css, svg, TemplateResult, repeat, LitElement } from 'lit';
 import { query, property } from 'lit/decorators.js';
-import { forceServiceInstance } from '/_100554_/l2/libCommom.js'
+import { forceServiceInstance } from '/_102027_/l2/libCommom.js'
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { ICANTest, ICANIntegration, TsTestAst } from '/_100554_/l2/tsTestAST.js';
 import { CollabPageElement } from '/_100554_/l2/collabPageElement.js';

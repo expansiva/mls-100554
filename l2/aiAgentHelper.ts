@@ -3,7 +3,7 @@
 import { updateMessage, getMessage, getThreadByName } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { getUserId, createThread } from '/_102025_/l2/collabMessagesHelper.js';
 import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
-import { openService } from '/_100554_/l2/libCommom.js';
+import { openService } from '/_102027_/l2/libCommom.js';
 
 /**
  * Helper function to collect all steps from a task in a flat array
