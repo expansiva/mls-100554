@@ -2,16 +2,17 @@
 
 import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, queryAll } from 'lit/decorators.js'; 
-import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from '/_102027_/l2/libCommom.js';
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, undoFile, IReqCreateStorFile, createStorFile } from '/_102027_/l2/libStor.js';
 import { createAllModels, createModel, readProjectTypescriptAndCompile, readProjectTypescriptAndCompileL1 } from '/_102027_/l2/libModel.js';
+import { addInHistory, getHistory } from '/_102027_/l2/libHistoriesRecents.js';
 import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+
 import { isNameValid } from '/_102027_/l2/libCommom.js';
 import '/_100554_/l2/collabInputSearch.js';
 
 /// **collab_i18n_start**
-
 const message_pt = {
     updateListVerify: "atualizar lista/verificar",
     update: "atualizar",
@@ -650,8 +651,7 @@ export class PluginExploreList extends PluginBaseModule {
             return;
         }
 
-        this.setHistory(mfile);
-        //if (mls.actualLevel != 1) selectLevel(2);
+        addInHistory(mfile);
         this.fireEvents('open', mfile, {});
 
     }
@@ -666,7 +666,7 @@ export class PluginExploreList extends PluginBaseModule {
 
         const mfile = this.getMyFileInElement(e.target as HTMLElement);
         if (!mfile) return;
-        this.setHistory(mfile);
+        addInHistory(mfile);
         if (mls.actualLevel != 1) selectLevel(2);
         (window as any).securityMode = true;
         this.fireEvents('open', mfile, {});
@@ -787,9 +787,8 @@ export class PluginExploreList extends PluginBaseModule {
             const file = await cloneAllFiles(storFile, storFile.project, name)
             if (!file.ts || file.ts instanceof Error) return;
 
-            this.setHistory(file.ts);
+            addInHistory(file.ts);
             if (mls.actualLevel != 1) selectLevel(2);
-            //this.fireEvents('open', file.ts, {});
             this.changeList(100);
 
         } catch (e: any) {
@@ -808,10 +807,8 @@ export class PluginExploreList extends PluginBaseModule {
             this.showLoading(true);
             const file = await renameAllFiles(storFile, +info.project, info.name, info.folder)
             if (!file.ts || file.ts instanceof Error) return;
-
-            this.setHistory(file.ts);
+            addInHistory(file.ts);
             if (mls.actualLevel != 1) selectLevel(2);
-            //this.fireEvents('open', file.ts, {});
             this.changeList(100);
 
         } catch (e: any) {
@@ -1398,7 +1395,7 @@ export class PluginExploreList extends PluginBaseModule {
         try {
             if (!window['mls']) return [];
             let arraySfHistory: mls.stor.IFileInfo[] = [];
-            const lh = this.getHistory();
+            const lh = getHistory();
             if (lh.length <= 0 || !window['mls']) {
 
                 const diff = this.filesInLocal.filter(a =>
@@ -1447,39 +1444,6 @@ export class PluginExploreList extends PluginBaseModule {
         }
     }
 
-    private getHistory(): { project: number, shortName: string, extension: string, folder: string }[] {
-
-        const info = localStorage.getItem('mlsInfoHistoryL' + mls.actualLevel);
-        return info ? JSON.parse(info) : [];
-
-    }
-
-    private setHistory(file: mls.stor.IFileInfo): void {
-
-        const info = localStorage.getItem('mlsInfoHistoryL' + mls.actualLevel);
-        const res: any[] = info ? JSON.parse(info) : [];
-        let idx = -1;
-        res.forEach((i: any, index) => {
-            if (i.project !== file.project || i.shortName !== file.shortName || i.folder !== file.folder) return;
-            idx = index;
-        });
-
-        if (idx >= 0) {
-            res.splice(idx, 1);
-        }
-
-        res.unshift({ project: file.project, shortName: file.shortName, extension: file.extension, folder: file.folder });
-
-        if (res.length > 10) {
-            for (let i = res.length - 1; i >= 0; i--) {
-                if (res.length <= 10) break;
-                res.splice(i, 1);
-            }
-        }
-
-        localStorage.setItem('mlsInfoHistoryL' + mls.actualLevel, JSON.stringify(res));
-
-    }
 
 
     private isValidNewName(file: mls.stor.IFileInfo, action: { mode: string, project: string, name: string, folder: string }): boolean {

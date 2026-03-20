@@ -356,11 +356,6 @@ export class ServicePreviewView extends StateLitElement {
                 html.style.height = '100%';
             }
 
-            if (iframe.contentDocument) {
-                const base = document.createElement('base') as HTMLBaseElement;
-                base.href = 'https://collab.codes/';
-                iframe.contentDocument.head.insertBefore(base, iframe.contentDocument.head.firstChild);
-            }
 
             if (iframe.contentDocument) {
                 iframe.contentDocument.body.style.overflowY = 'auto';
@@ -368,9 +363,6 @@ export class ServicePreviewView extends StateLitElement {
                 iframe.contentDocument.body.style.margin = '0';
                 iframe.contentDocument.body.style.height = '100%';
                 iframe.contentDocument.body.style.width = '100%';
-                // iframe.contentDocument.body.classList.add('bg-white');
-                // iframe.contentDocument.body.classList.add('dark:bg-slate-900');
-
                 iframe.contentDocument.body.style.background = 'var(--bg-primary-color)';
                 iframe.contentDocument.body.style.color = 'var(--text-primary-color)';
 
