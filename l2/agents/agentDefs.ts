@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/agents/agentDefs.ts" enhancement="_100554_/l2/enhancementAgent" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
+import { replaceAsis } from '/_102027_/l2/defsAST.js';
 
 export function createAgent(): IAgentAsync {
   return {
@@ -183,7 +184,7 @@ export const asis: mls.defs.AsIs = ${JSON.stringify(defs, null, 2)}
 
   const files = await mls.stor.getFiles({ ...fileInfo, loadContent: false });
   if (!files.ts) throw new Error(`[agentDefs] file .ts dont exists, defs: ${JSON.stringify(defs.meta)}`);
-  const params = { ...fileInfo, content: template, versionRef: new Date().toISOString(), extension: ".defs.ts" };
+  const params = { ...fileInfo, content: template, versionRef: new Date().toISOString(), extension: ".defs.ts", defs };
   if (!files.defs) {
     await createStorFile(params);
   } else {
@@ -206,7 +207,7 @@ async function createStorFile(params: { project: number, shortName: string, leve
   return file;
 }
 
-async function updateStorFile(params: { project: number, shortName: string, level: number, folder: string, content: string, extension: string, versionRef: string }): Promise<void> {
+async function updateStorFile(params: { project: number, shortName: string, level: number, folder: string, content: string, extension: string, versionRef: string, defs:AsIs }): Promise<void> {
   const file = await mls.stor.addOrUpdateFile(params);
   if (!file) throw new Error('[agentDefs] Invalid storFile');
   const path = mls.stor.getKeyToFile(params);
@@ -214,7 +215,9 @@ async function updateStorFile(params: { project: number, shortName: string, leve
   console.log(`[agentDefs] updating content: ${params.content}`);
 
   const modelDefs = await file.getOrCreateModel();
-  modelDefs.model.setValue(params.content);
+  const currentContent = modelDefs.model.getValue();
+  const newContent = replaceAsis(currentContent, params.defs); 
+  modelDefs.model.setValue(newContent);
 
 }
 
