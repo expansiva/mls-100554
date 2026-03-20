@@ -3,8 +3,8 @@
 import { html, css } from 'lit';
 import { customElement, property, queryAll, query } from 'lit/decorators.js';
 import { setProjectDetails, getProjectDetails } from '/_102027_/l2/libCommom.js';
+import { loadProjectHistory, saveProjectHistory } from '/_102027_/l2/libHistoriesRecents.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
-//import './_100554_pluginCreateNewProject'
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -222,7 +222,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         if (this.visible === 'true') this.firedetail('<projects-100554></projects-100554>');
         
         this.getOrgsAndProjects(); 
-        this.state.history = this.loadHistory();
+        this.state.history = loadProjectHistory();
         return html`
             <div class="scroll-custom l5-project-list">
                 <div class="filter-container" style="display:flex">
@@ -373,18 +373,6 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         this.state.orgs = [];
     }
 
-    private KeyHistory = 'serviceExploreProjects'
-    private loadHistory(): IHistory[] {
-        const lcHistory = localStorage.getItem(this.KeyHistory);
-        let rc: IHistory[] = [];
-        if (!lcHistory) return rc;
-        try {
-            rc = JSON.parse(lcHistory);
-        } catch (err) {
-            throw new Error('Error on load l5 project history');
-        }
-        return rc;
-    }
 
     private filterTimeout: number = 0;
     private _filterProjects(ev: InputEvent): void {
@@ -414,35 +402,15 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         this.setOrgActual(item.project);
         this.addOnHistory(item);
         window.location.reload();
-
-        // this._fireEventProjectSelected(item.project);
-        // this.changeScenario('select');
-        // await this.loadProjectActual(item.project);
-        // await mls.stor.server.unzipSourcesIfNeeded(item.project);
-        // this.openExplore()
     }
 
     private async onProjectClick(item: IInfoPrj) {
-
         if (!item.doSelect) return;
         this.setProjectActual(item.project);
         this.setOrgActual(item.project);
         this.addOnHistory(item);
         window.location.reload();
-
-        //this._fireEventProjectSelected(item.project);
-        // this.changeScenario('details');
-        // await this.loadProjectActual(item.project);
-        // await mls.stor.server.unzipSourcesIfNeeded(item.project);
-        // this.openExplore()
     }
-
-
-    private openExplore() {
-        this.selectLevel(5)
-        mls.events.fire([5], ['ProjectSelected'], '');
-    }
-
 
     private setProjectActual(project: number) {
         mls.setActualProject(project);
@@ -455,19 +423,6 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         mls.l5.setActualOrg(orgIndex);
     }
 
-    private _fireEventProjectSelected(project: number) {
-        const params: IParamsEvent = {
-            emitter: 'left',
-            value: project
-        };
-        mls.events.fire(5, ['ProjectSelected'], JSON.stringify(params));
-    }
-
-    private async loadProjectActual(project: number) {
-        await mls.stor.server.loadProjectInfoIfNeeded(project);
-    }
-
-
     private addOnHistory(item: IInfoPrj) {
         const indexInHistory = this.state.history.findIndex((his) => his.name === item.name && his.project === item.project);
         if (indexInHistory > -1) this.state.history.splice(indexInHistory, 1);
@@ -478,16 +433,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         };
         this.state.history.unshift(historyItem);
         if (this.state.history.length > 9) this.state.history.pop();
-        localStorage.setItem(this.KeyHistory, JSON.stringify(this.state.history));
-    }
-
-    private projectCreatedNumber: number = 100554;
-    private async onProjectCreated(ev: CustomEvent) {
-        this.projectCreated = true;
-        this.projectCreatedNumber = ev.detail;
-        /*setTimeout(() => {
-            if (this.buttonSeePrj) this.buttonSeePrj.scrollIntoView();
-        }, 150);*/
+        saveProjectHistory(this.state.history);
     }
 
 }
@@ -520,8 +466,4 @@ interface IHistory {
     project: number,
     name: string,
     doSelect: boolean,
-}
-interface IParamsEvent {
-    emitter: 'right' | 'left',
-    value: number
 }
