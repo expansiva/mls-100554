@@ -18,6 +18,8 @@ type Editors = {
     capabilities: monaco.editor.IStandaloneCodeEditor | undefined,
 }
 
+
+
 @customElement('agents--agent-to-be-conceptual2-clarification-100554')
 export class AgentToBeConceptual2Clarification extends CollabLitElement {
 
