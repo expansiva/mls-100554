@@ -16,7 +16,6 @@ export class MlsHistoryList extends CollabLitElement {
     @property({ type: Boolean, }) loading: boolean = true;
 
     private error = '';
-
     private data: IHistory[] = [];
 
     async connectedCallback() {
@@ -49,7 +48,7 @@ export class MlsHistoryList extends CollabLitElement {
             this.style.height = height + 'px';
         }
     }
-
+    
     private createJson(gitObj: IHistoryRet[] | null): IHistory[] {
         if (!gitObj) return []
         const today: Date = new Date();
