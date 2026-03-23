@@ -3,8 +3,8 @@
 import { html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { executeAgentByFile } from '/_100554_/l2/aiAgentHelper.js'
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
-import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { CollabLitElement } from '/_102027_/l2/collabLitElement.js';
+import { ServiceBase } from '/_102027_/l2/serviceBase.js';
 import { getPath } from '/_102027_/l2/utils.js';
 
 /// **collab_i18n_start** 

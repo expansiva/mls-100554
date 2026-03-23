@@ -2,7 +2,7 @@
 
 import { html, nothing, unsafeHTML } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import { openService, getProjectConfig, getProjectModuleConfig } from '/_102027_/l2/libCommom.js';
 import { convertFileNameToTag, getPath } from '/_102027_/l2/utils.js';
 import '/_100554_/l2/collabNav4Menu.js';

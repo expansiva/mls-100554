@@ -1,13 +1,13 @@
 /// <mls fileReference="_100554_/l2/pluginExploreListAddL2.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html } from 'lit';
+import { html } from 'lit'; 
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from '/_102027_/l2/utils.js';
-import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { ServiceBase } from '/_102027_/l2/serviceBase.js';
 import { CollabLitElement } from '/_102027_/l2/collabLitElement.js';
 import { IDetails } from "/_100554_/l2/pluginNewFileBase.js";
-import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
-import { getState, setState, initState } from '/_100554_/l2/collabState.js';
+import { propertyDataSource } from '/_102027_/l2/collabDecorators.js';
+import { getState, setState, initState } from '/_102027_/l2/collabState.js';
 import { loadPluginProject, isNameValid } from '/_102027_/l2/libCommom.js';
 import { getPath } from '/_102027_/l2/utils.js';
 

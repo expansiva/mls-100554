@@ -6,8 +6,8 @@ import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, 
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, undoFile, IReqCreateStorFile, createStorFile } from '/_102027_/l2/libStor.js';
 import { createAllModels, createModel, readProjectTypescriptAndCompile, readProjectTypescriptAndCompileL1 } from '/_102027_/l2/libModel.js';
 import { addInHistory, getHistory } from '/_102027_/l2/libHistoriesRecents.js';
-import { ServiceBase } from '/_100554_/l2/serviceBase.js';
-import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { ServiceBase } from '/_102027_/l2/serviceBase.js';
+import { PluginBaseModule } from '/_102027_/l2/pluginBaseModule.js';
 
 import { isNameValid } from '/_102027_/l2/libCommom.js';
 import '/_100554_/l2/collabInputSearch.js';

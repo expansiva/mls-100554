@@ -9,7 +9,7 @@ import { getInstanceByFile, isNameValid } from '/_102027_/l2/libCommom.js';
 import { executeAgentByFile } from '/_100554_/l2/aiAgentHelper.js'
 import { collabImport } from '/_102027_/l2/collabImport.js'
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
-import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { ServiceBase } from '/_102027_/l2/serviceBase.js';
 
 
 /// **collab_i18n_start**

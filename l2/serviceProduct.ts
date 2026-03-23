@@ -2,7 +2,7 @@
 
 import { html, css, repeat } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 
 /// **collab_i18n_start**
 
