@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, query, property, state } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 
 /// **collab_i18n_start**
 const message_pt = {

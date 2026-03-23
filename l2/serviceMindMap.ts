@@ -2,8 +2,8 @@
 
 import { html, unsafeHTML, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
-import {  MindMapData, getMindMapByStorFile, setMindMapVariable } from '/_100554_/l2/libMindMap.js'
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
+import {  MindMapData, getMindMapByStorFile, setMindMapVariable } from '/_102027_/l2/libMindMap.js'
 import '/_100554_/l2/widgetMindMapL4.js'; 
 
 @customElement('service-mind-map-100554')

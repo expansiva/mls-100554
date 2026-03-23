@@ -2,9 +2,9 @@
 
 import { html, css, repeat } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_100554_/l2/serviceBase.js';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_102027_/l2/serviceBase.js';
 import { collab_user } from '/_100554_/l2/collabIcons.js';
-import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
+import { getAllWebComponentsInSource } from '/_102027_/l2/libCompile.js';
 import { convertTagToFileName, convertFileNameToTag, getPath } from '/_102027_/l2/utils.js';
 import { loadPluginProject } from '/_102027_/l2/libCommom.js';
 import('/_100554_/l2/collabPanel.js');

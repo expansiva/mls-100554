@@ -2,7 +2,7 @@
 
 import { IJSONDependence } from '/_100554_/l2/libCompile';
 import { convertFileNameToTag, getPath } from '/_102027_/l2/utils';
-import { ServiceBase } from '/_100554_/l2/serviceBase'
+import { ServiceBase } from '/_102027_/l2/serviceBase'
 
 export function mountJSImporMap(info: IJSONDependence, ifr: HTMLIFrameElement): void {
 

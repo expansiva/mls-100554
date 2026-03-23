@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import { getConfigProject } from '/_100554_/l2/libProjectConfig.js';
 import { loadPluginProject } from '/_102027_/l2/libCommom.js';
 

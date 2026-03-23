@@ -8,7 +8,7 @@ import { openService } from '/_102027_/l2/libCommom.js';
 import { openCollabMessage } from '/_100554_/l2/aiAgentHelper.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { CollabPreviewL3 } from '/_100554_/l2/collabPreviewL3.js';
-import { ServiceBase } from '/_100554_/l2/serviceBase.js';
+import { ServiceBase } from '/_102027_/l2/serviceBase.js';
 
 import { getPath } from '/_102027_/l2/utils.js';
 
