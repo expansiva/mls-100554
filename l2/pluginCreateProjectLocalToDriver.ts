@@ -556,7 +556,7 @@ export class PluginCreateProject extends CollabLitElement {
       }
     }
 
-    const aux = param.level === 2 && param.shortName === 'designSystem';
+    const aux = false;  //param.level === 2 && param.shortName === 'designSystem';
     const file = await createStorFile(param, aux, aux, aux);
 
     if (file.level !== 2) {
@@ -609,7 +609,6 @@ export class PluginCreateProject extends CollabLitElement {
   }
 
   private async migrateLocalFiles(oldProject: number, newProject: number) {
-
     await this.createPrjInfo(newProject);
     const keys = Object.keys(mls.stor.files).filter((key) => key.startsWith(`${oldProject}_`));
 
@@ -687,7 +686,7 @@ export class PluginCreateProject extends CollabLitElement {
         userAuth: this.newProjectVisibility as any,
         archived_at: '',
         created_at: '',
-        prj_dependencies: [100554],
+        prj_dependencies: [100554, 102027],
         value: '',
         repository_secret: this.secret
 
