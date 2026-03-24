@@ -236,15 +236,20 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     }
 
     renderHistory() {
+
+        
         return html`
             <div class="l5-project-list-history" style="${this.state.history.length === 0 ? 'display:none' : 'display: block'}">
                 <div class="serviceListTitle">History</div>
                 <ul class="serviceListList">
                     ${this.state.history.map(
-            (his) => html`
-                        <li ?disabled=${!his.doSelect} class=${this.lastPrjId && +this.lastPrjId === his.project ? "selected" : ""} >
+                        (his) => {
+                            const name = his.name.length > 22 ? his.name.substring(0, 22) + '...' : his.name;
+
+                            return html`
+                        <li ?disabled=${!his.doSelect} class=${this.lastPrjId && +this.lastPrjId === his.project ? "selected" : ""} title="${his.name}" >
                             <div>
-                                <span>${his.name + ' (' + his.project.toString() + ')'}</span>
+                                <span>${name + ' (' + his.project.toString() + ')'}</span>
                             </div>
                             <div style="display:flex; gap:1rem;font-size:.8rem">
                                 <span class="linkItem" @click=${() => { this.onHistoryClick(his) }}>
@@ -252,7 +257,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                                 </span>
                             </div>
                         </li>
-                    `)}
+                    `})}
                 </ul>
             </div>
         `;
@@ -265,10 +270,14 @@ export class ServiceExploreProjects100554 extends ServiceBase {
             return html`
                     <div class="serviceListTitle">${org.key}</div>
                     <ul class="serviceListList">
-                        ${org.projects.map((prj) => html`
-                            <li ?disabled=${!prj.doSelect} class=${this.lastPrjId && +this.lastPrjId === prj.project ? "selected" : ""} >
+                        ${org.projects.map((prj) => {
+
+                            const name = prj.name.length > 22 ? prj.name.substring(0, 22) + '...' : prj.name;
+
+                            return html`
+                            <li ?disabled=${!prj.doSelect} class=${this.lastPrjId && +this.lastPrjId === prj.project ? "selected" : ""} title="${prj.name}">
                                 <div>
-                                    <span>${prj.name + ' (' + prj.project.toString() + ')'}</span>
+                                    <span>${name + ' (' + prj.project.toString() + ')'}</span>
                                 </div>
                                 <div style="display:flex; gap:1rem;font-size:.8rem">
                                     <span class="linkItem" @click=${() => this.onProjectClick(prj)}>
@@ -276,7 +285,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                                     </span>
                                 </div>
                             </li>
-                        `)}
+                        `})}
                     </ul>
                 `})}
     
