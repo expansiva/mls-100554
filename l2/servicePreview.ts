@@ -1200,17 +1200,24 @@ export class ServicePreview100554 extends ServiceBase {
     private async setTheme() {
         const project = mls.actualProject;
         if (!project) return;
-        const tokens = await getTokens(project)
-        this.themes = tokens.map((item) => item.themeName);
-        const themesOptions = this.themes.map((th) => {
-            const newOpt: IOptions = {
-                text: th,
-            }
-            return newOpt;
-        });
+        try {
+            const tokens = await getTokens(project)
+            this.themes = tokens.map((item) => item.themeName);
+            const themesOptions = this.themes.map((th) => {
+                const newOpt: IOptions = {
+                    text: th,
+                }
+                return newOpt;
+            });
 
-        if (this.menu.tools.theme) this.menu.tools.theme.options = themesOptions;
-        if (this.menu.refresh) this.menu.refresh();
+            if (this.menu.tools.theme) this.menu.tools.theme.options = themesOptions;
+            if (this.menu.refresh) this.menu.refresh();
+        } catch (err: any) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.warn('[setTheme] No themes:', message);
+            return ''
+        }
+
     }
 
     private createTestElement() {
