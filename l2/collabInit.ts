@@ -89,12 +89,11 @@ export class CollabInit extends LitElement {
         await this.loadLastProject();
         await this.setEventsModel();
         await this.setLastOpenedFiles();
-        await this.setDefaultFiles();
+        // await this.setDefaultFiles();
         await this.setLastModule();
         this.showMessagesIfNeeded();
         this.initNotificationIfEnabled();
         const services = await this.getServices();
-        this.checkURLParams();
         this.setEvents();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
 
@@ -104,7 +103,7 @@ export class CollabInit extends LitElement {
         try {
             await import('/_102027_/l2/libModel.js')
         } catch (e) {
-            
+
         }
     }
 
@@ -476,57 +475,6 @@ export class CollabInit extends LitElement {
         if (collabMessages) collabMessages.show();
     }
 
-    /**
-     * Checks the URL parameters and performs actions based on their values.
-     * - If the user is anonymous, opens the login dialog.
-     * - If the `details` parameter is `privacyPolicy`, opens the privacy policy details.
-     * - If the `details` parameter is `termsOfService`, opens the terms of service details.
-     *
-     */
-    private checkURLParams() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const details = urlParams.get('details');
-        if (details === 'privacyPolicy') return this.openPolicyPrivacy();
-        if (details === 'termsOfService') return this.openTerms();
-        if (this.isAnonymous) return this.openLogin();
-    }
-
-    /**
-     * Opens the privacy policy in the service Details.
-    */
-    private openPolicyPrivacy() {
-        this.setDetailsInitialPlugin('_100554_pluginSystemPrivacyPolicy');
-    }
-
-    /**
-     * Opens the terms of use in the service Details.
-    */
-    private openTerms() {
-        this.setDetailsInitialPlugin('_100554_pluginSystemTermsOfService');
-    }
-
-    /**
-     * Opens the login screen in the service Details.
-    */
-    private openLogin() {
-        this.setDetailsInitialPlugin('_100554_pluginCollabLogin');
-    }
-
-    /**
-     * Sets up the initial plugin for the details view by modifying the state of the application's
-     * toolbar and navigation components.
-     *
-     */
-    private setDetailsInitialPlugin(plugin: string) {
-        Promise.all(['collab-nav-2', 'collab-nav-3'].map((wc) => customElements.whenDefined(wc))).then(async () => {
-            const page = document.querySelector('collab-page');
-            const toolbar = page?.querySelector(`collab-nav-2[toolbarposition="right"]`) as IHTMLCollabNav2;
-            const nav3 = page?.querySelector('collab-nav-3[toolbarposition="right"]') as IHTMLCollabNav3;
-            if (!toolbar || !nav3) return;
-            nav3.args = { widget: plugin };
-            toolbar.state[7].right = '_100554_serviceDetail';
-        })
-    }
 
     private anonymousServices: IServices = {
         services: [
