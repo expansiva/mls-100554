@@ -3,131 +3,199 @@
 modules-100554 {
 
     display: block;
-    padding: 2rem;
-    color: #fff;
-    font-family: sans-serif;
+    display: block;
+    font-family: @font-family-primary;
+    font-size: @font-size-12;
+
+    .container {
+        padding: @space-16;
+    }
 
     .header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        flex-wrap: wrap;
-        margin-bottom: 2rem;
+        justify-content: space-between;
+        margin-bottom: @space-24;
+        gap: @space-16;
+    }
+
+    .title {
+        font-size: @font-size-20;
+        font-weight: @font-weight-bold;
         color: @text-primary-color;
-
+        margin: 0;
     }
 
-    #module-filter{
-        width: 60%;
+    .btn-add {
+        display: flex;
+        align-items: center;
+        gap: @space-8;
+        padding: @space-8 @space-16;
+        background-color: @text-secondary-color;
+        color: @bg-primary-color;
+        border: none;
+        border-radius: 4px;
+        font-size: @font-size-12;
+        font-weight: @font-weight-bold;
+        cursor: pointer;
+        transition: background-color @transition-normal;
+
+        &:hover {
+            background-color: @text-secondary-color-hover;
+        }
     }
 
-    .module-card.selected {
-        border: 2px solid #007bff;
-        background: #262626;
-    }
-
-    h3, h2{
+    .btn-back {
+        display: flex;
+        align-items: center;
+        gap: @space-8;
+        padding: @space-8 @space-16;
+        background-color: @bg-secondary-color;
         color: @text-primary-color;
+        border: none;
+        border-radius: 4px;
+        font-size: @font-size-12;
+        font-weight: @font-weight-bold;
+        cursor: pointer;
+        transition: background-color @transition-normal;
+
+        &:hover {
+            background-color: @bg-secondary-color-hover;
+        }
+    }
+
+    .icon {
+        font-size: @font-size-16;
+    }
+
+    .loading {
+        text-align: center;
+        padding: @space-32;
+        color: @text-primary-color-lighter;
+    }
+
+    .empty {
+        text-align: center;
+        padding: @space-32;
+        color: @text-primary-color-lighter;
+        background-color: @bg-secondary-color-lighter;
+        border-radius: 4px;
     }
 
     .modules-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: @space-8;
     }
 
     .module-card {
-        background: #1e1e1e;
-        border-radius: 12px;
-        padding: 1rem;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        transition: transform 0.2s;
+        display: flex;
+        cursor: pointer;
+        justify-content: space-between;
+        align-items: center;
+        padding: @space-16;
+        background-color: @bg-secondary-color-lighter;
+        border-radius: 4px;
+        border-left: 3px solid @text-secondary-color;
+        transition: background-color @transition-normal;
+
+        &:hover {
+            background-color: @bg-secondary-color;
+        }
     }
 
-    .module-card:hover {
-        transform: scale(1.02);
-    }
-
-    .card-content {
+    .module-info {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 4px;
     }
 
-    .module-title {
-        font-size: 1.2rem;
-        color: #fff;
+    .module-name {
+        font-size: @font-size-16;
+        font-weight: @font-weight-bold;
+        color: @text-primary-color;
     }
 
-    .module-category,
-    .module-uses {
-        font-size: 0.9rem;
-        color: #ccc;
+    .module-category {
+        font-size: @font-size-12;
+        color: @text-primary-color-lighter;
     }
 
-    .actions {
+    .module-files {
         display: flex;
-        justify-content: space-between;
-        gap: 0.5rem;
-        margin-top: 1rem;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
     }
 
-    .actions a {
-        flex: 1;
-        text-align: center;
-        text-decoration: none;
-        background: #2a2a2a;
-        color: white;
-        padding: 0.5rem;
-        border-radius: 6px;
-        transition: background 0.2s;
+    .files-count {
+        font-size: @font-size-20;
+        font-weight: @font-weight-bold;
+        color: @text-secondary-color;
     }
 
-    .actions a:hover {
-        background: #444;
+    .files-label {
+        font-size: @font-size-12;
+        color: @text-primary-color-lighter;
     }
 
-    .module-details {
-        padding: 2rem;
-        margin: 2rem auto;
-        color: #000;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    .form {
+        display: flex;
+        flex-direction: column;
+        gap: @space-16;
     }
 
-    .back-button {
-        background: none;
-        border: none;
-        font-size: 1rem;
-        cursor: pointer;
-        margin-bottom: 1rem;
-        color: #007bff;
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: @space-8;
     }
 
-    .back-button:hover {
-        text-decoration: underline;
+    .label {
+        font-size: @font-size-12;
+        font-weight: @font-weight-bold;
+        color: @text-primary-color;
     }
 
-    input {
-        width: 100%;
-        padding: 0.5rem;
-        border: 1px solid #ccc;
+    .input {
+        padding: @space-8 @space-16;
+        font-size: @font-size-16;
+        border: 1px solid @grey-color-dark;
         border-radius: 4px;
+        background-color: @bg-primary-color;
+        color: @text-primary-color;
+        transition: border-color @transition-normal;
+
+        &:focus {
+            outline: none;
+            border-color: @text-secondary-color;
+        }
+
+        &::placeholder {
+            color: @text-primary-color-lighter-disabled;
+        }
     }
 
-    button:not(.back-button) {
-        background: #007bff;
-        color: #fff;
+    .btn-save {
+        padding: @space-16;
+        background-color: @success-color;
+        color: @bg-primary-color;
         border: none;
-        padding: 0.5rem 1rem;
-        margin-top: 0.5rem;
-        cursor: pointer;
         border-radius: 4px;
-    }
+        font-size: @font-size-16;
+        font-weight: @font-weight-bold;
+        cursor: pointer;
+        transition: background-color @transition-normal;
+        margin-top: @space-8;
 
-    button:not(.back-button):hover {
-        background: #0056b3;
+        &:hover:not(:disabled) {
+            background-color: @success-color-hover;
+        }
+
+        &:disabled {
+            background-color: @success-color-disabled;
+            cursor: not-allowed;
+        }
     }
 }
 
