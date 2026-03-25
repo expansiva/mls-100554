@@ -86,6 +86,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
             },
             {
                 category: 'Services',
+                scope: ['l5ServicesRight'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_serviceModules'
+            },
+            {
+                category: 'Services',
                 scope: ['l4ServicesLeft'],
                 priority: 1,
                 auth: ['*'],
@@ -372,27 +379,6 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 priority: 1,
                 auth: ['*'],
                 widget: '_100554_pluginSystemTheme'
-            },
-            {
-                category: 'System',
-                scope: ['l5UserSettings'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_pluginSystemNotification'
-            },
-            {
-                category: 'System',
-                scope: ['l5UserSettings'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_pluginSystemPrivacyPolicy'
-            },
-            {
-                category: 'System',
-                scope: ['l5UserSettings'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_pluginSystemTermsOfService'
             },
             {
                 category: 'Page',
