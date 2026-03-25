@@ -2,19 +2,22 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { getDependenciesByHtmlFile, getTokens, IJSONDependence } from '/_100554_/l2/libCompile.js';
+
+import { getTokensCss } from '/_102027_/l2/designSystemBase.js';
 import { convertFileNameToTag, getPath } from '/_102027_/l2/utils.js';
+
 import { createModel } from '/_102027_/l2/libModel.js';
 import { getBaseTemplate } from '/_102027_/l2/libCommom.js';
-import { createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
-
-
+import { createStorFile,  } from '/_102027_/l2/libStor.js';
+import { getDependenciesByHtmlFile } from '/_102027_/l2/libCompile.js';
 import { compileStyleUsingStorFile } from '/_102027_/l2/libCompileStyle.js';
 
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { PreviewModeSinglePage } from '/_100554_/l2/previewModeSinglePage.js';
 import { PreviewModeMinimum } from '/_100554_/l2/previewModeMinimum.js';
-import { PreviewModeBase } from '/_102027_/l2/previewBase.js';
+import { PreviewModeBase } from '/_102027_/l2/previewBase.js'
+import { IReqCreateStorFile } from '/_102027_/l2/libStor.js';
+import { IJSONDependence } from '/_102027_/l2/libCompile.js';
 
 
 /// **collab_i18n_start**
@@ -275,7 +278,7 @@ export class ServicePreviewView extends StateLitElement {
             if (window.preview.iframe.contentDocument !== null) window.preview.iframe.contentDocument.head.appendChild(newStyle);
             if (oldStyle) oldStyle.remove();
         }
-        const tokens = await getTokens({ project, shortName, folder } as mls.stor.IFileInfoBase, this.actualtheme)
+        const tokens = await getTokensCss(project, this.actualtheme);
         this.mountTokens(tokens || '');
         this.stylechanged = 'false';
 

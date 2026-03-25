@@ -60,6 +60,8 @@ async function getTagsInTypescript(modelTS: mls.editor.IModelTS, tags: string[])
 
 async function getDependencies(models: mls.editor.IModels, filename: string, html: string, theme: string, withCss: boolean = false) {
 
+    debugger;
+
     if (!models.ts) throw new Error('getDependencies: Invalid model ts');
     const { project, shortName, folder } = models.ts.storFile;
 
@@ -68,7 +70,7 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
     const myLinks: { ref: string, rel: string }[] = [];
     const myErrors: { tag: string, error: string }[] = [];
     const myModules = {};
-    let tags = extrairTagsCustomizadas(html);
+    let tags = extractTagsCustom(html);
 
     const tag = convertFileNameToTag({ project, shortName, folder });
     if (!tags.includes(tag)) tags.push(tag);
@@ -83,7 +85,7 @@ async function getDependencies(models: mls.editor.IModels, filename: string, htm
         myModules,
     );
 
-    let tokens: string | undefined = await getTokens({ project, shortName, folder } as mls.stor.IFileInfoBase, theme);
+    let tokens: string | undefined = await getTokensCss(project, theme);
     return {
         file: filename,
         wcComponents: tags,
@@ -106,7 +108,7 @@ async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, h
     const myErrors: { tag: string, error: string }[] = [];
 
     const myModules = {};
-    let tags = extrairTagsCustomizadas(html);
+    let tags = extractTagsCustom(html);
 
     const tag = convertFileNameToTag({ project, shortName, folder });
     if (!tags.includes(tag)) tags.push(tag);
@@ -120,7 +122,7 @@ async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, h
         myModules,
     );
 
-    let tokens: string | undefined = await getTokens({ project, shortName, folder } as mls.stor.IFileInfoBase, theme);
+    let tokens: string | undefined = await getTokensCss(project, theme);
     let globalCss: string | undefined = await getGlobalCss(project, theme);
 
     return {
@@ -135,7 +137,7 @@ async function getDependenciesFile(file: mls.stor.IFileInfo, filename: string, h
     }
 }
 
-function extrairTagsCustomizadas(html: string): string[] {
+function extractTagsCustom(html: string): string[] {
 
     const container = document.createElement('div');
     container.innerHTML = html;
@@ -283,7 +285,7 @@ async function getEnhancementFromFetch(file: { project: number, shortName: strin
     const mlsLine = lines.find(line => line.trim().startsWith('/// <mls '));;
 
     if (!mlsLine) {
-        throw new Error(`Not found tag <mls> in ${url}`);
+        throw new Error(`Not found tag '<mls>' in ${url}`);
     }
 
     const enhancementMatch = mlsLine.match(/enhancement="([^"]+)"/);
@@ -361,17 +363,6 @@ async function getLinks(myLinks: { ref: string, rel: string }[], enhacementName:
     });
 }
 
-
-export async function getTokens(mfile: mls.stor.IFileInfoBase, theme: string) {
-
-    try {
-        const tokens = await getTokensCss(mfile.project, theme);
-        return tokens;
-
-    } catch (e: any) {
-        if (e.message.indexOf('dont exists') < 0) throw new Error(e.message);
-    }
-}
 
 export function getAllWebComponentsInSource(source: string): string[] {
     const regex = /<([a-z0-9]+-[a-z0-9-]*)(?=\s|>|\/|$)/g;

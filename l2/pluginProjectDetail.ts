@@ -2,7 +2,7 @@
 
 import { html, css, svg, TemplateResult, LitElement } from 'lit';
 import { query, property, customElement } from 'lit/decorators.js';
-import { getAllWebComponentsInSource } from '/_100554_/l2/libCompile.js';
+import { getAllWebComponentsInSource } from '/_102027_/l2/libCompile.js';
 import { convertTagToFileName } from '/_102027_/l2/utils.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import "/_100554_/l2/pluginProjectInfo.js";

@@ -1,6 +1,6 @@
 /// <mls fileReference="_100554_/l2/previewModeSinglePage.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { IJSONDependence } from '/_100554_/l2/libCompile.js';
+import { IJSONDependence } from '/_102027_/l2/libCompile.js';
 import { setErrorOnModel, convertTagToFileName, getPath } from '/_102027_/l2/utils.js';
 import * as util from '/_100554_/l2/previewModeUtil.js';
 
