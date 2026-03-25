@@ -1,0 +1,201 @@
+/// <mls fileReference="_100554_/l2/serviceModules.less" enhancement="enhancementStyle"/>
+
+service-modules-100554 {
+
+    display: block;
+    font-family: @font-family-primary;
+    font-size: @font-size-12;
+
+    .container {
+        padding: @space-16;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: @space-24;
+        gap: @space-16;
+    }
+
+    .title {
+        font-size: @font-size-20;
+        font-weight: @font-weight-bold;
+        color: @text-primary-color;
+        margin: 0;
+    }
+
+    .btn-add {
+        display: flex;
+        align-items: center;
+        gap: @space-8;
+        padding: @space-8 @space-16;
+        background-color: @text-secondary-color;
+        color: @bg-primary-color;
+        border: none;
+        border-radius: 4px;
+        font-size: @font-size-12;
+        font-weight: @font-weight-bold;
+        cursor: pointer;
+        transition: background-color @transition-normal;
+
+        &:hover {
+            background-color: @text-secondary-color-hover;
+        }
+    }
+
+    .btn-back {
+        display: flex;
+        align-items: center;
+        gap: @space-8;
+        padding: @space-8 @space-16;
+        background-color: @bg-secondary-color;
+        color: @text-primary-color;
+        border: none;
+        border-radius: 4px;
+        font-size: @font-size-12;
+        font-weight: @font-weight-bold;
+        cursor: pointer;
+        transition: background-color @transition-normal;
+
+        &:hover {
+            background-color: @bg-secondary-color-hover;
+        }
+    }
+
+    .icon {
+        font-size: @font-size-16;
+    }
+
+    .loading {
+        text-align: center;
+        padding: @space-32;
+        color: @text-primary-color-lighter;
+    }
+
+    .empty {
+        text-align: center;
+        padding: @space-32;
+        color: @text-primary-color-lighter;
+        background-color: @bg-secondary-color-lighter;
+        border-radius: 4px;
+    }
+
+    .modules-list {
+        display: flex;
+        flex-direction: column;
+        gap: @space-8;
+    }
+
+    .module-card {
+        display: flex;
+        cursor: pointer;
+        justify-content: space-between;
+        align-items: center;
+        padding: @space-16;
+        background-color: @bg-secondary-color-lighter;
+        border-radius: 4px;
+        border-left: 3px solid @text-secondary-color;
+        transition: background-color @transition-normal;
+
+        &:hover {
+            background-color: @bg-secondary-color;
+        }
+    }
+
+    .module-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .module-name {
+        font-size: @font-size-16;
+        font-weight: @font-weight-bold;
+        color: @text-primary-color;
+    }
+
+    .module-category {
+        font-size: @font-size-12;
+        color: @text-primary-color-lighter;
+    }
+
+    .module-files {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .files-count {
+        font-size: @font-size-20;
+        font-weight: @font-weight-bold;
+        color: @text-secondary-color;
+    }
+
+    .files-label {
+        font-size: @font-size-12;
+        color: @text-primary-color-lighter;
+    }
+
+    .form {
+        display: flex;
+        flex-direction: column;
+        gap: @space-16;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: @space-8;
+    }
+
+    .label {
+        font-size: @font-size-12;
+        font-weight: @font-weight-bold;
+        color: @text-primary-color;
+    }
+
+    .input {
+        padding: @space-8 @space-16;
+        font-size: @font-size-16;
+        border: 1px solid @grey-color-dark;
+        border-radius: 4px;
+        background-color: @bg-primary-color;
+        color: @text-primary-color;
+        transition: border-color @transition-normal;
+
+        &:focus {
+            outline: none;
+            border-color: @text-secondary-color;
+        }
+
+        &::placeholder {
+            color: @text-primary-color-lighter-disabled;
+        }
+    }
+
+    .btn-save {
+        padding: @space-16;
+        background-color: @success-color;
+        color: @bg-primary-color;
+        border: none;
+        border-radius: 4px;
+        font-size: @font-size-16;
+        font-weight: @font-weight-bold;
+        cursor: pointer;
+        transition: background-color @transition-normal;
+        margin-top: @space-8;
+
+        &:hover:not(:disabled) {
+            background-color: @success-color-hover;
+        }
+
+        &:disabled {
+            background-color: @success-color-disabled;
+            cursor: not-allowed;
+        }
+    }
+}
+
+
