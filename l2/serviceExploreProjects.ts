@@ -233,6 +233,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                 <div class="filter-container" style="display:flex">
                     <input style="width:100%" type="text" placeholder="Filter" @input=${this._filterProjects}>
                 </div>
+                ${this.renderHistory()} 
                 ${this.renderList()}
                 ${this.renderTotsOrgs()}
             </div>
