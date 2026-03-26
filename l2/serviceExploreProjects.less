@@ -27,27 +27,37 @@ service-explore-projects-100554 {
         outline: none;
     }
 
-    button{
+    svg{
+        color: @text-primary-color;
+        fill: @text-primary-color;
+    }
 
-        border:none;
+    button {
+
+        border: none;
         display: flex;
         flex-direction: row;
         justify-content: center;
-        gap:.2rem;
+        gap: .2rem;
         font-weight: 700;
         align-items: center;
         height: 40px;
         transition: height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         padding: 0.5rem;
-        cursor:pointer;
+        cursor: pointer;
         background: none;
         color: @active-color;
+
         &:hover {
             color: @active-color-hover;
             text-decoration: underline;
         }
     }
 
+    .linkItem {
+        color: @link-color-hover;
+        cursor: pointer;
+    }
 
     .l5-project-list {
 
@@ -64,8 +74,8 @@ service-explore-projects-100554 {
         .serviceListTitle {
             padding: 0.3em 1em;
             list-style-type: none;
-            background: #f7f7f7;
-            color: #000;
+            background:@grey-color ;
+            color: @text-primary-color; 
             font-weight: 600;
             cursor: default;
         }
@@ -88,19 +98,23 @@ service-explore-projects-100554 {
 
                 &[disabled] {
                     opacity: .5;
-                    cursor:not-allowed;
+                    cursor: not-allowed;
+
                     .linkItem {
                         font-weight: @font-weight-normal;
                         cursor: not-allowed;
-                        &:hover{
+
+                        &:hover {
                             text-decoration: none;
                         }
                     }
                 }
 
-                &:hover, &.selected {
-                    background: @grey-color;
-                    .linkItem{
+                &:hover,
+                &.selected {
+                    background: @bg-primary-color-lighter-disabled;
+
+                    .linkItem {
                         font-weight: @font-weight-bolder;
                         color: @link-color-hover;
                     }

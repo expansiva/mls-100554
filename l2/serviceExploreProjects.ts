@@ -1,7 +1,7 @@
 /// <mls fileReference="_100554_/l2/serviceExploreProjects.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, css } from 'lit';
-import { customElement, property, queryAll, query } from 'lit/decorators.js';
+import { customElement, property, queryAll, query, state } from 'lit/decorators.js';
 import { setProjectDetails, getProjectDetails } from '/_102027_/l2/libCommom.js';
 import { loadProjectHistory, saveProjectHistory } from '/_102027_/l2/libHistoriesRecents.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
@@ -55,7 +55,8 @@ const message_pt = {
     step3Title: 'Passo 3',
     step1Msg: 'Escolha o driver para carregar suas organizações existentes.',
     step2Msg: 'Agora selecione a organização e o modo de atualização.',
-    step3Msg: 'Finalmente, selecione a equipe e a visibilidade do projeto.'
+    step3Msg: 'Finalmente, selecione a equipe e a visibilidade do projeto.',
+    orgsTot: 'Total de organizações'
 }
 
 const message_en = {
@@ -107,6 +108,7 @@ const message_en = {
     step1Msg: 'Choose the driver to load your existing organizations.',
     step2Msg: 'Now select the organization and the update mode.',
     step3Msg: 'Finally select the team and the visibility of the project.',
+    orgsTot: 'Total organizations'
 }
 
 type MessageType = typeof message_en;
@@ -122,6 +124,8 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
     private msg: MessageType = messages['en'];
 
+    @state() scenary = 'list';
+    @state() inFilter = false;
     @property() projectCreated: boolean = false;
     @property() state: IServiceList = { history: [], orgs: [], projectSelected: undefined };
     @property() lastPrjId: string | null | undefined;
@@ -188,6 +192,8 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         super.connectedCallback();
         this.setEvents();
         this.getLastProject();
+        this.getOrgsAndProjects(); 
+        this.state.history = loadProjectHistory();
     }
 
     createRenderRoot() {
@@ -207,7 +213,7 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     renderContent() {
         switch (this.activeTab) {
             case 'IExplore':
-                return this.renderSelectProject();
+                return this.scenary === 'list' ? this.renderSelectProject() : this.renderScenaryOrg();
             default:
                 return html``;
         }
@@ -221,16 +227,14 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     renderSelectProject() {
         if (this.visible === 'true') this.firedetail('<projects-100554></projects-100554>');
         
-        this.getOrgsAndProjects(); 
-        this.state.history = loadProjectHistory();
+        
         return html`
             <div class="scroll-custom l5-project-list">
                 <div class="filter-container" style="display:flex">
                     <input style="width:100%" type="text" placeholder="Filter" @input=${this._filterProjects}>
                 </div>
-                ${this.renderHistory()}
                 ${this.renderList()}
-                
+                ${this.renderTotsOrgs()}
             </div>
         `
     }
@@ -247,14 +251,13 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                             const name = his.name.length > 22 ? his.name.substring(0, 22) + '...' : his.name;
 
                             return html`
-                        <li ?disabled=${!his.doSelect} class=${this.lastPrjId && +this.lastPrjId === his.project ? "selected" : ""} title="${his.name}" >
+                        <li ?disabled=${!his.doSelect} class=${this.lastPrjId && +this.lastPrjId === his.project ? "selected" : ""} title="${his.name}" @click=${() => { this.onHistoryClick(his) }}>
                             <div>
                                 <span>${name + ' (' + his.project.toString() + ')'}</span>
                             </div>
                             <div style="display:flex; gap:1rem;font-size:.8rem">
-                                <span class="linkItem" @click=${() => { this.onHistoryClick(his) }}>
-                                    ${this.msg.select}
-                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M439.1 297.4C451.6 309.9 451.6 330.2 439.1 342.7L279.1 502.7C266.6 515.2 246.3 515.2 233.8 502.7C221.3 490.2 221.3 469.9 233.8 457.4L371.2 320L233.9 182.6C221.4 170.1 221.4 149.8 233.9 137.3C246.4 124.8 266.7 124.8 279.2 137.3L439.2 297.3z"/></svg>
+                                
                             </div>
                         </li>
                     `})}
@@ -267,27 +270,67 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         return html`
             <div class="serviceListProjects">
                 ${this.state.orgs.map((org) => {
-            return html`
-                    <div class="serviceListTitle">${org.key}</div>
-                    <ul class="serviceListList">
-                        ${org.projects.map((prj) => {
+                    return html`
+                    <div style="display:${org.selected || this.inFilter ? '' : 'none'}">
+                        <div class="serviceListTitle">Org: ${org.key}</div>
+                        <ul class="serviceListList">
+                            ${org.projects.map((prj) => {
 
-                            const name = prj.name.length > 22 ? prj.name.substring(0, 22) + '...' : prj.name;
+                                const name = prj.name.length > 22 ? prj.name.substring(0, 22) + '...' : prj.name;
 
-                            return html`
-                            <li ?disabled=${!prj.doSelect} class=${this.lastPrjId && +this.lastPrjId === prj.project ? "selected" : ""} title="${prj.name}">
-                                <div>
-                                    <span>${name + ' (' + prj.project.toString() + ')'}</span>
-                                </div>
-                                <div style="display:flex; gap:1rem;font-size:.8rem">
-                                    <span class="linkItem" @click=${() => this.onProjectClick(prj)}>
-                                        ${this.msg.select}
-                                    </span>
-                                </div>
-                            </li>
-                        `})}
-                    </ul>
+                                return html`
+                                <li ?disabled=${!prj.doSelect} class=${this.lastPrjId && +this.lastPrjId === prj.project ? "selected" : ""} title="${prj.name}" @click=${() => this.onProjectClick(prj)}>
+                                    <div>
+                                        <span>${name + ' (' + prj.project.toString() + ')'}</span>
+                                    </div>
+                                    <div style="display:flex; gap:1rem;font-size:.8rem">
+                                        <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M439.1 297.4C451.6 309.9 451.6 330.2 439.1 342.7L279.1 502.7C266.6 515.2 246.3 515.2 233.8 502.7C221.3 490.2 221.3 469.9 233.8 457.4L371.2 320L233.9 182.6C221.4 170.1 221.4 149.8 233.9 137.3C246.4 124.8 266.7 124.8 279.2 137.3L439.2 297.3z"/></svg>
+                                    </div>
+                                </li>
+                        `}) }
+                        </ul>
+                    </div>
                 `})}
+    
+            </div>
+        `;
+    }
+
+    renderTotsOrgs() {
+        if (this.state.orgs.length <= 1) return '';
+        return html`
+            <div class="linkItem" style="margin-top:1rem; float:right; padding-right: .7rem;" @click="${this.goToOrgs}">${this.msg.orgsTot} (${this.state.orgs.length})</div>
+        `
+    }
+
+    renderScenaryOrg() {
+        return html`
+            <div class="scroll-custom l5-project-list">
+                <div class="filter-container" style="display:flex">
+                    <input style="width:100%" type="text" placeholder="Filter" @input=${this._filterOrgs}>
+                </div>
+                ${this.renderListOrgs()}
+            </div>
+        `
+    }
+
+    renderListOrgs() {
+        return html`
+            <div class="serviceListProjects">
+                <div class="serviceListTitle">Orgs:</div>
+                <ul class="serviceListList">
+                    ${this.state.orgs.map((org) => {
+                    return html`    
+                        <li  @click=${() => this.onOrgClick(org)}>
+                            <div>
+                                <span>Org: ${org.key}</span>
+                            </div>
+                            <div style="display:flex; gap:1rem;font-size:.8rem">
+                                <svg xmlns="http://www.w3.org/2000/svg" style="width:15px" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M439.1 297.4C451.6 309.9 451.6 330.2 439.1 342.7L279.1 502.7C266.6 515.2 246.3 515.2 233.8 502.7C221.3 490.2 221.3 469.9 233.8 457.4L371.2 320L233.9 182.6C221.4 170.1 221.4 149.8 233.9 137.3C246.4 124.8 266.7 124.8 279.2 137.3L439.2 297.3z"/></svg>
+                            </div>
+                        </li>
+                    `})}
+                </ul>
     
             </div>
         `;
@@ -364,12 +407,15 @@ export class ServiceExploreProjects100554 extends ServiceBase {
 
             if (prj.length <= 0) return;
 
+            const selected = !!prj.find((i) => this.lastPrjId && +this.lastPrjId === i.project);
+
             const obj: IStateOrg = {
                 name,
                 created_at,
                 description,
                 key: org,
-                projects: prj
+                projects: prj,
+                selected
             };
 
             this.state.orgs.push(obj);
@@ -395,6 +441,8 @@ export class ServiceExploreProjects100554 extends ServiceBase {
                 this.titleList?.forEach((item) => { item.style.display = ''; });
                 if (this.historieEl) this.historieEl.style.display = 'block';
             }
+
+            this.inFilter = !!filterText;
             this.list?.forEach((li: HTMLElement) => {
                 li.style.display = '';
                 const text = li.querySelector('span')?.innerText;
@@ -445,6 +493,37 @@ export class ServiceExploreProjects100554 extends ServiceBase {
         saveProjectHistory(this.state.history);
     }
 
+    private onOrgClick(org: IStateOrg) {
+        this.state.orgs.forEach((o) => o.selected = o.key === org.key);
+        this.requestUpdate();
+        this.scenary = 'list'
+    }
+
+    private goToOrgs() {
+        this.scenary = 'orgs'
+    }
+
+    
+    private _filterOrgs(ev: InputEvent): void {
+        const filterText = (ev.target as HTMLInputElement).value;
+        clearTimeout(this.filterTimeout);
+        this.filterTimeout = setTimeout(() => {
+            if (filterText) {
+                this.titleList?.forEach((item) => { item.style.display = 'none'; });
+                if (this.historieEl) this.historieEl.style.display = 'none';
+            } else {
+                this.titleList?.forEach((item) => { item.style.display = ''; });
+                if (this.historieEl) this.historieEl.style.display = 'block';
+            }
+
+            this.list?.forEach((li: HTMLElement) => {
+                li.style.display = '';
+                const text = li.querySelector('span')?.innerText;
+                if (text && text.toLowerCase().indexOf(filterText.toLowerCase()) < 0) li.style.display = 'none';
+            });
+        }, 100);
+    }
+
 }
 
 enum ETabs {
@@ -456,7 +535,8 @@ interface IStateOrg {
     name: string,
     created_at: string,
     description: string,
-    projects: IInfoPrj[]
+    projects: IInfoPrj[],
+    selected:boolean,
 }
 
 interface IInfoPrj {
