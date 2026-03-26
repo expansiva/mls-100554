@@ -2,14 +2,15 @@
 
 import { html, repeat } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';  
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';  
   
 @customElement('plugin-task-preview-result-100554')
-export class pluginTaskPreviewResult extends CollabLitElement {
+export class CollabMessageTaskPreviewResult extends CollabLitElement {
 
     @property({ type: Object }) message: mls.msg.Message | null = null;
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIResultStep | null = null;
+    
     @state() private mode: string = 'result';
 
     render() {
