@@ -40,7 +40,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l7ServicesLeft', 'l6ServicesLeft', 'l5ServicesLeft', 'l4ServicesLeft', 'l3ServicesLeft', 'l2ServicesLeft', 'l1ServicesLeft'],
                 priority: 10,
                 auth: ['*'],
-                widget: '_102025_serviceCollabMessages'
+                widget: '_100554_serviceCollabMessages'
             },
             {
                 category: 'Services',
