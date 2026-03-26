@@ -2,30 +2,28 @@
 
 import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
-import { IAgent } from '/_100554_/l2/aiAgentBase.js';
-import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js'; 
- 
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
+import { getTemporaryContext } from '/_102029_/l2/aiAgentHelper.js';
+import { loadAgent } from '/_102029_/l2/aiAgentOrchestration.js';
+
 @customElement('plugin-task-preview-agent-100554')
-export class PluginTaskPreviewAgent extends CollabLitElement { 
+export class CollabMessageTaskPreviewAgent extends CollabLitElement {
 
     @property({ type: Object }) message: mls.msg.Message | null = null;
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIAgentStep | null = null;
     @property({ type: String }) agentDescription: string = '';
+    
     @state() private prompts: mls.msg.IAMessageInputType[] = [];
-    @state() private mode: string = 'info';  
-
+    @state() private mode: string = 'info';
 
     private lastKey: number = -1;
 
     firstUpdated() {
-
         this.init();
-
     }
 
-    update(changedProperties:any) {
+    update(changedProperties: any) {
         super.update(changedProperties);
         this.init();
     }
@@ -58,15 +56,9 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
             </div>
         `;
 
-        /*
-        <button
-            class="tab-button ${this.mode === 'result' ? 'active' : ''}" @click=${() => this.selectTabResult()} >
-            Payload                             
-        </button>
-         */
     }
 
-    renderMode() { 
+    renderMode() {
 
         switch (this.mode) {
             case 'input': return this.renderInputs();
@@ -74,10 +66,10 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
             case 'result': return this.renderResults();
             default: return this.renderInputs();
         }
- 
+
     }
 
-    renderInfo() { 
+    renderInfo() {
 
         if (!this.task || !this.step) return html`Not found!`;
 
@@ -93,7 +85,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
         return html`
         <div class="containerinputs">
             <details open>
-                <summary> ${this.renderSummary('Agent '+aux)} </summary>
+                <summary> ${this.renderSummary('Agent ' + aux)} </summary>
                 <ul>
                     <li>
                         #${this.step.stepId} - ${this.step.agentName} - ${this.step.status} - $${this.step.interaction?.cost}
@@ -113,7 +105,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
                         <header>
                                 <h2>${this.task.PK}</h2>
                                 <small>Status: ${this.task.status} | Última atualização: ${new Date(
-                            this.task.last_updated
+            this.task.last_updated
         ).toLocaleString()}</small>
                         <br/><small>${this.task.title}</small>
                         </header>
@@ -136,6 +128,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
                     <li>
                         <span>Execute</span>
                         <div style="float: right;">
+                            <span>(run again - test)</span>
                             <svg xmlns="http://www.w3.org/2000/svg" style="transform: rotateY(174deg); z-index:9999;width:15px; cursor:pointer" @click=${(e: MouseEvent) => { e.stopPropagation(); e.preventDefault(); this.replayForSupport(e.currentTarget as HTMLElement, (this.step as mls.msg.AIAgentStep).agentName, (this.step as mls.msg.AIAgentStep).interaction, (this.step as mls.msg.AIAgentStep).stepId) }} viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M209.4 39.5c-9.1-9.6-24.3-10-33.9-.9L33.8 173.2c-19.9 18.9-19.9 50.7 0 69.6L175.5 377.4c9.6 9.1 24.8 8.7 33.9-.9s8.7-24.8-.9-33.9L66.8 208 208.5 73.4c9.6-9.1 10-24.3 .9-33.9zM352 64c0-12.6-7.4-24.1-19-29.2s-25-3-34.4 5.4l-160 144c-6.7 6.1-10.6 14.7-10.6 23.8s3.9 17.7 10.6 23.8l160 144c9.4 8.5 22.9 10.6 34.4 5.4s19-16.6 19-29.2l0-64 32 0c53 0 96 43 96 96c0 30.4-12.8 47.9-22.2 56.7c-5.5 5.1-9.8 12-9.8 19.5c0 10.9 8.8 19.7 19.7 19.7c2.8 0 5.6-.6 8.1-1.9C494.5 467.9 576 417.3 576 304c0-97.2-78.8-176-176-176l-48 0 0-64z"/></svg>
                             <span class="result"></span>
                         </div>
@@ -209,7 +202,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
     renderResults() {
 
         if (!this.step) return html`Not found step`;
-        
+
         const nextOptions: any[] = [];
         if (this.step.interaction?.payload) {
             nextOptions.push(...this.step.interaction.payload);
@@ -221,7 +214,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
         return html`
         <ul>
             ${nextOptions.length === 0 ? html`<li><em>Not next step</em></li>`
-                : nextOptions.map( (ns) => html` <li> [${ns.stepId}] ${ns.type} - ${ns.agentName} </li> ` )}
+                : nextOptions.map((ns) => html` <li> [${ns.stepId}] ${ns.type} - ${ns.agentName} </li> `)}
         </ul>
         `
     }//<li @click=${() => this.navigateToStep(ns.stepId)}> [${ns.stepId}] ${ns.type} - ${ns.agentName} </li>
@@ -233,11 +226,8 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
     private async init() {
 
         if (this.step && this.step.stepId === this.lastKey) return;
-
         this.lastKey = this.step?.stepId || -1;
-
         this.getPrompts();
-
         await this.getDescription();
     }
 
@@ -246,29 +236,24 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
         if (!this.step || !this.step.agentName) return;
 
         try {
+            const agent = await loadAgent(this.step.agentName);
+            if (!agent) return;
+            if (!agent || !agent.agentDescription) return;
+            this.agentDescription = agent.agentDescription;
 
-            const md = await import(`/_100554_/l2/${this.step.agentName}`);
-            if (!md || !md.createAgent) return;
-
-            const info = md.createAgent();
-            if (!info || !info.agentDescription) return;
-
-            this.agentDescription = info.agentDescription;
-            
         } catch (e) {
-            
+
         }
-        
+
     }
 
     private getPrompts() {
 
-        if (this.step && this.step.interaction && this.step.interaction.input){
+        if (this.step && this.step.interaction && this.step.interaction.input) {
             this.prompts = this.step.interaction.input;
         } else {
             this.prompts = [];
         }
-
 
     }
 
@@ -284,8 +269,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
         this.mode = 'result';
     }
 
-    private PROJECTNUMBER = 100554
-    private async replayForSupport(el:HTMLElement, agentName: string, interaction: any, stepId: number) {
+    private async replayForSupport(el: HTMLElement, agentName: string, interaction: any, stepId: number) {
 
         const sum = el?.closest('div');
         let result: HTMLElement | undefined;
@@ -301,7 +285,7 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
                 el.classList.add('rotate');
                 el.classList.add('fa-rotate-left');
             } else {
-                el.classList.remove('fa-rotate-left'); 
+                el.classList.remove('fa-rotate-left');
                 el.classList.remove('rotate');
                 el.classList.add('fa-reply-all');
             }
@@ -309,25 +293,23 @@ export class PluginTaskPreviewAgent extends CollabLitElement {
 
         try {
             load(true);
-            const moduleAgent = await import(`/_${this.PROJECTNUMBER}_/l2/${agentName}`);
-            if (!moduleAgent || !this.task) throw new Error('Not found agent:' + agentName);
-            if (!moduleAgent.createAgent) throw new Error('Not found createAgent:' + agentName);
 
-            const agent = moduleAgent.createAgent() as IAgent ;
-            if(!agent.replayForSupport) throw new Error('Not found replayForSupport:' + agentName);
+
+            if (!this.task) throw new Error('Not found task');
+            const agent = await loadAgent(agentName);
+            if (!agent) throw new Error('Not found agent:' + agentName);
 
             const context = getTemporaryContext(this.task.PK, this.task.owner, 'context temporary');
-
             context.task = this.task;
-            
-            await agent.replayForSupport(context, interaction.payload);
 
+            if (agent.replayForSupport) await agent.replayForSupport(context, interaction.payload);
             if (result) result.innerText = 'result: Ok';
+
             load(false);
 
-        } catch (e:any) {
+        } catch (e: any) {
             console.info(e);
-            if (result) result.innerText = e && e.message ? 'result: '+e.message : 'result: Erro';
+            if (result) result.innerText = e && e.message ? 'result: ' + e.message : 'result: Erro';
             load(false);
         }
 

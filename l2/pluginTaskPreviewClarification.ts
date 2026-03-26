@@ -2,12 +2,12 @@
 
 import { html, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'; 
-import {getStepById, getTemporaryContext} from "/_100554_/l2/aiAgentHelper.js";
-import { IAgent } from '/_100554_/l2/aiAgentBase.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js'; 
+import { getStepById, getTemporaryContext } from "/_102029_/l2/aiAgentHelper.js";
+import { loadAgent } from '/_102029_/l2/aiAgentOrchestration.js';
 
 @customElement('plugin-task-preview-clarification-100554')   
-export class PluginTaskPreviewClarification extends CollabLitElement { 
+export class CollabMessageTaskPreviewClarification extends CollabLitElement { 
 
     @property({ type: Object }) message: mls.msg.Message | null = null;
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
@@ -18,7 +18,6 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
     private elClarification: HTMLDivElement | null = null;
 
     firstUpdated() {
-
         this.getFile();
     }
 
@@ -183,8 +182,6 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
     //------IMPLEMENTATION----------
 
 
-
-
     private selectTabClarification() {
         this.mode = 'clarification';
     }
@@ -193,26 +190,16 @@ export class PluginTaskPreviewClarification extends CollabLitElement {
         this.mode = 'info';
     }
 
-    private selectTabResult() {
-        this.mode = 'result';
-    }
-
-    private DEFAULTPROJECT = 100554;
     private async getFile() {
 
         if (!this.step || !this.task ) return;
-
         const agentName = this.getAgentBeforeStep(this.step.stepId);
         if (!agentName) return;
-
-        const url = `/_${this.DEFAULTPROJECT}_/l2/${agentName}`;
-        const md = await import(url) as any;
-        const agent = md.createAgent() as IAgent;
+        const agent = await loadAgent(agentName);
+        if (!agent) return;
         const ctx = getTemporaryContext('11111', this.task.owner, '');
         ctx.task = this.task;
-
         this.elClarification = agent.beforeClarification ? await agent.beforeClarification(ctx, this.step.stepId, true) : null;
-
         if (this.elClarification) this.tag = 'div';
 
     }

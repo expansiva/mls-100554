@@ -1,15 +1,16 @@
 /// <mls fileReference="_100554_/l2/pluginTaskPreviewTools.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, repeat } from 'lit';
+import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'; 
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js'; 
    
 @customElement('plugin-task-preview-tools-100554')
-export class pluginTaskPreviewTools extends CollabLitElement {
+export class CollabMessageTaskPreviewTools extends CollabLitElement {
 
     @property({ type: Object }) message: mls.msg.Message | null = null;
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIToolStep | null = null;
+    
     @state() private mode: string = 'info';
 
     render() {

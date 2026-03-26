@@ -1,16 +1,45 @@
 /// <mls fileReference="_100554_/l2/pluginTaskPreviewFlexible.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, repeat } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { customElement, property, state, query } from 'lit/decorators.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 
 @customElement('plugin-task-preview-flexible-100554')
-export class pluginTaskPreviewFlexible extends CollabLitElement {
+export class CollabMessageTaskPreviewFlexible extends CollabLitElement {
 
+    @state() private mode: string = 'flexible';
     @property({ type: Object }) message: mls.msg.Message | null = null;
     @property({ type: Object }) task: mls.msg.TaskData | null = null;
     @property({ type: Object }) step: mls.msg.AIFlexibleResultStep | null = null;
-    @state() private mode: string = 'flexible';
+
+    @property({ type: String }) msize = '';
+    private editor: IHTMLEditorElement | undefined;
+    @query('#elEditor') elEditor: IHTMLEditorElement | undefined;
+    private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
+    get confE() { return `l2_left`; }
+
+    async firstUpdated() {
+        this.createEditor();
+    }
+
+    updated(changedProps: Map<string, any>) {
+        if (changedProps.has('step') && this.mode === 'flexible') {
+            this.updateEditorContent();
+        }
+        if (changedProps.has('msize')) {
+            this.editor?.setAttribute('msize', this.msize);
+        }
+    }
+
+    private updateEditorContent() {
+        if (!this._ed1 || !this.step) return;
+
+        const value = JSON.stringify(this.step.result, null, 2);
+        const model = this._ed1.getModel();
+        if (model) {
+            model.setValue(value);
+        }
+    }
 
     render() {
 
@@ -51,7 +80,6 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
 
     }
 
-
     renderInfo() {
 
         if (!this.task || !this.step) return html`Not found!`;
@@ -59,7 +87,7 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
         return html`
         <div class="containerinputs">
             <details open>
-                <summary> ${this.renderSummary('Flexible '+aux)} </summary>
+                <summary> ${this.renderSummary('Flexible ' + aux)} </summary>
                 <ul>
                     <li>
                         #${this.step.stepId} - ${this.step.type} - ${this.step.status} - $${this.step.interaction ? this.step.interaction.cost : '0'}
@@ -138,10 +166,10 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
                 `
             }
 
-                
+
         }
 
-        return html`<pre>${JSON.stringify(this.step.result, null, 2)}</pre>`
+        return html`<div id="elEditor" style="width:100%; height:100%"></div>`
 
     }
 
@@ -167,6 +195,41 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
 
     //------IMPLEMENTATION----------
 
+    private createModel() {
+        const uri = monaco.Uri.parse(`file://server/taskViewModel.ts`);
+        let src = '';
+        let model1 = monaco.editor.getModel(uri);
+        if (!model1) model1 = monaco.editor.createModel(src, 'javascript', uri);
+        return model1;
+    }
+
+    private createEditor(): void {
+        if (!this.elEditor || this._ed1) return;
+        if ((window as any).editorTaskView) {
+            this.editor = (window as any).elEditorTaskView;
+            this._ed1 = (window as any).editorTaskView;
+            this._ed1?.setModel(this.createModel());
+
+        } else {
+
+            const model = this.createModel();
+            (window as any).elEditorTaskView = document.createElement('mls-editor-100529');
+            (window as any).elEditorTaskView.style.cssText = 'width:100%; height:100%'
+            this.editor = (window as any).elEditorTaskView as IHTMLEditorElement;
+            (window as any).editorTaskView = monaco.editor.create(this.editor, this.conf as monaco.editor.IEditorOptions);
+            this._ed1 = (window as any).editorTaskView as monaco.editor.IStandaloneCodeEditor;
+            monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+                noImplicitAny: true
+            });
+
+            this._ed1.updateOptions({ readOnly: true });
+            this.editor.mlsEditor = this._ed1;
+            this._ed1.setModel(model);
+        }
+
+        this.elEditor.appendChild(this.editor as any);
+    }
+
 
     private selectTabFlexible() {
         this.mode = 'flexible';
@@ -180,4 +243,37 @@ export class pluginTaskPreviewFlexible extends CollabLitElement {
         this.mode = 'result';
     }
 
+    private conf = {
+        "contextmenu": true,
+        "autoIndent": "full",
+        "wordWrap": "on",
+        "wrappingIndent": "indent",
+        "tabCompletion": "on",
+        "renderControlCharacters": false,
+        "showUnused": true,
+        "glyphMargin": true,
+        "minimap": {
+            "enabled": false
+        },
+        "useTabStops": true,
+        "scrollBeyondLastColumn": 2,
+        "scrollBeyondLastLine": false,
+        "formatOnType": true,
+        "fixedOverflowWidgets": true,
+        "codeLens": true,
+        "showFoldingControls": "mouseover",
+        "suggestSelection": "first",
+        "stickyScroll": {
+            "enabled": false,
+            "maxLineCount": 3
+        },
+        "stickyTabStops": true,
+        "fontSize": 14,
+        "automaticLayout": true,
+    }
+
+}
+
+interface IHTMLEditorElement extends HTMLElement {
+    mlsEditor: monaco.editor.IStandaloneCodeEditor
 }
