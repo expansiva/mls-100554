@@ -1,7 +1,7 @@
 /// <mls fileReference="_100554_/l2/pluginExploreList.ts" enhancement="_100554_/l2/enhancementLit" /> 
 
-import { html, css, svg, repeat, TemplateResult } from 'lit';
-import { property, queryAll } from 'lit/decorators.js'; 
+import { html, css, svg, repeat, TemplateResult } from 'lit'; 
+import { property, queryAll, state } from 'lit/decorators.js'; 
 import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from '/_102027_/l2/libCommom.js';
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, undoFile, IReqCreateStorFile, createStorFile } from '/_102027_/l2/libStor.js';
 import { createAllModels, createModel, readProjectTypescriptAndCompile, readProjectTypescriptAndCompileL1 } from '/_102027_/l2/libModel.js';
@@ -11,6 +11,7 @@ import { PluginBaseModule } from '/_102027_/l2/pluginBaseModule.js';
 
 import { isNameValid } from '/_102027_/l2/libCommom.js';
 import '/_100554_/l2/collabInputSearch.js';
+import '/_100554_/l2/mlsFileTree.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -33,7 +34,8 @@ const message_pt = {
     components: 'Filtrar por Componente',
     others: 'Filtrar por Outros arquivos',
     orderName: 'Ordenar por nome',
-    orderFolder: 'Ordenar por pasta'
+    orderFolder: 'Ordenar por pasta',
+    allFiles: 'Todos os arquivos'
 }
 
 const message_en = {
@@ -56,7 +58,8 @@ const message_en = {
     components: 'Filter by Component',
     others: 'Filter by Other Files',
     orderName: 'Sort by name',
-    orderFolder: 'Sort by folder'
+    orderFolder: 'Sort by folder',
+    allFiles: 'All files'
 }
 
 type MessageType = typeof message_en;
@@ -117,6 +120,8 @@ export class PluginExploreList extends PluginBaseModule {
     @property({ type: Array }) files: mls.stor.IFileInfo[] = [];
 
     @property({ type: Array }) history: mls.stor.IFileInfo[] = [];
+
+    @state() modeFilter: string | undefined;
 
     @queryAll('li') lis: HTMLElement[] | undefined;
 
@@ -315,6 +320,7 @@ export class PluginExploreList extends PluginBaseModule {
                         <select @change=${this.changeHiddenFiles} .value="comp">
                             <option value="comp">${this.msg.components}</option>
                             <option value="other">${this.msg.others}</option>
+                            <option value="all">${this.msg.allFiles}</option>
                         </select>
                         <select @change=${this.changeModeOrder} .value="0">
                             <option value="0">${this.msg.orderName}</option>
@@ -364,6 +370,10 @@ export class PluginExploreList extends PluginBaseModule {
     }
 
     renderList() {
+
+        if (this.modeFilter === 'all' && this.filterProject > 0) {
+            return html`<mls-file-tree-100554 project="${this.filterProject}"></mls-file-tree-100554>`
+        }
 
         let letterInit = '';
         return html`
@@ -571,6 +581,7 @@ export class PluginExploreList extends PluginBaseModule {
         if (isHistory && folder) name = folder + '/' + file.shortName;
         if (isHistory && this.filterProject === 0) name = file.project + '_' + folder + '/' + file.shortName;
 
+        if (this.modeFilter === 'other') name = name + file.extension;
         return name;
     }
 
@@ -1089,7 +1100,8 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.storage = 0;
         this.info.error = 0;
         this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
-        this.hiddenFiles = e.target.value === 'other';
+        this.hiddenFiles = ['other', 'all'].includes(e.target.value);
+        this.modeFilter = e.target.value;
         await this.getFiles();
 
     }
@@ -1141,7 +1153,7 @@ export class PluginExploreList extends PluginBaseModule {
                 const name = li.nameFilter ? li.nameFilter : '******';
                 const inp = el.value.toLocaleLowerCase();
 
-                if (name.indexOf(inp) >= 0) {
+                if (name.indexOf(inp) >= 0 || li.classList.contains('folder')) {
                     li.style.display = '';
                 } else {
                     li.style.display = 'none';

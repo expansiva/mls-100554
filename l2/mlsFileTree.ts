@@ -1,0 +1,326 @@
+/// <mls fileReference="_100554_/l2/mlsFileTree.ts" enhancement="_100554_/l2/enhancementLit"/>
+
+
+import { html, css, nothing, TemplateResult } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { undoFile, deleteFile} from '/_102027_/l2/libStor.js';
+
+interface FileInfo {
+    project: number;
+    level: number;
+    shortName: string;
+    folder: string;
+    extension: string;
+}
+
+interface TreeNode {
+    name: string;
+    fullPath: string;
+    isFolder: boolean;
+    children: TreeNode[];
+    fileKey?: string;
+    extension?: string;
+    file: mls.stor.IFileInfo
+}
+
+@customElement('mls-file-tree-100554')
+export class MlsFileTree extends CollabLitElement {
+
+    @property() project: string | undefined;
+    @property({ type: Object }) files: Record<string, FileInfo> = {};
+    @state() private expanded: Set<string> = new Set();
+    @state() private selected: string = '';
+
+    firstUpdated() {
+        this.project = this.project ? this.project : (mls.actualProject || 0).toString()
+    }
+
+    render() {
+        // read from global if no property passed
+        const src = Object.keys(this.files).length > 0
+            ? this.files
+            : mls.stor.files ?? {};
+
+        if (Object.keys(src).length === 0) {
+            this.files = src;
+            return html`<div style="padding:8px;color:#888">Nenhum arquivo encontrado em mls.stor.files</div>`;
+        }
+
+        if (this.files !== src) this.files = src;
+
+        const tree = this.buildTree();
+
+        return html`
+            <ul class="tree-root">
+                ${tree.children.map(c => this.renderNode(c, 0))}
+            </ul>
+        `;
+    }
+
+    private renderNode(node: TreeNode, depth: number): TemplateResult<1> {
+        if (node.isFolder) {
+            const isOpen = this.expanded.has(node.fullPath);
+
+            return html`
+                <li class="test-item folder" style="--depth: ${depth}" @click=${() => this.toggleFolder(node.fullPath)} >
+                    <div class="elContent">
+                        <info-item>
+                            <span class="arrow ${isOpen ? 'open' : ''}">▶</span>
+                            <span class="icon">📁</span>
+                            <div style="display:flex; gap:.5rem" .innerHTML="${node.name}"></div>
+                        
+                        <span style="cursor:pointer;z-index: 99;display: flex; position: absolute; right: 25px;" title="delete all this folder" @click=${() => { this.undoAllByFolders(node.fullPath) }}><span class="fa fa-undo"></span></span>
+
+                        <span style="cursor:pointer;z-index: 99;display: flex; position: absolute; right: 5px;" title="delete all this folder" @click=${() => { this.delAllByFolders(node.fullPath) }}><svg xmlns="http://www.w3.org/2000/svg" style="width:15px; cursor:pointer; z-index:-1" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z"/></svg></span>
+                        </info-item>
+                    </div>
+                </li>
+                ${isOpen ? node.children.map(c => this.renderNode(c, depth + 1)) : nothing}
+            `;
+
+        } else {
+
+            return this.renderItem(node, depth);
+
+        }
+    }
+
+    renderItem(node: TreeNode, depth: number) {
+        const isSelected = this.selected === node.fileKey;
+
+        const file = node.file;
+        let auxVersion = '';
+        let auxStorage = '';
+        let auxBug = '';
+        let auxHtml = '';
+
+
+        const titleLocalStorage = this.getTitleInLocalStorage(file);
+        if (titleLocalStorage) {
+            auxStorage = `<span title=" ${titleLocalStorage} in localstorage" class="fa fa-location-dot" style="color:lightskyblue; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
+        }
+
+        if (file.hasError) {
+            auxBug = `<span title="bug" class="fa fa-bug" style="color:rgb(169, 3, 3); height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
+        }
+
+        if (file.isLocalVersionOutdated) {
+            auxVersion = `<span title="need conciliation" class="fa fa-unbalanced" style="color:orange; height: 14px; display: flex; justify-content: center; align-items: center;"></span>`
+        }
+
+
+        return html` 
+                <li  .myFile=${node.file} class="test-item" @click=${() => this.selectFile(node.fileKey!, node.file)} style="--depth: ${depth}" .nameFilter="${node.file.shortName.toLocaleLowerCase()}">
+                    <div class="elContent">
+                        <info-item>
+                            <span class="classClick" @click="${this.clickGroupHidden}">
+                                <span class="groupHiddenListIcon" >
+                                    <svg xmlns='http://www.w3.org/2000/svg' style='height: 21px;' viewBox='0 0 128 512' ><path style='fill:var(--text-primary-color)' d='M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z' fill='rgb(66,65,65,1)'/></svg>
+                                </span>
+                            </span>
+                            </span>
+                            <span class="spanFileName ${node.file.status === 'deleted' ? 'fileDeleted' : ''}">${node.name}</span>
+                            <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion + auxHtml}"></div>
+                        </info-item>
+                        <div class="groupHiddenList">
+                            <span class="mls-gpbtnslider-item" title="Undo" @click=${(e: any) => { e.stopPropagation(); this.undoFile(node.file)}}><span class="fa fa-undo"></span> Undo</span>
+                            <span class="mls-gpbtnslider-item" title="Delete" @click=${(e: any) => { e.stopPropagation(); this.deleteFile(node.file)}}><span class=" fa fa-trash"></span> Delete</span>
+                        </div>
+                    </div>
+                </li>
+            `;
+    }
+
+    private async deleteFile(file: mls.stor.IFileInfo) {
+        await deleteFile(file);
+        this.requestUpdate();
+    }
+
+    private async undoFile(file: mls.stor.IFileInfo) {
+        await undoFile(file);
+        this.requestUpdate();
+    }
+
+    private getTitleInLocalStorage(file: mls.stor.IFileInfo) {
+
+        const fileLocal = file && file.inLocalStorage && this.verifyDifBaseTemplate(file);
+        return fileLocal ? file.extension : '';
+
+    }
+
+    private dataDifBaseTemplate: Record<string, boolean> = {};
+    private verifyDifBaseTemplate(file: mls.stor.IFileInfo): boolean {
+
+        const { folder, shortName, project, extension } = file;
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, extension);
+
+        if (this.dataDifBaseTemplate[key] === undefined) return file.inLocalStorage;
+
+        return this.dataDifBaseTemplate[key];
+
+    }
+
+    private buildTree(): TreeNode {
+        const root: TreeNode = { name: '', fullPath: '', isFolder: true, children: [], file: {} as mls.stor.IFileInfo };
+
+        const getOrCreateFolder = (parent: TreeNode, name: string, path: string): TreeNode => {
+            let node = parent.children.find(c => c.isFolder && c.name === name);
+            if (!node) {
+                node = { name, fullPath: path, isFolder: true, children: [], file: {} as mls.stor.IFileInfo };
+                parent.children.push(node);
+            }
+            return node;
+        };
+
+        for (const [key, file] of Object.entries(this.files)) {
+            if (file.project !== +(this.project || '0') || isNaN(file.level)) continue;
+
+            const segments: string[] = [];
+            if (file.level > 0) segments.push(`l${file.level}`);
+            if (file.folder) segments.push(file.folder);
+
+            let current = root;
+            let pathSoFar = '';
+            for (const seg of segments) {
+                pathSoFar += '/' + seg;
+                current = getOrCreateFolder(current, seg, pathSoFar);
+            }
+
+            const fileName = file.shortName + file.extension;
+            current.children.push({
+                name: fileName,
+                fullPath: key,
+                isFolder: false,
+                children: [],
+                fileKey: key,
+                extension: file.extension,
+                file: file as mls.stor.IFileInfo
+            });
+        }
+
+        // sort: folders first, then files, alphabetically
+        const sortNode = (node: TreeNode) => {
+            node.children.sort((a, b) => {
+                if (a.isFolder !== b.isFolder) return a.isFolder ? -1 : 1;
+                return a.name.localeCompare(b.name);
+            });
+            node.children.forEach(sortNode);
+        };
+        sortNode(root);
+
+        return root;
+    }
+
+    private toggleFolder(path: string) {
+        const next = new Set(this.expanded);
+        next.has(path) ? next.delete(path) : next.add(path);
+        this.expanded = next;
+    }
+
+    private selectFile(key: string, file: mls.stor.IFileInfo) {
+        this.selected = key;
+        this.fireEventsDetails(file);
+    }
+
+    private clickGroupHidden(e: MouseEvent) {
+
+        e.stopPropagation();
+        const el = e.target as HTMLElement;
+        const father = el.closest('div');
+        if (!father)
+            return;
+        const target = father.querySelector('.groupHiddenList');
+        if (!target)
+            return;
+        target.classList.toggle('activegpbtnslider');
+
+
+
+    }
+
+    private async delAllByFolders(folder: string) {
+    
+        const level = this.getLevel(folder + '/');
+        folder = this.clearPath(folder + '/')
+
+        if (folder === 'root') folder = '';
+
+        const all = Object.keys(mls.stor.files).filter((k) => {
+
+            const s = mls.stor.files[k];
+            if (!s || s.project !== +(this.project || '0') || s.folder !== folder || s.level !== level) return false;
+
+            return true;
+
+        })
+
+        for await (const k of all) {
+
+            const mfile = mls.stor.files[k];
+            if (!mfile) continue;
+
+            await deleteFile(mfile);
+
+        }
+
+        this.requestUpdate();
+    }
+
+    private async undoAllByFolders(folder: string) {
+    
+        const level = this.getLevel(folder + '/');
+        folder = this.clearPath(folder + '/')
+
+        if (folder === 'root') folder = '';
+
+        const all = Object.keys(mls.stor.files).filter((k) => {
+
+            const s = mls.stor.files[k];
+            if (!s || s.project !== +(this.project || '0') || s.folder !== folder || s.level !== level) return false;
+
+            return true;
+
+        })
+
+        for await (const k of all) {
+
+            const mfile = mls.stor.files[k];
+            if (!mfile) continue;
+
+            await undoFile(mfile);
+
+        }
+
+        this.requestUpdate();
+    }
+
+    private getLevel(str: string) {
+        const match = str.match(/\/l(\d+)\//);
+        return match ? Number(match[1]) : null;
+    }
+
+    private clearPath(str: string) {
+        let path = str.replace(/^\/l\d+\//, '/').replace(/\/$/, '');
+        if(path.startsWith('/')) path = path.replace(/^\/+/, '')
+        return path
+    }
+
+    private fireEventsDetails(stor: mls.stor.IFileInfo) {
+        const key = mls.stor.getKeyToFile(stor);
+
+        const options = {
+            shortName: undefined,
+            project: undefined,
+            htmlText: '<plugin-view-file-100554 nameFile="' + key + '"></plugin-view-file-100554>'
+        }
+
+        mls.events.fire(
+            mls.actualLevel as any,
+            'PluginDetails' as any,
+            JSON.stringify(options),
+            0
+        );
+    }
+
+}

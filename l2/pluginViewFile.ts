@@ -160,6 +160,8 @@ export class PluginViewFile extends PluginBaseModule {
 
     renderInfoMode(): TemplateResult {
 
+        return html`<div id="elEditor" style="width:93%; min-height: 500px; display:${this.current === 2 ? 'block' : 'none'}"></div>`
+
         if (!this.file) return html``;
 
         if (this.isReadableText()) {
