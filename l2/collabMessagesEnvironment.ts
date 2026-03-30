@@ -30,7 +30,8 @@ export const collabEnvironment: CollabMessagesEnvironment = {
         openTaskDetails: (messageId: string, taskId: string, task: TaskData, message: Message) => openTaskDetails(messageId, taskId, task, message)
     },
     config: {
-        getMenuMode: () => 'custom'
+        getMenuMode: () => 'custom',
+        generateSvgAvatarEnabled: () => false
     }
 }
 
