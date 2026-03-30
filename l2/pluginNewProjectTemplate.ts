@@ -21,14 +21,7 @@ export const template_tsconfig = {
         "emitDecoratorMetadata": false,
         "noImplicitAny": false,
         "strictNullChecks": false,
-        "paths": {
-            "lit": [
-                "./project/_100554_/l2/litElement.ts"
-            ],
-            "lit/decorators.js": [
-                "./project/_100554_/l2/litDecorators.ts"
-            ]
-        },
+        "paths": {},
         "lib": [
             "dom",
             "ES2022"
@@ -88,6 +81,7 @@ export const template_package = {
         "dependencies": {
             "adm-zip": "0.5.16",
             "less": "^4.2.0",
+            "esbuild": "^0.27.2",
             "mls-ci": "git+https://github.com/expansiva/mls-ci.git",
             "node-fetch": "^2.7.0",
             "typescript": "^5.5.3"
@@ -129,8 +123,20 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '14'  # ou a versão do Node.js que você está usando
+        node-version: '24'  # ou a versão do Node.js que você está usando
 
+    - name: Fix package name
+      run: |
+        if [ -f packagelib.json ]; then
+          mv packagelib.json package.json
+        fi
+
+    - name: Fix tsconfig name
+      run: |
+        if [ -f tsconfiglib.json ]; then
+          mv tsconfiglib.json tsconfig.json
+        fi
+        
     - name: Install dependencies
       run: npm install
 
