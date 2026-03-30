@@ -4,11 +4,10 @@ import { html, } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_100554_/l2/serviceBase.js';
 
-import { setStorageAdapter } from '/_102029_/l2/storageAdapter.js';
 import { setEnvironment } from '/_102036_/l2/environmentContract.js';
 import { collabEnvironment } from '/_100554_/l2/collabMessagesEnvironment.js';
-import * as collabMessagesIndexedDb from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { checkIfNotificationUnread } from '/_102025_/l2/collabMessagesSyncNotifications.js';
+
 import {
     loadLastTab,
 } from "/_102025_/l2/collabMessagesHelper.js";
@@ -156,7 +155,6 @@ export class ServiceCollabMessages extends ServiceBase {
     }
 
     private bootstrapCollabMessages() {
-        setStorageAdapter(collabMessagesIndexedDb);
         setEnvironment(collabEnvironment);
     }
 
