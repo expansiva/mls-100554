@@ -397,13 +397,13 @@ export class PluginCreateProject extends CollabLitElement {
   }
 
   private async createInitialPackageFile(project: number) {
-    const fileName = 'package.json';
+    const fileName = 'packagelib.json';
     const content = template_package.template.replace(/\[project\]/g, project.toString()).trim();
     await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
   }
 
   private async createInitialTSConfigFile(project: number) {
-    const fileName = 'tsconfig.json';
+    const fileName = 'tsconfiglib.json';
     const content = template_tsconfig.template.trim();
     await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
   }

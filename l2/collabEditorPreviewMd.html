@@ -1,0 +1,90 @@
+<collab-editor-preview-md-100554 ">
+# productEdit
+  mode: edit
+  labelType: above
+  service: product.getById
+
+> field: 
+  label:Product Edit
+  type: text
+  molecule: h1
+ 
+## main {cols: 2}
+
+### Dados gerais {context: tab}
+
+#### Identificação
+
+> field: 
+  label:Nome do produto
+  type: text
+  molecule: label
+ 
+> field: ui.productEdit.name
+  label: Nome do produto
+  type: text
+  molecule: input
+  placeholder: Ex: Ração Premium
+  maxLength: 200
+  hint: Digite o **nome** completo
+  example: Ração Premium Adultos 15kg
+
+> field: 
+  label:Código SKU
+  type: text
+  molecule: label
+
+> field: ui.productEdit.sku
+  label: Código SKU
+  type: text
+  molecule:input
+  placeholder: Ex: RAC-001
+  hint: Código único do produto
+
+> field: 
+  label:Situação
+  type: text
+  molecule: label
+
+> field: ui.productEdit.status
+  label: Situação
+  type: select
+  molecule: select
+  example: Ativo
+
+### Mídia {context: tab}
+
+> field: ui.productEdit.coverImage
+  label: Imagem de capa
+  type: image
+  src: https://petcaesecia.fbitsstatic.net/img/p/racao-quatree-gourmet-para-caes-adultos-de-racas-pequenas-83936/268098-1.jpg?w=1200&h=1200&v=202501271254&qs=ignore
+  style: width:150px
+  molecule:img
+  hint: PNG ou JPG até 2MB
+
+## aside {cols: 1/3}
+
+> field: ui.productEdit.price
+  label: Preço
+  type: currency
+  example: 89,90
+  molecule:h4
+
+> field: ui.productEdit.price
+  label: 89,90
+  type: currency
+  molecule:h4
+
+> field: ui.productEdit.isActive
+  label: Disponível para venda
+  type: toggle
+  molecule:h4
+  example: true
+
+## actions
+
+1. save: Salvar | primary
+2. cancel: Cancelar | secondary
+3. delete: Excluir | danger | if: mode === edit
+
+</collab-editor-preview-md-100554> 
