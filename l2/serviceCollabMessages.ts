@@ -34,7 +34,7 @@ export class ServiceCollabMessages extends ServiceBase {
     }
 
     public menu: IServiceMenu = {
-        enabled: false,
+        enabled: true,
         title: '',
         main: {},
         tools: {},
