@@ -31,7 +31,7 @@ export const collabEnvironment: CollabMessagesEnvironment = {
     },
     config: {
         getMenuMode: () => 'custom',
-        generateSvgAvatarEnabled: () => false
+        generateSvgAvatarEnabled: () => true
     }
 }
 
