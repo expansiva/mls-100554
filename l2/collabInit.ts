@@ -77,6 +77,7 @@ export class CollabInit extends LitElement {
      * To show logs using: https://collab.codes/?traceLifeCycle=true
      */
     private async init() {
+
         this.setDrivers();
         const language = this.setAndGetBaseUrl();
         this.setHTMLLang(language);
@@ -89,10 +90,9 @@ export class CollabInit extends LitElement {
         await this.loadLastProject();
         await this.setEventsModel();
         await this.setLastOpenedFiles();
-        // await this.setDefaultFiles();
+        await this.setDefaultFiles();
         await this.setLastModule();
         this.showMessagesIfNeeded();
-        this.initNotificationIfEnabled();
         const services = await this.getServices();
         this.setEvents();
         this.enableNav(this.avatarUrl, language, services, this.isAnonymous);
@@ -554,22 +554,6 @@ export class CollabInit extends LitElement {
         return {
             services: rc2,
         };
-    }
-
-    private async initNotificationIfEnabled() {
-
-        try {
-            let preferences: string | null | undefined;
-            const module = await import('/_102025_/l2/collabMessagesHelper.js');
-            if (!module || !module.loadNotificationPreferences) preferences = null;
-            if (preferences !== 'granted' && Notification.permission !== 'granted') return;
-            const moduleSync = await import('/_102025_/l2/collabMessagesSyncNotifications.js');
-            if (!moduleSync || !moduleSync.listenToThreadEvents || typeof moduleSync.listenToThreadEvents !== 'function') return;
-            moduleSync.listenToThreadEvents();
-        } catch (err: any) {
-            console.error('Error on listen notifications' + err.message)
-        }
-
     }
 
 }
