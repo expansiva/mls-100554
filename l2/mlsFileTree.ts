@@ -111,7 +111,7 @@ export class MlsFileTree extends CollabLitElement {
 
 
         return html` 
-                <li  .myFile=${node.file} class="test-item" @click=${() => this.selectFile(node.fileKey!, node.file)} style="--depth: ${depth}" .nameFilter="${node.file.shortName.toLocaleLowerCase()}">
+                <li  .myFile=${node.file} class="test-item ${isSelected ? 'selected': ''}" @click=${() => this.selectFile(node.fileKey!, node.file)} style="--depth: ${depth}" .nameFilter="${node.file.shortName.toLocaleLowerCase()}">
                     <div class="elContent">
                         <info-item>
                             <span class="classClick" @click="${this.clickGroupHidden}">
