@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { getAllSteps } from '/_102029_/l2/aiAgentHelper.js';
-import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
+import { getAllSteps } from '/_102027_/l2/aiAgentHelper.js';
+import { CollabLitElement } from '/_102027_/l2/collabLitElement.js';
 
 import '/_100554_/l2/pluginTaskPreviewAgent.js';
 import '/_100554_/l2/pluginTaskPreviewClarification.js';
