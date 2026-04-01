@@ -230,9 +230,11 @@ export class PluginViewFile extends PluginBaseModule {
 
         if (typeof data === 'string') {
             this.contentText = data;
+            this.current = 2;
         }
         else {
             this.contentUrl = await mls.stor.cache.getURL(this.file.project, this.file.folder, this.file.shortName, this.file.extension, this.file.versionRef) || '';
+            this.current = 1;
         }
 
     }

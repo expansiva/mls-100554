@@ -1,22 +1,22 @@
-/// <mls fileReference="_100554_/l2/widgetInputText.ts" enhancement="_100554_/l2/enhancementLit" />
+/// <mls fileReference="_100554_/l2/widgetSelect.ts" enhancement="_blank"/>
 
-import { html, ifDefined, LitElement } from 'lit';
+import { html, ifDefined } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-// import { IAutoCapitalize, IcaFormsInputStringBase } from '/_100554_/l2/icaFormsInputStringBase.js';
-import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
 import {CollabLitElement} from '/_102027_/l2/collabLitElement.js'
 
-@customElement('widget-input-text-100554')
-export class WcInputText100554 extends CollabLitElement { 
+@customElement('widget-select-100554')
+export class WcInputText100554 extends CollabLitElement {  
+
     autocapitalize: any = "off";
     validationmessage: string | undefined;
     debounce: string | undefined;
 
-    @propertyDataSource({ type: String }) value: string | undefined;
+    
+    @property({ type: String }) value: string | undefined;
 
     @property({ type: String }) name: string | undefined;
 
-    @propertyDataSource({ type: String }) label: string | undefined;
+    @property({ type: String }) label: string | undefined;
 
     @property({ type: String }) pattern: string | undefined;
 
@@ -38,40 +38,38 @@ export class WcInputText100554 extends CollabLitElement {
 
     @property({ type: Boolean }) autofocus: boolean = false;
 
-    @propertyDataSource({ type: String }) hint: string | undefined;
+    @property({ type: String }) hint: string | undefined;
 
-    @property({ type: String }) autocorrect: 'off' | 'on' | undefined = undefined;
+    @property({ type: String }) options: string | undefined;
 
-    @property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' | undefined = undefined;
-
-    @query('.input_control') input: HTMLInputElement | undefined;
+    get _options() {
+     
+        if (this.options) return JSON.parse(this.options);
+        else return []
+    }
 
     error: string = '';
- 
+
     render() {
         return html`
         <label class="form-control-label">
           ${this.label}
         </label>
 
-        <input
+        <select
             class="input_control"
-            type="text"
             name=${ifDefined(this.name)}
             ?disabled=${this.disabled}
             ?readonly=${this.readonly}
             ?required=${this.required}
-            maxlength=${ifDefined(this.minlength)}    
-            minlength=${ifDefined(this.maxlength)}
-            autocomplete=${ifDefined(this.autocomplete)}
-            placeholder=${ifDefined(this.placeholder)}
             .value=${this.value || ''}
             ?autofocus=${this.autofocus}
             pattern=${ifDefined(this.pattern)}
-            @input=${this.handleChange}
 
         
-        />
+        >
+            ${this._options.map((s:string) => html`<option value="${s}">${s}</option>`)}
+        </select>
         <small class="form_hint">${this.hint}</small>
         <div class="form_error_message">${this.error}</div>
         `;

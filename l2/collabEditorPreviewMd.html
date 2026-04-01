@@ -1,3 +1,4 @@
+
 <collab-editor-preview-md-100554 ">
 # productEdit
   mode: edit
@@ -11,48 +12,38 @@
  
 ## main {cols: 2}
 
-### Dados gerais {context: tab}
+### {molecule: content-tabs-100554}
+#### Dados gerais {molecule: nav-item, innerHTML: Dados Gerais}
+#### Mídia {molecule: nav-item, innerHTML: Mídia}
 
-#### Identificação
+#### {molecule: content-item}
 
-> field: 
-  label:Nome do produto
-  type: text
-  molecule: label
  
 > field: ui.productEdit.name
   label: Nome do produto
   type: text
-  molecule: input
+  molecule: widget-input-text-100554
   placeholder: Ex: Ração Premium
   maxLength: 200
   hint: Digite o **nome** completo
   example: Ração Premium Adultos 15kg
 
-> field: 
-  label:Código SKU
-  type: text
-  molecule: label
 
 > field: ui.productEdit.sku
   label: Código SKU
   type: text
-  molecule:input
+  molecule:widget-input-text-100554
   placeholder: Ex: RAC-001
   hint: Código único do produto
-
-> field: 
-  label:Situação
-  type: text
-  molecule: label
 
 > field: ui.productEdit.status
   label: Situação
   type: select
-  molecule: select
+  molecule: widget-select-100554
   example: Ativo
+  options: [1,2]
 
-### Mídia {context: tab}
+#### {molecule: content-item}
 
 > field: ui.productEdit.coverImage
   label: Imagem de capa
@@ -62,7 +53,7 @@
   molecule:img
   hint: PNG ou JPG até 2MB
 
-## aside {cols: 1/3}
+### aside
 
 > field: ui.productEdit.price
   label: Preço
@@ -81,10 +72,32 @@
   molecule:h4
   example: true
 
-## actions
+## actions {
+  col: 0, 
+  style: gap:.5rem; display:flex
+}
 
-1. save: Salvar | primary
-2. cancel: Cancelar | secondary
-3. delete: Excluir | danger | if: mode === edit
+> field:
+  innerHTML: Salvar
+  type: action
+  molecule:button
+  example: true
+  class: primary
+
+> field:
+  innerHTML: Cancelar
+  type: action
+  molecule:button
+  example: true
+  class: secondary
+
+> field:
+  innerHTML: Excluir
+  type: action
+  molecule:button
+  example: true
+  class: danger
+  rule:if: mode === edit
+
 
 </collab-editor-preview-md-100554> 
