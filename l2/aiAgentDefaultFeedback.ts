@@ -2,7 +2,6 @@
 
 import { html, TemplateResult, nothing, svg } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { getTask } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { collab_play, collab_pause, collab_bell } from '/_100554_/l2/collabIcons.js';
 import { continuePoolingTask, pauseOrContinueTask } from '/_100554_/l2/aiAgentOrchestration.js';

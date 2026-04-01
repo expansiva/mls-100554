@@ -2,7 +2,7 @@
 
 import { html, TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import { StateLitElement } from '/_102027_/l2/stateLitElement.js';
 
 import {
     getNextResultStep,
@@ -11,9 +11,9 @@ import {
     getInteractionStepId,
     getStepById,
     getTotalCost
-} from '/_102029_/l2/aiAgentHelper.js';
+} from '/_102027_/l2/aiAgentHelper.js';
 
-import { getClarificationElement } from '/_102029_/l2/aiAgentOrchestration.js';
+import { getClarificationElement } from '/_102027_/l2/aiAgentOrchestration.js';
 import { collab_money } from '/_100554_/l2/collabIcons.js';
 
 @customElement('plugin-task-details-100554')
