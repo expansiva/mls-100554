@@ -15,13 +15,14 @@ export function createAgent(): IAgentAsync {
     };
 }
 
+
 async function beforePromptImplicit(
     agent: IAgentMeta,
     context: mls.msg.ExecutionContext,
     userPrompt: string,
 ): Promise<mls.msg.AgentIntent[]> {
 
-    if (!userPrompt || userPrompt.length < 5) throw new Error('invalid prompt');
+    if (!userPrompt || userPrompt.length < 1) throw new Error('invalid prompt');
 
     const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
         type: "add-message-ai",
@@ -122,8 +123,7 @@ Generate valid, self-contained, responsive SVGs ready for use, accurately repres
    - Use '<text>' with 'font-family="sans-serif"', 'font-size="16"' by default, and 'text-anchor="middle"' if centered.  
    - Position text according to the description.
 
-9. **Fallback:**  
-   - If the request is vague or lacks clear visual elements, generate at least **one centered gray circle**, maintaining responsiveness.
+9. Fallback & Creativity: Identify the meaning of the prompt. If the request is vague, meaningless, or lacks clear visual elements (like made-up words), do your best to invent an abstract, colorful, and creative SVG representation based on the "feeling" or sound of the word.
 
 10. **Validation:**  
    - The SVG must be self-contained and render without errors.
