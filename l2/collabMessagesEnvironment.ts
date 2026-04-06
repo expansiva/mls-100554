@@ -13,6 +13,7 @@ export const collabEnvironment: CollabMessagesEnvironment = {
     setIntegrationsOpenClaw: (integrations: IOpenClawIntegration[]) => setIntegrationsOpenClaw(integrations),
     notifications: {
         getFCMTokenForBackend,
+        getNotifySoundUrl,
         sendACK: (id: string) => sendACK(id),
         sendRequestMissed,
     },
@@ -98,6 +99,10 @@ async function setIntegrationsOpenClaw(integrations: IOpenClawIntegration[]): Pr
         throw new Error(err.message);
     }
 
+}
+
+async function getNotifySoundUrl() {
+    return './l3/_100529_/audio/collabNotification.mp3';
 }
 
 async function getFCMTokenForBackend() {
