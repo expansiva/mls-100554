@@ -18,7 +18,61 @@
 
 #### {molecule: content-item}
 
- 
+card:
+  title:{ui.productEdit.name}
+  description:{ui.productEdit.description}
+  text:
+    label: Nome do produto
+    type: input
+    placeholder: Ex: Ração Premium
+    maxLength: 200
+    hint: Digite o **nome** completo
+    example: Ração Premium Adultos 15kg
+  money:
+    label: Valor do produto
+    type: input
+    placeholder: R$ 00,00
+    maxValue: 9999
+    hint: Digite o **valor**
+    example: R$ 10,99
+    constraint: se valor maior que 50 pedir confirmação
+  
+
+card:
+  title:{ui.productEdit.name}
+  description:{ui.productEdit.description}
+  input:
+    label: Nome do produto
+    type: text
+    placeholder: Ex: Ração Premium
+    maxLength: 200
+    hint: Digite o **nome** completo
+    example: Ração Premium Adultos 15kg
+  input:
+    label: Valor do produto
+    type: money
+    placeholder: R$ 00,00
+    maxValue: 9999
+    hint: Digite o **valor**
+    example: R$ 10,99
+
+<view-card>
+  title:{ui.productEdit.name}
+  description:{ui.productEdit.description}
+  <enter-text>
+    > field: ui.productEdit.name
+      label: Nome do produto
+      type: text
+      placeholder: Ex: Ração Premium
+      maxLength: 200
+      hint: Digite o **nome** completo
+      example: Ração Premium Adultos 15kg
+  </enter-text>  
+</view-card>
+
+digite abaixo o nome do produto
+
+
 > field: ui.productEdit.name
   label: Nome do produto
   type: text
