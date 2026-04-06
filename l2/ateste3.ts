@@ -2,7 +2,7 @@
 
 export class Teste {
     constructor() {
-        alert('ola');
+        console.info('ola');
     }
 }
 

@@ -44,8 +44,10 @@ export class PageMdPreview extends CollabLitElement {
     private async configHTML() {
 
         this._tree = this.parseMd(this._rawMd);
-        this._html = this.renderNode(this._tree);
-        const json = await getDependenciesByHtmlFile(mls.actual[2].left || {} as mls.stor.IFileInfo, this._html, 'Default');
+        const _html = this.renderNode(this._tree);
+        const json = await getDependenciesByHtmlFile(mls.actual[2].left || {} as mls.stor.IFileInfo, _html, 'Default');
+
+
 
         if (json && json.importsJs) {
             json.importsJs.forEach((i) => {
@@ -58,6 +60,8 @@ export class PageMdPreview extends CollabLitElement {
             });
         }
 
+        setTimeout(() => { this._html = _html; }, 500)
+
 
     }
 
@@ -66,7 +70,7 @@ export class PageMdPreview extends CollabLitElement {
     private parseAttrs(lines: string[], i: number): { attrs: any, newI: number } {
         const attrs: any = {};
         const line = lines[i];
-    
+
 
         // extrai nome e conteúdo inline do heading  "## name {k:v, k:v}"
         const headingMatch = line.match(/^#+\s+([^\{]*)(?:\{([^\}]*)\})?/);
@@ -164,7 +168,7 @@ export class PageMdPreview extends CollabLitElement {
         while (i < lines.length) {
             i++
             const line = lines[i];
-            
+
 
             if (!line || !line.trim()) continue;
 
@@ -194,7 +198,7 @@ export class PageMdPreview extends CollabLitElement {
             // ── > field: → campo ─────────────────────────────────────────────
             if (line.startsWith('> field:') || line.startsWith('&gt; field:')) {
                 const fieldId = line.replace('> field:', '').replace('&gt; field:', '').trim();
-                const { props, newI }: any = this.parseFieldProps(lines, i +1); 
+                const { props, newI }: any = this.parseFieldProps(lines, i + 1);
                 i = newI;
                 const molecule = props.molecule || 'span';
                 if (props.molecule) delete props.molecule;
@@ -268,12 +272,26 @@ export class PageMdPreview extends CollabLitElement {
 
         let style = "";
         let name = (node as any as NodeFather).name;
-        if ((node as any as NodeFather).cols > 1) {
-            style = `style="display:flex"`;
+        if ((node as any as NodeFather).cols && (node as any as NodeFather).cols > 1) {
+            style = `style="${this.colsToGrid((node as any as NodeFather).cols)}"`;
         }
 
 
         return `<${molecule} ${nodeAttrs} ${style} name="${name}">${inner}</${molecule}>`;
+    }
+
+
+    private colsToGrid(cols: string | number): string {
+        if (!cols) return '';
+        const s = String(cols).trim();
+
+        // "2"   → "1fr 1fr"
+        // "1/3" → "1fr 3fr"
+        const template = s.includes('/')
+            ? s.split('/').map(v => v.trim() + 'fr').join(' ')
+            : Array(Number(s)).fill('1fr').join(' ');
+
+        return `display:grid; grid-template-columns: ${template};`;
     }
 
     private renderChildren(children: any = []) {
