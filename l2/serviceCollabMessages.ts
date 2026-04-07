@@ -15,6 +15,7 @@ import {
 } from "/_102025_/l2/collabMessagesHelper.js";
 
 import '/_102025_/l2/collabMessages.js';
+import '/_102025_/l2/collabMessagesSettingsGeral.js';
 import '/_100554_/l2/pluginFindTask.js';
 
 /// **collab_i18n_start** 
@@ -90,8 +91,7 @@ export class ServiceCollabMessages extends ServiceBase {
 
     public onClickMain(op: string) {
         if (op === 'opAboutThis') this.showAboutThis();
-        // if (op === 'opReset') this.resetOnBoarding();
-        if (op === 'opSettings') this.openSettings();
+        if (op === 'opSettings2') this.openSettings2();
         if (op === 'opFindTask') this.openFindTask();
     }
 
@@ -99,7 +99,7 @@ export class ServiceCollabMessages extends ServiceBase {
         title: '',
         main: {
             // opReset: { text: 'Reset onboarding', icon: 'f2ea' },
-            opSettings: { text: 'Settings', icon: 'f085' },
+            opSettings2: { text: 'Settings2', icon: 'f085' },
             opFindTask: { text: 'Find Task', icon: 'f002' },
             opAboutThis: 'About this content',
         },
@@ -194,10 +194,10 @@ export class ServiceCollabMessages extends ServiceBase {
         this.toogleBadge(customEvent.detail, '_100554_serviceCollabMessages');
     }
 
-    private openSettings() {
+    private openSettings2() {
         if (this.menu.setTabActive) this.menu.setTabActive(-1);
         if (this.menu.setMode) {
-            const settings = document.createElement('collab-messages-settings-102025');
+            const settings = document.createElement('collab-messages-settings-geral-102025');
             (settings as any)['serviceBase'] = this;
             this.menu.setMode('page', settings);
         }
