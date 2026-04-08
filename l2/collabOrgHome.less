@@ -1,0 +1,133 @@
+/// <mls fileReference="_100554_/l2/collabOrgHome.less" enhancement="_blank" />
+
+collab-org-home-100554 {  
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: @font-family-primary;
+    font-size: @font-size-16;
+    color: @text-primary-color; 
+    padding-top: 1rem;
+
+    .state-loading,
+    .state-error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 48px 24px;
+        color: @text-primary-color-lighter;
+        font-size: @font-size-16;
+    }
+
+    .state-error {
+        flex-direction: column;
+        color: @error-color;
+
+        .error-icon {
+            font-size: @font-size-24;
+        }
+
+        button {
+            margin-top: 8px;
+            padding: 6px 16px;
+            background-color: @active-color;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: @font-size-16;
+            font-family: @font-family-primary;
+            cursor: pointer;
+
+            &:hover {
+                background-color: @active-color-hover;
+            }
+
+            &:focus {
+                background-color: @active-color-focus;
+                outline: none;
+            }
+        }
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid @grey-color;
+        border-top-color: @active-color;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .org-card {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        max-width: 680px;
+    }
+
+    .org-header {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .org-name {
+        margin: 0;
+        font-size: @font-size-24;
+        font-family: @font-family-primary;
+        color: @text-primary-color-darker;
+        display: flex;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .org-description {
+        display: flex;
+        justify-content: center;
+        margin: 0;
+        font-size: @font-size-16;
+        color: @text-primary-color-lighter;
+    }
+
+    .org-counters {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+
+    .counter {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        background-color: @bg-primary-color;
+        border: 1px solid @grey-color-dark;
+        border-radius: 8px;
+        padding: 20px 32px;
+        min-width: 120px;
+    }
+
+    .counter-value {
+        font-size: @font-size-24;
+        font-weight: 700;
+        color: @active-color;
+    }
+
+    .counter-label {
+        font-size: @font-size-12;
+        color: @text-primary-color-lighter;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+}
+
+

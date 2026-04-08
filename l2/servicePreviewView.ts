@@ -311,7 +311,7 @@ export class ServicePreviewView extends StateLitElement {
             this.father.setError('');
             this.setDevice(iframe);
             this.setTheme(iframe);
-            this.setMessage(iframe);
+            //this.setMessage(iframe);
             await this.setMyFile();
 
             if (this.models &&

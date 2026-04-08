@@ -1,0 +1,264 @@
+/// <mls fileReference="_100554_/l2/collabOrgTeams.less" enhancement="_blank" />
+
+collab-org-teams-100554 {
+
+    display: block;
+    font-family: @font-family-primary;
+    font-size: @font-size-16;
+
+    .state-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 48px 24px;
+        color: @text-primary-color-lighter;
+        font-size: @font-size-16;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid @grey-color;
+        border-top-color: @active-color;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .feedback {
+        font-size: @font-size-16;
+        padding: 10px 14px;
+        border-radius: 4px;
+    }
+
+    .feedback.error {
+        color: @error-color;
+        background-color: @grey-color-lighter;
+    }
+
+    .teams-root {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .page-title {
+        font-size: @font-size-24;
+        color: @text-primary-color;
+        margin: 0;
+    }
+
+    /* ── New Team Form ── */
+
+    .new-team-form-wrapper {
+        border: 1px solid @grey-color-dark;
+        border-radius: 4px;
+        padding: 20px;
+        background-color: @bg-secondary-color-lighter;
+    }
+
+    .new-team-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group label {
+        font-size: @font-size-16;
+        color: @text-primary-color;
+    }
+
+    .form-group input {
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        color: @text-primary-color;
+        background-color: @bg-primary-color;
+        border: 1px solid @grey-color-dark;
+        border-radius: 4px;
+        padding: 8px 12px;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: @active-color;
+    }
+
+    .form-group input:disabled {
+        background-color: @bg-primary-color-disabled;
+        color: @text-primary-color-disabled;
+        cursor: not-allowed;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    /* ── Buttons ── */
+
+    .btn-primary {
+        padding: 8px 20px;
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        background-color: @active-color;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background-color: @active-color-hover;
+    }
+
+    .btn-primary:disabled {
+        background-color: @active-color-disabled;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        padding: 8px 20px;
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        background-color: transparent;
+        color: @text-primary-color;
+        border: 1px solid @grey-color-dark;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background-color: @bg-primary-color-hover;
+    }
+
+    .btn-secondary:disabled {
+        color: @text-primary-color-disabled;
+        cursor: not-allowed;
+    }
+
+    /* ── Table ── */
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .teams-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: @font-size-16;
+    }
+
+    .teams-table thead tr {
+        background-color: @bg-secondary-color-lighter;
+        border-bottom: 2px solid @grey-color-dark;
+    }
+
+    .teams-table th {
+        text-align: left;
+        padding: 10px 14px;
+        font-size: @font-size-16;
+        color: @text-primary-color-lighter;
+    }
+
+    .teams-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid @grey-color;
+        color: @text-primary-color;
+        vertical-align: middle;
+    }
+
+    .team-row.expanded td {
+        border-bottom: none;
+    }
+
+    .expand-row td {
+        padding: 0 0 1px 0;
+        border-bottom: 1px solid @grey-color;
+        background-color: @bg-secondary-color-lighter;
+    }
+
+    .btn-expand {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: @text-primary-color-lighter;
+        font-size: @font-size-12;
+        padding: 4px 6px;
+    }
+
+    .btn-expand:hover {
+        color: @text-primary-color;
+    }
+
+    .td-name {
+        font-weight: 600;
+    }
+
+    .auth-badge {
+        font-size: @font-size-12;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+    .auth-badge.auth-admin {
+        background-color: @active-color;
+        color: #fff;
+    }
+
+    .auth-badge.auth-write {
+        background-color: @success-color;
+        color: #fff;
+    }
+
+    .auth-badge.auth-read {
+        background-color: @grey-color-dark;
+        color: @text-primary-color;
+    }
+
+    .btn-link {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: @link-color;
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        padding: 0;
+        text-decoration: underline;
+    }
+
+    .btn-link:hover {
+        color: @link-color-hover;
+    }
+
+    .no-teams {
+        font-size: @font-size-16;
+        color: @text-primary-color-lighter;
+        margin: 0;
+    }
+
+}
+
+

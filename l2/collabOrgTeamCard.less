@@ -1,0 +1,213 @@
+/// <mls fileReference="_100554_/l2/collabOrgTeamCard.less" enhancement="_blank" />
+
+collab-org-team-card-100554 {
+
+    display: block;
+    font-family: @font-family-primary;
+    font-size: @font-size-16;
+
+    .team-card {
+        padding: 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* ── Member list ── */
+
+    .member-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .member-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+        border-radius: 4px;
+    }
+
+    .member-item:hover {
+        background-color: @bg-primary-color-hover;
+    }
+
+    .member-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: block;
+    }
+
+    .member-name {
+        font-size: @font-size-16;
+        color: @text-primary-color;
+    }
+
+    .no-members {
+        font-size: @font-size-16;
+        color: @text-primary-color-lighter;
+        padding: 8px 0;
+    }
+
+    /* ── Confirm inline ── */
+
+    .confirm-inline {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .confirm-label {
+        font-size: @font-size-12;
+        color: @text-primary-color-lighter;
+    }
+
+    /* ── Add section ── */
+
+    .add-section {
+        padding-top: 4px;
+    }
+
+    .btn-add-toggle {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        color: @link-color;
+        padding: 0;
+    }
+
+    .btn-add-toggle:hover:not(:disabled) {
+        color: @link-color-hover;
+    }
+
+    .btn-add-toggle:disabled {
+        color: @link-color-disabled;
+        cursor: not-allowed;
+    }
+
+    .add-form {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .add-input {
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        color: @text-primary-color;
+        background-color: @bg-primary-color;
+        border: 1px solid @grey-color-dark;
+        border-radius: 4px;
+        padding: 6px 10px;
+        flex: 1;
+        box-sizing: border-box;
+    }
+
+    .add-input:focus {
+        outline: none;
+        border-color: @active-color;
+    }
+
+    .add-input:disabled {
+        background-color: @bg-primary-color-disabled;
+        color: @text-primary-color-disabled;
+        cursor: not-allowed;
+    }
+
+    /* ── Buttons ── */
+
+    .btn-primary {
+        padding: 6px 14px;
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        background-color: @active-color;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background-color: @active-color-hover;
+    }
+
+    .btn-primary:disabled {
+        background-color: @active-color-disabled;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        padding: 6px 14px;
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        background-color: transparent;
+        color: @text-primary-color;
+        border: 1px solid @grey-color-dark;
+        border-radius: 4px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-secondary:hover {
+        background-color: @bg-primary-color-hover;
+    }
+
+    .btn-danger {
+        padding: 6px 14px;
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        background-color: @error-color;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+        background-color: @error-color-hover;
+    }
+
+    .btn-danger:disabled {
+        background-color: @error-color-disabled;
+        cursor: not-allowed;
+    }
+
+    .btn-remove {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: @font-size-16;
+        padding: 4px 6px;
+        color: @text-primary-color-lighter;
+        border-radius: 4px;
+        line-height: 1;
+    }
+
+    .btn-remove:hover:not(:disabled) {
+        background-color: @error-color;
+        color: #fff;
+    }
+
+    .btn-remove:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+}
+
+
