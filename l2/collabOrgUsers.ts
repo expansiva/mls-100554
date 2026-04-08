@@ -44,6 +44,7 @@ const messages: { [key: string]: MessageType } = {
 /// **collab_i18n_end**
 
 interface Member {
+    id:number,
     username: string;
     avatarUrl: string;
     teams: string[];
@@ -56,27 +57,13 @@ interface RepoAccess {
 
 type AccessMap = { [username: string]: RepoAccess };
 
-const MOCK_MEMBERS: Member[] = [
-    { username: 'alice',   avatarUrl: 'https://i.pravatar.cc/40?u=alice',   teams: ['frontend', 'design'] },
-    { username: 'bob',     avatarUrl: 'https://i.pravatar.cc/40?u=bob',     teams: ['backend'] },
-    { username: 'carol',   avatarUrl: 'https://i.pravatar.cc/40?u=carol',   teams: ['frontend', 'backend'] },
-    { username: 'dave',    avatarUrl: 'https://i.pravatar.cc/40?u=dave',    teams: [] },
-    { username: 'eve',     avatarUrl: 'https://i.pravatar.cc/40?u=eve',     teams: ['design'] },
-];
 
-const MOCK_ACCESS: { [username: string]: RepoAccess } = {
-    alice: { github: true,  gitlab: true  },
-    bob:   { github: true,  gitlab: false },
-    carol: { github: false, gitlab: true  },
-    dave:  { github: false, gitlab: false },
-    eve:   { github: true,  gitlab: null  },
-};
+
 
 @customElement('collab-org-users-100554')
 export class CollabOrgUsers extends CollabLitElement {
 
-    @property({ type: String }) orgSlug: string = '';
-    @property({ type: String }) baseUrl: string = '';
+    @property({ type: Number }) project: number = 0;
 
     private msg: MessageType = messages['en'];
     private _members: Member[] = [];
@@ -96,12 +83,16 @@ export class CollabOrgUsers extends CollabLitElement {
         this.requestUpdate();
 
         try {
-            // const res = await fetch(`${this.baseUrl}/organizations/${this.orgSlug}/members`);
-            // if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            // this._members = await res.json() as Member[];
+            const idxOrg = mls.l5.getProjectOrgIndex(this.project) || -1;
+            const orgName = mls.l5.getOrgsName()[idxOrg];
+            const lastOrg = mls.stor.orgs[orgName];
+            if (!lastOrg) {
+                this._error = 'Not found organization';
+                return
+            }
 
-            await new Promise<void>((resolve: () => void) => setTimeout(resolve, 700));
-            this._members = [...MOCK_MEMBERS];
+
+            this._members = this.configUsers(lastOrg);
 
             await this._fetchAllAccess();
         } catch (err: unknown) {
@@ -110,6 +101,30 @@ export class CollabOrgUsers extends CollabLitElement {
             this._loading = false;
             this.requestUpdate();
         }
+    }
+
+    private configUsers(info: mls.cbe.IOrgInfo) {
+        const users: Member[] = [];
+
+        info.sett.users.forEach((u, idx: number) => {
+
+            const user: Member = {
+                id: idx,
+                username: u,
+                avatarUrl: 'https://i.pravatar.cc/40?u=alice',
+                teams: []
+            }
+
+            info.sett.teams.forEach((t) => {
+                if (t.usrIndex.includes(idx)) user.teams.push(t.name);
+            })
+
+            users.push(user);
+
+        })
+
+        return users;
+
     }
 
     private async _fetchAllAccess(): Promise<void> {
@@ -123,12 +138,9 @@ export class CollabOrgUsers extends CollabLitElement {
     }
 
     private async _fetchRepoAccess(username: string): Promise<RepoAccess> {
-        // const res = await fetch(`${this.baseUrl}/organizations/${this.orgSlug}/members/${username}/repository-access`);
-        // if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        // return await res.json() as RepoAccess;
-
+    
         await new Promise<void>((resolve: () => void) => setTimeout(resolve, 300));
-        return MOCK_ACCESS[username] ?? { github: null, gitlab: null };
+        return { github: false,  gitlab: false  };
     }
 
     private _toggleInvite(): void {
@@ -231,8 +243,7 @@ export class CollabOrgUsers extends CollabLitElement {
                 ${this._inviteOpen ? html`
                     <div class="invite-wrapper">
                         <collab-org-invite-user-100554
-                            org-slug="${this.orgSlug}"
-                            base-url="${this.baseUrl}"
+                            project="${this.project}"
                             @invite-success="${(): void => this._handleInviteSuccess()}"
                         ></collab-org-invite-user-100554>
                     </div>

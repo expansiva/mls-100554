@@ -281,7 +281,7 @@ export class ServiceDetail100554 extends ServiceBase {
         if (ori1 === 'any') {
             el.innerHTML = '';
             this.setContentinEl(el, content, args);
-            el.style.display = '';
+            el.style.cssText = ' width: 100%; height: 100%;';
             return;
         }
 

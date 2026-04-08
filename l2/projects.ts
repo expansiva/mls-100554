@@ -5,7 +5,6 @@ import { customElement, state } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { setProjectDetails, checkIfHasLocalProject, getLocalProjectName } from '/_102027_/l2/libCommom.js';
 import '/_100554_/l2/pluginCreateProject.js'
-import '/_100554_/l2/collabOrgManager.js'
  
 @customElement('projects-100554')
 export class Projects102009 extends StateLitElement { 
@@ -137,11 +136,11 @@ export class Projects102009 extends StateLitElement {
     `
   }
 
-  renderProjectDetails() {
+  renderProjectDetails_old() {
     return html`<button class="back-button" @click=${this.goBack}>← Back</button><collab-org-manager-100554></collab-org-manager-100554>`
   }
 
-  renderProjectDetails_old() {
+  renderProjectDetails() {
     return html`
     <div class="project-details">
       <button class="back-button" @click=${this.goBack}>← Back</button>

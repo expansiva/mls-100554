@@ -40,8 +40,7 @@ const messages: { [key: string]: MessageType } = {
 export class CollabOrgManager extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
-    @property({ type: String }) orgSlug: string = '';
-    @property({ type: String }) baseUrl: string = '';
+    @property({ type: Number }) project: number = 0;
     @property({ type: String }) activeSection: string = 'home';
 
     private _handleSectionClick(section: string): void {
@@ -69,14 +68,14 @@ export class CollabOrgManager extends CollabLitElement {
 
     private _renderSection(): TemplateResult {
         const sectionMap: Record<string, TemplateResult> = {
-            home:     html`<collab-org-home-100554     org-slug="${this.orgSlug}" base-url="${this.baseUrl}"></collab-org-home-100554>`,
-            settings: html`<collab-org-settings-100554 org-slug="${this.orgSlug}" base-url="${this.baseUrl}"></collab-org-settings-100554>`,
-            projects: html`<collab-org-projects-100554 org-slug="${this.orgSlug}" base-url="${this.baseUrl}"></collab-org-projects-100554>`,
-            trash:    html`<collab-org-trash-100554    org-slug="${this.orgSlug}" base-url="${this.baseUrl}"></collab-org-trash-100554>`,
-            users:    html`<collab-org-users-100554    org-slug="${this.orgSlug}" base-url="${this.baseUrl}"></collab-org-users-100554>`,
-            teams:    html`<collab-org-teams-100554    org-slug="${this.orgSlug}" base-url="${this.baseUrl}"></collab-org-teams-100554>`,
-            explorer: html`<collab-org-explorer-100554 org-slug="${this.orgSlug}" base-url="${this.baseUrl}"></collab-org-explorer-100554>`,
-            verify:   html`<collab-org-verify-100554   org-slug="${this.orgSlug}" base-url="${this.baseUrl}"></collab-org-verify-100554>`,
+            home:     html`<collab-org-home-100554     project="${this.project}"></collab-org-home-100554>`,
+            settings: html`<collab-org-settings-100554 project="${this.project}"></collab-org-settings-100554>`,
+            projects: html`<collab-org-projects-100554 project="${this.project}"></collab-org-projects-100554>`,
+            trash:    html`<collab-org-trash-100554    project="${this.project}"></collab-org-trash-100554>`,
+            users:    html`<collab-org-users-100554    project="${this.project}"></collab-org-users-100554>`,
+            teams:    html`<collab-org-teams-100554    project="${this.project}"></collab-org-teams-100554>`,
+            explorer: html`<collab-org-explorer-100554 project="${this.project}"></collab-org-explorer-100554>`,
+            verify:   html`<collab-org-verify-100554   project="${this.project}"></collab-org-verify-100554>`,
         };
         return sectionMap[this.activeSection] ?? html`<div class="fallback">Seção não encontrada</div>`;
     }
