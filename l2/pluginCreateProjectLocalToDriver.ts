@@ -348,7 +348,7 @@ export class PluginCreateProject extends CollabLitElement {
     this.activeScenerie = 'select';
   }
 
-  private async tryItem(fc: Function, log: string) {
+  private async tryItem(fc: Function, log: string, needThrow: boolean = true) {
     try {
       this.addLog({ pre: this.msg.log_init, log, status: "inprogress" });
       setTimeout(() => this.logsContainer?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
@@ -370,7 +370,7 @@ export class PluginCreateProject extends CollabLitElement {
       const msg = log + ':' + err.message;
       this.changeStatusLastLog('error', msg);
       this.setProgressError(true);
-      throw new Error(err.message);
+      if(needThrow) throw new Error(err.message);
     }
   }
 
@@ -686,7 +686,7 @@ export class PluginCreateProject extends CollabLitElement {
         userAuth: this.newProjectVisibility as any,
         archived_at: '',
         created_at: '',
-        prj_dependencies: [100554, 102027],
+        prj_dependencies: [100554, 102027, 102025],
         value: '',
         repository_secret: this.secret
 
@@ -945,7 +945,7 @@ export class PluginCreateProject extends CollabLitElement {
       this.setProgress(newPercent);
 
       await this.sleep(200);
-      await this.tryItem(async () => await this.setPermissionAction(this.orgName, newProjectName), `${this.msg.log_14}`);
+      await this.tryItem(async () => await this.setPermissionAction(this.orgName, newProjectName), `${this.msg.log_14}`, false);
       newPercent += percent;
       this.setProgress(newPercent);
 
