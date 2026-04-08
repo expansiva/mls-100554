@@ -77,8 +77,7 @@ const MOCK_SETTINGS: OrgSettings = {
 @customElement('collab-org-settings-100554')
 export class CollabOrgSettings extends CollabLitElement {
 
-    @property({ type: String }) orgSlug: string = '';
-    @property({ type: String }) baseUrl: string = '';
+    @property({ type: Number }) project: number = 0;
 
     private msg: MessageType = messages['en'];
     private _loading: boolean = false;
@@ -98,12 +97,27 @@ export class CollabOrgSettings extends CollabLitElement {
         this.requestUpdate();
 
         try {
-            // const res = await fetch(`${this.baseUrl}/organizations/${this.orgSlug}/settings`);
-            // if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            // this._form = await res.json() as OrgSettings;
+            const idxOrg = mls.l5.getProjectOrgIndex(this.project) || -1;
+            const orgName = mls.l5.getOrgsName()[idxOrg];
+            const lastOrg = mls.stor.orgs[orgName];
+            if (!lastOrg) {
+                this._error = 'Not found organization';
+                return
+            }
 
-            await new Promise<void>((resolve: () => void) => setTimeout(resolve, 700));
-            this._form = { ...MOCK_SETTINGS };
+            const info = JSON.parse(lastOrg.value || '{}');
+            const objParse = info.l5_actionOrgSettings ? info.l5_actionOrgSettings : {};
+
+            this._form = {
+                url: objParse.html_url ? objParse.html_url : '',
+                company: objParse.company ? objParse.company : '',
+                location: objParse.location ? objParse.location : '',
+                email: objParse.email ? objParse.email : '',
+                logo: objParse.logo ? objParse.logo : '',
+                description: objParse.description ? objParse.l5_actionOrgSettings.description : '',
+
+            };
+
         } catch (err: unknown) {
             this._error = err instanceof Error ? err.message : 'Unknown error';
         } finally {
@@ -126,6 +140,13 @@ export class CollabOrgSettings extends CollabLitElement {
             //     body: JSON.stringify(this._form),
             // });
             // if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const orgPreferences: any = {
+                l5_actionOrgSettings: { ...this._form }
+            };
+
+            //mls.l5.setProjectSettings()
+            
 
             await new Promise<void>((resolve: () => void) => setTimeout(resolve, 600));
             this._successMessage = this.msg.feedbackSuccess;

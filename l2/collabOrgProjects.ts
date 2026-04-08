@@ -35,8 +35,7 @@ const messages: { [key: string]: MessageType } = {
 @customElement('collab-org-projects-100554')
 export class CollabOrgProjects extends CollabLitElement {
 
-    @property({ type: String }) orgSlug: string = '';
-    @property({ type: String }) baseUrl: string = '';
+    @property({ type: Number }) project: number = 0;
 
     private msg: MessageType = messages['en'];
     private projects: mls.cbe.IPrj_settings[] = [];
@@ -55,14 +54,14 @@ export class CollabOrgProjects extends CollabLitElement {
         this.requestUpdate();
 
         try {
-            // const res = await fetch(`${this.baseUrl}/organizations/${this.orgSlug}/projects`);
-            // if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            // this.projects = await res.json() as Project[];
-
-            //await new Promise<void>((resolve: () => void) => setTimeout(resolve, 600));
-            if (!mls.l5.actualOrg) mls.l5.actualOrg = 0;
-            const orgName = mls.l5.getOrgsName()[mls.l5.actualOrg];
+    
+            const idxOrg = mls.l5.getProjectOrgIndex(this.project) || -1;
+            const orgName = mls.l5.getOrgsName()[idxOrg];
             const lastOrg = mls.stor.orgs[orgName];
+            if (!lastOrg) {
+                this._error = 'Not found organization';
+                return
+            }
 
             this.projects = lastOrg.sett.projects;
         } catch (err: unknown) {
@@ -80,11 +79,10 @@ export class CollabOrgProjects extends CollabLitElement {
     }
 
     private handleViewProject(project: mls.cbe.IPrj_settings): void {
-        this.dispatchEvent(new CustomEvent('project-selected', {
-            detail: { project_id: project.id, name: project.name },
-            bubbles: true,
-            composed: true,
-        }));
+        mls.setActualProject(project.id);
+        const orgIndex = mls.l5.getProjectOrgIndex(project.id);
+        mls.l5.setActualOrg(orgIndex);
+        window.location.reload();
     } 
 
     private getFiltered(archived: boolean): mls.cbe.IPrj_settings[] {

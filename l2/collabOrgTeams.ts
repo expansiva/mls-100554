@@ -58,28 +58,21 @@ interface Team {
     auth: string;
     projectCount: number;
     userCount: number;
+    users:{idx:number, name:string, avatar:string}[]
 }
 
 type FormStatus = 'idle' | 'saving' | 'success' | 'error';
 
-const MOCK_TEAMS: Team[] = [
-    { name: 'frontend',  auth: 'write', projectCount: 3, userCount: 5 },
-    { name: 'backend',   auth: 'admin', projectCount: 4, userCount: 3 },
-    { name: 'design',    auth: 'read',  projectCount: 2, userCount: 4 },
-    { name: 'devops',    auth: 'admin', projectCount: 6, userCount: 2 },
-];
-
 @customElement('collab-org-teams-100554')
 export class CollabOrgTeams extends CollabLitElement {
 
-    @property({ type: String }) orgSlug: string = '';
-    @property({ type: String }) baseUrl: string = '';
+    @property({ type: Number }) project: number = 0;
 
     private msg: MessageType = messages['en'];
     private _teams: Team[] = [];
     private _loading: boolean = false;
     private _error: string = '';
-    private _expandedTeam: string | null = null;
+    private _expandedTeam: Team | null = null;
     private _newTeamOpen: boolean = false;
     private _newTeamName: string = '';
     private _formStatus: FormStatus = 'idle';
@@ -96,18 +89,41 @@ export class CollabOrgTeams extends CollabLitElement {
         this.requestUpdate();
 
         try {
-            // const res = await fetch(`${this.baseUrl}/organizations/${this.orgSlug}/teams`);
-            // if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            // this._teams = await res.json() as Team[];
 
-            await new Promise<void>((resolve: () => void) => setTimeout(resolve, 700));
-            this._teams = [...MOCK_TEAMS];
+            const idxOrg = mls.l5.getProjectOrgIndex(this.project) || -1;
+            const orgName = mls.l5.getOrgsName()[idxOrg];
+            const lastOrg = mls.stor.orgs[orgName];
+            if (!lastOrg) {
+                this._error = 'Not found organization';
+                return
+            }
+
+            this._teams = this.configTeams(lastOrg);
         } catch (err: unknown) {
             this._error = err instanceof Error ? err.message : 'Unknown error';
         } finally {
             this._loading = false;
             this.requestUpdate();
         }
+    }
+
+    private configTeams(info: mls.cbe.IOrgInfo) {
+        const teams: Team[] = [];
+
+        info.sett.teams.forEach((t) => {
+
+            const team: Team = { name: t.name,  auth: t.auth, projectCount: 0, userCount: t.usrIndex.length, users:[] }
+
+            info.sett.users.forEach((u, idx) => {
+                if(t.usrIndex.includes(idx)) team.users.push({idx, name:u, avatar:'https://i.pravatar.cc/40?u=alice'})
+            })
+
+            teams.push(team);
+
+        })
+
+        return teams;
+
     }
 
     private async _handleCreate(e: Event): Promise<void> {
@@ -145,8 +161,8 @@ export class CollabOrgTeams extends CollabLitElement {
         }
     }
 
-    private _toggleExpand(teamName: string): void {
-        this._expandedTeam = this._expandedTeam === teamName ? null : teamName;
+    private _toggleExpand(team:Team): void {
+        this._expandedTeam = this._expandedTeam === team ? null : team;
         this.requestUpdate();
     }
 
@@ -225,7 +241,6 @@ export class CollabOrgTeams extends CollabLitElement {
                 <table class="teams-table">
                     <thead>
                         <tr>
-                            <th></th>
                             <th>${this.msg.colTeam}</th>
                             <th>${this.msg.colAuth}</th>
                             <th>${this.msg.colProjects}</th>
@@ -241,23 +256,18 @@ export class CollabOrgTeams extends CollabLitElement {
     }
 
     private _renderRow(t: Team): TemplateResult {
-        const expanded: boolean = this._expandedTeam === t.name;
+        const expanded: boolean = !!this._expandedTeam && this._expandedTeam.name === t.name;
         return html`
             <tr class="team-row ${expanded ? 'expanded' : ''}">
-                <td class="td-toggle">
-                    <button class="btn-expand" @click="${(): void => this._toggleExpand(t.name)}">
-                        ${expanded ? '▲' : '▼'}
-                    </button>
-                </td>
+                
                 <td class="td-name">${t.name}</td>
                 <td class="td-auth"><span class="auth-badge auth-${t.auth}">${t.auth}</span></td>
                 <td class="td-link">
-                    <button class="btn-link" @click="${(): void => this._emitViewProjects(t.name)}">
-                        ${t.projectCount} ${this.msg.viewProjects}
-                    </button>
+                    ${t.projectCount} projects
+                
                 </td>
                 <td class="td-link">
-                    <button class="btn-link" @click="${(): void => this._emitViewUsers(t.name)}">
+                    <button class="btn-link" @click="${(): void => this._toggleExpand(t)}">
                         ${t.userCount} ${this.msg.viewUsers}
                     </button>
                 </td>
@@ -266,9 +276,8 @@ export class CollabOrgTeams extends CollabLitElement {
                 <tr class="expand-row">
                     <td colspan="5">
                         <collab-org-team-card-100554
-                            team-name="${t.name}"
-                            org-slug="${this.orgSlug}"
-                            base-url="${this.baseUrl}"
+                            .team=${t}
+                            project="${this.project}"
                         ></collab-org-team-card-100554>
                     </td>
                 </tr>

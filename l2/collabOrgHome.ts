@@ -50,8 +50,7 @@ const MOCK_ORG_DATA: OrgData = {
 export class CollabOrgHome extends CollabLitElement {
 
     private msg: MessageType = messages['en'];
-    @property({ type: String }) orgSlug: string = '';
-    @property({ type: String }) baseUrl: string = '';
+    @property({ type: Number }) project: number = 0;
 
     private _loading: boolean = false;
     private _error: string = '';
@@ -69,17 +68,14 @@ export class CollabOrgHome extends CollabLitElement {
         this.requestUpdate();
 
         try {
-            // Simulação de fetch — substituir pela chamada real:
-            // const res = await fetch(`${this.baseUrl}/organizations/${this.orgSlug}`);
-            // if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            // this._data = await res.json() as OrgData;
 
-            //await new Promise<void>((resolve: () => void) => setTimeout(resolve, 800));
-
-            if (!mls.l5.actualOrg) mls.l5.actualOrg = 0;
-            const orgName = mls.l5.getOrgsName()[mls.l5.actualOrg];
+            const idxOrg = mls.l5.getProjectOrgIndex(this.project) || -1;
+            const orgName = mls.l5.getOrgsName()[idxOrg];
             const lastOrg = mls.stor.orgs[orgName];
-            
+            if (!lastOrg) {
+                this._error = 'Not found organization';
+                return
+            }
 
             this._data = {
                 name: orgName,

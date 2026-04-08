@@ -34,22 +34,51 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
-interface Member {
-    username: string;
-    avatar_url: string;
+interface Member { idx: number, name: string, avatar: string }
+
+interface Team {
+    name: string;
+    auth: string;
+    projectCount: number;
+    userCount: number;
+    users: Member[]
 }
 
 @customElement('collab-org-team-card-100554')
 export class CollabOrgTeamCard extends CollabLitElement {
 
-    @property({ type: String })  teamName: string = '';
-    @property({ type: Array })   members: Member[] = [];
+    private team: Team | undefined; 
+    @property({ type: Number }) project: number = 0;
+    @property({ type: Array }) members: Member[] = [];
+    @property({ type: Array }) users: Member[] = [];
     @property({ type: Boolean }) loading: boolean = false;
 
     private msg: MessageType = messages['en'];
     private _addOpen: boolean = false;
     private _addUsername: string = '';
     private _confirmingRemove: string | null = null;
+
+    firstUpdated() {
+
+        const idxOrg = mls.l5.getProjectOrgIndex(this.project) || -1;
+        const orgName = mls.l5.getOrgsName()[idxOrg];
+        const lastOrg = mls.stor.orgs[orgName];
+        if (!lastOrg) {
+            
+            return
+        }
+
+        if (this.team) {
+            this.members = this.team.users;
+        }
+
+        const users: Member[] = [];
+        lastOrg.sett.users.forEach((u, idx) => {
+            users.push({ idx, name: u, avatar: 'https://i.pravatar.cc/40?u=alice' })
+        });
+
+        this.users = users;
+    }
 
     private _toggleAdd(): void {
         this._addOpen = !this._addOpen;
@@ -65,11 +94,8 @@ export class CollabOrgTeamCard extends CollabLitElement {
     private _handleAdd(e: Event): void {
         e.preventDefault();
         if (!this._addUsername.trim()) return;
-        this.dispatchEvent(new CustomEvent('member-add', {
-            detail: { team_name: this.teamName, username: this._addUsername.trim() },
-            bubbles: true,
-            composed: true,
-        }));
+
+
         this._addOpen = false;
         this._addUsername = '';
         this.requestUpdate();
@@ -86,23 +112,20 @@ export class CollabOrgTeamCard extends CollabLitElement {
     }
 
     private _confirmRemove(username: string): void {
-        this.dispatchEvent(new CustomEvent('member-remove', {
-            detail: { team_name: this.teamName, username },
-            bubbles: true,
-            composed: true,
-        }));
+
+
         this._confirmingRemove = null;
         this.requestUpdate();
     }
 
     private _renderMember(m: Member): TemplateResult {
-        const confirming: boolean = this._confirmingRemove === m.username;
+        const confirming: boolean = this._confirmingRemove === m.name;
 
         return html`
             <li class="member-item">
                 <div class="member-info">
-                    <img class="avatar" src="${m.avatar_url}" alt="${m.username}" />
-                    <span class="member-name">${m.username}</span>
+                    <img class="avatar" src="${m.avatar}" alt="${m.name}" />
+                    <span class="member-name">${m.name}</span>
                 </div>
 
                 ${confirming ? html`
@@ -111,7 +134,7 @@ export class CollabOrgTeamCard extends CollabLitElement {
                         <button
                             class="btn-danger"
                             ?disabled="${this.loading}"
-                            @click="${(): void => this._confirmRemove(m.username)}"
+                            @click="${(): void => this._confirmRemove(m.name)}"
                         >${this.msg.confirmRemove}</button>
                         <button
                             class="btn-secondary"
@@ -122,7 +145,7 @@ export class CollabOrgTeamCard extends CollabLitElement {
                     <button
                         class="btn-remove"
                         ?disabled="${this.loading}"
-                        @click="${(): void => this._requestRemove(m.username)}"
+                        @click="${(): void => this._requestRemove(m.name)}"
                         title="Remove"
                     >🗑</button>
                 `}
@@ -133,14 +156,16 @@ export class CollabOrgTeamCard extends CollabLitElement {
     private _renderAddForm(): TemplateResult {
         return html`
             <form class="add-form" @submit="${(e: Event): void => this._handleAdd(e)}">
-                <input
-                    type="text"
+                <select
                     class="add-input"
                     placeholder="${this.msg.addUserPlaceholder}"
                     .value="${this._addUsername}"
                     ?disabled="${this.loading}"
                     @input="${(e: Event): void => this._handleAddInput(e)}"
-                />
+                >   
+                    <option value="-1"></option> 
+                    ${this.users.map((u) => html`<option value="${u.idx}">${u.name}</option>`)}
+                </select>
                 <button type="submit" class="btn-primary" ?disabled="${this.loading}">
                     ${this.msg.btnAdd}
                 </button>
@@ -162,22 +187,22 @@ export class CollabOrgTeamCard extends CollabLitElement {
 
                 <ul class="member-list">
                     ${this.members.length > 0
-                        ? this.members.map((m: Member) => this._renderMember(m))
-                        : html`<li class="no-members">${this.msg.noMembers}</li>`
-                    }
+                ? this.members.map((m: Member) => this._renderMember(m))
+                : html`<li class="no-members">${this.msg.noMembers}</li>`
+            }
                 </ul>
 
                 <div class="add-section">
                     ${this._addOpen
-                        ? this._renderAddForm()
-                        : html`
+                ? this._renderAddForm()
+                : html`
                             <button
                                 class="btn-add-toggle"
                                 ?disabled="${this.loading}"
                                 @click="${(): void => this._toggleAdd()}"
                             >+ ${this.msg.addUser}</button>
                         `
-                    }
+            }
                 </div>
 
             </div>
