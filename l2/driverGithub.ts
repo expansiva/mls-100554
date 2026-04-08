@@ -106,6 +106,10 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		return this.createFileInRepoIO(owner, repo, path, content);
 	}
 
+	public deleteFileInRepo(owner: string, repo: string, path: string): Promise<boolean> {
+		throw new Error('Not implemented');
+	}
+
 	public changeVisibility(owner: string, repo: string, visibility: "PUBLIC" | "PRIVATE" | "INTERNAL"): Promise<boolean> {
 		return this.changeVisibilityIO(owner, repo, visibility);
 	}
@@ -123,11 +127,12 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 	}
 
 	public addVariable2(owner: string, repo: string, name: string, value: string): Promise<boolean> {
-		return this.addVariableIO2(owner, repo, name, value);
+		return this.addVariableIO(owner, repo, name, value);
 	}
 
 	public addVariable(name: string, value: string): Promise<boolean> {
-		return this.addVariableIO(name, value);
+		throw new Error('Not implemented');
+		//return this.addVariableIO(name, value);
 	}
 
 	public updateVariable(name: string, value: string): Promise<boolean> {
@@ -1344,7 +1349,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-	private addVariableIO2(owner: string, repo: string, newVariable: string, secret: string): Promise<boolean> {
+	private addVariableIO(owner: string, repo: string, newVariable: string, secret: string): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -1376,7 +1381,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 				});
 
 				if (retFetch.status === 401) {
-					throw new Error(`Conecte no "gitHub", faça SignIn no "gitHub" para permitir salvar nos repositórios<br/>É importante salvar nos repositórios para permitir históricos e evitar perca de dados.`);
+					throw new Error(`Connect to GitHub and sign in to GitHub to allow saving to the repositories. Saving to the repositories is important to maintain a history and prevent data loss.`);
 				}
 
 				if (retFetch.status === 404) {
@@ -1408,77 +1413,6 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-	private addVariableIO(newVariable: string, secret: string): Promise<boolean> {
-
-		return new Promise<boolean>(async (resolve, reject) => {
-
-			if (!newVariable || !secret) {
-				reject(new Error('Information invalid!'));
-				return;
-			}
-
-			try {
-
-				this.verifyMKey();
-
-				const prj = mls.actualProject;
-				if (!prj) {
-					reject(new Error('Not Found project!'));
-					return;
-				}
-
-				const info = await dL.getMyKeysBranch(prj)
-
-				const body = {
-					name: newVariable,
-					value: secret
-				};
-
-				const retFetch = await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/actions/variables`, {
-					method: 'POST',
-					mode: 'cors',
-					cache: 'no-cache',
-					credentials: 'same-origin',
-					headers: {
-						'Content-Type': 'application/x-www-form-urlencoded',
-						Authorization: 'bearer ' + mKey,
-					},
-					referrerPolicy: 'no-referrer',
-					body: JSON.stringify(body)
-				});
-
-				if (retFetch.status === 401) {
-					throw new Error(`Conecte no "gitHub", faça SignIn no "gitHub" para permitir salvar nos repositórios<br/>É importante salvar nos repositórios para permitir históricos e evitar perca de dados.`);
-				}
-
-				if (retFetch.status === 404) {
-					resolve(false);
-					return;
-				}
-
-				if (retFetch.status === 403) {
-					resolve(false);
-					return;
-				}
-
-				const ret = await retFetch.json();
-
-				if (ret && ret.message) {
-					reject(new Error(ret.message));
-					return;
-				}
-
-				resolve(true);
-
-			} catch (err: any) {
-
-				reject(err);
-
-			}
-
-		});
-
-	}
 
 	private setPermissionActionIO(owner: string, repo: string, login: string): Promise<boolean> {
 
@@ -1512,6 +1446,14 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					}),
 					referrerPolicy: 'no-referrer',
 				});
+
+				if (retFetch.status === 409) {
+					throw new Error(`Required permission not available.An organization administrator needs to enable write permissions for GitHub Actions (Read and write) in the settings.`);
+				}
+
+				if (retFetch.status === 403) {
+					throw new Error(`You have to configure your repository - Settings -> Action -> General -> Workflow permissions and choose read and write permissions`);
+				}
 
 				if (![200, 204].includes(retFetch.status)) {
 					throw new Error(`Error: set permission action`);
