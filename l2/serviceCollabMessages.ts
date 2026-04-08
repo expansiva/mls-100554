@@ -99,7 +99,7 @@ export class ServiceCollabMessages extends ServiceBase {
         title: '',
         main: {
             // opReset: { text: 'Reset onboarding', icon: 'f2ea' },
-            opSettings2: { text: 'Settings2', icon: 'f085' },
+            opSettings2: { text: 'Settings', icon: 'f085' },
             opFindTask: { text: 'Find Task', icon: 'f002' },
             opAboutThis: 'About this content',
         },
