@@ -1,0 +1,179 @@
+/// <mls fileReference="_100554_/l2/collabOrgUsers.less" enhancement="_blank" />
+
+collab-org-users-100554 {
+
+    display: block;
+    font-family: @font-family-primary;
+    font-size: @font-size-16;
+
+    .state-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 48px 24px;
+        color: @text-primary-color-lighter;
+        font-size: @font-size-16;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid @grey-color;
+        border-top-color: @active-color;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .feedback.error {
+        color: @error-color;
+        background-color: @grey-color-lighter;
+        font-size: @font-size-16;
+        padding: 10px 14px;
+        border-radius: 4px;
+    }
+
+    .users-root {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .page-title {
+        font-size: @font-size-24;
+        font-family: @font-family-primary;
+        color: @text-primary-color;
+        margin: 0;
+    }
+
+    .btn-invite {
+        padding: 8px 16px;
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        background-color: @active-color;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-invite:hover {
+        background-color: @active-color-hover;
+    }
+
+    .invite-wrapper {
+        border: 1px solid @grey-color-dark;
+        border-radius: 4px;
+        padding: 16px;
+        background-color: @bg-secondary-color-lighter;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .members-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: @font-size-16;
+    }
+
+    .members-table thead tr {
+        background-color: @bg-secondary-color-lighter;
+        border-bottom: 2px solid @grey-color-dark;
+    }
+
+    .members-table th {
+        text-align: left;
+        padding: 10px 14px;
+        font-size: @font-size-16;
+        color: @text-primary-color-lighter;
+    }
+
+    .members-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid @grey-color;
+        color: @text-primary-color;
+        vertical-align: middle;
+    }
+
+    .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: block;
+    }
+
+    .td-teams .tags-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .team-tag {
+        background-color: @bg-secondary-color;
+        color: @text-primary-color;
+        font-size: @font-size-12;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+    .no-teams {
+        color: @text-primary-color-lighter;
+    }
+
+    .access-badges {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        font-size: @font-size-12;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+    .badge-ok {
+        background-color: @success-color;
+        color: #fff;
+    }
+
+    .badge-fail {
+        background-color: @error-color;
+        color: #fff;
+    }
+
+    .badge-neutral {
+        background-color: @grey-color-dark;
+        color: @text-primary-color;
+    }
+
+    .access-loading {
+        font-size: @font-size-12;
+        color: @text-primary-color-lighter;
+    }
+
+    .no-members {
+        font-size: @font-size-16;
+        color: @text-primary-color-lighter;
+        margin: 0;
+    }
+
+}
+
+

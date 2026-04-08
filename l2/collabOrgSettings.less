@@ -1,0 +1,252 @@
+/// <mls fileReference="_100554_/l2/collabOrgSettings.less" enhancement="_blank" />
+
+collab-org-settings-100554 {
+
+    display: block;
+    font-family: @font-family-primary;
+    font-size: @font-size-16;
+    color: @text-primary-color;
+
+    // ── Loading ────────────────────────────────────────────────────────────────
+
+    .state-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 48px 24px;
+        color: @text-primary-color-lighter;
+        font-size: @font-size-16;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid @grey-color;
+        border-top-color: @active-color;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    // ── Root ──────────────────────────────────────────────────────────────────
+
+    .settings-root {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 40px 24px;
+    }
+
+    .page-title {
+        margin: 0;
+        font-size: @font-size-24;
+        font-weight: 700;
+        color: @text-primary-color-darker;
+    }
+
+    // ── Form ──────────────────────────────────────────────────────────────────
+
+    .settings-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        label {
+            font-size: @font-size-16;
+            font-weight: 600;
+            color: @text-primary-color;
+
+            .hint {
+                font-weight: 400;
+                font-size: @font-size-12;
+                color: @text-primary-color-lighter;
+                margin-left: 4px;
+            }
+        }
+
+        input,
+        textarea {
+            font-family: @font-family-primary;
+            font-size: @font-size-16;
+            color: @text-primary-color;
+            background-color: @bg-primary-color;
+            border: 1px solid @grey-color-dark;
+            border-radius: 4px;
+            padding: 8px 12px;
+            outline: none;
+            transition: border-color 0.15s ease;
+            resize: vertical;
+
+            &:hover {
+                border-color: @grey-color-darker;
+            }
+
+            &:focus {
+                border-color: @active-color;
+            }
+        }
+    }
+
+    // ── Feedback ──────────────────────────────────────────────────────────────
+
+    .feedback {
+        padding: 10px 14px;
+        border-radius: 4px;
+        font-size: @font-size-16;
+
+        &.success {
+            background-color: @bg-secondary-color-lighter;
+            color: @success-color;
+            border: 1px solid @success-color;
+        }
+
+        &.error {
+            background-color: @bg-secondary-color-lighter;
+            color: @error-color;
+            border: 1px solid @error-color;
+        }
+    }
+
+    // ── Actions ───────────────────────────────────────────────────────────────
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-primary {
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        color: #ffffff;
+        background-color: @active-color;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 24px;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+
+        &:hover:not(:disabled) {
+            background-color: @active-color-hover;
+        }
+
+        &:focus:not(:disabled) {
+            background-color: @active-color-focus;
+            outline: none;
+        }
+
+        &:disabled {
+            background-color: @active-color-disabled;
+            cursor: not-allowed;
+        }
+    }
+
+    // ── Danger Zone ───────────────────────────────────────────────────────────
+
+    .danger-zone {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        border: 1px solid @error-color;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .danger-title {
+        margin: 0;
+        padding: 12px 16px;
+        font-size: @font-size-16;
+        font-weight: 700;
+        color: @error-color;
+        background-color: @bg-secondary-color-lighter;
+        border-bottom: 1px solid @error-color;
+    }
+
+    .danger-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px;
+        border-bottom: 1px solid @grey-color;
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    .danger-item-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        strong {
+            font-size: @font-size-16;
+            color: @text-primary-color-darker;
+        }
+
+        p {
+            margin: 0;
+            font-size: @font-size-12;
+            color: @text-primary-color-lighter;
+        }
+    }
+
+    .btn-warning {
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        color: #ffffff;
+        background-color: @warning-color;
+        border: none;
+        border-radius: 4px;
+        padding: 6px 16px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background-color 0.15s ease;
+
+        &:hover {
+            background-color: @warning-color-hover;
+        }
+
+        &:focus {
+            background-color: @warning-color-focus;
+            outline: none;
+        }
+    }
+
+    .btn-danger {
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        color: #ffffff;
+        background-color: @error-color;
+        border: none;
+        border-radius: 4px;
+        padding: 6px 16px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background-color 0.15s ease;
+
+        &:hover {
+            background-color: @error-color-hover;
+        }
+
+        &:focus {
+            background-color: @error-color-focus;
+            outline: none;
+        }
+    }
+
+}
+

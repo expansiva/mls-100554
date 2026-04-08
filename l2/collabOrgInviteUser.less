@@ -1,0 +1,108 @@
+/// <mls fileReference="_100554_/l2/collabOrgInviteUser.less" enhancement="_blank" />
+
+collab-org-invite-user-100554 {
+
+    display: block;
+    font-family: @font-family-primary;
+    font-size: @font-size-16;
+
+    .invite-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group label {
+        font-size: @font-size-16;
+        color: @text-primary-color;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        color: @text-primary-color;
+        background-color: @bg-primary-color;
+        border: 1px solid @grey-color-dark;
+        border-radius: 4px;
+        padding: 8px 12px;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .form-group input:hover,
+    .form-group select:hover,
+    .form-group textarea:hover {
+        border-color: @grey-color-darker;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: @active-color;
+    }
+
+    .form-group input:disabled,
+    .form-group select:disabled,
+    .form-group textarea:disabled {
+        background-color: @bg-primary-color-disabled;
+        color: @text-primary-color-disabled;
+        cursor: not-allowed;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+    }
+
+    .feedback {
+        font-size: @font-size-16;
+        padding: 10px 14px;
+        border-radius: 4px;
+    }
+
+    .feedback.success {
+        color: @success-color;
+        background-color: @grey-color-lighter;
+    }
+
+    .feedback.error {
+        color: @error-color;
+        background-color: @grey-color-lighter;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-primary {
+        padding: 8px 20px;
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        background-color: @active-color;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background-color: @active-color-hover;
+    }
+
+    .btn-primary:disabled {
+        background-color: @active-color-disabled;
+        cursor: not-allowed;
+    }
+
+}
+
+
