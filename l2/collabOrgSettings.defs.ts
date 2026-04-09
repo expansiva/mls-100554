@@ -17,7 +17,14 @@ component:
     destructive actions.
 
   external:
-    - mls (dont need import)
+    mls:
+      description: Global variable injected by the host environment at runtime
+      usage: use directly without any import, declare or type annotation
+      forbidden:
+        - declare const mls
+        - declare var mls
+        - import mls
+        - window.mls
 
   props:
     - name: project
@@ -192,6 +199,9 @@ component:
         - h1.page-title → msg.pageTitle
         - _renderForm()
         - _renderDangerZone()
+  i18n:
+    languages: [en, pt]
+    default: en
 \`\`\`
 
 

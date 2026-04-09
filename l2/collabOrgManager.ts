@@ -9,8 +9,6 @@ import '/_100554_/l2/collabOrgProjects.js'
 import '/_100554_/l2/collabOrgUsers.js'
 import '/_100554_/l2/collabOrgTeams.js'
 
-
-
 /// **collab_i18n_start**
 const message_pt = {
     home: 'Inicio',
