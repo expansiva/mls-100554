@@ -1,5 +1,4 @@
-/// <mls fileReference="_100554_/l2/agents/agentMaterializePlugin.ts" enhancement="_100554_/l2/enhancementAgent"/>
-
+/// <mls fileReference="_100554_/l2/agenst/agentMaterializeTSLit.ts" enhancement="_100554_/l2/enhancementAgent"/>
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { getTokensLess } from '/_102027_/l2/designSystemBase.js';
@@ -8,10 +7,10 @@ import { collabImport } from '/_102027_/l2/collabImport.js';
 
 export function createAgent(): IAgentAsync {
   return {
-    agentName: "agentMaterializePlugin",
+    agentName: "agentMaterializeTSLit",
     agentProject: 100554,
     agentFolder: "agents",
-    agentDescription: " Materialization Plugin",
+    agentDescription: " Materialization TSLit",
     visibility: "private",
     beforePromptImplicit,
     afterPromptStep
@@ -149,7 +148,7 @@ export function extractJSON(str:string) {
 }
 
 const system1 = `
-<!-- modelType: deepseekreasoner -->
+<!-- modelType: mini -->
 <!-- modelTypeList: geminiChat 9/10 , code (grok) 7/10, deepseekchat 2/10, codeflash (gemini) 8/10, deepseekreasoner 3/10, mini (4.1) ou nano (openai) 4/10, codeinstruct (4.1) 4/10, codereasoning(gpt5) 3/10, code2 (kimi 2.5) -->
 
 You are a senior Frontend Architect and Staff Software Engineer with 20+ years of experience building large-scale web applications using TypeScript, Lit, and state-driven architectures.
