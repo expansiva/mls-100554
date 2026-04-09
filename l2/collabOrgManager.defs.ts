@@ -1,56 +1,133 @@
 /// <mls fileReference="_100554_/l2/collabOrgManager.defs.ts" enhancement="_blank"/>
 
-export const req = `
----
+export const skill = `
+## COMP – \`collab-org-manager-100554\`
 
-## COMP-01 – '<collab-org-manager>'
+# Definition
 
-**Descrição:** Componente raiz e orquestrador. Controla o menu lateral internamente e renderiza a seção ativa no conteúdo principal. É o único ponto de entrada da suite — quem usa a suite instancia apenas este componente.
+\`\`\`YAML
+component:
+  tag: collab-org-manager-100554
+  file: _100554_/l2/collabOrgManager.ts
+  type: common
+  extends: CollabLitElement
+  description: >
+    Shell component that renders a sidebar navigation and dynamically displays
+    the active section component. Acts as the layout manager for all
+    organization sub-pages.
 
-**Responsabilidades:**
+  imports:
+    - /_100554_/l2/collabOrgHome.js
+    - /_100554_/l2/collabOrgSettings.js
+    - /_100554_/l2/collabOrgProjects.js
+    - /_100554_/l2/collabOrgUsers.js
+    - /_100554_/l2/collabOrgTeams.js
 
-_Layout:_
-- Renderizar um layout de duas colunas: menu lateral fixo à esquerda + área de conteúdo à direita.
-- Em telas largas (≥ 768px): menu expandido, exibindo ícone + label lado a lado para cada item.
-- Em telas estreitas (< 768px): menu recolhido, exibindo apenas o ícone centralizado; ao hover ou foco, exibir a label em tooltip.
-- A transição entre os modos deve ser suave (CSS transition na largura do menu).
+  props:
+    - name: project
+      type: number
+      default: 0
+      description: Project index passed down to every section component
+    - name: activeSection
+      type: string
+      default: home
+      description: Key of the currently active section
 
-_Menu lateral:_
-- Renderizar os itens de navegação diretamente no template, sem delegar a um componente filho.
-- Cada item do menu é composto por um **ícone SVG** + **label textual**, dispostos horizontalmente no modo expandido.
-- Itens disponíveis e suas respectivas seções:
+  internal_state:
+    - name: _menuItems
+      type: Array<{ section: string; label: string }>
+      description: Static list of visible menu entries
+      value:
+        - { section: home,     label: Home }
+        - { section: settings, label: Settings }
+        - { section: projects, label: Projects }
+        - { section: users,    label: Users }
+        - { section: teams,    label: Teams }
+      commented_out:
+        - { section: trash,    label: Trash }
+        - { section: explorer, label: Explorer }
+        - { section: verify,   label: Verify }
 
-| Ícone | Label | Seção ('active-section') |
-|---|---|---|
-| 🏠 home | Home | 'home' |
-| ⚙️ settings | Settings | 'settings' |
-| 📁 folder | Projects | 'projects' |
-| 🗑️ trash | Trash | 'trash' |
-| 👤 person | Users | 'users' |
-| 👥 group | Teams | 'teams' |
-| 📈 chart | Explorer | 'explorer' |
-| 🔍 search | Verify | 'verify' |
+  methods:
+    _handleSectionClick:
+      returns: void
+      params:
+        - section: string
+      steps:
+        - set this.activeSection = section
+        - dispatch CustomEvent('section-changed') with detail { section }, bubbles true, composed true
 
-- O item ativo deve ter destaque visual distinto (ex: background, cor de texto e ícone diferenciados).
-- Ao clicar em um item, atualizar 'active-section' internamente e emitir o evento 'section-changed'.
-- A seta '›' à direita de cada item (presente no sistema antigo) deve ser exibida apenas no modo expandido.
+    _renderIcon:
+      returns: TemplateResult
+      params:
+        - section: string
+      steps:
+        - define a Record<string, TemplateResult> map with inline SVG for each key
+        - return icons[section] or html\`\` if not found
+      icon_keys:
+        - home
+        - settings
+        - projects
+        - trash
+        - users
+        - teams
+        - explorer
+        - verify
 
-_Conteúdo:_
-- Renderizar o componente de seção correspondente ao 'active-section' atual.
-- Propagar 'org-slug' e 'base-url' automaticamente para todos os componentes de seção filhos.
-- Exibir um estado de fallback ("Seção não encontrada") caso 'active-section' não corresponda a nenhuma seção conhecida.
+    _renderSection:
+      returns: TemplateResult
+      steps:
+        - define a Record<string, TemplateResult> sectionMap with one child element per key
+        - each child receives prop project="\${this.project}"
+        - return sectionMap[this.activeSection] or div.fallback if not found
+      section_map:
+        home:     collab-org-home-100554
+        settings: collab-org-settings-100554
+        projects: collab-org-projects-100554
+        trash:    collab-org-trash-100554
+        users:    collab-org-users-100554
+        teams:    collab-org-teams-100554
+        explorer: collab-org-explorer-100554
+        verify:   collab-org-verify-100554
 
-**Props principais:**
+  events:
+    - name: section-changed
+      when: when a menu item is clicked
+      detail: { section: string }
+      options: { bubbles: true, composed: true }
 
-| Prop | Tipo | Descrição |
-|---|---|---|
-| 'org-slug' | 'string' | Identificador da organização |
-| 'base-url' | 'string' | URL base da API |
-| 'active-section' | 'string' | Seção ativa inicial (default: '"home"') |
+  render:
+    root:
+      element: div.layout
+      children:
+        - nav.sidebar:
+            content: >
+              maps _menuItems to div.menu-item elements.
+              active item receives class "active" when section === activeSection.
+              each item has @click → _handleSectionClick(item.section).
+              each item has @keydown → calls _handleSectionClick on Enter or Space.
+              each item has tabindex="0".
+            children_per_item:
+              - span.menu-icon → _renderIcon(item.section)
+              - span.menu-label → this.msg[item.section] (cast as any)
+              - span.menu-arrow → › (static)
+        - main.content:
+            content: _renderSection()
 
-**Eventos emitidos:**
-- 'section-changed' → '{ section: string }' disparado ao trocar de seção via menu
+  i18n:
+    languages: [en, pt]
+    default: en
 
----
+\`\`\`
+
+
+# Required skills
+
+## Lit Skill
+[[(_100554_/l2/skills/lit.ts).skill]]
+
+## Less Skill
+[[(_100554_/l2/skills/less.ts).getSkillWithTokens()]]
+
 
 `
