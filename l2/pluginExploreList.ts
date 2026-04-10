@@ -109,7 +109,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     @property() projectLabel: string = '1';
 
-    @property() filterProject: number = -1; // -1: noFilter; 0: all project
+    @state() filterProject: number = -1; // -1: noFilter; 0: all project
 
     @property() modeView: number = 0; // 0: alphabetical; 1: folder
 
@@ -238,6 +238,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     firstUpdated() {
         if (!this.autoPrepare) return;
+        
         this.prepare();
         forceServiceInstance(2, '_100554_serviceSource');
 
@@ -305,24 +306,22 @@ export class PluginExploreList extends PluginBaseModule {
             auxS = `<b>[${this.info.storage}]</b> <span class="fa fa-location-dot"></span> <b>${this.msg.filesInLocalStorage}.</b>`;
         }
 
-
-
         return html`
         <div class="groupHeader">
-            <header class="toolbar">
+            <header class="toolbar"> 
                 <div class="toolbar__left">
                     <collab-input-search-100554 @input="${this.filterLiChange}"> </collab-input-search-100554>
                     <div class="toolbar__radio-group">
                         <select @change=${this.changeSelectProject} .value="${this.filterProject}">
-                            ${this.myDep.map((p) => html`<option value="${p}">${p}</option>`)}
+                            ${this.myDep.map((p) => html`<option value="${p}" ?selected=${this.filterProject === p}>${p}</option>`)}
                             <option value="0">${this.msg.localProject}</option>
                         </select>
-                        <select @change=${this.changeHiddenFiles} .value="comp">
+                        <select @change=${this.changeHiddenFiles} .value="${this.modeFilter}">
                             <option value="comp">${this.msg.components}</option>
                             <option value="other">${this.msg.others}</option>
                             <option value="all">${this.msg.allFiles}</option>
                         </select>
-                        <select @change=${this.changeModeOrder} .value="0">
+                        <select @change=${this.changeModeOrder} .value="${this.modeView}">
                             <option value="0">${this.msg.orderName}</option>
                             <option value="1">${this.msg.orderFolder}</option>
                         </select>
@@ -353,6 +352,10 @@ export class PluginExploreList extends PluginBaseModule {
 
     renderHistory() {
 
+        if (this.modeFilter === 'all' && this.filterProject > 0) { 
+            return html``;
+        }
+
         return html`
             ${this.history.length <= 0 ? '' :
                 html`
@@ -372,7 +375,7 @@ export class PluginExploreList extends PluginBaseModule {
     renderList() {
 
         if (this.modeFilter === 'all' && this.filterProject > 0) {
-            return html`<mls-file-tree-100554 project="${this.filterProject}"></mls-file-tree-100554>`
+            return html`<mls-file-tree-100554 project="${this.filterProject}" position="${this.position}"></mls-file-tree-100554>`
         }
 
         let letterInit = '';
@@ -996,20 +999,25 @@ export class PluginExploreList extends PluginBaseModule {
         this.projectLabel = this.project.toString();
         this.fireEventLoadProject();
         await this.getFiles();
+        
 
 
     }
 
     private setLastFilter() {
+
         this.project = this.project === -1 ? mls.actualProject || 0 : this.project;
         if (this.filterByLevel[mls.actualLevel]) {
 
             this.filterProject = this.filterByLevel[mls.actualLevel].prj;
             this.modeView = this.filterByLevel[mls.actualLevel].group;
+            
         } else {
-
+ 
             this.filterProject = this.filterProject === -1 ? mls.actualProject || 0 : this.filterProject;
         }
+        
+        this.loadLastPreference();
 
     }
 
@@ -1034,50 +1042,6 @@ export class PluginExploreList extends PluginBaseModule {
             return;
         target.classList.toggle('activegpbtnslider');
 
-        /*e.stopPropagation();
-        const el = e.target as HTMLElement;
-        if (!el) return;
-        if (el.classList.contains('activegpbtnslider')) {
-            const li = el.closest('li') as HTMLElement;
-            const elContentAux = li.querySelector('.elContentAux') as HTMLElement;
-            if (elContentAux) elContentAux.style.display = 'none';
-        }
-        el.classList.toggle('activegpbtnslider');*/
-
-    }
-
-    private clickHiddenAux(e: MouseEvent) {
-
-        e.stopPropagation();
-        const el = e.target as HTMLElement;
-        if (!el) return;
-
-        const elContentAux = el.closest('.elContentAux') as HTMLElement;
-        if (!elContentAux) return;
-
-        const iptProj = elContentAux.querySelector('.spanPrj input') as HTMLInputElement;
-        const iptName = elContentAux.querySelector('.spanName input') as HTMLInputElement;
-
-        if (iptName) iptName.value = '';
-        if (iptProj) iptProj.value = this.project.toString();
-
-        elContentAux.style.display = 'none';
-
-    }
-
-    private clickOptStop(e: MouseEvent) {
-        e.stopPropagation();
-    }
-
-    private async clickRadioProject0(e: MouseEvent) {
-
-        this.info.tot = 0;
-        this.info.version = 0;
-        this.info.storage = 0;
-        this.info.error = 0;
-        this.filterProject = 0;
-        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
-        await this.getFiles();
 
     }
 
@@ -1102,6 +1066,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
         this.hiddenFiles = ['other', 'all'].includes(e.target.value);
         this.modeFilter = e.target.value;
+        this.setLastPreference();
         await this.getFiles();
 
     }
@@ -1111,26 +1076,6 @@ export class PluginExploreList extends PluginBaseModule {
         this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
     }
 
-    private clickRadioProjectActual(e: MouseEvent): void {
-
-        this.info.tot = 0;
-        this.info.version = 0;
-        this.info.storage = 0;
-        this.info.error = 0;
-        this.filterProject = mls.actualProject as number;
-        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
-        this.getFiles();
-    }
-
-    private clickRadioSortAlph(e: MouseEvent): void {
-        this.modeView = 0;
-        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
-    }
-
-    private clickRadioSortFolder(e: MouseEvent): void {
-        this.modeView = 1;
-        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
-    }
 
     private inFilter = false;
     private timeFilterChange = 0;
@@ -1161,65 +1106,6 @@ export class PluginExploreList extends PluginBaseModule {
             })
 
         }, 500);
-
-    }
-
-    private async verifyChangeInList(e: MouseEvent) {
-        try {
-            await this.verifyChangeInList2(e);
-        } catch (e) {
-
-        }
-    }
-
-    private async verifyChangeInList2(e: MouseEvent) {
-
-        try {
-
-            e.stopPropagation();
-            const el = e.target as HTMLElement;
-            if (!el) return;
-
-            const isClick = el.innerText === 'updated';
-            if (isClick) return;
-            el.innerText = 'updated';
-
-            const ret = await mls.l2.typescript.compileAll(mls.actualProject as number);
-            this.setFilesErros(ret);
-
-            this.changeList(500);
-
-            setTimeout(() => {
-                if (!this) return;
-                el.innerText = 'update list/ verify';
-            }, 50000);
-
-        } catch (e: any) {
-            console.info('Error verifyChangeInList2:' + e.message);
-        }
-
-    }
-
-    private setFilesErros(array: string[]) {
-
-        const ret: mls.stor.IFileInfo[] = [];
-        const itens = array.map(str => str.replace(/^--- Error compiling\s+/, ''));
-
-        itens.forEach((f) => {
-
-            let pr = f.substring(1).split("_")[0];
-            let prID: number = Number(pr);
-            if (isNaN(prID)) prID = 0; // error
-            let path = f.substring(pr.length + 2);
-            const key = mls.stor.getKeyToFiles(prID, 2, path, '', '.ts');
-            if (mls.stor.files[key]) {
-                mls.stor.files[key].hasError = true;
-                ret.push(mls.stor.files[key]);
-            }
-
-        })
-
-        return ret;
 
     }
 
@@ -1263,13 +1149,6 @@ export class PluginExploreList extends PluginBaseModule {
         const keyTs = mls.stor.getKeyToFile({ ...sf, extension: '.ts' });
         if (this.hiddenFiles && mls.stor.files[keyTs]) return false;
 
-        //if (this.filterProject === mls.actualProject && sf.project !== this.filterProject) return false;
-
-        //if (this.filterProject === -1 && sf.project !== mls.actualProject) return false;
-
-        /*if (mls.actualLevel === 1 && !sf.shortName.startsWith('be')) {
-            return false;
-        }*/
 
         if (mls.actualLevel === 1 && sf.level !== 1) {
             return false;
@@ -1366,39 +1245,6 @@ export class PluginExploreList extends PluginBaseModule {
         if (this.dataDifBaseTemplate[key] === undefined) return file.inLocalStorage;
 
         return this.dataDifBaseTemplate[key];
-
-    }
-
-    private async isDifBaseTemplate(file: mls.stor.IFileInfo): Promise<boolean> {
-
-        if (!file.inLocalStorage || !file.getValueInfo) return false;
-
-        const vl = await file.getValueInfo();
-        const { folder, shortName, project, extension } = file;
-
-        let source = '';
-        switch (file.extension) {
-            case ('.ts'):
-                source = await getBaseTemplate({ folder, shortName, project, extension: '.ts' }, '_100554_enhancementLit');
-                break;
-            case ('.html'):
-                source = await getBaseTemplate({ folder, shortName, project, extension: '.html' });
-                break;
-            case ('.less'):
-                source = await getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
-                break;
-            case ('.test.ts'):
-                source = await getBaseTemplate({ folder, shortName, project, extension: '.test.ts' });
-                break;
-            case ('.defs.ts'):
-                source = await getBaseTemplate({ folder, shortName, project, extension: '.defs.ts' });
-                break;
-        }
-
-        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, extension);
-        if (!this.dataDifBaseTemplate[key]) this.dataDifBaseTemplate[key] = vl.content !== source;
-
-        return vl.content !== source;
 
     }
 
@@ -1537,6 +1383,42 @@ export class PluginExploreList extends PluginBaseModule {
         this.closeAllMenus();
         this.changeList();
 
+    }
+
+    private loadLastPreference() {
+        const m = this.getLastModeFilter();
+        if (m) this.modeFilter = m;
+    }
+
+    private getLastModeFilter() {
+        const js = localStorage.getItem('_100554_/l2/pluginExploreList');
+        let m = '';
+        if (js) {
+            try {
+                const j = JSON.parse(js);
+                m = j.modeFilter;
+            } catch (e) {
+                
+            }
+        }
+
+        return m ;
+    }
+
+    private setLastPreference() {
+        const js = localStorage.getItem('_100554_/l2/pluginExploreList');
+        let j:any = {};
+        if (js) {
+            try {
+                j = JSON.parse(js);
+                
+            } catch (e) {
+                
+            }
+        }
+
+        j.modeFilter = this.modeFilter;
+        localStorage.setItem('_100554_/l2/pluginExploreList', JSON.stringify(j));
     }
 
 }

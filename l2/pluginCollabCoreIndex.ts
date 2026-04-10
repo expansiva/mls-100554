@@ -408,7 +408,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginNewFileAgent'
             },
-
+            {
+                category: 'MD',
+                scope: ['l2NewFile'],
+                priority: 1,
+                auth: ['*'],
+                widget: '_100554_pluginNewFileMd'
+            },
 
             {
                 category: 'Preview',

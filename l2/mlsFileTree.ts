@@ -4,7 +4,9 @@
 import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
-import { undoFile, deleteFile} from '/_102027_/l2/libStor.js';
+import { undoFile, deleteFile, createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
+import { getBaseTemplate } from '/_102027_/l2/libCommom.js';
+import { createModel } from '/_102027_/l2/libModel.js';
 
 interface FileInfo {
     project: number;
@@ -27,6 +29,7 @@ interface TreeNode {
 @customElement('mls-file-tree-100554')
 export class MlsFileTree extends CollabLitElement {
 
+    @property() position: string | undefined;
     @property() project: string | undefined;
     @property({ type: Object }) files: Record<string, FileInfo> = {};
     @state() private expanded: Set<string> = new Set();
@@ -111,7 +114,7 @@ export class MlsFileTree extends CollabLitElement {
 
 
         return html` 
-                <li  .myFile=${node.file} class="test-item ${isSelected ? 'selected': ''}" @click=${() => this.selectFile(node.fileKey!, node.file)} style="--depth: ${depth}" .nameFilter="${node.file.shortName.toLocaleLowerCase()}">
+                <li  .myFile=${node.file} class="test-item ${isSelected ? 'selected' : ''}" @click=${() => this.selectFile(node.fileKey!, node.file)} style="--depth: ${depth}" .nameFilter="${node.file.shortName.toLocaleLowerCase()}">
                     <div class="elContent">
                         <info-item>
                             <span class="classClick" @click="${this.clickGroupHidden}">
@@ -124,8 +127,8 @@ export class MlsFileTree extends CollabLitElement {
                             <div style="display:flex; gap:.5rem" .innerHTML="${auxStorage + auxBug + auxVersion + auxHtml}"></div>
                         </info-item>
                         <div class="groupHiddenList">
-                            <span class="mls-gpbtnslider-item" title="Undo" @click=${(e: any) => { e.stopPropagation(); this.undoFile(node.file)}}><span class="fa fa-undo"></span> Undo</span>
-                            <span class="mls-gpbtnslider-item" title="Delete" @click=${(e: any) => { e.stopPropagation(); this.deleteFile(node.file)}}><span class=" fa fa-trash"></span> Delete</span>
+                            <span class="mls-gpbtnslider-item" title="Undo" @click=${(e: any) => { e.stopPropagation(); this.undoFile(node.file) }}><span class="fa fa-undo"></span> Undo</span>
+                            <span class="mls-gpbtnslider-item" title="Delete" @click=${(e: any) => { e.stopPropagation(); this.deleteFile(node.file) }}><span class=" fa fa-trash"></span> Delete</span>
                         </div>
                     </div>
                 </li>
@@ -220,7 +223,11 @@ export class MlsFileTree extends CollabLitElement {
 
     private selectFile(key: string, file: mls.stor.IFileInfo) {
         this.selected = key;
-        this.fireEventsDetails(file);
+        if (['.ts'].includes(file.extension)) {
+            this.fireEvents(file);
+        } else {
+            this.fireEventsDetails(file);
+        }
     }
 
     private clickGroupHidden(e: MouseEvent) {
@@ -240,7 +247,7 @@ export class MlsFileTree extends CollabLitElement {
     }
 
     private async delAllByFolders(folder: string) {
-    
+
         const level = this.getLevel(folder + '/');
         folder = this.clearPath(folder + '/')
 
@@ -268,7 +275,7 @@ export class MlsFileTree extends CollabLitElement {
     }
 
     private async undoAllByFolders(folder: string) {
-    
+
         const level = this.getLevel(folder + '/');
         folder = this.clearPath(folder + '/')
 
@@ -302,7 +309,7 @@ export class MlsFileTree extends CollabLitElement {
 
     private clearPath(str: string) {
         let path = str.replace(/^\/l\d+\//, '/').replace(/\/$/, '');
-        if(path.startsWith('/')) path = path.replace(/^\/+/, '')
+        if (path.startsWith('/')) path = path.replace(/^\/+/, '')
         return path
     }
 
@@ -322,5 +329,86 @@ export class MlsFileTree extends CollabLitElement {
             0
         );
     }
+
+
+    private async fireEvents(file: mls.stor.IFileInfo, timeout: number = 0): Promise<void> {
+
+        try {
+
+            const params = {} as mls.events.IFileAction;
+
+            //const files = await createAllModels(file, true);
+
+            if ([1, 2, 3, 4].includes(mls.actualLevel)) await this.createModel(file, '.ts');
+            if ([2, 3, 4].includes(mls.actualLevel)) await this.createModel(file, '.less');
+            if ([2, 3, 4].includes(mls.actualLevel)) await this.createModel(file, '.html');
+
+            params.action = 'open';
+            params.level = file.level;
+            params.project = file.project;
+            params.shortName = file.shortName;
+            params.extension = file.extension;
+            params.folder = file.folder;
+            params.position = this.position as ('right' | 'left');
+
+
+            const lv = mls.actualLevel;
+            let name = `_${file.project}_${file.shortName}`;
+            if (file.folder) name = `_${file.project}_${file.folder}/${file.shortName}`;
+            mls.actual[lv as any].setFullName(name);
+            mls.actual[lv as any][this.position as ('right' | 'left')] = file
+
+
+            mls.events.fire([mls.actualLevel], ['FileAction'], JSON.stringify(params), timeout);
+
+
+        } catch (err: any) {
+            console.info(err.message || '[fireEvents]: erro open');
+
+        }
+    }
+
+    private async createModel(base: mls.stor.IFileInfo, ext: string) {
+
+        if (ext === '.ts') {
+            return await createModel(base, true, false);
+        }
+
+        const { project, shortName, folder, level } = base;
+        const key = mls.stor.getKeyToFiles(project, base.level, shortName, folder, ext);
+        let stor = mls.stor.files[key];
+
+        if (!stor) {
+
+            const param: IReqCreateStorFile = {
+                project,
+                shortName,
+                folder,
+                level,
+                extension: '.ts',
+                source: '',
+                status: 'new'
+            }
+
+            if (ext === '.less') {
+                const templateLess = await getBaseTemplate({ folder, shortName, project, extension: '.less' }, 'enhancementStyle');
+                return createStorFile({ ...param, extension: '.less', source: templateLess }, true, true, false)
+            }
+
+            if (ext === '.html') {
+                const templateHTML = await getBaseTemplate({ folder, shortName, project, extension: '.html' });
+                return createStorFile({ ...param, extension: '.html', source: templateHTML }, true, true, false)
+            }
+
+
+        } else {
+            await createModel(stor, true, false);
+        }
+
+
+    }
+
+
+
 
 }

@@ -3,8 +3,9 @@
 import { html, svg, TemplateResult } from 'lit';
 import { state, property, query } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import { createModelAnyFile } from '/_102027_/l2/libModel.js';
 
-/// **collab_i18n_start**
+/// **collab_i18n_start** 
 const message_pt = {
     msg1: 'Este arquivo não é visual nem de áudio',
     msg2: 'Não é possível mostrar o conteúdo deste tipo de arquivo.',
@@ -32,7 +33,7 @@ export class PluginViewFile extends PluginBaseModule {
     @property() nameFile: string = '';
 
     @state() current: number = 1;
-    @state() file: mls.stor.IFileInfo | undefined ;
+    @state() file: mls.stor.IFileInfo | undefined;
 
     @state() contentText: string = '';
     @state() contentUrl: string = '';
@@ -58,14 +59,23 @@ export class PluginViewFile extends PluginBaseModule {
         }
     }
 
-    private updateEditorContent() {
+    private async updateEditorContent() {
         this.createEditor();
         if (!this._ed1) return;
 
-        const value = this.contentText;
-        const model = this._ed1.getModel();
-        if (model) {
-            model.setValue(value);
+        this._ed1.updateOptions({ readOnly: true });
+        
+        if (this.extension === '.md' && this.file) {
+            this._ed1.updateOptions({ readOnly: false });
+            const m = await createModelAnyFile(this.file);
+            this._ed1.setModel(m.model);
+
+        } else {
+            const value = this.contentText;
+            const model = this._ed1.getModel();
+            if (model) {
+                model.setValue(value);
+            }
         }
 
     }
@@ -162,22 +172,7 @@ export class PluginViewFile extends PluginBaseModule {
 
         return html`<div id="elEditor" style="width:93%; min-height: 500px; display:${this.current === 2 ? 'block' : 'none'}"></div>`
 
-        if (!this.file) return html``;
 
-        if (this.isReadableText()) {
-            /*return html`
-                <textarea
-                    readonly
-                    style="width:100%;height:600px"
-                >${this.contentText}</textarea>
-            `;*/
-
-            return html`<div id="elEditor" style="width:93%; min-height: 500px; display:${this.current === 2 ? 'block' : 'none'}"></div>`
-        }
-
-        return html`
-            <p style=" display:${this.current === 2 ? 'block' : 'none'}">${this.msg.msg2}</p>
-        `;
     }
 
     // -------------------------
@@ -209,9 +204,9 @@ export class PluginViewFile extends PluginBaseModule {
             this._ed1 = (window as any).editorTaskView as monaco.editor.IStandaloneCodeEditor;
             monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
                 noImplicitAny: true
-            });
+            })
 
-            this._ed1.updateOptions({ readOnly: true });
+
             this.editor.mlsEditor = this._ed1;
             this._ed1.setModel(model);
         }
