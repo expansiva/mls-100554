@@ -34,7 +34,7 @@ async function beforePromptImplicit(
                         agentName: agent.agentName,
                         inputAI: [{
                                 type: "system",
-                                content: system1.replace("{{systemExperienceConstraints}}", systemExperienceConstraints)
+                                content: system1 //.replace("{{systemExperienceConstraints}}", systemExperienceConstraints)
                         }, {
                                 type: "human",
                                 content: userPrompt
@@ -68,7 +68,7 @@ async function beforePromptStep(
                 hookSequential,
                 parentStepId: parentStep.stepId,
                 humanPrompt: args || '',
-                systemPrompt: system1.replace("{{systemExperienceConstraints}}", systemExperienceConstraints)
+                systemPrompt: system1 // .replace("{{systemExperienceConstraints}}", systemExperienceConstraints)
         }
 
         return [continueIntent];
@@ -113,8 +113,8 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
         console.log({ toBePages });
         if (context.isTest) return [];
 
-        const toBe = getPayloadToBeConceptual3(context);
-        if (!toBe) throw new Error(`[processOutputToBePages] invalid toBe: undefined`)
+        // const toBe = getPayloadToBeConceptual3(context);
+        // if (!toBe) throw new Error(`[processOutputToBePages] invalid toBe: undefined`)
 
         const paths = toBePages.pages.map((page) => page.pageName).slice(0, 1);
         const newStep: mls.msg.AgentIntentAddStep = {
@@ -167,7 +167,7 @@ export function getPayloadToBePages(context: mls.msg.ExecutionContext): ToBePage
 "t3, grok-code-fast-1, 26s, $0.0036, 6.2/10",
 "t4, moonshotai/kimi-k2.5, 61s, $0.0156, 5.8/10 - double deffinition of staff pages, json formatting issues, loop"*/
 const system1 = `
-<!-- modelType: codereasoning -->
+<!-- modelType: code -->
 <!-- modelTypeList: geminiChat ?/10 , code (grok) ?/10, deepseekchat ?/10, codeflash (gemini) ?/10, deepseekreasoner ?/10, mini (4.1) ou nano (openai) ?/10, codeinstruct (4.1) ?/10, codereasoning(gpt5) ?/10, code2 (kimi 2.5) ?/10 -->
 
 You are a senior BUSINESS Analyst.
@@ -189,12 +189,11 @@ Rules:
 - Do NOT define technical implementation.
 - You MUST follow experienceConstraints when deciding organisms and interaction patterns.
 
-{{systemExperienceConstraints}}
-
 ## Output format
 You must return the object strictly as JSON, no spaces, no indent, minified
 [[OutputSection]]
 `
+
 export const systemExperienceConstraints = `
 ## Experience Constraints
 [[ExperienceConstraints]]
@@ -254,8 +253,6 @@ export interface Section {
 export interface Organism {
         organismName: string;  // e.g. "listProductsTop5", always prefixed with pageName in camelCase
         purpose: string;       // Short description of the organism's single responsibility
-        fieldsets?: string[];  // Optional: list of thematic groups inside this organism (e.g. ["Personal Data", "Addresses", "Preferences"])
-        // Each string represents a <fieldset> + <legend> grouping of related form fields.
-        // Used only when the organism contains a complex form that benefits from semantic grouping.
+        rulesApplied: string[];
 }
 //#endregion
