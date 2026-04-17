@@ -1,0 +1,235 @@
+<plugin-agent-playground-100554  style="display:none"> <promptcustom type="memory" group="A"> {
+"outputPath":"_102009_/l2/storeLocation.defs.ts",
+"folder":"/_102025_/l2/pizzaria/web/"
+"definition":{
+  "pages": [
+    {
+      "screenId": "store-location",
+      "pageName": "storeLocation",
+      "actor": "customer",
+      "purpose": "Endereço completo, horário de funcionamento, mapa e canais de contato da unidade",
+      "sections": [
+        {
+          "sectionName": "main",
+          "mode": "stack",
+          "organisms": [
+            {
+              "organismName": "storeLocationAddressMap",
+              "purpose": "Exibe endereço, mapa e horários de funcionamento da loja",
+              "rulesApplied": [
+                "rule_lang_ptbr_only",
+                "rule_brazil_target",
+                "rule_essential_features",
+                "rule_design_clean_modern_responsive"
+              ],
+              "dataShape": {
+                "shape": "object",
+                "stateKey": "db.storeInfo",
+                "sourceRoutine": "storeInfo.getStoreById",
+                "fields": [
+                  {
+                    "entityField": "name",
+                    "entity": "StoreInfo",
+                    "priority": "required",
+                    "usage": "display"
+                  },
+                  {
+                    "entityField": "address",
+                    "entity": "StoreInfo",
+                    "priority": "required",
+                    "usage": "display"
+                  },
+                  {
+                    "entityField": "city",
+                    "entity": "StoreInfo",
+                    "priority": "recommended",
+                    "usage": "display"
+                  },
+                  {
+                    "entityField": "state",
+                    "entity": "StoreInfo",
+                    "priority": "recommended",
+                    "usage": "display"
+                  },
+                  {
+                    "entityField": "country",
+                    "entity": "StoreInfo",
+                    "priority": "required",
+                    "usage": "display"
+                  },
+                  {
+                    "entityField": "businessHours",
+                    "entity": "StoreInfo",
+                    "priority": "required",
+                    "usage": "display"
+                  },
+                  {
+                    "entityField": "mapLink",
+                    "entity": "StoreInfo",
+                    "priority": "recommended",
+                    "usage": "display"
+                  }
+                ],
+                "params": [
+                  {
+                    "paramName": "storeId",
+                    "type": "string",
+                    "source": {
+                      "from": "route",
+                      "routeParam": "storeInfoId"
+                    }
+                  }
+                ],
+                "editable": false
+              },
+              "tempStates": [],
+              "computedFields": [
+                {
+                  "fieldId": "fullAddress",
+                  "derivedFrom": [
+                    "address",
+                    "city",
+                    "state",
+                    "country"
+                  ],
+                  "description": "Concatena endereço, cidade, estado e país para exibição completa e para uso no mapa.",
+                  "priority": "required"
+                }
+              ],
+              "navigationFields": [
+                {
+                  "fieldId": "openMap",
+                  "target": "external:mapLink",
+                  "params": [
+                    "mapLink"
+                  ],
+                  "priority": "recommended",
+                  "navigationType": "external"
+                }
+              ],
+              "emits": [
+                {
+                  "event": "addressMapLoaded",
+                  "payload": "storeId"
+                }
+              ]
+            },
+            {
+              "organismName": "storeLocationContactSummary",
+              "purpose": "Exibe canais de contato da unidade",
+              "rulesApplied": [
+                "rule_lang_ptbr_only",
+                "rule_brazil_target",
+                "rule_essential_features",
+                "rule_design_clean_modern_responsive"
+              ],
+              "dataShape": {
+                "shape": "object",
+                "stateKey": "db.storeInfo",
+                "sourceRoutine": "storeInfo.getStoreById",
+                "fields": [
+                  {
+                    "entityField": "phone",
+                    "entity": "StoreInfo",
+                    "priority": "recommended",
+                    "usage": "display"
+                  },
+                  {
+                    "entityField": "whatsapp",
+                    "entity": "StoreInfo",
+                    "priority": "recommended",
+                    "usage": "display"
+                  },
+                  {
+                    "entityField": "email",
+                    "entity": "StoreInfo",
+                    "priority": "recommended",
+                    "usage": "display"
+                  }
+                ],
+                "params": [
+                  {
+                    "paramName": "storeId",
+                    "type": "string",
+                    "source": {
+                      "from": "route",
+                      "routeParam": "storeInfoId"
+                    }
+                  }
+                ],
+                "editable": false
+              },
+              "tempStates": [],
+              "computedFields": [
+                {
+                  "fieldId": "hasWhatsapp",
+                  "derivedFrom": [
+                    "whatsapp"
+                  ],
+                  "description": "Indica se o WhatsApp está disponível para exibir botão de contato rápido.",
+                  "priority": "recommended"
+                }
+              ],
+              "navigationFields": [
+                {
+                  "fieldId": "contactWhatsapp",
+                  "target": "external:whatsapp",
+                  "params": [
+                    "whatsapp"
+                  ],
+                  "priority": "recommended",
+                  "navigationType": "external"
+                },
+                {
+                  "fieldId": "contactPhone",
+                  "target": "external:tel",
+                  "params": [
+                    "phone"
+                  ],
+                  "priority": "recommended",
+                  "navigationType": "external"
+                },
+                {
+                  "fieldId": "contactEmail",
+                  "target": "external:mailto",
+                  "params": [
+                    "email"
+                  ],
+                  "priority": "recommended",
+                  "navigationType": "external"
+                }
+              ],
+              "emits": [
+                {
+                  "event": "contactChannelClicked",
+                  "payload": "{channel:string,storeId:string}"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "actionStates": [
+        {
+          "stateKey": "ui.storeLocation.loading",
+          "description": "Carregando dados da unidade",
+          "values": [
+            "idle",
+            "loading",
+            "error"
+          ]
+        }
+      ],
+      "tempStates": [
+        {
+          "stateKey": "ui.storeLocation.selectedContactChannel",
+          "type": "string",
+          "description": "Canal de contato selecionado pelo usuário para destaque ou ação rápida",
+          "priority": "optional"
+        }
+      ]
+    }
+  ]
+}
+
+} </promptcustom> </plugin-agent-playground-100554>

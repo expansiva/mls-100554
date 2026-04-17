@@ -1,10 +1,12 @@
 /// <mls fileReference="_100554_/l2/agents/agentToBeConceptual3.ts" enhancement="_100554_/l2/enhancementAgent" />
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
-import { getAllAgentStepByAgentName } from '/_100554_/l2/aiAgentHelper.js';
+import { getAllAgentStepByAgentName, appendLongTermMemory } from '/_100554_/l2/aiAgentHelper.js';
 import { outputPrompt, Output, ModuleToBe } from '/_100554_/l2/agents/agentToBeConceptual.js';
 import { addModule, configureMasterFrontEnd } from '/_100554_/l2/projectAST.js';
 import { saveModuleToBe } from '/_100554_/l2/moduleToBeAST.js';
+import { createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
+import { updateVariableJson } from '/_102027_/l2/defsAST.js';
 
 
 export function createAgent(): IAgentAsync {
@@ -131,7 +133,9 @@ async function processOutputToBeConceptual3(fromAgent: string, context: mls.msg.
 
   if (context.isTest) return [];
   if (fromAgent === 'agentToBeUserJourney') {
+
     await configModule(context);
+
     const newStep: mls.msg.AgentIntentAddStep = {
       type: "add-step",
       messageId: context.message.orderAt,
@@ -188,12 +192,37 @@ async function configModule(context: mls.msg.ExecutionContext) {
   const auraLiveView = '_102020_collabAuraLiveView';
   const project: number = mls.actualProject as number;
   const moduleName: string = moduleTobe.meta.moduleName;
-  const res = await addModule(project, moduleName, true);
+/*  const res = await addModule(project, moduleName, true);
   if (!res.ok) throw new Error(`[configModule](addModule) ${res.message}`)
   const res2 = await configureMasterFrontEnd(project, auraStart, auraBuild, auraLiveView);
   if (!res2.ok) throw new Error(`[configModule](configureMasterFrontEnd) ${res.message}`)
   const res3 = await saveModuleToBe(project, moduleTobe.meta.moduleName, moduleTobe, undefined);
-  if (!res3.ok) throw new Error(`[configModule](saveToBe) ${res.message}`)
+  if (!res3.ok) throw new Error(`[configModule](saveToBe) ${res.message}`)*/
+
+  await appendLongTermMemory(context, { "moduleName": moduleName });
+  const ref = `_${mls.actualProject || 0}_/l2/${moduleName}/module.defs.ts`;
+  const info = mls.stor.convertFileReferenceToFile(ref);
+  const k = mls.stor.getKeyToFile(info);
+  let sf = mls.stor.files[k];
+
+
+  if (!sf) {
+    const param: IReqCreateStorFile = {
+      ...info,
+      source: updateVariableJson('', 'ontology', moduleTobe)
+    }
+
+    sf = await createStorFile(param, false, false, false);
+  } else {
+
+    const m = await sf.getOrCreateModel();
+    let src = m.model.getValue();
+    src = updateVariableJson(src, 'ontology', moduleTobe);
+    m.model.setValue(src);
+
+    console.info('passou');
+
+  }
 
 
 }
