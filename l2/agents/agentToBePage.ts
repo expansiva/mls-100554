@@ -2,6 +2,9 @@
 
 import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
 import { ModuleToBe } from '/_100554_/l2/agents/agentToBeConceptual.js';
+import { createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
+import { updateVariableJson } from '/_102027_/l2/defsAST.js';
+
 
 export function createAgent(): IAgentAsync {
   return {
@@ -11,7 +14,9 @@ export function createAgent(): IAgentAsync {
     agentDescription: "Implement Page",
     visibility: "private",
     beforePromptImplicit,
+    beforePromptStep,
     afterPromptStep
+    
   };
 }
 
@@ -44,6 +49,31 @@ async function beforePromptImplicit(
 
 }
 
+async function beforePromptStep(
+  agent: IAgentMeta,
+  context: mls.msg.ExecutionContext,
+  parentStep: mls.msg.AIAgentStep,
+  step: mls.msg.AIAgentStep,
+  hookSequential: number,
+  args?: string
+): Promise<mls.msg.AgentIntent[]> {
+
+  if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
+
+  const continueParallel: mls.msg.AgentIntentPromptReady = {
+    type: "prompt_ready",
+    args,
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    hookSequential,
+    parentStepId: parentStep.stepId,
+    humanPrompt: args
+  }
+  
+  return [continueParallel];
+}
+
 
 async function afterPromptStep(
   agent: IAgentMeta,
@@ -60,6 +90,39 @@ async function afterPromptStep(
   if (!payload || payload.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload`);
   // const output = payload.result as ToBePages;
 
+  // preciso do modulo
+  let module = context.task?.iaCompressed?.longMemory['moduleName'];
+  if (!module) throw new Error('Not found moduleName:'+ agent.agentName);
+
+  console.info(module);
+
+  const refDef = `_${mls.actualProject || 0}_/l2/${module}/${payload.result.pages[0].pageName}.defs.ts`;
+  const srcDefs = updateVariableJson('/// <mls fileReference="' + refDef + '"/>\n\n', 'definition', payload.result);
+
+  await saveFile(refDef, srcDefs);
+
+  await saveFile(`_${mls.actualProject || 0}_/l2/${module}/${payload.result.pages[0].pageName}.ts`, '');
+
+
+  const newStep: mls.msg.AgentIntentAddStep = {
+    type: "add-step",
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    parentStepId: 1,
+    step:
+    {
+      type: 'agent',
+      stepId: 0,
+      interaction: null,
+      status: 'waiting_human_input',
+      nextSteps: [],
+      agentName: 'agentToBePage2',
+      prompt: JSON.stringify({ outputPath:refDef, folder:`/_${mls.actualProject || 0}_/l2/${module}/web/` , definition: payload.result }),
+      rags: [],
+    }
+  };
+
   const updateStatus: mls.msg.AgentIntentUpdateStatus = {
     type: 'update-status',
     hookSequential,
@@ -71,8 +134,30 @@ async function afterPromptStep(
     // cleaner: 'input_output',
     status: 'completed'
   };
-  return [updateStatus];
+  return [newStep, updateStatus];
 
+}
+
+async function saveFile(ref: string, src: string) {
+
+  const info = mls.stor.convertFileReferenceToFile(ref);
+  const k = mls.stor.getKeyToFile(info);
+  let sf = mls.stor.files[k];
+
+  if (!sf) {
+    const param: IReqCreateStorFile = {
+      ...info,
+      source: src
+    }
+
+    sf = await createStorFile(param, false, false, false);
+
+  } else {
+
+    const m = await sf.getOrCreateModel();
+    if (m && m.model) m.model.setValue(src);
+
+  }
 }
 
 const system1 = `
@@ -90,11 +175,11 @@ You must return the object strictly as JSON, no spaces, no indent, minified
 
 //#region OutputSection
 export type Output = {
-        type: "flexible";
-        result: ToBePages;
+  type: "flexible";
+  result: ToBePages;
 };
 export interface ToBePages {
-        pages: Page[];
+  pages: Page[];
 }
 export interface Page {
   screenId: string;
@@ -191,12 +276,12 @@ export interface DataShapeParam {
   source: ParamSource;
 }
 export type ParamSource =
-  | { from: 'route';    routeParam: string }          // /store/:storeInfoId
-  | { from: 'state';    stateKey: string }             // picked in another organism
-  | { from: 'context';  contextKey: string }           // user.storeId, user.companyId
-  | { from: 'config';   configKey: string }            // module.defaultStoreId
-  | { from: 'parent';   parentStateKey: string }       // parent organism selection
-  | { from: 'fixed';    value: string | number | boolean };  // hardcoded
+  | { from: 'route'; routeParam: string }          // /store/:storeInfoId
+  | { from: 'state'; stateKey: string }             // picked in another organism
+  | { from: 'context'; contextKey: string }           // user.storeId, user.companyId
+  | { from: 'config'; configKey: string }            // module.defaultStoreId
+  | { from: 'parent'; parentStateKey: string }       // parent organism selection
+  | { from: 'fixed'; value: string | number | boolean };  // hardcoded
 
 /**
  * A field inside an object or collection item.
