@@ -6,7 +6,7 @@ import { createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
 import { updateVariableJson } from '/_102027_/l2/defsAST.js';
 
 
-export function createAgent(): IAgentAsync {
+export function createAgent(): IAgentAsync { 
   return {
     agentName: "agentToBePage",
     agentProject: 100554,
@@ -60,6 +60,23 @@ async function beforePromptStep(
 
   if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
 
+  if (args.startsWith("[agentToBePages]")) {
+  
+    const continueParallel1: mls.msg.AgentIntentPromptReady = {
+      type: "prompt_ready",
+      args,
+      messageId: context.message.orderAt,
+      threadId: context.message.threadId,
+      taskId: context.task?.PK || '',
+      hookSequential,
+      parentStepId: 1,
+      humanPrompt: '',
+      systemPrompt: system1
+    }
+    return [continueParallel1];
+
+  }
+
   const continueParallel: mls.msg.AgentIntentPromptReady = {
     type: "prompt_ready",
     args,
@@ -88,7 +105,27 @@ async function afterPromptStep(
 
   const payload = step.interaction.payload[0] as Output | undefined;
   if (!payload || payload.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload`);
-  // const output = payload.result as ToBePages;
+
+  const output = payload.result as ToBePages;
+  const intents = await processOutput(context, output, agent);
+  
+
+  const updateStatus: mls.msg.AgentIntentUpdateStatus = {
+    type: 'update-status',
+    hookSequential,
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    parentStepId: parentStep.stepId,
+    stepId: step.stepId,
+    //cleaner: 'input_output',
+    status: 'completed'
+  };
+  return [...intents, updateStatus];
+
+}
+
+async function processOutput(context: mls.msg.ExecutionContext, output: any, agent: IAgentMeta): Promise<mls.msg.AgentIntent[]> { 
 
   // preciso do modulo
   let module = context.task?.iaCompressed?.longMemory['moduleName'];
@@ -96,12 +133,12 @@ async function afterPromptStep(
 
   console.info(module);
 
-  const refDef = `_${mls.actualProject || 0}_/l2/${module}/${payload.result.pages[0].pageName}.defs.ts`;
-  const srcDefs = updateVariableJson('/// <mls fileReference="' + refDef + '"/>\n\n', 'definition', payload.result);
+  const refDef = `_${mls.actualProject || 0}_/l2/${module}/${output.pages[0].pageName}.defs.ts`;
+  const srcDefs = updateVariableJson('/// <mls fileReference="' + refDef + '"  enhancement="_blank"/>\n\n', 'definition', output);
 
   await saveFile(refDef, srcDefs);
 
-  await saveFile(`_${mls.actualProject || 0}_/l2/${module}/${payload.result.pages[0].pageName}.ts`, '');
+  await saveFile(`_${mls.actualProject || 0}_/l2/${module}/${output.pages[0].pageName}.ts`, '');
 
 
   const newStep: mls.msg.AgentIntentAddStep = {
@@ -118,23 +155,12 @@ async function afterPromptStep(
       status: 'waiting_human_input',
       nextSteps: [],
       agentName: 'agentToBePage2',
-      prompt: JSON.stringify({ outputPath:refDef, folder:`/_${mls.actualProject || 0}_/l2/${module}/web/` , definition: payload.result }),
+      prompt: JSON.stringify({ outputPath:refDef, folder:`/_${mls.actualProject || 0}_/l2/${module}/web/` , definition: output }),
       rags: [],
     }
   };
 
-  const updateStatus: mls.msg.AgentIntentUpdateStatus = {
-    type: 'update-status',
-    hookSequential,
-    messageId: context.message.orderAt,
-    threadId: context.message.threadId,
-    taskId: context.task?.PK || '',
-    parentStepId: parentStep.stepId,
-    stepId: step.stepId,
-    // cleaner: 'input_output',
-    status: 'completed'
-  };
-  return [newStep, updateStatus];
+  return [newStep];
 
 }
 
@@ -150,7 +176,7 @@ async function saveFile(ref: string, src: string) {
       source: src
     }
 
-    sf = await createStorFile(param, false, false, false);
+    sf = await createStorFile(param, true, true, true);
 
   } else {
 

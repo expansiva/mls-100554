@@ -122,7 +122,7 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
                 messageId: context.message.orderAt,
                 threadId: context.message.threadId,
                 taskId: context.task?.PK || '',
-                parentStepId: parentStep.stepId,
+                parentStepId: 1,
                 step:
                 {
                         type: 'agent',
