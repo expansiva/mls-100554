@@ -189,7 +189,7 @@ export class PluginViewFile extends PluginBaseModule {
 
     private createEditor(): void {
         if (!this.elEditor || this._ed1) return;
-        if ((window as any).editorTaskView) {
+        if ((window as any).editorTaskView && (window as any).elEditorDetailsView) {
             this.editor = (window as any).elEditorDetailsView;
             this._ed1 = (window as any).editorTaskView;
             this._ed1?.setModel(this.createModel());

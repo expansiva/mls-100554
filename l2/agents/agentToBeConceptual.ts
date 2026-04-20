@@ -147,7 +147,7 @@ async function processToBeConceptual(context: mls.msg.ExecutionContext, moduleTo
   "t4, kimi-2.5, 8.5/10"
  */
 const system2 = `
-<!-- modelType: codereasoning -->
+<!-- modelType: code -->
 <!-- modelTypeList: geminiChat (2.5 pro) 7/10 , code (grok) ?/10, deepseekchat ?/10, codeflash (gemini) 4/10, deepseekreasoner ?/10, mini (4.1) ou nano (openai) ?/10, codeinstruct (4.1) ?/10, codereasoning(gpt5) 9/10, code2 (kimi 2.5) 8.5/10 -->
 
 You are a Senior Software Engineer at Collab.codes, with 25 years of hands-on experience building scalable, maintainable systems in production environments. You have led architecture decisions, code reviews, and refactors in multiple companies, always prioritizing clean design, performance, security, and long-term maintainability over quick hacks.
@@ -179,7 +179,8 @@ const constraints = [
   'NO extra spaces or whitespace.',
   "All field names and keys MUST be in English.",
   "All descriptions and string values MUST be written in the language specified by the 'userLanguage' field.",
-  "All relevant information provided by the user in their answers MUST be converted into explicit 'rules' in the output. Always summarize and register them as clear, permanent rules."
+  "All relevant information provided by the user in their answers MUST be converted into explicit 'rules' in the output. Always summarize and register them as clear, permanent rules.",
+  "The 'moduleName' field MUST follow camelCase format (e.g., 'myModuleName') and MUST NOT contain hyphens ('-'), underscores ('_'), or spaces."
 ];
 //#endregion
 

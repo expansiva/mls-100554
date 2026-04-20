@@ -63,10 +63,11 @@ async function beforePromptStep(
     threadId: context.message.threadId,
     taskId: context.task?.PK || '',
     hookSequential,
-    parentStepId: parentStep.stepId,
+    parentStepId: 1,
+    systemPrompt: system1,
     humanPrompt: args
   }
-  
+
   return [continueParallel];
 }
 
@@ -88,7 +89,51 @@ async function afterPromptStep(
   let intents: mls.msg.AgentIntent[] = [];
 
   const output = payload.result;
-  await processOutput(context, output, agent);
+  intents = await processOutput(context, output, agent);
+
+  const updateStatus: mls.msg.AgentIntentUpdateStatus = {
+    type: 'update-status',
+    hookSequential,
+    messageId: context.message.orderAt,
+    threadId: context.message.threadId,
+    taskId: context.task?.PK || '',
+    parentStepId: parentStep.stepId,
+    stepId: step.stepId,
+    status
+  };
+
+  return [...intents, updateStatus];
+
+}
+
+async function processOutput(context: mls.msg.ExecutionContext, output: any, agent: IAgentMeta): Promise<mls.msg.AgentIntent[]> {
+
+  let module = context.task?.iaCompressed?.longMemory['moduleName'];
+  if (!module) throw new Error('Not found moduleName:' + agent.agentName);
+
+  const ref = mls.stor.convertFileReferenceToFile(output.outputPath);
+  const key = mls.stor.getKeyToFile(ref);
+  const sf = mls.stor.files[key];
+  if (!sf) throw new Error('Not found stor:' + output.outputPath);
+  const m = await sf.getOrCreateModel();
+  const src = m.model.getValue();
+
+  //contract
+  let newSrc = generateContract(src, output.outputPath, module);
+
+  //shared
+  newSrc = generateShared(newSrc, output.outputPath, module, sf);
+
+  // page
+  newSrc = updateVariableJson(newSrc, 'desktopLayoutSpec', output.definition);
+
+  //pipeLine
+  newSrc = updateVariableJson(newSrc, 'materializeIndex', generatePipeLine(module, sf));
+
+  // update model
+  m.model.setValue(newSrc);
+
+  await mls.stor.localStor.setContent(sf, { contentType: 'string', content: newSrc });
 
   const newStep: mls.msg.AgentIntentAddStep = {
     type: "add-step",
@@ -104,78 +149,52 @@ async function afterPromptStep(
       status: 'waiting_human_input',
       nextSteps: [],
       agentName: 'agentMaterialize',
-      prompt: '@@ ["'+output.outputPath+'"]',
+      prompt: output.outputPath ,
       rags: [],
     }
   };
 
-  const updateStatus: mls.msg.AgentIntentUpdateStatus = {
-    type: 'update-status',
-    hookSequential,
-    messageId: context.message.orderAt,
-    threadId: context.message.threadId,
-    taskId: context.task?.PK || '',
-    parentStepId: parentStep.stepId,
-    stepId: step.stepId,
-    status
-  };
-
-  return [newStep, updateStatus];
-
+  return [newStep];
 }
 
-async function processOutput(context: mls.msg.ExecutionContext, output: any, agent: IAgentMeta): Promise<mls.msg.AgentIntent[]> {
-
-  let module = context.task?.iaCompressed?.longMemory['moduleName'];
-  if (!module) throw new Error('Not found moduleName:' + agent.agentName);
-  
-  const ref = mls.stor.convertFileReferenceToFile(output.outputPath);
-  const key = mls.stor.getKeyToFile(ref);
-  const sf = mls.stor.files[key];
-  if (!sf) throw new Error('Not found stor:' + output.outputPath);
-  const m = await sf.getOrCreateModel();
-  const src = m.model.getValue();
-
-  //contract
-  let newSrc = updateVariableText(src, 'contractSpec', `
+function generateContract(src: string, defsPath: string, moduleName: string) {
+  return updateVariableText(src, 'contractSpec', `
 ##Pages spec
 \\\`\\\`\\\`JSON
-    [(${output.outputPath}).definition]
+    [(${defsPath}).definition]
 \\\`\\\`\\\`
 
 ##Ontology
 \\\`\\\`\\\`JSON
-    [(_102029_/l2/${module}/module.defs.ts).ontology]
+    [(_102029_/l2/${moduleName}/module.defs.ts).ontology]
 \\\`\\\`\\\`
 `)
+}
 
-  //shared
-  newSrc = updateVariableText(newSrc, 'sharedSpec', `
+function generateShared(src: string, defsPath: string, moduleName: string, sf: mls.stor.IFileInfo) {
+  return updateVariableText(src, 'sharedSpec', `
 ##Pages spec
 \\\`\\\`\\\`JSON
 {
-  "interfacePath":"_${sf.project}_/l1/${module}/layer_2_controller/${sf.shortName}.js",
-  "definition": [(${output.outputPath}).definition]
+  "interfacePath":"_${sf.project}_/l1/${moduleName}/layer_2_controller/${sf.shortName}.js",
+  "definition": [(${defsPath}).definition]
 }    
 \\\`\\\`\\\`
 
 ##Ontology
 \\\`\\\`\\\`
-    [(_102029_/l2/${module}/module.defs.ts).ontology]
+    [(_102029_/l2/${moduleName}/module.defs.ts).ontology]
 \\\`\\\`\\\`
 `)
+}
 
-  // page
-  newSrc = updateVariableJson(newSrc, 'desktopLayoutSpec', output.definition);
-
-
-  //pipeLine
+function generatePipeLine(moduleName:string, sf:mls.stor.IFileInfo) {
   const dt = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
   const pipe = [
     {
       "id": "contract",
       "specVar": "contractSpec",
-      "outputPath": "/l1/"+module+"/layer_2_controller/"+sf.shortName+".ts",
+      "outputPath": "/l1/" + moduleName + "/layer_2_controller/" + sf.shortName + ".ts",
       "skillPath": "_102027_/l2/agents/skills/genContract.ts",
       "agent": "agentMaterializeContract",
       "dependsOn": [],
@@ -184,7 +203,7 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
     {
       "id": "shared",
       "specVar": "sharedSpec",
-      "outputPath": "/l2/"+module+"/web/shared/"+sf.shortName+".ts",
+      "outputPath": "/l2/" + moduleName + "/web/shared/" + sf.shortName + ".ts",
       "skillPath": "_102027_/l2/agents/skills/genPageShared.ts",
       "agent": "agentMaterializeSharedPage",
       "dependsOn": ["contract"],
@@ -193,7 +212,7 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
     {
       "id": "desktop",
       "specVar": "desktopLayoutSpec",
-      "outputPath": "/l2/"+module+"/web/desktop/"+sf.shortName+".ts",
+      "outputPath": "/l2/" + moduleName + "/web/desktop/" + sf.shortName + ".ts",
       "skillPath": "_102027_/l2/agents/skills/genPageRender.ts",
       "agent": "agentMaterializePageLit",
       "dependsOn": ["contract", "shared"],
@@ -202,18 +221,15 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
     {
       "id": "desktop-less",
       "specVar": "desktopLayoutSpec",
-      "outputPath": "/l2/"+module+"/web/desktop/"+sf.shortName+".less",
+      "outputPath": "/l2/" + moduleName + "/web/desktop/" + sf.shortName + ".less",
       "skillPath": "_102027_/l2/agents/skills/genLess.ts",
       "agent": "agentMaterializeLess",
       "dependsOn": ["shared"],
       "specUpdatedAt": dt,
     }
-  ]
-  newSrc = updateVariableJson(newSrc, 'materializeIndex', pipe);
+  ];
 
-  m.model.setValue(newSrc);
-
-  return [];
+  return pipe;
 }
 
 
