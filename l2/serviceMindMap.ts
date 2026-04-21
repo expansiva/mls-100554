@@ -141,8 +141,12 @@ export class ServiceMindMap100554 extends ServiceBase {
     //----------IMPLEMENTS-------------------
 
     private async configure() {
+        try {
+            this.dataJson = this.actualFile ? await getMindMapByStorFile(this.actualFile[mls.actualLevel]) : undefined;
+        } catch (e) {
+            this.dataJson = undefined;
+        }
         
-        this.dataJson = this.actualFile ? await getMindMapByStorFile(this.actualFile[mls.actualLevel]) : undefined;
     }
 
 }

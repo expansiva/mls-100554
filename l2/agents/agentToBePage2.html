@@ -4,205 +4,94 @@
 "definition":{
   "pages": [
     {
-      "screenId": "store-location",
-      "pageName": "storeLocation",
+      "screenId": "login",
+      "pageName": "login",
       "actor": "customer",
-      "purpose": "Endereço completo, horário de funcionamento, mapa e canais de contato da unidade",
+      "purpose": "Authenticate user and provide access to the pizzaria platform",
       "sections": [
         {
           "sectionName": "main",
           "mode": "stack",
           "organisms": [
             {
-              "organismName": "storeLocationAddressMap",
-              "purpose": "Exibe endereço, mapa e horários de funcionamento da loja",
+              "organismName": "loginForm",
+              "purpose": "Collects user credentials and submits for authentication",
               "rulesApplied": [
-                "rule_lang_ptbr_only",
-                "rule_brazil_target",
-                "rule_essential_features",
-                "rule_design_clean_modern_responsive"
+                "Password must be at least 8 characters",
+                "Email must be valid format",
+                "Show/hide password toggle",
+                "Disable submit while loading",
+                "Show error on failed login"
               ],
               "dataShape": {
-                "shape": "object",
-                "stateKey": "db.storeInfo",
-                "sourceRoutine": "storeInfo.getStoreById",
-                "fields": [
+                "shape": "fields",
+                "entityFields": [
                   {
-                    "entityField": "name",
-                    "entity": "StoreInfo",
+                    "entity": "user",
+                    "entityField": "email",
+                    "stateKey": "db.user.email",
                     "priority": "required",
-                    "usage": "display"
+                    "usage": "edit",
+                    "priorityReason": "Essential for authentication"
                   },
                   {
-                    "entityField": "address",
-                    "entity": "StoreInfo",
+                    "entity": "user",
+                    "entityField": "password",
+                    "stateKey": "db.user.password",
                     "priority": "required",
-                    "usage": "display"
-                  },
-                  {
-                    "entityField": "city",
-                    "entity": "StoreInfo",
-                    "priority": "recommended",
-                    "usage": "display"
-                  },
-                  {
-                    "entityField": "state",
-                    "entity": "StoreInfo",
-                    "priority": "recommended",
-                    "usage": "display"
-                  },
-                  {
-                    "entityField": "country",
-                    "entity": "StoreInfo",
-                    "priority": "required",
-                    "usage": "display"
-                  },
-                  {
-                    "entityField": "businessHours",
-                    "entity": "StoreInfo",
-                    "priority": "required",
-                    "usage": "display"
-                  },
-                  {
-                    "entityField": "mapLink",
-                    "entity": "StoreInfo",
-                    "priority": "recommended",
-                    "usage": "display"
+                    "usage": "edit",
+                    "priorityReason": "Essential for authentication"
                   }
-                ],
-                "params": [
-                  {
-                    "paramName": "storeId",
-                    "type": "string",
-                    "source": {
-                      "from": "route",
-                      "routeParam": "storeInfoId"
-                    }
-                  }
-                ],
-                "editable": false
+                ]
               },
-              "tempStates": [],
+              "tempStates": [
+                {
+                  "stateKey": "ui.login.showPassword",
+                  "type": "boolean",
+                  "description": "Toggle to show/hide password input",
+                  "priority": "recommended",
+                  "initialValue": "false"
+                },
+                {
+                  "stateKey": "ui.login.rememberMe",
+                  "type": "boolean",
+                  "description": "Remember user for future logins",
+                  "priority": "optional",
+                  "initialValue": "false"
+                }
+              ],
               "computedFields": [
                 {
-                  "fieldId": "fullAddress",
+                  "fieldId": "isFormValid",
                   "derivedFrom": [
-                    "address",
-                    "city",
-                    "state",
-                    "country"
+                    "db.user.email",
+                    "db.user.password"
                   ],
-                  "description": "Concatena endereço, cidade, estado e país para exibição completa e para uso no mapa.",
+                  "description": "True if email and password are valid",
                   "priority": "required"
                 }
               ],
               "navigationFields": [
                 {
-                  "fieldId": "openMap",
-                  "target": "external:mapLink",
-                  "params": [
-                    "mapLink"
-                  ],
+                  "fieldId": "toForgotPassword",
+                  "target": "forgotPassword",
+                  "params": [],
                   "priority": "recommended",
-                  "navigationType": "external"
+                  "navigationType": "internal"
+                },
+                {
+                  "fieldId": "toRegister",
+                  "target": "register",
+                  "params": [],
+                  "priority": "optional",
+                  "navigationType": "internal"
                 }
               ],
               "emits": [
                 {
-                  "event": "addressMapLoaded",
-                  "payload": "storeId"
-                }
-              ]
-            },
-            {
-              "organismName": "storeLocationContactSummary",
-              "purpose": "Exibe canais de contato da unidade",
-              "rulesApplied": [
-                "rule_lang_ptbr_only",
-                "rule_brazil_target",
-                "rule_essential_features",
-                "rule_design_clean_modern_responsive"
-              ],
-              "dataShape": {
-                "shape": "object",
-                "stateKey": "db.storeInfo",
-                "sourceRoutine": "storeInfo.getStoreById",
-                "fields": [
-                  {
-                    "entityField": "phone",
-                    "entity": "StoreInfo",
-                    "priority": "recommended",
-                    "usage": "display"
-                  },
-                  {
-                    "entityField": "whatsapp",
-                    "entity": "StoreInfo",
-                    "priority": "recommended",
-                    "usage": "display"
-                  },
-                  {
-                    "entityField": "email",
-                    "entity": "StoreInfo",
-                    "priority": "recommended",
-                    "usage": "display"
-                  }
-                ],
-                "params": [
-                  {
-                    "paramName": "storeId",
-                    "type": "string",
-                    "source": {
-                      "from": "route",
-                      "routeParam": "storeInfoId"
-                    }
-                  }
-                ],
-                "editable": false
-              },
-              "tempStates": [],
-              "computedFields": [
-                {
-                  "fieldId": "hasWhatsapp",
-                  "derivedFrom": [
-                    "whatsapp"
-                  ],
-                  "description": "Indica se o WhatsApp está disponível para exibir botão de contato rápido.",
-                  "priority": "recommended"
-                }
-              ],
-              "navigationFields": [
-                {
-                  "fieldId": "contactWhatsapp",
-                  "target": "external:whatsapp",
-                  "params": [
-                    "whatsapp"
-                  ],
-                  "priority": "recommended",
-                  "navigationType": "external"
-                },
-                {
-                  "fieldId": "contactPhone",
-                  "target": "external:tel",
-                  "params": [
-                    "phone"
-                  ],
-                  "priority": "recommended",
-                  "navigationType": "external"
-                },
-                {
-                  "fieldId": "contactEmail",
-                  "target": "external:mailto",
-                  "params": [
-                    "email"
-                  ],
-                  "priority": "recommended",
-                  "navigationType": "external"
-                }
-              ],
-              "emits": [
-                {
-                  "event": "contactChannelClicked",
-                  "payload": "{channel:string,storeId:string}"
+                  "event": "submitLogin",
+                  "payload": "{email,password,rememberMe}",
+                  "writesState": "ui.login.loading"
                 }
               ]
             }
@@ -211,21 +100,22 @@
       ],
       "actionStates": [
         {
-          "stateKey": "ui.storeLocation.loading",
-          "description": "Carregando dados da unidade",
+          "stateKey": "ui.login.loading",
+          "description": "Login form submission in progress",
           "values": [
             "idle",
             "loading",
+            "success",
             "error"
           ]
         }
       ],
       "tempStates": [
         {
-          "stateKey": "ui.storeLocation.selectedContactChannel",
+          "stateKey": "ui.login.errorMessage",
           "type": "string",
-          "description": "Canal de contato selecionado pelo usuário para destaque ou ação rápida",
-          "priority": "optional"
+          "description": "Error message to display on failed login",
+          "priority": "required"
         }
       ]
     }
