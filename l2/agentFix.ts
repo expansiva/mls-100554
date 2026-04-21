@@ -1,7 +1,7 @@
 /// <mls fileReference="_100554_/l2/agentFix.ts" enhancement="_100554_/l2/enhancementAgent" />
 
-import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
-import { getState, setState } from '/_100554_/l2/collabState.js';
+import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
+import { getState, setState } from '/_102027_/l2/collabState.js';
 import { ServiceSource100554 } from '/_100554_/l2/serviceSource.js';
 import { getPath } from '/_102027_/l2/utils.js';
 
@@ -15,6 +15,7 @@ export function createAgent(): IAgentAsync {
         visibility: "public",
         beforePromptImplicit,
         afterPromptStep,
+        scope: ['l2_preview', 'collabMessages']
     };
 }
 
