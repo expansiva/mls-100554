@@ -88,8 +88,6 @@ async function afterPromptStep(
   let status: mls.msg.AIStepStatus = 'completed';
   let intents: mls.msg.AgentIntent[] = [];
 
-  const output = payload.result;
-  intents = await processOutput(context, output, agent);
 
   const updateStatus: mls.msg.AgentIntentUpdateStatus = {
     type: 'update-status',
@@ -101,6 +99,16 @@ async function afterPromptStep(
     stepId: step.stepId,
     status
   };
+
+  const output = payload.result;
+  if (context.isTest) {
+    console.info(output);
+    return [updateStatus];
+  }
+
+  intents = await processOutput(context, output, agent);
+
+  
 
   return [...intents, updateStatus];
 
@@ -125,7 +133,8 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
   newSrc = generateShared(newSrc, output.outputPath, module, sf);
 
   // page
-  newSrc = updateVariableJson(newSrc, 'desktopLayoutSpec', output.definition);
+  newSrc = updateVariableJson(newSrc, 'desktopLayout', output.definition);
+  newSrc = generatePage(newSrc, output.outputPath, module, sf);
 
   //pipeLine
   newSrc = updateVariableJson(newSrc, 'materializeIndex', generatePipeLine(module, sf));
@@ -149,7 +158,7 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
       status: 'waiting_human_input',
       nextSteps: [],
       agentName: 'agentMaterialize',
-      prompt: output.outputPath ,
+      prompt: output.outputPath,
       rags: [],
     }
   };
@@ -161,12 +170,7 @@ function generateContract(src: string, defsPath: string, moduleName: string) {
   return updateVariableText(src, 'contractSpec', `
 ##Pages spec
 \\\`\\\`\\\`JSON
-    [(${defsPath}).definition]
-\\\`\\\`\\\`
-
-##Ontology
-\\\`\\\`\\\`JSON
-    [(_102029_/l2/${moduleName}/module.defs.ts).ontology]
+    [[(${defsPath}).definition]]
 \\\`\\\`\\\`
 `)
 }
@@ -177,18 +181,32 @@ function generateShared(src: string, defsPath: string, moduleName: string, sf: m
 \\\`\\\`\\\`JSON
 {
   "interfacePath":"_${sf.project}_/l1/${moduleName}/layer_2_controller/${sf.shortName}.js",
-  "definition": [(${defsPath}).definition]
+  "definition": [[(${defsPath}).definition]]
 }    
 \\\`\\\`\\\`
 
-##Ontology
+##Base Interfaces, Enuns ...
 \\\`\\\`\\\`
-    [(_102029_/l2/${moduleName}/module.defs.ts).ontology]
+    [[(_${sf.project}_/l1/${moduleName}/layer_2_controller/${sf.shortName}.ts)]]
 \\\`\\\`\\\`
 `)
 }
 
-function generatePipeLine(moduleName:string, sf:mls.stor.IFileInfo) {
+function generatePage(src: string, defsPath: string, moduleName: string, sf: mls.stor.IFileInfo) {
+  return updateVariableText(src, 'desktopLayoutSpec', `
+## Page layout
+\\\`\\\`\\\`JSON
+  [[(${defsPath}).desktopLayout]]  
+\\\`\\\`\\\`
+
+##Base class
+\\\`\\\`\\\`
+  [[(_${sf.project}_/l2/${moduleName}/web/shared/${sf.shortName}.ts)]]
+\\\`\\\`\\\`
+`)
+}
+
+function generatePipeLine(moduleName: string, sf: mls.stor.IFileInfo) {
   const dt = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
   const pipe = [
     {
@@ -220,7 +238,7 @@ function generatePipeLine(moduleName:string, sf:mls.stor.IFileInfo) {
     },
     {
       "id": "desktop-less",
-      "specVar": "desktopLayoutSpec",
+      "specVar": "desktopLayout",
       "outputPath": "/l2/" + moduleName + "/web/desktop/" + sf.shortName + ".less",
       "skillPath": "_102027_/l2/agents/skills/genLess.ts",
       "agent": "agentMaterializeLess",
@@ -430,47 +448,6 @@ Collect all text labels needed:
 
 ---
 
-## Output format
-
-\`\`\`json
-{
-    type: "flexible";
-    
-    result:{
-      "outputPath": "/_102009_/petshop/storeLocation.defs.ts",
-      "definition":{
-  "className":  "StoreLocationPage",
-  "tagName":    "petshop--web--desktop--store-location-102009",
-  "extends":    "StoreLocationShared",
-  "sharedPath": "/_102009_/l2/petshop/web/shared/storeLocation.js",
-  "styling":    "classes-only",
-
-  "imports": [
-    { "type": "value", "import": "{ StoreLocationAction }", "path": "/_102009_/l2/petshop/web/shared/storeLocation.js" },
-    { "type": "value", "import": "{ StoreLocationShared }",  "path": "/_102009_/l2/petshop/web/shared/storeLocation.js" }
-  ],
-
-  "render": {
-    "conditions": [...],
-    "blocks": {
-      "loading": { ... },
-      "error":   { ... },
-      "default": { ... }
-    }
-  },
-
-  "i18n": {
-    "default":   "en",
-    "languages": ["en", "pt"],
-    "keys": [...]
-  }
-  }
-}
-}
-\`\`\`
-
----
-
 ## Element schema reference
 
 ### Container
@@ -532,140 +509,12 @@ Collect all text labels needed:
 
 ---
 
-## Full output example — store-location page
+## Output format
+You must return the object strictly as JSON
 
 \`\`\`json
-{
-    type: "flexible";
-    
-    result: {
-      "outputPath": "/_102009_/petshop/storeLocation.defs.ts",
-      "definition":{
-  "className":  "StoreLocationPage",
-  "tagName":    "petshop--web--desktop--store-location-102009",
-  "extends":    "StoreLocationShared",
-  "sharedPath": "/_102009_/l2/petshop/web/shared/storeLocation.js",
-  "styling":    "classes-only",
-
-  "imports": [
-    ...
-  ],
-
-  "render": {
-    "conditions": [
-      { "if": "this.loading", "return": "loading" },
-      { "if": "this.error",   "return": "error"   }
-    ],
-
-    "blocks": {
-      "loading": {
-        "element": "div", "class": "loading",
-        "children": [
-          { "element": "span", "class": "spinner" },
-          { "element": "span", "class": "loading__message", "i18n": "loading" }
-        ]
-      },
-
-      "error": {
-        "element": "div", "class": "error",
-        "children": [
-          { "element": "span", "class": "error__message", "bind": "this.error" },
-          {
-            "element": "button", "class": "btn btn--secondary", "i18n": "retry",
-            "event": { "on": "click", "type": "action", "state": "action", "value": "StoreLocationAction.LOAD_STORE_INFO" }
-          }
-        ]
-      },
-
-      "default": {
-        "element": "div", "class": "store-location-page",
-        "children": [
-
-          {
-            "element": "section", "class": "store-location-address-map",
-            "children": [
-              {
-                "element": "div", "class": "store-location-address-map__cols",
-                "children": [
-                  {
-                    "element": "div", "class": "store-location-address-map__info",
-                    "children": [
-                      { "element": "h2",      "class": "store-location-address-map__title",   "bind": "this.storeInfo_name"          },
-                      { "element": "address", "class": "store-location-address-map__address", "bind": "this.storeInfo_fullAddress"   },
-                      { "element": "p",       "class": "store-location-address-map__hours",   "bind": "this.storeInfo_businessHours" }
-                    ]
-                  },
-                  {
-                    "element": "div", "class": "store-location-address-map__map",
-                    "children": [
-                      {
-                        "element": "button", "class": "btn btn--secondary", "i18n": "openMap",
-                        "event": { "on": "click", "type": "method", "method": "openMap" }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-
-          {
-            "element": "section", "class": "store-location-contact-summary",
-            "children": [
-              {
-                "element": "div", "class": "store-location-contact-summary__channels",
-                "children": [
-                  {
-                    "element": "div", "class": "store-location-contact-summary__channel",
-                    "condition": "this.storeInfo_phone",
-                    "children": [
-                      {
-                        "element": "button", "class": "btn btn--secondary", "i18n": "callUs",
-                        "event": { "on": "click", "type": "method", "method": "contactPhone" }
-                      }
-                    ]
-                  },
-                  {
-                    "element": "div", "class": "store-location-contact-summary__channel",
-                    "condition": "this.storeInfo_hasWhatsapp",
-                    "children": [
-                      {
-                        "element": "button", "class": "btn btn--secondary", "i18n": "whatsapp",
-                        "event": { "on": "click", "type": "method", "method": "contactWhatsapp" }
-                      }
-                    ]
-                  },
-                  {
-                    "element": "div", "class": "store-location-contact-summary__channel",
-                    "condition": "this.storeInfo_email",
-                    "children": [
-                      {
-                        "element": "button", "class": "btn btn--secondary", "i18n": "emailUs",
-                        "event": { "on": "click", "type": "method", "method": "contactEmail" }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-
-        ]
-      }
-    }
-  },
-
-  "i18n": {
-    "default":   "en",
-    "languages": ["en", "pt"],
-    "keys": ["loading", "retry", "openMap", "callUs", "whatsapp", "emailUs"]
-  }
-}
-}
-}
+[[OutputSection]]
 \`\`\`
-
----
 
 ## What you NEVER do
 
@@ -681,13 +530,73 @@ Collect all text labels needed:
 
 `
 
+
+
 //#region OutputSection
 export type Output =
   {
     type: "flexible";
-    result: any;
+    result: StoreLocationDefinition;
   }
 
+export interface StoreLocationDefinition {
+  outputPath: string;
+  definition: {
+    className: string;
+    tagName: string;
+    extends: string;
+    sharedPath: string;
+    styling: string;
+
+    imports: ImportsDef[];
+
+    render: RenderConfig;
+
+    i18n: I18nConfig;
+  };
+}
+
+export interface ImportsDef {
+
+  type: string,
+  import: string,
+  path: string
+
+}
+
+export interface RenderConfig {
+  conditions: RenderCondition[];
+  blocks: Record<string, RenderBlock>;
+}
+
+export interface RenderCondition {
+  if: string;
+  return: string;
+}
+
+export interface RenderBlock {
+  element: string;
+  class?: string;
+  bind?: string;
+  i18n?: string;
+  condition?: string;
+  event?: EventConfig;
+  children?: RenderBlock[];
+}
+
+export interface EventConfig {
+  on: string;
+  type: "action" | "method";
+  state?: string;
+  value?: string;
+  method?: string;
+}
+
+export interface I18nConfig {
+  default: string;
+  languages: string[];
+  keys: string[];
+}
 
 //#endregion 
 
