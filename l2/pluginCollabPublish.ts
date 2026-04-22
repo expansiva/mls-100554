@@ -7,7 +7,8 @@ import { getAllDefs, IdefModule } from '/_102027_/l2/libMindMap.js';
 import { getDependenciesByHtmlFile } from '/_102027_/l2/libCompile.js';
 import { PreviewModeSinglePage } from '/_100554_/l2/previewModeSinglePage.js'; 
 import { getMyKeysBranch } from '/_102027_/l2/libCommom.js';
-import { getConfigProject, updateConfigProject } from '/_100554_/l2/libProjectConfig.js';
+import { getConfigProject, updateConfigProject } from '/_102027_/l2/libProjectConfig.js';
+
 
 /// **collab_i18n_start**
 const message_pt = {
