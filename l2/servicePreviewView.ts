@@ -5,7 +5,6 @@ import { customElement, property } from 'lit/decorators.js';
 
 import { getTokensCss } from '/_102027_/l2/designSystemBase.js';
 import { convertFileNameToTag, getPath } from '/_102027_/l2/utils.js';
-
 import { createModel } from '/_102027_/l2/libModel.js';
 import { getBaseTemplate } from '/_102027_/l2/libCommom.js';
 import { createStorFile,  } from '/_102027_/l2/libStor.js';
@@ -575,6 +574,7 @@ export class ServicePreviewView extends StateLitElement {
         (iframe.contentDocument.body as any)['service'] = this.father;
 
         let ret = await getDependenciesByHtmlFile(this.file, txt, this.actualtheme, true);
+        
         const domVirtual = document.createElement('div');
         domVirtual.innerHTML = txt;
 

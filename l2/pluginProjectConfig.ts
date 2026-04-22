@@ -3,13 +3,12 @@
 import { html, css, svg, TemplateResult } from 'lit';
 import { query, property } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
-import * as libProjectConfig from '/_100554_/l2/libProjectConfig.js';
+import * as libProjectConfig from '/_102027_/l2/libProjectConfig.js';
 
 /// **collab_i18n_start**
 const message_pt = {
     clear: 'Limpar alterações',
 }
-
 const message_en = {
     clear: 'Clear changes',
 }

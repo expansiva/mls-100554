@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IServiceMenu, IOptions } from '/_102027_/l2/serviceBase.js';
 import { getTokens } from '/_102027_/l2/designSystemBase.js';
-import { getConfigProject } from '/_100554_/l2/libProjectConfig.js';
+import { getConfigProject } from '/_102027_/l2/libProjectConfig.js';
 import { createPath, getLastOpenedFiles, OpenedFileL2 } from '/_102027_/l2/libCommom.js';
 import { collabImport } from '/_102027_/l2/collabImport.js';
 

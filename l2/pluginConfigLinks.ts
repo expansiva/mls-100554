@@ -3,13 +3,12 @@
 import { html, svg, TemplateResult, repeat, unsafeHTML } from 'lit';
 import { query, property } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
-import { getConfigProject, updateConfigProject } from '/_100554_/l2/libProjectConfig.js';
+import { getConfigProject, updateConfigProject } from '/_102027_/l2/libProjectConfig.js';
 
 export class PluginConfigLinks extends PluginBaseModule {
 
     @property() myLinks: ILinks[] = [];
     @property({ type: Boolean }) autoPrepare: boolean = false;
-
     private myConfig: mls.l5_common.ProjectConfig | undefined;
 
     async prepare() {

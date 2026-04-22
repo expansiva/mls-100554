@@ -2,9 +2,8 @@
 
 import { html, css, LitElement, repeat } from 'lit';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
-
 import { customElement, property, query } from 'lit/decorators.js';
-import { getConfigProject, updateConfigProjectPlugins } from '/_100554_/l2/libProjectConfig.js';
+import { getConfigProject, updateConfigProjectPlugins } from '/_102027_/l2/libProjectConfig.js';
 import '/_100554_/l2/collabTilesItem.js';
 import 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.3/Sortable.min.js';//https://github.com/SortableJS/Sortable/blob/master/Sortable.js
 @customElement('collab-tiles-100554')
