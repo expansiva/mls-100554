@@ -116,7 +116,7 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
         // const toBe = getPayloadToBeConceptual3(context);
         // if (!toBe) throw new Error(`[processOutputToBePages] invalid toBe: undefined`)
 
-        const paths = toBePages.pages.map((page) => page.pageName).slice(0, 1);
+        const paths = toBePages.pages.map((page) => page.pageName);//.slice(0, 1);
         const newStep: mls.msg.AgentIntentAddStep = {
                 type: "add-step",
                 messageId: context.message.orderAt,

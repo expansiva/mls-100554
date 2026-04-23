@@ -196,7 +196,10 @@ function generatePage(src: string, defsPath: string, moduleName: string, sf: mls
   return updateVariableText(src, 'desktopLayoutSpec', `
 ## Page layout
 \\\`\\\`\\\`JSON
-  [[(${defsPath}).desktopLayout]]  
+{ 
+  "interfacePath":"_${sf.project}_/l1/${moduleName}/layer_2_controller/${sf.shortName}.js",
+  "definition": [[(${defsPath}).desktopLayout]]  
+}
 \\\`\\\`\\\`
 
 ##Base class
@@ -286,7 +289,7 @@ The project number \`_XXXXX_\` is extracted from \`outputPath\` (the \`_102009_\
 Same as \`sharedPath\` — both the action enum and the shared class are imported from the shared file:
 \`\`\`json
 "imports": [
-  { "type": "value", "import": "{ StoreLocationAction }", "path": "/_102009_/l2/petshop/web/shared/storeLocation.js" },
+  { "type": "value", "import": "{ anyInterfaces }", "path": "{interfacePath}" },
   { "type": "value", "import": "{ StoreLocationShared }",  "path": "/_102009_/l2/petshop/web/shared/storeLocation.js" }
 ]
 \`\`\`
