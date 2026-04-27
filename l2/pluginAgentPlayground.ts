@@ -5,12 +5,12 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { loadChatPreferences, IChatPreferences, saveChatPreferences, getUserId, createThread } from '/_102025_/l2/collabMessagesHelper.js';
 import { getThreadByName, listThreads, getTask, getMessage, addMessage } from '/_102025_/l2/collabMessagesIndexedDB.js';
-import { IAgent } from '/_100554_/l2/aiAgentBase.js';
-import { getTemporaryContext, getAllSteps } from '/_100554_/l2/aiAgentHelper.js';
+
+import { getTemporaryContext, getAllSteps } from '/_102027_/l2/aiAgentHelper.js';
 import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
 import { collab_trash } from '/_100554_/l2/collabIcons.js';
 import { setState } from '/_100554_/l2/collabState.js';
-import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
+import { loadAgent, executeBeforePrompt } from '/_102027_/l2/aiAgentOrchestration.js';
 import { openElementInServiceDetails } from '/_102027_/l2/libCommom.js';
 import "/_100554_/l2/docMd.js";
 
