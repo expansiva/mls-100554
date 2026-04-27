@@ -402,9 +402,9 @@ export class PluginCreateProject extends CollabLitElement {
     await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
   }
 
-  private async createInitialTSConfigFile(project: number) {
+  private async createInitialTSConfigFile(project: number) { 
     const fileName = 'tsconfiglib.json';
-    const content = template_tsconfig.template.trim();
+    const content = template_tsconfig.template.replace(/\[project\]/g, project.toString()).trim(); 
     await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
   }
 
@@ -423,7 +423,7 @@ export class PluginCreateProject extends CollabLitElement {
     if (!dt) return;
     mls.stor.projects[project] = {
       project,
-      projectDependencies: [100554, 102020],
+      projectDependencies: [100554, 102020, 102027],
       projectDriver: dt.projectDriver,
       projectURL: dt.projectURL
     };

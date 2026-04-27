@@ -8,8 +8,8 @@ export const template_tsconfig = {
         "target": "es2020",
         "module": "ES2020",
         "esModuleInterop": true,
-        "outDir": "./preBuild/",
-        "rootDir": "./project",
+        "outDir": "./preBuild/_[project]_/",
+        "rootDir": "./project/_[project]_",
         "strict": true,
         "removeComments": false,
         "noUnusedParameters": false,
@@ -21,14 +21,21 @@ export const template_tsconfig = {
         "emitDecoratorMetadata": false,
         "noImplicitAny": false,
         "strictNullChecks": false,
-        "paths": {},
+        "paths": {
+            "/_[project]_/*": [
+                "./project/_[project]_/*"
+            ],
+            "/_102027_/*": [
+                "./project/_102027_/*"
+            ]
+        },
         "lib": [
             "dom",
             "ES2022"
         ]
     },
     "include": [
-        "project/**/*",
+        "project/_[project]_/**/*",
         "monaco.d.ts",
         "mls.d.ts"
     ],
@@ -83,6 +90,7 @@ export const template_package = {
             "less": "^4.2.0",
             "esbuild": "^0.27.2",
             "mls-ci": "git+https://github.com/expansiva/mls-ci.git",
+            "mls-102027": "git+https://github.com/expansiva/mls-102027.git",
             "node-fetch": "^2.7.0",
             "typescript": "^5.5.3"
         }
