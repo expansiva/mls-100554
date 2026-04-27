@@ -1,16 +1,16 @@
 /// <mls fileReference="_100554_/l2/serviceSource.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html } from 'lit';
-import { customElement, query, property } from 'lit/decorators.js'; 
-import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_102027_/l2/serviceBase.js';  
+import { customElement, query, property } from 'lit/decorators.js';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_102027_/l2/serviceBase.js';
 import { formatHtml, sync } from '/_100554_/l2/collabDOMSync.js';
 import { LessCSS } from "/_100554_/l2/lessCSS.js";
 import { initState, getState } from '/_102027_/l2/collabState.js';
 import { propertyDataSource } from '/_102027_/l2/collabDecorators.js';
 import { collab_html, collab_typescript, collab_less, collab_fileTest, collab_file_code } from '/_100554_/l2/collabIcons.js';
-import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
+
 import { getUserId, createThread, addMessage } from '/_102025_/l2/collabMessagesHelper.js';
-import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate } from '/_102027_/l2/libCommom.js';
+import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate, getStyleEnhancementName } from '/_102027_/l2/libCommom.js';
 import { readProjectTypescriptAndCompile, createModel } from '/_102027_/l2/libModel.js';
 import { IReqCreateStorFile, createStorFile } from '/_102027_/l2/libStor.js';
 import { getThreadByName } from '/_102025_/l2/collabMessagesIndexedDB.js';
@@ -910,8 +910,22 @@ export class ServiceSource100554 extends ServiceBase {
             this._ed1.setSelection(
                 new monaco.Selection(lineNumber, 1, lineNumber, line.length + 1)
             );
-            const enhancementInstanceLess = await import('/_100554_/l2/enhancementStyle.js')
-            if (enhancementInstanceLess && this.activeModels) await enhancementInstanceLess.onAfterChange(this.activeModels);
+
+            if (!this.activeModels || !this.activeModels.style) return;
+            const { project, shortName, folder, level } = this.activeModels.style.storFile;
+
+            const enhacementName = await getStyleEnhancementName({ project, shortName, folder, level }).catch((e: any) => undefined);
+            if (!enhacementName || enhacementName === 'enhancementStyle') {
+                const enhancementInstanceLess = await import('/_100554_/l2/enhancementStyle.js')
+                if (enhancementInstanceLess) await enhancementInstanceLess.onAfterChange(this.activeModels);
+            } else {
+                const path = getPath(enhacementName);
+                if (!path) throw new Error('[_updateModelStatusLess] Not found path:' + enhacementName)
+                const enhancementInstanceLess = await import(`/_${path.project}_/l2/${path.folder ? path.folder + '/' : ''}${path.shortName}.js`)
+                if (enhancementInstanceLess) await enhancementInstanceLess.onAfterChange(this.activeModels);
+            }
+
+
         }
 
     }
@@ -1041,8 +1055,19 @@ export class ServiceSource100554 extends ServiceBase {
                 if (this.mode !== 'icStyle' || !this.activeModels || !this.activeModels.style) return;
                 const uriActual = this.activeModels.style.model.uri.toString();
                 if (uris.some(uri => uri.toString() === uriActual)) {
-                    const enhancementInstanceLess = await import('/_100554_/l2/enhancementStyle.js');
-                    if (enhancementInstanceLess && this.activeModels) await enhancementInstanceLess.onAfterMarkersChange(this.activeModels);
+
+                    const { project, shortName, folder, level } = this.activeModels.style.storFile;
+                    const enhacementName = await getStyleEnhancementName({ project, shortName, folder, level }).catch((e: any) => undefined);
+                    if (!enhacementName || enhacementName === 'enhancementStyle') {
+                        const enhancementInstanceLess = await import('/_100554_/l2/enhancementStyle.js')
+                        if (enhancementInstanceLess) await enhancementInstanceLess.onAfterMarkersChange(this.activeModels);
+                    } else {
+                        const path = getPath(enhacementName);
+                        if (!path) throw new Error('[_updateModelStatusLess] Not found path:' + enhacementName)
+                        const enhancementInstanceLess = await import(`/_${path.project}_/l2/${path.folder ? path.folder + '/' : ''}${path.shortName}.js`)
+                        if (enhancementInstanceLess) await enhancementInstanceLess.onAfterMarkersChange(this.activeModels);
+                    }
+
                 }
             });
         };
