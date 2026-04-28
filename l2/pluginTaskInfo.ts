@@ -16,6 +16,7 @@ export class PluginTaskInfo extends StateLitElement {
     private elParent: HTMLElement | undefined;
     private forceViewRaw = false;
     private hasTodo = true;
+    private currentStepId = 0;
 
     @property() task: mls.msg.TaskData | undefined = undefined;
     @property() message: mls.msg.Message | undefined = undefined;
@@ -92,12 +93,14 @@ export class PluginTaskInfo extends StateLitElement {
                     <div
                         class="tab ${this.activeTab === 'step' ? 'active' : ''}"
                         @click=${() => this.setTab('step')}
-                    >Step</div>
+                    >Steps</div>
                     <div
+                        style="display:none"
                         class="tab ${this.activeTab === 'raw' ? 'active' : ''}"
                         @click=${() => this.setTab('raw')}
                     >Raw</div>
                     <div
+                        style="display:none"
                         class="tab ${this.activeTab === 'workflow' ? 'active' : ''}"
                         @click=${() => this.setTab('workflow')}
                     >Workflow</div>
@@ -127,11 +130,11 @@ export class PluginTaskInfo extends StateLitElement {
     }
 
     renderStep() {
-        return html`<plugin-task-preview-100554 .message=${this.message} .task=${this.task}></plugin-task-preview-100554>`
+        return html`<plugin-task-preview-100554 .message=${this.message} .task=${this.task} .father="${this}" .currentStepId=${this.currentStepId}></plugin-task-preview-100554>` 
     }
 
     renderTodo() {
-        return html`<plugin-task-log-preview-100554 .message=${this.message} .task=${this.task}></plugin-task-log-preview-100554>`
+        return html`<plugin-task-log-preview-100554 .message=${this.message} .task=${this.task} .father="${this}"></plugin-task-log-preview-100554>`
     }
 
     renderDirectClarification() {

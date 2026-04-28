@@ -167,13 +167,39 @@ export class MlsFileTree extends CollabLitElement {
     private buildTree(): TreeNode {
         const root: TreeNode = { name: '', fullPath: '', isFolder: true, children: [], file: {} as mls.stor.IFileInfo };
 
-        const getOrCreateFolder = (parent: TreeNode, name: string, path: string): TreeNode => {
+        /*const getOrCreateFolder = (parent: TreeNode, name: string, path: string): TreeNode => {
+            console.info(parent, name)
             let node = parent.children.find(c => c.isFolder && c.name === name);
             if (!node) {
                 node = { name, fullPath: path, isFolder: true, children: [], file: {} as mls.stor.IFileInfo };
                 parent.children.push(node);
             }
             return node;
+        };*/
+
+        const getOrCreateFolder = (parent: TreeNode, name: string, path: string): TreeNode => {
+            const parts = name.split('/');
+            let current = parent;
+            let currentPath = '';
+
+            for (const part of parts) {
+                currentPath = currentPath ? `${currentPath}/${part}` : part;
+
+                let node = current.children.find(c => c.isFolder && c.name === part);
+                if (!node) {
+                    node = {
+                        name: part,
+                        fullPath: currentPath,
+                        isFolder: true,
+                        children: [],
+                        file: {} as mls.stor.IFileInfo
+                    };
+                    current.children.push(node);
+                }
+                current = node;
+            }
+
+            return current;
         };
 
         for (const [key, file] of Object.entries(this.files)) {

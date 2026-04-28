@@ -1,14 +1,16 @@
 /// <mls fileReference="_100554_/l2/aiAgentDefaultFeedback.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { html, TemplateResult, nothing, svg } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, state, property } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { collab_play, collab_pause, collab_bell } from '/_100554_/l2/collabIcons.js';
 import { continuePoolingTask, pauseOrContinueTask } from '/_100554_/l2/aiAgentOrchestration.js';
 import { getNextPendentStep } from "/_100554_/l2/aiAgentHelper.js";
 
-@customElement('ai-agent-default-feedback-100554')
+@customElement('ai-agent-default-feedback-100554') 
 export class AiAgentDefaultFeedback100554 extends StateLitElement {
+
+    @property() father: HTMLElement | undefined;
 
     @state() task?: mls.msg.TaskData;
     @state() message?: mls.msg.Message;
@@ -120,10 +122,10 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
                 </span>
 
                 <span class="actions">
-                    <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.selectedStep = step; }}>
+                    <a href="#" @click=${(e: MouseEvent) => { e.preventDefault(); this.clickDetails(step) }}>
                         details
                     </a>
-                    <a href="#"
+                    <a style="display:none" href="#"
                         @click=${(e: MouseEvent) => {
                 e.preventDefault();
                 this.selectedTraceStep = step;
@@ -174,6 +176,15 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
             
         </div>
     `;
+    }
+
+    private clickDetails(step: mls.msg.AIAgentStep | mls.msg.AIToolStep | mls.msg.AIClarificationStep) {
+        //this.selectedStep = step;
+
+        if (!this.father) return;
+        (this.father as any).currentStepId = step.stepId;
+
+        
     }
 
     private pauseOrContinueTask(action: "paused" | "continue") {

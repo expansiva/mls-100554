@@ -12,8 +12,11 @@ import { collabImport } from '/_102027_/l2/collabImport.js';
 @customElement('plugin-task-log-preview-100554')
 export class PluginTaskLogPreview100554 extends StateLitElement {
 
+  @state() currentStepId: number = 0;
+
   @property() task: mls.msg.TaskData | undefined = undefined;
   @property() message: mls.msg.Message | undefined = undefined;
+  @property() father: HTMLElement | undefined;
 
 
   @state() template?: TemplateResult;
@@ -28,6 +31,18 @@ export class PluginTaskLogPreview100554 extends StateLitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     window.removeEventListener('task-change', this.onTaskChange);
+  }
+
+  updated(changedProperties: any) {
+    if (changedProperties.has('currentStepId')) {
+      const oldValue = changedProperties.get('currentStepId');
+      const newValue = +this.currentStepId;
+
+      if (!this.father || newValue === 0) return
+      (this.father as any).currentStepId = newValue;
+      (this.father as any).activeTab = 'step';
+      
+    }
   }
 
   render() {
@@ -55,7 +70,7 @@ export class PluginTaskLogPreview100554 extends StateLitElement {
     if (!agent || !agent.getFeedBack) {
       await collabImport({ folder: '', project: 100554, shortName: 'aiAgentDefaultFeedback', extension: '.ts' })
 
-      this.template = html`<ai-agent-default-feedback-100554 .task=${this.task} .message=${this.message}></ai-agent-default-feedback-100554>`
+      this.template = html`<ai-agent-default-feedback-100554 .task=${this.task} .message=${this.message} .father=${this}></ai-agent-default-feedback-100554>`
 
       return;
     }
