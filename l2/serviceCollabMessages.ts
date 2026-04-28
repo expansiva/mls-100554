@@ -9,10 +9,11 @@ import { collabEnvironment } from '/_100554_/l2/collabMessagesEnvironment.js';
 import { loadNotificationPreferences } from '/_102025_/l2/collabMessagesHelper.js';
 
 import { checkIfNotificationUnread, listenToThreadEvents } from '/_102025_/l2/collabMessagesSyncNotifications.js';
+import { getThread } from '/_102025_/l2/collabMessagesIndexedDB.js';
 
-import {
-    loadLastTab,
-} from "/_102025_/l2/collabMessagesHelper.js";
+import { loadLastTab } from "/_102025_/l2/collabMessagesHelper.js";
+import { openService } from "/_102027_/l2/libCommom.js";
+
 
 import '/_102025_/l2/collabMessages.js';
 import '/_102025_/l2/collabMessagesSettingsGeral.js';
@@ -153,7 +154,11 @@ export class ServiceCollabMessages extends ServiceBase {
     }
 
     render() {
-        return html`<collab-messages-102025 .activeTab=${this.activeTab} ></collab-messages-102025>`;
+        return html`<collab-messages-102025 
+            .activeTab=${this.activeTab} 
+            .threadToOpen=${this.threadToOpen}
+            .taskToOpen=${this.taskToOpen}
+         ></collab-messages-102025>`;
     }
 
     private bootstrapCollabMessages() {
@@ -243,27 +248,26 @@ export class ServiceCollabMessages extends ServiceBase {
 
     private async onCollabEventsCollabMessages(ev: mls.events.IEvent) {
 
-        /*
         if (!ev.desc) return;
         this.threadToOpen = '';
         this.taskToOpen = '';
 
         try {
-            const data: ICollabMessageEvent = JSON.parse(ev.desc);
+            const data = JSON.parse(ev.desc);
             if (data.type === 'thread-open') {
                 if (!data.threadId) return;
                 const thread = await getThread(data.threadId);
                 if (!thread) return;
                 if (data.taskId) this.taskToOpen = data.taskId;
 
-                openService('_102025_serviceCollabMessages', 'left', ev.level);
+                openService('_100554_serviceCollabMessages', 'left', ev.level);
                 const group = thread.group;
                 this.threadToOpen = thread.threadId;
                 if (group !== this.activeTab) this.activeTab = group as ITabType;
             }
         } catch (err: any) {
             console.error(err.message)
-        }*/
+        }
 
     }
 
