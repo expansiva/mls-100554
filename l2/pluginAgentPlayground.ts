@@ -4,7 +4,7 @@ import { html, repeat, unsafeHTML } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { loadChatPreferences, IChatPreferences, saveChatPreferences, getUserId, createThread } from '/_102025_/l2/collabMessagesHelper.js';
-import { getThreadByName, listThreads, getTask, getMessage, addMessage } from '/_102025_/l2/collabMessagesIndexedDB.js';
+import { getThreadByName, listThreads, getTask, getMessage, addMessage } from '/_102025_/l2/collabMessagesIndexedDB.js'; 
 
 import { getTemporaryContext, getAllSteps } from '/_102027_/l2/aiAgentHelper.js';
 import { updateHTML } from '/_100554_/l2/collabDOMSync.js';
@@ -71,8 +71,14 @@ export class AgentTester extends CollabLitElement {
         const aux = this.loading ? '' : 'none'
         return html`
 <div class="overlay" style="display:${aux}">
-<div class="spinner"></div>
-Running...
+<div style="display:flex; flex-direction:column">
+<div style="display:flex; flex-direction:column; align-items:center; justify-content:center">
+    <div class="spinner"></div>
+    Running...
+</div>
+
+<button @click=${this.openInMessage} class="action-btn" style=" width:300px; margin: 1rem auto; color: var(--bg-primary-color); background: var(--active-color);">Open Message</button>
+</div>
 </div>
 <div class="actions">
 ${this.renderHead()}
@@ -788,6 +794,25 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
         }
 
         return input.slice(start, end + 1);
+    }
+
+    private async openInMessage() {
+
+        let pageName = mls.actual[mls.actualLevel].getFullName();
+        if (mls.actualLevel === 2) {
+            const info = mls.actual[2].left;
+            if (!info) return;
+            pageName = info.folder ? `_${info.project}_${info.folder}/${info.shortName}` : `${info.project}_${info.shortName}`;
+        }
+
+        let thread = await getThreadByName(pageName);
+        if (!thread) {
+            return
+        }
+
+        const threadId = thread.threadId;
+
+        mls.events.fire([2],['collabMessages'] as any, JSON.stringify({type: 'thread-open', threadId, taskId:''}))
     }
 }
 interface Iprompts {

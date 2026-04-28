@@ -1,13 +1,15 @@
-/// <mls fileReference="_100554_/l2/pluginTaskPreviewFlexible.ts" enhancement="_100554_/l2/enhancementLit" />
+/// <mls fileReference="_100554_/l2/pluginTaskPreviewRaw.ts" enhancement="_100554_/l2/enhancementLit"/>
 
 import { html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_102027_/l2/collabLitElement.js';
+import { getTotalCost } from '/_102027_/l2/aiAgentHelper.js';
+import { collab_money } from '/_100554_/l2/collabIcons.js';
 
 type TabMode = 'flexible' | 'info' | 'result';
 
-@customElement('plugin-task-preview-flexible-100554')
-export class CollabMessageTaskPreviewFlexible extends CollabLitElement {
+@customElement('plugin-task-preview-raw-100554')
+export class CollabMessageTaskPreviewRaw extends CollabLitElement {
 
     @state() private mode: TabMode = 'flexible';
     @property({ type: Object }) message: mls.msg.Message | null = null;
@@ -83,16 +85,15 @@ export class CollabMessageTaskPreviewFlexible extends CollabLitElement {
 
     private updateEditorContent(): void {
         const ed1 = this.sharedMonaco;
-        if (!ed1 || !this.step) return;
-        const value = JSON.stringify(this.step.result, null, 2);
+        if (!ed1 || !this.task) return;
+        const value = JSON.stringify(this.task, null, 2);
         ed1.getModel()?.setValue(value);
     }
 
     // ── Render ────────────────────────────────────────────────────────────────
 
     render() {
-        if (!this.step) return html`<p>Step not Found.</p>`;
-
+        
         return html`
             <div style="height: calc(100% - 41px);">
                 <div class="tab-header">
@@ -100,7 +101,7 @@ export class CollabMessageTaskPreviewFlexible extends CollabLitElement {
                         <button class="tab-button ${this.mode === 'info' ? 'active' : ''}"
                             @click=${() => this.setMode('info')}>Info</button>
                         <button class="tab-button ${this.mode === 'flexible' ? 'active' : ''}"
-                            @click=${() => this.setMode('flexible')}>Flexible</button>
+                            @click=${() => this.setMode('flexible')}>Raw</button>
                     </div>
                 </div>
                 <div class="tab-content">
@@ -124,41 +125,69 @@ export class CollabMessageTaskPreviewFlexible extends CollabLitElement {
     }
 
     private renderInfo() {
-        if (!this.task || !this.step) return html`Not found!`;
-
-        const progressLabel = this.step.status === 'in_progress' ? '(in progress)' : '';
-        const lastUpdated = new Date(this.task.last_updated).toLocaleString();
-        const cost = this.step.interaction?.cost ?? '0';
+        if (!this.task ) return html`Not found!`;
 
         return html`
             <div class="containerinputs">
                 <details open>
-                    <summary>${this.renderSummary(`Flexible ${progressLabel}`)}</summary>
-                    <ul>
-                        <li>#${this.step.stepId} - ${this.step.type} - ${this.step.status} - $${cost}</li>
-                    </ul>
-                </details>
-                <details>
-                    <summary>${this.renderSummary('Task details')}</summary>
-                    <ul>
-                        <li>
-                            <header>
-                                <h2>${this.task.PK}</h2>
-                                <small>Status: ${this.task.status} | Última atualização: ${lastUpdated}</small>
-                                <br/><small>${this.task.title}</small>
-                            </header>
-                        </li>
-                    </ul>
-                </details>
-                <details>
-                    <summary>${this.renderSummary('Message details')}</summary>
-                    <ul>
-                        <li><pre>${JSON.stringify(this.message, null, 2)}</pre></li>
-                    </ul>
+                    <summary>${this.renderSummary('Task')}</summary>
+                    <div>
+                        <b>${this.task.PK}</b> 
+                        <span>${this.task.status}</span> 
+                        <span>${collab_money} ${getTotalCost(this.task)}</span>
+                    </div>
+                    ${this.renderTaskModeDetails()}
                 </details>
             </div>
         `;
     }
+
+    private renderTaskModeDetails() {
+        return html`
+            ${this.renderTaskInfo()}
+            ${this.renderlLongMemory()}
+        `
+    }
+
+
+    private renderTaskInfo() {
+
+        if (!this.task) return html``;
+        const cloneTask = Object.assign({}, this.task);
+        delete cloneTask.iaCompressed;
+
+        return html`
+            <div class="task-info">
+                <h4>Details</h4>
+                <ul>
+                    ${Object.keys(cloneTask).map((key) => {
+            return html`
+                            <li>${key}: 
+                            ${cloneTask && typeof (cloneTask as any)[key] === 'string'
+                    ? (cloneTask as any)[key]
+                    : (cloneTask as any)[key].toString()
+                } </li>`
+        })}
+                </ul>             
+            </div>
+        `
+    }
+
+    private renderlLongMemory() {
+        if (!this.task || !this.task.iaCompressed?.longMemory) return html``
+        return html`
+            
+            <div class="task-info">
+                <h4>LongMemory</h4>
+                <ul>
+                ${Object.keys(this.task.iaCompressed?.longMemory).map((key) => {
+            return html`<li>${key}:${this.task?.iaCompressed?.longMemory[key]}</li>`
+        })}
+            </ul>
+            </div>
+        `
+    }
+
 
     private renderSummary(title: string) {
         return html`
@@ -178,27 +207,6 @@ export class CollabMessageTaskPreviewFlexible extends CollabLitElement {
     }
 
     private renderFlexible() {
-        if (!this.step) return html`
-            <div class="containerinputs"><h3>No input found!</h3></div>
-        `;
-
-        if (this.step.result?.dataUrl) {
-            return html`
-                <div style="max-width:520px; margin:0 auto; text-align:center;">
-                    <figure style="margin:0;">
-                        <img
-                            src="${this.step.result.dataUrl}"
-                            alt="${this.step.result.dataUrl}"
-                            style="width:100%; height:auto; display:block; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.12);"
-                        />
-                        <figcaption style="margin-top:10px; font-size:14px; color:#555; line-height:1.4;">
-                            ${this.step.result.dataUrl}
-                        </figcaption>
-                    </figure>
-                </div>
-            `;
-        }
-
         return html`<div id="elEditor" style="width:100%; height:100%"></div>`;
     }
 
