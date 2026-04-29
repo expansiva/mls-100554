@@ -23,10 +23,10 @@ export const template_tsconfig = {
         "strictNullChecks": false,
         "paths": {
             "/_[project]_/*": [
-                "./project/_[project]_/*"
+                "./*"
             ],
             "/_102027_/*": [
-                "./project/_102027_/*"
+                "node_modules/mls-102027/*"
             ]
         },
         "lib": [
@@ -162,7 +162,7 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add obj
+        git add -f obj
         git commit -m "Compile TypeScript files"
       env:
         GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
