@@ -1,6 +1,5 @@
 /// <mls fileReference="_100554_/l2/mlsFileTree.ts" enhancement="_100554_/l2/enhancementLit"/>
 
-
 import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
@@ -249,7 +248,7 @@ export class MlsFileTree extends CollabLitElement {
 
     private selectFile(key: string, file: mls.stor.IFileInfo) {
         this.selected = key;
-        if (['.ts'].includes(file.extension)) {
+        if (['.ts'].includes(file.extension) && file.level === 2) {
             this.fireEvents(file);
         } else {
             this.fireEventsDetails(file);
