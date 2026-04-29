@@ -43,13 +43,6 @@ export class ServiceUnit extends ServiceBase {
 
     @queryAll('.plugin-container') allContainers: HTMLDivElement[] | undefined;
 
-    private lastActiveTabByLevel: Record<number, number> = {
-        5: ETabs.Explore,
-        4: ETabs.Explore,
-        3: ETabs.Explore,
-        2: ETabs.Explore,
-        1: ETabs.Explore,
-    }
 
     private myData: { [key: string]: mls.plugin.MenuAction[] } = {};
 
