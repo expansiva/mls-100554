@@ -1,0 +1,11 @@
+node_modules
+dist
+obj
+.env
+logs
+package-lock.json
+tsconfig.tsbuildinfo
+appconfig.json
+.claude/worktrees/**
+.DS_Store
+preBuild

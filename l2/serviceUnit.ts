@@ -203,7 +203,7 @@ export class ServiceUnit extends ServiceBase {
         const keyToFile = mls.stor.getKeyToFiles(project, 2, 'project', '', '.html');
         const file = mls.stor.files[keyToFile]
         if (!file) return html`<div>File 'project.html' dont's exist in selected project</div>`;
-        this.loadHelpPage('project' || '', project || 0);
+        this.loadHelpPage('project', project || 0);
         return html`<div style="overflow:auto;height:100%;" id="projectDiv"></div>`
     }
 

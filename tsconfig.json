@@ -1,14 +1,15 @@
 {
     "compilerOptions": {
-        "target": "es2020",
-        "module": "ES2020",
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "baseUrl": ".",
         "esModuleInterop": true,
         "outDir": "./preBuild/_100554_/",
-        "rootDir": "./project/_100554_",
         "strict": true,
         "removeComments": false,
         "noUnusedParameters": false,
-        "skipLibCheck": false,
+        "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "sourceMap": false,
         "declaration": false,
@@ -16,31 +17,58 @@
         "emitDecoratorMetadata": false,
         "noImplicitAny": false,
         "strictNullChecks": false,
+        "allowJs": true,
+        "checkJs": false,
         "paths": {
             "/_100554_/*": [
-                "./project/_100554_/*"
+                "./*"
             ],
             "/_102027_/*": [
-                "./project/_102027_/*"
+                "node_modules/mls-102027/*",
+                "../_102027_/*"
             ],
             "/_102025_/*": [
-                "./project/_102025_/*"
+                "node_modules/mls-102025/*",
+                "../_102025_/*"
+            ],
+            "/_102036_/*": [
+                "node_modules/mls-102036/*",
+                "../_102036_/*"
+            ],
+            "/_102029_/*": [
+                "./project/_102029_/*",
+                "node_modules/mls-102029/*"
+            ],
+            "lit": [
+                "node_modules/mls-102027/l2/litElement"
+            ],
+            "lit/*": [
+                "node_modules/mls-102027/l2/decorators"
+            ],
+            "@msg/*": [
+                "../../collab-messages/src/*"
+            ],
+            "@common/*": [
+                "../../cbe-common/src/*"
             ]
         },
         "lib": [
-            "dom",
+            "DOM",
+            "DOM.Iterable",
             "ES2022"
         ]
     },
     "include": [
-        "project/_100554_/**/*",
-        "monaco.d.ts",
-        "mls.d.ts"
+        "**/*.ts",
+        "../../cfe-collab-front-end/wwwroot/mls.d.ts",
+        "../../cfe-collab-front-end/wwwroot/global.d.ts",
+        "../../cfe-collab-front-end/types/monaco.d.ts"
     ],
     "exclude": [
         "node_modules",
-        "**/*.spec.ts",
-        "l2/*.ts"
+        ".git",
+        "preBuild",
+        "**/*.spec.ts"
     ]
 }
 
