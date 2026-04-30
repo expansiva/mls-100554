@@ -267,7 +267,7 @@ draggable="true"
         if (typeof this.result !== 'string') return this.renderCompare();
 
         const aux = this.inError ? 'color:red' : '';
-        return html`<button @click=${this.openInDetails} class="action-btn" style=" width:calc(100% - 50px); margin: 1rem auto; color: var(--bg-primary-color); background: var(--active-color);">Open Details</button> <pre class="result" style="${aux}"> ${this.escape(this.result)} </pre> `
+        return html`<button @click=${this.openInMessage} class="action-btn" style=" width:calc(100% - 50px); margin: 1rem auto; color: var(--bg-primary-color); background: var(--active-color);">Open Details</button> <pre class="result" style="${aux}"> ${this.escape(this.result)} </pre> `
     }
 
     renderCompare() {
@@ -405,7 +405,8 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
     }
 
     private async handlePlay() {
-        this.loading = true;
+        //this.loading = true;
+        this.selectTabResult();
         this.msgSelectGroup = false;
         if (this.inEdit) {
             setTimeout(async () => {
@@ -414,7 +415,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
             return;
         }
         try {
-
+            
             const selectedGroups = this.selCompare && this.selCompare.value ? this.selCompare.value.split(';') : [];
 
             if (selectedGroups.length <= 0 && this.activeGroup) {
