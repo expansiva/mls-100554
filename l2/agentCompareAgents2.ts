@@ -1,7 +1,7 @@
-/// <mls fileReference="_100554_/l2//agentCompareAgents2.ts" enhancement="_100554_/l2/enhancementAgent.ts"/>
+/// <mls fileReference="_100554_/l2//agentCompareAgents2.ts" enhancement="_102027_/l2/enhancementAgent.ts"/>
 
-import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
-import { appendLongTermMemory } from '/_100554_/l2/aiAgentHelper.js';
+import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
+import { appendLongTermMemory } from '/_102027_/l2/aiAgentHelper.js';
 
 export function createAgent(): IAgentAsync {
     return {

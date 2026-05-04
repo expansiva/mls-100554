@@ -1,6 +1,6 @@
 /// <mls fileReference="_100554_/l2/agentDesignRef2Image2.ts" enhancement="_blank" />
 
-import { IAgentAsync, IAgentMeta, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { IAgentAsync, IAgentMeta, svg_agent } from '/_102027_/l2/aiAgentBase.js';
 
 export function createAgent(): IAgentAsync {
     return {

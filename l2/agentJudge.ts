@@ -1,6 +1,6 @@
-/// <mls fileReference="_100554_/l2/agentJudge.ts" enhancement="_100554_/l2/enhancementAgent" />
+/// <mls fileReference="_100554_/l2/agentJudge.ts" enhancement="_102027_/l2/enhancementAgent" />
 
-import { IAgentAsync, IAgentMeta, svg_agent } from '/_100554_/l2/aiAgentBase.js';
+import { IAgentAsync, IAgentMeta, svg_agent } from '/_102027_/l2/aiAgentBase.js';
 
 export function createAgent2(): IAgentAsync {
     return {
