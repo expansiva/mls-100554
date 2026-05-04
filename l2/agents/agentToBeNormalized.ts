@@ -1,7 +1,7 @@
-/// <mls fileReference="_100554_/l2/agents/agentToBeNormalized.ts" enhancement="_100554_/l2/enhancementAgent" />
+/// <mls fileReference="_100554_/l2/agents/agentToBeNormalized.ts" enhancement="_102027_/l2/enhancementAgent" />
  
 
-import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
+import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
 import { ModuleToBe } from '/_100554_/l2/agents/agentToBeConceptual.js';
 
 export function createAgent(): IAgentAsync {

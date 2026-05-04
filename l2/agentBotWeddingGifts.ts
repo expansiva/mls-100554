@@ -1,72 +1,88 @@
 /// <mls fileReference="_100554_/l2/agentBotWeddingGifts.ts" enhancement="_blank" />
 
+import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
 
-import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
-import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
-import '/_100554_/l2/widgetQuestionsForClarification.js';
-
-import {
-    getNextInProgressStepByAgentName,
-    notifyTaskChange,
-    notifyThreadChange,
-    updateStepStatus,
-} from "/_100554_/l2/aiAgentHelper.js";
-import { addMessage } from '/_102025_/l2/collabMessagesHelper.js';
-
-import {
-    startNewAiTask,
-    executeNextStep,
-} from "/_100554_/l2/aiAgentOrchestration.js";
-
-const agentName = "agentBotWeddingGifts";
-const project = 100554;
-
-export function createAgent(): IAgent {
+export function createAgent(): IAgentAsync {
     return {
-        agentName,
-        avatar_url: svg_agent,
+        agentName: "agentBotWeddingGifts",
+        agentProject: 100554,
+        agentFolder: "",
         agentDescription: "Agent Bot, for gifts management",
         visibility: "public",
-        async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
-            return _beforePrompt(context);
-        },
-        async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
-            return _afterPrompt(context);
-        },
-        async installBot(context: mls.msg.ExecutionContext): Promise<boolean> {
-            return _installBot(context);
-        },
-        async beforeBot(context: mls.msg.ExecutionContext, msg: string, toolsBeforeSendMessage: mls.bots.ToolsBeforeSendMessage[]): Promise<Record<string, any>> {
-            return _beforeBot(context, msg, toolsBeforeSendMessage);
-        }
+        installBot,
+        beforeBot,
+        beforePromptImplicit,
+        // beforePromptStep,
+        afterPromptStep
     };
 }
 
-const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-    const taskTitle = "Planning...";
-    if (!context || !context.message) throw new Error("Invalid context");
-    if (context.task) throw new Error("this agent cannot execute with anothers agentes")
+import { notifyThreadChange } from "/_102027_/l2/aiAgentHelper.js";
+import { addMessage } from '/_102025_/l2/collabMessagesHelper.js';
+const agentName = "agentBotWeddingGifts";
 
-    const inputs: any = await getPrompts(getPromptMock(), getOriginalRecord());
-    await startNewAiTask(agentName, taskTitle, context.message.content, context.message.threadId, context.message.senderId, inputs, context, _afterPrompt);
-    return;
+async function beforePromptImplicit(
+    agent: IAgentMeta,
+    context: mls.msg.ExecutionContext,
+    userPrompt: string,
+): Promise<mls.msg.AgentIntent[]> {
+
+    if (!userPrompt || userPrompt.length < 5) throw new Error('invalid prompt');
+
+    const prompts = await getPrompts(getPromptMock(), getOriginalRecord());
+
+    const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
+        type: "add-message-ai",
+        request: {
+            action: 'addMessageAI',
+            agentName: agent.agentName,
+            inputAI: [{
+                type: "system",
+                content: prompts,
+            }, {
+                type: "human",
+                content: context.message.content
+            }],
+            taskTitle: `Test 1`,
+            threadId: context.message.threadId,
+            userMessage: context.message.content,
+        }
+    };
+    return [addMessageAI];
+
 }
 
-const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-    if (!context || !context.message || !context.task) throw new Error("Invalid context");
-    const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] afterPrompt: No in progress interaction found.`);
-    context = await updateStepStatus(context, step.stepId, "completed");
-    notifyTaskChange(context);
-    await executeNextStep(context);
+async function afterPromptStep(
+    agent: IAgentMeta,
+    context: mls.msg.ExecutionContext,
+    parentStep: mls.msg.AIAgentStep,
+    step: mls.msg.AIAgentStep,
+    hookSequential: number,
+): Promise<mls.msg.AgentIntent[]> {
+
+    if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
+    let status: mls.msg.AIStepStatus = 'completed';
+    const updateStatus: mls.msg.AgentIntentUpdateStatus = {
+        type: 'update-status',
+        hookSequential,
+        messageId: context.message.orderAt,
+        threadId: context.message.threadId,
+        taskId: context.task?.PK || '',
+        parentStepId: parentStep.stepId,
+        stepId: step.stepId,
+        status
+    };
+
+    return [updateStatus];
+
 }
 
-const _installBot = async (context: mls.msg.ExecutionContext): Promise<boolean> => {
-    const inputs = await getPromptByHtml({ project, shortName: agentName, folder: '', data: undefined });
-    const llmPrompt: string = inputs
-        .filter(i => i.type === "system")
-        .map(i => i.content)
-        .join("\n\n");
+const installBot = async (context: mls.msg.ExecutionContext): Promise<boolean> => {
+
+    const llmPrompt = system1
+        .replace('{{userPrompt}}', '')
+        .replace('{{botRecord}}', '')
+
     const rc = await mls.api.msgAddOrUpdateThreadBot({
         botId: agentName,
         llmPrompt,
@@ -84,20 +100,19 @@ const _installBot = async (context: mls.msg.ExecutionContext): Promise<boolean> 
     return false;
 }
 
-async function _beforeBot(context: mls.msg.ExecutionContext, msg: string, toolsBeforeSendMessage: mls.bots.ToolsBeforeSendMessage[]): Promise<Record<string, any>> {
+async function beforeBot(context: mls.msg.ExecutionContext, msg: string, toolsBeforeSendMessage: mls.bots.ToolsBeforeSendMessage[]): Promise<Record<string, any>> {
     // prepare config to send in 
     const contextToBot: Record<string, any> = {};
     return contextToBot;
 }
 
 
-async function getPrompts(userPrompt: string, botRecord: string): Promise<mls.msg.IAMessageInputType[]> {
+async function getPrompts(userPrompt: string, botRecord: string): Promise<string> {
     if (!userPrompt) throw new Error(`Erro [${agentName}] getPrompts: invalid userPrompt`);
-    const dataForReplace = {
-        userPrompt,
-        botRecord
-    }
-    const prompts = await getPromptByHtml({ project, shortName: agentName, folder: '', data: dataForReplace })
+    const prompts = system1
+        .replace('{{userPrompt}}', userPrompt)
+        .replace('{{botRecord}}', botRecord)
+
     return prompts;
 }
 
@@ -134,12 +149,64 @@ function getOriginalRecord(): string {
     return JSON.stringify(gifts);
 }
 
-export interface GiftItem {
-  name: string;                         // Normalized gift name
-  originalNames: string[];             // List of similar names used by users
-  status: "available" | "reserved" | "purchased" | "declined";
-  reservedBy?: string;                  // Optional userId or name
-  date?: string;                        // ISO format date
-  message?: string;                     // Optional message from the user
-  purchaseUrl?: string;                 // Optional URL for where to buy the gift
+const system1 = `
+<!-- modelType: mini -->
+<!-- modelContext: CollabMessageBot -->
+<!-- trigger: [{"type":"onNewMessage", "conditions":[] }] -->
+<!-- threadFeature: summary -->
+<!-- threadPermissionLevel: all -->
+
+You are an assistant responsible for managing a wedding gift list.
+
+Each message is a user input from the Collab.Messages thread.  
+Your job is to analyze the message, identify if it refers to the wedding list, and take appropriate action.
+
+If the message is NOT related to the wedding gift list, simply return the previous context (unchanged) in the "flexible" format.
+
+If the message is a gift suggestion, add it to the list.
+
+If the message indicates a user will buy or reserve a gift, mark the item accordingly with the user's name or ID.
+
+If the message requests to view the current gift list or a summary of it, return it using the "result" format (in the user’s language if possible).
+
+You should normalize gift names to group similar items (e.g., "coffee maker" and "espresso machine" may refer to the same concept).
+
+Include the user language (e.g., \`en\`, \`pt\`, \`es\`) in the summary result for multilingual support.
+
+---
+
+## Context
+### Old WeddingGifts
+\`\`\`json
+{{botRecord}}
+\`\`\`
+
+## Output Format (JSON)
+
+`;
+
+//#region OutputSection
+export type Output = {
+    type: "flexible";
+    result: WeddingGifts;
+} | {
+    type: "result";
+    result: string[];
+};
+
+interface WeddingGifts {
+    gifts: GiftItem[];
 }
+
+export interface GiftItem {
+    name: string;                         // Normalized gift name
+    originalNames: string[];             // List of similar names used by users
+    status: "available" | "reserved" | "purchased" | "declined";
+    reservedBy?: string;                  // Optional userId or name
+    date?: string;                        // ISO format date
+    message?: string;                     // Optional message from the user
+    purchaseUrl?: string;                 // Optional URL for where to buy the gift
+}
+//#endregion
+
+

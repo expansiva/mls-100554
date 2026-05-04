@@ -1,7 +1,6 @@
-/// <mls fileReference="_100554_/l2/agents/agentToBePage.ts" enhancement="_100554_/l2/enhancementAgent" />
+/// <mls fileReference="_100554_/l2/agents/agentToBePage.ts" enhancement="_102027_/l2/enhancementAgent" />
 
-import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
-import { ModuleToBe } from '/_100554_/l2/agents/agentToBeConceptual.js';
+import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
 import { createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
 import { updateVariableJson } from '/_102027_/l2/defsAST.js';
 

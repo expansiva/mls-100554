@@ -1,10 +1,8 @@
-/// <mls fileReference="_100554_/l2/agents/agentToBeConceptual3.ts" enhancement="_100554_/l2/enhancementAgent" />
+/// <mls fileReference="_100554_/l2/agents/agentToBeConceptual3.ts" enhancement="_102027_/l2/enhancementAgent" />
 
-import { IAgentAsync, IAgentMeta } from '/_100554_/l2/aiAgentBase.js';
-import { getAllAgentStepByAgentName, appendLongTermMemory } from '/_100554_/l2/aiAgentHelper.js';
+import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
+import { getAllAgentStepByAgentName, appendLongTermMemory } from '/_102027_/l2/aiAgentHelper.js';
 import { outputPrompt, Output, ModuleToBe } from '/_100554_/l2/agents/agentToBeConceptual.js';
-import { addModule, configureMasterFrontEnd } from '/_100554_/l2/projectAST.js';
-import { saveModuleToBe } from '/_100554_/l2/moduleToBeAST.js';
 import { createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
 import { updateVariableJson } from '/_102027_/l2/defsAST.js';
 

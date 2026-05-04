@@ -1,135 +1,180 @@
-/// <mls fileReference="_100554_/l2/agentArchitectMind.ts" enhancement="_blank"/> 
+/// <mls fileReference="_100554_/l2/agentArchitectMind.ts" enhancement="_102027_/l2/enhancementAgent"/> 
 
-import { IAgent, svg_agent } from '/_100554_/l2/aiAgentBase.js';
-import { getPromptByHtml } from '/_100554_/l2/aiPrompts.js';
+
+import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
 import { getAllDefs } from '/_100554_/l2/libMindMap.js';
 
-import {
-    startNewInteractionInAiTask,
-    startNewAiTask,
-    executeNextStep,
-} from "/_100554_/l2/aiAgentOrchestration.js";
-
-import {
-    getNextFlexiblePendingStep,
-    getNextPendingStepByAgentName,
-    getNextInProgressStepByAgentName,
-    updateStepStatus,
-    updateTaskTitle,
-} from "/_100554_/l2/aiAgentHelper.js";
-
-const agentName = "agentArchitectMind";
-
-export function createAgent(): IAgent {
+export function createAgent(): IAgentAsync {
     return {
-        agentName,
-        avatar_url: svg_agent,
-        agentDescription: "Agente arquiteto",
+        agentName: "agentArchitectMind",
+        agentProject: 100554,
+        agentFolder: "",
+        agentDescription: "Agent architect",
         visibility: "public",
-        scope: [],
-        async beforePrompt(context: mls.msg.ExecutionContext): Promise<void> {
-            return _beforePrompt(context);
-        },
-        async afterPrompt(context: mls.msg.ExecutionContext): Promise<void> {
-            return _afterPrompt(context);
-        },
-        async replayForSupport(context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> {
-            return _replayForSupport(context, payload);
-        }
-    }
-};
-
-const _beforePrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
-    const taskTitle = "Planning";
-
-    if (!context || !context.message) throw new Error("Invalid context");
-    if (!context.task) {
-
-
-
-        let pp = context.message.content
-            .replace(`@@ ${agentName}`, '')
-            .replace(`@@_100554_${agentName}`, '')
-            .replace(`@@ _100554_${agentName}`, '')
-            .replace(`@@ _100554_/l2/${agentName}`, '')
-            .replace(`@@_100554_/l2/${agentName}`, '')
-            .replace(`@@${agentName}`, '').trim();
-
-        let data = pp;
-        const inputs = await getPrompts(data);
-
-        await startNewAiTask(
-            agentName,
-            taskTitle,
-            context.message.content,
-            context.message.threadId,
-            context.message.senderId,
-            inputs, context,
-            _afterPrompt
-        );
-        return;
-    }
-
-    const step: mls.msg.AIAgentStep | null = getNextPendingStepByAgentName(context.task, agentName);
-
-    if (!step) throw new Error(`[${agentName}] beforePrompt: No pending step found for this agent.`);
-
-    context = await updateStepStatus(context, step.stepId, "in_progress");
-
-    if (!step.prompt) throw new Error(`[${agentName}] beforePrompt: No prompt found in step for this agent.`);
-
-    const data = step.prompt;
-    const inputs = await getPrompts( data);
-    await startNewInteractionInAiTask(agentName, taskTitle, inputs, context, _afterPrompt, step.stepId);
-
+        beforePromptImplicit,
+        afterPromptStep
+    };
 }
 
-const _afterPrompt = async (context: mls.msg.ExecutionContext): Promise<void> => {
+async function beforePromptImplicit(
+    agent: IAgentMeta,
+    context: mls.msg.ExecutionContext,
+    userPrompt: string,
+): Promise<mls.msg.AgentIntent[]> {
 
-    if (!context || !context.message || !context.task) throw new Error("Invalid context");
-    const step: mls.msg.AIAgentStep | null = getNextInProgressStepByAgentName(context.task, agentName);
-    if (!step) throw new Error(`[${agentName}] afterPrompt: No pending interaction found.`);
-    context = await updateStepStatus(context, step.stepId, "completed");
-
-    if (!context.task) throw new Error("Invalid context 2");
-    const payload = getNextFlexiblePendingStep(context.task) as mls.msg.AIPayload | null;
-
-    if (payload) context = await updateStepStatus(context, payload.stepId, "completed");
-    if (!context.task) throw new Error("Invalid context task");
-    context.task = await updateTaskTitle(context.task, "Updating links");
-
-    await executeNextStep(context);
-
-}
-
-const _replayForSupport = async (context: mls.msg.ExecutionContext, payload: mls.msg.AIPayload[]): Promise<void> => {
-    const step = payload[0] as mls.msg.AIPayload;
-    if (!step || step.type !== 'flexible') throw new Error('Invalid step for replay');
-}
-
-
-export async function getPrompts(info: any): Promise<mls.msg.IAMessageInputType[]> {
+    if (!userPrompt || userPrompt.length < 5) throw new Error('invalid prompt');
 
     const data = {
         defs: await getDefs(),
-        prompt:info
+        prompt: userPrompt
     };
 
-    const prompts = await getPromptByHtml({ project: 100554, shortName: agentName, folder: '', data })
-    return prompts;
+    const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
+        type: "add-message-ai",
+        request: {
+            action: 'addMessageAI',
+            agentName: agent.agentName,
+            inputAI: [{
+                type: "system",
+                content: system1.replace('{{defs}}', JSON.stringify(data)),
+            }, {
+                type: "human",
+                content: context.message.content.replace(`@@ ${agent.agentName}`, '')
+                    .replace(`@@_100554_${agent.agentName}`, '')
+                    .replace(`@@ _100554_${agent.agentName}`, '')
+                    .replace(`@@ _100554_/l2/${agent.agentName}`, '')
+                    .replace(`@@_100554_/l2/${agent.agentName}`, '')
+                    .replace(`@@${agent.agentName}`, '').trim()
+            }],
+            taskTitle: `Searching...`,
+            threadId: context.message.threadId,
+            userMessage: context.message.content,
+        }
+    };
+    return [addMessageAI];
+
 }
 
+async function afterPromptStep(
+    agent: IAgentMeta,
+    context: mls.msg.ExecutionContext,
+    parentStep: mls.msg.AIAgentStep,
+    step: mls.msg.AIAgentStep,
+    hookSequential: number,
+): Promise<mls.msg.AgentIntent[]> {
 
-export async function getDefs():Promise<string> {
+    if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
+    const payload = (step.interaction?.payload?.[0]) as Output;
+
+    console.info(payload.result)
+
+    if (!payload || !payload.type) throw new Error(`Payload invalid`);
+    if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
+
+    let status: mls.msg.AIStepStatus = 'completed';
+    let intents: mls.msg.AgentIntent[] = [];
+
+    const updateStatus: mls.msg.AgentIntentUpdateStatus = {
+        type: 'update-status',
+        hookSequential,
+        messageId: context.message.orderAt,
+        threadId: context.message.threadId,
+        taskId: context.task?.PK || '',
+        parentStepId: parentStep.stepId,
+        stepId: step.stepId,
+        status
+    };
+
+    return [updateStatus];
+
+}
+
+export async function getDefs(): Promise<string> {
 
     const defs = await getAllDefs();
-    const ret:any = {};
+    const ret: any = {};
     Object.keys(defs).forEach((key) => {
-
         ret[key] = defs[key].defs.asIs;
-        
-    })
+    });
 
     return JSON.stringify(ret);
 
 }
+
+
+const system1 = `
+<!-- modelType: nano -->
+
+<!-- modelTypeList: geminiChat ?/10 , code (grok) ?/10, deepseekchat ?/10, codeflash (gemini) ?/10, deepseekreasoner ?/10, mini (4.1) ou nano (openai) ?/10, codeinstruct (4.1) ?/10, codereasoning(gpt5) ?/10, code2 (kimi 2.5) ?/10 -->
+
+Você é um arquiteto de software sênior responsável por entender um grande sistema a partir de documentos estruturados de definição de arquivos ("file defs").
+
+Cada file def descreve:
+- O propósito do arquivo
+- Suas responsabilidades
+- Seus relacionamentos com outros arquivos
+- Seu papel arquitetural dentro do sistema
+
+Você NUNCA lê código-fonte.
+Você raciocina EXCLUSIVAMENTE com base nos file defs fornecidos.
+
+Seu trabalho é responder perguntas sobre a arquitetura do sistema, responsabilidades dos arquivos, fluxo de dados, comportamento e impacto de mudanças analisando esses file defs.
+
+Ao responder:
+
+1. Baseie seu raciocínio SOMENTE nos file defs fornecidos.
+2. Nunca invente arquivos, comportamentos ou responsabilidades que não estejam descritos nos defs.
+3. Ao identificar arquivos relevantes, explique claramente POR QUE cada arquivo é relevante com base em suas responsabilidades descritas.
+4. Pense sempre em termos de arquitetura, responsabilidade e relacionamentos — não em busca de palavras-chave.
+5. Se a resposta não puder ser determinada a partir dos defs, deixe isso claro.
+6. Prefira raciocínio semântico (o que o arquivo faz) ao invés de correspondência textual.
+7. Sempre que possível, agrupe os arquivos por papel arquitetural (UI, estado, persistência, navegação, integração, etc).
+8. Seja técnico, preciso e objetivo.
+9. A descrição deve ser sempre na lingua da solicitação do usuário.
+
+Você atua como uma camada de inteligência arquitetural sobre o sistema.
+
+## DEFS
+
+\`\`\`json
+{{defs}}
+\`\`\`
+
+## FORMATO OBRIGATÓRIO DE RESPOSTA
+
+Você deve SEMPRE retornar exclusivamente um JSON válido, sem nenhum texto antes ou depois.
+
+Nunca escreva explicações fora do JSON.
+Nunca utilize markdown.
+Nunca escreva comentários.
+Nunca escreva texto adicional.
+
+Regras obrigatórias:
+
+- "file" deve conter exatamente o nome do arquivo conforme aparece no file def.
+- "description" deve explicar tecnicamente a relação do arquivo com a pergunta do usuário.
+- Retorne apenas arquivos que realmente tenham relação com a pergunta.
+Se nenhum arquivo for relevante, retorne vazio: []
+
+## Output format
+You must return the object strictly as JSON
+[[OutputSection]]
+`
+
+//#region OutputSection
+export type Output = {
+    type: "flexible";
+    result: IResult[];
+};
+
+interface IResult {
+    files: [
+        {
+            file: string, // "nome_do_arquivo",
+            description: string //  "explicação técnica clara e curta do porquê este arquivo é relevante para a pergunta, baseada nas responsabilidades descritas no file def"
+        }
+    ]
+}
+
+//#endregion
+
