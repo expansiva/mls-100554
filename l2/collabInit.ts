@@ -507,13 +507,36 @@ export class CollabInit extends LitElement {
             return this.anonymousServices;
         }
 
-        let project: number = 100554;//this.actualProject || 0;
-        if (!project) project = this.baseProject;
+        // Build project list in priority order (highest priority first)
+        const projectList: number[] = [];
 
-        if (window.traceLifeCycle) console.info(`getServices using index project: ${project}`);
+        // 1. Actual project (highest priority)
+        if (this.actualProject) {
+            projectList.push(this.actualProject);
+        }
 
+        // 2. Actual project dependencies
+        if (this.actualProject) {
+            const dependencies = await mls.l5.getProjectDependencies(this.actualProject, false);
+            if (dependencies && dependencies.length > 0) {
+                for (const dep of dependencies) {
+                    if (!projectList.includes(dep)) {
+                        projectList.push(dep);
+                    }
+                }
+            }
+        }
 
-        await mls.plugin.loadAll(project, false);
+        // 3. Base project (lowest priority)
+        if (this.baseProject && !projectList.includes(this.baseProject)) {
+            projectList.push(this.baseProject);
+        }
+
+        if (window.traceLifeCycle) console.info(`getServices using index project: ${this.actualProject}, priority order: ${projectList.join(' > ')}`);
+
+        for (const prj of projectList) {
+            await mls.plugin.loadAll(prj, false);
+        }
 
         const levels = [0, 1, 2, 3, 4, 5, 6, 7];
         const rc: ITempServices = {
@@ -531,14 +554,35 @@ export class CollabInit extends LitElement {
 
         levels.forEach((level) => {
             positions.forEach((position) => {
-                const scope = `l${level}Services${position}`;
-                const services = mls.plugin.getAllMenuActions(project, { scope } as any);
-                const sorted = services.sort((a: mls.plugin.MenuAction, b: mls.plugin.MenuAction) => (a.priority || 1) - (b.priority || 1));
-                sorted.forEach((service: mls.plugin.MenuAction) => {
-                    if (service && service.widget) {
-                        rc[level][position].push(service.widget);
+                // Track already added widgets by their base path name
+                const addedPaths = new Set<string>();
+
+                // Iterate in priority order: actualProject > dependencies > baseProject
+                for (const prjNumber of projectList) {
+                    const scope = `l${level}Services${position}`;
+                    const services = mls.plugin.getAllMenuActions(prjNumber, { scope } as any);
+                    const sorted = services.sort(
+                        (a: mls.plugin.MenuAction, b: mls.plugin.MenuAction) => (a.priority || 1) - (b.priority || 1)
+                    );
+
+                    for (const service of sorted) {
+                        if (service && service.widget) {
+                            const info = mls.actual[0].setFullName(service.widget);
+                            const path = info.path;
+                            if (!path) continue;
+
+                            // Only add if no widget with the same path was already added by a higher priority project
+                            if (!addedPaths.has(path)) {
+                                addedPaths.add(path);
+                                rc[level][position].push(service.widget);
+                            } else {
+                                if (window.traceLifeCycle) {
+                                    console.info(`getServices: skipping ${service.widget} (project ${prjNumber}), already provided by higher priority project`);
+                                }
+                            }
+                        }
                     }
-                });
+                }
             });
         });
 
