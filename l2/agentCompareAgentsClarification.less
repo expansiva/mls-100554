@@ -1,0 +1,131 @@
+/// <mls fileReference="_100554_/l2/agentCompareAgentsClarification.less" enhancement="enhancementStyle"/>
+
+agent-compare-agents-clarification-100554 {
+
+    display: block;
+    font-family: @font-family-primary;
+    overflow: hidden;
+    height: 100%;
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background: @bg-primary-color;
+        min-height: 0;
+        overflow: hidden;
+        container-type: inline-size;
+    }
+
+    /* ========================= Content ========================= */
+
+    .content {
+        position: relative;
+        flex: 1;
+        overflow: auto;
+
+        &:has(.editorEntities),
+        &:has(.editorRules),
+        &:has(.editorCapabilities) {
+            display: flex;
+            min-height: 0;
+        }
+
+        .suggestions {
+            padding: 1rem;
+            // width: 100%;
+        }
+    }
+
+    
+
+    /* ======================== Card ========================= */
+
+    .card {
+        position: relative;
+        gap: @space-16;
+        padding: @space-16;
+        border-radius: 10px;
+        background: @bg-primary-color-darker;
+        border: 1px solid @grey-color;
+        transition: all @transition-normal;
+        cursor: pointer;
+        margin-bottom: 1rem;
+
+        &:hover {
+            background: @bg-primary-color-hover;
+        }
+
+        &.selected {
+            border-color: @active-color;
+        }
+
+        input{
+            width: 100%;
+        }
+
+        textarea{
+            width: 100%;
+            height: 100px;
+        }
+    }
+
+    .body {
+        display: flex;
+        flex-direction: column;
+        gap: @space-8;
+    }
+
+    .title {
+        font-weight: @font-weight-bold;
+    }
+
+    .desc {
+        font-size: @font-size-12;
+        color: @text-primary-color-lighter;
+    }
+
+    
+
+    /* ========================= Actions ========================= */
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: @space-16;
+        margin-top: @space-16;
+
+        .action-btn {
+            min-width: 120px;
+            font-size: @font-size-16;
+            font-weight: 500;
+            border-radius: @space-8;
+            padding: @space-8;
+            border: none;
+            cursor: pointer;
+            transition: background @transition-slow, color @transition-slow;
+            outline: none;
+
+            &.cancel {
+                background: @bg-secondary-color;
+                color: @text-primary-color;
+
+                &:hover {
+                    background: @bg-secondary-color-hover;
+                }
+            }
+
+            &.continue {
+                background: @active-color;
+                color: #fff;
+
+                &:hover {
+                    background: @active-color-hover;
+                }
+            }
+        }
+
+    }
+
+}
+
+
