@@ -1,6 +1,7 @@
-/// <mls fileReference="_100554_/l2/docMd.ts" enhancement="_100554_/l2/enhancementLit"/>
+/// <mls fileReference="_100554_/l2/docMd.ts" enhancement="_102027_/l2/enhancementLit"/>
 
-import { html, css , unsafeHTML} from 'lit';
+import { html } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, state } from 'lit/decorators.js';
 import { CollabLitElement } from '/_102027_/l2/collabLitElement.js';
 
