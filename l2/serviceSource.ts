@@ -39,6 +39,14 @@ const messages: { [key: string]: MessageType } = {
 }
 /// **collab_i18n_end**
 
+enum EToolsSource {
+    'icTs' = 0,
+    'icHTML' = 1,
+    'icStyle' = 2,
+    'icTest' = 3,
+    'icDefs' = 4,
+}
+
 @customElement('service-source-100554')
 export class ServiceSource100554 extends ServiceBase {
 
@@ -101,93 +109,96 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (this.isModeHistory && this.menu.selectTool) this.menu.selectTool('History');
 
+        const config = this.tabConfig[op];
+        if (!config) return;
+
+        const model = this.activeModels?.[config.key];
+
+        if (op !== EToolsSource.icTs && !model?.storFile) {
+            this.ensureAndActivateModel(config.extension, op);
+            return;
+        }
+
         if (op === EToolsSource.icTs) {
             this.showActiveModel();
-            this.updateActionBasedOnError('ts', this.activeModels?.ts?.model.id);
-            if (this._ed1) this.highlightReviewLines(this._ed1);
-
-        }
-        if (op === EToolsSource.icHTML) {
-            if (!this.activeModels || !this.activeModels.html || !this.activeModels.html.storFile) return;
-            this.showThisModel(this.activeModels?.html);
-            this.updateActionBasedOnError('html', this.activeModels?.html?.model.id);
-            if (this._ed1) this.highlightReviewLines(this._ed1);
-        }
-        if (op === EToolsSource.icStyle) {
-            if (!this.activeModels || !this.activeModels.style || !this.activeModels.style.storFile) return;
-            this.showThisModel(this.activeModels?.style);
-            mls.editor.forceModelUpdate(this.activeModels.style.model);
-            this.updateActionBasedOnError('style', this.activeModels.style.model.id);
-            if (this._ed1) this.highlightReviewLines(this._ed1);
+        } else {
+            this.showThisModel(model);
         }
 
-        if (op === EToolsSource.icTest) {
-            if (!this.activeModels || !this.activeModels.test || !this.activeModels.test.storFile) {
-                this.createModelIfNeed('.test.ts', op);
-                return;
-            }
-            this.showThisModel(this.activeModels?.test);
-            this.updateActionBasedOnError('test', this.activeModels?.test?.model.id);
+        if (config.forceUpdate && model) {
+            mls.editor.forceModelUpdate(model.model);
         }
 
-        if (op === EToolsSource.icDefs) {
-            if (!this.activeModels || !this.activeModels.defs || !this.activeModels.defs.storFile) {
-                this.createModelIfNeed('.defs.ts', op);
-                return;
-            }
-            this.showThisModel(this.activeModels?.defs);
-            this.updateActionBasedOnError('defs', this.activeModels?.defs?.model.id);
+        this.updateActionBasedOnError(config.key, model?.model.id);
+
+        if (config.highlightReview && this._ed1) {
+            this.highlightReviewLines(this._ed1);
+        }
+    };
+
+    private readonly tabConfig: Record<number, {
+        key: "html" | "defs" | "ts" | "style" | "test";
+        extension: string;
+        highlightReview?: boolean;
+        forceUpdate?: boolean;
+    }> = {
+            [EToolsSource.icTs]: { key: 'ts', extension: '', highlightReview: true },
+            [EToolsSource.icHTML]: { key: 'html', extension: '.html', highlightReview: true },
+            [EToolsSource.icStyle]: { key: 'style', extension: '.less', highlightReview: true, forceUpdate: true },
+            [EToolsSource.icTest]: { key: 'test', extension: '.test.ts' },
+            [EToolsSource.icDefs]: { key: 'defs', extension: '.defs.ts' },
+        };
+
+    private readonly opModelMap: Record<number, keyof mls.editor.IModels> = {
+        [EToolsSource.icHTML]: 'html',
+        [EToolsSource.icStyle]: 'style',
+        [EToolsSource.icTest]: 'test',
+        [EToolsSource.icDefs]: 'defs',
+    };
+
+    private async ensureAndActivateModel(ext: string, op: number): Promise<void> {
+        try {
+            if (!this.activeModels?.ts) return;
+
+            await this.ensureStorFileExists(ext);
+            this.refreshActiveModels();
+            this.activateModelForOp(op);
+
+        } catch (e) {
+            console.error('ensureAndActivateModel failed:', e);
         }
     }
 
-    private async createModelIfNeed(ext: string, op: number) {
+    private async ensureStorFileExists(ext: string): Promise<void> {
+        const { project, shortName, folder, level } = this.activeModels!.ts!.storFile;
+        const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, ext);
+        const stor = mls.stor.files[key];
 
-        try {
-            if (!this.activeModels || !this.activeModels.ts) return;
-
-            const { project, shortName, folder, level } = this.activeModels.ts.storFile;
-
-            const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, ext);
-            let stor = mls.stor.files[key];
-
-            if (!stor) {
-
-                let template = await getBaseTemplate({ folder, shortName, project, extension: ext });
-
-                const param: IReqCreateStorFile = {
-                    project,
-                    shortName,
-                    folder,
-                    level,
-                    extension: ext,
-                    source: template,
-                    status: 'new'
-                }
-
-                await createStorFile(param, true, true, false);
-
-            } else {
-                await createModel(stor, true, false);
-            }
-
-            this.activeModels = mls.editor.getModels(project, shortName, folder);
-
-            if (op === EToolsSource.icTest) {
-                if (!this.activeModels || !this.activeModels.test || !this.activeModels.test.storFile) return;
-                this.showThisModel(this.activeModels?.test);
-                this.updateActionBasedOnError('test', this.activeModels?.test?.model.id);
-            }
-
-            if (op === EToolsSource.icDefs) {
-                if (!this.activeModels || !this.activeModels.defs || !this.activeModels.defs.storFile) return;
-                this.showThisModel(this.activeModels?.defs);
-                this.updateActionBasedOnError('defs', this.activeModels?.defs?.model.id);
-            }
-
-        } catch (e) {
-
+        if (!stor) {
+            const template = await getBaseTemplate({ folder, shortName, project, extension: ext });
+            await createStorFile({
+                project, shortName, folder, level,
+                extension: ext, source: template, status: 'new',
+            }, true, true, false);
+        } else {
+            await createModel(stor, true, false);
         }
+    }
 
+    private refreshActiveModels(): void {
+        const { project, shortName, folder } = this.activeModels!.ts!.storFile;
+        this.activeModels = mls.editor.getModels(project, shortName, folder);
+    }
+
+    private activateModelForOp(op: number): void {
+        const modelKey = this.opModelMap[op];
+        if (!modelKey || !this.activeModels) return;
+
+        const model = this.activeModels[modelKey as keyof mls.editor.IModels];
+        if (!model?.storFile) return;
+
+        this.showThisModel(model);
+        this.updateActionBasedOnError(modelKey, model.model.id);
     }
 
     private async createModelIfNeedWithOutActiveModel(project: number, folder: string, shortName: string, ext: string) {
@@ -833,7 +844,6 @@ export class ServiceSource100554 extends ServiceBase {
             this.closeMenu();
 
             const storFiles = await mls.stor.getFiles({ project: storFileBase.project, shortName: storFileBase.shortName, folder: storFileBase.folder, loadContent: true, });
-
             let fileModels = mls.editor.getModels(storFileBase.project, storFileBase.shortName, storFileBase.folder);
 
             [storFiles.ts, storFiles.html, storFiles.less, storFiles.test, storFiles.defs].forEach((storF) => {
@@ -915,6 +925,8 @@ export class ServiceSource100554 extends ServiceBase {
             const { project, shortName, folder, level } = this.activeModels.style.storFile;
 
             const enhacementName = await getStyleEnhancementName({ project, shortName, folder, level }).catch((e: any) => undefined);
+            if (enhacementName === '_blank') return;
+
             if (!enhacementName || enhacementName === 'enhancementStyle') {
                 const enhancementInstanceLess = await import('/_100554_/l2/enhancementStyle.js')
                 if (enhancementInstanceLess) await enhancementInstanceLess.onAfterChange(this.activeModels);
@@ -1058,6 +1070,7 @@ export class ServiceSource100554 extends ServiceBase {
 
                     const { project, shortName, folder, level } = this.activeModels.style.storFile;
                     const enhacementName = await getStyleEnhancementName({ project, shortName, folder, level }).catch((e: any) => undefined);
+                    if (enhacementName === '_blank') return;
                     if (!enhacementName || enhacementName === 'enhancementStyle') {
                         const enhancementInstanceLess = await import('/_100554_/l2/enhancementStyle.js')
                         if (enhancementInstanceLess) await enhancementInstanceLess.onAfterMarkersChange(this.activeModels);
@@ -1812,13 +1825,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
 
 }
 
-enum EToolsSource {
-    'icTs' = 0,
-    'icHTML' = 1,
-    'icStyle' = 2,
-    'icTest' = 3,
-    'icDefs' = 4,
-}
+
 
 export type FormattableModel = monaco.editor.ITextModel & { needFormat: boolean };
 
