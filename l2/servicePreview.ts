@@ -15,8 +15,8 @@ import { globalState, setState, initState, getState } from '/_102027_/l2/collabS
 import { collab_record, collab_trash, collab_file_pen, collab_play, collab_test } from '/_100554_/l2/collabIcons.js';
 import { CollabState } from '/_102027_/l2/collabState.js';
 import { TsTestAst } from '/_100554_/l2/tsTestAST.js';
-import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
-import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
+import { getTemporaryContext } from '/_102027_/l2/aiAgentHelper.js';
+import { loadAgent, executeBeforePrompt } from '/_102027_/l2/aiAgentOrchestration.js';
 import { createModel } from '/_102027_/l2/libModel.js';
 import { getPath } from '/_102027_/l2/utils.js';
 
