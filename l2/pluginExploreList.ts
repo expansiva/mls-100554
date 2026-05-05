@@ -1,7 +1,7 @@
 /// <mls fileReference="_100554_/l2/pluginExploreList.ts" enhancement="_100554_/l2/enhancementLit" /> 
 
-import { html, css, svg, repeat, TemplateResult } from 'lit'; 
-import { property, queryAll, state } from 'lit/decorators.js'; 
+import { html, css, svg, repeat, TemplateResult } from 'lit';
+import { property, queryAll, state } from 'lit/decorators.js';
 import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from '/_102027_/l2/libCommom.js';
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, undoFile, IReqCreateStorFile, createStorFile } from '/_102027_/l2/libStor.js';
 import { createAllModels, createModel, readProjectTypescriptAndCompile, readProjectTypescriptAndCompileL1 } from '/_102027_/l2/libModel.js';
@@ -238,7 +238,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     firstUpdated() {
         if (!this.autoPrepare) return;
-        
+
         this.prepare();
         forceServiceInstance(2, '_100554_serviceSource');
 
@@ -352,7 +352,7 @@ export class PluginExploreList extends PluginBaseModule {
 
     renderHistory() {
 
-        if (this.modeFilter === 'all' && this.filterProject > 0) { 
+        if (this.modeFilter === 'all' && this.filterProject > 0) {
             return html``;
         }
 
@@ -860,10 +860,12 @@ export class PluginExploreList extends PluginBaseModule {
             const params = {} as mls.events.IFileAction;
 
             //const files = await createAllModels(file, true);
+            const storFiles = await mls.stor.getFiles({ project: file.project, shortName: file.shortName, folder: file.folder, loadContent: false });
+            
 
             if ([1, 2, 3, 4].includes(mls.actualLevel)) await this.createModel(file, '.ts');
-            if ([2, 3, 4].includes(mls.actualLevel)) await this.createModel(file, '.less');
-            if ([2, 3, 4].includes(mls.actualLevel)) await this.createModel(file, '.html');
+            if ([2, 3, 4].includes(mls.actualLevel) && storFiles.less) await this.createModel(file, '.less');
+            if ([2, 3, 4].includes(mls.actualLevel) && storFiles.html) await this.createModel(file, '.html');
 
             (params.action as any) = action;
             params.level = file.level;
@@ -999,7 +1001,7 @@ export class PluginExploreList extends PluginBaseModule {
         this.projectLabel = this.project.toString();
         this.fireEventLoadProject();
         await this.getFiles();
-        
+
 
 
     }
@@ -1011,12 +1013,12 @@ export class PluginExploreList extends PluginBaseModule {
 
             this.filterProject = this.filterByLevel[mls.actualLevel].prj;
             this.modeView = this.filterByLevel[mls.actualLevel].group;
-            
+
         } else {
- 
+
             this.filterProject = this.filterProject === -1 ? mls.actualProject || 0 : this.filterProject;
         }
-        
+
         this.loadLastPreference();
 
     }
@@ -1398,22 +1400,22 @@ export class PluginExploreList extends PluginBaseModule {
                 const j = JSON.parse(js);
                 m = j.modeFilter;
             } catch (e) {
-                
+
             }
         }
 
-        return m ;
+        return m;
     }
 
     private setLastPreference() {
         const js = localStorage.getItem('_100554_/l2/pluginExploreList');
-        let j:any = {};
+        let j: any = {};
         if (js) {
             try {
                 j = JSON.parse(js);
-                
+
             } catch (e) {
-                
+
             }
         }
 
