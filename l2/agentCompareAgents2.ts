@@ -1,4 +1,4 @@
-/// <mls fileReference="_100554_/l2//agentCompareAgents2.ts" enhancement="_102027_/l2/enhancementAgent.ts"/>
+/// <mls fileReference="_100554_/l2/agentCompareAgents2.ts" enhancement="_102027_/l2/enhancementAgent.ts"/>
 
 import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
 import { appendLongTermMemory } from '/_102027_/l2/aiAgentHelper.js';
@@ -76,7 +76,7 @@ async function beforePromptStep(
                 interaction: null,
                 status: 'waiting_human_input',
                 nextSteps: [],
-                agentName: agName,
+                agentName: agName.trim(),
                 prompt: info.promptUser,
                 rags: [],
             }
@@ -103,7 +103,7 @@ async function afterPromptStep(
     if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
 
     const payload = (step.interaction?.payload?.[0]);
-    console.info(step);
+    console.info(step); 
 
     return [];
 
