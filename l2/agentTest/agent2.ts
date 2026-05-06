@@ -1,20 +1,19 @@
-/// <mls fileReference="_100554_/l2/agentTest/agent1.ts" enhancement="_102027_/l2/enhancementAgent" />
+/// <mls fileReference="_100554_/l2/agentTest/agent2.ts" enhancement="_102027_/l2/enhancementAgent.ts"/>
 
 import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
 
 export function createAgent(): IAgentAsync {
     return {
-        agentName: "agent1",
+        agentName: "agent2",
         agentProject: 100554,
-        agentFolder: "",
-        agentDescription: "Agente para teste 1",
+        agentFolder: "agentTest",
+        agentDescription: "Agente para teste 2",
         visibility: "public",
         beforePromptImplicit,
         beforePromptStep,
         afterPromptStep
     };
 }
-
 async function beforePromptImplicit(
     agent: IAgentMeta,
     context: mls.msg.ExecutionContext,
@@ -82,7 +81,7 @@ async function afterPromptStep(
 
     if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
 
-    const payload = (step.interaction?.payload?.[0]) as Output;
+    const payload = (step.interaction?.payload?.[0]) as any;
     if (!payload || !payload.type) throw new Error(`Payload invalid`);
     if (payload?.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload: ${payload}`)
 
@@ -122,6 +121,11 @@ You must return the object strictly as JSON, no spaces, no indent, minified
 //#region OutputSection
 export type Output = {
     type: "flexible";
-    result: string[];
+    result: Info[];
 };
+
+export type Info = {
+    country: string,
+    briefDescription:string,
+}
 //#endregion
