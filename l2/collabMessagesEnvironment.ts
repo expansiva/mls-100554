@@ -159,8 +159,8 @@ async function openTaskDetails(messageId: string, taskId: string, task: TaskData
     element: HTMLElement | undefined;
 }> {
 
-    await import('/_100554_/l2/pluginTaskInfo.js');
-    const el = document.createElement('plugin-task-info-100554');
+    await import('/_102025_/l2/collabMessagesTaskInfo.js');
+    const el = document.createElement('collab-messages-task-info-102025');
     el.setAttribute('messageId', messageId);
     if (task && task.PK) el.setAttribute('taskId', task.PK);
     (el as any)['task'] = task;

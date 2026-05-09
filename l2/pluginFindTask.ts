@@ -8,8 +8,6 @@ import { msgGetTaskUpdate } from '/_102025_/l2/shared/api.js';
 import * as msg from '/_102025_/l2/shared/interfaces.js';
 import { StateLitElement } from '/_102027_/l2/stateLitElement.js';
 
-import '/_100554_/l2/pluginTaskDetails.js';
-
 /// **collab_i18n_start** 
 const message_pt = {
     loading: 'Carregando...',
@@ -86,7 +84,7 @@ export class PluginFindTask extends StateLitElement {
             </div>
             
 
-            <plugin-task-details-100554 .task=${this.actualTask} .message=${this.actualMessage} taskId=${this.actualTask?.PK}></plugin-task-details-100554>
+            ${this.actualTask ? html`<small class="error">Task details moved to mls-102025.</small>` : ''}
         
         `
     }
@@ -130,4 +128,3 @@ export class PluginFindTask extends StateLitElement {
     }
 
 }
-
