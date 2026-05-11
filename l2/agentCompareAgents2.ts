@@ -1,7 +1,7 @@
 /// <mls fileReference="_100554_/l2/agentCompareAgents2.ts" enhancement="_102027_/l2/enhancementAgent.ts"/>
 
 import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
-import { appendLongTermMemory } from '/_102027_/l2/aiAgentHelper.js';
+import { appendLongTermMemory, getStepById } from '/_102027_/l2/aiAgentHelper.js';
 
 export function createAgent(): IAgentAsync {
     return {
@@ -56,12 +56,19 @@ async function beforePromptStep(
 
     if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
 
-    await appendLongTermMemory(context, { "afterPromptProxy": step.stepId.toString() });
-    console.info(args);
-
     const info: any = JSON.parse(args);
     const steps: mls.msg.AgentIntentAddStep[] = [];
- 
+
+    await appendLongTermMemory(context, { "afterPromptProxy": step.stepId.toString() });
+    await appendLongTermMemory(context, { "totAgents": info.agentNames.length.toString() });
+    await appendLongTermMemory(context, { "promptCompare": info.promptCompare });
+    await appendLongTermMemory(context, { "stepIdOri": step.stepId.toString() });
+    await appendLongTermMemory(context, { "parentIdOri": parentStep.stepId.toString() });
+
+    //Clear variable parameter.
+    (window as any).agentCompareAgents2 = [];
+
+    // Add steps for each agents
     info.agentNames.forEach((agName: string) => {
         const newStep: mls.msg.AgentIntentAddStep = {
             type: "add-step",
@@ -87,7 +94,7 @@ async function beforePromptStep(
 
     return steps;
 
-    
+
 }
 
 
@@ -99,21 +106,100 @@ async function afterPromptStep(
     hookSequential: number,
 ): Promise<mls.msg.AgentIntent[]> {
 
-
     if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
 
-    const payload = (step.interaction?.payload?.[0]);
-    console.info(step); 
+    // In this mode afterPromptProxy the current step send in parentStep.
+    const intents = processOutput(context, parentStep.stepId, hookSequential);
 
-    return [];
+    return intents;
 
 }
 
-async function processOutput(context: mls.msg.ExecutionContext, output: any): Promise<mls.msg.AgentIntent[]> {
+async function processOutput(context: mls.msg.ExecutionContext, agentStep: number,  hookSequential: number): Promise<mls.msg.AgentIntent[]> {
 
-    // Do something with output
+    const intents: mls.msg.AgentIntent[] = []
 
-    return [];
+    let totAgents = +(context.task?.iaCompressed?.longMemory['totAgents'] || '0');
+    let finishedAgent: number[] = (window as any).agentCompareAgents2 || [];
+    finishedAgent.push(agentStep);
+
+    if (!context.task) throw new Error('Not found task');
+
+    // Complete current step;
+    const updateStatus: mls.msg.AgentIntentUpdateStatus = {
+        type: 'update-status',
+        hookSequential,
+        messageId: context.message.orderAt,
+        threadId: context.message.threadId,
+        taskId: context.task?.PK || '',
+        parentStepId: 1,
+        stepId: agentStep,
+        status: 'completed'
+    };
+
+    intents.push(updateStatus);
+
+    // Verify finished all agents
+    if (finishedAgent.length === totAgents) {
+
+        let toCompare = '#Compare the results';
+
+        for (let idStep of finishedAgent) {
+
+            const step = getStepById(context.task, idStep) as mls.msg.AIAgentStep;
+            if (!step) throw new Error('[agentCompareAgents2] Not found step:' + step);
+
+            const payload = (step.interaction?.payload?.[0]);
+
+            toCompare += `\n\n//--------------------\n##Agent:${step.agentName}\n\n${JSON.stringify(payload)}\n//--------------------`;
+
+        }
+
+        // Add step to Compare
+        const newStep: mls.msg.AgentIntentAddStep = {
+            type: "add-step",
+            messageId: context.message.orderAt,
+            threadId: context.message.threadId,
+            taskId: context.task?.PK || '',
+            parentStepId: 1,
+            step:
+            {
+                type: 'agent',
+                stepId: 0,
+                interaction: null,
+                status: 'waiting_human_input',
+                nextSteps: [],
+                agentName: "agentCompareAgents3",
+                prompt: toCompare,
+                rags: null,
+            }
+        };
+
+        intents.push(newStep);
+
+    } if (finishedAgent.length > totAgents) {
+
+        // Finishe compare
+        const updateStatus: mls.msg.AgentIntentUpdateStatus = {
+            type: 'update-status',
+            hookSequential,
+            messageId: context.message.orderAt,
+            threadId: context.message.threadId,
+            taskId: context.task?.PK || '',
+            parentStepId: +(context.task?.iaCompressed?.longMemory['parentIdOri'] || '0'),
+            stepId: +(context.task?.iaCompressed?.longMemory['stepIdOri'] || '0'),
+            status: 'completed'
+        };
+
+        intents.push(updateStatus)
+        
+    } else {
+
+        (window as any).agentCompareAgents2 = finishedAgent;
+
+    }
+
+    return intents;
 }
 
 

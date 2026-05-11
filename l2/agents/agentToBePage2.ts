@@ -238,7 +238,7 @@ function generatePipeLine(moduleName: string, sf: mls.stor.IFileInfo) {
       "agent": "agentMaterializePageLit",
       "dependsOn": ["contract", "shared"],
       "specUpdatedAt": dt,
-    },
+    }/*,
     {
       "id": "desktop-less",
       "specVar": "desktopLayout",
@@ -247,7 +247,7 @@ function generatePipeLine(moduleName: string, sf: mls.stor.IFileInfo) {
       "agent": "agentMaterializeLess",
       "dependsOn": ["shared"],
       "specUpdatedAt": dt,
-    }
+    }*/
   ];
 
   return pipe;
