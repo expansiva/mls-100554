@@ -120,6 +120,8 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
                 messageId: context.message.orderAt,
                 threadId: context.message.threadId,
                 taskId: context.task?.PK || '',
+                stepTitle: "Initializing pages: {{completed}} of {{total}}, errors: {{failed}}",
+      
                 parentStepId: 1,
                 step:
                 {

@@ -117,7 +117,7 @@ async function afterPromptStep(
     taskId: context.task?.PK || '',
     parentStepId: parentStep.stepId,
     stepId: step.stepId,
-    //cleaner: 'input_output',
+    cleaner: 'input_output',
     status: 'completed'
   };
   return [...intents, updateStatus];
@@ -130,14 +130,14 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
   let module = context.task?.iaCompressed?.longMemory['moduleName'];
   if (!module) throw new Error('Not found moduleName:'+ agent.agentName);
 
-  console.info(module);
+  const pageName = `_${mls.actualProject || 0}_/l2/${module}/${output.pages[0].pageName}.ts`;
 
   const refDef = `_${mls.actualProject || 0}_/l2/${module}/${output.pages[0].pageName}.defs.ts`;
   const srcDefs = updateVariableJson('/// <mls fileReference="' + refDef + '"  enhancement="_blank"/>\n\n', 'definition', output);
 
   await saveFile(refDef, srcDefs);
 
-  await saveFile(`_${mls.actualProject || 0}_/l2/${module}/${output.pages[0].pageName}.ts`, '');
+  await saveFile(pageName, '');
 
 
   const newStep: mls.msg.AgentIntentAddStep = {
@@ -154,6 +154,7 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
       status: 'waiting_human_input',
       nextSteps: [],
       agentName: 'agentToBePage2',
+      stepTitle: 'Creating page:' + pageName,
       prompt: JSON.stringify({ outputPath:refDef, folder:`/_${mls.actualProject || 0}_/l2/${module}/web/` , definition: output }),
       rags: [],
     }
@@ -183,6 +184,8 @@ async function saveFile(ref: string, src: string) {
     if (m && m.model) m.model.setValue(src);
 
   }
+
+  await mls.stor.localStor.setContent(sf, { contentType: 'string', content: src });
 }
 
 const system1 = `

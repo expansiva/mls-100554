@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/agents/agentToBePage2.ts" enhancement="_102027_/l2/enhancementAgent.ts"/>
 
-import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
+import { IAgentAsync, IAgentMeta} from '/_102027_/l2/aiAgentBase.js';
+import { appendLongTermMemory } from '/_102027_/l2/aiAgentHelper.js';
 import { updateVariableJson, updateVariableText } from '/_102027_/l2/defsAST.js';
 
 export function createAgent(): IAgentAsync {
@@ -63,9 +64,10 @@ async function beforePromptStep(
     threadId: context.message.threadId,
     taskId: context.task?.PK || '',
     hookSequential,
-    parentStepId: 1,
+    parentStepId: parentStep.stepId,
     systemPrompt: system1,
-    humanPrompt: args
+    humanPrompt: args,
+    
   }
 
   return [continueParallel];
@@ -97,6 +99,7 @@ async function afterPromptStep(
     taskId: context.task?.PK || '',
     parentStepId: parentStep.stepId,
     stepId: step.stepId,
+    cleaner: 'input_output',
     status
   };
 
@@ -106,17 +109,16 @@ async function afterPromptStep(
     return [updateStatus];
   }
 
-  intents = await processOutput(context, output, agent);
+  intents = await processOutput(context, output, agent, parentStep);
 
-  
-
-  return [...intents, updateStatus];
+  return [...intents];
 
 }
 
-async function processOutput(context: mls.msg.ExecutionContext, output: any, agent: IAgentMeta): Promise<mls.msg.AgentIntent[]> {
+async function processOutput(context: mls.msg.ExecutionContext, output: any, agent: IAgentMeta, parentStep: mls.msg.AIAgentStep): Promise<mls.msg.AgentIntent[]> {
 
-  let module = context.task?.iaCompressed?.longMemory['moduleName'];
+  await appendLongTermMemory(context, { "moduleName": 'pizzaria' });
+  let module = 'pizzaria';//context.task?.iaCompressed?.longMemory['moduleName'];
   if (!module) throw new Error('Not found moduleName:' + agent.agentName);
 
   const ref = mls.stor.convertFileReferenceToFile(output.outputPath);
@@ -149,7 +151,7 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
     messageId: context.message.orderAt,
     threadId: context.message.threadId,
     taskId: context.task?.PK || '',
-    parentStepId: 1,
+    parentStepId: parentStep.stepId,
     step:
     {
       type: 'agent',
