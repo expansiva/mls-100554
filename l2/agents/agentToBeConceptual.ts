@@ -106,6 +106,7 @@ async function afterPromptStep(
     taskId: context.task?.PK || '',
     parentStepId: parentStep.stepId,
     stepId: step.stepId,
+    cleaner: 'input_output',
     status
   };
   return [...intents, updateStatus];
