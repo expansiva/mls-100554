@@ -5,6 +5,7 @@ import { createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
 import { updateVariableJson } from '/_102027_/l2/defsAST.js';
 
 
+
 export function createAgent(): IAgentAsync { 
   return {
     agentName: "agentToBePage",
@@ -84,7 +85,9 @@ async function beforePromptStep(
     taskId: context.task?.PK || '',
     hookSequential,
     parentStepId: parentStep.stepId,
-    humanPrompt: args
+    humanPrompt: args,
+    systemPrompt: system1
+
   }
   
   return [continueParallel];
@@ -106,7 +109,7 @@ async function afterPromptStep(
   if (!payload || payload.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload`);
 
   const output = payload.result as ToBePages;
-  const intents = await processOutput(context, output, agent);
+  const intents = await processOutput(context, output, agent, parentStep);
   
 
   const updateStatus: mls.msg.AgentIntentUpdateStatus = {
@@ -118,13 +121,13 @@ async function afterPromptStep(
     parentStepId: parentStep.stepId,
     stepId: step.stepId,
     cleaner: 'input_output',
-    status: 'completed'
+    status: 'pending'
   };
   return [...intents, updateStatus];
 
 }
 
-async function processOutput(context: mls.msg.ExecutionContext, output: any, agent: IAgentMeta): Promise<mls.msg.AgentIntent[]> { 
+async function processOutput(context: mls.msg.ExecutionContext, output: any, agent: IAgentMeta, parentStep: mls.msg.AIAgentStep): Promise<mls.msg.AgentIntent[]> { 
 
   // preciso do modulo
   let module = context.task?.iaCompressed?.longMemory['moduleName'];
@@ -136,25 +139,23 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
   const srcDefs = updateVariableJson('/// <mls fileReference="' + refDef + '"  enhancement="_blank"/>\n\n', 'definition', output);
 
   await saveFile(refDef, srcDefs);
-
   await saveFile(pageName, '');
-
 
   const newStep: mls.msg.AgentIntentAddStep = {
     type: "add-step",
     messageId: context.message.orderAt,
     threadId: context.message.threadId,
     taskId: context.task?.PK || '',
-    parentStepId: 1,
+    parentStepId: parentStep.stepId,
+    stepTitle: 'Creating definition',
     step:
-    {
+    { 
       type: 'agent',
       stepId: 0,
       interaction: null,
       status: 'waiting_human_input',
       nextSteps: [],
       agentName: 'agentToBePage2',
-      stepTitle: 'Creating page:' + pageName,
       prompt: JSON.stringify({ outputPath:refDef, folder:`/_${mls.actualProject || 0}_/l2/${module}/web/` , definition: output }),
       rags: [],
     }

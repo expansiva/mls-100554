@@ -97,7 +97,7 @@ async function afterPromptStep(
                 taskId: context.task?.PK || '',
                 parentStepId: parentStep.stepId,
                 stepId: step.stepId,
-                // cleaner: 'input_output',
+                cleaner: 'input_output',
                 status
         };
 
@@ -107,15 +107,35 @@ async function afterPromptStep(
 
 async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePages: ToBePages, parentStep: mls.msg.AIAgentStep): Promise<mls.msg.AgentIntent[]> {
 
-        console.log("processOutputToBePages === toBePages");
-        console.log({ toBePages });
+
         if (context.isTest) return [];
 
-        // const toBe = getPayloadToBeConceptual3(context);
-        // if (!toBe) throw new Error(`[processOutputToBePages] invalid toBe: undefined`)
+        const paths = toBePages.pages.map((page) => page.pageName)//.slice(0, 1);
+        const steps: mls.msg.AgentIntent[] = [];
+        paths.forEach((path) => {
+                const newStep: mls.msg.AgentIntentAddStep = {
+                        type: "add-step",
+                        messageId: context.message.orderAt,
+                        threadId: context.message.threadId,
+                        taskId: context.task?.PK || '',
+                        parentStepId: 1,
+                        stepTitle: 'Creating page:' + path,
+                        step:
+                        {
+                                type: 'agent',
+                                stepId: 0,
+                                interaction: null,
+                                status: 'waiting_human_input',
+                                nextSteps: [],
+                                agentName: 'agentToBePage',
+                                prompt: JSON.stringify(path),
+                                rags: [],
+                        }
+                };
 
-        const paths = toBePages.pages.map((page) => page.pageName);//.slice(0, 1);
-        const newStep: mls.msg.AgentIntentAddStep = {
+                steps.push(newStep);
+        });
+        /*const newStep: mls.msg.AgentIntentAddStep = {
                 type: "add-step",
                 messageId: context.message.orderAt,
                 threadId: context.message.threadId,
@@ -140,7 +160,9 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
                 }
         };
 
-        return [newStep];
+        return [newStep];*/
+
+        return steps;
 }
 
 

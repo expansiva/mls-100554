@@ -1,7 +1,7 @@
 /// <mls fileReference="_100554_/l2/agents/agentToBePage2.ts" enhancement="_102027_/l2/enhancementAgent.ts"/>
 
 import { IAgentAsync, IAgentMeta} from '/_102027_/l2/aiAgentBase.js';
-import { appendLongTermMemory } from '/_102027_/l2/aiAgentHelper.js';
+import { appendLongTermMemory, findPreviousAgentStep } from '/_102027_/l2/aiAgentHelper.js';
 import { updateVariableJson, updateVariableText } from '/_102027_/l2/defsAST.js';
 
 export function createAgent(): IAgentAsync {
@@ -111,14 +111,13 @@ async function afterPromptStep(
 
   intents = await processOutput(context, output, agent, parentStep);
 
-  return [...intents];
+  return [...intents, updateStatus];
 
 }
 
 async function processOutput(context: mls.msg.ExecutionContext, output: any, agent: IAgentMeta, parentStep: mls.msg.AIAgentStep): Promise<mls.msg.AgentIntent[]> {
 
-  await appendLongTermMemory(context, { "moduleName": 'pizzaria' });
-  let module = 'pizzaria';//context.task?.iaCompressed?.longMemory['moduleName'];
+  let module = context.task?.iaCompressed?.longMemory['moduleName'];
   if (!module) throw new Error('Not found moduleName:' + agent.agentName);
 
   const ref = mls.stor.convertFileReferenceToFile(output.outputPath);
@@ -146,12 +145,14 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
 
   await mls.stor.localStor.setContent(sf, { contentType: 'string', content: newSrc });
 
+  const stepOri = context.task ? (findPreviousAgentStep(context.task, parentStep.stepId))?.stepId : parentStep.stepId;
+
   const newStep: mls.msg.AgentIntentAddStep = {
     type: "add-step",
     messageId: context.message.orderAt,
     threadId: context.message.threadId,
     taskId: context.task?.PK || '',
-    parentStepId: parentStep.stepId,
+    parentStepId: stepOri || parentStep.stepId ,
     step:
     {
       type: 'agent',
@@ -191,6 +192,12 @@ function generateShared(src: string, defsPath: string, moduleName: string, sf: m
 \\\`\\\`\\\`
     [[(_${sf.project}_/l1/${moduleName}/layer_2_controller/${sf.shortName}.ts)]]
 \\\`\\\`\\\`
+
+##JSON Layout ...
+\\\`\\\`\\\`
+    [[(${defsPath}).desktopLayout]]
+\\\`\\\`\\\`
+
 `)
 }
 
@@ -207,6 +214,11 @@ function generatePage(src: string, defsPath: string, moduleName: string, sf: mls
 ##Base class
 \\\`\\\`\\\`
   [[(_${sf.project}_/l2/${moduleName}/web/shared/${sf.shortName}.ts)]]
+\\\`\\\`\\\`
+
+##Interface class
+\\\`\\\`\\\`
+  [[(_${sf.project}_/l1/${moduleName}/layer_2_controller/${sf.shortName}.ts)]]
 \\\`\\\`\\\`
 `)
 }
@@ -235,7 +247,7 @@ function generatePipeLine(moduleName: string, sf: mls.stor.IFileInfo) {
     {
       "id": "desktop",
       "specVar": "desktopLayoutSpec",
-      "outputPath": "/l2/" + moduleName + "/web/desktop/" + sf.shortName + ".ts",
+      "outputPath": "/l2/" + moduleName + "/web/desktop/page11/" + sf.shortName + ".ts",
       "skillPath": "_102027_/l2/agents/skills/genPageRender.ts",
       "agent": "agentMaterializePageLit",
       "dependsOn": ["contract", "shared"],
@@ -244,7 +256,7 @@ function generatePipeLine(moduleName: string, sf: mls.stor.IFileInfo) {
     {
       "id": "desktop-less",
       "specVar": "desktopLayout",
-      "outputPath": "/l2/" + moduleName + "/web/desktop/" + sf.shortName + ".less",
+      "outputPath": "/l2/" + moduleName + "/web/desktop/page11/" + sf.shortName + ".less",
       "skillPath": "_102027_/l2/agents/skills/genLess.ts",
       "agent": "agentMaterializeLess",
       "dependsOn": ["shared"],
@@ -303,14 +315,14 @@ Steps:
 1. Take \`folder\`: \`"l2/petshop/web/"\`
 2. Remove leading \`l2/\` and trailing \`/\`: \`"petshop/web"\`
 3. Replace \`/\` with \`--\`: \`"petshop--web"\`
-4. Add \`"--desktop--"\`: \`"petshop--web--desktop"\`
+4. Add \`"--desktop--page11--"\`: \`"petshop--web--desktop--page11"\`
 5. Convert \`pageName\` to kebab-case: \`"storeLocation"\` → \`"store-location"\`
 6. Append project number from \`outputPath\`: \`"-102009"\`
 
 \`\`\`
 folder:   "l2/petshop/web/"
 pageName: "storeLocation"
-→ tagName: "petshop--web--desktop--store-location-102009"
+→ tagName: "petshop--web--desktop--page11--store-location-102009"
 \`\`\`
 
 ### outputPath

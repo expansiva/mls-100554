@@ -158,6 +158,7 @@ function processOutputToBeConceptual2(
     taskId: context.task?.PK || '',
     parentStepId: parentStep.stepId,
     stepId: step.stepId,
+    cleaner: 'input_output',
     status
   };
 
@@ -169,6 +170,7 @@ function processOutputToBeConceptual2(
     taskId: context.task?.PK || '',
     parentStepId: 1,
     stepId: parentStep.stepId,
+    cleaner: 'input',
     status: 'completed'
   };
 
