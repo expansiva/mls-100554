@@ -1,9 +1,10 @@
 /// <mls fileReference="_100554_/l2/ateste2.ts" enhancement="_100554_/l2/enhancementLit" />
 
-class Teste2 {
+import { variavelTeste } from '_100554_/l1/teste.js'; // assim funciona
+//import { variavelTeste } from '/_100554_/l1/teste.js'; // assim não
+
+export class Teste2 {
     constructor() {
-        console.info('ola');
+        console.info(variavelTeste);
     }
 }
-
-new Teste2();
