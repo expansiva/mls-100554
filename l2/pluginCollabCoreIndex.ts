@@ -100,13 +100,6 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
             },
             {
                 category: 'Services',
-                scope: ['l3ServicesLeft'],
-                priority: 2,
-                auth: ['*'],
-                widget: '_100554_serviceOrganism'
-            },
-            {
-                category: 'Services',
                 scope: ['l2ServicesLeft', 'l2ServicesRight'],
                 priority: 2,
                 auth: ['*'],
