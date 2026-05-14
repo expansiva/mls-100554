@@ -243,6 +243,7 @@ export class CollabInit extends LitElement {
         const htmlEl = document.documentElement;
         if (theme === 'dark' && htmlEl) {
             htmlEl.setAttribute('data-theme', 'dark');
+            htmlEl.classList.add('dark');
         }
     }
 
