@@ -1,8 +1,8 @@
 /// <mls fileReference="_100554_/l2/agents/agentToBePages.ts" enhancement="_102027_/l2/enhancementAgent" />
 
 import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
-import { getAgentStepByAgentName } from '/_102027_/l2/aiAgentHelper.js';
-
+import { getAgentStepByAgentName, getTemporaryContext } from '/_102027_/l2/aiAgentHelper.js';
+import { addMessage } from '/_102025_/l2/collabMessagesHelper.js';
 
 export function createAgent(): IAgentAsync {
         return {
@@ -13,7 +13,7 @@ export function createAgent(): IAgentAsync {
                 visibility: "private",
                 beforePromptImplicit,
                 beforePromptStep,
-                afterPromptStep
+                afterPromptStep,
         };
 }
 
@@ -110,8 +110,24 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
 
         if (context.isTest) return [];
 
-        const paths = toBePages.pages.map((page) => page.pageName)//.slice(0, 1);
-        const steps: mls.msg.AgentIntent[] = [];
+        const paths = toBePages.pages.map((page) => page.pageName).slice(0, 2)//.slice(0, 1);
+
+        /*try {
+                let module = context.task?.iaCompressed?.longMemory['moduleName'];
+                if (!module) throw new Error('Not found moduleName:');
+                paths.forEach((path) => {
+                        const threadId = context.task ? (context.task.messageid_created || '').split('/')[0] : '';
+                        const agentName = 'agentToBePage';
+                        const message = '@@' + agentName + ' ' + JSON.stringify({ page: path, moduleName: module });
+                        addMessage(threadId, message);
+                });
+        } catch (e: any) {
+
+        }
+
+        return [];*/
+
+        /*const steps: mls.msg.AgentIntent[] = [];
         paths.forEach((path) => {
                 const newStep: mls.msg.AgentIntentAddStep = {
                         type: "add-step",
@@ -135,13 +151,15 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
 
                 steps.push(newStep);
         });
-        /*const newStep: mls.msg.AgentIntentAddStep = {
+        
+        return steps;*/
+
+        const newStep: mls.msg.AgentIntentAddStep = {
                 type: "add-step",
                 messageId: context.message.orderAt,
                 threadId: context.message.threadId,
                 taskId: context.task?.PK || '',
                 stepTitle: "Initializing pages: {{completed}} of {{total}}, errors: {{failed}}",
-      
                 parentStepId: 1,
                 step:
                 {
@@ -151,8 +169,9 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
                         status: 'waiting_human_input',
                         nextSteps: [],
                         agentName: "agentToBePage",
-                        prompt: `[agentToBePages] ${JSON.stringify({ toBePages, moduleName: 'petShop' })}`,
+                        prompt: `[agentToBePages] ${JSON.stringify({ toBePages, moduleName: '' })}`,
                         rags: null,
+                        onFailure:'wait_after_prompt'
                 },
                 executionMode: {
                         type: 'parallel',
@@ -160,9 +179,9 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
                 }
         };
 
-        return [newStep];*/
+        return [newStep];
 
-        return steps;
+
 }
 
 
@@ -189,7 +208,7 @@ export function getPayloadToBePages(context: mls.msg.ExecutionContext): ToBePage
 "t3, grok-code-fast-1, 26s, $0.0036, 6.2/10",
 "t4, moonshotai/kimi-k2.5, 61s, $0.0156, 5.8/10 - double deffinition of staff pages, json formatting issues, loop"*/
 const system1 = `
-<!-- modelType: code -->
+<!-- modelType: codeinstruct -->
 <!-- modelTypeList: geminiChat ?/10 , code (grok) ?/10, deepseekchat ?/10, codeflash (gemini) ?/10, deepseekreasoner ?/10, mini (4.1) ou nano (openai) ?/10, codeinstruct (4.1) ?/10, codereasoning(gpt5) ?/10, code2 (kimi 2.5) ?/10 -->
 
 You are a senior BUSINESS Analyst.

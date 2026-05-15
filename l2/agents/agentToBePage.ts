@@ -12,7 +12,7 @@ export function createAgent(): IAgentAsync {
     agentProject: 100554,
     agentFolder: "agents",
     agentDescription: "Implement Page",
-    visibility: "private",
+    visibility: "public",
     beforePromptImplicit,
     beforePromptStep,
     afterPromptStep
@@ -29,6 +29,7 @@ async function beforePromptImplicit(
   if (!userPrompt) throw new Error('invalid prompt');
 
   // userPrompt contains all we need
+  const info = JSON.parse(userPrompt);
 
   const addMessageAI: mls.msg.AgentIntentAddMessageAI = {
     type: "add-message-ai",
@@ -41,8 +42,10 @@ async function beforePromptImplicit(
       ],
       taskTitle: agent.agentDescription,
       threadId: context.message.threadId,
-      userMessage: context.message.content,
+      userMessage: info.page,
+      longTermMemory:{moduleName: info.moduleName}
     }
+    
   };
 
   return [addMessageAI];
@@ -86,7 +89,7 @@ async function beforePromptStep(
     hookSequential,
     parentStepId: parentStep.stepId,
     humanPrompt: args,
-    systemPrompt: system1
+    //systemPrompt: system1
 
   }
   
@@ -102,6 +105,10 @@ async function afterPromptStep(
   hookSequential: number,
 ): Promise<mls.msg.AgentIntent[]> {
 
+  if (step.status === 'waiting_after_prompt_with_error') {
+    console.info('Chegou com erro:', step);
+    return [];
+  }
 
   if (!agent || !context || !step || !step.interaction || !step.interaction.payload) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
 
@@ -109,7 +116,7 @@ async function afterPromptStep(
   if (!payload || payload.type !== 'flexible' || !payload.result) throw new Error(`[afterPromptStep] invalid payload`);
 
   const output = payload.result as ToBePages;
-  const intents = await processOutput(context, output, agent, parentStep);
+  const intents = await processOutput(context, output, agent, step);
   
 
   const updateStatus: mls.msg.AgentIntentUpdateStatus = {
@@ -123,7 +130,7 @@ async function afterPromptStep(
     cleaner: 'input_output',
     status: 'pending'
   };
-  return [...intents, updateStatus];
+  return [...intents];
 
 }
 
@@ -157,7 +164,7 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
       nextSteps: [],
       agentName: 'agentToBePage2',
       prompt: JSON.stringify({ outputPath:refDef, folder:`/_${mls.actualProject || 0}_/l2/${module}/web/` , definition: output }),
-      rags: [],
+      rags: []
     }
   };
 
@@ -190,7 +197,7 @@ async function saveFile(ref: string, src: string) {
 }
 
 const system1 = `
-<!-- modelType: code -->
+<!-- modelType: codeinstruct -->
 <!-- modelTypeList: geminiChat ?/10 , code (grok) ?/10, deepseekchat ?/10, codeflash (gemini) ?/10, deepseekreasoner ?/10, mini (4.1) ou nano (openai) ?/10, codeinstruct (4.1) ?/10, codereasoning(gpt5) ?/10, code2 (kimi 2.5) ?/10 -->
 
 You are a senior Frontend Architect and Staff Software Engineer with 20+ years of experience building large-scale web applications.

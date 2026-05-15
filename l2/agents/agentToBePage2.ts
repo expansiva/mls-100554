@@ -56,7 +56,7 @@ async function beforePromptStep(
 ): Promise<mls.msg.AgentIntent[]> {
 
   if (!args) throw new Error(`(${agent.agentName})[beforePromptStep] args invalid`);
-
+  
   const continueParallel: mls.msg.AgentIntentPromptReady = {
     type: "prompt_ready",
     args,
@@ -146,7 +146,7 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
   await mls.stor.localStor.setContent(sf, { contentType: 'string', content: newSrc });
 
   const stepOri = context.task ? (findPreviousAgentStep(context.task, parentStep.stepId))?.stepId : parentStep.stepId;
-
+    
   const newStep: mls.msg.AgentIntentAddStep = {
     type: "add-step",
     messageId: context.message.orderAt,
@@ -269,11 +269,8 @@ function generatePipeLine(moduleName: string, sf: mls.stor.IFileInfo) {
 
 
 const system1 = `
-<!-- modelType: code-->
+<!-- modelType: codereasoning-->
 <!-- modelTypeList: geminiChat (2.5 pro), code (grok), deepseekchat, codeflash (gemini), deepseekreasoner, mini (4.1) ou nano (openai), codeinstruct (4.1), codereasoning(gpt5), code2 (kimi 2.5) -->
-
-
-# SKILL: Layout Spec Generator
 
 You are responsible for generating the \`layoutSpec\` JSON from a single definition JSON. You analyze the page's intent and organisms, and produce a complete layout definition that the WebComponent agent will use to generate the \`render()\` method.
 
@@ -527,9 +524,12 @@ Collect all text labels needed:
 ---
 
 ## Output format
-You must return the object strictly as JSON
+You must return ONLY a valid JSON object. No preamble, no explanation, no markdown
+fences, no text before or after the JSON. Start your response with { and end with }
 
-\`\`\`json
+You must return the object strictly as JSON, respecting the data type below.
+
+\`\`\`typescript
 [[OutputSection]]
 \`\`\`
 

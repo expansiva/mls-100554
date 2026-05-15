@@ -206,7 +206,7 @@ function processOutputToBeConceptual2(
 "t4, grok-code-fast-1, 6s, $0.0015, 6.8/10"
 */
 const system3 = `
-<!-- modelType: geminiChat -->
+<!-- modelType: codeinstruct --> 
 <!-- modelTypeList: geminiChat ?/10 , code (grok) ?/10, deepseekchat ?/10, codeflash (gemini) ?/10, deepseekreasoner ?/10, mini (4.1) ou nano (openai) ?/10, codeinstruct (4.1) ?/10, codereasoning(gpt5) ?/10, code2 (kimi 2.5) ?/10 -->
 
 You are a senior BUSINESS Analyst with 20+ years of experience in system design, requirements analysis, and business process optimization.
