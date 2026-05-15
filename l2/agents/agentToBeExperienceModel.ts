@@ -170,7 +170,7 @@ ${JSON.stringify(capabilities2)}
 "t4, moonshotai/kimi-k2.5, 28s, $0.0117, 8/10"
 */
 const system1 = `
-<!-- modelType: code -->
+<!-- modelType: codeinstruct -->
 <!-- modelTypeList: geminiChat ?/10 , code (grok) ?/10, deepseekchat ?/10, codeflash (gemini) ?/10, deepseekreasoner ?/10, mini (4.1) ou nano (openai) ?/10, codeinstruct (4.1) ?/10, codereasoning(gpt5) ?/10, code2 (kimi 2.5) ?/10 -->
 
 You are a senior BUSINESS Analyst with 20+ years of experience in system design, requirements analysis, and business process optimization.

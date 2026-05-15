@@ -1,10 +1,10 @@
-/// <mls fileReference="_100554_/l2/widgetQuestionsForClarification.ts" enhancement="_100554_/l2/enhancementLit" />
+/// <mls fileReference="_100554_/l2/widgetQuestionsForClarification.ts" enhancement="_102027_/l2/enhancementLit" /> 
 
 import { html } from 'lit';
 import { property, state } from 'lit/decorators.js';
-import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { IAgent, IAgentAsync } from '/_100554_/l2/aiAgentBase.js';
-import { ClarificationValue, endClarification } from '/_100554_/l2/aiAgentOrchestration.js';
+import { StateLitElement } from '/_102027_/l2/stateLitElement.js';
+import { IAgent, IAgentAsync } from '/_102027_/l2/aiAgentBase.js';
+import { ClarificationValue } from '/_102027_/l2/aiAgentOrchestration.js';
 
 export class WidgetQuestionsForClarification100554 extends StateLitElement {
 
@@ -63,20 +63,19 @@ export class WidgetQuestionsForClarification100554 extends StateLitElement {
 
   private onCancel() {
     if (this.value && !this.readonly) {
-      if (this.mode === 'new') {
-        this.dispatchEvent(
-          new CustomEvent('clarification-finish', {
-            detail: {
-              value: this.value,
-              action: 'cancel'
-            },
-            bubbles: true,
-            composed: true
-          })
-        );
-        return;
-      }
-      endClarification(this.value, "cancel");
+
+      this.dispatchEvent(
+        new CustomEvent('clarification-finish', {
+          detail: {
+            value: this.value,
+            action: 'cancel'
+          },
+          bubbles: true,
+          composed: true
+        })
+      );
+      return;
+
     }
   }
 
@@ -93,22 +92,17 @@ export class WidgetQuestionsForClarification100554 extends StateLitElement {
         )
       };
 
-      if (this.mode === 'new') {
-        this.dispatchEvent(
-          new CustomEvent('clarification-finish', {
-            detail: {
-              value: this.value,
-              action: 'continue'
-            },
-            bubbles: true,
-            composed: true
-          })
-        );
-        return;
-      }
-
-      endClarification(this.value, "continue");
-
+      this.dispatchEvent(
+        new CustomEvent('clarification-finish', {
+          detail: {
+            value: this.value,
+            action: 'continue'
+          },
+          bubbles: true,
+          composed: true
+        })
+      );
+      return;
     }
   }
 
