@@ -110,7 +110,7 @@ async function processOutputToBePages(context: mls.msg.ExecutionContext, toBePag
 
         if (context.isTest) return [];
 
-        const paths = toBePages.pages.map((page) => page.pageName).slice(0, 2)//.slice(0, 1);
+        const paths = toBePages.pages.map((page) => page.pageName)//.slice(0, 1);
 
         /*try {
                 let module = context.task?.iaCompressed?.longMemory['moduleName'];

@@ -13,7 +13,7 @@ export function createAgent(): IAgentAsync {
     visibility: "public",
     beforePromptImplicit,
     beforePromptStep,
-    afterPromptStep
+    afterPromptStep,
   };
 }
 
@@ -82,7 +82,11 @@ async function afterPromptStep(
   hookSequential: number,
 ): Promise<mls.msg.AgentIntent[]> {
 
-
+  if (step.status === 'waiting_after_prompt_with_error') {
+    console.info('['+agent.agentName+'] Chegou com erro:', step);
+    return [];
+  }
+  
   if (!agent || !context || !step) throw new Error(`[afterPromptStep] invalid params, agent:${!!agent}, context:${!!context}, step:${!!step}`);
 
   const payload = (step.interaction?.payload?.[0]);
@@ -163,6 +167,7 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
       agentName: 'agentMaterialize',
       prompt: output.outputPath,
       rags: [],
+      onFailure:'wait_after_prompt'
     }
   };
 
@@ -174,6 +179,11 @@ function generateContract(src: string, defsPath: string, moduleName: string) {
 ##Pages spec
 \\\`\\\`\\\`JSON
     [[(${defsPath}).definition]]
+\\\`\\\`\\\`
+
+##JSON Layout ...
+\\\`\\\`\\\`
+    [[(${defsPath}).desktopLayout]]
 \\\`\\\`\\\`
 `)
 }
@@ -267,9 +277,9 @@ function generatePipeLine(moduleName: string, sf: mls.stor.IFileInfo) {
   return pipe;
 }
 
-
+//codereasoning
 const system1 = `
-<!-- modelType: codereasoning-->
+<!-- modelType: codereasoning -->
 <!-- modelTypeList: geminiChat (2.5 pro), code (grok), deepseekchat, codeflash (gemini), deepseekreasoner, mini (4.1) ou nano (openai), codeinstruct (4.1), codereasoning(gpt5), code2 (kimi 2.5) -->
 
 You are responsible for generating the \`layoutSpec\` JSON from a single definition JSON. You analyze the page's intent and organisms, and produce a complete layout definition that the WebComponent agent will use to generate the \`render()\` method.
@@ -294,14 +304,14 @@ folder:    "l2/petshop/web/"
 pageName:  "storeLocation"
 → sharedPath: "/_XXXXX_/l2/petshop/web/shared/storeLocation.js"
 \`\`\`
-The project number \`_XXXXX_\` is extracted from \`outputPath\` (the \`_102009_\` part).
+The project number \`_XXXXX_\`, if needed, is extracted from \`outputPath\` (the \`_XXXXX_\` part). Only if it does not already exist in the path.
 
 ### imports paths
 Same as \`sharedPath\` — both the action enum and the shared class are imported from the shared file:
 \`\`\`json
 "imports": [
   { "type": "value", "import": "{ anyInterfaces }", "path": "{interfacePath}" },
-  { "type": "value", "import": "{ StoreLocationShared }",  "path": "/_102009_/l2/petshop/web/shared/storeLocation.js" }
+  { "type": "value", "import": "{ StoreLocationShared }",  "path": "/_102005_/l2/petshop/web/shared/storeLocation.js" }
 ]
 \`\`\`
 
@@ -415,12 +425,12 @@ Always generate when shared has \`loading\` and \`error\` states:
 
 **Form submit** → action event:
 \`\`\`json
-{ "event": { "on": "submit", "type": "action", "state": "action", "value": "PageNameAction.SAVE_X", "prevent": true } }
+{ "event": { "on": "submit", "type": "action", "state": "action", "value": "EmitsAction.SAVE_X", "prevent": true } }
 \`\`\`
 
 **Retry button** → action event to reload:
 \`\`\`json
-{ "event": { "on": "click", "type": "action", "state": "action", "value": "PageNameAction.LOAD_X" } }
+{ "event": { "on": "click", "type": "action", "state": "action", "value": "EmitsAction.LOAD_X" } }
 \`\`\`
 
 **computedFields with boolean** (e.g. \`hasWhatsapp\`) → used as \`"condition"\` on wrapper element, not rendered directly.
@@ -450,7 +460,7 @@ Temp states use their camelCase name directly: \`"condition": "this.selectedCont
 ### Step 9 — Action enum values
 
 Action enum values are derived from the shared file reasoning (not from the contract). The pattern is:
-- \`PascalCase(pageName)Action.LOAD_STORE_INFO\` for loads
+- \`EmitsAction.LOAD_STORE_INFO\` for loads
 - Reference only actions that will exist in the shared file
 
 ### Step 10 — i18n keys
@@ -563,7 +573,6 @@ export interface StoreLocationDefinition {
     tagName: string;
     extends: string;
     sharedPath: string;
-    styling: string;
 
     imports: ImportsDef[];
 

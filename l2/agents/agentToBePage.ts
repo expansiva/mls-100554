@@ -90,7 +90,6 @@ async function beforePromptStep(
     parentStepId: parentStep.stepId,
     humanPrompt: args,
     //systemPrompt: system1
-
   }
   
   return [continueParallel];
@@ -106,7 +105,7 @@ async function afterPromptStep(
 ): Promise<mls.msg.AgentIntent[]> {
 
   if (step.status === 'waiting_after_prompt_with_error') {
-    console.info('Chegou com erro:', step);
+    console.info('['+agent.agentName+'] Chegou com erro:', step);
     return [];
   }
 
@@ -164,7 +163,8 @@ async function processOutput(context: mls.msg.ExecutionContext, output: any, age
       nextSteps: [],
       agentName: 'agentToBePage2',
       prompt: JSON.stringify({ outputPath:refDef, folder:`/_${mls.actualProject || 0}_/l2/${module}/web/` , definition: output }),
-      rags: []
+      rags: [],
+      onFailure:'wait_after_prompt'
     }
   };
 
