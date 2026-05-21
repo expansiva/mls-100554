@@ -189,9 +189,7 @@ export class ServiceCollabMessages extends ServiceBase {
 
     private async checkNotificationPending() {
         const hasPendingMessages = await checkIfNotificationUnread();
-        if (hasPendingMessages) {
-            this.toogleBadge(true, '_100554_serviceCollabMessages');
-        }
+        this.toogleBadge(hasPendingMessages, '_100554_serviceCollabMessages');
     }
 
     private onThreadReceivedNotification(e: Event) {
