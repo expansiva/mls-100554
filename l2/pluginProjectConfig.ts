@@ -51,9 +51,9 @@ export class PluginProjectConfig extends PluginBaseModule {
     private template: string = `window.project_config`
 
     async prepare() {
+        debugger;
         this.createEditor();
         await this.loadProjectConfigs();
-        this.setMsizeEditor();
     }
 
     firstUpdated() {
@@ -63,12 +63,6 @@ export class PluginProjectConfig extends PluginBaseModule {
 
     createRenderRoot() {
         return this;
-    }
-
-    updated(changedProperties: any) {
-        if (changedProperties.has('msize')) {
-            this.setMsizeEditor();
-        }
     }
 
     render(): TemplateResult {
@@ -132,10 +126,6 @@ export class PluginProjectConfig extends PluginBaseModule {
         }
     }
 
-    private setMsizeEditor() {
-        this.c2?.setAttribute('msize', this.msize);
-    }
-
     private createEditor(): void {
         if (!this.c2 || this._ed1) return;
         const opt = {
@@ -143,7 +133,6 @@ export class PluginProjectConfig extends PluginBaseModule {
         };
         this._ed1 = monaco.editor.create(this.c2, opt);
         (this.c2 as any)['mlsEditor'] = this._ed1;
-        this.setMsizeEditor();
     }
 
     private async loadProjectConfigs(ignoreLocal: boolean = false) {
