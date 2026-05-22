@@ -19,8 +19,8 @@ const messages: { [key: string]: MessageType } = {
     'en': message_en,
     'pt': message_pt
 }
-/// **collab_i18n_end**
 
+/// **collab_i18n_end**
 
 export const pluginData: mls.plugin.IPluginData = {
     title: "Config",
@@ -39,7 +39,7 @@ export class PluginProjectConfig extends PluginBaseModule {
     @property({ type: Boolean }) autoPrepare: boolean = false;
     @property({ type: String }) msize = '';
 
-    @query('mls-editor-100529') c2: HTMLElement | undefined;
+    @query('.editor-container') c2: HTMLElement | undefined;
     @query('.plugin-body') body: HTMLDivElement | undefined;
 
     private _ed1: monaco.editor.IStandaloneCodeEditor | undefined;
@@ -72,11 +72,13 @@ export class PluginProjectConfig extends PluginBaseModule {
     }
 
     render(): TemplateResult {
+
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
         this.style.display = 'block';
         this.style.width = '100%';
-        this.style.height = '100%';
+        const h = this.msize ? this.msize.split(',')[1] + 'px' : '100%'
+        this.style.height = h;
         if (this.scope !== "dashboard") return html``;
         return html`
             <div class="plugin-container">
@@ -103,7 +105,7 @@ export class PluginProjectConfig extends PluginBaseModule {
 
     renderBody(): TemplateResult {
         return html`<div class="plugin-body">
-            <mls-editor-100529 ismls2="true"></mls-editor-100529>
+            <div class="editor-container"></div>
         </div>`;
     }
 

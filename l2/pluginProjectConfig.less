@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/pluginProjectConfig.less" enhancement="_100554_/l2/enhancementLit" />
 
 plugin-project-config-100554 {
+    
 
     plugin-project-config-100554 {
         font-family: @font-family-primary;
@@ -12,21 +13,31 @@ plugin-project-config-100554 {
     }
 
     .plugin-body {
-        height: 100%;
-        width: -webkit-fill-available;
+        flex: 1;
+        min-height: 0;
+        width: 100%;
         padding: 1rem;
         overflow: hidden;
+        display: flex;
     }
 
     .plugin-container {
         padding: 10px 0;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
+
         height: 100%;
         width: 100%;
+
+        min-height: 0;
+    }
+
+    .editor-container {
+        flex: 1;
+        min-height: 0;
     }
 
     header {
@@ -37,12 +48,12 @@ plugin-project-config-100554 {
         display: flex;
         gap: .5rem;
 
-        h2{
-            color: @text-primary-color!important;  
+        h2 {
+            color: @text-primary-color  !important;
         }
 
-        svg{
-            fill: @text-primary-color; 
+        svg {
+            fill: @text-primary-color;
         }
     }
 
