@@ -110,7 +110,7 @@ export class ServiceMindMap100554 extends ServiceBase {
             this.actualFile[mls.actualLevel] = mls.stor.files[key];
             this.configure();
 
-            if (ev.level === 4) this.openMe();
+            // if (ev.level === 4) this.openMe();
 
 
         } catch (e) {
