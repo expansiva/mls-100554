@@ -9,7 +9,8 @@ export async function initCompileMonaco(project: number): Promise<boolean> {
     try {
         await mls.editor.InitMonaco();
 
-        const depsActualProject = mls.l5.getProjectDependencies(project, false);
+        let depsActualProject = mls.l5.getProjectDependencies(project, false);
+        if (project === mls.stor.LOCALPROJECTNUMBER) depsActualProject = [102027]
         const deps = [project, ...depsActualProject];
         for await (let prj of deps) {
             if ([100529, 100131].includes(prj)) continue;
@@ -30,6 +31,8 @@ export async function initCompileMonaco(project: number): Promise<boolean> {
 
 @customElement('collab-init-100554')
 export class CollabInit extends LitElement {
+
+    private localProjectImports = [102027]
 
     private actualProject: number | undefined = 0;
 
@@ -383,6 +386,13 @@ export class CollabInit extends LitElement {
         for await (let prj of deps) {
             if (this.actualProject && this.actualProject !== mls.stor.LOCALPROJECTNUMBER) await mls.stor.server.loadProjectInfoIfNeeded(prj);
         }
+
+        if (this.actualProject === mls.stor.LOCALPROJECTNUMBER) {
+            for await (let depPrj of this.localProjectImports) {
+                await mls.stor.server.loadProjectInfoIfNeeded(depPrj);
+            }
+        }
+
         initCompileMonaco(this.actualProject);
     }
 
