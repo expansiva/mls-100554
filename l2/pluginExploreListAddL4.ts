@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/pluginExploreListAddL4.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, repeat, TemplateResult } from 'lit'; 
+import { html, TemplateResult } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { customElement, state, property, query } from 'lit/decorators.js';
 import { createAllFiles, IReqCreateAllFiles } from '/_102027_/l2/libStor.js';
 import { getTemplateImport } from '/_100554_/l2/pluginNewFileBase.js';

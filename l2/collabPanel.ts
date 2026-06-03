@@ -1,6 +1,8 @@
 /// <mls fileReference="_100554_/l2/collabPanel.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, css, UnsafeHTMLDirective, repeat, unsafeHTML } from 'lit';
+import { html } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property, query } from 'lit/decorators.js';
 import '/_100554_/l2/collabPanelItem.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';

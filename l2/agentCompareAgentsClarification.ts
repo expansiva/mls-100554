@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/agentCompareAgentsClarification.ts" enhancement="_100554_/l2/enhancementLit"/>
 
-import { html, nothing, unsafeHTML } from 'lit';
+import { html, nothing   } from 'lit';
+import { unsafeHTML} from 'lit/directives/unsafe-html.js';
 import { customElement, state, property, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 

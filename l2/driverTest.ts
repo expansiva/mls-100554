@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/driverTest.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, css, LitElement, repeat } from 'lit';
+import { html, css, LitElement } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { customElement, property, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 

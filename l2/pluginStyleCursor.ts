@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/pluginStyleCursor.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, repeat } from 'lit';
+import { html } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { customElement, property } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';

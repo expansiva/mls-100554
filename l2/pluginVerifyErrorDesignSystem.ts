@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/pluginVerifyErrorDesignSystem.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, repeat } from 'lit';
+import { html } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { property, customElement } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { preCompileLessByThemeOrDefault } from '/_102027_/l2/designSystemBase.js'; 

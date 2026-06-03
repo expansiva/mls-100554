@@ -185,8 +185,8 @@ export class PluginProjectConfig extends PluginBaseModule {
         const that = this;
         (async function scope() {
             eval(val); // eslint-disable-line no-eval
-            if (window.project_config && typeof window.project_config === 'object' && that.lastProject) {
-                libProjectConfig.updateConfigProject(that.lastProject, window.project_config);
+            if ((window as any).project_config && typeof (window as any).project_config === 'object' && that.lastProject) {
+                libProjectConfig.updateConfigProject(that.lastProject, (window as any).project_config);
             }
         }).call(this);
 

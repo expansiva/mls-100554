@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/widgetSelect.ts" enhancement="_blank"/>
 
-import { html, ifDefined } from 'lit';
+import { html } from 'lit';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { customElement, property, query } from 'lit/decorators.js';
 import {CollabLitElement} from '/_102027_/l2/collabLitElement.js'
 

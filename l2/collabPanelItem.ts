@@ -1,8 +1,9 @@
 /// <mls fileReference="_100554_/l2/collabPanelItem.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, css, LitElement, repeat, unsafeHTML } from 'lit';
+import { html  } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property, query } from 'lit/decorators.js';
-import { convertTagToFileName, convertFileNameToTag } from '/_102027_/l2/utils';
+import { convertTagToFileName, convertFileNameToTag } from '/_102027_/l2/utils.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 
 @customElement('collab-panel-item-100554')

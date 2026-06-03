@@ -1,6 +1,8 @@
 /// <mls fileReference="_100554_/l2/servicePage.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, css, unsafeHTML, repeat } from 'lit';
+import { html, css } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import { selectLevel, openService, saveOpenedFile } from '/_102027_/l2/libCommom.js';

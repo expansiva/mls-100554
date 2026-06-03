@@ -144,7 +144,7 @@ export class CollabInit extends LitElement {
      * Loads and sets up collaboration drivers asynchronously.
      */
     private async setDrivers(): Promise<void> {
-        if (window.traceLifeCycle) console.info('loading: drivers collab');
+        if ((window as any).traceLifeCycle) console.info('loading: drivers collab');
         await this.instanceDriverGitHub();
         await this.instanceDriverGitLab();
     }
@@ -153,7 +153,7 @@ export class CollabInit extends LitElement {
      * Instantiates and registers the GitHub collaboration driver asynchronously.
      */
     private async instanceDriverGitHub(): Promise<void> {
-        if (window.traceLifeCycle) console.info('loading: driver github');
+        if ((window as any).traceLifeCycle) console.info('loading: driver github');
         const { DriverGitHub } = await import('/_100554_/l2/driverGithub.js');
         const instanceGitHub = new DriverGitHub();
         const driverInstanceGitHub = mls.stor.others.getDriver('github');
@@ -164,7 +164,7 @@ export class CollabInit extends LitElement {
      * Instantiates and registers the GitLab collaboration driver asynchronously.
      */
     private async instanceDriverGitLab(): Promise<void> {
-        if (window.traceLifeCycle) console.info('loading: driver gitlab');
+        if ((window as any).traceLifeCycle) console.info('loading: driver gitlab');
         const { DriverGitLab } = await import('/_100554_/l2/driverGitlab.js');
         const instanceGitLab = new DriverGitLab();
         const driverInstanceGitLab = mls.stor.others.getDriver('gitlab');
@@ -176,7 +176,7 @@ export class CollabInit extends LitElement {
      * @returns The user's language (e.g., 'en-US', 'pt-BR').
      */
     private setAndGetBaseUrl(): string {
-        if (window.traceLifeCycle) console.info('setting: baseUrl');
+        if ((window as any).traceLifeCycle) console.info('setting: baseUrl');
         const language = this.getUserLanguageOrDefault();
         const base = document.head.querySelector('base');
         if (!base) return language;
@@ -222,7 +222,7 @@ export class CollabInit extends LitElement {
      * @param lang The language code to set (e.g., 'en-US').
      */
     private setHTMLLang(lang: string): void {
-        if (window.traceLifeCycle) console.info('setting: htmlLang');
+        if ((window as any).traceLifeCycle) console.info('setting: htmlLang');
         const htmlEl = document.documentElement;
         if (htmlEl) htmlEl.lang = lang;
     }
@@ -241,7 +241,7 @@ export class CollabInit extends LitElement {
      * Sets the theme for the application based on user settings or OS preferences.
      */
     private setTheme(): void {
-        if (window.traceLifeCycle) console.info('setting: theme');
+        if ((window as any).traceLifeCycle) console.info('setting: theme');
         const theme = this.getTheme();
         const htmlEl = document.documentElement;
         if (theme === 'dark' && htmlEl) {
@@ -276,7 +276,7 @@ export class CollabInit extends LitElement {
      */
     private async setTokensCss(): Promise<void> {
 
-        if (window.traceLifeCycle) console.info('setting: tokens');
+        if ((window as any).traceLifeCycle) console.info('setting: tokens');
         try {
             const module = await import('/_102027_/l2/designSystemBase.js');
             if (!module || !module.getTokensCss || typeof module.getTokensCss !== 'function') return;
@@ -298,7 +298,7 @@ export class CollabInit extends LitElement {
      * @param isAnonymous Indicates whether the user is anonymous.
      */
     private enableNav(avatarUrl: string, language: string, services: IServices, isAnonymous: boolean): void {
-        if (window.traceLifeCycle) console.info('enableNav: collab-nav-1');
+        if ((window as any).traceLifeCycle) console.info('enableNav: collab-nav-1');
 
         const collabNav1 = document.querySelector('collab-nav-1') as IHTMLCollabNav1;
         if (!collabNav1) return;
@@ -306,7 +306,7 @@ export class CollabInit extends LitElement {
         if (avatarUrl) collabNav1.changeIconToImage(7, avatarUrl);
 
         const state = isAnonymous ? 'anonymous' : 'enabled';
-        if (window.traceLifeCycle) console.info(`setting: status collab-nav-1 : ${state}`);
+        if ((window as any).traceLifeCycle) console.info(`setting: status collab-nav-1 : ${state}`);
         collabNav1.services = services;
         collabNav1.setAttribute('status', state);
     }
@@ -321,7 +321,7 @@ export class CollabInit extends LitElement {
      * @returns The last selected project ID as a number, or `undefined` if not found.
      */
     private async getLastProjectSelected(): Promise<number | undefined> {
-        if (window.traceLifeCycle) console.info('getLastProjectSelected');
+        if ((window as any).traceLifeCycle) console.info('getLastProjectSelected');
 
         try {
             const lib = await import('/_102027_/l2/libCommom.js');
@@ -342,7 +342,7 @@ export class CollabInit extends LitElement {
      * @returns The last selected project ID as a number, or `undefined` if not found.
      */
     private async setProjectActual(): Promise<number | undefined> {
-        if (window.traceLifeCycle) console.info('setProjectActual');
+        if ((window as any).traceLifeCycle) console.info('setProjectActual');
         const project = await this.getLastProjectSelected();
         mls.setActualProject(project ? project : this.baseProject);
         return project;
@@ -353,7 +353,7 @@ export class CollabInit extends LitElement {
      * @param project The project ID to determine the organization index.
      */
     private setOrgActual(project: number | undefined): void {
-        if (window.traceLifeCycle) console.info(`setOrgActual for project: ${project}`);
+        if ((window as any).traceLifeCycle) console.info(`setOrgActual for project: ${project}`);
         if (!project && !this.baseProject) return;
         const orgIndex = mls.l5.getProjectOrgIndex(project || this.baseProject);
         mls.l5.setActualOrg(orgIndex);
@@ -365,7 +365,7 @@ export class CollabInit extends LitElement {
      * @returns A promise that resolves when the base project information is loaded.
      */
     private async loadProjectBase() {
-        if (window.traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
+        if ((window as any).traceLifeCycle) console.info(`loadProjectBase: ${this.baseProject}`);
         await mls.stor.server.loadProjectInfoIfNeeded(this.baseProject);
     }
 
@@ -381,7 +381,7 @@ export class CollabInit extends LitElement {
     private async loadLastProject() {
         try {
 
-            if (window.traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
+            if ((window as any).traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
             if (!this.actualProject) return;
             const depsActualProject = mls.l5.getProjectDependencies(this.actualProject, false);
             const deps = [this.actualProject, ...depsActualProject];
@@ -518,10 +518,10 @@ export class CollabInit extends LitElement {
      */
     private async getServices(): Promise<IServices> {
 
-        if (window.traceLifeCycle) console.info(`init getServices`);
+        if ((window as any).traceLifeCycle) console.info(`init getServices`);
 
         if (this.isAnonymous) {
-            if (window.traceLifeCycle) console.info(`getServices: Anonymous`);
+            if ((window as any).traceLifeCycle) console.info(`getServices: Anonymous`);
             return this.anonymousServices;
         }
 
@@ -550,7 +550,7 @@ export class CollabInit extends LitElement {
             projectList.push(this.baseProject);
         }
 
-        if (window.traceLifeCycle) console.info(`getServices using index project: ${this.actualProject}, priority order: ${projectList.join(' > ')}`);
+        if ((window as any).traceLifeCycle) console.info(`getServices using index project: ${this.actualProject}, priority order: ${projectList.join(' > ')}`);
 
         for (const prj of projectList) {
             await mls.plugin.loadAll(prj, false);
@@ -594,7 +594,7 @@ export class CollabInit extends LitElement {
                                 addedPaths.add(path);
                                 rc[level][position].push(service.widget);
                             } else {
-                                if (window.traceLifeCycle) {
+                                if ((window as any).traceLifeCycle) {
                                     console.info(`getServices: skipping ${service.widget} (project ${prjNumber}), already provided by higher priority project`);
                                 }
                             }

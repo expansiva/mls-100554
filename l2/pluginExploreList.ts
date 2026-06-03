@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/pluginExploreList.ts" enhancement="_100554_/l2/enhancementLit" /> 
 
-import { html, css, svg, repeat, TemplateResult } from 'lit';
+import { html, css, svg, TemplateResult } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { property, queryAll, state } from 'lit/decorators.js';
 import { selectLevel, forceServiceInstance, getBaseTemplate, getInstanceByFile, OpenedFileL2, saveOpenedFile } from '/_102027_/l2/libCommom.js';
 import { cloneAllFiles, deleteAllFiles, renameAllFiles, undoAllFiles, undoFile, IReqCreateStorFile, createStorFile } from '/_102027_/l2/libStor.js';

@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/servicePreviewView.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, unsafeHTML } from 'lit';
+import { html } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property } from 'lit/decorators.js';
 
 import { getTokensCss } from '/_102027_/l2/designSystemBase.js';

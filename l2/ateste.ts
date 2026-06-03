@@ -1,6 +1,6 @@
 /// <mls fileReference="_100554_/l2/ateste.ts" enhancement="_100554_/l2/enhancementLit" />
  
-import { html, when, repeat, classMap, styleMap, ifDefined, LitElement } from 'lit';   
+import { html } from 'lit';   
 import { customElement, property, state, query } from 'lit/decorators.js';  
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';  
  

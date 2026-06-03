@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/collabNav4Menu.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, unsafeHTML } from 'lit';
+import { html } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property, state } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { collab_bars, collab_bell, collab_chevron_down, collab_xmark } from '/_100554_/l2/collabIcons.js';

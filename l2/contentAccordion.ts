@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/contentAccordion.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, unsafeHTML } from 'lit';
+import { html } from 'lit';
+import {unsafeHTML} from 'lit/directives/unsafe-html.js';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
 

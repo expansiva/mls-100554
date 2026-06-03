@@ -1,6 +1,8 @@
 /// <mls fileReference="_100554_/l2/serviceSave.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, css, unsafeHTML, repeat } from 'lit';
+import { html, css } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import { collab_branch } from '/_100554_/l2/collabIcons.js';
@@ -937,7 +939,7 @@ export class ServiceSave extends ServiceBase {
 
             await this.setInfos();
             this.fireEvents();
-            window.collabMessages.add(this.myMessage.pullrequestOk, 'information', { timeToClose: 5000, autoClose: true });
+            (window as any).collabMessages.add(this.myMessage.pullrequestOk, 'information', { timeToClose: 5000, autoClose: true });
             this.showLoader(false);
 
         } catch (err: any) {

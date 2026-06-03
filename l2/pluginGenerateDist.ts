@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/pluginGenerateDist.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, svg, TemplateResult, unsafeHTML} from 'lit';
+import { html, svg, TemplateResult } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { state } from 'lit/decorators.js';
 import { convertFileNameToTag } from '/_102027_/l2/utils.js'
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';

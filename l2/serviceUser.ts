@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/serviceUser.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, repeat, LitElement } from 'lit';
+import { html, LitElement } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import { loadPluginProject } from '/_102027_/l2/libCommom.js';

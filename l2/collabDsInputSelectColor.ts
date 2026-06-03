@@ -1,9 +1,10 @@
 /// <mls fileReference="_100554_/l2/collabDsInputSelectColor.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, css, repeat } from 'lit';
+import { html, css } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { customElement, property } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
-import { convertColorToHex } from '/_102027_/l2/libCommom.js';
+//import { convertColorToHex } from '/_102027_/l2/libCommom.js';
 
 export function initCollabDsInputSelectColor() { };
 
@@ -24,7 +25,7 @@ export class CollabDsInputSelectColor extends CollabLitElement {
 
     get valueColor(): string { return this._valueColor; };
 
-    set valueColor(str) { this._valueColor = convertColorToHex(str) || '#000000' };
+    set valueColor(str) { this._valueColor = str || '#000000'}//convertColorToHex(str) || '#000000' };
 
     public arrayInputSelect: string[] = [];
 

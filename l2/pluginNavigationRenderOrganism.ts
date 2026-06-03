@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/pluginNavigationRenderOrganism.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, repeat, TemplateResult, LitElement } from 'lit';
+import { html, TemplateResult, LitElement } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { customElement, state, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag, convertTagToFileName } from '/_102027_/l2/utils.js';
 import { collab_trash, collab_pencil, collab_bars, collab_info } from '/_100554_/l2/collabIcons.js';

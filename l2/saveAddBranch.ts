@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/saveAddBranch.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, css, repeat, LitElement } from 'lit';
+import { html, css, LitElement } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { customElement, property } from 'lit/decorators.js';
 import { getMyKeysBranch } from '/_102027_/l2/libCommom';
 

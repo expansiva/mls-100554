@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/collabEditorPreviewMd.ts" enhancement="_102027_/l2/enhancementLit"/>
 
-import { html, css, unsafeHTML } from 'lit';
+import { html, css,  } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, state } from 'lit/decorators.js';
 import { CollabLitElement } from '/_102027_/l2/collabLitElement.js';
 import { getDependenciesByHtmlFile } from '/_102027_/l2/libCompile.js';

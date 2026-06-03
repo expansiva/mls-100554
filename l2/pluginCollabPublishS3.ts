@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/pluginCollabPublishS3.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, svg, TemplateResult, unsafeHTML } from 'lit';
+import { html, svg, TemplateResult } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { state, query } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 

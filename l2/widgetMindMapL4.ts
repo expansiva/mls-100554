@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/widgetMindMapL4.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, unsafeHTML } from 'lit';
+import { html } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property } from 'lit/decorators.js';
 import { propertyDataSource, propertyCompositeDataSource } from '/_100554_/l2/collabDecorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js'; 

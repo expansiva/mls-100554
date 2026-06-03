@@ -1,6 +1,8 @@
 /// <mls fileReference="_100554_/l2/pluginGithubL4Project.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, svg, TemplateResult, repeat, unsafeHTML } from 'lit';
+import { html, svg, TemplateResult } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { query, property, customElement } from 'lit/decorators.js';
 import { getMyKeysBranch } from '/_102027_/l2/libCommom.js';
 import * as gitIO from '/_100554_/l2/libGithubIo.js';

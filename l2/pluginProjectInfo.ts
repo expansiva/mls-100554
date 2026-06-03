@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/pluginProjectInfo.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, css, svg, TemplateResult, repeat } from 'lit';
+import { html, css, svg, TemplateResult } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { query, property, state } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 

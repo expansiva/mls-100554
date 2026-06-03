@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/serviceMindMap.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, unsafeHTML, css } from 'lit';
+import { html, css } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import {  MindMapData, getMindMapByStorFile, setMindMapVariable } from '/_102027_/l2/libMindMap.js'

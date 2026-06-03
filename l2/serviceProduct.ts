@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/serviceProduct.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, css, repeat } from 'lit';
+import { html, css } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 

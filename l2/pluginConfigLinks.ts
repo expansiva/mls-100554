@@ -1,6 +1,8 @@
 /// <mls fileReference="_100554_/l2/pluginConfigLinks.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, svg, TemplateResult, repeat, unsafeHTML } from 'lit';
+import { html, svg, TemplateResult } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { query, property } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { getConfigProject, updateConfigProject } from '/_102027_/l2/libProjectConfig.js';

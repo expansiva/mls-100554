@@ -1,6 +1,8 @@
 /// <mls fileReference="_100554_/l2/cssHelperIndex.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, when, repeat } from 'lit';
+import { html,  } from 'lit';
+import { when } from 'lit/directives/when.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { customElement, property, queryAll } from 'lit/decorators.js';
 import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
 import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';

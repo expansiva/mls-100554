@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/widgetInputText.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, ifDefined, LitElement } from 'lit';
+import { html, LitElement } from 'lit';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { customElement, property, query } from 'lit/decorators.js';
 // import { IAutoCapitalize, IcaFormsInputStringBase } from '/_100554_/l2/icaFormsInputStringBase.js';
 import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
@@ -40,7 +41,7 @@ export class WcInputText100554 extends CollabLitElement {
 
     @propertyDataSource({ type: String }) hint: string | undefined;
 
-    @property({ type: String }) autocorrect: 'off' | 'on' | undefined = undefined;
+    @property({ type: String }) autocorrect: any = undefined;
 
     @property({ type: String }) autoCapitalize: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' | undefined = undefined;
 
