@@ -7,6 +7,8 @@ import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { LessAST } from "/_100554_/l2/pluginEditStyleAST.js";
 import { getPath } from '/_102027_/l2/utils.js';
 
+import '/_102027_/l2/collabMonacoEditor.js';
+
 /// **collab_i18n_start**
 const message_pt = {
     noItens: 'Nenhum item foi encontrado!'
@@ -27,7 +29,7 @@ const messages: { [key: string]: MessageType } = {
 export class PluginEditStyleL3 extends PluginBaseModule {
 
     //--------PROPERTS-----------
-    @query('mls-editor-100529') private editorEl: HTMLElement | undefined;
+    @query('collab-monaco-editor-102027') private editorEl: HTMLElement | undefined;
     @property({ type: String }) msize = '';
     @state() error = '';
 
@@ -103,7 +105,7 @@ export class PluginEditStyleL3 extends PluginBaseModule {
         this.style.display = 'block';
         return html`
             ${this.error ? html`<h3 style="color:red">${this.error}</h3>` : ''}
-            <mls-editor-100529 style="${this.error ? 'display:none' : 'display: ""'}" slot="left"></mls-editor-100529>
+            <collab-monaco-editor-102027 style="${this.error ? 'display:none' : 'display: ""'}" slot="left"></collab-monaco-editor-102027>
         `
     }
 

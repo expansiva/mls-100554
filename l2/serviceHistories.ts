@@ -3,6 +3,7 @@
 import { html } from 'lit';
 import { customElement, query, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
+import '/_102027_/l2/collabMonacoEditor.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -75,7 +76,7 @@ export class ServiceHistories100554 extends ServiceBase {
         onClickMain: this.onClickMain.bind(this),
     }
 
-    @query('mls-editor-100529')
+    @query('collab-monaco-editor-102027')
     private c2: HTMLElement | undefined;
 
     public static modelCount: number;
@@ -255,7 +256,7 @@ export class ServiceHistories100554 extends ServiceBase {
         this.msg = messages[lang];
 
         return html`
-            <mls-editor-100529 ismls2="true"></mls-editor-100529>
+            <collab-monaco-editor-102027 ismls2="true"></collab-monaco-editor-102027>
         `
     }
 }

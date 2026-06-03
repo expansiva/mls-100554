@@ -16,9 +16,11 @@ import { IReqCreateStorFile, createStorFile } from '/_102027_/l2/libStor.js';
 import { getThreadByName } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import { getPath } from '/_102027_/l2/utils.js';
 import { CollabSpliterVerticalVarFixed100554 } from '/_100554_/l2/collabSpliterVerticalVarFixed.js';
+
 import '/_100554_/l2/collabSpliterVerticalVarFixed.js';
 import '/_100554_/l2/collabSpliterHorizontalVarFixed.js';
 import '/_100554_/l2/cssHelperIndex.js';
+import '/_102027_/l2/collabMonacoEditor.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -496,8 +498,8 @@ export class ServiceSource100554 extends ServiceBase {
 
     //---------------------------------------------
 
-    @query('mls-editor-100529') private editorEl: HTMLElement | undefined;
-    @query('mls-editor-100529.history') private editorHistoryEl: HTMLElement | undefined;
+    @query('collab-monaco-editor-102027') private editorEl: HTMLElement | undefined;
+    @query('collab-monaco-editor-102027.history') private editorHistoryEl: HTMLElement | undefined;
     @query('.overlay-loading') public overlayLoading: HTMLElement | undefined;
 
     @query('collab-spliter-vertical-var-fixed-100554') private verticalSpliter: CollabSpliterVerticalVarFixed100554 | undefined;
@@ -1812,8 +1814,8 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
                     fixedwidth="30%"
                     fixedvisible=${this.mode !== 'icStyle' || this.isModeHistory ? 'hidden' : `${this.panelRightOpened === true ? 'visible' : 'closed'}`} 
                 >
-                    <mls-editor-100529 style=${this.isModeHistory ? 'display:none;' : 'display:block;'} slot="left"></mls-editor-100529>
-                    <mls-editor-100529 style=${this.isModeHistory ? 'display:block;' : 'display:none;'} class="history" slot="left"></mls-editor-100529>
+                    <collab-monaco-editor-102027 style=${this.isModeHistory ? 'display:none;' : 'display:block;'} slot="left"></collab-monaco-editor-102027>
+                    <collab-monaco-editor-102027 style=${this.isModeHistory ? 'display:block;' : 'display:none;'} class="history" slot="left"></collab-monaco-editor-102027>
                     <css-helper-index-100554 state="{{ less.${this.position} }}" slot="right" position=${this.position} style="height:100%;"></css-helper-index-100554>
                     
                 </collab-spliter-horizontal-var-fixed-100554>

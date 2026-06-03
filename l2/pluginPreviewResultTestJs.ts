@@ -3,6 +3,7 @@
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
+import '/_102027_/l2/collabMonacoEditor.js';
 
 /// **collab_i18n_start**
 
@@ -31,7 +32,7 @@ export class PluginPreviewResultJs extends PluginBaseModule {
     get confE() { return `l2_left`; }
 
     @property({ type: String }) msize = '';
-    @query('mls-editor-100529') editor: IHTMLEditorElement | undefined;
+    @query('collab-monaco-editor-102027') editor: IHTMLEditorElement | undefined;
 
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
@@ -57,7 +58,7 @@ export class PluginPreviewResultJs extends PluginBaseModule {
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        return html`<mls-editor-100529></mls-editor-100529>`
+        return html`<collab-monaco-editor-102027></collab-monaco-editor-102027>`
     }
 
     private createEditor(): void {

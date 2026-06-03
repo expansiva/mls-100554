@@ -10,6 +10,7 @@ import {
     collab_thumbs_up,
 } from '/_100554_/l2/collabIcons.js'
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import '/_102027_/l2/collabMonacoEditor.js';
 
 
 export function initCollabShowCodeDiff100554() {
@@ -90,7 +91,7 @@ export class CollabShowCodeDiff extends CollabLitElement {
 
     public actualTextResult: string = '';
 
-    @query('mls-editor-100529')
+    @query('collab-monaco-editor-102027')
     private c1: HTMLElement | undefined;
 
     @query('#diff_check')
@@ -320,7 +321,7 @@ export class CollabShowCodeDiff extends CollabLitElement {
                     </div>
             </div>
 
-            <mls-editor-100529 style="display: block;height:600px;" ismls2="true"></mls-editor-100529>
+            <collab-monaco-editor-102027 style="display: block;height:600px;" ismls2="true"></collab-monaco-editor-102027>
     `;
     }
 
