@@ -7,7 +7,7 @@ import { initState } from '/_102027_/l2/collabState.js';
 import { propertyDataSource } from '/_102027_/l2/collabDecorators.js';
 import {  collab_typescript, collab_file_code } from '/_100554_/l2/collabIcons.js';
 import { createAgent } from '/_100554_/l2/agentFix.js';
-import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
+import { getTemporaryContext } from '/_102027_/l2/aiAgentHelper.js';
 import {  getUserId, createThread } from '/_102025_/l2/collabMessagesHelper.js';
 import { saveOpenedFile, getLastOpenedFiles, OpenedFileL2, getBaseTemplate } from '/_102027_/l2/libCommom.js';
 import { createAllModels, readProjectTypescriptAndCompile, createModel } from '/_102027_/l2/libModel.js';
@@ -18,6 +18,7 @@ import { CollabSpliterVerticalVarFixed100554 } from '/_100554_/l2/collabSpliterV
 import '/_100554_/l2/collabSpliterVerticalVarFixed.js';
 import '/_100554_/l2/collabSpliterHorizontalVarFixed.js';
 import '/_100554_/l2/cssHelperIndex.js';
+import '/_102027_/l2/collabMonacoEditor.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -264,8 +265,8 @@ export class ServiceSource100554 extends ServiceBase {
 
     //---------------------------------------------
 
-    @query('mls-editor-100529') private editorEl: HTMLElement | undefined;
-    @query('mls-editor-100529.history') private editorHistoryEl: HTMLElement | undefined;
+    @query('collab-monaco-editor-102027') private editorEl: HTMLElement | undefined;
+    @query('collab-monaco-editor-102027.history') private editorHistoryEl: HTMLElement | undefined;
     @query('.overlay-loading') public overlayLoading: HTMLElement | undefined;
 
     @query('collab-spliter-vertical-var-fixed-100554') private verticalSpliter: CollabSpliterVerticalVarFixed100554 | undefined;
@@ -1226,8 +1227,8 @@ export class ServiceSource100554 extends ServiceBase {
              <div class="overlay-loading"> <span>${this.textOverlayLoading} <span class="loader"></span> </span> </div>
              <collab-spliter-vertical-var-fixed-100554 msize=${this.msize} withresize="false" fixedheight="100" complementcolor="#1e1e1e">
                 
-                    <mls-editor-100529 style=${this.isModeHistory ? 'display:none;' : 'display:block;'} slot="left"></mls-editor-100529>
-                    <mls-editor-100529 style=${this.isModeHistory ? 'display:block;' : 'display:none;'} class="history" slot="left"></mls-editor-100529>
+                    <collab-monaco-editor-102027 style=${this.isModeHistory ? 'display:none;' : 'display:block;'} slot="left"></collab-monaco-editor-102027>
+                    <collab-monaco-editor-102027 style=${this.isModeHistory ? 'display:block;' : 'display:none;'} class="history" slot="left"></collab-monaco-editor-102027>
                     <css-helper-index-100554 state="{{ less.${this.position} }}" slot="right" position=${this.position} style="height:100%;"></css-helper-index-100554>
                     
                 </collab-spliter-horizontal-var-fixed-100554>

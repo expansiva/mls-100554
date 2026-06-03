@@ -4,6 +4,7 @@ import { html, css, svg, repeat, TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { getDependenciesByMFile } from '/_102027_/l2/libCompile.js';
+import '/_102027_/l2/collabMonacoEditor.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -39,7 +40,7 @@ export class PluginPreviewResultJs extends PluginBaseModule {
     get confE() { return `l2_left`; }
 
     @property({ type: String }) msize = '';
-    @query('mls-editor-100529') editor: IHTMLEditorElement | undefined;
+    @query('collab-monaco-editor') editor: IHTMLEditorElement | undefined;
 
     updated(changedProperties: any) {
         if (changedProperties.has('msize')) {
@@ -65,7 +66,7 @@ export class PluginPreviewResultJs extends PluginBaseModule {
     render() {
         const lang = this.getMessageKey(messages);
         this.msg = messages[lang];
-        return html`<mls-editor-100529></mls-editor-100529>`
+        return html`<collab-monaco-editor></collab-monaco-editor>`
     }
 
     private createEditor(): void {

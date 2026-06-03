@@ -20,7 +20,6 @@ import { loadAgent, executeBeforePrompt } from '/_102027_/l2/aiAgentOrchestratio
 import { createModel } from '/_102027_/l2/libModel.js';
 import { getPath } from '/_102027_/l2/utils.js';
 
-
 import '/_100554_/l2/collabConsole.js';
 import '/_100554_/l2/collabResultTest.js';
 import '/_100554_/l2/servicePreviewView.js';
@@ -1065,7 +1064,7 @@ export class ServicePreview100554 extends ServiceBase {
 
     private createEditor() {
         if (!this.monacoeditor) {
-            this.monacoeditor = document.createElement('mls-editor-100529');
+            this.monacoeditor = document.createElement('collab-monaco-editor-102027');
             this.monacoeditor.setAttribute('ismls2', 'true');
 
         }

@@ -4,6 +4,7 @@ import { html, svg, TemplateResult } from 'lit';
 import { state, property, query } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { createModelAnyFile } from '/_102027_/l2/libModel.js';
+import '/_102027_/l2/collabMonacoEditor.js';
 
 /// **collab_i18n_start** 
 const message_pt = {
@@ -197,7 +198,7 @@ export class PluginViewFile extends PluginBaseModule {
         } else {
 
             const model = this.createModel();
-            (window as any).elEditorDetailsView = document.createElement('mls-editor-100529');
+            (window as any).elEditorDetailsView = document.createElement('collab-monaco-editor-102027');
             (window as any).elEditorDetailsView.style.cssText = 'display:block; width: calc(100% - 150px); height: 500px;'
             this.editor = (window as any).elEditorDetailsView as IHTMLEditorElement;
             (window as any).editorTaskView = monaco.editor.create(this.editor, this.conf as monaco.editor.IEditorOptions);
