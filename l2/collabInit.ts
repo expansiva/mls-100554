@@ -379,21 +379,28 @@ export class CollabInit extends LitElement {
      * @returns A promise that resolves when the project information has been loaded.
      */
     private async loadLastProject() {
-        if (window.traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
-        if (!this.actualProject) return;
-        const depsActualProject = mls.l5.getProjectDependencies(this.actualProject, false);
-        const deps = [this.actualProject, ...depsActualProject];
-        for await (let prj of deps) {
-            if (this.actualProject && this.actualProject !== mls.stor.LOCALPROJECTNUMBER) await mls.stor.server.loadProjectInfoIfNeeded(prj);
-        }
+        try {
 
-        if (this.actualProject === mls.stor.LOCALPROJECTNUMBER) {
-            for await (let depPrj of this.localProjectImports) {
-                await mls.stor.server.loadProjectInfoIfNeeded(depPrj);
+            if (window.traceLifeCycle) console.info(`loadLastProject: ${this.actualProject}`);
+            if (!this.actualProject) return;
+            const depsActualProject = mls.l5.getProjectDependencies(this.actualProject, false);
+            const deps = [this.actualProject, ...depsActualProject];
+            for await (let prj of deps) {
+                if (this.actualProject && this.actualProject !== mls.stor.LOCALPROJECTNUMBER) await mls.stor.server.loadProjectInfoIfNeeded(prj);
             }
+
+            if (this.actualProject === mls.stor.LOCALPROJECTNUMBER) {
+                for await (let depPrj of this.localProjectImports) {
+                    await mls.stor.server.loadProjectInfoIfNeeded(depPrj);
+                }
+            }
+
+            initCompileMonaco(this.actualProject);
+
+        } catch (e:any) {
+            console.info('[loadLastProject] Error:' + e.message || 'Invalid project');
         }
 
-        initCompileMonaco(this.actualProject);
     }
 
     private async setLastOpenedFiles() {
