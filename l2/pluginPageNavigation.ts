@@ -8,7 +8,7 @@ import { convertTagToFileName, convertFileNameToTag } from '/_102027_/l2/utils.j
 import { selectLevel, openService } from '/_102027_/l2/libCommom.js';
 import { formatHtml, setValueInModeKeepingUndo } from '/_100554_/l2/collabDOMSync.js';
 import { CollabPreviewL4 } from '/_100554_/l2/collabPreviewL4.js';
-import { openCollabMessage } from '/_100554_/l2/aiAgentHelper.js';
+//import { openCollabMessage } from '/_100554_/l2/aiAgentHelper.js';
 import { getPath } from '/_102027_/l2/utils.js';
 
 /// **collab_i18n_start**
@@ -245,7 +245,7 @@ export class PluginNavigationRenderOrganism extends PluginBaseModule {
 
         if (!mls.stor.files[key]) return;
 
-        openCollabMessage(mls.stor.files[key]);
+        //openCollabMessage(mls.stor.files[key]);
     }
 
     private getActualFileL4() {

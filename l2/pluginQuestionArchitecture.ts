@@ -3,8 +3,8 @@
 import { html, svg, TemplateResult } from 'lit';
 import { state } from 'lit/decorators.js'; 
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
-import { loadAgent, executeBeforePrompt } from '/_100554_/l2/aiAgentOrchestration.js';
-import { getTemporaryContext } from '/_100554_/l2/aiAgentHelper.js';
+import { loadAgent, executeBeforePrompt } from '/_102027_/l2/aiAgentOrchestration.js';
+import { getTemporaryContext } from '/_102027_/l2/aiAgentHelper.js';
 import { getThreadByName } from '/_102025_/l2/collabMessagesIndexedDB.js';
 import {  getUserId, createThread } from '/_102025_/l2/collabMessagesHelper.js';
 

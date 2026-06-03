@@ -5,7 +5,7 @@ import { customElement, state, property, query } from 'lit/decorators.js';
 import { createAllFiles, IReqCreateAllFiles } from '/_102027_/l2/libStor.js';
 import { convertFileNameToTag } from '/_102027_/l2/utils.js';
 import { getInstanceByFile, isNameValid } from '/_102027_/l2/libCommom.js';
-import { executeAgentByFile } from '/_100554_/l2/aiAgentHelper.js'
+//import { executeAgentByFile } from '/_102027_/l2/aiAgentHelper.js'
 import { collabImport } from '/_102027_/l2/collabImport.js'
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { ServiceBase } from '/_102027_/l2/serviceBase.js';  
@@ -231,7 +231,7 @@ export class PluginExploreListAddL3 extends PluginBaseModule {
                     userPrompt: this.iptPrompt.value
                     
                 }) 
-                await executeAgentByFile('agentCreateNewPrototypeOrganism', prompt, files.ts, true);
+                //await executeAgentByFile('agentCreateNewPrototypeOrganism', prompt, files.ts, true);
             }
             
 
