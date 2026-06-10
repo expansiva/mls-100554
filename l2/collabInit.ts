@@ -135,10 +135,6 @@ export class CollabInit extends LitElement {
     private onLevelChangedToL2(data: { to: number, from: number }) {
         if (!this.firstAccessLevels[2]) return;
         this.firstAccessLevels[2] = false;
-        const page = top?.document.querySelector('collab-page');
-        if (!page) return;
-        const toolbar = page.querySelector(`collab-nav-2[toolbarposition="left"]`) as HTMLElement;
-        (toolbar as any).state[2].left = '_100554_serviceSource';
     }
     /**
      * Loads and sets up collaboration drivers asynchronously.
