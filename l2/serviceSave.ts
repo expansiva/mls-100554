@@ -960,6 +960,7 @@ export class ServiceSave extends ServiceBase {
 
     private verifyNeedSelectDS(array: mls.stor.IFileInfo[]) {
 
+        return;
         if (!this.freeToSave.hasDS) return;
         const has = array.filter((a) => a.project === mls.actualProject && a.shortName === 'designSystem' && a.extension === '.ts' && a.folder === '').length > 0;
 
@@ -1404,6 +1405,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private freeToSaveProjectAndDs(arr: mls.stor.IFileInfo[]) {
+        return;
         const keyDS = mls.stor.getKeyToFiles(mls.actualProject as number, 2, 'designSystem', '', '.ts');
         const keyPrj = mls.stor.getKeyToFiles(mls.actualProject as number, 2, 'project', '', '.ts');
         const fileDS = mls.stor.files[keyDS];
