@@ -1386,10 +1386,10 @@ export class ServiceSave extends ServiceBase {
         const key = mls.stor.getKeyToFiles(mls.actualProject as number, 2, 'designSystem', '', '.ts');
         const file = mls.stor.files[key];
         let aux = '';
-        if (file && file.inLocalStorage) {
+        /*if (file && file.inLocalStorage) {
             this.freeToSave.hasDS = true;
             aux = '<plugin-verify-error-design-system-100554 autoPrepare="true"></plugin-verify-error-design-system-100554>'
-        }
+        }*/
 
         const options = {
             shortName: undefined,
