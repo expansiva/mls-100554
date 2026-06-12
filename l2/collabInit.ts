@@ -3,6 +3,14 @@
 import { html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+async function getLocalProjectDeps(): Promise<number[]> {
+    const lib = await import('/_102027_/l2/libCommom.js');
+    if (!lib || !lib.getLocalProjectDependencies) return [];
+    const dependencies: number[] = lib.getLocalProjectDependencies();
+    if (!dependencies.length) return [];
+    return dependencies;
+}
+
 let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
     if (!on1CompileMonaco) return true;
@@ -10,7 +18,7 @@ export async function initCompileMonaco(project: number): Promise<boolean> {
         await mls.editor.InitMonaco();
 
         let depsActualProject = mls.l5.getProjectDependencies(project, false);
-        if (project === mls.stor.LOCALPROJECTNUMBER) depsActualProject = [102027]
+        if (project === mls.stor.LOCALPROJECTNUMBER) depsActualProject = await getLocalProjectDeps()
         const deps = [project, ...depsActualProject];
         for await (let prj of deps) {
             if ([100529, 100131].includes(prj)) continue;
@@ -32,7 +40,6 @@ export async function initCompileMonaco(project: number): Promise<boolean> {
 @customElement('collab-init-100554')
 export class CollabInit extends LitElement {
 
-    private localProjectImports = [102027]
 
     private actualProject: number | undefined = 0;
 
@@ -386,14 +393,15 @@ export class CollabInit extends LitElement {
             }
 
             if (this.actualProject === mls.stor.LOCALPROJECTNUMBER) {
-                for await (let depPrj of this.localProjectImports) {
+                const localProjectImports = await getLocalProjectDeps();
+                for await (let depPrj of localProjectImports) {
                     await mls.stor.server.loadProjectInfoIfNeeded(depPrj);
                 }
             }
 
             initCompileMonaco(this.actualProject);
 
-        } catch (e:any) {
+        } catch (e: any) {
             console.info('[loadLastProject] Error:' + e.message || 'Invalid project');
         }
 
@@ -523,15 +531,18 @@ export class CollabInit extends LitElement {
 
         // Build project list in priority order (highest priority first)
         const projectList: number[] = [];
+        const isLocalProject = this.actualProject === mls.stor.LOCALPROJECTNUMBER;
 
-        // 1. Actual project (highest priority)
-        if (this.actualProject) {
+        // 1. Actual project (highest priority) — the local project has no services of its own
+        if (this.actualProject && !isLocalProject) {
             projectList.push(this.actualProject);
         }
 
         // 2. Actual project dependencies
         if (this.actualProject) {
-            const dependencies = await mls.l5.getProjectDependencies(this.actualProject, false);
+            const dependencies = isLocalProject
+                ? await getLocalProjectDeps()
+                : mls.l5.getProjectDependencies(this.actualProject, false);
             if (dependencies && dependencies.length > 0) {
                 for (const dep of dependencies) {
                     if (!projectList.includes(dep)) {

@@ -5,8 +5,9 @@ import { customElement, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { gitHubLogin, gitLabLogin, isProviderConnected, gitlabIcon, githubIcon } from '/_100554_/l2/libProviders.js';
 import { replaceTripleslashAndTag, createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
-import { getLocalProjectName, isValidProjectName, setProjectDetails, deleteLastOpenedFiles
- } from '/_102027_/l2/libCommom.js';
+import {
+  getLocalProjectName, getLocalProjectDependencies, isValidProjectName, setProjectDetails, deleteLastOpenedFiles
+} from '/_102027_/l2/libCommom.js';
 
 import {
   collab_arrows_rotate
@@ -370,7 +371,7 @@ export class PluginCreateProject extends CollabLitElement {
       const msg = log + ':' + err.message;
       this.changeStatusLastLog('error', msg);
       this.setProgressError(true);
-      if(needThrow) throw new Error(err.message);
+      if (needThrow) throw new Error(err.message);
     }
   }
 
@@ -402,9 +403,9 @@ export class PluginCreateProject extends CollabLitElement {
     await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
   }
 
-  private async createInitialTSConfigFile(project: number) { 
+  private async createInitialTSConfigFile(project: number) {
     const fileName = 'tsconfiglib.json';
-    const content = template_tsconfig.template.replace(/\[project\]/g, project.toString()).trim(); 
+    const content = template_tsconfig.template.replace(/\[project\]/g, project.toString()).trim();
     await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
   }
 
@@ -421,9 +422,10 @@ export class PluginCreateProject extends CollabLitElement {
 
     const dt = mls.l5.getProjectSettings(project);
     if (!dt) return;
+    const localDependencies = getLocalProjectDependencies();
     mls.stor.projects[project] = {
       project,
-      projectDependencies: [100554, 102020, 102027],
+      projectDependencies: localDependencies.length ? localDependencies : [102027],
       projectDriver: dt.projectDriver,
       projectURL: dt.projectURL
     };
@@ -668,6 +670,8 @@ export class PluginCreateProject extends CollabLitElement {
     }
 
     const userNameCollab: string = this.getLoginUser() as string;
+    const localDependencies = getLocalProjectDependencies();
+
     const param: {
       orgName: string;
       info: mls.cbe.IProjectInfo;
@@ -686,7 +690,7 @@ export class PluginCreateProject extends CollabLitElement {
         userAuth: this.newProjectVisibility as any,
         archived_at: '',
         created_at: '',
-        prj_dependencies: [100554, 102027, 102025],
+        prj_dependencies: localDependencies.length ? localDependencies : [102027],
         value: '',
         repository_secret: this.secret
 
