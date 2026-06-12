@@ -37,16 +37,32 @@ declare global {
 
 export interface CollabFsLocalFile {
     path: string;
-    content: string;
+    content?: string;
     size: number;
     lastModified: number;
+}
+
+export interface CollabFsAccessProgress {
+    current: number;
+    path: string;
+}
+
+export interface CollabFsListOptions {
+    readContent?: boolean;
+}
+
+export interface CollabFsAccessAdapter {
+    listTextFiles(directory: CollabFsDirectoryHandle, onProgress?: (progress: CollabFsAccessProgress) => void, options?: CollabFsListOptions): Promise<CollabFsLocalFile[]>;
+    readTextFile(directory: CollabFsDirectoryHandle, path: string): Promise<string | null>;
+    writeTextFile(directory: CollabFsDirectoryHandle, path: string, content: string): Promise<void>;
+    removeFile(directory: CollabFsDirectoryHandle, path: string): Promise<void>;
 }
 
 const DB_NAME = 'collabFileSystem100554';
 const DB_VERSION = 1;
 const STORE_HANDLES = 'directoryHandles';
 
-export class FileSystemAccessAdapter {
+export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
 
     public isSupported(): boolean {
         return typeof window !== 'undefined' && typeof window.showDirectoryPicker === 'function' && typeof indexedDB !== 'undefined';
@@ -95,9 +111,13 @@ export class FileSystemAccessAdapter {
         }
     }
 
-    public async listTextFiles(directory: CollabFsDirectoryHandle): Promise<CollabFsLocalFile[]> {
+    public async listTextFiles(
+        directory: CollabFsDirectoryHandle,
+        onProgress?: (progress: CollabFsAccessProgress) => void,
+        options: CollabFsListOptions = {}
+    ): Promise<CollabFsLocalFile[]> {
         const files: CollabFsLocalFile[] = [];
-        await this.walkTextFiles(directory, '', files);
+        await this.walkTextFiles(directory, '', files, onProgress, options);
         files.sort((a, b) => a.path.localeCompare(b.path));
         return files;
     }
@@ -131,11 +151,17 @@ export class FileSystemAccessAdapter {
         await current.removeEntry(fileName, { recursive: false });
     }
 
-    private async walkTextFiles(directory: CollabFsDirectoryHandle, prefix: string, files: CollabFsLocalFile[]): Promise<void> {
+    public async walkTextFiles(
+        directory: CollabFsDirectoryHandle,
+        prefix: string,
+        files: CollabFsLocalFile[],
+        onProgress?: (progress: CollabFsAccessProgress) => void,
+        options: CollabFsListOptions = {}
+    ): Promise<void> {
         for await (const [name, handle] of directory.entries()) {
             if (handle.kind === 'directory') {
                 if (this.shouldIgnoreDirectory(name)) continue;
-                await this.walkTextFiles(handle, prefix ? `${prefix}/${name}` : name, files);
+                await this.walkTextFiles(handle, prefix ? `${prefix}/${name}` : name, files, onProgress, options);
                 continue;
             }
 
@@ -143,17 +169,17 @@ export class FileSystemAccessAdapter {
             if (this.shouldIgnoreFile(path)) continue;
 
             const file = await handle.getFile();
-            const content = await file.text();
             files.push({
                 path,
-                content,
+                content: options.readContent ? await file.text() : undefined,
                 size: file.size,
                 lastModified: file.lastModified,
             });
+            onProgress?.({ current: files.length, path });
         }
     }
 
-    private async getFileHandleByPath(directory: CollabFsDirectoryHandle, path: string, create: boolean): Promise<CollabFsFileHandle | null> {
+    public async getFileHandleByPath(directory: CollabFsDirectoryHandle, path: string, create: boolean): Promise<CollabFsFileHandle | null> {
         this.assertSafePath(path);
         const parts = path.split('/').filter(Boolean);
         if (parts.length < 1) return null;
@@ -167,14 +193,14 @@ export class FileSystemAccessAdapter {
         return current.getFileHandle(fileName, { create });
     }
 
-    private assertSafePath(path: string): void {
+    public assertSafePath(path: string): void {
         const parts = path.split('/');
         if (!path || path.startsWith('/') || path.includes('\\') || parts.some((part) => part === '..' || part === '')) {
             throw new Error(`Unsafe local path: ${path}`);
         }
     }
 
-    private shouldIgnoreDirectory(name: string): boolean {
+    public shouldIgnoreDirectory(name: string): boolean {
         return name === '.git' ||
             name === 'node_modules' ||
             name === 'dist' ||
@@ -182,16 +208,16 @@ export class FileSystemAccessAdapter {
             name === '.cache';
     }
 
-    private shouldIgnoreFile(path: string): boolean {
+    public shouldIgnoreFile(path: string): boolean {
         const name = path.split('/').pop() || '';
         return name === '.DS_Store' || name.endsWith('.tmp') || name.endsWith('~');
     }
 
-    private getProjectKey(project: number): string {
+    public getProjectKey(project: number): string {
         return `project:${project}`;
     }
 
-    private openDB(): Promise<IDBDatabase> {
+    public openDB(): Promise<IDBDatabase> {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(DB_NAME, DB_VERSION);
             request.onupgradeneeded = () => {
@@ -203,14 +229,14 @@ export class FileSystemAccessAdapter {
         });
     }
 
-    private requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
+    public requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
         return new Promise((resolve, reject) => {
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
     }
 
-    private transactionDone(tx: IDBTransaction): Promise<void> {
+    public transactionDone(tx: IDBTransaction): Promise<void> {
         return new Promise((resolve, reject) => {
             tx.oncomplete = () => resolve();
             tx.onerror = () => reject(tx.error);

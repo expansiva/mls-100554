@@ -9,27 +9,7 @@ export const asis: mls.defs.AsIs = {
     "componentScope": "editor",
     "group": "enhancement"
   },
-  "references": {
-    "imports": [
-      {
-        "ref": "/_100554_/l2/collabFileSystemAccess.js",
-        "dependencies": [
-          {
-            "name": "CollabFsDirectoryHandle",
-            "type": "type"
-          },
-          {
-            "name": "CollabFsLocalFile",
-            "type": "type"
-          },
-          {
-            "name": "FileSystemAccessAdapter",
-            "type": "class"
-          }
-        ]
-      }
-    ]
-  },
+  "references": {},
   "asIs": {
     "semantic": {
       "generalDescription": "Manual sync engine for comparing mls.stor browser files with a selected local folder.",

@@ -83,6 +83,10 @@ export const asis: mls.defs.AsIs = {
             "type": "type"
           },
           {
+            "name": "CollabFsProgress",
+            "type": "type"
+          },
+          {
             "name": "CollabFsScanResult",
             "type": "type"
           }

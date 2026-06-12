@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import { CollabFsDirectoryHandle, FileSystemAccessAdapter } from '/_100554_/l2/collabFileSystemAccess.js';
-import { CollabFileSystemSync, CollabFsChange, CollabFsDiffLine, CollabFsScanResult } from '/_100554_/l2/collabFileSystemSync.js';
+import { CollabFileSystemSync, CollabFsChange, CollabFsDiffLine, CollabFsProgress, CollabFsScanResult } from '/_100554_/l2/collabFileSystemSync.js';
 
 const PREF_KEY = 'serviceCollabFileSystem100554';
 
@@ -16,6 +16,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     @state() private project = 0;
     @state() private folderName = '';
     @state() private statusMessage = '';
+    @state() private progressMessage = '';
     @state() private changes: CollabFsChange[] = [];
     @state() private selectedPath = '';
     @state() private scanResult: CollabFsScanResult | null = null;
@@ -23,6 +24,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     private adapter = new FileSystemAccessAdapter();
     private sync = new CollabFileSystemSync(this.adapter);
     private handle: CollabFsDirectoryHandle | null = null;
+    private lastProgressAt = 0;
 
     public details: IService = {
         icon: '&#xf07b',
@@ -66,10 +68,10 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
         void this.loadProjectHandle(true);
     }
 
-    public async onClickMain(op: string) {
-        if (op === 'opSelectFolder') await this.selectFolder();
-        else if (op === 'opScan') await this.scan();
-        else if (op === 'opPull') await this.pullToFs();
+    public onClickMain(op: string): void {
+        if (op === 'opSelectFolder') void this.selectFolder();
+        else if (op === 'opScan') void this.scan();
+        else if (op === 'opPull') void this.pullToFs();
         else if (op === 'opAboutThis') this.showAboutThis();
         else if (this.menu.setMode) this.menu.setMode('initial');
     }
@@ -108,7 +110,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
 
     private renderHeaderStatus() {
         if (!this.supported) return 'Browser unsupported';
-        if (this.busy) return 'Working...';
+        if (this.busy) return this.progressMessage || this.statusMessage || 'Working...';
         if (this.folderName) return this.folderName;
         return 'No folder selected';
     }
@@ -162,6 +164,14 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
             `;
         }
 
+        if (change.localContent === undefined && change.browserContent === undefined) {
+            return html`
+                <h3>${change.path}</h3>
+                <div class="collab-fs-detail-meta">${this.getDetailText(change)}</div>
+                <p class="collab-fs-muted">Diff not loaded. Scan used metadata for speed.</p>
+            `;
+        }
+
         const localContent = change.localContent || '';
         const browserContent = change.browserContent || '';
         const lines = this.sync.buildDiff(localContent, browserContent);
@@ -201,16 +211,18 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
             if (!project) throw new Error('No project selected.');
             if (!this.supported) throw new Error('File System Access API is not available in this browser.');
 
+            this.statusMessage = 'Waiting for folder selection.';
             const handle = await this.adapter.showDirectoryPicker();
             if (!await this.adapter.ensurePermission(handle)) throw new Error('Folder permission was not granted.');
 
-            await this.sync.validateFirstSync(project, handle);
-            await this.sync.ensureManifest(project, handle);
+            this.folderName = handle.name;
+            this.reportProgress({ phase: 'local', current: 0, path: handle.name });
+            await this.sync.validateFirstSync(project, handle, this.reportProgress.bind(this));
+            await this.sync.ensureManifest(project, handle, this.reportProgress.bind(this));
             await this.adapter.saveHandle(project, handle);
 
             this.project = project;
             this.handle = handle;
-            this.folderName = handle.name;
             this.savePreferences(project, handle.name);
             this.statusMessage = 'Folder linked.';
             await this.scanCurrent();
@@ -228,7 +240,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
             if (!this.handle) throw new Error('No folder selected.');
             if (!await this.adapter.ensurePermission(this.handle)) throw new Error('Folder permission was not granted.');
 
-            const result = await this.sync.pullToFs(project, this.handle);
+            const result = await this.sync.pullToFs(project, this.handle, this.reportProgress.bind(this));
             const message = `Pull complete. ${result.written} written, ${result.deleted} deleted, ${result.skipped} skipped.`;
             await mls.events.fire([5], ['CollabFileSystem' as any], JSON.stringify({
                 action: 'pullToFs',
@@ -249,7 +261,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
         if (!await this.adapter.ensurePermission(this.handle)) throw new Error('Folder permission was not granted.');
 
         this.project = project;
-        const result = await this.sync.scan(project, this.handle);
+        const result = await this.sync.scan(project, this.handle, this.reportProgress.bind(this));
         this.scanResult = result;
         this.changes = result.changes;
         this.selectedPath = this.changes[0]?.path || '';
@@ -306,13 +318,35 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     private async runExclusive(action: () => Promise<void>): Promise<void> {
         if (this.busy) return;
         this.busy = true;
+        this.progressMessage = '';
+        this.lastProgressAt = 0;
         try {
             await action();
         } catch (err) {
             this.statusMessage = err instanceof Error ? err.message : String(err);
         } finally {
+            this.progressMessage = '';
             this.busy = false;
         }
+    }
+
+    private reportProgress(progress: CollabFsProgress): void {
+        const now = Date.now();
+        if (now - this.lastProgressAt < 100 && progress.current !== progress.total) return;
+        this.lastProgressAt = now;
+        this.progressMessage = this.formatProgress(progress);
+        this.statusMessage = this.progressMessage;
+    }
+
+    private formatProgress(progress: CollabFsProgress): string {
+        const count = progress.total ? `${progress.current}/${progress.total}` : `${progress.current}`;
+        const path = progress.path ? ` - ${progress.path}` : '';
+        if (progress.phase === 'browser') return `Lendo browser ${count}${path}`;
+        if (progress.phase === 'local') return `Lendo local ${count}${path}`;
+        if (progress.phase === 'compare') return `Comparando ${count}${path}`;
+        if (progress.phase === 'write') return `Gravando local ${count}${path}`;
+        if (progress.phase === 'delete') return `Removendo local ${count}${path}`;
+        return `Atualizando manifesto ${count}${path}`;
     }
 
     private setEvents(): void {

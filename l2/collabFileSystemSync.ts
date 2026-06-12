@@ -1,8 +1,30 @@
 /// <mls fileReference="_100554_/l2/collabFileSystemSync.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { CollabFsDirectoryHandle, CollabFsLocalFile, FileSystemAccessAdapter } from '/_100554_/l2/collabFileSystemAccess.js';
-
 export type CollabFsChangeKind = 'browserOnly' | 'localOnly' | 'modified' | 'unsupported';
+
+interface CollabFsFileHandleLike {
+    kind: 'file';
+    name: string;
+    getFile(): Promise<File>;
+}
+
+interface CollabFsDirectoryHandle {
+    kind: 'directory';
+    name: string;
+    entries(): AsyncIterableIterator<[string, CollabFsDirectoryHandle | CollabFsFileHandleLike]>;
+}
+
+interface CollabFsLocalFile {
+    path: string;
+    content?: string;
+    size: number;
+    lastModified: number;
+}
+
+interface CollabFsAccessProgress {
+    current: number;
+    path: string;
+}
 
 export interface CollabFsManifest {
     schemaVersion: 1;
@@ -16,8 +38,10 @@ export interface CollabFsManifest {
 export interface CollabFsManifestFile {
     path: string;
     versionRef: string;
-    browserHash: string;
-    diskHash: string;
+    browserHash?: string;
+    diskHash?: string;
+    diskSize?: number;
+    diskLastModified?: number;
     lastDirection: 'browser-to-fs' | 'linked';
 }
 
@@ -25,16 +49,16 @@ export interface CollabFsBrowserEntry {
     path: string;
     key: string;
     file: mls.stor.IFileInfo;
-    content: string;
-    hash: string;
+    content?: string;
+    hash?: string;
     versionRef: string;
     unsupported: boolean;
 }
 
 export interface CollabFsLocalEntry {
     path: string;
-    content: string;
-    hash: string;
+    content?: string;
+    hash?: string;
     size: number;
     lastModified: number;
 }
@@ -71,6 +95,20 @@ export interface CollabFsDiffLine {
     text: string;
 }
 
+export interface CollabFsProgress {
+    phase: 'browser' | 'local' | 'compare' | 'write' | 'delete' | 'manifest';
+    current: number;
+    total?: number;
+    path?: string;
+}
+
+interface CollabFsSyncAdapter {
+    listTextFiles(directory: CollabFsDirectoryHandle, onProgress?: (progress: CollabFsAccessProgress) => void, options?: { readContent?: boolean }): Promise<CollabFsLocalFile[]>;
+    readTextFile(directory: CollabFsDirectoryHandle, path: string): Promise<string | null>;
+    writeTextFile(directory: CollabFsDirectoryHandle, path: string, content: string): Promise<void>;
+    removeFile(directory: CollabFsDirectoryHandle, path: string): Promise<void>;
+}
+
 const MANIFEST_FILE = '.collab-fs.json';
 const KNOWN_EXTENSIONS = [
     '.defs.ts',
@@ -93,9 +131,9 @@ const KNOWN_EXTENSIONS = [
 
 export class CollabFileSystemSync {
 
-    constructor(private adapter: FileSystemAccessAdapter) { }
+    constructor(private adapter: CollabFsSyncAdapter) { }
 
-    public async validateFirstSync(project: number, handle: CollabFsDirectoryHandle): Promise<void> {
+    public async validateFirstSync(project: number, handle: CollabFsDirectoryHandle, onProgress?: (progress: CollabFsProgress) => void): Promise<void> {
         const manifest = await this.readManifest(handle);
         if (manifest) {
             if (manifest.project !== project) {
@@ -104,9 +142,15 @@ export class CollabFileSystemSync {
             return;
         }
 
-        const browserEntries = await this.getBrowserEntries(project);
-        const allLocalFiles = await this.adapter.listTextFiles(handle);
-        const localControlled = await this.getLocalEntries(handle);
+        if (handle.name === 'mls-base') {
+            throw new Error(`Select the project folder mls-${project}. Selecting mls-base will be supported in a later phase.`);
+        }
+
+        const browserEntries = await this.getBrowserEntries(project, onProgress, { readContent: false });
+        const allLocalFiles = await this.adapter.listTextFiles(handle, (progress) => {
+            onProgress?.({ phase: 'local', current: progress.current, path: progress.path });
+        }, { readContent: false });
+        const localControlled = await this.getLocalEntriesFromFiles(allLocalFiles, onProgress, { readContent: false });
         const nonControlled = allLocalFiles.filter((file) => file.path !== MANIFEST_FILE && !this.parseLocalPath(file.path, project));
 
         if (allLocalFiles.filter((file) => file.path !== MANIFEST_FILE).length === 0) return;
@@ -120,32 +164,38 @@ export class CollabFileSystemSync {
         }
 
         const localMap = this.mapByPath(localControlled);
-        for (const browserEntry of supportedBrowserEntries) {
-            const localEntry = localMap.get(browserEntry.path);
+        for (let i = 0; i < supportedBrowserEntries.length; i++) {
+            const browserEntry = await this.hydrateBrowserEntry(supportedBrowserEntries[i]);
+            onProgress?.({ phase: 'compare', current: i + 1, total: supportedBrowserEntries.length, path: browserEntry.path });
+            const localEntryBase = localMap.get(browserEntry.path);
+            const localEntry = localEntryBase ? await this.hydrateLocalEntry(handle, localEntryBase) : undefined;
             if (!localEntry || localEntry.hash !== browserEntry.hash) {
                 throw new Error(`Selected folder differs from the opened project at ${browserEntry.path}.`);
             }
         }
     }
 
-    public async ensureManifest(project: number, handle: CollabFsDirectoryHandle): Promise<CollabFsManifest> {
+    public async ensureManifest(project: number, handle: CollabFsDirectoryHandle, onProgress?: (progress: CollabFsProgress) => void): Promise<CollabFsManifest> {
         const existing = await this.readManifest(handle);
         if (existing && existing.project === project) return existing;
 
-        const browserEntries = await this.getBrowserEntries(project);
-        const localEntries = await this.getLocalEntries(handle);
+        const browserEntries = await this.getBrowserEntries(project, onProgress, { readContent: false });
+        const localEntries = await this.getLocalEntries(handle, onProgress, { readContent: false });
         return this.writeManifest(project, handle, browserEntries, localEntries, 'linked', existing?.selectedAt);
     }
 
-    public async scan(project: number, handle: CollabFsDirectoryHandle): Promise<CollabFsScanResult> {
-        const browserEntries = await this.getBrowserEntries(project);
-        const localEntries = await this.getLocalEntries(handle);
+    public async scan(project: number, handle: CollabFsDirectoryHandle, onProgress?: (progress: CollabFsProgress) => void): Promise<CollabFsScanResult> {
+        const manifest = await this.readManifest(handle);
+        const browserEntries = await this.getBrowserEntries(project, onProgress, { readContent: false });
+        const localEntries = await this.getLocalEntries(handle, onProgress, { readContent: false });
         const browserMap = this.mapByPath(browserEntries);
         const localMap = this.mapByPath(localEntries);
         const paths = Array.from(new Set([...browserMap.keys(), ...localMap.keys()])).sort();
         const changes: CollabFsChange[] = [];
 
-        for (const path of paths) {
+        for (let i = 0; i < paths.length; i++) {
+            const path = paths[i];
+            onProgress?.({ phase: 'compare', current: i + 1, total: paths.length, path });
             const browserEntry = browserMap.get(path);
             const localEntry = localMap.get(path);
 
@@ -180,15 +230,22 @@ export class CollabFileSystemSync {
                 continue;
             }
 
-            if (browserEntry && localEntry && browserEntry.hash !== localEntry.hash) {
+            if (browserEntry && localEntry && this.isUnchangedByManifest(manifest, browserEntry, localEntry)) {
+                continue;
+            }
+
+            if (browserEntry && localEntry) {
+                const hydratedBrowser = await this.hydrateBrowserEntry(browserEntry);
+                const hydratedLocal = await this.hydrateLocalEntry(handle, localEntry);
+                if (hydratedBrowser.hash === hydratedLocal.hash) continue;
                 changes.push({
                     path,
                     kind: 'modified',
-                    file: browserEntry.file,
-                    browserContent: browserEntry.content,
-                    localContent: localEntry.content,
-                    browserHash: browserEntry.hash,
-                    localHash: localEntry.hash,
+                    file: hydratedBrowser.file,
+                    browserContent: hydratedBrowser.content,
+                    localContent: hydratedLocal.content,
+                    browserHash: hydratedBrowser.hash,
+                    localHash: hydratedLocal.hash,
                 });
             }
         }
@@ -203,30 +260,37 @@ export class CollabFileSystemSync {
         };
     }
 
-    public async pullToFs(project: number, handle: CollabFsDirectoryHandle): Promise<CollabFsPullResult> {
-        const browserEntries = await this.getBrowserEntries(project);
-        const localEntries = await this.getLocalEntries(handle);
+    public async pullToFs(project: number, handle: CollabFsDirectoryHandle, onProgress?: (progress: CollabFsProgress) => void): Promise<CollabFsPullResult> {
+        const browserEntries = await this.getBrowserEntries(project, onProgress, { readContent: true });
+        const localEntries = await this.getLocalEntries(handle, onProgress, { readContent: false });
         const browserMap = this.mapByPath(browserEntries.filter((entry) => !entry.unsupported));
         let written = 0;
         let deleted = 0;
         let skipped = 0;
 
-        for (const browserEntry of browserEntries) {
+        for (let i = 0; i < browserEntries.length; i++) {
+            const browserEntry = browserEntries[i];
             if (browserEntry.unsupported) {
                 skipped++;
                 continue;
             }
-            await this.adapter.writeTextFile(handle, browserEntry.path, browserEntry.content);
+            onProgress?.({ phase: 'write', current: written + 1, total: browserEntries.length, path: browserEntry.path });
+            await this.adapter.writeTextFile(handle, browserEntry.path, browserEntry.content || '');
             written++;
         }
 
-        for (const localEntry of localEntries) {
+        const localDeleteEntries = localEntries.filter((localEntry) => !browserMap.has(localEntry.path));
+        for (let i = 0; i < localDeleteEntries.length; i++) {
+            const localEntry = localDeleteEntries[i];
+            onProgress?.({ phase: 'delete', current: i + 1, total: localDeleteEntries.length, path: localEntry.path });
             if (browserMap.has(localEntry.path)) continue;
             await this.adapter.removeFile(handle, localEntry.path).catch(() => undefined);
             deleted++;
         }
 
-        const manifest = await this.writeManifest(project, handle, browserEntries, browserEntries, 'browser-to-fs');
+        onProgress?.({ phase: 'manifest', current: 1, total: 1, path: MANIFEST_FILE });
+        const localAfterPull = await this.getLocalEntries(handle, onProgress, { readContent: false });
+        const manifest = await this.writeManifest(project, handle, browserEntries, localAfterPull, 'browser-to-fs');
         return { written, deleted, skipped, manifest };
     }
 
@@ -295,25 +359,31 @@ export class CollabFileSystemSync {
         return result;
     }
 
-    private async getBrowserEntries(project: number): Promise<CollabFsBrowserEntry[]> {
+    private async getBrowserEntries(
+        project: number,
+        onProgress?: (progress: CollabFsProgress) => void,
+        options: { readContent?: boolean } = { readContent: true }
+    ): Promise<CollabFsBrowserEntry[]> {
         const entries: CollabFsBrowserEntry[] = [];
         const files = Object.values(mls.stor.files)
             .filter((file) => this.isBrowserFileMappable(file, project))
             .sort((a, b) => this.getBrowserPath(a).localeCompare(this.getBrowserPath(b)));
 
-        for (const file of files) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
             const path = this.getBrowserPath(file);
-            const content = await this.getBrowserTextContent(file);
+            onProgress?.({ phase: 'browser', current: i + 1, total: files.length, path });
+            const content = options.readContent ? await this.getBrowserTextContent(file) : undefined;
             const unsupported = typeof content !== 'string';
             const text = typeof content === 'string' ? content : '';
             entries.push({
                 path,
                 key: mls.stor.getKeyToFile(file),
                 file,
-                content: text,
-                hash: await this.hashContent(text),
+                content: options.readContent ? text : undefined,
+                hash: options.readContent ? await this.hashContent(text) : undefined,
                 versionRef: file.versionRef || '',
-                unsupported,
+                unsupported: options.readContent ? unsupported : false,
             });
         }
 
@@ -329,17 +399,56 @@ export class CollabFileSystemSync {
         return null;
     }
 
-    private async getLocalEntries(handle: CollabFsDirectoryHandle): Promise<CollabFsLocalEntry[]> {
-        const files = await this.adapter.listTextFiles(handle);
+    private async getLocalEntries(
+        handle: CollabFsDirectoryHandle,
+        onProgress?: (progress: CollabFsProgress) => void,
+        options: { readContent?: boolean } = { readContent: true }
+    ): Promise<CollabFsLocalEntry[]> {
+        const files = await this.adapter.listTextFiles(handle, (progress) => {
+            onProgress?.({ phase: 'local', current: progress.current, path: progress.path });
+        }, options);
+        return this.getLocalEntriesFromFiles(files, onProgress, options);
+    }
+
+    private async getLocalEntriesFromFiles(
+        files: CollabFsLocalFile[],
+        onProgress?: (progress: CollabFsProgress) => void,
+        options: { readContent?: boolean } = { readContent: true }
+    ): Promise<CollabFsLocalEntry[]> {
         const entries: CollabFsLocalEntry[] = [];
-        for (const file of files) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
             if (!this.parseLocalPath(file.path, 0)) continue;
+            onProgress?.({ phase: 'local', current: i + 1, total: files.length, path: file.path });
             entries.push({
                 ...file,
-                hash: await this.hashContent(file.content),
+                hash: options.readContent ? await this.hashContent(file.content || '') : undefined,
             });
         }
         return entries;
+    }
+
+    private async hydrateBrowserEntry(entry: CollabFsBrowserEntry): Promise<CollabFsBrowserEntry> {
+        if (entry.content !== undefined && entry.hash !== undefined) return entry;
+        const content = await this.getBrowserTextContent(entry.file);
+        const unsupported = typeof content !== 'string';
+        const text = typeof content === 'string' ? content : '';
+        return {
+            ...entry,
+            content: text,
+            hash: await this.hashContent(text),
+            unsupported,
+        };
+    }
+
+    private async hydrateLocalEntry(handle: CollabFsDirectoryHandle, entry: CollabFsLocalEntry): Promise<CollabFsLocalEntry> {
+        if (entry.content !== undefined && entry.hash !== undefined) return entry;
+        const content = await this.adapter.readTextFile(handle, entry.path) || '';
+        return {
+            ...entry,
+            content,
+            hash: await this.hashContent(content),
+        };
     }
 
     private async writeManifest(
@@ -362,6 +471,8 @@ export class CollabFileSystemSync {
                 versionRef: browserEntry.versionRef,
                 browserHash: browserEntry.hash,
                 diskHash: diskEntry?.hash || '',
+                diskSize: 'size' in (diskEntry || {}) ? (diskEntry as CollabFsLocalEntry).size : undefined,
+                diskLastModified: 'lastModified' in (diskEntry || {}) ? (diskEntry as CollabFsLocalEntry).lastModified : undefined,
                 lastDirection,
             };
         }
@@ -383,6 +494,20 @@ export class CollabFileSystemSync {
         if (!Number.isInteger(file.level) || file.level < 1 || file.level > 7) return false;
         if (!file.shortName || !file.extension || !file.extension.startsWith('.')) return false;
         return this.isSafeRelativePath(this.getBrowserPath(file));
+    }
+
+    private isUnchangedByManifest(
+        manifest: CollabFsManifest | null,
+        browserEntry: CollabFsBrowserEntry,
+        localEntry: CollabFsLocalEntry
+    ): boolean {
+        const item = manifest?.files[browserEntry.path];
+        if (!item) return false;
+        if (browserEntry.file.inLocalStorage || browserEntry.file.status !== 'nochange') return false;
+        if (mls.editor.getModel(browserEntry.file)) return false;
+        if (item.versionRef !== browserEntry.versionRef) return false;
+        if (item.diskSize === undefined || item.diskLastModified === undefined) return false;
+        return item.diskSize === localEntry.size && item.diskLastModified === localEntry.lastModified;
     }
 
     private getBrowserPath(file: mls.stor.IFileInfo): string {
