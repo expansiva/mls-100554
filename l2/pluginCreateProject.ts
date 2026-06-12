@@ -8,7 +8,7 @@ import { createConfigFile } from '/_102027_/l2/libProjectConfig.js';
 import { createModel } from '/_102027_/l2/libModel.js';
 import { addMessage, createThread } from '/_102025_/l2/collabMessagesHelper.js';
 import { getThreadByName } from '/_102025_/l2/collabMessagesIndexedDB.js';
-import { setProjectDetails, checkIfHasLocalProject, setLocalProjectName, isValidProjectName } from '/_102027_/l2/libCommom.js';
+import { setProjectDetails, checkIfHasLocalProject, setLocalProjectName, setLocalProjectDependencies, isValidProjectName } from '/_102027_/l2/libCommom.js';
 
 import {
   template_ds,
@@ -22,6 +22,7 @@ const message_pt = {
   createProjectTitle: 'Criar projeto',
   createProjectHelper: 'Por favor escolha o tipo de projeto abaixo e pressione continuar.',
   labelName: 'Nome do projeto',
+  labelType: 'Tipo do projeto',
   optionBlank: 'Projeto em branco',
   optionPrompt: 'Iniciar com prompt',
   promptPlaceholder: 'Digite seu prompt aqui...',
@@ -45,6 +46,7 @@ const message_en = {
   createProjectTitle: 'Create project',
   createProjectHelper: 'Please choose your project type below and press continue.',
   labelName: 'Project name',
+  labelType: 'Project type',
   optionBlank: 'Blank project',
   optionPrompt: 'Start with prompt',
   promptPlaceholder: 'Type your prompt here...',
@@ -71,6 +73,34 @@ const messages: { [key: string]: MessageType } = {
 };
 /// **collab_i18n_end**
 
+export interface IProjectType {
+  id: string;
+  name: string;
+  dependencies: number[];
+  agent?: string;
+}
+
+export const projectTypes: IProjectType[] = [
+  {
+    id: 'auraDev',
+    name: 'Aura',
+    dependencies: [102020, 102021, 102027, 102029, 102033, 102034],
+    agent: 'agentNewSolution',
+  },
+  {
+    id: 'landingPage',
+    name: 'Landing Page',
+    dependencies: [102032, 102027],
+  },
+    {
+    id: 'workspace',
+    name: 'Workspace',
+    dependencies: [102027],
+  },
+];
+
+const inputClasses = 'w-full text-sm font-normal px-2.5 py-1.5 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-400 dark:focus:ring-indigo-600';
+
 @customElement('plugin-create-project-100554')
 export class PluginCreateProject extends CollabLitElement {
   private msg: MessageType = messages['pt']; // default pt
@@ -80,6 +110,7 @@ export class PluginCreateProject extends CollabLitElement {
   @state() projectName: string = '';
   @state() projectType: 'blank' | 'prompt' = 'prompt';
   @state() projectPrompt: string = '';
+  @state() selectedProjectTypeId: string = projectTypes[0].id;
   @state() errorName: string = '';
   @state() errorPrompt: string = '';
   @state() alreadyHasProjectLocal: boolean = false;
@@ -87,18 +118,23 @@ export class PluginCreateProject extends CollabLitElement {
   @state() projectCreatedSucessfully: boolean = false;
 
   private projectNumber = mls.stor.LOCALPROJECTNUMBER;
-  private agentName = 'agentGeneratePrototype';
+
+  private get selectedProjectType(): IProjectType {
+    return projectTypes.find((item) => item.id === this.selectedProjectTypeId) || projectTypes[0];
+  }
 
   firstUpdated(changedProperties: Map<PropertyKey, unknown>) {
     super.firstUpdated(changedProperties);
     this.alreadyHasProjectLocal = checkIfHasLocalProject()
+    if (!this.selectedProjectType.agent) this.projectType = 'blank';
   }
 
   render() {
+    this.style.display = 'block';
     const lang = this.getMessageKey(messages);
     this.msg = messages[lang];
     return html`
-      <section class="plugin-create-project-100554">
+      <section class="plugin-create-project-100554 block p-5 text-gray-800 dark:text-gray-200">
         ${this.renderScenario()}
       </section>
     `;
@@ -115,8 +151,8 @@ export class PluginCreateProject extends CollabLitElement {
 
     if (this.alreadyHasProjectLocal) {
       return html`
-        <div>
-            ${this.msg.alreadyHasProjectLocal}
+        <div class="rounded-lg border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-900/10 px-3 py-2.5">
+          <span class="text-sm text-amber-600 dark:text-amber-400 leading-relaxed">${this.msg.alreadyHasProjectLocal}</span>
         </div>
       `
     }
@@ -127,38 +163,55 @@ export class PluginCreateProject extends CollabLitElement {
       `
     }
     return html`
-      <h2>${this.msg.createProjectTitle}</h2>
-      <p>${this.msg.createProjectHelper}</p>
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">${this.msg.createProjectTitle}</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">${this.msg.createProjectHelper}</p>
 
-      <label>
+      <label class="block mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
         ${this.msg.labelName}
-        <input 
-          type="text" 
-          .value=${this.projectName} 
-          @input=${(e: Event) => this.projectName = (e.target as HTMLInputElement).value} 
+        <input
+          type="text"
+          class="${inputClasses} mt-1.5"
+          .value=${this.projectName}
+          @input=${(e: Event) => this.projectName = (e.target as HTMLInputElement).value}
         />
       </label>
        ${this.errorName
-        ? html`<div class="error">${this.errorName}</div>`
+        ? html`<div class="text-xs text-red-500 dark:text-red-400 mb-3">${this.errorName}</div>`
         : ''}
-        
-      <div class="options">
-        <label>
-          <input 
-            type="radio" 
-            name="projectType" 
-            value="prompt"
-            ?checked=${this.projectType === 'prompt'}
-            @change=${() => this.projectType = 'prompt'}
-          />
-          ${this.msg.optionPrompt}
-        </label>
 
-        <label>
-          <input 
-            type="radio" 
-            name="projectType" 
+      <label class="block mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+        ${this.msg.labelType}
+        <select
+          class="${inputClasses} mt-1.5 cursor-pointer"
+          @change=${this.handleProjectTypeChange}
+        >
+          ${projectTypes.map((item) => html`
+            <option value=${item.id} ?selected=${this.selectedProjectTypeId === item.id}>${item.name}</option>
+          `)}
+        </select>
+      </label>
+
+      <div class="flex flex-col gap-2 mb-4">
+        ${this.selectedProjectType.agent ? html`
+          <label class="flex items-center gap-2 text-sm font-normal text-gray-700 dark:text-gray-300 cursor-pointer">
+            <input
+              type="radio"
+              name="projectType"
+              value="prompt"
+              class="accent-indigo-500"
+              ?checked=${this.projectType === 'prompt'}
+              @change=${() => this.projectType = 'prompt'}
+            />
+            ${this.msg.optionPrompt}
+          </label>
+        ` : ''}
+
+        <label class="flex items-center gap-2 text-sm font-normal text-gray-700 dark:text-gray-300 cursor-pointer">
+          <input
+            type="radio"
+            name="projectType"
             value="blank"
+            class="accent-indigo-500"
             ?checked=${this.projectType === 'blank'}
             @change=${() => this.projectType = 'blank'}
           />
@@ -168,27 +221,31 @@ export class PluginCreateProject extends CollabLitElement {
 
       </div>
 
-      ${this.projectType === 'prompt' ? html`
-        <textarea 
+      ${this.projectType === 'prompt' && this.selectedProjectType.agent ? html`
+        <textarea
+          class="${inputClasses} min-h-25 resize-y mb-1"
           placeholder=${this.msg.promptPlaceholder}
           .value=${this.projectPrompt}
           @input=${(e: Event) => this.projectPrompt = (e.target as HTMLTextAreaElement).value}
         ></textarea>
-        ${this.errorPrompt ? html`<div class="error">${this.errorPrompt}</div>` : ''}
+        ${this.errorPrompt ? html`<div class="text-xs text-red-500 dark:text-red-400 mb-3">${this.errorPrompt}</div>` : ''}
       ` : ''}
 
-      <div class="banner">
-        <pre>${this.msg.banner}</pre>
+      <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 p-3 my-4">
+        <pre class="m-0 font-sans text-xs leading-relaxed text-gray-600 dark:text-gray-400 whitespace-break-spaces">${this.msg.banner}</pre>
       </div>
 
-      <div class="actions">
-        <button @click=${this.handleCancel}>${this.msg.btnCancel}</button>
+      <div class="flex gap-3">
         <button
-          class="primary"
+          class="text-sm px-3 py-1.5 rounded-md border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+          @click=${this.handleCancel}
+        >${this.msg.btnCancel}</button>
+        <button
+          class="text-sm px-3 py-1.5 rounded-md bg-indigo-500 dark:bg-indigo-600 text-white hover:bg-indigo-600 dark:hover:bg-indigo-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           @click=${this.handleCreate}
           ?disabled=${this.isLoading}
           >
-            ${this.isLoading ? html`<span class="loader"></span>` : this.msg.btnCreate}
+            ${this.isLoading ? html`<span class="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin align-middle"></span>` : this.msg.btnCreate}
         </button>
       </div>
     `;
@@ -196,29 +253,30 @@ export class PluginCreateProject extends CollabLitElement {
 
   private renderProjectCreatedOk() {
     return html`
-      <div class="container-success">
-            <div class="text-center">
-                <div class="success-icon">
-                    <div class="success-icon__tip"></div>
-                    <div class="success-icon__long"></div>
-                </div>
-                <h1>${this.msg.projectOk1}</h1>
-                <h5 class="text-muted">${this.msg.projectOk2}</h5>
+      <div class="flex flex-col items-center justify-center gap-3 p-6 text-center">
+            <div class="w-20 h-20 rounded-full border-4 border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+                <svg class="w-10 h-10 text-emerald-500 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
             </div>
-            <div class="actions">
-                <button
-                  type="button"
-                  class="continue"
-                  @click=${() => { window.location.reload() }}
-                >${this.msg.btnContinue}</button>
-            </div>
+            <h1 class="text-lg font-semibold text-gray-800 dark:text-gray-100">${this.msg.projectOk1}</h1>
+            <h5 class="text-sm text-gray-400 dark:text-gray-500">${this.msg.projectOk2}</h5>
+            <button
+              type="button"
+              class="text-sm px-3 py-1.5 rounded-md bg-indigo-500 dark:bg-indigo-600 text-white hover:bg-indigo-600 dark:hover:bg-indigo-500 transition-colors cursor-pointer"
+              @click=${() => { window.location.reload() }}
+            >${this.msg.btnContinue}</button>
         </div>
-    
     `
   }
 
   private handleCancel() {
     console.log("Cancel clicked");
+  }
+
+  private handleProjectTypeChange(e: Event) {
+    this.selectedProjectTypeId = (e.target as HTMLSelectElement).value;
+    if (!this.selectedProjectType.agent) this.projectType = 'blank';
   }
 
   private validateForm(): boolean {
@@ -276,14 +334,15 @@ export class PluginCreateProject extends CollabLitElement {
 
     this.setProjectActual(this.projectNumber);
     setLocalProjectName(this.projectName);
+    setLocalProjectDependencies(this.selectedProjectType.dependencies);
 
-    if (this.projectType === 'prompt') {
+    if (this.projectType === 'prompt' && this.selectedProjectType.agent) {
       const threadProjectName = `_${this.projectNumber}_${this.projectName}`
       let thread = await getThreadByName(threadProjectName);
       if (!thread) {
         thread = await createThread(threadProjectName, [], 'company');
       }
-      const messageForAgent = `@@${this.agentName} ${this.projectPrompt}`;
+      const messageForAgent = `@@${this.selectedProjectType.agent} ${this.projectPrompt}`;
       if (!thread) {
         throw new Error('No find thread, try again');
       }
