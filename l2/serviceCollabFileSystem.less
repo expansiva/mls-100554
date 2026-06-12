@@ -1,0 +1,225 @@
+/// <mls fileReference="_100554_/l2/serviceCollabFileSystem.less" enhancement="_100554_/l2/enhancementLit" />
+
+service-collab-file-system-100554 {
+    display: block;
+    height: 100%;
+    overflow: hidden;
+    color: @text-primary-color;
+    background: @bg-primary-color;
+
+    .collab-fs-shell {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        height: 100%;
+        min-height: 0;
+        padding: 0.75rem;
+    }
+
+    .collab-fs-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+        border-bottom: 1px solid @border-primary-color;
+        padding-bottom: 0.75rem;
+    }
+
+    h2,
+    h3,
+    p {
+        margin: 0;
+    }
+
+    h2 {
+        font-size: @font-size-18;
+        font-weight: @font-weight-bold;
+    }
+
+    h3 {
+        overflow-wrap: anywhere;
+        font-size: @font-size-16;
+        font-weight: @font-weight-bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .collab-fs-header p,
+    .collab-fs-muted,
+    .collab-fs-detail-meta {
+        color: @text-secondary-color;
+        font-size: @font-size-12;
+    }
+
+    .collab-fs-project {
+        flex: 0 0 auto;
+        border: 1px solid @border-primary-color;
+        border-radius: 4px;
+        padding: 0.2rem 0.45rem;
+        font-size: @font-size-12;
+    }
+
+    .collab-fs-actions,
+    .collab-fs-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    button {
+        min-height: 2rem;
+        border: 1px solid @border-primary-color;
+        border-radius: 4px;
+        padding: 0.35rem 0.6rem;
+        background: @bg-secondary-color;
+        color: @text-primary-color;
+        cursor: pointer;
+        font: inherit;
+    }
+
+    button:hover {
+        border-color: @text-secondary-color;
+    }
+
+    button:disabled {
+        cursor: default;
+        opacity: 0.55;
+    }
+
+    button.primary {
+        background: #1f6feb;
+        border-color: #1f6feb;
+        color: #ffffff;
+    }
+
+    .collab-fs-notice {
+        border-left: 3px solid #1f6feb;
+        background: @bg-secondary-color;
+        padding: 0.5rem 0.65rem;
+        font-size: @font-size-13;
+    }
+
+    .collab-fs-summary {
+        color: @text-secondary-color;
+        font-size: @font-size-12;
+    }
+
+    .collab-fs-summary span {
+        border: 1px solid @border-primary-color;
+        border-radius: 4px;
+        padding: 0.15rem 0.4rem;
+    }
+
+    .collab-fs-workspace {
+        display: grid;
+        grid-template-columns: minmax(12rem, 38%) minmax(0, 1fr);
+        gap: 0.75rem;
+        min-height: 0;
+        flex: 1;
+    }
+
+    .collab-fs-list,
+    .collab-fs-details {
+        min-height: 0;
+        overflow: auto;
+        border: 1px solid @border-primary-color;
+    }
+
+    .collab-fs-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .collab-fs-change {
+        display: grid;
+        grid-template-columns: 3.5rem minmax(0, 1fr);
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        min-height: 2.5rem;
+        border-width: 0 0 1px 0;
+        border-radius: 0;
+        text-align: left;
+        background: transparent;
+    }
+
+    .collab-fs-change.selected {
+        background: @bg-secondary-color;
+    }
+
+    .collab-fs-change .path {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .kind {
+        border-radius: 4px;
+        padding: 0.15rem 0.3rem;
+        text-align: center;
+        font-size: @font-size-12;
+    }
+
+    .kind.browserOnly {
+        background: #d1f7c4;
+        color: #1a4d1a;
+    }
+
+    .kind.localOnly {
+        background: #ffd7d7;
+        color: #7a2020;
+    }
+
+    .kind.modified {
+        background: #fff1b8;
+        color: #604600;
+    }
+
+    .kind.unsupported {
+        background: #e6e8eb;
+        color: #353a40;
+    }
+
+    .collab-fs-details {
+        padding: 0.75rem;
+    }
+
+    .collab-fs-empty {
+        color: @text-secondary-color;
+        padding: 1rem;
+    }
+
+    .collab-fs-diff {
+        overflow: auto;
+        margin: 0.75rem 0 0;
+        border: 1px solid @border-primary-color;
+        background: @bg-secondary-color;
+        font-size: @font-size-12;
+        line-height: 1.45;
+    }
+
+    .collab-fs-diff div {
+        display: grid;
+        grid-template-columns: 1.5rem minmax(0, 1fr);
+        min-height: 1.35rem;
+        white-space: pre;
+    }
+
+    .collab-fs-diff span {
+        user-select: none;
+        text-align: center;
+    }
+
+    .collab-fs-diff code {
+        overflow: visible;
+        font-family: monospace;
+    }
+
+    .collab-fs-diff .added {
+        background: #dafbe1;
+    }
+
+    .collab-fs-diff .removed {
+        background: #ffebe9;
+    }
+}
