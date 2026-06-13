@@ -193,11 +193,11 @@ export class CollabFileSystemSync {
         const allLocalFiles = await this.adapter.listTextFiles(handle, (progress) => {
             onProgress?.({ phase: 'local', current: progress.current, path: progress.path });
         }, { readContent: false });
-        const localFilesToValidate = allLocalFiles.filter((file) => !this.isIgnoredRootFile(file.path));
+        const localFilesToValidate = allLocalFiles.filter((file) => this.isProjectLayoutPath(file.path));
         if (localFilesToValidate.length === 0) return { empty: true };
 
-        const localControlled = await this.getLocalEntriesFromFiles(allLocalFiles, onProgress, { readContent: false });
-        const nonControlled = allLocalFiles.filter((file) => !this.isIgnoredRootFile(file.path) && !this.parseLocalPath(file.path, project));
+        const localControlled = await this.getLocalEntriesFromFiles(localFilesToValidate, onProgress, { readContent: false });
+        const nonControlled = localFilesToValidate.filter((file) => !this.parseLocalPath(file.path, project));
 
         if (nonControlled.length > 0) {
             throw new Error(
@@ -807,6 +807,10 @@ export class CollabFileSystemSync {
 
     private isIgnoredRootFile(path: string): boolean {
         return path === MANIFEST_FILE || path === '.DS_Store';
+    }
+
+    private isProjectLayoutPath(path: string): boolean {
+        return /^l[1-7]\//.test(path);
     }
 
     private formatPathExamples(entries: Array<{ path: string }>, limit: number = 8): string {
