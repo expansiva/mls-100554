@@ -37,7 +37,7 @@ declare global {
 
 export interface CollabFsLocalFile {
     path: string;
-    content?: string;
+    content?: string | Blob;
     size: number;
     lastModified: number;
 }
@@ -54,6 +54,8 @@ export interface CollabFsListOptions {
 export interface CollabFsAccessAdapter {
     listTextFiles(directory: CollabFsDirectoryHandle, onProgress?: (progress: CollabFsAccessProgress) => void, options?: CollabFsListOptions): Promise<CollabFsLocalFile[]>;
     readTextFile(directory: CollabFsDirectoryHandle, path: string): Promise<string | null>;
+    readFileContent(directory: CollabFsDirectoryHandle, path: string): Promise<string | Blob | null>;
+    writeFile(directory: CollabFsDirectoryHandle, path: string, content: string | Blob): Promise<CollabFsLocalFile>;
     writeTextFile(directory: CollabFsDirectoryHandle, path: string, content: string): Promise<void>;
     removeFile(directory: CollabFsDirectoryHandle, path: string): Promise<void>;
 }
@@ -61,6 +63,7 @@ export interface CollabFsAccessAdapter {
 const DB_NAME = 'collabFileSystem100554';
 const DB_VERSION = 1;
 const STORE_HANDLES = 'directoryHandles';
+const BASE_HANDLE_KEY = 'base:mls-base';
 
 export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
 
@@ -99,6 +102,36 @@ export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
         }
     }
 
+    public async saveBaseHandle(handle: CollabFsDirectoryHandle): Promise<void> {
+        const db = await this.openDB();
+        try {
+            const tx = db.transaction(STORE_HANDLES, 'readwrite');
+            const done = this.transactionDone(tx);
+            const store = tx.objectStore(STORE_HANDLES);
+            await this.requestToPromise(store.put({
+                key: BASE_HANDLE_KEY,
+                handle,
+                name: handle.name,
+                updatedAt: new Date().toISOString(),
+            }));
+            await done;
+        } finally {
+            db.close();
+        }
+    }
+
+    public async getBaseHandle(): Promise<CollabFsDirectoryHandle | null> {
+        const db = await this.openDB();
+        try {
+            const tx = db.transaction(STORE_HANDLES, 'readonly');
+            const store = tx.objectStore(STORE_HANDLES);
+            const result = await this.requestToPromise<any>(store.get(BASE_HANDLE_KEY));
+            return result?.handle || null;
+        } finally {
+            db.close();
+        }
+    }
+
     public async getHandle(project: number): Promise<CollabFsDirectoryHandle | null> {
         const db = await this.openDB();
         try {
@@ -129,13 +162,32 @@ export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
         return file.text();
     }
 
-    public async writeTextFile(directory: CollabFsDirectoryHandle, path: string, content: string): Promise<void> {
+    public async readFileContent(directory: CollabFsDirectoryHandle, path: string): Promise<string | Blob | null> {
+        const handle = await this.getFileHandleByPath(directory, path, false);
+        if (!handle) return null;
+        const file = await handle.getFile();
+        if (this.shouldReadAsText(path)) return file.text();
+        return file;
+    }
+
+    public async writeFile(directory: CollabFsDirectoryHandle, path: string, content: string | Blob): Promise<CollabFsLocalFile> {
         this.assertSafePath(path);
         const handle = await this.getFileHandleByPath(directory, path, true);
         if (!handle) throw new Error(`Unable to create file ${path}`);
         const writable = await handle.createWritable();
         await writable.write(content);
         await writable.close();
+        const file = await handle.getFile();
+        return {
+            path,
+            content: undefined,
+            size: file.size,
+            lastModified: file.lastModified,
+        };
+    }
+
+    public async writeTextFile(directory: CollabFsDirectoryHandle, path: string, content: string): Promise<void> {
+        await this.writeFile(directory, path, content);
     }
 
     public async removeFile(directory: CollabFsDirectoryHandle, path: string): Promise<void> {
@@ -171,7 +223,7 @@ export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
             const file = await handle.getFile();
             files.push({
                 path,
-                content: options.readContent ? await file.text() : undefined,
+                content: options.readContent ? (this.shouldReadAsText(path) ? await file.text() : file) : undefined,
                 size: file.size,
                 lastModified: file.lastModified,
             });
@@ -202,6 +254,7 @@ export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
 
     public shouldIgnoreDirectory(name: string): boolean {
         return name === '.git' ||
+            name === '.github' ||
             name === 'node_modules' ||
             name === 'dist' ||
             name === 'distFrontend' ||
@@ -210,7 +263,11 @@ export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
 
     public shouldIgnoreFile(path: string): boolean {
         const name = path.split('/').pop() || '';
-        return name === '.DS_Store' || name.endsWith('.tmp') || name.endsWith('~');
+        return name === '.DS_Store' || name === '.gitignore' || name === 'config.json' || name.endsWith('.tmp') || name.endsWith('~');
+    }
+
+    public shouldReadAsText(path: string): boolean {
+        return /\.(defs\.ts|test\.ts|tsx|ts|html|less|css|json|md|js|jsx|vue|sql|txt|yml|yaml|style|svg)$/i.test(path);
     }
 
     public getProjectKey(project: number): string {
