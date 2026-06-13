@@ -151,16 +151,26 @@ export class CollabFileSystemSync {
             onProgress?.({ phase: 'local', current: progress.current, path: progress.path });
         }, { readContent: false });
         const localControlled = await this.getLocalEntriesFromFiles(allLocalFiles, onProgress, { readContent: false });
-        const nonControlled = allLocalFiles.filter((file) => file.path !== MANIFEST_FILE && !this.parseLocalPath(file.path, project));
+        const nonControlled = allLocalFiles.filter((file) => !this.isIgnoredRootFile(file.path) && !this.parseLocalPath(file.path, project));
 
-        if (allLocalFiles.filter((file) => file.path !== MANIFEST_FILE).length === 0) return;
+        if (allLocalFiles.filter((file) => !this.isIgnoredRootFile(file.path)).length === 0) return;
         if (nonControlled.length > 0) {
-            throw new Error(`Selected folder has files outside the project layout. First link requires an empty or identical folder.`);
+            throw new Error(
+                `Selected folder has files outside the project layout. Expected files like l2/name.ts or l5/project.json. ` +
+                `Examples: ${this.formatPathExamples(nonControlled)}. First link requires an empty or identical folder.`
+            );
         }
 
         const supportedBrowserEntries = browserEntries.filter((entry) => !entry.unsupported);
         if (localControlled.length !== supportedBrowserEntries.length) {
-            throw new Error(`Selected folder has ${localControlled.length} project files, but browser has ${supportedBrowserEntries.length}.`);
+            const browserPaths = new Set(supportedBrowserEntries.map((entry) => entry.path));
+            const localPaths = new Set(localControlled.map((entry) => entry.path));
+            const onlyLocal = localControlled.filter((entry) => !browserPaths.has(entry.path));
+            const onlyBrowser = supportedBrowserEntries.filter((entry) => !localPaths.has(entry.path));
+            throw new Error(
+                `Selected folder has ${localControlled.length} project files, but browser has ${supportedBrowserEntries.length}. ` +
+                `Only local: ${this.formatPathExamples(onlyLocal)}. Only browser: ${this.formatPathExamples(onlyBrowser)}.`
+            );
         }
 
         const localMap = this.mapByPath(localControlled);
@@ -170,7 +180,10 @@ export class CollabFileSystemSync {
             const localEntryBase = localMap.get(browserEntry.path);
             const localEntry = localEntryBase ? await this.hydrateLocalEntry(handle, localEntryBase) : undefined;
             if (!localEntry || localEntry.hash !== browserEntry.hash) {
-                throw new Error(`Selected folder differs from the opened project at ${browserEntry.path}.`);
+                throw new Error(
+                    `Selected folder differs from the opened project at ${browserEntry.path}. ` +
+                    `Local size: ${localEntry?.size ?? 'missing'}, browser versionRef: ${browserEntry.versionRef || '-'}`
+                );
             }
         }
     }
@@ -494,6 +507,17 @@ export class CollabFileSystemSync {
         if (!Number.isInteger(file.level) || file.level < 1 || file.level > 7) return false;
         if (!file.shortName || !file.extension || !file.extension.startsWith('.')) return false;
         return this.isSafeRelativePath(this.getBrowserPath(file));
+    }
+
+    private isIgnoredRootFile(path: string): boolean {
+        return path === MANIFEST_FILE || path === '.DS_Store';
+    }
+
+    private formatPathExamples(entries: Array<{ path: string }>, limit: number = 8): string {
+        if (entries.length === 0) return '-';
+        const paths = entries.slice(0, limit).map((entry) => entry.path);
+        const suffix = entries.length > limit ? `, ... +${entries.length - limit}` : '';
+        return paths.join(', ') + suffix;
     }
 
     private isUnchangedByManifest(
