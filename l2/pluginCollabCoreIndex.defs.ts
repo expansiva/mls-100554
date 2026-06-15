@@ -21,6 +21,7 @@ export const asis: mls.defs.AsIs = {
       "_100554_serviceProject",
       "_100554_serviceUnit",
       "_100554_serviceSave",
+      "_100554_serviceCollabFileSystem",
       "_100554_servicePage",
       "_100554_serviceProduct",
       "_100554_serviceOrganism",

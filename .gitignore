@@ -9,3 +9,4 @@ appconfig.json
 .claude/worktrees/**
 .DS_Store
 preBuild
+.collab-fs.json
