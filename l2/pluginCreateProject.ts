@@ -12,10 +12,10 @@ import { setProjectDetails, checkIfHasLocalProject, setLocalProjectName, setLoca
 
 import {
   template_ds,
-  template_l5Project,
-  template_l2Project
-} from '/_100554_/l2/pluginNewProjectTemplate.js';
-
+  template_l2Project,
+  projectTypes,
+  type IProjectType
+} from '/_102027_/l2/libNewProject.js';
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -73,31 +73,6 @@ const messages: { [key: string]: MessageType } = {
 };
 /// **collab_i18n_end**
 
-export interface IProjectType {
-  id: string;
-  name: string;
-  dependencies: number[];
-  agent?: string;
-}
-
-export const projectTypes: IProjectType[] = [
-  {
-    id: 'auraDev',
-    name: 'Aura',
-    dependencies: [102020, 102021, 102027, 102029, 102033, 102034],
-    agent: 'agentNewSolution',
-  },
-  {
-    id: 'landingPage',
-    name: 'Landing Page',
-    dependencies: [102032, 102027],
-  },
-    {
-    id: 'workspace',
-    name: 'Workspace',
-    dependencies: [102027],
-  },
-];
 
 const inputClasses = 'w-full text-sm font-normal px-2.5 py-1.5 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-400 dark:focus:ring-indigo-600';
 
