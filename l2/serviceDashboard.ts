@@ -116,9 +116,9 @@ export class ServiceDashboard100554 extends ServiceBase {
 
             if (w && +w < 800) this.cssBreakPoint = 'break-800';
             else if (w && +w > 800) this.cssBreakPoint = '';
-            clearTimeout(this.refreshTimeOut);
+            if (this.refreshTimeOut) window.clearTimeout(this.refreshTimeOut);
 
-            this.refreshTimeOut = setTimeout(() => {
+            this.refreshTimeOut = window.setTimeout(() => {
                 this.shadowRoot?.querySelectorAll('collab-tiles-item-100554 collabtileitemcontent').forEach((item) => {
                     Array.from(item.children).forEach((plugin) => {
                         const root = plugin.shadowRoot || plugin;

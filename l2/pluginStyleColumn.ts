@@ -186,13 +186,14 @@ export class PluginStyleColumn extends StateLitElement {
 
     private timeonChange = -1;
     private handleChange(e: KeyboardEvent) {
-        clearTimeout(this.timeonChange);
+        if (this.timeonChange) window.clearTimeout(this.timeonChange);
         const el = e.detail ? (e.detail as any).target : e.target as HTMLInputElement;
         const prop = el.getAttribute('prop');
         if (!prop) return;
         const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(prop);
         if (!convertedProp) return;
-        this.timeonChange = setTimeout(() => {
+        if (this.timeonChange) window.clearTimeout(this.timeonChange);
+        this.timeonChange = window.setTimeout(() => {
             if (convertedProp === 'columnRule') {
                 this.columnRuleWidth = (el as any).valueInput;
                 this.columnRuleColor = (el as any).valueColor;

@@ -189,11 +189,11 @@ export class PluginStyleBoxShadow extends StateLitElement {
     private timeonChangeProp = -1;
 
     private handleChange(e: KeyboardEvent) {
-        clearTimeout(this.timeonChangeProp);
+        if (this.timeonChangeProp) window.clearTimeout(this.timeonChangeProp);
         const el = e.detail ? (e.detail as any).target : e.target as HTMLInputElement;
         const prop = el.getAttribute('prop');
         if (!prop) return;
-        this.timeonChangeProp = setTimeout(() => {
+        this.timeonChangeProp = window.setTimeout(() => {
             (this as any)[prop] = el.value;
             this.mountValue();
         }, 100);

@@ -439,8 +439,8 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     private filterTimeout: number = 0;
     private _filterProjects(ev: InputEvent): void {
         const filterText = (ev.target as HTMLInputElement).value;
-        clearTimeout(this.filterTimeout);
-        this.filterTimeout = setTimeout(() => {
+        if (this.filterTimeout) window.clearTimeout(this.filterTimeout);
+        this.filterTimeout = window.setTimeout(() => {
             if (filterText) {
                 this.titleList?.forEach((item) => { item.style.display = 'none'; });
                 if (this.historieEl) this.historieEl.style.display = 'none';
@@ -513,8 +513,8 @@ export class ServiceExploreProjects100554 extends ServiceBase {
     
     private _filterOrgs(ev: InputEvent): void {
         const filterText = (ev.target as HTMLInputElement).value;
-        clearTimeout(this.filterTimeout);
-        this.filterTimeout = setTimeout(() => {
+        if (this.filterTimeout) window.clearTimeout(this.filterTimeout);
+        this.filterTimeout = window.setTimeout(() => {
             if (filterText) {
                 this.titleList?.forEach((item) => { item.style.display = 'none'; });
                 if (this.historieEl) this.historieEl.style.display = 'none';

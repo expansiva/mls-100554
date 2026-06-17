@@ -215,7 +215,8 @@ export class PluginStyleSpacing extends StateLitElement {
         const prop = el.getAttribute('prop');
         if (!prop) return;
         const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(prop);
-        this.timeonChangeMargin = setTimeout(() => {
+        if (this.timeonChangeMargin) window.clearTimeout(this.timeonChangeMargin);
+        this.timeonChangeMargin = window.setTimeout(() => {
             if (!this.marginLocked) {
                 if (!convertedProp) return;
                 (this as any)[convertedProp] = el.value;

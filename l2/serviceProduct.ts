@@ -376,8 +376,8 @@ export class ServiceProduct extends ServiceBase {
     private changeListTimeout: number = 0;
     public changeList(time: number = 500): void {
         this.showLoading(false);
-        clearTimeout(this.changeListTimeout);
-        this.changeListTimeout = setTimeout(async () => {
+        if (this.changeListTimeout) window.clearTimeout(this.changeListTimeout);
+        this.changeListTimeout = window.setTimeout(async () => {
             await this.init();
 
         }, time);
@@ -414,8 +414,8 @@ export class ServiceProduct extends ServiceBase {
         e.stopPropagation();
         const el = e.target as HTMLInputElement;
         if (!el) return;
-        clearTimeout(this.timeFilterChange);
-        this.timeFilterChange = setTimeout(() => {
+        if (this.timeFilterChange) window.clearTimeout(this.timeFilterChange);
+        this.timeFilterChange = window.setTimeout(() => {
 
             this.inFilter = el.value.length > 0;
 

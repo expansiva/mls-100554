@@ -284,7 +284,7 @@ export class PluginEditStyleL3 extends PluginBaseModule {
     private timeOnChangeLessOrigin = 0;
     private changeLessOrigin() {
         clearTimeout(this.timeOnChangeLessOrigin);
-        this.timeOnChangeLessOrigin = setTimeout(() => {
+        this.timeOnChangeLessOrigin = window.setTimeout(() => {
             this.changeLessOrigin2();
         }, 600);
     }

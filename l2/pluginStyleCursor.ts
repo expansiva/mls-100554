@@ -77,8 +77,8 @@ export class PluginStyleClipath extends StateLitElement {
         if (!el || !css && !name) return;
         css = css.replace('cursor:', '').trim();
 
-        clearTimeout(this.timeonChange);
-        this.timeonChange = setTimeout(() => {
+        if (this.timeonChange) window.clearTimeout(this.timeonChange);
+        this.timeonChange = window.setTimeout(() => {
             this.setState(css);
 
         }, 100);

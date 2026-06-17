@@ -335,12 +335,12 @@ export class PluginStyleBorder extends StateLitElement {
 
     private timeonChangeBorder = -1;
     private handleChangeBorder(e: KeyboardEvent) {
-        clearTimeout(this.timeonChangeBorder);
+        if (this.timeonChangeBorder) window.clearTimeout(this.timeonChangeBorder);
         const el = (e.detail as any).target as CollabDsInputSelectColor;
         const prop = el.getAttribute('prop');
         if (!prop) return;
         const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(prop);
-        this.timeonChangeBorder = setTimeout(() => {
+        this.timeonChangeBorder = window.setTimeout(() => {
             if (!this.borderLocked) {
                 if (!convertedProp) return;
                 (this as any)[convertedProp] = el.value;
@@ -358,12 +358,12 @@ export class PluginStyleBorder extends StateLitElement {
 
     private timeonChangeBorderRadius = -1;
     private handleChangeBorderRadius(e: KeyboardEvent) {
-        clearTimeout(this.timeonChangeBorderRadius);
+        if (this.timeonChangeBorderRadius) window.clearTimeout(this.timeonChangeBorderRadius);
         const el = (e.detail as any).target as HTMLInputElement;
         const prop = el.getAttribute('prop');
         if (!prop) return;
         const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(prop);
-        this.timeonChangeBorderRadius = setTimeout(() => {
+        this.timeonChangeBorderRadius = window.setTimeout(() => {
             if (!this.borderRadiusLocked) {
                 if (!convertedProp) return;
                 (this as any)[convertedProp] = el.value;

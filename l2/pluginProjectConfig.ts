@@ -169,8 +169,8 @@ export class PluginProjectConfig extends PluginBaseModule {
 
     private setEventsModel(model: monaco.editor.ITextModel) {
         model.onDidChangeContent((event) => {
-            if (this.timeoutChangesEditorStyle) clearTimeout(this.timeoutChangesEditorStyle);
-            this.timeoutChangesEditorStyle = setTimeout(() => {
+            if (this.timeoutChangesEditorStyle) window.clearTimeout(this.timeoutChangesEditorStyle);
+            this.timeoutChangesEditorStyle = window.setTimeout(() => {
                 this.onEditorChange();
             }, 1000);
         });

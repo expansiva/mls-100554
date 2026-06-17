@@ -34,7 +34,7 @@ export class CollabL3PreviewText extends StateLitElement {
     private timeFireEvent = 0;
     private fireEvent() {
         clearTimeout(this.timeFireEvent);
-        this.timeFireEvent = setTimeout(() => {
+        this.timeFireEvent = window.setTimeout(() => {
             const el = this.closest('[id]') as HTMLElement;
             if (!el) return;
             const param = {

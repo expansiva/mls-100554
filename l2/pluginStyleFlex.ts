@@ -274,8 +274,8 @@ export class PluginStyleFlex extends StateLitElement {
         e.stopPropagation();
         let el = e.target as any;
         let prop = el.getAttribute('prop') || '';
-        clearTimeout(this.timeonChange);
-        this.timeonChange = setTimeout(() => {
+        if (this.timeonChange) window.clearTimeout(this.timeonChange);
+        this.timeonChange = window.setTimeout(() => {
             this.setState(prop, el.value);
 
         }, 100);
@@ -292,8 +292,8 @@ export class PluginStyleFlex extends StateLitElement {
         let css: string = (el as any).gallery;
         if (!el || !css) return;
 
-        clearTimeout(this.timeonChange);
-        this.timeonChange = setTimeout(() => {
+        if (this.timeonChange) window.clearTimeout(this.timeonChange);
+        this.timeonChange = window.setTimeout(() => {
 
             const allItens = css.split(';');
             allItens.forEach((i) => {

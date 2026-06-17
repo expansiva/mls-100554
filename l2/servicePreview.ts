@@ -401,8 +401,8 @@ export class ServicePreview100554 extends ServiceBase {
     }
 
     private onReloader(): void {
-        clearTimeout(this.timeEvent);
-        this.timeEvent = setTimeout(async () => {
+        if (this.timeEvent) window.clearTimeout(this.timeEvent);
+        this.timeEvent = window.setTimeout(async () => {
             this.preview(this.lastModePreview);
             mls.events.fire((+(this.level as any)) as any, 'L3EditEvents' as any, `{"action":"navigation", "position":"right"}`, 500);
         }, 500);

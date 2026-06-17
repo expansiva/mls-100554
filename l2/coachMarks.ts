@@ -145,7 +145,7 @@ export class CoachMarks100554 extends CollabLitElement {
             btn.onclick = () => this.close();
 
             let turn = this.info.timeClose + 1;
-            this.timeInterval = setInterval(() => {
+            this.timeInterval = window.setInterval(() => {
 
                 if (turn <= 0) {
                     clearInterval(this.timeInterval);

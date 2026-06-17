@@ -1049,7 +1049,8 @@ export class ServiceSource100554 extends ServiceBase {
                 const position = e.position;
                 if (!model) return;
 
-                this.timeHtmlChangeCursor = setTimeout(() => {
+                if (this.timeHtmlChangeCursor) window.clearTimeout(this.timeHtmlChangeCursor);
+                this.timeHtmlChangeCursor = window.setTimeout(() => {
                     const lineContent = model.getLineContent(position.lineNumber);
                     if (lineContent.includes('id="')) {
                         const idValue = this.extractIdValue(lineContent);

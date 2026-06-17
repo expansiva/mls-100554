@@ -193,8 +193,8 @@ export class Projects102009 extends StateLitElement {
     e.stopPropagation();
     const el = e.target as HTMLInputElement;
     if (!el) return;
-    clearTimeout(this.timeFilterChange);
-    this.timeFilterChange = setTimeout(() => {
+    if (this.timeFilterChange) window.clearTimeout(this.timeFilterChange);
+    this.timeFilterChange = window.setTimeout(() => {
 
       const all = this.querySelectorAll('.project-card');
       all.forEach((card: any) => {

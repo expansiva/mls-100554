@@ -493,7 +493,7 @@ ${repeat(this.list, ((key: mls.msg.ThreadPerformanceCache) => key) as any, ((ite
     private timeSave = 0;
     private async handleSave(setDefault: boolean = false) {
         clearTimeout(this.timeSave);
-        this.timeSave = setTimeout(() => {
+        this.timeSave = window.setTimeout(() => {
             setState('preview.pausePreview', true);
             const aux = this.agent ? `agent="${this.agent}"` : '';
 

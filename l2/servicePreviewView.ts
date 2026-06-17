@@ -723,9 +723,9 @@ export class ServicePreviewView extends StateLitElement {
 
     private timeShow = -1;
     private showLoader(show: boolean) {
-        clearTimeout(this.timeShow);
+        if (this.timeShow) window.clearTimeout(this.timeShow);
 
-        this.timeShow = setTimeout(() => {
+        this.timeShow = window.setTimeout(() => {
             if (!this.father) return;
             if (show === false) this.father.updateLoadingToFalseIfNoTasksRunning();
             else this.father.loading = show;

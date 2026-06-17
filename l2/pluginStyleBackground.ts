@@ -445,8 +445,8 @@ export class PluginCssTokens extends StateLitElement {
 
     private timeonChangeProp = -1;
     private onChangeProp(index: string) {
-        clearTimeout(this.timeonChangeProp);
-        this.timeonChangeProp = setTimeout(() => {
+        window.clearTimeout(this.timeonChangeProp);
+        this.timeonChangeProp = window.setTimeout(() => {
             const el = this.querySelector('.groupEdit[index="' + index + '"]')
             if (!el) return;
             this.changeValues(el as HTMLDivElement, index);
@@ -454,8 +454,8 @@ export class PluginCssTokens extends StateLitElement {
     }
 
     private onChangeAux(prop: string) {
-        clearTimeout(this.timeonChangeProp);
-        this.timeonChangeProp = setTimeout(() => {
+        window.clearTimeout(this.timeonChangeProp);
+        this.timeonChangeProp = window.setTimeout(() => {
 
             const el = this.querySelector('*[prop="' + prop + '"]') as HTMLInputElement;
             this.info.aux = el.value + 'deg';

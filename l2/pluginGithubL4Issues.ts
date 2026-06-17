@@ -544,8 +544,8 @@ export class PluginGithubL4Issues extends CollabLitElement {
     private filter(e: KeyboardEvent) {
         const el = e.target as HTMLInputElement;
 
-        clearTimeout(this.timeFilter)
-        this.timeFilter = setTimeout(() => {
+        if (this.timeFilter) window.clearTimeout(this.timeFilter);
+        this.timeFilter = window.setTimeout(() => {
 
             const val = el.value.toLocaleLowerCase();
             const all = this.contentlistissues?.querySelectorAll('contentlistitem');

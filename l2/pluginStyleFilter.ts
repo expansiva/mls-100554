@@ -291,7 +291,8 @@ export class PluginStyleFilter extends StateLitElement {
         const el = e.detail ? (e.detail as any).target : e.target as HTMLInputElement;
         const prop = el.getAttribute('prop');
         if (!prop) return;
-        this.timeonChangeProp = setTimeout(() => {
+        if (this.timeonChangeProp) window.clearTimeout(this.timeonChangeProp);
+        this.timeonChangeProp = window.setTimeout(() => {
             (this as any)[prop] = el.value;
             this.mountValue();
         }, 100);

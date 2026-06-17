@@ -166,7 +166,7 @@ export function watchState(
         activeWatchers.delete(path);
     }
 
-    const interval = setInterval(() => {
+    const interval = window.setInterval(() => {
         const current = normalizeValue(stateManager.getState(path));
         if (current !== expected) {
             clearInterval(interval);

@@ -966,7 +966,7 @@ export class PluginExploreList extends PluginBaseModule {
     public changeList(time: number = 500): void {
         this.showLoading(false);
         clearTimeout(this.changeListTimeout);
-        this.changeListTimeout = setTimeout(async () => {
+        this.changeListTimeout = window.setTimeout(async () => {
             await this.init();
 
         }, time);
@@ -1088,7 +1088,7 @@ export class PluginExploreList extends PluginBaseModule {
         const el = e.target as HTMLInputElement;
         if (!el) return;
         clearTimeout(this.timeFilterChange);
-        this.timeFilterChange = setTimeout(() => {
+        this.timeFilterChange = window.setTimeout(() => {
 
             this.inFilter = el.value.length > 0;
 

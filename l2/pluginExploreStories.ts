@@ -240,7 +240,7 @@ export class PluginExploreStories extends PluginBaseModule {
             el = el.closest('menuitems') as HTMLElement;
         if (!el || !el.getAttribute('mode')) return;
 
-        this.timeBlur = setTimeout(() => {
+        this.timeBlur = window.setTimeout(() => {
             el.setAttribute('mode', '');
         }, 800)
 
@@ -250,7 +250,7 @@ export class PluginExploreStories extends PluginBaseModule {
     private overMenu(e: MouseEvent) {
 
         if (!this.timeBlur) return;
-        clearTimeout(this.timeBlur);
+        window.clearTimeout(this.timeBlur);
 
     }
 

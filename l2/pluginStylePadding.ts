@@ -219,7 +219,8 @@ export class PluginStylePadding extends StateLitElement {
         const prop = el.getAttribute('prop');
         if (!prop) return;
         const convertedProp = this.state?.lessCSS?.lessAST.toCamelCaseProperty(prop);
-        this.timeonChangePadding = setTimeout(() => {
+        if (this.timeonChangePadding) window.clearTimeout(this.timeonChangePadding);
+        this.timeonChangePadding = window.setTimeout(() => {
             if (!this.paddingLocked) {
                 if (!convertedProp) return;
                 (this as any)[convertedProp] = el.value;

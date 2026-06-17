@@ -162,7 +162,7 @@ export class CollabSpliterVerticalVarFixed100554 extends LitElement {
         this.resizeObserver = new ResizeObserver((entries) => {
 
           if (this.timeoutResize) clearTimeout(this.timeoutResize);
-          this.timeoutResize = setTimeout(() => {
+          this.timeoutResize = window.setTimeout(() => {
             for (let entry of entries) {
               this.fixedheight = entry.contentRect.height.toString();
             }
