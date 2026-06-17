@@ -1,6 +1,6 @@
 /// <mls fileReference="_100554_/l2/pluginCreateProjectLocalToDriver.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { html, css } from 'lit';
+import { html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
 import { gitHubLogin, gitLabLogin, isProviderConnected, gitlabIcon, githubIcon } from '/_100554_/l2/libProviders.js';
@@ -17,7 +17,7 @@ import {
   template_package,
   template_build,
   template_tsconfig,
-} from '/_100554_/l2/pluginNewProjectTemplate.js';
+} from '/_102027_/l2/libNewProject.js';
 
 import '/_100554_/l2/pluginNewProjectLog.js';
 
