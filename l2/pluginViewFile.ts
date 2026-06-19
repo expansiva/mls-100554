@@ -57,6 +57,7 @@ export class PluginViewFile extends PluginBaseModule {
         }
         if (changedProps.has('msize')) {
             this.editor?.setAttribute('msize', this.msize);
+            (window as any).elEditorDetailsView?.setAttribute('msize', this.msize);
         }
     }
 
@@ -64,14 +65,21 @@ export class PluginViewFile extends PluginBaseModule {
         this.createEditor();
         if (!this._ed1) return;
 
-        this._ed1.updateOptions({ readOnly: true });
+        this._ed1.updateOptions({ readOnly: false });
         
         if (this.extension === '.md' && this.file) {
             this._ed1.updateOptions({ readOnly: false });
             const m = await createModelAnyFile(this.file);
             this._ed1.setModel(m.model);
 
-        } else {
+            return
+
+        }
+
+        if (this.file && ['.html', '.ts', '.defs.ts', '.test.ts'].includes(this.file.extension)) {
+            const m = await this.file.getOrCreateModel();
+            this._ed1.setModel(m.model);
+        }else {
             const value = this.contentText;
             const model = this._ed1.getModel();
             if (model) {
@@ -171,7 +179,7 @@ export class PluginViewFile extends PluginBaseModule {
 
     renderInfoMode(): TemplateResult {
 
-        return html`<div id="elEditor" style="width:93%; min-height: 500px; display:${this.current === 2 ? 'block' : 'none'}"></div>`
+        return html`<div id="elEditor" style="width:93%; min-height: 100%; display:${this.current === 2 ? 'block' : 'none'}"></div>`
 
 
     }
