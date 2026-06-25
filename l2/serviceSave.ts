@@ -6,7 +6,7 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import { collab_branch } from '/_100554_/l2/collabIcons.js';
-import { undoFile } from '/_102027_/l2/libStor.js'; 
+import { undoFile } from '/_102027_/l2/libStor.js';
 import { initServiceSaveaddBranch } from '/_100554_/l2/saveAddBranch.js';
 import { getMyKeysBranch, calculateTotalStringSize } from '/_102027_/l2/libCommom.js';
 import { getConfigProject, updateConfigProject } from '/_102027_/l2/libProjectConfig.js';
@@ -464,14 +464,14 @@ export class ServiceSave extends ServiceBase {
         if (['new', 'rename'].includes(item.file.status)) {
 
             return html`
-                <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${(e:any) => this.undoFile(e.target, item.file)}" style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 17px; display:flex; align-items:center; cursor:pointer"></span> 
+                <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${(e: any) => this.undoFile(e.target, item.file)}" style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 17px; display:flex; align-items:center; cursor:pointer"></span> 
             `;
 
         } else {
 
             return html`
             <span @click="${this.clickHistory}" .item=${item} style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 17px; display:flex; align-items:center; cursor:pointer" class="mls-gpbtnslider-item fa-regular fa-clock" title="History"></span>
-            <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${(e:any) => this.undoFile(e.target,item.file)}" style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 17px; display:flex; align-items:center; cursor:pointer"></span>
+            <span class="mls-gpbtnslider-item fa fa-undo" title="undo" @click="${(e: any) => this.undoFile(e.target, item.file)}" style="font-size: 13px; color: #7678a6; margin-left: 2px; height: 17px; display:flex; align-items:center; cursor:pointer"></span>
             `;
 
         }
@@ -569,7 +569,7 @@ export class ServiceSave extends ServiceBase {
         return true;
     }
 
-    private async setInfos() { 
+    private async setInfos() {
         try {
 
             const objProjects: any = {};
@@ -658,7 +658,7 @@ export class ServiceSave extends ServiceBase {
         new: { icon: 'fa-plus', title: 'New' }
     };
 
-    private fromToExtension:Record<string, string> = {
+    private fromToExtension: Record<string, string> = {
         '.ts': 'ts',
         '.less': 'style',
         '.html': 'html',
@@ -686,7 +686,7 @@ export class ServiceSave extends ServiceBase {
             disabled = true;
             onlyFather = true;
         }
- 
+
         errorLocal = !(await mls.stor.localDB.existFile({ project: item.project, extension: item.extension, shortName: item.shortName, folder: item.folder, level: item.level }));
 
         if (errorLocal) span = '<span> Error: the file does not exist in the database<span>';
@@ -862,8 +862,14 @@ export class ServiceSave extends ServiceBase {
 
     private forceSaveL5ProjectFile: boolean = false;
     private arrayRollback: mls.stor.IFileInfo[] = [];
+    private inSaving: boolean = false;
     //Sempre que salvar vai gerar um novo branch no usuario e solicitar um pullrequest.
     private async onSave(e: MouseEvent) {
+
+        if (this.inSaving) return;
+
+        this.inSaving = true;
+
         const oldOwner = this.owner;
         const oldRepo = this.repo;
         const oldBranch = this.branch;
@@ -871,16 +877,23 @@ export class ServiceSave extends ServiceBase {
         try {
             e.stopPropagation();
             const el = e.target as HTMLButtonElement;
-            if (!el) return;
+            if (!el) {
+                this.inSaving = false;
+                return;
+            }
 
             if (this.exceededLimit) {
+                this.inSaving = false;
                 this.setError(this.myMessage.msgErroTotFile);
                 return;
             }
 
 
             const father = el.closest('sectionsave') as HTMLDivElement;
-            if (!father) return;
+            if (!father) {
+                this.inSaving = false;
+                return;
+            }
 
             const txt = father.querySelector('textarea') as HTMLTextAreaElement;
             if (!txt.value) {
@@ -931,6 +944,8 @@ export class ServiceSave extends ServiceBase {
             txt.value = '';
 
             this.clearLocalHIstoryCurrentInfoDriver();
+            
+            this.inSaving = false;
             this.owner = oldOwner;
             this.repo = oldRepo;
             this.branch = oldBranch;
@@ -943,6 +958,7 @@ export class ServiceSave extends ServiceBase {
             this.showLoader(false);
 
         } catch (err: any) {
+            this.inSaving = false;
             this.owner = oldOwner;
             this.repo = oldRepo;
             this.branch = oldBranch;
@@ -955,7 +971,8 @@ export class ServiceSave extends ServiceBase {
             this.backChecked();
             this.showLoader(false);
             console.info('Error onSave:', err);
-        }
+
+        } 
     }
 
     private verifyNeedSelectDS(array: mls.stor.IFileInfo[]) {
@@ -1436,7 +1453,7 @@ export class ServiceSave extends ServiceBase {
                         ${storFile.extension} Undo File.
                     </label>
                 </div>`;
-        
+
         //if (el) el.remove();
         //this.itens = this.removeFileByInfoImmutable(this.itens || {}, storFile);
         /*setTimeout(async () => {
@@ -1470,7 +1487,7 @@ export class ServiceSave extends ServiceBase {
                     const items = ifile[fileKey];
 
                     const found = items.some(
-                        item =>  item.file.shortName === targetFile.shortName && item.file.folder === targetFile.folder && item.file.level === targetFile.level
+                        item => item.file.shortName === targetFile.shortName && item.file.folder === targetFile.folder && item.file.level === targetFile.level
                         // troque aqui se não for "id"
                     );
 
@@ -1528,5 +1545,5 @@ interface Iitem {
     onlyFather: boolean,
     disabled: boolean,
     errorLocal: boolean,
-    modelIsDispose:boolean
+    modelIsDispose: boolean
 }
