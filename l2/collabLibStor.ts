@@ -20,6 +20,7 @@ export async function createStorFile(req: IReqCreateStorFile, needCreateModel: b
     if (!file) throw new Error('[createStorFile] Invalid storFile');
 
     file.status = req.status ?? 'new';
+    file.updatedAt = new Date().toISOString();
 
     let source = req.source;
     if (req.level === 2) {
