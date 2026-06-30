@@ -2,13 +2,20 @@
 
 plugin-view-file-100554 {
 
-    display: block;
+     display: flex;
+    flex-direction: column;
+    height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
     color: @text-primary-color;
 
     .agent-box {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
         max-width: 1200px;
-        margin: 10px auto;
+        margin: 0 auto;
         padding: .3rem;
         border-radius: 18px;
     }
@@ -103,13 +110,15 @@ plugin-view-file-100554 {
 
     .viewer-container {
 
+        flex: 1;
+        min-height: 0;
         background: @bg-primary-color-darker;
         padding: 1rem;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         overflow: auto;
-        min-height: 500px;
     }
 
     /* IMAGE / VIDEO */
@@ -120,6 +129,7 @@ plugin-view-file-100554 {
         max-height: 600px;
         border-radius: 8px;
         box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        margin: auto;
     }
 
     /* AUDIO */
@@ -127,6 +137,7 @@ plugin-view-file-100554 {
     .viewer-container audio {
         width: 100%;
         max-width: 500px;
+        margin: auto;
     }
 
     /* IFRAME */

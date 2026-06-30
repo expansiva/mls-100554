@@ -8,7 +8,7 @@ import { getBaseTemplate } from '/_102027_/l2/libCommom.js';
 import { createModel } from '/_102027_/l2/libModel.js';
 
 interface FileInfo {
-    project: number;
+    project: number; 
     level: number;
     shortName: string;
     folder: string;
@@ -30,6 +30,7 @@ export class MlsFileTree extends CollabLitElement {
 
     @property() position: string | undefined;
     @property() project: string | undefined;
+    @property() filter: string = '';
     @property({ type: Object }) files: Record<string, FileInfo> = {};
     @state() private expanded: Set<string> = new Set();
     @state() private selected: string = '';
@@ -51,6 +52,8 @@ export class MlsFileTree extends CollabLitElement {
 
         if (this.files !== src) this.files = src;
 
+        if (this.filter) return this.renderFiltered(src);
+
         const tree = this.buildTree();
 
         return html`
@@ -58,6 +61,53 @@ export class MlsFileTree extends CollabLitElement {
                 ${tree.children.map(c => this.renderNode(c, 0))}
             </ul>
         `;
+    }
+
+    private renderFiltered(src: Record<string, any>): TemplateResult {
+        const project = +(this.project || '0');
+        const term = this.filter.toLowerCase();
+
+        const matches = (Object.values(src) as mls.stor.IFileInfo[])
+            .filter(f =>
+                f.project === project && (
+                    f.shortName.toLowerCase().includes(term) ||
+                    (f.folder && f.folder.toLowerCase().includes(term)) ||
+                    (f.extension && f.extension.toLowerCase().includes(term))
+                )
+            )
+            .sort((a, b) => a.shortName.localeCompare(b.shortName));
+
+        if (matches.length === 0) {
+            return html`<div style="padding:8px;color:#888">Sem resultados para "<strong>${this.filter}</strong>"</div>`;
+        }
+
+        return html`<ul class="tree-root">${matches.map(file => {
+            const key = mls.stor.getKeyToFile(file);
+            const fullName = (file.folder ? file.folder + '/' : '') + file.shortName + file.extension;
+            const highlighted = this.highlightText(fullName, term);
+            return html`
+                <li class="test-item ${this.selected === key ? 'selected' : ''}"
+                    style="--depth:0"
+                    .myFile=${file}
+                    @click=${() => this.selectFile(key, file)}>
+                    <div class="elContent">
+                        <info-item>
+                            <span class="spanFileName" .innerHTML="${highlighted}"></span>
+                        </info-item>
+                    </div>
+                </li>
+            `;
+        })}</ul>`;
+    }
+
+    private highlightText(text: string, term: string): string {
+        const idx = text.toLowerCase().indexOf(term);
+        if (idx < 0) return text;
+        return (
+            text.slice(0, idx) +
+            `<mark style="background:rgba(255,200,0,.4);border-radius:2px;font-weight:600;padding:0 1px">${text.slice(idx, idx + term.length)}</mark>` +
+            text.slice(idx + term.length)
+        );
     }
 
     private renderNode(node: TreeNode, depth: number): TemplateResult<1> {
@@ -140,6 +190,7 @@ export class MlsFileTree extends CollabLitElement {
     }
 
     private async undoFile(file: mls.stor.IFileInfo) {
+        if (!window.confirm(`Undo: ${file.shortName}?`)) return;
         await undoFile(file);
         this.requestUpdate();
     }
@@ -313,9 +364,10 @@ export class MlsFileTree extends CollabLitElement {
 
         const files = this.collectFilesFromNode(node);
 
-        console.log('[mlsFileTree] undoAllByFolders', { folder: node.fullPath, count: files.length });
-
         if (files.length === 0) return;
+
+        const label = node.fullPath || 'root';
+        if (!window.confirm(`undo: ${label} (${files.length})?`)) return;
 
         for await (const mfile of files) {
             if (!mfile) continue;

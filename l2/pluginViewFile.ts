@@ -179,7 +179,7 @@ export class PluginViewFile extends PluginBaseModule {
 
     renderInfoMode(): TemplateResult {
 
-        return html`<div id="elEditor" style="width:93%; min-height: 100%; display:${this.current === 2 ? 'block' : 'none'}"></div>`
+        return html`<div id="elEditor" style="width:100%; flex:1; min-height:0; align-self:stretch; display:${this.current === 2 ? 'flex' : 'none'}; flex-direction:column;"></div>`
 
 
     }
@@ -207,7 +207,7 @@ export class PluginViewFile extends PluginBaseModule {
 
             const model = this.createModel();
             (window as any).elEditorDetailsView = document.createElement('collab-monaco-editor-102027');
-            (window as any).elEditorDetailsView.style.cssText = 'display:block; width: calc(100% - 150px); height: 500px;'
+            (window as any).elEditorDetailsView.style.cssText = 'display:block; width:100%; flex:1; min-height:0;'
             this.editor = (window as any).elEditorDetailsView as IHTMLEditorElement;
             (window as any).editorTaskView = monaco.editor.create(this.editor, this.conf as monaco.editor.IEditorOptions);
             this._ed1 = (window as any).editorTaskView as monaco.editor.IStandaloneCodeEditor;
