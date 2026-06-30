@@ -116,7 +116,7 @@ export class ServiceDetail100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        if (!this.contentPlugin) return;
+        if (!this.contentPlugin || reinit) return;
         Array.from(this.contentPlugin.children).forEach((child) => {
             if (child.tagName.startsWith('PLUGIN-')) {
                 child.setAttribute('msize', this.msize);
@@ -264,7 +264,7 @@ export class ServiceDetail100554 extends ServiceBase {
 
     private updateContentPluginWithScripts(ori: string, content: string, args: any): void {
         if (!this.contentPlugin) throw new Error('Error on serviceDetail, contentPlugin is null');
-
+    
         const ori1 = ori.replace(/\//g, '--')
 
         Array.from(this.contentPlugin.children).forEach((i) => (i as HTMLElement).style.display = "none");
@@ -275,6 +275,7 @@ export class ServiceDetail100554 extends ServiceBase {
             el = document.createElement('div');
             el.id = ori1 + mls.actualLevel;
             this.setContentinEl(el, content, args);
+            el.style.cssText = ' width: 100%; height: 100%;';
             return;
         }
 

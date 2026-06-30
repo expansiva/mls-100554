@@ -376,7 +376,7 @@ export class PluginExploreList extends PluginBaseModule {
     renderList() {
 
         if (this.modeFilter === 'all' && this.filterProject > 0) {
-            return html`<mls-file-tree-100554 project="${this.filterProject}" position="${this.position}"></mls-file-tree-100554>`
+            return html`<mls-file-tree-100554 project="${this.filterProject}" position="${this.position}" filter="${this.searchTerm}"></mls-file-tree-100554>`
         }
 
         let letterInit = '';
@@ -480,7 +480,9 @@ export class PluginExploreList extends PluginBaseModule {
     renderLiItem(file: mls.stor.IFileInfo, index: number, inHistory: boolean) {
 
         const name = this.getAllName(file, inHistory);
-        const nameFilter = inHistory ? '*******' : name.toLocaleLowerCase();
+        const nameFilter = inHistory
+            ? '*******'
+            : `${file.folder ? file.folder + '/' : ''}${file.shortName}${file.extension}`.toLocaleLowerCase();
 
         let auxVersion = '';
         let auxStorage = '';
@@ -611,6 +613,8 @@ export class PluginExploreList extends PluginBaseModule {
             if (['project', 'designSystem'].includes(mfile.shortName) && mfile.folder === '' && mfile.status === 'new') {
                 throw new Error(`This action cannot be performed on this file at this time.`);
             }
+
+            if (!window.confirm(`${this.msg.undo}: ${mfile.shortName}?`)) return;
 
             if (this.hiddenFiles) {
                 await undoFile(mfile);
@@ -1082,6 +1086,8 @@ export class PluginExploreList extends PluginBaseModule {
 
     private inFilter = false;
     private timeFilterChange = 0;
+    private searchTerm: string = '';
+
     private filterLiChange(e: InputEvent) {
 
         e.stopPropagation();
@@ -1090,7 +1096,15 @@ export class PluginExploreList extends PluginBaseModule {
         clearTimeout(this.timeFilterChange);
         this.timeFilterChange = window.setTimeout(() => {
 
+            this.searchTerm = el.value;
             this.inFilter = el.value.length > 0;
+
+            // In tree mode, push filter into the shadow-DOM tree component directly
+            if (this.modeFilter === 'all' && this.filterProject > 0) {
+                const tree = this.querySelector('mls-file-tree-100554') as any;
+                if (tree) tree.filter = this.searchTerm;
+                return;
+            }
 
             const contentServiceList = el.closest('.contentServiceList');
             if (!contentServiceList) return;
@@ -1106,7 +1120,7 @@ export class PluginExploreList extends PluginBaseModule {
                 } else {
                     li.style.display = 'none';
                 }
-            })
+            });
 
         }, 500);
 
