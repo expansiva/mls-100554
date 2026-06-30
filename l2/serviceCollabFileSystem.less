@@ -3,7 +3,7 @@
 service-collab-file-system-100554 {
     display: block;
     height: 100%;
-    overflow: hidden;
+    overflow: auto;
     color: @text-primary-color;
     background: @bg-primary-color;
 
@@ -12,7 +12,6 @@ service-collab-file-system-100554 {
         display: flex;
         flex-direction: column;
         gap: 0.75rem;
-        height: 100%;
         min-height: 0;
         padding: 0.75rem;
     }
@@ -45,10 +44,14 @@ service-collab-file-system-100554 {
     }
 
     .collab-fs-header p,
-    .collab-fs-muted,
-    .collab-fs-detail-meta {
+    .collab-fs-muted {
         color: @text-primary-color-lighter;
         font-size: @font-size-12;
+    }
+
+    .collab-fs-muted.center {
+        text-align: center;
+        margin-top: 0.5rem;
     }
 
     .collab-fs-project {
@@ -59,13 +62,7 @@ service-collab-file-system-100554 {
         font-size: @font-size-12;
     }
 
-    .collab-fs-actions,
-    .collab-fs-summary {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
+    // ---- buttons ----
     button {
         min-height: 2rem;
         border: 1px solid @bg-primary-color-focus;
@@ -92,51 +89,192 @@ service-collab-file-system-100554 {
         color: #ffffff;
     }
 
-    .collab-fs-notice {
-        border-left: 3px solid #1f6feb;
-        background: @bg-secondary-color;
-        padding: 0.5rem 0.65rem;
-        font-size: @font-size-12;
+    button.danger {
+        border-color: #f85149;
+        color: #f85149;
+        background: transparent;
     }
 
-    .collab-fs-summary {
+    button.block {
+        width: 100%;
+    }
+
+    button.icon {
+        min-height: auto;
+        border: none;
+        background: transparent;
         color: @text-primary-color-lighter;
+        padding: 0.15rem 0.3rem;
+    }
+
+    button .dir {
+        font-weight: @font-weight-bold;
+    }
+
+    // ---- first run ----
+    .collab-fs-firstrun {
+        text-align: center;
+        padding: 0.75rem 0.25rem;
+    }
+
+    .collab-fs-firstrun-icon {
+        font-family: 'Font Awesome 6 Pro', 'FontAwesome';
+        font-size: 1.8rem;
+        color: @text-primary-color-lighter;
+    }
+
+    .collab-fs-firstrun-title {
+        font-size: @font-size-14;
+        font-weight: @font-weight-bold;
+        margin: 0.5rem 0 0.35rem;
+    }
+
+    .collab-fs-firstrun button {
+        margin-top: 0.85rem;
+    }
+
+    // ---- connection ----
+    .collab-fs-connection {
+        background: @bg-secondary-color;
+        border-radius: 6px;
+        padding: 0.5rem 0.65rem;
+    }
+
+    .collab-fs-connection-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: @font-size-13;
+    }
+
+    .collab-fs-dot {
+        flex: 0 0 auto;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #2ea043;
+    }
+
+    .collab-fs-connection-text {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .collab-fs-connection-text .arrow {
+        color: @text-primary-color-lighter;
+    }
+
+    .collab-fs-details-panel {
+        margin-top: 0.6rem;
+        border-top: 1px solid @bg-primary-color-focus;
+        padding-top: 0.6rem;
+    }
+
+    .collab-fs-details-panel dl {
+        margin: 0;
         font-size: @font-size-12;
     }
 
-    .collab-fs-summary span {
-        border: 1px solid @bg-primary-color-focus;
-        border-radius: 4px;
-        padding: 0.15rem 0.4rem;
+    .collab-fs-details-panel dl > div {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.15rem 0;
     }
 
-    .collab-fs-workspace {
-        display: grid;
-        grid-template-columns: minmax(12rem, 38%) minmax(0, 1fr);
-        gap: 0.75rem;
-        min-height: 0;
+    .collab-fs-details-panel dt {
+        color: @text-primary-color-lighter;
+    }
+
+    .collab-fs-details-panel dd {
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .collab-fs-details-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.6rem;
+    }
+
+    .collab-fs-details-actions button {
         flex: 1;
     }
 
-    .collab-fs-list,
-    .collab-fs-details {
-        min-height: 0;
-        overflow: auto;
-        border: 1px solid @bg-primary-color-focus;
-    }
-
-    .collab-fs-list {
+    // ---- scan cta ----
+    .collab-fs-scan-cta {
         display: flex;
         flex-direction: column;
     }
 
+    // ---- clean ----
+    .collab-fs-clean {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        background: @bg-secondary-color;
+        border-radius: 6px;
+        padding: 0.65rem 0.75rem;
+        font-size: @font-size-13;
+    }
+
+    // ---- metrics ----
+    .collab-fs-metrics {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .collab-fs-metrics > div {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: @bg-secondary-color;
+        border-radius: 6px;
+        padding: 0.4rem 0.25rem;
+    }
+
+    .collab-fs-metrics .num {
+        font-size: @font-size-16;
+        font-weight: @font-weight-bold;
+    }
+
+    .collab-fs-metrics .lbl {
+        font-size: @font-size-12;
+        color: @text-primary-color-lighter;
+    }
+
+    .collab-fs-metrics .rescan {
+        flex: 0 0 auto;
+        font-size: @font-size-16;
+    }
+
+    // ---- change list ----
+    .collab-fs-list {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .collab-fs-group-title {
+        margin: 0.65rem 0 0.25rem;
+        font-size: @font-size-11;
+        color: @text-primary-color-lighter;
+    }
+
     .collab-fs-change {
         display: grid;
-        grid-template-columns: 3.5rem minmax(0, 1fr);
+        grid-template-columns: 4.5rem minmax(0, 1fr) auto;
         align-items: center;
         gap: 0.5rem;
         width: 100%;
-        min-height: 2.5rem;
+        min-height: 2.2rem;
         border-width: 0 0 1px 0;
         border-radius: 0;
         text-align: left;
@@ -151,75 +289,90 @@ service-collab-file-system-100554 {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        font-size: @font-size-13;
     }
 
+    .collab-fs-change .warn {
+        color: #f85149;
+        font-style: normal;
+    }
+
+    // ---- badges by direction / risk ----
     .kind {
         border-radius: 4px;
         padding: 0.15rem 0.3rem;
         text-align: center;
-        font-size: @font-size-12;
+        font-size: @font-size-11;
     }
 
-    .kind.browserOnly {
-        background: #d1f7c4;
-        color: #1a4d1a;
+    .kind.b-browser {
+        background: #E6F1FB;
+        color: #0C447C;
     }
 
-    .kind.localOnly {
-        background: #ffd7d7;
-        color: #7a2020;
+    .kind.b-disk {
+        background: #FAEEDA;
+        color: #633806;
     }
 
-    .kind.modified {
-        background: #fff1b8;
-        color: #604600;
+    .kind.b-new {
+        background: #EAF3DE;
+        color: #173404;
     }
 
-    .kind.unsupported {
-        background: #e6e8eb;
-        color: #353a40;
+    .kind.b-conflict {
+        background: #FCEBEB;
+        color: #791F1F;
     }
 
-    .collab-fs-details {
+    .kind.b-skip {
+        background: #E6E8EB;
+        color: #353A40;
+    }
+
+    // ---- actions ----
+    .collab-fs-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .collab-fs-actions button {
+        flex: 1;
+    }
+
+    // ---- confirm panel ----
+    .collab-fs-confirm {
+        background: @bg-secondary-color;
+        border: 1px solid @bg-primary-color-focus;
+        border-radius: 6px;
         padding: 0.75rem;
     }
 
-    .collab-fs-empty {
-        color: @text-primary-color-lighter;
-        padding: 1rem;
+    .collab-fs-confirm ul {
+        margin: 0.25rem 0 0.75rem;
+        padding-left: 1.1rem;
+        font-size: @font-size-13;
     }
 
-    .collab-fs-diff {
-        overflow: auto;
-        margin: 0.75rem 0 0;
-        border: 1px solid @bg-primary-color-focus;
+    .collab-fs-confirm li {
+        padding: 0.1rem 0;
+    }
+
+    .collab-fs-confirm-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .collab-fs-confirm-actions button {
+        flex: 1;
+    }
+
+    // ---- notice ----
+    .collab-fs-notice {
+        border-left: 3px solid #1f6feb;
         background: @bg-secondary-color;
+        padding: 0.5rem 0.65rem;
         font-size: @font-size-12;
-        line-height: 1.45;
-    }
-
-    .collab-fs-diff div {
-        display: grid;
-        grid-template-columns: 1.5rem minmax(0, 1fr);
-        min-height: 1.35rem;
-        white-space: pre;
-    }
-
-    .collab-fs-diff span {
-        user-select: none;
-        text-align: center;
-    }
-
-    .collab-fs-diff code {
-        overflow: visible;
-        font-family: monospace;
-    }
-
-    .collab-fs-diff .added {
-        background: #dafbe1;
-    }
-
-    .collab-fs-diff .removed {
-        background: #ffebe9;
     }
 }

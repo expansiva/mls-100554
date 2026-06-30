@@ -58,9 +58,11 @@ export interface CollabFsAccessAdapter {
     writeFile(directory: CollabFsDirectoryHandle, path: string, content: string | Blob): Promise<CollabFsLocalFile>;
     writeTextFile(directory: CollabFsDirectoryHandle, path: string, content: string): Promise<void>;
     removeFile(directory: CollabFsDirectoryHandle, path: string): Promise<void>;
+    trashFile(directory: CollabFsDirectoryHandle, path: string, trashFolder: string): Promise<void>;
 }
 
 const DB_NAME = 'collabFileSystem100554';
+const TRASH_DIR = '.collab-fs-trash';
 const DB_VERSION = 1;
 const STORE_HANDLES = 'directoryHandles';
 const BASE_HANDLE_KEY = 'base:mls-base';
@@ -127,6 +129,18 @@ export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
             const store = tx.objectStore(STORE_HANDLES);
             const result = await this.requestToPromise<any>(store.get(BASE_HANDLE_KEY));
             return result?.handle || null;
+        } finally {
+            db.close();
+        }
+    }
+
+    public async removeHandle(project: number): Promise<void> {
+        const db = await this.openDB();
+        try {
+            const tx = db.transaction(STORE_HANDLES, 'readwrite');
+            const done = this.transactionDone(tx);
+            tx.objectStore(STORE_HANDLES).delete(this.getProjectKey(project));
+            await done;
         } finally {
             db.close();
         }
@@ -203,6 +217,17 @@ export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
         await current.removeEntry(fileName, { recursive: false });
     }
 
+    // Backs up the file under .collab-fs-trash before deleting, so a Pull is reversible.
+    public async trashFile(directory: CollabFsDirectoryHandle, path: string, trashFolder: string): Promise<void> {
+        this.assertSafePath(path);
+        const handle = await this.getFileHandleByPath(directory, path, false);
+        if (!handle) return;
+        const file = await handle.getFile();
+        const content = this.shouldReadAsText(path) ? await file.text() : file;
+        await this.writeFile(directory, `${trashFolder}/${path}`, content);
+        await this.removeFile(directory, path);
+    }
+
     public async walkTextFiles(
         directory: CollabFsDirectoryHandle,
         prefix: string,
@@ -253,7 +278,8 @@ export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
     }
 
     public shouldIgnoreDirectory(name: string): boolean {
-        return name === '.git' ||
+        return name === TRASH_DIR ||
+            name === '.git' ||
             name === '.github' ||
             name === 'node_modules' ||
             name === 'dist' ||

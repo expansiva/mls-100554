@@ -7,7 +7,171 @@ import { CollabFsDirectoryHandle, FileSystemAccessAdapter } from '/_100554_/l2/c
 import { CollabFileSystemSync, CollabFsChange, CollabFsProgress, CollabFsScanResult } from '/_100554_/l2/collabFileSystemSync.js';
 import { openElementInServiceDetails } from '/_100554_/l2/libCommom.js';
 
+/// **collab_i18n_start**
+const message_en = {
+    title: 'Local FS',
+    unsupported: 'Use a Chromium browser for local filesystem access.',
+    noProject: 'No project selected.',
+    linkTitle: 'Link a local folder',
+    linkBody: "Pick an empty folder for this project. Don't reuse a folder that's a git working copy — sync manages files directly.",
+    selectFolder: 'Select folder',
+    connected: 'Connected',
+    project: 'Project',
+    folder: 'Folder',
+    lastSync: 'Last sync',
+    files: 'Files',
+    never: 'never',
+    changeFolder: 'Change',
+    disconnect: 'Disconnect',
+    scanChanges: 'Scan changes',
+    scanHint: 'Scan to see what to pull or push.',
+    scanning: 'Scanning…',
+    clean: 'Clean. No changes.',
+    rescan: 'Scan again',
+    toPull: 'to pull',
+    toPush: 'to push',
+    conflictsLabel: 'conflict',
+    groupBrowser: 'From browser — Pull to apply',
+    groupDisk: 'From disk — Push to apply',
+    groupConflict: 'Conflicts — kept on disk',
+    groupSkipped: 'Skipped',
+    bAdded: 'added',
+    bChanged: 'changed',
+    bDeleted: 'deleted',
+    bNew: 'new',
+    bConflict: 'conflict',
+    bSkipped: 'skipped',
+    pull: 'Pull',
+    push: 'Push',
+    pushBlocked: 'Push blocked. Pull to FS first.',
+    confirmPullTitle: 'Pull to FS',
+    confirmPushTitle: 'Push to Browser',
+    cWrite: 'written to disk from the browser',
+    cTrash: 'moved to .collab-fs-trash',
+    cConflictKept: 'conflict(s) kept untouched',
+    cKeepLocal: 'new local file(s) kept',
+    cCreate: 'created in the browser',
+    cUpdate: 'updated in the browser',
+    cDelete: 'deleted in the browser',
+    confirm: 'Confirm',
+    cancel: 'Cancel',
+    folderLinked: 'Folder linked. Scan to see changes.',
+    pullCanceled: 'Pull canceled.',
+    pushCanceled: 'Push canceled.',
+    nothingToPull: 'Nothing to pull.',
+    nothingToPush: 'Nothing to push.',
+    disconnected: 'Folder disconnected.',
+    resWritten: 'written',
+    resTrashed: 'trashed',
+    resSkipped: 'skipped',
+    resCreated: 'created',
+    resUpdated: 'updated',
+    resDeleted: 'deleted',
+    pBrowser: 'Reading browser',
+    pLocal: 'Reading local',
+    pCompare: 'Comparing',
+    pWrite: 'Writing local',
+    pDelete: 'Removing local',
+    pPush: 'Loading browser',
+    pManifest: 'Updating manifest',
+    mSelectFolder: 'Select folder',
+    mScan: 'Scan changes',
+    mPull: 'Pull to FS',
+    mPush: 'Push to Browser',
+    mAbout: 'About this content',
+};
+
+const message_pt: typeof message_en = {
+    title: 'Local FS',
+    unsupported: 'Use um navegador Chromium para acessar o sistema de arquivos local.',
+    noProject: 'Nenhum projeto selecionado.',
+    linkTitle: 'Conectar uma pasta local',
+    linkBody: 'Escolha uma pasta vazia para este projeto. Não reutilize uma pasta que seja um repositório git — a sincronização gerencia os arquivos diretamente.',
+    selectFolder: 'Selecionar pasta',
+    connected: 'Conectado',
+    project: 'Projeto',
+    folder: 'Pasta',
+    lastSync: 'Última sync',
+    files: 'Arquivos',
+    never: 'nunca',
+    changeFolder: 'Trocar',
+    disconnect: 'Desconectar',
+    scanChanges: 'Verificar mudanças',
+    scanHint: 'Verifique para ver o que enviar ou trazer.',
+    scanning: 'Verificando…',
+    clean: 'Limpo. Sem mudanças.',
+    rescan: 'Verificar de novo',
+    toPull: 'p/ trazer',
+    toPush: 'p/ enviar',
+    conflictsLabel: 'conflito',
+    groupBrowser: 'Do browser — Pull aplica',
+    groupDisk: 'Do disco — Push aplica',
+    groupConflict: 'Conflitos — mantidos no disco',
+    groupSkipped: 'Ignorados',
+    bAdded: 'novo',
+    bChanged: 'alterado',
+    bDeleted: 'removido',
+    bNew: 'novo',
+    bConflict: 'conflito',
+    bSkipped: 'ignorado',
+    pull: 'Pull',
+    push: 'Push',
+    pushBlocked: 'Push bloqueado. Faça Pull to FS primeiro.',
+    confirmPullTitle: 'Pull to FS',
+    confirmPushTitle: 'Push to Browser',
+    cWrite: 'gravados no disco a partir do browser',
+    cTrash: 'movidos para .collab-fs-trash',
+    cConflictKept: 'conflito(s) mantidos intactos',
+    cKeepLocal: 'arquivo(s) novo(s) locais mantidos',
+    cCreate: 'criados no browser',
+    cUpdate: 'atualizados no browser',
+    cDelete: 'removidos no browser',
+    confirm: 'Confirmar',
+    cancel: 'Cancelar',
+    folderLinked: 'Pasta conectada. Verifique as mudanças.',
+    pullCanceled: 'Pull cancelado.',
+    pushCanceled: 'Push cancelado.',
+    nothingToPull: 'Nada para trazer.',
+    nothingToPush: 'Nada para enviar.',
+    disconnected: 'Pasta desconectada.',
+    resWritten: 'gravados',
+    resTrashed: 'p/ lixeira',
+    resSkipped: 'ignorados',
+    resCreated: 'criados',
+    resUpdated: 'atualizados',
+    resDeleted: 'removidos',
+    pBrowser: 'Lendo browser',
+    pLocal: 'Lendo local',
+    pCompare: 'Comparando',
+    pWrite: 'Gravando local',
+    pDelete: 'Removendo local',
+    pPush: 'Carregando browser',
+    pManifest: 'Atualizando manifesto',
+    mSelectFolder: 'Selecionar pasta',
+    mScan: 'Verificar mudanças',
+    mPull: 'Pull to FS',
+    mPush: 'Push to Browser',
+    mAbout: 'Sobre este conteúdo',
+};
+
+type MessageType = typeof message_en;
+
+const messages: { [key: string]: MessageType } = {
+    'en': message_en,
+    'pt': message_pt,
+};
+/// **collab_i18n_end**
+
 const PREF_KEY = 'serviceCollabFileSystem100554';
+
+const BROWSER_KINDS: CollabFsChange['kind'][] = ['browserOnly', 'browserModified', 'browserDeleted'];
+const DISK_KINDS: CollabFsChange['kind'][] = ['diskOnly', 'localOnly', 'diskModified', 'diskDeleted'];
+const CONFLICT_KINDS: CollabFsChange['kind'][] = ['bothModified', 'modified'];
+const SKIPPED_KINDS: CollabFsChange['kind'][] = ['unsupported'];
+
+type PendingConfirm =
+    | { kind: 'pull'; pull: ReturnType<CollabFileSystemSync['planPull']> }
+    | { kind: 'push'; push: ReturnType<CollabFileSystemSync['planPush']> };
 
 @customElement('service-collab-file-system-100554')
 export class ServiceCollabFileSystem100554 extends ServiceBase {
@@ -21,7 +185,13 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     @state() private changes: CollabFsChange[] = [];
     @state() private selectedPath = '';
     @state() private scanResult: CollabFsScanResult | null = null;
+    @state() private scanned = false;
+    @state() private detailsOpen = false;
+    @state() private pendingConfirm: PendingConfirm | null = null;
+    @state() private lastSyncAt = '';
+    @state() private linkedFileCount = 0;
 
+    private msg: MessageType = messages['en'];
     private adapter = new FileSystemAccessAdapter();
     private sync = new CollabFileSystemSync(this.adapter);
     private handle: CollabFsDirectoryHandle | null = null;
@@ -39,13 +209,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
 
     public menu: IServiceMenu = {
         title: '',
-        main: {
-            opSelectFolder: 'Select folder',
-            opScan: 'Scan changes',
-            opPull: 'Pull to FS',
-            opPush: 'Push to Browser',
-            opAboutThis: 'About this content',
-        },
+        main: {},
         tabs: undefined,
         tools: {},
         onClickMain: this.onClickMain.bind(this),
@@ -53,6 +217,14 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
 
     constructor() {
         super();
+        this.msg = messages[this.getMessageKey(messages)];
+        this.menu.main = {
+            opSelectFolder: this.msg.mSelectFolder,
+            opScan: this.msg.mScan,
+            opPull: this.msg.mPull,
+            opPush: this.msg.mPush,
+            opAboutThis: this.msg.mAbout,
+        };
         this.supported = this.adapter.isSupported();
         this.setEvents();
     }
@@ -62,94 +234,233 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     }
 
     async firstUpdated() {
-        await this.loadProjectHandle(true);
+        await this.loadProjectHandle();
     }
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
         if (!visible) return;
-        void this.loadProjectHandle(true);
+        void this.loadProjectHandle();
     }
 
     public onClickMain(op: string): void {
         if (op === 'opSelectFolder') void this.selectFolder();
         else if (op === 'opScan') void this.scan();
-        else if (op === 'opPull') void this.pullToFs();
-        else if (op === 'opPush') void this.pushToBrowser();
+        else if (op === 'opPull') this.requestPull();
+        else if (op === 'opPush') this.requestPush();
         else if (op === 'opAboutThis') this.showAboutThis();
         else if (this.menu.setMode) this.menu.setMode('initial');
     }
 
     render() {
+        const m = this.msg;
         return html`
             <section class="collab-fs-shell">
                 <header class="collab-fs-header">
                     <div>
-                        <h2>Local FS</h2>
+                        <h2>${m.title}</h2>
                         <p>${this.renderHeaderStatus()}</p>
                     </div>
                     <span class="collab-fs-project">mls-${this.project || '-'}</span>
                 </header>
 
-                <div class="collab-fs-actions">
-                    <button @click=${() => this.selectFolder()} ?disabled=${this.busy || !this.supported}>Select folder</button>
-                    <button @click=${() => this.scan()} ?disabled=${this.busy || !this.handle}>Scan Changes</button>
-                    <button class="primary" @click=${() => this.pullToFs()} ?disabled=${this.busy || !this.handle}>Pull to FS</button>
-                    <button class="primary" @click=${() => this.pushToBrowser()} ?disabled=${this.busy || !this.handle || !this.hasPushableChanges() || this.hasPushBlockingChanges()}>Push to Browser</button>
-                </div>
-
+                ${this.renderBody()}
                 ${this.renderNotice()}
-                ${this.renderSummary()}
-
-                <div class="collab-fs-list">
-                    ${this.renderChangesList()}
-                </div>
             </section>
         `;
     }
 
-    private renderHeaderStatus() {
-        if (!this.supported) return 'Browser unsupported';
-        if (this.busy) return this.progressMessage || this.statusMessage || 'Working...';
-        if (this.folderName) return this.folderName;
-        return 'No folder selected';
-    }
-
-    private renderNotice() {
-        if (!this.statusMessage) return html``;
-        return html`<div class="collab-fs-notice">${this.statusMessage}</div>`;
-    }
-
-    private renderSummary() {
-        const total = this.changes.length;
-        const browserCount = this.scanResult?.browserCount || 0;
-        const localCount = this.scanResult?.localCount || 0;
-        const unsupportedCount = this.scanResult?.unsupportedCount || 0;
+    private renderBody() {
+        if (!this.supported || !this.project) return html``;
+        if (!this.handle) return this.renderFirstRun();
         return html`
-            <div class="collab-fs-summary">
-                <span>${total} changes</span>
-                <span>${browserCount} browser</span>
-                <span>${localCount} local</span>
-                ${unsupportedCount > 0 ? html`<span>${unsupportedCount} skipped</span>` : html``}
+            ${this.renderConnection()}
+            ${this.pendingConfirm
+                ? this.renderConfirmPanel()
+                : (this.scanned ? this.renderScanned() : this.renderScanCta())}
+        `;
+    }
+
+    private renderFirstRun() {
+        const m = this.msg;
+        return html`
+            <div class="collab-fs-firstrun">
+                <i class="collab-fs-firstrun-icon">&#xf07b;</i>
+                <p class="collab-fs-firstrun-title">${m.linkTitle}</p>
+                <p class="collab-fs-muted">${m.linkBody}</p>
+                <button class="primary block" @click=${() => this.selectFolder()} ?disabled=${this.busy}>${m.selectFolder}</button>
             </div>
         `;
     }
 
-    private renderChangesList() {
-        if (!this.handle) return html`<div class="collab-fs-empty">Select a folder.</div>`;
-        if (this.busy && this.changes.length === 0) return html`<div class="collab-fs-empty">Scanning...</div>`;
-        if (this.changes.length === 0) return html`<div class="collab-fs-empty">No changes.</div>`;
+    private renderConnection() {
+        const m = this.msg;
+        return html`
+            <div class="collab-fs-connection">
+                <div class="collab-fs-connection-row">
+                    <span class="collab-fs-dot"></span>
+                    <span class="collab-fs-connection-text">mls-${this.project} <span class="arrow">&rarr;</span> ${this.folderName || '-'}</span>
+                    <button class="icon" aria-label="${m.connected}" @click=${() => this.detailsOpen = !this.detailsOpen}>
+                        ${this.detailsOpen ? '▴' : '▾'}
+                    </button>
+                </div>
+                ${this.detailsOpen ? this.renderDetails() : html``}
+            </div>
+        `;
+    }
+
+    private renderDetails() {
+        const m = this.msg;
+        return html`
+            <div class="collab-fs-details-panel">
+                <dl>
+                    <div><dt>${m.project}</dt><dd>mls-${this.project}</dd></div>
+                    <div><dt>${m.folder}</dt><dd>${this.folderName || '-'}</dd></div>
+                    <div><dt>${m.lastSync}</dt><dd>${this.formatLastSync()}</dd></div>
+                    <div><dt>${m.files}</dt><dd>${this.scanResult?.browserCount ?? this.linkedFileCount}</dd></div>
+                </dl>
+                <div class="collab-fs-details-actions">
+                    <button @click=${() => this.selectFolder()} ?disabled=${this.busy}>${m.changeFolder}</button>
+                    <button class="danger" @click=${() => this.disconnect()} ?disabled=${this.busy}>${m.disconnect}</button>
+                </div>
+            </div>
+        `;
+    }
+
+    private renderScanCta() {
+        const m = this.msg;
+        return html`
+            <div class="collab-fs-scan-cta">
+                <button class="primary block" @click=${() => this.scan()} ?disabled=${this.busy}>
+                    ${this.busy ? m.scanning : m.scanChanges}
+                </button>
+                <p class="collab-fs-muted center">${m.scanHint}</p>
+            </div>
+        `;
+    }
+
+    private renderScanned() {
+        const m = this.msg;
+        if (this.changes.length === 0) {
+            return html`
+                <div class="collab-fs-clean">
+                    <p>${m.clean}</p>
+                    <button @click=${() => this.scan()} ?disabled=${this.busy}>${m.rescan}</button>
+                </div>
+            `;
+        }
+
+        const pull = this.sync.planPull(this.changes);
+        const push = this.sync.planPush(this.changes);
+        const pullCount = pull.write.length + pull.delete.length;
+        const pushCount = push.create.length + push.update.length + push.delete.length;
+        const pushBlocked = push.blocked.length > 0;
 
         return html`
-            ${this.changes.map((change) => html`
-                    <button
-                        class="collab-fs-change ${this.selectedPath === change.path ? 'selected' : ''}"
-                        @click=${() => this.openChangeDetails(change)}
-                    >
-                        <span class="kind ${change.kind}">${this.getKindLabel(change.kind)}</span>
-                        <span class="path">${change.path}</span>
+            <div class="collab-fs-metrics">
+                <div><span class="num">${pullCount}</span><span class="lbl">${m.toPull}</span></div>
+                <div><span class="num">${pushCount}</span><span class="lbl">${m.toPush}</span></div>
+                <div><span class="num">${pull.conflict.length}</span><span class="lbl">${m.conflictsLabel}</span></div>
+                <button class="icon rescan" aria-label="${m.rescan}" @click=${() => this.scan()} ?disabled=${this.busy}>&#x21BB;</button>
+            </div>
+
+            <div class="collab-fs-list">
+                ${this.renderGroup(m.groupBrowser, BROWSER_KINDS)}
+                ${this.renderGroup(m.groupDisk, DISK_KINDS)}
+                ${this.renderGroup(m.groupConflict, CONFLICT_KINDS)}
+                ${this.renderGroup(m.groupSkipped, SKIPPED_KINDS)}
+            </div>
+
+            <div class="collab-fs-actions">
+                <button class="primary" @click=${() => this.requestPull()} ?disabled=${this.busy || pullCount === 0}>
+                    <span class="dir">&darr;</span> ${m.pull} &middot; ${pullCount}
+                </button>
+                <button @click=${() => this.requestPush()} ?disabled=${this.busy || pushCount === 0 || pushBlocked}>
+                    <span class="dir">&uarr;</span> ${m.push} &middot; ${pushCount}
+                </button>
+            </div>
+            ${pushBlocked ? html`<p class="collab-fs-muted center">${m.pushBlocked}</p>` : html``}
+        `;
+    }
+
+    private renderGroup(title: string, kinds: CollabFsChange['kind'][]) {
+        const items = this.changes.filter((change) => kinds.includes(change.kind));
+        if (items.length === 0) return html``;
+        return html`
+            <p class="collab-fs-group-title">${title}</p>
+            ${items.map((change) => html`
+                <button
+                    class="collab-fs-change ${this.selectedPath === change.path ? 'selected' : ''}"
+                    @click=${() => this.openChangeDetails(change)}
+                >
+                    <span class="kind ${this.getBadgeClass(change.kind)}">${this.getBadgeLabel(change.kind)}</span>
+                    <span class="path">${change.path}</span>
+                    ${CONFLICT_KINDS.includes(change.kind) ? html`<i class="warn">&#x26A0;</i>` : html``}
                 </button>
             `)}
         `;
+    }
+
+    private renderConfirmPanel() {
+        const p = this.pendingConfirm;
+        if (!p) return html``;
+        const m = this.msg;
+        const title = p.kind === 'pull' ? m.confirmPullTitle : m.confirmPushTitle;
+        const lines = p.kind === 'pull' ? this.pullConfirmLines(p.pull) : this.pushConfirmLines(p.push);
+        return html`
+            <div class="collab-fs-confirm">
+                <h3>${title}</h3>
+                <ul>${lines.map((line) => html`<li>${line}</li>`)}</ul>
+                <div class="collab-fs-confirm-actions">
+                    <button @click=${() => this.confirmCancel()} ?disabled=${this.busy}>${m.cancel}</button>
+                    <button class="primary" @click=${() => this.confirmExecute()} ?disabled=${this.busy}>${m.confirm}</button>
+                </div>
+            </div>
+        `;
+    }
+
+    private pullConfirmLines(plan: ReturnType<CollabFileSystemSync['planPull']>): string[] {
+        const m = this.msg;
+        const lines = [`${plan.write.length} ${m.cWrite}`, `${plan.delete.length} ${m.cTrash}`];
+        if (plan.conflict.length) lines.push(`${plan.conflict.length} ${m.cConflictKept}`);
+        if (plan.keepLocal.length) lines.push(`${plan.keepLocal.length} ${m.cKeepLocal}`);
+        return lines;
+    }
+
+    private pushConfirmLines(plan: ReturnType<CollabFileSystemSync['planPush']>): string[] {
+        const m = this.msg;
+        return [`${plan.create.length} ${m.cCreate}`, `${plan.update.length} ${m.cUpdate}`, `${plan.delete.length} ${m.cDelete}`];
+    }
+
+    private renderHeaderStatus() {
+        const m = this.msg;
+        if (!this.supported) return m.unsupported;
+        if (this.busy) return this.progressMessage || this.statusMessage || m.scanning;
+        if (!this.project) return m.noProject;
+        if (this.folderName) return this.folderName;
+        return m.linkTitle;
+    }
+
+    private renderNotice() {
+        if (!this.statusMessage || this.busy) return html``;
+        return html`<div class="collab-fs-notice">${this.statusMessage}</div>`;
+    }
+
+    private getBadgeClass(kind: CollabFsChange['kind']): string {
+        if (BROWSER_KINDS.includes(kind)) return 'b-browser';
+        if (kind === 'diskOnly' || kind === 'localOnly') return 'b-new';
+        if (kind === 'diskModified' || kind === 'diskDeleted') return 'b-disk';
+        if (CONFLICT_KINDS.includes(kind)) return 'b-conflict';
+        return 'b-skip';
+    }
+
+    private getBadgeLabel(kind: CollabFsChange['kind']): string {
+        const m = this.msg;
+        if (kind === 'browserOnly') return m.bAdded;
+        if (kind === 'diskOnly' || kind === 'localOnly') return m.bNew;
+        if (kind === 'diskDeleted' || kind === 'browserDeleted') return m.bDeleted;
+        if (kind === 'diskModified' || kind === 'browserModified') return m.bChanged;
+        if (CONFLICT_KINDS.includes(kind)) return m.bConflict;
+        return m.bSkipped;
     }
 
     private openChangeDetails(change: CollabFsChange): void {
@@ -260,41 +571,6 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
                 color: var(--text-primary-color-lighter, #8b949e);
                 font-size: 0.8rem;
             }
-            .collab-fs-diff {
-                overflow: auto;
-                margin: 0.75rem 0 0;
-                border: 1px solid rgba(128, 128, 128, 0.35);
-                background: rgba(128, 128, 128, 0.08);
-                color: inherit;
-                font-size: 0.8rem;
-                line-height: 1.45;
-            }
-            .collab-fs-diff div {
-                display: grid;
-                grid-template-columns: 1.5rem minmax(0, 1fr);
-                min-height: 1.35rem;
-                white-space: pre;
-            }
-            .collab-fs-diff span {
-                user-select: none;
-                text-align: center;
-            }
-            .collab-fs-diff code {
-                overflow: visible;
-                font-family: monospace;
-            }
-            .collab-fs-diff .added {
-                background: rgba(35, 134, 54, 0.22);
-            }
-            .collab-fs-diff .removed {
-                background: rgba(248, 81, 73, 0.22);
-            }
-            .collab-fs-diff .added span {
-                color: #2ea043;
-            }
-            .collab-fs-diff .removed span {
-                color: #f85149;
-            }
         `;
         return style;
     }
@@ -304,22 +580,6 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
         p.className = 'collab-fs-muted';
         p.textContent = text;
         container.appendChild(p);
-    }
-
-    private getSelectedChange(): CollabFsChange | undefined {
-        return this.changes.find((change) => change.path === this.selectedPath) || this.changes[0];
-    }
-
-    private getKindLabel(kind: CollabFsChange['kind']): string {
-        if (kind === 'browserOnly') return 'add';
-        if (kind === 'localOnly' || kind === 'diskOnly') return 'new';
-        if (kind === 'diskDeleted') return 'delete';
-        if (kind === 'browserDeleted') return 'browser';
-        if (kind === 'diskModified') return 'fs';
-        if (kind === 'browserModified') return 'browser';
-        if (kind === 'bothModified') return 'conflict';
-        if (kind === 'modified') return 'edit';
-        return 'skip';
     }
 
     private getDetailText(change: CollabFsChange): string {
@@ -336,10 +596,9 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     private async selectFolder(): Promise<void> {
         await this.runExclusive(async () => {
             const project = this.getProject();
-            if (!project) throw new Error('No project selected.');
-            if (!this.supported) throw new Error('File System Access API is not available in this browser.');
+            if (!project) throw new Error(this.msg.noProject);
+            if (!this.supported) throw new Error(this.msg.unsupported);
 
-            this.statusMessage = 'Waiting for folder selection.';
             const selectedHandle = await this.adapter.showDirectoryPicker();
             if (!await this.adapter.ensurePermission(selectedHandle)) throw new Error('Folder permission was not granted.');
             const handle = await this.resolveSelectedProjectHandle(project, selectedHandle);
@@ -355,24 +614,79 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
             this.project = project;
             this.handle = handle;
             this.savePreferences(project, handle.name);
-            this.statusMessage = 'Folder linked.';
-            await this.scanCurrent();
+            this.resetScanState();
+            this.detailsOpen = false;
+            await this.refreshManifestInfo();
+            this.statusMessage = this.msg.folderLinked;
+        });
+    }
+
+    private async disconnect(): Promise<void> {
+        await this.runExclusive(async () => {
+            const project = this.getProject();
+            if (project) await this.adapter.removeHandle(project);
+            localStorage.removeItem(PREF_KEY);
+            this.handle = null;
+            this.folderName = '';
+            this.detailsOpen = false;
+            this.resetScanState();
+            this.statusMessage = this.msg.disconnected;
         });
     }
 
     private async scan(): Promise<void> {
-        await this.runExclusive(() => this.scanCurrent());
+        await this.runExclusive(async () => {
+            await this.scanCurrent();
+            this.scanned = true;
+        });
     }
 
-    private async pullToFs(): Promise<void> {
+    private requestPull(): void {
+        if (this.busy || !this.handle || !this.scanned) return;
+        const plan = this.sync.planPull(this.changes);
+        if (plan.write.length + plan.delete.length === 0) {
+            this.statusMessage = this.msg.nothingToPull;
+            return;
+        }
+        this.pendingConfirm = { kind: 'pull', pull: plan };
+    }
+
+    private requestPush(): void {
+        if (this.busy || !this.handle || !this.scanned) return;
+        const plan = this.sync.planPush(this.changes);
+        if (plan.blocked.length > 0) {
+            this.statusMessage = this.msg.pushBlocked;
+            return;
+        }
+        if (plan.create.length + plan.update.length + plan.delete.length === 0) {
+            this.statusMessage = this.msg.nothingToPush;
+            return;
+        }
+        this.pendingConfirm = { kind: 'push', push: plan };
+    }
+
+    private confirmCancel(): void {
+        const kind = this.pendingConfirm?.kind;
+        this.pendingConfirm = null;
+        this.statusMessage = kind === 'pull' ? this.msg.pullCanceled : this.msg.pushCanceled;
+    }
+
+    private async confirmExecute(): Promise<void> {
+        const pending = this.pendingConfirm;
+        if (!pending) return;
+        this.pendingConfirm = null;
+        if (pending.kind === 'pull') await this.runPull();
+        else await this.runPush();
+    }
+
+    private async runPull(): Promise<void> {
         await this.runExclusive(async () => {
             const project = this.getProject();
-            if (!project) throw new Error('No project selected.');
+            if (!project) throw new Error(this.msg.noProject);
             if (!this.handle) throw new Error('No folder selected.');
             if (!await this.adapter.ensurePermission(this.handle)) throw new Error('Folder permission was not granted.');
 
             const result = await this.sync.pullToFs(project, this.handle, this.reportProgress.bind(this));
-            const message = `Pull complete. ${result.written} written, ${result.deleted} deleted, ${result.skipped} skipped.`;
             await mls.events.fire([5], ['CollabFileSystem' as any], JSON.stringify({
                 action: 'pullToFs',
                 project,
@@ -381,19 +695,19 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
                 skipped: result.skipped,
             }), 0);
             await this.scanCurrent();
-            this.statusMessage = message;
+            const m = this.msg;
+            this.statusMessage = `${result.written} ${m.resWritten} · ${result.deleted} ${m.resTrashed} · ${result.skipped} ${m.resSkipped}`;
         });
     }
 
-    private async pushToBrowser(): Promise<void> {
+    private async runPush(): Promise<void> {
         await this.runExclusive(async () => {
             const project = this.getProject();
-            if (!project) throw new Error('No project selected.');
+            if (!project) throw new Error(this.msg.noProject);
             if (!this.handle) throw new Error('No folder selected.');
             if (!await this.adapter.ensurePermission(this.handle)) throw new Error('Folder permission was not granted.');
 
             const result = await this.sync.pushToBrowser(project, this.handle, this.reportProgress.bind(this));
-            const message = `Push complete. ${result.created} created, ${result.updated} updated, ${result.deleted} deleted, ${result.skipped} skipped.`;
             await mls.events.fire([5], ['CollabFileSystem' as any], JSON.stringify({
                 action: 'pushToBrowser',
                 project,
@@ -403,13 +717,14 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
                 skipped: result.skipped,
             }), 0);
             await this.scanCurrent();
-            this.statusMessage = message;
+            const m = this.msg;
+            this.statusMessage = `${result.created} ${m.resCreated} · ${result.updated} ${m.resUpdated} · ${result.deleted} ${m.resDeleted} · ${result.skipped} ${m.resSkipped}`;
         });
     }
 
     private async scanCurrent(): Promise<void> {
         const project = this.getProject();
-        if (!project) throw new Error('No project selected.');
+        if (!project) throw new Error(this.msg.noProject);
         if (!this.handle) throw new Error('No folder selected.');
         if (!await this.adapter.ensurePermission(this.handle)) throw new Error('Folder permission was not granted.');
 
@@ -418,21 +733,25 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
         this.scanResult = result;
         this.changes = result.changes;
         this.selectedPath = this.changes[0]?.path || '';
-        this.statusMessage = this.getScanStatusMessage(result);
+        this.lastSyncAt = new Date().toISOString();
+        this.statusMessage = '';
     }
 
-    private async loadProjectHandle(scanNow: boolean): Promise<void> {
+    private async loadProjectHandle(): Promise<void> {
+        const previousProject = this.project;
         const project = this.getProject();
-        this.project = project;
         this.supported = this.adapter.isSupported();
 
         if (!this.supported) {
-            this.statusMessage = 'Use a Chromium browser for local filesystem access.';
+            this.statusMessage = this.msg.unsupported;
             return;
         }
 
+        if (project !== previousProject) this.resetScanState();
+        this.project = project;
+
         if (!project) {
-            this.statusMessage = 'No project selected.';
+            this.statusMessage = this.msg.noProject;
             return;
         }
 
@@ -440,13 +759,35 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
         this.handle = handle;
         this.folderName = handle?.name || this.readPreferences(project)?.folderName || '';
         if (!handle) {
-            this.statusMessage = 'No folder selected.';
-            this.changes = [];
-            this.scanResult = null;
+            this.resetScanState();
             return;
         }
+        await this.refreshManifestInfo();
+    }
 
-        if (scanNow) await this.runExclusive(() => this.scanCurrent());
+    private resetScanState(): void {
+        this.scanned = false;
+        this.changes = [];
+        this.scanResult = null;
+        this.selectedPath = '';
+        this.pendingConfirm = null;
+        this.lastSyncAt = '';
+        this.linkedFileCount = 0;
+    }
+
+    private async refreshManifestInfo(): Promise<void> {
+        if (!this.handle) return;
+        const manifest = await this.sync.readManifest(this.handle).catch(() => null);
+        if (!manifest) return;
+        this.lastSyncAt = manifest.lastSyncAt || '';
+        this.linkedFileCount = Object.keys(manifest.files || {}).length;
+    }
+
+    private formatLastSync(): string {
+        if (!this.lastSyncAt) return this.msg.never;
+        const date = new Date(this.lastSyncAt);
+        if (Number.isNaN(date.getTime())) return this.msg.never;
+        return date.toLocaleString();
     }
 
     private async resolveSelectedProjectHandle(project: number, handle: CollabFsDirectoryHandle): Promise<CollabFsDirectoryHandle> {
@@ -511,59 +852,34 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     }
 
     private formatProgress(progress: CollabFsProgress): string {
+        const m = this.msg;
         const count = progress.total ? `${progress.current}/${progress.total}` : `${progress.current}`;
         const path = progress.path ? ` - ${progress.path}` : '';
-        if (progress.phase === 'browser') return `Lendo browser ${count}${path}`;
-        if (progress.phase === 'local') return `Lendo local ${count}${path}`;
-        if (progress.phase === 'compare') return `Comparando ${count}${path}`;
-        if (progress.phase === 'write') return `Gravando local ${count}${path}`;
-        if (progress.phase === 'delete') return `Removendo local ${count}${path}`;
-        if (progress.phase === 'push') return `Carregando browser ${count}${path}`;
-        return `Atualizando manifesto ${count}${path}`;
-    }
-
-    private getScanStatusMessage(result: CollabFsScanResult): string {
-        if (result.changes.length === 0) return 'Clean.';
-        if (this.hasPushBlockingChanges() && this.hasPushableChanges()) return 'Changes scanned. Push blocked by browser changes.';
-        if (this.hasPushBlockingChanges()) return 'Changes scanned. Pull to FS available.';
-        return 'Changes scanned. Push to Browser available.';
-    }
-
-    private hasPushableChanges(): boolean {
-        return this.changes.some((change) =>
-            change.kind === 'diskOnly' ||
-            change.kind === 'diskModified' ||
-            change.kind === 'diskDeleted' ||
-            change.kind === 'localOnly'
-        );
-    }
-
-    private hasPushBlockingChanges(): boolean {
-        return this.changes.some((change) =>
-            change.kind === 'browserOnly' ||
-            change.kind === 'browserModified' ||
-            change.kind === 'browserDeleted' ||
-            change.kind === 'bothModified' ||
-            change.kind === 'modified'
-        );
+        if (progress.phase === 'browser') return `${m.pBrowser} ${count}${path}`;
+        if (progress.phase === 'local') return `${m.pLocal} ${count}${path}`;
+        if (progress.phase === 'compare') return `${m.pCompare} ${count}${path}`;
+        if (progress.phase === 'write') return `${m.pWrite} ${count}${path}`;
+        if (progress.phase === 'delete') return `${m.pDelete} ${count}${path}`;
+        if (progress.phase === 'push') return `${m.pPush} ${count}${path}`;
+        return `${m.pManifest} ${count}${path}`;
     }
 
     private setEvents(): void {
-        mls.events.addEventListener([5], ['ProjectSelected' as any], () => this.loadProjectHandle(true));
+        mls.events.addEventListener([5], ['ProjectSelected' as any], () => this.loadProjectHandle());
         mls.events.addEventListener([1, 2, 3, 4, 5, 6, 7], ['ToolBarSelected' as any], () => {
-            if (this.visible === 'true') this.loadProjectHandle(false);
+            if (this.visible === 'true') this.loadProjectHandle();
         });
     }
 
     private showAboutThis(): boolean {
+        const m = this.msg;
         const div = document.createElement('div');
         div.style.padding = '1rem';
         div.innerHTML = `
-            <h3>Local FS</h3>
+            <h3>${m.title}</h3>
             <ul>
-                <li>Project: mls-${this.project || '-'}</li>
-                <li>Folder: ${this.folderName || '-'}</li>
-                <li>Changes: ${this.changes.length}</li>
+                <li>${m.project}: mls-${this.project || '-'}</li>
+                <li>${m.folder}: ${this.folderName || '-'}</li>
             </ul>
         `;
         if (this.menu.setMode) this.menu.setMode('page', div);

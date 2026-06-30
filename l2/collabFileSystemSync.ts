@@ -114,6 +114,20 @@ export interface CollabFsFirstSyncValidation {
     empty: boolean;
 }
 
+export interface CollabFsPullPlan {
+    write: string[];
+    delete: string[];
+    conflict: string[];
+    keepLocal: string[];
+}
+
+export interface CollabFsPushPlan {
+    create: string[];
+    update: string[];
+    delete: string[];
+    blocked: string[];
+}
+
 export interface CollabFsDiffLine {
     type: 'context' | 'added' | 'removed';
     text: string;
@@ -135,9 +149,11 @@ interface CollabFsSyncAdapter {
     writeFile(directory: CollabFsDirectoryHandle, path: string, content: string | Blob): Promise<CollabFsLocalFile>;
     writeTextFile(directory: CollabFsDirectoryHandle, path: string, content: string): Promise<void>;
     removeFile(directory: CollabFsDirectoryHandle, path: string): Promise<void>;
+    trashFile(directory: CollabFsDirectoryHandle, path: string, trashFolder: string): Promise<void>;
 }
 
 const MANIFEST_FILE = '.collab-fs.json';
+const TRASH_ROOT = '.collab-fs-trash';
 const PULL_WRITE_CONCURRENCY = 5;
 const KNOWN_EXTENSIONS = [
     '.defs.ts',
@@ -326,11 +342,45 @@ export class CollabFileSystemSync {
         };
     }
 
+    // Classifies scan changes into what a Pull would safely apply vs. keep untouched.
+    // write: bring browser version down to disk. delete: browser removed it and disk is unchanged.
+    // conflict: disk has local work (or both sides changed) - keep the local file as-is.
+    // keepLocal: brand new local file with no browser counterpart - keep it for a later Push.
+    public planPull(changes: CollabFsChange[]): CollabFsPullPlan {
+        const plan: CollabFsPullPlan = { write: [], delete: [], conflict: [], keepLocal: [] };
+        for (const change of changes) {
+            if (change.kind === 'browserOnly' || change.kind === 'browserModified' || change.kind === 'diskDeleted') plan.write.push(change.path);
+            else if (change.kind === 'browserDeleted') plan.delete.push(change.path);
+            else if (change.kind === 'diskModified' || change.kind === 'bothModified' || change.kind === 'modified') plan.conflict.push(change.path);
+            else if (change.kind === 'diskOnly' || change.kind === 'localOnly') plan.keepLocal.push(change.path);
+        }
+        return plan;
+    }
+
+    // Classifies scan changes into what a Push would apply. blocked lists browser-side changes
+    // that must be pulled first (Push stays blocked while any exist).
+    public planPush(changes: CollabFsChange[]): CollabFsPushPlan {
+        const plan: CollabFsPushPlan = { create: [], update: [], delete: [], blocked: [] };
+        for (const change of changes) {
+            if (change.kind === 'diskOnly' || change.kind === 'localOnly') plan.create.push(change.path);
+            else if (change.kind === 'diskModified') plan.update.push(change.path);
+            else if (change.kind === 'diskDeleted') plan.delete.push(change.path);
+            else if (this.isBrowserSideChange(change)) plan.blocked.push(change.path);
+        }
+        return plan;
+    }
+
     public async pullToFs(project: number, handle: CollabFsDirectoryHandle, onProgress?: (progress: CollabFsProgress) => void): Promise<CollabFsPullResult> {
+        // Classify first so we never overwrite locally-changed files or delete brand new local files.
+        const scanResult = await this.scan(project, handle, onProgress);
+        const plan = this.planPull(scanResult.changes);
+        const conflictPaths = new Set(plan.conflict);
+        const deletablePaths = new Set(plan.delete);
+        const trashFolder = `${TRASH_ROOT}/${this.buildTrashStamp()}`;
+
         const manifest = await this.readManifest(handle);
         const browserEntries = await this.getBrowserEntries(project, onProgress, { readContent: false });
         const localEntries = await this.getLocalEntries(handle, onProgress, { readContent: false });
-        const browserMap = this.mapByPath(browserEntries.filter((entry) => !entry.unsupported));
         const localMap = this.mapByPath(localEntries);
         this.applyManifestHashesToLocalMap(manifest, localMap);
         const hydratedBrowserEntries: CollabFsBrowserEntry[] = new Array(browserEntries.length);
@@ -345,7 +395,8 @@ export class CollabFileSystemSync {
                 onProgress?.({ phase: 'browser', current, total: browserEntries.length, path: browserEntry.path });
                 const localEntry = localMap.get(browserEntry.path);
                 const manifestFile = manifest?.files[browserEntry.path];
-                if (this.shouldSkipPullWrite(manifest, browserEntry, localEntry)) {
+                // Conflicts (local changed, or both sides changed) are kept untouched on disk.
+                if (conflictPaths.has(browserEntry.path) || this.shouldSkipPullWrite(manifest, browserEntry, localEntry)) {
                     return {
                         browserEntry: this.withManifestBrowserHash(browserEntry, manifestFile),
                         localEntry,
@@ -387,18 +438,20 @@ export class CollabFileSystemSync {
             }
         }
 
-        const localDeleteEntries = localEntries.filter((localEntry) => !browserMap.has(localEntry.path));
+        // Only delete files the browser deleted while the local copy stayed unchanged.
+        // New local files (diskOnly) and conflicts are never deleted by a Pull.
+        const localDeleteEntries = localEntries.filter((localEntry) => deletablePaths.has(localEntry.path));
         for (let i = 0; i < localDeleteEntries.length; i++) {
             const localEntry = localDeleteEntries[i];
             onProgress?.({ phase: 'delete', current: i + 1, total: localDeleteEntries.length, path: localEntry.path });
-            if (browserMap.has(localEntry.path)) continue;
-            await this.adapter.removeFile(handle, localEntry.path).catch(() => undefined);
+            await this.adapter.trashFile(handle, localEntry.path, trashFolder).catch(() => undefined);
             localMap.delete(localEntry.path);
             deleted++;
         }
 
         onProgress?.({ phase: 'manifest', current: 1, total: 1, path: MANIFEST_FILE });
-        const nextManifest = await this.writeManifest(project, handle, hydratedBrowserEntries, Array.from(localMap.values()), 'browser-to-fs');
+        // Preserve manifest entries for conflicts so they stay detectable on the next scan.
+        const nextManifest = await this.writeManifest(project, handle, hydratedBrowserEntries, Array.from(localMap.values()), 'browser-to-fs', manifest?.selectedAt, { previous: manifest, paths: conflictPaths });
         return { written, deleted, skipped, manifest: nextManifest };
     }
 
@@ -766,7 +819,8 @@ export class CollabFileSystemSync {
         browserEntries: CollabFsBrowserEntry[],
         diskEntries: Array<CollabFsBrowserEntry | CollabFsLocalEntry>,
         lastDirection: CollabFsManifestDirection,
-        selectedAt?: string
+        selectedAt?: string,
+        preserve?: { previous: CollabFsManifest | null, paths: Set<string> }
     ): Promise<CollabFsManifest> {
         const diskMap = this.mapByPath(diskEntries);
         const now = new Date().toISOString();
@@ -784,6 +838,16 @@ export class CollabFileSystemSync {
                 diskLastModified: 'lastModified' in (diskEntry || {}) ? (diskEntry as CollabFsLocalEntry).lastModified : undefined,
                 lastDirection,
             };
+        }
+
+        // Keep the prior baseline for preserved paths (conflicts), or drop unmanaged ones,
+        // so a freshly recomputed entry can't hide the conflict on the next scan.
+        if (preserve) {
+            for (const path of preserve.paths) {
+                const previousFile = preserve.previous?.files[path];
+                if (previousFile) files[path] = previousFile;
+                else delete files[path];
+            }
         }
 
         const manifest: CollabFsManifest = {
@@ -864,6 +928,10 @@ export class CollabFileSystemSync {
 
     private mapByPath<T extends { path: string }>(entries: T[]): Map<string, T> {
         return new Map(entries.map((entry) => [entry.path, entry]));
+    }
+
+    private buildTrashStamp(): string {
+        return new Date().toISOString().replace(/[:.]/g, '-');
     }
 
     private async hashContent(content: string | Blob): Promise<string> {
