@@ -346,10 +346,13 @@ export class CollabFileSystemSync {
     // write: bring browser version down to disk. delete: browser removed it and disk is unchanged.
     // conflict: disk has local work (or both sides changed) - keep the local file as-is.
     // keepLocal: brand new local file with no browser counterpart - keep it for a later Push.
+    // Note: diskDeleted (file removed on disk while the browser stayed unchanged) is intentionally
+    // NOT a Pull action - a deletion on disk means "delete it", so it is propagated by Push, and
+    // Pull no longer resurrects it. Restoring a deleted file is available per-file in the details.
     public planPull(changes: CollabFsChange[]): CollabFsPullPlan {
         const plan: CollabFsPullPlan = { write: [], delete: [], conflict: [], keepLocal: [] };
         for (const change of changes) {
-            if (change.kind === 'browserOnly' || change.kind === 'browserModified' || change.kind === 'diskDeleted') plan.write.push(change.path);
+            if (change.kind === 'browserOnly' || change.kind === 'browserModified') plan.write.push(change.path);
             else if (change.kind === 'browserDeleted') plan.delete.push(change.path);
             else if (change.kind === 'diskModified' || change.kind === 'bothModified' || change.kind === 'modified') plan.conflict.push(change.path);
             else if (change.kind === 'diskOnly' || change.kind === 'localOnly') plan.keepLocal.push(change.path);
@@ -376,6 +379,9 @@ export class CollabFileSystemSync {
         const plan = this.planPull(scanResult.changes);
         const conflictPaths = new Set(plan.conflict);
         const deletablePaths = new Set(plan.delete);
+        // Files deleted on disk are left untouched by Pull (never resurrected); Push propagates them.
+        const diskDeletedPaths = scanResult.changes.filter((change) => change.kind === 'diskDeleted').map((change) => change.path);
+        const keepPaths = new Set([...conflictPaths, ...diskDeletedPaths]);
         const trashFolder = `${TRASH_ROOT}/${this.buildTrashStamp()}`;
 
         const manifest = await this.readManifest(handle);
@@ -395,8 +401,8 @@ export class CollabFileSystemSync {
                 onProgress?.({ phase: 'browser', current, total: browserEntries.length, path: browserEntry.path });
                 const localEntry = localMap.get(browserEntry.path);
                 const manifestFile = manifest?.files[browserEntry.path];
-                // Conflicts (local changed, or both sides changed) are kept untouched on disk.
-                if (conflictPaths.has(browserEntry.path) || this.shouldSkipPullWrite(manifest, browserEntry, localEntry)) {
+                // Conflicts and disk-deleted files are kept untouched on disk (never resurrected).
+                if (keepPaths.has(browserEntry.path) || this.shouldSkipPullWrite(manifest, browserEntry, localEntry)) {
                     return {
                         browserEntry: this.withManifestBrowserHash(browserEntry, manifestFile),
                         localEntry,
@@ -450,8 +456,8 @@ export class CollabFileSystemSync {
         }
 
         onProgress?.({ phase: 'manifest', current: 1, total: 1, path: MANIFEST_FILE });
-        // Preserve manifest entries for conflicts so they stay detectable on the next scan.
-        const nextManifest = await this.writeManifest(project, handle, hydratedBrowserEntries, Array.from(localMap.values()), 'browser-to-fs', manifest?.selectedAt, { previous: manifest, paths: conflictPaths });
+        // Preserve manifest entries for conflicts and disk-deleted files so they stay detectable next scan.
+        const nextManifest = await this.writeManifest(project, handle, hydratedBrowserEntries, Array.from(localMap.values()), 'browser-to-fs', manifest?.selectedAt, { previous: manifest, paths: keepPaths });
         return { written, deleted, skipped, manifest: nextManifest };
     }
 
@@ -513,9 +519,11 @@ export class CollabFileSystemSync {
         return { created, updated, deleted, skipped, manifest };
     }
 
-    // Resolves a single conflicting file by picking a winning side and making the other match it.
-    // keep='browser' writes the browser version over the local file; keep='disk' pushes the local
-    // file into the browser. The manifest baseline is updated so the conflict does not reappear.
+    // Resolves a single file by picking a winning side and making the other match it — including
+    // deletions. keep='browser' means the browser wins: write its content to disk, or if the browser
+    // deleted it, delete the local file too. keep='disk' means the disk wins: push its content to the
+    // browser, or if the file was deleted on disk, delete it in the browser. The manifest baseline is
+    // updated (or the entry removed on deletion) so the state does not reappear on the next scan.
     public async resolveConflict(
         project: number,
         handle: CollabFsDirectoryHandle,
@@ -525,45 +533,63 @@ export class CollabFileSystemSync {
     ): Promise<void> {
         const browserEntries = await this.getBrowserEntries(project, onProgress, { readContent: false });
         const browserEntry = browserEntries.find((entry) => entry.path === path);
+        const localContent = await this.adapter.readFileContent(handle, path).catch(() => null);
 
         if (keep === 'browser') {
-            if (!browserEntry) throw new Error(`Browser file not found: ${path}`);
-            const hydrated = await this.hydrateBrowserEntry(browserEntry);
-            if (hydrated.unsupported) throw new Error(`Unsupported file: ${path}`);
-            onProgress?.({ phase: 'write', current: 1, total: 1, path });
-            const written = await this.adapter.writeFile(handle, path, hydrated.content || '');
+            if (browserEntry) {
+                const hydrated = await this.hydrateBrowserEntry(browserEntry);
+                if (hydrated.unsupported) throw new Error(`Unsupported file: ${path}`);
+                onProgress?.({ phase: 'write', current: 1, total: 1, path });
+                const written = await this.adapter.writeFile(handle, path, hydrated.content || '');
+                await this.upsertManifestEntry(handle, project, {
+                    path,
+                    versionRef: hydrated.versionRef,
+                    browserHash: hydrated.hash,
+                    diskHash: hydrated.hash,
+                    diskSize: written.size,
+                    diskLastModified: written.lastModified,
+                    lastDirection: 'browser-to-fs',
+                });
+                return;
+            }
+            // Browser deleted it: mirror the deletion on disk.
+            onProgress?.({ phase: 'delete', current: 1, total: 1, path });
+            if (localContent !== null) {
+                await this.adapter.trashFile(handle, path, `${TRASH_ROOT}/${this.buildTrashStamp()}`).catch(() => undefined);
+            }
+            await this.removeManifestEntry(handle, path);
+            return;
+        }
+
+        if (localContent !== null) {
+            const diskHash = await this.hashContent(localContent);
+            onProgress?.({ phase: 'push', current: 1, total: 1, path });
+            let file: mls.stor.IFileInfo;
+            if (browserEntry) {
+                await this.updateBrowserFile(browserEntry.file, localContent);
+                file = browserEntry.file;
+            } else {
+                file = await this.createBrowserFile(project, path, localContent);
+            }
             await this.upsertManifestEntry(handle, project, {
                 path,
-                versionRef: hydrated.versionRef,
-                browserHash: hydrated.hash,
-                diskHash: hydrated.hash,
-                diskSize: written.size,
-                diskLastModified: written.lastModified,
-                lastDirection: 'browser-to-fs',
+                versionRef: file.versionRef || '',
+                browserHash: diskHash,
+                diskHash,
+                diskSize: localContent instanceof Blob ? localContent.size : new TextEncoder().encode(localContent).length,
+                diskLastModified: Date.now(),
+                lastDirection: 'fs-to-browser',
             });
             return;
         }
 
-        const content = await this.adapter.readFileContent(handle, path);
-        if (content === null) throw new Error(`Local file not found: ${path}`);
-        const diskHash = await this.hashContent(content);
+        // Disk deleted it: mirror the deletion in the browser.
         onProgress?.({ phase: 'push', current: 1, total: 1, path });
-        let file: mls.stor.IFileInfo;
         if (browserEntry) {
-            await this.updateBrowserFile(browserEntry.file, content);
-            file = browserEntry.file;
-        } else {
-            file = await this.createBrowserFile(project, path, content);
+            await deleteFile(browserEntry.file);
+            this.fireBrowserFileChanged(browserEntry.file);
         }
-        await this.upsertManifestEntry(handle, project, {
-            path,
-            versionRef: file.versionRef || '',
-            browserHash: diskHash,
-            diskHash,
-            diskSize: content instanceof Blob ? content.size : new TextEncoder().encode(content).length,
-            diskLastModified: Date.now(),
-            lastDirection: 'fs-to-browser',
-        });
+        await this.removeManifestEntry(handle, path);
     }
 
     private async upsertManifestEntry(handle: CollabFsDirectoryHandle, project: number, entry: CollabFsManifestFile): Promise<void> {
@@ -575,6 +601,14 @@ export class CollabFileSystemSync {
         manifest.files[entry.path] = entry;
         manifest.lastSyncAt = now;
         await this.adapter.writeTextFile(handle, MANIFEST_FILE, `${JSON.stringify(manifest, null, 2)}\n`);
+    }
+
+    private async removeManifestEntry(handle: CollabFsDirectoryHandle, path: string): Promise<void> {
+        const existing = await this.readManifest(handle);
+        if (!existing || !existing.files[path]) return;
+        delete existing.files[path];
+        existing.lastSyncAt = new Date().toISOString();
+        await this.adapter.writeTextFile(handle, MANIFEST_FILE, `${JSON.stringify(existing, null, 2)}\n`);
     }
 
     public async readManifest(handle: CollabFsDirectoryHandle): Promise<CollabFsManifest | null> {
@@ -644,9 +678,12 @@ export class CollabFileSystemSync {
 
     private async hasBrowserChangedSinceManifest(manifestFile: CollabFsManifestFile | undefined, browserEntry: CollabFsBrowserEntry): Promise<boolean> {
         if (!manifestFile) return true;
-        if (manifestFile.versionRef !== browserEntry.versionRef) return true;
-        if (!browserEntry.file.inLocalStorage && browserEntry.file.status === 'nochange') return false;
-        if (!manifestFile.browserHash) return true;
+        const clean = !browserEntry.file.inLocalStorage && browserEntry.file.status === 'nochange';
+        // Fast path: same versionRef and a clean file means unchanged.
+        if (manifestFile.versionRef === browserEntry.versionRef && clean) return false;
+        // No baseline hash to compare against: fall back to the versionRef/status heuristic.
+        if (!manifestFile.browserHash) return manifestFile.versionRef !== browserEntry.versionRef || !clean;
+        // Otherwise trust content: a versionRef bump alone (common for generated files) is not a change.
         const hydratedBrowser = await this.hydrateBrowserEntry(browserEntry);
         return hydratedBrowser.hash !== manifestFile.browserHash;
     }

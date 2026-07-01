@@ -371,7 +371,6 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
                 <div><span class="num">${pullCount}</span><span class="lbl">${m.toPull}</span></div>
                 <div><span class="num">${pushCount}</span><span class="lbl">${m.toPush}</span></div>
                 <div><span class="num">${pull.conflict.length}</span><span class="lbl">${m.conflictsLabel}</span></div>
-                <button class="icon rescan" aria-label="${m.rescan}" @click=${() => this.scan()} ?disabled=${this.busy}>&#x21BB;</button>
             </div>
 
             <div class="collab-fs-actions">
@@ -383,6 +382,9 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
                 </button>
             </div>
             ${pushBlocked ? html`<p class="collab-fs-muted center">${m.pushBlocked}</p>` : html``}
+            <button class="block rescan-btn" @click=${() => this.scan()} ?disabled=${this.busy}>
+                <span class="dir">&#x21BB;</span> ${m.rescan}
+            </button>
 
             <div class="collab-fs-list">
                 ${this.renderGroup(m.groupBrowser, BROWSER_KINDS)}
@@ -490,7 +492,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
         meta.textContent = this.getDetailText(change);
         div.appendChild(meta);
 
-        if (CONFLICT_KINDS.includes(change.kind)) {
+        if (this.isResolvable(change.kind)) {
             this.appendConflictResolution(div, change);
             this.openDetailsRight(div);
             return;
@@ -536,6 +538,10 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
             sourceModified,
             language: this.getLanguageFromPath(change.path),
         }), 0);
+    }
+
+    private isResolvable(kind: CollabFsChange['kind']): boolean {
+        return CONFLICT_KINDS.includes(kind) || kind === 'diskDeleted' || kind === 'browserDeleted';
     }
 
     private appendConflictResolution(container: HTMLElement, change: CollabFsChange): void {
@@ -666,7 +672,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     private getDetailText(change: CollabFsChange): string {
         if (change.kind === 'browserOnly') return 'Pull to FS creates this file locally.';
         if (change.kind === 'localOnly' || change.kind === 'diskOnly') return 'Push to Browser creates this file in the browser.';
-        if (change.kind === 'diskDeleted') return 'Push to Browser marks this file deleted in the browser. Pull to FS restores it locally.';
+        if (change.kind === 'diskDeleted') return 'Deleted on disk. Push to Browser deletes it in the browser too. Keep the browser version to restore it on disk instead.';
         if (change.kind === 'browserDeleted') return 'Browser deleted this file. Push is blocked until Pull to FS or conflict resolution.';
         if (change.kind === 'diskModified') return 'Push to Browser imports the local file.';
         if (change.kind === 'browserModified') return 'Browser changed this file. Push is blocked until Pull to FS.';
