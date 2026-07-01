@@ -513,6 +513,70 @@ export class CollabFileSystemSync {
         return { created, updated, deleted, skipped, manifest };
     }
 
+    // Resolves a single conflicting file by picking a winning side and making the other match it.
+    // keep='browser' writes the browser version over the local file; keep='disk' pushes the local
+    // file into the browser. The manifest baseline is updated so the conflict does not reappear.
+    public async resolveConflict(
+        project: number,
+        handle: CollabFsDirectoryHandle,
+        path: string,
+        keep: 'browser' | 'disk',
+        onProgress?: (progress: CollabFsProgress) => void
+    ): Promise<void> {
+        const browserEntries = await this.getBrowserEntries(project, onProgress, { readContent: false });
+        const browserEntry = browserEntries.find((entry) => entry.path === path);
+
+        if (keep === 'browser') {
+            if (!browserEntry) throw new Error(`Browser file not found: ${path}`);
+            const hydrated = await this.hydrateBrowserEntry(browserEntry);
+            if (hydrated.unsupported) throw new Error(`Unsupported file: ${path}`);
+            onProgress?.({ phase: 'write', current: 1, total: 1, path });
+            const written = await this.adapter.writeFile(handle, path, hydrated.content || '');
+            await this.upsertManifestEntry(handle, project, {
+                path,
+                versionRef: hydrated.versionRef,
+                browserHash: hydrated.hash,
+                diskHash: hydrated.hash,
+                diskSize: written.size,
+                diskLastModified: written.lastModified,
+                lastDirection: 'browser-to-fs',
+            });
+            return;
+        }
+
+        const content = await this.adapter.readFileContent(handle, path);
+        if (content === null) throw new Error(`Local file not found: ${path}`);
+        const diskHash = await this.hashContent(content);
+        onProgress?.({ phase: 'push', current: 1, total: 1, path });
+        let file: mls.stor.IFileInfo;
+        if (browserEntry) {
+            await this.updateBrowserFile(browserEntry.file, content);
+            file = browserEntry.file;
+        } else {
+            file = await this.createBrowserFile(project, path, content);
+        }
+        await this.upsertManifestEntry(handle, project, {
+            path,
+            versionRef: file.versionRef || '',
+            browserHash: diskHash,
+            diskHash,
+            diskSize: content instanceof Blob ? content.size : new TextEncoder().encode(content).length,
+            diskLastModified: Date.now(),
+            lastDirection: 'fs-to-browser',
+        });
+    }
+
+    private async upsertManifestEntry(handle: CollabFsDirectoryHandle, project: number, entry: CollabFsManifestFile): Promise<void> {
+        const existing = await this.readManifest(handle);
+        const now = new Date().toISOString();
+        const manifest: CollabFsManifest = (existing && existing.project === project)
+            ? existing
+            : { schemaVersion: 1, project, selectedAt: now, lastSyncAt: now, syncMode: 'manual', files: {} };
+        manifest.files[entry.path] = entry;
+        manifest.lastSyncAt = now;
+        await this.adapter.writeTextFile(handle, MANIFEST_FILE, `${JSON.stringify(manifest, null, 2)}\n`);
+    }
+
     public async readManifest(handle: CollabFsDirectoryHandle): Promise<CollabFsManifest | null> {
         const content = await this.adapter.readTextFile(handle, MANIFEST_FILE).catch(() => null);
         if (!content) return null;

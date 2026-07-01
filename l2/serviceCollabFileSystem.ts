@@ -62,6 +62,11 @@ const message_en = {
     nothingToPull: 'Nothing to pull.',
     nothingToPush: 'Nothing to push.',
     disconnected: 'Folder disconnected.',
+    killBrowser: 'Kill browser version',
+    killFs: 'Kill FS version',
+    viewDiff: 'View diff',
+    resolvedKeepBrowser: 'Resolved. Browser version won.',
+    resolvedKeepFs: 'Resolved. FS version won.',
     resWritten: 'written',
     resTrashed: 'trashed',
     resSkipped: 'skipped',
@@ -135,6 +140,11 @@ const message_pt: typeof message_en = {
     nothingToPull: 'Nada para trazer.',
     nothingToPush: 'Nada para enviar.',
     disconnected: 'Pasta desconectada.',
+    killBrowser: 'Matar versão do browser',
+    killFs: 'Matar versão do FS',
+    viewDiff: 'Ver diff',
+    resolvedKeepBrowser: 'Resolvido. Venceu a versão do browser.',
+    resolvedKeepFs: 'Resolvido. Venceu a versão do FS.',
     resWritten: 'gravados',
     resTrashed: 'p/ lixeira',
     resSkipped: 'ignorados',
@@ -364,13 +374,6 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
                 <button class="icon rescan" aria-label="${m.rescan}" @click=${() => this.scan()} ?disabled=${this.busy}>&#x21BB;</button>
             </div>
 
-            <div class="collab-fs-list">
-                ${this.renderGroup(m.groupBrowser, BROWSER_KINDS)}
-                ${this.renderGroup(m.groupDisk, DISK_KINDS)}
-                ${this.renderGroup(m.groupConflict, CONFLICT_KINDS)}
-                ${this.renderGroup(m.groupSkipped, SKIPPED_KINDS)}
-            </div>
-
             <div class="collab-fs-actions">
                 <button class="primary" @click=${() => this.requestPull()} ?disabled=${this.busy || pullCount === 0}>
                     <span class="dir">&darr;</span> ${m.pull} &middot; ${pullCount}
@@ -380,6 +383,13 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
                 </button>
             </div>
             ${pushBlocked ? html`<p class="collab-fs-muted center">${m.pushBlocked}</p>` : html``}
+
+            <div class="collab-fs-list">
+                ${this.renderGroup(m.groupBrowser, BROWSER_KINDS)}
+                ${this.renderGroup(m.groupDisk, DISK_KINDS)}
+                ${this.renderGroup(m.groupConflict, CONFLICT_KINDS)}
+                ${this.renderGroup(m.groupSkipped, SKIPPED_KINDS)}
+            </div>
         `;
     }
 
@@ -480,6 +490,12 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
         meta.textContent = this.getDetailText(change);
         div.appendChild(meta);
 
+        if (CONFLICT_KINDS.includes(change.kind)) {
+            this.appendConflictResolution(div, change);
+            this.openDetailsRight(div);
+            return;
+        }
+
         if (change.kind === 'unsupported') {
             this.appendMuted(div, change.message || 'Unsupported file.');
             this.openDetailsRight(div);
@@ -520,6 +536,50 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
             sourceModified,
             language: this.getLanguageFromPath(change.path),
         }), 0);
+    }
+
+    private appendConflictResolution(container: HTMLElement, change: CollabFsChange): void {
+        const m = this.msg;
+        const actions = document.createElement('div');
+        actions.className = 'collab-fs-detail-actions';
+
+        // "kill browser" keeps the disk version; "kill fs" keeps the browser version.
+        const killBrowser = document.createElement('button');
+        killBrowser.className = 'danger';
+        killBrowser.textContent = m.killBrowser;
+        killBrowser.addEventListener('click', () => void this.resolveConflict(change, 'disk'));
+        actions.appendChild(killBrowser);
+
+        const killFs = document.createElement('button');
+        killFs.className = 'danger';
+        killFs.textContent = m.killFs;
+        killFs.addEventListener('click', () => void this.resolveConflict(change, 'browser'));
+        actions.appendChild(killFs);
+
+        container.appendChild(actions);
+
+        if (typeof change.localContent === 'string' && typeof change.browserContent === 'string') {
+            const wrap = document.createElement('div');
+            wrap.className = 'collab-fs-detail-actions';
+            const viewDiff = document.createElement('button');
+            viewDiff.textContent = m.viewDiff;
+            viewDiff.addEventListener('click', () => this.openMonacoDiffRight(change, change.localContent as string, change.browserContent as string));
+            wrap.appendChild(viewDiff);
+            container.appendChild(wrap);
+        }
+    }
+
+    private async resolveConflict(change: CollabFsChange, keep: 'browser' | 'disk'): Promise<void> {
+        await this.runExclusive(async () => {
+            const project = this.getProject();
+            if (!project) throw new Error(this.msg.noProject);
+            if (!this.handle) throw new Error('No folder selected.');
+            if (!await this.adapter.ensurePermission(this.handle)) throw new Error('Folder permission was not granted.');
+
+            await this.sync.resolveConflict(project, this.handle, change.path, keep, this.reportProgress.bind(this));
+            await this.scanCurrent();
+            this.statusMessage = keep === 'browser' ? this.msg.resolvedKeepBrowser : this.msg.resolvedKeepFs;
+        });
     }
 
     private isDiskSideChange(change: CollabFsChange): boolean {
@@ -571,6 +631,26 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
             .collab-fs-muted {
                 color: var(--text-primary-color-lighter, #8b949e);
                 font-size: 0.8rem;
+            }
+            .collab-fs-detail-actions {
+                display: flex;
+                gap: 0.5rem;
+                margin-top: 0.75rem;
+            }
+            .collab-fs-detail-actions button {
+                flex: 1;
+                min-height: 2rem;
+                border: 1px solid rgba(128, 128, 128, 0.4);
+                border-radius: 4px;
+                padding: 0.35rem 0.6rem;
+                background: transparent;
+                color: inherit;
+                cursor: pointer;
+                font: inherit;
+            }
+            .collab-fs-detail-actions button.danger {
+                border-color: #f85149;
+                color: #f85149;
             }
         `;
         return style;

@@ -256,10 +256,13 @@ service-collab-file-system-100554 {
     }
 
     // ---- change list ----
+    // Own scroll so the action buttons above stay visible with long lists (hundreds of files).
     .collab-fs-list {
         display: flex;
         flex-direction: column;
         min-height: 0;
+        max-height: 55vh;
+        overflow: auto;
     }
 
     .collab-fs-group-title {
