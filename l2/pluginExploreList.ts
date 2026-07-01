@@ -1070,9 +1070,10 @@ export class PluginExploreList extends PluginBaseModule {
         this.info.version = 0;
         this.info.storage = 0;
         this.info.error = 0;
-        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
         this.hiddenFiles = ['other', 'all'].includes(e.target.value);
         this.modeFilter = e.target.value;
+        if (this.modeFilter === 'all' && this.modeView !== 0) this.modeView = 0;
+        this.filterByLevel[mls.actualLevel] = { prj: this.filterProject, group: this.modeView };
         this.setLastPreference();
         await this.getFiles();
 

@@ -34,32 +34,43 @@ export class MlsFileTree extends CollabLitElement {
     @property({ type: Object }) files: Record<string, FileInfo> = {};
     @state() private expanded: Set<string> = new Set();
     @state() private selected: string = '';
+    @state() private _loading = false;
+    @state() private _loadingMsg = '';
 
     firstUpdated() {
         this.project = this.project ? this.project : (mls.actualProject || 0).toString()
     }
 
     render() {
-        // read from global if no property passed
-        const src = Object.keys(this.files).length > 0
-            ? this.files
-            : mls.stor.files ?? {};
+        const src = Object.keys(this.files).length > 0 ? this.files : mls.stor.files ?? {};
 
         if (Object.keys(src).length === 0) {
             this.files = src;
-            return html`<div style="padding:8px;color:#888">Nenhum arquivo encontrado em mls.stor.files</div>`;
+            return html`
+                ${this._renderOverlay()}
+                <div style="padding:8px;color:#888">Nenhum arquivo encontrado em mls.stor.files</div>
+            `;
         }
 
         if (this.files !== src) this.files = src;
 
-        if (this.filter) return this.renderFiltered(src);
+        const content = this.filter
+            ? this.renderFiltered(src)
+            : html`<ul class="tree-root">${this.buildTree().children.map(c => this.renderNode(c, 0))}</ul>`;
 
-        const tree = this.buildTree();
+        return html`<div style="position:relative;height:100%">${this._renderOverlay()}${content}</div>`;
+    }
 
+    private _renderOverlay() {
+        if (!this._loading) return nothing;
         return html`
-            <ul class="tree-root">
-                ${tree.children.map(c => this.renderNode(c, 0))}
-            </ul>
+            <style>@keyframes mft-spin{100%{transform:rotate(360deg)}}</style>
+            <div style="position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center">
+                <div style="background:var(--bg-secondary-color,#252526);border-radius:10px;padding:1.75rem 2.5rem;display:flex;flex-direction:column;align-items:center;gap:1rem;min-width:240px;box-shadow:0 8px 32px rgba(0,0,0,.6)">
+                    <div style="width:38px;height:38px;border:4px solid rgba(255,255,255,.15);border-top-color:#4fa3e0;border-radius:50%;animation:mft-spin .75s linear infinite"></div>
+                    <span style="color:var(--text-primary-color,#ccc);font-size:.9rem;text-align:center;white-space:pre-wrap">${this._loadingMsg}</span>
+                </div>
+            </div>
         `;
     }
 
@@ -352,9 +363,19 @@ export class MlsFileTree extends CollabLitElement {
         const label = node.fullPath || 'root';
         if (!window.confirm(`delete: ${label} (${files.length})?`)) return;
 
-        for await (const mfile of files) {
-            if (!mfile) continue;
-            await deleteFile(mfile);
+        this._loading = true;
+        this._loadingMsg = `Deleting ${label}\n0 / ${files.length}`;
+        await this.updateComplete;
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                if (!files[i]) continue;
+                this._loadingMsg = `Deleting ${label}\n${i + 1} / ${files.length}`;
+                await deleteFile(files[i]);
+            }
+        } finally {
+            this._loading = false;
+            this._loadingMsg = '';
         }
 
         this.requestUpdate();
@@ -369,9 +390,19 @@ export class MlsFileTree extends CollabLitElement {
         const label = node.fullPath || 'root';
         if (!window.confirm(`undo: ${label} (${files.length})?`)) return;
 
-        for await (const mfile of files) {
-            if (!mfile) continue;
-            await undoFile(mfile);
+        this._loading = true;
+        this._loadingMsg = `Undoing ${label}\n0 / ${files.length}`;
+        await this.updateComplete;
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                if (!files[i]) continue;
+                this._loadingMsg = `Undoing ${label}\n${i + 1} / ${files.length}`;
+                await undoFile(files[i]);
+            }
+        } finally {
+            this._loading = false;
+            this._loadingMsg = '';
         }
 
         this.requestUpdate();
