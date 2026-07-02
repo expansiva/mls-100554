@@ -40,8 +40,9 @@ export class PreviewModeSinglePage {
 
         if (!this.json || !this.ifr || !this.esbuild || !this.file) return;
 
-
-        const find = this.findWidgets(this.ifr.contentDocument?.body)
+        const find = this.findWidgets(this.ifr.contentDocument?.body);
+        const savedBody = this.ifr.contentDocument?.body.innerHTML || '';
+        if (this.ifr.contentDocument) this.ifr.contentDocument.body.innerHTML = '';
 
         const result = await this._buildJS(find);
         util.mountJSImporMap(this.json, this.ifr);
@@ -53,6 +54,16 @@ export class PreviewModeSinglePage {
         this.ifr.contentDocument?.body.appendChild(s);
         if (this.isService && this.file) util.simulateService(this.json, this.ifr, this.file);
 
+        if (this.ifr && this.ifr.contentDocument && savedBody) {
+            const div = this.ifr.contentDocument.createElement('div');
+            div.innerHTML = savedBody;
+            this.ifr.contentDocument.body.appendChild(div);
+            //this.ifr.contentDocument.body.insertAdjacentHTML('beforeend', savedBody);
+        }
+
+    
+
+
     }
 
     private async _buildJS(other: string[]) {
@@ -62,10 +73,12 @@ export class PreviewModeSinglePage {
         let valids = [...Object.keys(myMap), ...this.json.importsJs, ...other];
         valids = [...new Set(valids)];
 
-        if (Object.keys(myMap).length === 0) myMap = {
-            lit: "https://cdn.jsdelivr.net/gh/lit/dist@3/all/lit-all.min.js",
-            "lit/decorators.js": "https://cdn.jsdelivr.net/npm/lit@3.0.0/decorators/+esm"
-
+        if (Object.keys(myMap).length === 0) {
+            const enhancementModules = await import('/_100554_/l2/enhancementLit.js');
+            const maps = enhancementModules.requires.filter((item: any) => item.type === 'cdn');
+            maps.forEach((item: any) => {
+                myMap[item.name] = item.ref;
+            });
         }
 
         const virtualFsPlugin = {
