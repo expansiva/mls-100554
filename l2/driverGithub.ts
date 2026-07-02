@@ -375,7 +375,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 			const cont = (await fileInfo.getValueInfo()).content;
 			fileInfo.inLocalStorage = oldV;
-			return cont;
+			if(cont) return cont;
 
 		}
 
