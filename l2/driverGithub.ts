@@ -356,8 +356,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		if (typeof cont !== 'string') {
 
-			cont = await dL.fileToBase64(cont as File);
-			[, cont] = cont.split('base64,');
+			cont = await this.convertToBase64(cont as File, f);
 
 		} else cont = dL.base64EncodeUnicode(cont);//btoa(cont);
 
@@ -640,8 +639,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			let cont = await this.verifyAndGetContent(file);
 
 			if (typeof cont !== 'string') {
-				cont = await dL.fileToBase64(cont as File);
-				[, cont] = cont.split('base64,');
+				cont = await this.convertToBase64(cont as File, file);
 			} else {
 				cont = dL.base64EncodeUnicode(cont);
 			}
@@ -763,8 +761,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 						let cont = await this.verifyAndGetContent(file);
 
 						if (typeof cont !== "string") {
-							cont = await dL.fileToBase64(cont as File);
-							[, cont] = cont.split("base64,");
+							cont = await this.convertToBase64(cont as File, file);
 						} else {
 							cont = dL.base64EncodeUnicode(cont);
 						}
@@ -801,7 +798,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		}
 
 		return results;
-	} 
+	}
 
 	//-------------IO----------------
 
@@ -938,7 +935,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 			}
 
 			if (file.status === "renamed") {
-				
+
 				const oldInfo = await (file.getValueInfo?.() ?? undefined);
 				if (!oldInfo) continue;
 
@@ -979,8 +976,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 				let cont = await this.verifyAndGetContent(task.originalFile);
 
 				if (typeof cont !== "string") {
-					cont = await dL.fileToBase64(cont as File);
-					[, cont] = cont.split("base64,");
+					cont = await this.convertToBase64(cont as File, task.originalFile);
 				} else {
 					cont = dL.base64EncodeUnicode(cont);
 				}
@@ -2999,4 +2995,16 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		});
 
 	}
+
+	private async convertToBase64(content: Blob | File, file: mls.stor.IFileInfo): Promise<string> {
+		try {
+			if (!content) throw new Error('Content invalid');
+			let cont = await dL.fileToBase64(content);
+			[, cont] = cont.split("base64,");
+			return cont
+		} catch (e: any) {
+			throw new Error('[convertToBase64]:'+(e.message || '') + ` file:${file.project}/${file.folder ? file.folder + '/' : ''}${file.shortName}${file.extension}`)
+		}
+	}
+
 }
