@@ -66,24 +66,24 @@ export class PluginViewFile extends PluginBaseModule {
         if (!this._ed1) return;
 
         this._ed1.updateOptions({ readOnly: false });
-        
-        if (this.extension === '.md' && this.file) {
-            this._ed1.updateOptions({ readOnly: false });
-            const m = await createModelAnyFile(this.file);
-            this._ed1.setModel(m.model);
 
-            return
-
-        }
-
-        if (this.file && ['.html', '.ts', '.defs.ts', '.test.ts'].includes(this.file.extension)) {
+        if (this.file && ['.html', '.ts', '.defs.ts', '.test.ts', '.less'].includes(this.file.extension)) {
             const m = await this.file.getOrCreateModel();
             this._ed1.setModel(m.model);
-        }else {
-            const value = this.contentText;
-            const model = this._ed1.getModel();
-            if (model) {
-                model.setValue(value);
+        } else if (this.file) {
+            const m = await createModelAnyFile(this.file);
+            this._ed1.setModel(m.model);
+            if (!(m as any).pluginViewEventsWired) {
+                (m as any).pluginViewEventsWired = true;
+                const file = this.file;
+                let timeout: number = 0;
+                m.model.onDidChangeContent(() => {
+                    clearTimeout(timeout);
+                    timeout = window.setTimeout(() => {
+                        mls.events.fireFileAction('statusOrErrorChanged', file, 'left', 0);
+                        mls.events.fireFileAction('editorEvents' as any, file, 'left');
+                    }, 400);
+                });
             }
         }
 
