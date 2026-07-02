@@ -96,8 +96,10 @@ export class ServicePreviewL1100554 extends ServiceBase {
         const info = getPath(moduleConfig.masterBackEnd.serverView)
         if (!info) throw new Error('[connectedCallback] Not found path:' + moduleConfig.masterBackEnd.serverView);
         await import(`/${moduleConfig.masterBackEnd.serverView}`);
-        this.startInstance = await import(`/${moduleConfig.masterBackEnd.start}`);
-        await this.startInstance.start(mls.actualProject, 'none');
+        if (moduleConfig.masterBackEnd.start) {
+            this.startInstance = await import(`/${moduleConfig.masterBackEnd.start}`);
+            await this.startInstance.start(mls.actualProject, 'none');
+        }
         this.liveViewTag = convertFileNameToTag(info);
 
     }
