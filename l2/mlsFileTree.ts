@@ -310,7 +310,7 @@ export class MlsFileTree extends CollabLitElement {
 
     private selectFile(key: string, file: mls.stor.IFileInfo) {
         this.selected = key;
-        if (['.ts'].includes(file.extension) && file.level === 2) {
+        if (['.ts'].includes(file.extension) && [1, 2].includes(file.level) && mls.actualLevel === file.level) {
             this.fireEvents(file);
         } else {
             this.fireEventsDetails(file);
