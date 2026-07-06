@@ -4,8 +4,8 @@ import { html, LitElement } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { customElement, property, query } from 'lit/decorators.js';
 // import { IAutoCapitalize, IcaFormsInputStringBase } from '/_100554_/l2/icaFormsInputStringBase.js';
-import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
-import {CollabLitElement} from '/_102027_/l2/collabLitElement.js'
+import { propertyDataSource } from '/_102029_/l2/collabDecorators.js';
+import {CollabLitElement} from '/_102029_/l2/collabLitElement.js'
 
 @customElement('widget-input-text-100554')
 export class WcInputText100554 extends CollabLitElement { 

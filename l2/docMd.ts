@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, state } from 'lit/decorators.js';
-import { CollabLitElement } from '/_102027_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 
 @customElement('doc-md-100554')
 export class DocMd extends CollabLitElement {

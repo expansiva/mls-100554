@@ -79,7 +79,7 @@ export const asis: mls.defs.AsIs = {
         "dependencies": []
       },
       {
-        "ref": "/_100554_/l2/collabLitElement.js",
+        "ref": "/_102029_/l2/collabLitElement.js",
         "dependencies": [
           {
             "name": "CollabLitElement",

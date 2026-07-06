@@ -2,7 +2,7 @@
 
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 
 @customElement('collab-console-l1-100554')
 export class CollabConsoleL1100554 extends CollabLitElement {

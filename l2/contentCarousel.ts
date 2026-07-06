@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import {unsafeHTML} from 'lit/directives/unsafe-html.js';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js'
 
 @customElement('content-carousel-100554')
 export class ContentTabs extends CollabLitElement {

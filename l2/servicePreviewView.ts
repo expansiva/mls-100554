@@ -12,7 +12,7 @@ import { createStorFile,  } from '/_102027_/l2/libStor.js';
 import { getDependenciesByHtmlFile } from '/_102027_/l2/libCompile.js';
 import { compileStyleUsingStorFile } from '/_102027_/l2/libCompileStyle.js';
 
-import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
 import { PreviewModeSinglePage } from '/_100554_/l2/previewModeSinglePage.js';
 import { PreviewModeMinimum } from '/_100554_/l2/previewModeMinimum.js';
 import { PreviewModeBase } from '/_102027_/l2/previewBase.js'

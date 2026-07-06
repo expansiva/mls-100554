@@ -164,7 +164,7 @@ export class PluginExploreListAddL3 extends PluginBaseModule {
 
     import { html } from 'lit';
     import { customElement } from 'lit/decorators.js';
-    import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+    import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 
     @customElement('${tag}')
     export class ${name} extends CollabLitElement {

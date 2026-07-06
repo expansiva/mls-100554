@@ -3,7 +3,7 @@
 import { html, nothing   } from 'lit';
 import { unsafeHTML} from 'lit/directives/unsafe-html.js';
 import { customElement, state, property, query } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 
 
 @customElement('agent-compare-agents-clarification-100554')

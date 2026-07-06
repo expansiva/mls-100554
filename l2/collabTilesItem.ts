@@ -4,7 +4,7 @@ import { html, css, LitElement } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property, query } from 'lit/decorators.js';
 import { convertFileNameToTag } from '/_102027_/l2/utils';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 import { getPath } from '/_102027_/l2/utils.js';
 
 

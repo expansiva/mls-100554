@@ -4,7 +4,7 @@
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { getInstanceByFile, openService, saveOpenedFile, getLastModule, setLastModule, getProjectConfig } from '/_102027_/l2/libCommom.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js'
 
 /// **collab_i18n_start**
 const message_pt = {

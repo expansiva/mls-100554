@@ -9,7 +9,7 @@ import {
     collab_thumbs_down,
     collab_thumbs_up,
 } from '/_100554_/l2/collabIcons.js'
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 import '/_102027_/l2/collabMonacoEditor.js';
 
 

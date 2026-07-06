@@ -1,6 +1,6 @@
 /// <mls fileReference="_100554_/l2/libCommom.ts" enhancement="_blank" />
 
-import { getMessageKey } from "/_100554_/l2/collabLitElement.js";
+import { getMessageKey } from "/_102029_/l2/collabLitElement.js";
 import { getPath } from '/_102027_/l2/utils.js';
 
 /// **collab_i18n_start** 

@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import { propertyDataSource } from '/_102029_/l2/collabDecorators.js';
 
 @customElement('collab-l3-preview-text-100554')
 export class CollabL3PreviewText extends StateLitElement {

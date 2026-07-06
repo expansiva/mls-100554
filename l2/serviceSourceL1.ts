@@ -3,8 +3,8 @@
 import { html } from 'lit';
 import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_102027_/l2/serviceBase.js';
-import { initState } from '/_102027_/l2/collabState.js';
-import { propertyDataSource } from '/_102027_/l2/collabDecorators.js';
+import { initState } from '/_102029_/l2/collabState.js';
+import { propertyDataSource } from '/_102029_/l2/collabDecorators.js';
 import {  collab_typescript, collab_file_code } from '/_100554_/l2/collabIcons.js';
 import { createAgent } from '/_100554_/l2/agentFix.js';
 import { getTemporaryContext } from '/_102027_/l2/aiAgentHelper.js';

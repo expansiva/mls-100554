@@ -31,7 +31,7 @@ export const asis: mls.defs.AsIs = {
         ]
       },
       {
-        "ref": "/_100554_/l2/collabDecorators.js",
+        "ref": "/_102029_/l2/collabDecorators.js",
         "dependencies": [
           {
             "name": "propertyDataSource"
@@ -42,7 +42,7 @@ export const asis: mls.defs.AsIs = {
         ]
       },
       {
-        "ref": "/_100554_/l2/stateLitElement.js",
+        "ref": "/_102029_/l2/stateLitElement.js",
         "dependencies": [
           {
             "name": "StateLitElement"

@@ -12,7 +12,7 @@ export const asis: mls.defs.AsIs = {
   "references": {
     "imports": [
       {
-        "ref": "/_100554_/l2/collabLitElement.js",
+        "ref": "/_102029_/l2/collabLitElement.js",
         "dependencies": [
           {
             "name": "IScenaryDetails",

@@ -5,8 +5,8 @@ import { customElement, query, property } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu, IOptions } from '/_102027_/l2/serviceBase.js';
 import { formatHtml, sync } from '/_100554_/l2/collabDOMSync.js';
 import { LessCSS } from "/_100554_/l2/lessCSS.js";
-import { initState, getState } from '/_102027_/l2/collabState.js';
-import { propertyDataSource } from '/_102027_/l2/collabDecorators.js';
+import { initState, getState } from '/_102029_/l2/collabState.js';
+import { propertyDataSource } from '/_102029_/l2/collabDecorators.js';
 import { collab_html, collab_typescript, collab_less, collab_fileTest, collab_file_code } from '/_100554_/l2/collabIcons.js';
 
 import { getUserId, createThread, addMessage } from '/_102025_/l2/collabMessagesHelper.js';
@@ -203,7 +203,7 @@ export class ServiceSource100554 extends ServiceBase {
         this.updateActionBasedOnError(modelKey, model.model.id);
     }
 
-    private async createModelIfNeedWithOutActiveModel(project: number, folder: string, shortName: string, ext: string) {
+    private async createModelIfNeedWithOutActiveModel(project: number, folder: string, shortName: string, ext: string, createIfMissing: boolean = true) {
 
         try {
 
@@ -211,6 +211,10 @@ export class ServiceSource100554 extends ServiceBase {
             let stor = mls.stor.files[key];
 
             if (!stor) {
+
+                // Missing storFiles must only be materialized by an explicit user
+                // action (tab click -> ensureStorFileExists), never on file open.
+                if (!createIfMissing) return;
 
                 let template = await getBaseTemplate({ folder, shortName, project, extension: ext });
 
@@ -231,7 +235,7 @@ export class ServiceSource100554 extends ServiceBase {
             }
 
         } catch (e) {
-
+            console.error('[createModelIfNeedWithOutActiveModel]', e);
         }
 
     }
@@ -340,9 +344,9 @@ export class ServiceSource100554 extends ServiceBase {
         let models = mls.editor.getModels(project, shortName, folder);
         if (!models || !models.ts) {
             //models = await createAllModels(storFile);
-            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.ts');
-            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.less');
-            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.html');
+            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.ts', false);
+            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.less', false);
+            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.html', false);
 
             models = mls.editor.getModels(project, shortName, folder);
         }
@@ -1643,9 +1647,9 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         let models = mls.editor.getModels(project, shortName, folder);
         if (!models || !models.ts) {
             //models = await createAllModels(storFile);
-            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.ts');
-            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.less');
-            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.html');
+            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.ts', false);
+            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.less', false);
+            await this.createModelIfNeedWithOutActiveModel(storFile.project, storFile.folder, storFile.shortName, '.html', false);
 
             models = mls.editor.getModels(project, shortName, folder);
         }

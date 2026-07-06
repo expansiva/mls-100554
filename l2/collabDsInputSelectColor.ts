@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 //import { convertColorToHex } from '/_102027_/l2/libCommom.js';
 
 export function initCollabDsInputSelectColor() { };

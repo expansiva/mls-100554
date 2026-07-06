@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 import { gitHubLogin, gitLabLogin, isProviderConnected, gitlabIcon, githubIcon } from '/_100554_/l2/libProviders.js';
 import { replaceTripleslashAndTag, createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
 import {

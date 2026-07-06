@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
-import { initState } from '/_100554_/l2/collabState.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
+import { initState } from '/_102029_/l2/collabState.js';
 import '/_100554_/l2/collabL3EditText.js';
 
 @customElement('collab-preview-l3-100554')

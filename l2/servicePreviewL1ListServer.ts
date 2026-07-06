@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js'
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js'
 import { IJSONDependence } from '/_102027_/l2/libCompile.js';
 import { getPath } from '/_102027_/l2/utils.js';
 import "/_100554_/l2/collabConsoleL1.js";

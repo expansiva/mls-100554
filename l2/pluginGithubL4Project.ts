@@ -6,7 +6,7 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { query, property, customElement } from 'lit/decorators.js';
 import { getMyKeysBranch } from '/_102027_/l2/libCommom.js';
 import * as gitIO from '/_100554_/l2/libGithubIo.js';
-import { CollabLitElement } from '/_102027_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 
 import 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.3/Sortable.min.js';
 

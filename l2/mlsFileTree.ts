@@ -2,7 +2,7 @@
 
 import { html, css, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 import { undoFile, deleteFile, createStorFile, IReqCreateStorFile } from '/_102027_/l2/libStor.js';
 import { getBaseTemplate } from '/_102027_/l2/libCommom.js';
 import { createModel } from '/_102027_/l2/libModel.js';

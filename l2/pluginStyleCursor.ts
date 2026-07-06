@@ -3,10 +3,10 @@
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
-import { getState, setState } from '/_100554_/l2/collabState.js';
-import { getMessageKey } from '/_100554_/l2/collabLitElement.js'
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import { propertyDataSource } from '/_102029_/l2/collabDecorators.js';
+import { getState, setState } from '/_102029_/l2/collabState.js';
+import { getMessageKey } from '/_102029_/l2/collabLitElement.js'
 import { ICSSState } from '/_100554_/l2/lessCSS.js';
 
 /// **collab_i18n_start**

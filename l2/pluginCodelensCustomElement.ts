@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 import '/_100554_/l2/widgetTextCode.js';
 
 /// **collab_i18n_start**

@@ -1,5 +1,5 @@
 /// <mls fileReference="_100554_/l2/testScenario2.ts" enhancement="_100554_/l2/enhancementLit" />
-import { IScenaryDetails } from '/_100554_/l2/collabLitElement.js';
+import { IScenaryDetails } from '/_102029_/l2/collabLitElement.js';
 
 export function _100554_testScenario2_getScenaryDetails(): IScenaryDetails {
     const html = document.createElement('div');

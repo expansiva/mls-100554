@@ -2,9 +2,9 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from '/_102027_/l2/stateLitElement.js';
-import { getMessageKey } from "/_102027_/l2/collabLitElement.js";
-import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import { getMessageKey } from "/_102029_/l2/collabLitElement.js";
+import { propertyDataSource } from '/_102029_/l2/collabDecorators.js';
 import { IDetails, createNewFile } from "/_100554_/l2/pluginNewFileBase.js";
 import { ServiceBase } from '/_102027_/l2/serviceBase.js';
 import '/_100554_/l2/widgetTextCode.js';

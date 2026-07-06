@@ -2,7 +2,7 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
 import { collab_spinner_clock, collab_check, collab_xmark } from '/_100554_/l2/collabIcons.js'
 
 @customElement('collab-result-test-100554')

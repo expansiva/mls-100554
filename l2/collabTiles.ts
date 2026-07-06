@@ -2,7 +2,7 @@
 
 import { html,   } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 import { customElement, property, query } from 'lit/decorators.js';  
 import { getConfigProject, updateConfigProjectPlugins } from '/_102027_/l2/libProjectConfig.js'; 
 import '/_100554_/l2/collabTilesItem.js';

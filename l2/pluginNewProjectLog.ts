@@ -3,7 +3,7 @@
 import { html, css, LitElement, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { collab_check, collab_circle_notch, collab_triangle_exclamation } from '/_100554_/l2/collabIcons';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement';
 
 @customElement('plugin-new-project-log-100554')
 export class CollabLogLine100554 extends CollabLitElement {

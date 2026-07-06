@@ -1,7 +1,7 @@
 /// <mls fileReference="_100554_/l2/collabManagerCoachMarks.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { addCoachMark, ICoachMarks } from '/_100554_/l2/coachMarks.js';
-import {getMessageKey} from '/_100554_/l2/collabLitElement.js'
+import {getMessageKey} from '/_102029_/l2/collabLitElement.js'
 
 /// **collab_i18n_start**
 const message_pt = {

@@ -2,7 +2,7 @@
 
 
 import { property } from 'lit/decorators.js';
-import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
 
 export abstract class PluginBaseModule extends StateLitElement {
 

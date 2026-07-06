@@ -3,7 +3,7 @@
 import { html } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { customElement, property, query } from 'lit/decorators.js';
-import {CollabLitElement} from '/_102027_/l2/collabLitElement.js'
+import {CollabLitElement} from '/_102029_/l2/collabLitElement.js'
 
 @customElement('widget-select-100554')
 export class WcInputText100554 extends CollabLitElement {  

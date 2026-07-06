@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { propertyDataSource, propertyCompositeDataSource } from '/_100554_/l2/collabDecorators.js';
-import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { propertyDataSource, propertyCompositeDataSource } from '/_102029_/l2/collabDecorators.js';
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
 import { collab_bolt } from '/_100554_/l2/collabIcons.js';
 
 export const initCollabSelectOneWithDescription = ''; 

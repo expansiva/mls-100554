@@ -2,7 +2,7 @@
 
 import { html, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 import '/_100554_/l2/collabOrgHome.js'
 import '/_100554_/l2/collabOrgSettings.js'
 import '/_100554_/l2/collabOrgProjects.js'

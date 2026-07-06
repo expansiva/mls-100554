@@ -3,9 +3,9 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from '/_102027_/l2/stateLitElement.js';
-import { getMessageKey } from "/_102027_/l2/collabLitElement.js";
-import { propertyDataSource } from '/_100554_/l2/collabDecorators.js';
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import { getMessageKey } from "/_102029_/l2/collabLitElement.js";
+import { propertyDataSource } from '/_102029_/l2/collabDecorators.js';
 import { IDetails } from "/_100554_/l2/pluginNewFileBase.js";
 import { createStorFile, IReqCreateStorFile } from "/_102027_/l2/libStor.js";
 import { createModelAnyFile } from "/_102027_/l2/libModel.js";

@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
 
 @customElement('wc-aux-command-100554')
 export class WcAuxCommand100554 extends StateLitElement {

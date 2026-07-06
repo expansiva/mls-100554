@@ -2,11 +2,11 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { StateLitElement } from '/_100554_/l2/stateLitElement.js';
-import { propertyDataSource, propertyCompositeDataSource } from '/_100554_/l2/collabDecorators.js';
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import { propertyDataSource, propertyCompositeDataSource } from '/_102029_/l2/collabDecorators.js';
 import {
     getState, setState, subscribe, unsubscribe, notify, initState
-} from '/_100554_/l2/collabState.js';
+} from '/_102029_/l2/collabState.js';
 
 //
 // Test state handling in Lit. Usage:

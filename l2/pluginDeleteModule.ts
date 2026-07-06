@@ -2,7 +2,7 @@
 
 import { html, css, TemplateResult } from 'lit';
 import { customElement, state, property } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
 import { removeModule } from '/_100554_/l2/projectAST.js';
 import { removeTokensTheme } from '/_102027_/l2/designSystemBase.js';
 import { deleteFile } from '/_102027_/l2/libStor.js' 

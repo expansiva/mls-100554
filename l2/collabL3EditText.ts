@@ -2,8 +2,8 @@
 
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CollabLitElement } from '/_100554_/l2/collabLitElement.js';
-import { initState } from '/_100554_/l2/collabState.js';
+import { CollabLitElement } from '/_102029_/l2/collabLitElement.js';
+import { initState } from '/_102029_/l2/collabState.js';
 import { createModel } from '/_102027_/l2/libModel.js';
 import { getPath } from '/_102027_/l2/utils.js';
 
