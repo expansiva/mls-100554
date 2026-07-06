@@ -36,7 +36,8 @@ const message_pt = {
     errorVerify: 'Foi encontrado arquivos com erros',
     obsVerify: 'O salvamento só será permitido se não houver arquivos com erros ou se a verificação for cancelada!',
     msgTotFile: 'Tamanho total dos arquivos selecionados:',
-    msgErroTotFile: 'Excedeu o tamanho total permitido'
+    msgErroTotFile: 'Excedeu o tamanho total permitido',
+    msgErrorFilesSelected: 'Arquivos com erro foram selecionados, deseja realmente continuar?'
 }
 const message_en = {
     openPullrequest: 'Open pull requests',
@@ -58,7 +59,8 @@ const message_en = {
     errorVerify: 'Files with errors were found',
     obsVerify: 'Saving will only be allowed if there are no files with errors, or the check is cancelled!',
     msgTotFile: 'Total size of selected files:',
-    msgErroTotFile: 'Exceeded the total size allowed'
+    msgErroTotFile: 'Exceeded the total size allowed',
+    msgErrorFilesSelected: 'Files with errors are selected, do you really want to continue?'
 }
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
@@ -353,7 +355,7 @@ export class ServiceSave extends ServiceBase {
                         <h4 class="mt-3">${this.myMessage.comments}:</h4>
                         <div style="display:flex; gap:1rem; align-items:center;">
                             <textarea id="commitMessage" class="form-control" style="max-width:600px;" maxlength="50"></textarea>
-                            <button id="btn_save" ?disabled=${!this.isFreeToSave} class="btn-service-save btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
+                            <button id="btn_save" ${'' /* ?disabled=${!this.isFreeToSave} */} class="btn-service-save btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
                         </div>
                         <small style="font-size:12px;font-weight:bold">*${this.myMessage.obsVerify}</small>
                     </div>
@@ -426,7 +428,7 @@ export class ServiceSave extends ServiceBase {
                     <span class="fatv fa-caret-righttv" @click="${this.openMeList}" > 
                         <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
                     </span>
-                    <input type = "checkbox" ?disabled=${forceError} id = "l2-${indexPP}-${indexP}-${index}" @click="${this.clickSetValueAllChilds}"/> 
+                    <input type = "checkbox" ${'' /* ?disabled=${forceError} */} id = "l2-${indexPP}-${indexP}-${index}" @click="${this.clickSetValueAllChilds}"/>
                     <label for= "l2-${indexPP}-${indexP}-${index}" > ${file} </label>
                 </div>
                 <ul>
@@ -442,7 +444,7 @@ export class ServiceSave extends ServiceBase {
         return html`
             <li style="padding-left: 1.1rem;" class="${item.errorLocal || item.modelIsDispose ? 'errorLocal' : ''}">
                 <div style="align-items: center;">
-                    ${item.disabled || item.onlyFather || item.errorLocal || forceError || item.modelIsDispose
+                    ${item.disabled || item.onlyFather || item.errorLocal /*|| forceError*/ || item.modelIsDispose
                 ? html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
                 : html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
             }
@@ -674,7 +676,7 @@ export class ServiceSave extends ServiceBase {
         let span = `<span style = "font-size: 12px; color: #7678a6; margin-left: 5px;" class="fa ${this.oIcon[item.status].icon}" title = "${this.oIcon[item.status].title}" > </span>`;
         if (item.hasError && item.status !== 'deleted') {
             span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px; height: 16px;" class="fa fa-bug" title="Error"></span>';
-            disabled = true;
+            //disabled = true; // arquivos com erro agora podem ser selecionados; onSave pede confirmação
         }
         if (item.isLocalVersionOutdated) {
             span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px;" class="fa fa-unbalanced" title="Version block"></span>';
@@ -919,6 +921,15 @@ export class ServiceSave extends ServiceBase {
 
             const msg = txt.value;
             const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
+
+            if (array.some((f) => f.hasError && f.status !== 'deleted')) {
+                if (!window.confirm(this.myMessage.msgErrorFilesSelected)) {
+                    this.inSaving = false;
+                    this.showLoader(false);
+                    return;
+                }
+            }
+
             this.verifyNeedSelectDS(array);
             this.freeToSaveProjectAndDs(array);
             this.arrayRollback = array;
