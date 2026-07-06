@@ -62,7 +62,7 @@ export const asis: mls.defs.AsIs = {
         ]
       },
       {
-        "ref": "/_100554_/l2/libProjectConfig.js",
+        "ref": "/_102027_/l2/libProjectConfig.js",
         "dependencies": [
           {
             "name": "getConfigProject",
@@ -71,7 +71,7 @@ export const asis: mls.defs.AsIs = {
         ]
       },
       {
-        "ref": "/_100554_/l2/libCommom.js",
+        "ref": "/_102027_/l2/libCommom.js",
         "dependencies": [
           {
             "name": "loadPluginProject",

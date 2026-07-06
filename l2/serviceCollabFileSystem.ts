@@ -5,7 +5,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import { CollabFsDirectoryHandle, FileSystemAccessAdapter } from '/_100554_/l2/collabFileSystemAccess.js';
 import { CollabFileSystemSync, CollabFsChange, CollabFsProgress, CollabFsScanResult } from '/_100554_/l2/collabFileSystemSync.js';
-import { openElementInServiceDetails } from '/_100554_/l2/libCommom.js';
+import { openElementInServiceDetails } from '/_102027_/l2/libCommom.js';
 
 
 /// **collab_i18n_start**

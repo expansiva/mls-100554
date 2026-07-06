@@ -6,7 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { propertyDataSource, propertyCompositeDataSource } from '/_102029_/l2/collabDecorators.js';
 import { StateLitElement } from '/_102029_/l2/stateLitElement.js'; 
 import { convertTagToFileName } from '/_100554_/l2/utilsLit';
-import { MindMapSelected, MindMapData, MindMapNodeStyles, MindMapNodeStyle, MindMapNode, setMindMapVariable, getMindMapVariable, getMindMapByStorFile, getMindMapByName } from '/_100554_/l2/libMindMap.js'
+import { MindMapSelected, MindMapData, MindMapNodeStyles, MindMapNodeStyle, MindMapNode, setMindMapVariable, getMindMapVariable, getMindMapByStorFile, getMindMapByName } from '/_102027_/l2/libMindMap.js'
 import { getPath } from '/_102027_/l2/utils.js';
 
 @customElement('widget-mind-map-l4-100554')

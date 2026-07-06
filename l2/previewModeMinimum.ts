@@ -1,6 +1,6 @@
 /// <mls fileReference="_100554_/l2/previewModeMinimum.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { IJSONDependence } from '/_100554_/l2/libCompile';
+import { IJSONDependence } from '/_102027_/l2/libCompile';
 import * as util from '/_100554_/l2/previewModeUtil';
 
 export class PreviewModeMinimum {

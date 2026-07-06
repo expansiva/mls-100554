@@ -3,7 +3,7 @@
 import { html, svg, TemplateResult } from 'lit';
 import { state } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
-import { getAllDefs, IdefModule } from '/_100554_/l2/libMindMap.js';  
+import { getAllDefs, IdefModule } from '/_102027_/l2/libMindMap.js';  
 
 export class pluginCodeInsights extends PluginBaseModule {
 
