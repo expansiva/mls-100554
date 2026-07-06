@@ -8,7 +8,7 @@ import { getTokensCss } from '/_102027_/l2/designSystemBase.js';
 import { convertFileNameToTag, getPath } from '/_102027_/l2/utils.js';
 import { createModel } from '/_102027_/l2/libModel.js';
 import { getBaseTemplate } from '/_102027_/l2/libCommom.js';
-import { createStorFile,  } from '/_102027_/l2/libStor.js';
+import { createStorFile, } from '/_102027_/l2/libStor.js';
 import { getDependenciesByHtmlFile } from '/_102027_/l2/libCompile.js';
 import { compileStyleUsingStorFile } from '/_102027_/l2/libCompileStyle.js';
 
@@ -474,9 +474,7 @@ export class ServicePreviewView extends StateLitElement {
         );
 
         const file = mls.stor.files[key];
-
         const mkey = mls.editor.getKeyModel(info.project as number, info.shortName as string, file.folder, file.level);
-
         if (!mls.stor.files[key]) throw new Error(this.msg.notFoundStorfile + ': ' + key);
 
         if (!mls.editor.models[mkey] && mls.actualLevel !== 7) {
@@ -501,6 +499,11 @@ export class ServicePreviewView extends StateLitElement {
         const { project, shortName, folder, level } = base;
         const key = mls.stor.getKeyToFiles(project, base.level, shortName, folder, ext);
         let stor = mls.stor.files[key];
+        if (stor) {
+            await createModel(stor, true, false);
+        }
+
+        /*
 
         if (!stor) {
 
@@ -527,7 +530,7 @@ export class ServicePreviewView extends StateLitElement {
 
         } else {
             await createModel(stor, true, false);
-        }
+        }*/
 
 
     }
@@ -575,7 +578,7 @@ export class ServicePreviewView extends StateLitElement {
         (iframe.contentDocument.body as any)['service'] = this.father;
 
         let ret = await getDependenciesByHtmlFile(this.file, txt, this.actualtheme, true);
-        
+
         const domVirtual = document.createElement('div');
         domVirtual.innerHTML = txt;
 

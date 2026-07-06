@@ -83,7 +83,7 @@ export const pluginData: mls.plugin.IPluginData = {
 export class PluginExploreList extends PluginBaseModule {
 
     public async createModels(stor: mls.stor.IFileInfo) {
-        await createAllModels(stor);
+        await createAllModels(stor, true, false, false);
     }
 
     private resizeObserver: ResizeObserver | undefined;
@@ -866,8 +866,7 @@ export class PluginExploreList extends PluginBaseModule {
 
             //const files = await createAllModels(file, true);
             const storFiles = await mls.stor.getFiles({ project: file.project, shortName: file.shortName, folder: file.folder, loadContent: false });
-            
-
+    
             if ([1, 2, 3, 4].includes(mls.actualLevel)) await this.createModel(file, '.ts');
             if ([2, 3, 4].includes(mls.actualLevel) && storFiles.less) await this.createModel(file, '.less');
             if ([2, 3, 4].includes(mls.actualLevel) && storFiles.html) await this.createModel(file, '.html');
