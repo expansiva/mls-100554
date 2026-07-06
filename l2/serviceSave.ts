@@ -37,7 +37,9 @@ const message_pt = {
     obsVerify: 'O salvamento só será permitido se não houver arquivos com erros ou se a verificação for cancelada!',
     msgTotFile: 'Tamanho total dos arquivos selecionados:',
     msgErroTotFile: 'Excedeu o tamanho total permitido',
-    msgErrorFilesSelected: 'Arquivos com erro foram selecionados, deseja realmente continuar?'
+    msgErrorFilesSelected: 'Arquivos com erro foram selecionados, deseja realmente continuar?',
+    sync: 'Sinc',
+    msgSync: 'Deseja realmente sincronizar? Suas alterações do projeto [prj] serão todas perdidas.'
 }
 const message_en = {
     openPullrequest: 'Open pull requests',
@@ -60,7 +62,9 @@ const message_en = {
     obsVerify: 'Saving will only be allowed if there are no files with errors, or the check is cancelled!',
     msgTotFile: 'Total size of selected files:',
     msgErroTotFile: 'Exceeded the total size allowed',
-    msgErrorFilesSelected: 'Files with errors are selected, do you really want to continue?'
+    msgErrorFilesSelected: 'Files with errors are selected, do you really want to continue?',
+    sync: 'Sync',
+    msgSync: 'Do you really want to synchronize? All your project [prj] changes will be lost.'
 }
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
@@ -277,6 +281,10 @@ export class ServiceSave extends ServiceBase {
                     <span style="font-weight:600">Branch:</span>
                     <span>${this.branch}</span>
                 </div>
+
+                <button class="btn-service-save" style=" justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " title="${this.myMessage.sync}" @click="${() => { this.forceSync() }}">
+                    ${collab_branch} ${this.myMessage.sync}
+                </button>
 
                 <button class="btn-service-save" style=" display: none; justify-content: center; align-items: center; margin: 0px; padding: 5px; height: 23px; " @click="${() => { if (this.menu.setMenuActive) this.menu.setMenuActive('opBranch') }}">
                     ${collab_branch} Change
@@ -955,7 +963,7 @@ export class ServiceSave extends ServiceBase {
             txt.value = '';
 
             this.clearLocalHIstoryCurrentInfoDriver();
-            
+
             this.inSaving = false;
             this.owner = oldOwner;
             this.repo = oldRepo;
@@ -983,7 +991,7 @@ export class ServiceSave extends ServiceBase {
             this.showLoader(false);
             console.info('Error onSave:', err);
 
-        } 
+        }
     }
 
     private verifyNeedSelectDS(array: mls.stor.IFileInfo[]) {
@@ -1449,8 +1457,6 @@ export class ServiceSave extends ServiceBase {
 
         if (!findDS || !findPrj) throw new Error('The project and designerSystem files must be saved.');
 
-
-
     }
 
     private async undoFile(item: HTMLElement, storFile: mls.stor.IFileInfo) {
@@ -1527,6 +1533,44 @@ export class ServiceSave extends ServiceBase {
 
         // se nada mudou, retorna o mesmo objeto (referência)
         return changed ? newData : data;
+    }
+
+    private async forceSync() {
+
+        const conf = window.confirm(this.myMessage.msgSync.replace('[prj]', (mls.actualProject || 0).toString()));
+        if (!conf) return;
+
+
+        const obj = Object.values(mls.stor.files).filter((s) => s.status !== 'nochange' && s.project === mls.actualProject);
+
+        if (!obj || obj.length === 0) return;
+
+        this.showLoader(true);
+
+        try {
+
+            for (const file of obj) {
+                await undoFile(file);
+            }
+
+            const data = this.getAllUserOpenedFiles();
+            if (data[mls.actualProject || 0]) delete data[mls.actualProject || 0];
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+
+            this.showLoader(false);
+            window.location.reload();
+
+        } catch (e: any) {
+            this.showLoader(false);
+            this.error = e.message || 'Erro to sync';
+        }
+
+    }
+
+    private STORAGE_KEY = '_100554_serviceInit';
+    private getAllUserOpenedFiles(): Record<string, any> {
+        const raw = localStorage.getItem(this.STORAGE_KEY);
+        return raw ? JSON.parse(raw) : {};
     }
 }
 
