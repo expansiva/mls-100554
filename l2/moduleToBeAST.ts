@@ -1,6 +1,6 @@
 /// <mls fileReference="_100554_/l2/moduleToBeAST.ts" enhancement="_blank"/>
 
-import { collabImport } from '/_100554_/l2/collabImport.js';
+import { collabImport } from '/_102027_/l2/collabImport.js';
 import { createNewFile } from "/_100554_/l2/pluginNewFileBase.js";
 
 const shortName = 'moduleToBe';
