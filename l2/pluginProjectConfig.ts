@@ -51,7 +51,6 @@ export class PluginProjectConfig extends PluginBaseModule {
     private template: string = `window.project_config`
 
     async prepare() {
-        debugger;
         this.createEditor();
         await this.loadProjectConfigs();
     }
