@@ -1,6 +1,6 @@
 /// <mls fileReference="_100554_/l2/collabFileSystemSync.ts" enhancement="_100554_/l2/enhancementLit" />
 
-import { createStorFile, deleteFile } from '/_100554_/l2/collabLibStor.js';
+import { createStorFile, deleteFile } from '/_102027_/l2/libStor.js';
 
 export type CollabFsChangeKind =
     'browserOnly' |
