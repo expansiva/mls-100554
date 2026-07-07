@@ -70,9 +70,9 @@ export class PluginNewFilePage extends StateLitElement {
     private service = this.closest('service-detail-100554') as ServiceBase;
 
     private template: string = `
-import { CollabPageElement } from '${getTemplateImport(100554,'collabPageElement', '')}';
+import { CollabPageElement } from '${getTemplateImport(102027,'collabPageElement', '')}';
 import { customElement } from 'lit/decorators.js';
-import { globalState, initState, setState } from '${getTemplateImport(100554,'collabState', '')}';
+import { globalState, initState, setState } from '${getTemplateImport(102027,'collabState', '')}';
 
 @customElement('[tagName]')
 export class [className] extends CollabPageElement {
@@ -83,7 +83,7 @@ export class [className] extends CollabPageElement {
 `;
 
 
-    private enhancement: string = `_100554_/l2/enhancementLit.ts`;
+    private enhancement: string = `_102027_/l2/enhancementLit.ts`;
 
     private groupName: string = `other`;
 
@@ -103,7 +103,7 @@ export class [className] extends CollabPageElement {
 
         const folder = this.folder ? `${this.folder}/` : '';
         const name = `_${this.project}_/l2/${folder}${this.shortName}.ts`
-        return `/// <mls fileReference="${name}" enhancement="${enhancement}"${group}/>\n${newExample}\n`
+        return `/// <mls fileReference="${name}" enhancement="${enhancement}"/>\n${newExample}\n`
     }
 
     private getTemplateHTML(): string {
