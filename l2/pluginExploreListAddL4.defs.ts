@@ -74,7 +74,7 @@ export const asis: mls.defs.AsIs = {
         ]
       },
       {
-        "ref": "/_100554_/l2/libCommom.js",
+        "ref": "/_102027_/l2/libCommom.js",
         "dependencies": [
           {
             "name": "getInstanceByFile"
@@ -93,7 +93,7 @@ export const asis: mls.defs.AsIs = {
         ]
       },
       {
-        "ref": "/_100554_/l2/collabImport.js",
+        "ref": "/_102027_/l2/collabImport.js",
         "dependencies": [
           {
             "name": "collabImport"

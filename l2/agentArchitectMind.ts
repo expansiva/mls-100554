@@ -2,7 +2,7 @@
 
 
 import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
-import { getAllDefs } from '/_100554_/l2/libMindMap.js';
+import { getAllDefs } from '/_102027_/l2/libMindMap.js';
 
 export function createAgent(): IAgentAsync {
     return {

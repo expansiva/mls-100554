@@ -1,7 +1,7 @@
 /// <mls fileReference="_100554_/l2/projectAST.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import { createModel } from '/_102027_/l2/libModel.js';
-import { collabImport } from '/_100554_/l2/collabImport.js';
+import { collabImport } from '/_102027_/l2/collabImport.js';
 import { createNewFile } from "/_100554_/l2/pluginNewFileBase.js";
 
 // Adds a new module with the given name to the modules array in the editor content.

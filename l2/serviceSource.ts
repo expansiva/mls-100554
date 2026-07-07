@@ -163,6 +163,7 @@ export class ServiceSource100554 extends ServiceBase {
             if (!this.activeModels?.ts) return;
 
             await this.ensureStorFileExists(ext);
+            if (this.mode !== EToolsSource[op]) return; // user switched tabs during the await
             this.refreshActiveModels();
             this.activateModelForOp(op);
 
@@ -174,17 +175,19 @@ export class ServiceSource100554 extends ServiceBase {
     private async ensureStorFileExists(ext: string): Promise<void> {
         const { project, shortName, folder, level } = this.activeModels!.ts!.storFile;
         const key = mls.stor.getKeyToFiles(project, 2, shortName, folder, ext);
-        const stor = mls.stor.files[key];
+        let stor = mls.stor.files[key];
 
         if (!stor) {
             const template = await getBaseTemplate({ folder, shortName, project, extension: ext });
-            await createStorFile({
+            stor = await createStorFile({
                 project, shortName, folder, level,
                 extension: ext, source: template, status: 'new',
             }, true, true, false);
-        } else {
-            await createModel(stor, true, false);
         }
+
+        // createStorFile only auto-creates models for .ts/.html/.defs.ts/.test.ts,
+        // so .less depends on this explicit createModel (no-op when the model already exists)
+        await createModel(stor, true, false);
     }
 
     private refreshActiveModels(): void {

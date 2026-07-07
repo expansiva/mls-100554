@@ -3,7 +3,7 @@
 import { svg, TemplateResult, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
-import {  MindMapData, getMindMapByName, setMindMapVariable } from '/_100554_/l2/libMindMap.js'
+import {  MindMapData, getMindMapByName, setMindMapVariable } from '/_102027_/l2/libMindMap.js'
 import '/_100554_/l2/widgetMindMapL4.js';
 
 
