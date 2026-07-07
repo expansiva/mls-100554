@@ -2,6 +2,7 @@
 
 import { html, svg, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { PluginBaseModule } from '/_100554_/l2/pluginBaseModule.js';
 import { MindMapData } from '/_102027_/l2/libMindMap.js'
 import '/_100554_/l2/widgetMindMapL4.js';
@@ -11,6 +12,7 @@ const message_pt = {
     btnSearch: 'Pesquisar',
     lblSearch: 'Texto a pesquisar (texto ou regex):',
     lblChoice: 'Selecionar tipo de arquivo:',
+    lblPrj: 'Selecionar o projeto:',
     lblTotal: 'Total arquivos encontrados:',
 }
 
@@ -18,6 +20,7 @@ const message_en = {
     btnSearch: 'Search',
     lblSearch: 'Text to search (text or regex):',
     lblChoice: 'Select file type:',
+    lblPrj: 'Select project:',
     lblTotal: 'Total files found:',
 };
 
@@ -71,8 +74,23 @@ export class PluginProjectFindFiles extends PluginBaseModule {
     }
 
     renderBody(): TemplateResult {
+        const projects = [
+            mls.actualProject as number,
+            ...mls.l5.getProjectDependencies(mls.actualProject || 0, false) || []
+        ];
+
         return html`
             <div class="body">
+                <div class="form-group" style="width:15%; min-width:140px">
+                    <label for="filterProject">${this.msg.lblPrj}</label>
+                    <select name="filterProject">
+                        ${repeat(
+                            projects,
+                            (project:number) => project,
+                            (project:number) => html` <option value="${project}"> ${project} </option> ` )}
+                    </select>
+                </div>
+
                 <div class="form-group" style="width:15%; min-width:140px">
                     <label for="fileType">${this.msg.lblChoice}</label>
                     <select name="fileType">
@@ -81,9 +99,10 @@ export class PluginProjectFindFiles extends PluginBaseModule {
                         <option value=".less">.less - style</option>
                     </select>
                 </div>
-                <div class="form-group" style="width:55%; min-width:200px">
+                
+                <div class="form-group" style="width:35%; min-width:200px">
                     <label for="searchText">${this.msg.lblSearch}</label>
-                    <input name="searchText" type="text"  autocomplete="off"/>    
+                    <input name="searchText" type="text"  autocomplete="off"/>     
                 </div>
                 <div class="view-toggle">
                     <button class="btn is-active" @click=${this.changeMode} mode="list" data-view="list" title="List view">
@@ -129,7 +148,7 @@ export class PluginProjectFindFiles extends PluginBaseModule {
     async onSearch() {
         const fileType = (this.querySelector('[name="fileType"]') as HTMLSelectElement).value;
         const searchText = (this.querySelector('[name="searchText"]') as HTMLInputElement).value;
-        const project = mls.actualProject;
+        const project = +(this.querySelector('[name="filterProject"]') as HTMLSelectElement).value;
         const files = Object.entries(mls.stor.files)
             .filter(([, file]) => file.project === project && file.extension === fileType)
             .map(([key]) => key);
@@ -211,7 +230,7 @@ export class PluginProjectFindFiles extends PluginBaseModule {
             related: [] as any[]
         }
 
-        js.nodes.push(main); 
+        js.nodes.push(main);
 
         this.matchedFiles.slice().sort((a, b) => a.localeCompare(b)).forEach((i) => {
 
@@ -240,7 +259,7 @@ export class PluginProjectFindFiles extends PluginBaseModule {
 
 
     openFile(e: MouseEvent) {
-    
+
         const el = e.target as HTMLElement;
         if (!el) return;
 
@@ -256,7 +275,7 @@ export class PluginProjectFindFiles extends PluginBaseModule {
     }
 
 
-    async fireEvents(action: string, file: mls.stor.IFileInfo,  timeout: number = 0) {
+    async fireEvents(action: string, file: mls.stor.IFileInfo, timeout: number = 0) {
 
         try {
 
