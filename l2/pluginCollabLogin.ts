@@ -176,17 +176,13 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
 
   googleLogin() {
     if (this.verifyDisconnect('google')) return;
-    const clientid = '870551353501-mk6renhaoi3h2tt75n9n5ihudeot8e46.apps.googleusercontent.com';
-    const urlBack = `${this.getRedirectLink()}?source=google`;
-    const access_type: 'online' | 'offline' = 'offline';
-    const responseType = 'code';
-    const scope = 'profile email';
-    const state = this.generateRandomState();
-    localStorage.setItem('pluginCollabLogin', state)
-    const ddm = '1'; // Dynamic Decision-Making
-    const o2v = '2'; // version oauth2
-    const url = `https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?client_id=${encodeURIComponent(clientid)}&redirect_uri=${encodeURIComponent(urlBack)}&response_type=${responseType}&scope=${encodeURIComponent(scope)}&access_type=${encodeURIComponent(access_type)}&prompt=select_account&state=${encodeURIComponent(state)}&service=lso&o2v=${o2v}&ddm=${encodeURIComponent(ddm)}&flowName=GeneralOAuthFlow`;
-    window.location.href = url;
+    // Login now goes through collab-auth (JWT-based). collab-auth handles the
+    // Google OAuth and redirects back to this origin with the tokens in the URL
+    // fragment (see cbeLogin's collab-auth callback handler). GitHub/GitLab keep
+    // their direct OAuth flow below for repository access.
+    const authBase = 'https://auth.collab.codes';
+    const returnTo = `${window.location.origin}/?collabauth=1`;
+    window.location.href = `${authBase}/auth/login/google?returnTo=${encodeURIComponent(returnTo)}`;
   }
 
   gitHubLogin() {
