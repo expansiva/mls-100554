@@ -69,7 +69,7 @@ export class PluginNewFileWebComponent extends StateLitElement {
     private template: string = `
  import { html } from 'lit'; 
  import { customElement, property } from 'lit/decorators.js';
- import { StateLitElement } from '${getTemplateImport(100554, 'stateLitElement', '')}';
+ import { StateLitElement } from '${getTemplateImport(102027, 'stateLitElement', '')}';
 
  @customElement('[tagName]')
  export class [className] extends StateLitElement {
@@ -82,7 +82,7 @@ export class PluginNewFileWebComponent extends StateLitElement {
  }`;
 
 
-    private enhancement: string = `_100554_/l2/enhancementLit.ts`;
+    private enhancement: string = `_102027_/l2/enhancementLit.ts`;
 
     private groupName: string = `other`;
 
@@ -101,7 +101,7 @@ export class PluginNewFileWebComponent extends StateLitElement {
 
         const folder = this.folder ? `${this.folder}/` : '';
         const name = `_${this.project}_/l2/${folder}${this.shortName}.ts`
-        return `/// <mls fileReference="${name}" enhancement="${enhancement}"${group}/>\n${newExample}\n`
+        return `/// <mls fileReference="${name}" enhancement="${enhancement}"/>\n${newExample}\n`
     }
 
     private async handleAddFile() {

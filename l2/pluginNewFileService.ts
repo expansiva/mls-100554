@@ -72,7 +72,7 @@ export class PluginNewFileService extends StateLitElement {
     private template: string = `
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '${getTemplateImport(100554, 'serviceBase', '')}';
+import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '${getTemplateImport(102027, 'serviceBase', '')}';
 
 @customElement('[tagName]')
 export class [className] extends ServiceBase {
@@ -112,7 +112,7 @@ export class [className] extends ServiceBase {
 }`;
 
 
-    private enhancement: string = `_100554_/l2/enhancementLitService.js`;
+    private enhancement: string = `_102027_/l2/enhancementLitService.js`;
 
     private groupName: string = `other`;
 
@@ -132,7 +132,7 @@ export class [className] extends ServiceBase {
 
         const folder = this.folder ? `${this.folder}/` : '';
         const name = `_${this.project}_/l2/${folder}${this.shortName}.ts`
-        return `/// <mls fileReference="${name}" enhancement="${enhancement}"${group}/>\n${newExample}\n`
+        return `/// <mls fileReference="${name}" enhancement="${enhancement}"/>\n${newExample}\n`
     }
 
     private async handleAddFile() {
