@@ -60,7 +60,7 @@ export class PluginProjectUsage extends PluginBaseModule {
         let details = mls.l5.getProjectDetails(project);
         if (!details || !settings) return;
         const config = await getConfigProject(project);
-        this.designSystems = config?.designSystems.length || 0;
+        this.designSystems = config?.designSystems ? Object.keys(config.designSystems).length : 0;
         this.projectLastModified = getDateFormated(details.repository_lastModified || '');
         this.files = Object.keys(mls.stor.files).filter((item => item.startsWith(project.toString()))).length;
     
