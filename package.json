@@ -15,6 +15,7 @@
     "mls-ci": "git+https://github.com/expansiva/mls-ci.git",
     "mls-102025": "git+https://github.com/expansiva/mls-102025.git",
     "mls-102027": "git+https://github.com/expansiva/mls-102027.git",
+    "mls-102029": "git+https://github.com/expansiva/mls-102029.git",
     "node-fetch": "^2.7.0",
     "typescript": "^5.5.3"
   }
