@@ -13,43 +13,43 @@ export class PluginSiteMonitorIndex extends PluginBaseIndex {
             scope: ['l5Panel'],
             priority: 1,
             auth: ['admin', 'editor'],
-            widget: '_100554_pluginSiteMonitorDashboardErrors'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginErrors'
         },
         {
             category: 'Site',
             scope: ['l5Panel'],
             auth: ['admin', 'editor'],
-            widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginActiveUsers'
         },
         {
             category: 'Site',
             scope: ['l5Panel'],
             auth: ['admin', 'editor'],
-            widget: '_100554_pluginSiteMonitorDashboardSpikes'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginSpikes'
         },
         {
             category: 'Site',
             scope: ['l5Panel'],
             auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorDashboardResponseTime'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginResponseTime'
         },
         {
             category: 'Tools',
             scope: ['l5Panel'],
             auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorDashboardRegionalLatency'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginRegionalLatency'
         },
         {
             category: 'Tools',
             scope: ['l5Panel'],
             auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorDashboardResponseTime'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginResponseTime'
         },
         {
             category: 'Tools',
             scope: ['l5Panel'],
             auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorDashboardSales'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginSales'
         },
       ];
     }
