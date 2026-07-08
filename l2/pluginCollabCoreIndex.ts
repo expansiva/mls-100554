@@ -141,14 +141,6 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_pluginExploreList'
             },
-
-            {
-                category: 'Stories',
-                scope: ['l3PageNavigation'],
-                priority: 2,
-                auth: ['*'],
-                widget: '_100554_pluginNavigationRenderOrganism'
-            },
             {
                 category: 'Stories',
                 scope: ['l3PageStyle'],
