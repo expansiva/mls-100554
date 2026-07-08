@@ -12,61 +12,61 @@ export class PluginExamplesIndex extends PluginBaseIndex {
             scope: ['l6Dashboard'],
             priority: 1,
             auth: ['admin', 'editor'],
-            widget: '_100554_pluginSiteMonitorDashboardErrors'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginErrors'
         },
         {
             category: 'Examples 1',
             scope: ['l6Dashboard'],
             auth: ['admin', 'editor'],
-            widget: '_100554_pluginSiteMonitorDashboardActiveUsers'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginActiveUsers'
         },
         {
             category: 'Examples 1',
             scope: ['l6Dashboard'],
             auth: ['admin', 'editor'],
-            widget: '_100554_pluginSiteMonitorDashboardExpenses'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginExpenses'
         },
         {
             category: 'Examples 1',
             scope: ['l6Dashboard'],
             auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorDashboardRegionalLatency'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginRegionalLatency'
         },
         {
             category: 'Examples 1',
             scope: ['l6Dashboard'],
             auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorDashboardResponseTime'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginResponseTime'
         },
         {
             category: 'Examples 1',
             scope: ['l6Dashboard'],
             auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorDashboardSales'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginSales'
         },
         {
             category: 'Examples 2',
             scope: ['l6Dashboard'],
             auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorDashboardRegionalLatency'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginRegionalLatency'
         },
         {
             category: 'Examples 2',
             scope: ['l6Dashboard'],
             auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorDashboardResponseTime'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginResponseTime'
           },
         {
             category: 'Examples 2',
             scope: ['l6Dashboard'],
             auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorDashboardSales'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginSales'
         },
         {
             category: 'Examples 2',
             scope: ['l6Dashboard'],
             auth: ['admin', 'author'],
-            widget: '_100554_pluginSiteMonitorDashboardSpikes'
+            widget: '_100555_/l2/pluginSiteMonitorDashboard/pluginSpikes'
         },
 
         
