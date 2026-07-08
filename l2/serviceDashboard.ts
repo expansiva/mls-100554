@@ -14,7 +14,7 @@ export class ServiceDashboard100554 extends ServiceBase {
 
     @property() cssBreakPoint: string = '';
 
-    @property() activeTab: string = 'Icon1';
+    @property() activeTab: string = 'Example1';
 
     //------SERVICE----------
 

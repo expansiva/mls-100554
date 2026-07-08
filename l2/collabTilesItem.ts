@@ -120,7 +120,8 @@ export class CollabTilesItem extends CollabLitElement {
 
         const infoPathPlugin = getPath(this.plugin);
         if (!infoPathPlugin) throw new Error('[loadingPlugin] Not found path:' + this.plugin);
-        await import('/' + `_${infoPathPlugin.project}_/l2/${infoPathPlugin.shortName}`);
+        const folder = infoPathPlugin.folder ? infoPathPlugin.folder + '/' : ''; 
+        await import('/' + `_${infoPathPlugin.project}_/l2/${folder}${infoPathPlugin.shortName}`);
         const tag = convertFileNameToTag(infoPathPlugin);
         this.elPlugin = document.createElement(tag);
         this.elPlugin.setAttribute('dashboardindex', this.index);
