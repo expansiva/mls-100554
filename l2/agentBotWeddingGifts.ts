@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/agentBotWeddingGifts.ts" enhancement="_blank" />
 
 import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
+import { msgAddOrUpdateThreadBot } from '/_102036_/l2/shared/api.js';
 
 export function createAgent(): IAgentAsync {
     return {
@@ -83,7 +84,7 @@ const installBot = async (context: mls.msg.ExecutionContext): Promise<boolean> =
         .replace('{{userPrompt}}', '')
         .replace('{{botRecord}}', '')
 
-    const rc = await mls.api.msgAddOrUpdateThreadBot({
+    const rc = await msgAddOrUpdateThreadBot({
         botId: agentName,
         llmPrompt,
         status: "active",
@@ -91,9 +92,9 @@ const installBot = async (context: mls.msg.ExecutionContext): Promise<boolean> =
         userId: context.message.senderId,
         config: undefined
     });
-    if (rc.statusCode === 200) {
+    if (rc.success) {
         await addMessage(context.message.threadId, `Bot ${agentName} instaled OK!`);
-        notifyThreadChange(rc.thread);
+        notifyThreadChange(rc.response!.thread);
         return true;
     };
     console.error("error on install bot", rc);

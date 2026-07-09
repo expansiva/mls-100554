@@ -3,6 +3,7 @@
 import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
 import { loadAgent } from '/_102027_/l2/aiAgentOrchestration.js';
 import { addMessage } from '/_102025_/l2/collabMessagesHelper.js';
+import { msgAddOrUpdateThreadBot } from '/_102036_/l2/shared/api.js';
 
 export function createAgent(): IAgentAsync {
     return {
@@ -55,7 +56,7 @@ async function afterPromptStep(
 }
 
 export async function disableBot(context: mls.msg.ExecutionContext, projectId: number, shortName: string, folder:string): Promise<boolean> {
-    const rc = await mls.api.msgAddOrUpdateThreadBot({
+    const rc = await msgAddOrUpdateThreadBot({
         botId: agentName,
         llmPrompt: "",
         status: "disabled",
@@ -63,7 +64,7 @@ export async function disableBot(context: mls.msg.ExecutionContext, projectId: n
         userId: context.message.senderId,
         config: undefined
     });
-    if (rc.statusCode === 200) {
+    if (rc.success) {
         await addMessage(context.message.threadId, `Bot ${agentName} disabled OK!`);
         return true;
     };
