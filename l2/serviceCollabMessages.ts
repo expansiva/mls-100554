@@ -229,16 +229,12 @@ export class ServiceCollabMessages extends ServiceBase {
     private isFirstEnter: boolean = true;
     private configureByLevel() {
         if (!this.menu || !this.menu.tabs || !this.menu.setTabActive) return;
-        this.changeDisplayMenu(this.level === 7);
+        // APPS tab is now available on every level (was restricted to level 7).
+        this.changeDisplayMenu(true);
         if (this.isFirstEnter) {
             this.isFirstEnter = false;
-            let lastActive = ETabs[loadLastTab() as ITabType];
-            lastActive = lastActive === ETabs.APPS && this.level !== 7 ? ETabs.CONNECT : lastActive;
+            const lastActive = ETabs[loadLastTab() as ITabType];
             this.menu.setTabActive(lastActive);
-        }
-
-        if (this.level !== 7 && this.activeTab === 'APPS') {
-            this.menu.setTabActive(ETabs.CONNECT)
         }
 
         this.lastLevel = this.level;

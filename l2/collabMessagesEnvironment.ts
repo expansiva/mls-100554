@@ -5,7 +5,7 @@ import { IAgentMeta, IOpenClawIntegration, Thread, ToolsBeforeSendMessage, Execu
 
 import { loadAgent, executeBeforePrompt } from '/_102027_/l2/aiAgentOrchestration.js';
 import { getTemporaryContext } from '/_102027_/l2/aiAgentHelper.js';
-import { openElementInServiceDetails, getProjectConfig, getProjectModuleConfig } from '/_102027_/l2/libCommom.js';
+import { openElementInServiceDetails } from '/_102027_/l2/libCommom.js';
 
 export const collabEnvironment: CollabMessagesEnvironment = {
     getAgents,
@@ -40,58 +40,112 @@ export const collabEnvironment: CollabMessagesEnvironment = {
     }
 }
 
-// Builds the Apps menu tree for the current Studio project:
-// first level = module (project.ts modules), children = the module's navigation pages
-// (module.ts menu). Reuses the same config readers the live view uses.
+// --- Apps menu, sourced from the workspace config.json (moved to <project>/l5/config.json) ---
+
+interface IConfigNavItem { id: string; label?: string; href?: string; description?: string; icon?: string }
+interface IConfigPage { pageId?: string; route?: string; source?: string; title?: string }
+interface IConfigModule {
+    moduleId: string;
+    basePath?: string;
+    navigation?: IConfigNavItem[];
+    frontend?: { pages?: IConfigPage[] };
+}
+interface IConfigProject { modules?: IConfigModule[] }
+interface IWorkspaceConfig { defaultProjectId?: string; projects?: Record<string, IConfigProject> }
+
+// Reads and parses <project>/l5/config.json from the stor.
+async function readWorkspaceConfig(project: number): Promise<IWorkspaceConfig | undefined> {
+    try {
+        const key = mls.stor.getKeyToFiles(project, 5, 'config', '', '.json');
+        const storFile = mls.stor.files[key];
+        if (!storFile) return undefined;
+        const content = await storFile.getContent();
+        if (!content || typeof content !== 'string') return undefined;
+        return JSON.parse(content) as IWorkspaceConfig;
+    } catch (err) {
+        console.info('[readWorkspaceConfig] failed', err);
+        return undefined;
+    }
+}
+
+// Builds the Apps menu tree from config.json:
+// first level = module (per project), children = the module's navigation links.
+// Only modules that expose navigation links are listed.
 async function getProgramMenu(): Promise<CollabProgramMenu[]> {
 
     const project = mls.actualProject as number;
     if (!project) return [];
 
-    const projectConfig = await getProjectConfig(project);
-    if (!projectConfig || !projectConfig.modules) return [];
+    const config = await readWorkspaceConfig(project);
+    if (!config || !config.projects) return [];
 
     const menus: CollabProgramMenu[] = [];
 
-    for await (const module of projectConfig.modules) {
-        let items: CollabProgramMenuItem[] = [];
-        try {
-            const moduleConfig = await getProjectModuleConfig(module.path, project);
-            items = (moduleConfig?.menu ?? []).map((m) => ({
-                title: m.title,
-                icon: m.icon ?? module.icon ?? '',
-                url: m.pageName,
-                pageName: m.pageName,
-                target: m.target
-            }));
-        } catch (err) {
-            // A single broken module must not hide the rest of the menu.
-            console.info('[getProgramMenu] skip module ' + module.path, err);
-        }
+    for (const projectId of Object.keys(config.projects)) {
+        const modules = config.projects[projectId]?.modules ?? [];
+        for (const module of modules) {
+            const navigation = module.navigation ?? [];
+            if (navigation.length === 0) continue;
 
-        menus.push({
-            name: module.name,
-            icon: module.icon ?? '',
-            project,
-            path: module.path,
-            menu: items
-        });
+            const items: CollabProgramMenuItem[] = navigation.map((nav) => ({
+                title: nav.label ?? nav.id,
+                icon: nav.icon ?? '',
+                url: nav.href ?? '',
+                pageName: nav.id,
+                target: undefined
+            }));
+
+            menus.push({
+                name: module.moduleId,
+                icon: '',
+                project: Number(projectId),
+                path: module.basePath ?? '',
+                menu: items
+            });
+        }
     }
 
     return menus;
 }
 
-// Opens the selected page on the right side (Aura preview / live view, level 7).
-// Reuses the standard preview path: servicePreview handles the 'openLink' FileAction
-// fired at level 7 (see servicePreview.onOpenLink).
+// Splits a config "source" path (e.g. "l2/cafeFlow/web/desktop/page11/kitchenQueue.ts")
+// into the stor coordinates used to open the file.
+function parseSource(source: string): { level: number; folder: string; shortName: string; extension: string } {
+    let s = source.replace(/^\.?\//, '');
+    let level = 2;
+    const m = s.match(/^l(\d)\//);
+    if (m) { level = Number(m[1]); s = s.slice(m[0].length); }
+
+    const dot = s.lastIndexOf('.');
+    const extension = dot >= 0 ? s.slice(dot) : '.ts';
+    s = dot >= 0 ? s.slice(0, dot) : s;
+
+    const slash = s.lastIndexOf('/');
+    const folder = slash >= 0 ? s.slice(0, slash) : '';
+    const shortName = slash >= 0 ? s.slice(slash + 1) : s;
+    return { level, folder, shortName, extension };
+}
+
+// Opens the selected page on the right side (Aura preview). Resolves the real page file
+// from config.json (frontend.pages[].source) and reuses the standard preview path:
+// servicePreview handles the 'openLink' FileAction fired at level 7.
 async function openProgram(item: CollabProgramMenuItem & { project?: number; module?: string; path?: string }): Promise<void> {
 
     const project = item.project ?? (mls.actualProject as number);
-    const folder = item.path ?? '';
-    const shortName = item.pageName;
-    if (!project || !shortName) return;
+    if (!project) return;
 
-    const fullName = folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`;
+    let target = { level: 2, folder: item.path ?? '', shortName: item.pageName, extension: '.ts' };
+
+    // Resolve the page source from config so the preview opens the actual .ts file.
+    const config = await readWorkspaceConfig(mls.actualProject as number);
+    const modules = config?.projects?.[String(project)]?.modules ?? [];
+    const module = modules.find(m => m.basePath === item.path || m.moduleId === item.module);
+    const page = (module?.frontend?.pages ?? []).find(p => p.pageId === item.pageName || p.route === item.url);
+    if (page?.source) target = parseSource(page.source);
+
+    if (!target.shortName) return;
+
+    const fullName = target.folder ? `_${project}_${target.folder}/${target.shortName}` : `_${project}_${target.shortName}`;
 
     // Point the level-7 preview context at the selected page.
     mls.actual[7].setFullName(fullName);
@@ -99,11 +153,11 @@ async function openProgram(item: CollabProgramMenuItem & { project?: number; mod
     // Fire the same event the rest of the studio uses to open a page in the preview.
     const params = {} as mls.events.IFileAction;
     (params.action as any) = 'openLink';
-    params.level = 2;
+    params.level = target.level;
     params.project = project;
-    params.shortName = shortName;
-    params.extension = '.ts';
-    params.folder = folder;
+    params.shortName = target.shortName;
+    params.extension = target.extension;
+    params.folder = target.folder;
     params.position = 'right';
 
     mls.events.fire([7], ['FileAction'], JSON.stringify(params), 0);
