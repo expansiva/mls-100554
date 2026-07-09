@@ -5,7 +5,9 @@ import { IAgentMeta, IOpenClawIntegration, Thread, ToolsBeforeSendMessage, Execu
 
 import { loadAgent, executeBeforePrompt } from '/_102027_/l2/aiAgentOrchestration.js';
 import { getTemporaryContext } from '/_102027_/l2/aiAgentHelper.js';
-import { openElementInServiceDetails } from '/_102027_/l2/libCommom.js';
+import { openElementInServiceDetails, saveOpenedFile } from '/_102027_/l2/libCommom.js';
+import { createModel } from '/_102027_/l2/libModel.js';
+import { setAuraState, saveAuraProject, getAuraState, type IAuraPage } from '/_102020_/l2/auraState.js';
 
 export const collabEnvironment: CollabMessagesEnvironment = {
     getAgents,
@@ -70,7 +72,7 @@ async function readWorkspaceConfig(project: number): Promise<IWorkspaceConfig | 
 
 // Builds the Apps menu tree from config.json:
 // first level = module (per project), children = the module's navigation links.
-// Only modules that expose navigation links are listed.
+// Every module is listed (even without navigation), so backend/empty modules still show up.
 async function getProgramMenu(): Promise<CollabProgramMenu[]> {
 
     const project = mls.actualProject as number;
@@ -85,7 +87,6 @@ async function getProgramMenu(): Promise<CollabProgramMenu[]> {
         const modules = config.projects[projectId]?.modules ?? [];
         for (const module of modules) {
             const navigation = module.navigation ?? [];
-            if (navigation.length === 0) continue;
 
             const items: CollabProgramMenuItem[] = navigation.map((nav) => ({
                 title: nav.label ?? nav.id,
@@ -126,9 +127,9 @@ function parseSource(source: string): { level: number; folder: string; shortName
     return { level, folder, shortName, extension };
 }
 
-// Opens the selected page on the right side (Aura preview). Resolves the real page file
-// from config.json (frontend.pages[].source) and reuses the standard preview path:
-// servicePreview handles the 'openLink' FileAction fired at level 7.
+// Opens the selected page in the Aura preview. Resolves the real page file from
+// config.json (frontend.pages[].source), then mirrors the proven aura open flow
+// (serviceGenome._openPage): editor models + mls.actual[3/4] + aura state + 'open' event.
 async function openProgram(item: CollabProgramMenuItem & { project?: number; module?: string; path?: string }): Promise<void> {
 
     const project = item.project ?? (mls.actualProject as number);
@@ -142,25 +143,46 @@ async function openProgram(item: CollabProgramMenuItem & { project?: number; mod
     const module = modules.find(m => m.basePath === item.path || m.moduleId === item.module);
     const page = (module?.frontend?.pages ?? []).find(p => p.pageId === item.pageName || p.route === item.url);
     if (page?.source) target = parseSource(page.source);
-
     if (!target.shortName) return;
 
-    const fullName = target.folder ? `_${project}_${target.folder}/${target.shortName}` : `_${project}_${target.shortName}`;
+    // Swap the source's variation segment (e.g. page11) for the current layout/design system.
+    const layout = getAuraState().actualLayout ?? 1;
+    const ds = getAuraState().actualDesignSystem ?? 1;
+    const folder = target.folder.replace(/page\d+(\/|$)/, `page${layout}${ds}$1`);
 
-    // Point the level-7 preview context at the selected page.
-    mls.actual[7].setFullName(fullName);
+    const file = { project, level: target.level, folder, shortName: target.shortName, extension: target.extension } as mls.stor.IFileInfo;
+    const fullName = folder ? `_${project}_${folder}/${target.shortName}` : `_${project}_${target.shortName}`;
 
-    // Fire the same event the rest of the studio uses to open a page in the preview.
+    // Bind the editor levels used by the preview and load the monaco models.
+    for (const lv of [3, 4]) {
+        mls.actual[lv].setFullName(fullName);
+        (mls.actual[lv] as any).right = file;
+    }
+
+    const files = await mls.stor.getFiles({ project, shortName: target.shortName, folder, loadContent: false });
+    if (files?.ts) await createModel(files.ts);
+    if (files?.less) await createModel(files.less);
+    if (files?.html) await createModel(files.html);
+
+    saveOpenedFile(project, 4, mls.actual[4].getFullName());
+    saveOpenedFile(project, 3, mls.actual[3].getFullName());
+
+    // Aura preview repaints from the actualPage state.
+    const pageRef: IAuraPage = { project, shortName: target.shortName, folder, level: target.level, extension: target.extension };
+    setAuraState('actualPage', pageRef);
+    saveAuraProject();
+
+    // Fire the standard 'open' action the preview listens to.
     const params = {} as mls.events.IFileAction;
-    (params.action as any) = 'openLink';
-    params.level = target.level;
+    (params.action as any) = 'open';
+    params.level = mls.actualLevel;
     params.project = project;
     params.shortName = target.shortName;
     params.extension = target.extension;
-    params.folder = target.folder;
+    params.folder = folder;
     params.position = 'right';
 
-    mls.events.fire([7], ['FileAction'], JSON.stringify(params), 0);
+    mls.events.fire([mls.actualLevel], ['FileAction'], JSON.stringify(params), 0);
 }
 
 async function getAgents(): Promise<IAgentMeta[]> {
