@@ -289,7 +289,7 @@ export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
 
     public shouldIgnoreFile(path: string): boolean {
         const name = path.split('/').pop() || '';
-        return name === '.DS_Store' || name === '.gitignore' || name === 'config.json' || name.endsWith('.tmp') || name.endsWith('~');
+        return name === '.DS_Store' || name === '.gitignore' || name.endsWith('.tmp') || name.endsWith('~');
     }
 
     public shouldReadAsText(path: string): boolean {
