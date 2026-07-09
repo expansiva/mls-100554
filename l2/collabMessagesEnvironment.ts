@@ -1,11 +1,11 @@
 /// <mls fileReference="_100554_/l2/collabMessagesEnvironment.ts" enhancement="_blank"/>
 
-import { CollabMessagesEnvironment } from '/_102036_/l2/environmentContract.js';
+import { CollabMessagesEnvironment, CollabProgramMenu, CollabProgramMenuItem } from '/_102036_/l2/environmentContract.js';
 import { IAgentMeta, IOpenClawIntegration, Thread, ToolsBeforeSendMessage, ExecutionContext, TaskData, Message } from '/_102036_/l2/shared/interfaces.js';
 
 import { loadAgent, executeBeforePrompt } from '/_102027_/l2/aiAgentOrchestration.js';
 import { getTemporaryContext } from '/_102027_/l2/aiAgentHelper.js';
-import { openElementInServiceDetails } from '/_102027_/l2/libCommom.js';
+import { openElementInServiceDetails, getProjectConfig, getProjectModuleConfig } from '/_102027_/l2/libCommom.js';
 
 export const collabEnvironment: CollabMessagesEnvironment = {
     getAgents,
@@ -30,10 +30,83 @@ export const collabEnvironment: CollabMessagesEnvironment = {
     tasks: {
         openTaskDetails: (messageId: string, taskId: string, task: TaskData, message: Message) => openTaskDetails(messageId, taskId, task, message)
     },
+    apps: {
+        getProgramMenu: () => getProgramMenu(),
+        openProgram: (item: CollabProgramMenuItem & { project?: number; module?: string; path?: string }) => openProgram(item)
+    },
     config: {
         getMenuMode: () => 'custom',
         generateSvgAvatarEnabled: () => true
     }
+}
+
+// Builds the Apps menu tree for the current Studio project:
+// first level = module (project.ts modules), children = the module's navigation pages
+// (module.ts menu). Reuses the same config readers the live view uses.
+async function getProgramMenu(): Promise<CollabProgramMenu[]> {
+
+    const project = mls.actualProject as number;
+    if (!project) return [];
+
+    const projectConfig = await getProjectConfig(project);
+    if (!projectConfig || !projectConfig.modules) return [];
+
+    const menus: CollabProgramMenu[] = [];
+
+    for await (const module of projectConfig.modules) {
+        let items: CollabProgramMenuItem[] = [];
+        try {
+            const moduleConfig = await getProjectModuleConfig(module.path, project);
+            items = (moduleConfig?.menu ?? []).map((m) => ({
+                title: m.title,
+                icon: m.icon ?? module.icon ?? '',
+                url: m.pageName,
+                pageName: m.pageName,
+                target: m.target
+            }));
+        } catch (err) {
+            // A single broken module must not hide the rest of the menu.
+            console.info('[getProgramMenu] skip module ' + module.path, err);
+        }
+
+        menus.push({
+            name: module.name,
+            icon: module.icon ?? '',
+            project,
+            path: module.path,
+            menu: items
+        });
+    }
+
+    return menus;
+}
+
+// Opens the selected page on the right side (Aura preview / live view, level 7).
+// Reuses the standard preview path: servicePreview handles the 'openLink' FileAction
+// fired at level 7 (see servicePreview.onOpenLink).
+async function openProgram(item: CollabProgramMenuItem & { project?: number; module?: string; path?: string }): Promise<void> {
+
+    const project = item.project ?? (mls.actualProject as number);
+    const folder = item.path ?? '';
+    const shortName = item.pageName;
+    if (!project || !shortName) return;
+
+    const fullName = folder ? `_${project}_${folder}/${shortName}` : `_${project}_${shortName}`;
+
+    // Point the level-7 preview context at the selected page.
+    mls.actual[7].setFullName(fullName);
+
+    // Fire the same event the rest of the studio uses to open a page in the preview.
+    const params = {} as mls.events.IFileAction;
+    (params.action as any) = 'openLink';
+    params.level = 2;
+    params.project = project;
+    params.shortName = shortName;
+    params.extension = '.ts';
+    params.folder = folder;
+    params.position = 'right';
+
+    mls.events.fire([7], ['FileAction'], JSON.stringify(params), 0);
 }
 
 async function getAgents(): Promise<IAgentMeta[]> {
