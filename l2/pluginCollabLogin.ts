@@ -152,8 +152,16 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
   `;
   }
 
-  logoff() {
-    document.cookie = `loginUser=anonymous; path=/; secure; samesite=strict;`;
+  async logoff() {
+    // Clear the session server-side: the JWT cookies (cauth/crefresh) are
+    // httpOnly, so JS cannot remove them — the cbe does it (action:authLogout)
+    // and resets loginUser=anonymous on the shared .collab.codes domain. This
+    // also avoids the old host-only `loginUser=anonymous` duplicate cookie.
+    try {
+      await (mls.api.base.cbePost as any)({ action: 'authLogout' });
+    } catch (e) {
+      console.error('logoff error', e);
+    }
     window.location.reload();
   }
 
