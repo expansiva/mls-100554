@@ -7,6 +7,7 @@ import { loadAgent, executeBeforePrompt } from '/_102027_/l2/aiAgentOrchestratio
 import { getTemporaryContext } from '/_102027_/l2/aiAgentHelper.js';
 import { openElementInServiceDetails, saveOpenedFile } from '/_102027_/l2/libCommom.js';
 import { createModel } from '/_102027_/l2/libModel.js';
+import { collabImport } from '/_102027_/l2/collabImport.js';
 import { setAuraState, saveAuraProject, getAuraState, type IAuraPage } from '/_102020_/l2/auraState.js';
 
 export const collabEnvironment: CollabMessagesEnvironment = {
@@ -55,6 +56,11 @@ interface IConfigModule {
 interface IConfigProject { modules?: IConfigModule[] }
 interface IWorkspaceConfig { defaultProjectId?: string; projects?: Record<string, IConfigProject> }
 
+// External/master modules keep their frontend definition (nav + routes) in their own
+// module.ts (moduleFrontendDefinition), not in this project's config.json.
+interface IModuleRoute { path: string; entrypoint?: string; title?: string }
+interface IModuleFrontendDef { navigation?: IConfigNavItem[]; routes?: IModuleRoute[] }
+
 // Reads and parses <project>/l5/config.json from the stor.
 async function readWorkspaceConfig(project: number): Promise<IWorkspaceConfig | undefined> {
     try {
@@ -70,9 +76,29 @@ async function readWorkspaceConfig(project: number): Promise<IWorkspaceConfig | 
     }
 }
 
+// Reads <project>/l2/<moduleId>/module.ts and returns its moduleFrontendDefinition.
+// Used for external modules whose nav/routes are not in the client config.json.
+async function readModuleFrontendDef(project: number, moduleId: string): Promise<IModuleFrontendDef | undefined> {
+    try {
+        const mod = await collabImport({ folder: moduleId, project, shortName: 'module', extension: '.ts' });
+        return mod?.moduleFrontendDefinition as IModuleFrontendDef | undefined;
+    } catch (err) {
+        console.info('[readModuleFrontendDef] failed ' + moduleId, err);
+        return undefined;
+    }
+}
+
+// Converts a module.ts route entrypoint (e.g. "/_102034_/l2/monitor/web/routes/overview.js")
+// into the editable source coordinates (.ts) used to open it in the preview.
+function parseEntrypoint(entrypoint: string): { level: number; folder: string; shortName: string; extension: string } {
+    const rel = entrypoint.replace(/^\//, '').replace(/^_\d+_\//, '').replace(/\.js$/, '.ts');
+    return parseSource(rel);
+}
+
 // Builds the Apps menu tree from config.json:
 // first level = module (per project), children = the module's navigation links.
-// Every module is listed (even without navigation), so backend/empty modules still show up.
+// Modules with no links are skipped (e.g. backend / not-yet-generated modules like mdm),
+// so the menu only shows modules that actually have pages to open.
 async function getProgramMenu(): Promise<CollabProgramMenu[]> {
 
     const project = mls.actualProject as number;
@@ -86,7 +112,13 @@ async function getProgramMenu(): Promise<CollabProgramMenu[]> {
     for (const projectId of Object.keys(config.projects)) {
         const modules = config.projects[projectId]?.modules ?? [];
         for (const module of modules) {
-            const navigation = module.navigation ?? [];
+            let navigation = module.navigation ?? [];
+
+            // External modules (e.g. audit/monitor) keep their navigation in module.ts.
+            if (navigation.length === 0) {
+                const def = await readModuleFrontendDef(Number(projectId), module.moduleId);
+                navigation = def?.navigation ?? [];
+            }
 
             const items: CollabProgramMenuItem[] = navigation.map((nav) => ({
                 title: nav.label ?? nav.id,
@@ -95,6 +127,8 @@ async function getProgramMenu(): Promise<CollabProgramMenu[]> {
                 pageName: nav.id,
                 target: undefined
             }));
+
+            if (items.length === 0) continue;
 
             menus.push({
                 name: module.moduleId,
@@ -137,12 +171,20 @@ async function openProgram(item: CollabProgramMenuItem & { project?: number; mod
 
     let target = { level: 2, folder: item.path ?? '', shortName: item.pageName, extension: '.ts' };
 
-    // Resolve the page source from config so the preview opens the actual .ts file.
+    // 1) Client page: resolve the .ts source from config.json (frontend.pages[].source).
     const config = await readWorkspaceConfig(mls.actualProject as number);
     const modules = config?.projects?.[String(project)]?.modules ?? [];
     const module = modules.find(m => m.basePath === item.path || m.moduleId === item.module);
     const page = (module?.frontend?.pages ?? []).find(p => p.pageId === item.pageName || p.route === item.url);
-    if (page?.source) target = parseSource(page.source);
+    if (page?.source) {
+        target = parseSource(page.source);
+    } else {
+        // 2) External module route: resolve the route entrypoint (.ts) from module.ts.
+        const def = await readModuleFrontendDef(project, item.module ?? '');
+        const route = (def?.routes ?? []).find(r => r.path === item.url)
+            ?? (def?.routes ?? []).find(r => (r.title ?? '') === item.title);
+        if (route?.entrypoint) target = parseEntrypoint(route.entrypoint);
+    }
     if (!target.shortName) return;
 
     // Swap the source's variation segment (e.g. page11) for the current layout/design system.
