@@ -88,12 +88,6 @@ async function readModuleFrontendDef(project: number, moduleId: string): Promise
     }
 }
 
-// Converts a module.ts route entrypoint (e.g. "/_102034_/l2/monitor/web/routes/overview.js")
-// into the editable source coordinates (.ts) used to open it in the preview.
-function parseEntrypoint(entrypoint: string): { level: number; folder: string; shortName: string; extension: string } {
-    const rel = entrypoint.replace(/^\//, '').replace(/^_\d+_\//, '').replace(/\.js$/, '.ts');
-    return parseSource(rel);
-}
 
 // Builds the Apps menu tree from config.json:
 // first level = module (per project), children = the module's navigation links.
@@ -176,15 +170,15 @@ async function openProgram(item: CollabProgramMenuItem & { project?: number; mod
     const modules = config?.projects?.[String(project)]?.modules ?? [];
     const module = modules.find(m => m.basePath === item.path || m.moduleId === item.module);
     const page = (module?.frontend?.pages ?? []).find(p => p.pageId === item.pageName || p.route === item.url);
-    if (page?.source) {
-        target = parseSource(page.source);
-    } else {
-        // 2) External module route: resolve the route entrypoint (.ts) from module.ts.
-        const def = await readModuleFrontendDef(project, item.module ?? '');
-        const route = (def?.routes ?? []).find(r => r.path === item.url)
-            ?? (def?.routes ?? []).find(r => (r.title ?? '') === item.title);
-        if (route?.entrypoint) target = parseEntrypoint(route.entrypoint);
+    if (!page?.source) {
+        // External/runtime modules (e.g. monitor/audit) are a URL-driven runtime SPA and are
+        // not previewable in the Studio aura preview yet. Opening is deferred until 102034 is
+        // modernized — see todo/modernize_102034_aura_preview.md. Skip to avoid the failing
+        // preview; the items still show in the menu.
+        console.info('[openProgram] external module not previewable in Studio yet: ' + (item.module ?? '') + '/' + item.pageName);
+        return;
     }
+    target = parseSource(page.source);
     if (!target.shortName) return;
 
     // Swap the source's variation segment (e.g. page11) for the current layout/design system.
