@@ -33,6 +33,7 @@ const message_pt = {
     msgBlockAll: 'Você não tem acesso a este repositorio, por fvor entre em contato com o admin do projeto',
     msgBlock: 'Você não tem acesso de escrita neste repositorio, caso deseje criar um fork clique no botão abaixo',
     pullrequestOk: 'Pull request realizado com sucesso',
+    msgAllSynced: 'Tudo já está sincronizado — pull request desnecessário (os arquivos deletados já não existem no repositório remoto).',
     errorVerify: 'Foi encontrado arquivos com erros',
     obsVerify: 'O salvamento só será permitido se não houver arquivos com erros ou se a verificação for cancelada!',
     msgTotFile: 'Tamanho total dos arquivos selecionados:',
@@ -58,6 +59,7 @@ const message_en = {
     msgBlockAll: 'You do not have access to this repository, please contact the project admin',
     msgBlock: 'You do not have write access to this repository, if you wish to create a fork click the button below',
     pullrequestOk: 'Pull request completed successfully',
+    msgAllSynced: 'Everything is already in sync — pull request not needed (the deleted files no longer exist in the remote repository).',
     errorVerify: 'Files with errors were found',
     obsVerify: 'Saving will only be allowed if there are no files with errors, or the check is cancelled!',
     msgTotFile: 'Total size of selected files:',
@@ -953,10 +955,17 @@ export class ServiceSave extends ServiceBase {
 
             await this.onSavenewPullrequest(array, msg);
             //console.info('gerou o push');
-            this.loadingFeedBack = `Generating a pull request...`;
 
-            await this.firePullrequest(msg);
-            //console.info('gerou o pullrequest');
+            const driver = mls.stor.others.getDefaultDriver(prj);
+            const saveInfo = (driver as any).lastSaveInfo as { commits: number, skippedDeletions: string[] } | undefined;
+            const hasCommits = !saveInfo || saveInfo.commits > 0;
+
+            if (hasCommits) {
+                this.loadingFeedBack = `Generating a pull request...`;
+
+                await this.firePullrequest(msg);
+                //console.info('gerou o pullrequest');
+            }
 
             this.backChecked();
 
@@ -974,7 +983,8 @@ export class ServiceSave extends ServiceBase {
 
             await this.setInfos();
             this.fireEvents();
-            (window as any).collabMessages.add(this.myMessage.pullrequestOk, 'information', { timeToClose: 5000, autoClose: true });
+            const msgEnd = hasCommits ? this.myMessage.pullrequestOk : this.myMessage.msgAllSynced;
+            (window as any).collabMessages.add(msgEnd, 'information', { timeToClose: 5000, autoClose: true });
             this.showLoader(false);
 
         } catch (err: any) {
