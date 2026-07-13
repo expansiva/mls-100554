@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js'; 
 import { ServiceBase, IService, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import { collab_branch } from '/_100554_/l2/collabIcons.js';
 import { undoFile, removeNewStorFilesWithTemplateDefault } from '/_102027_/l2/libStor.js';
@@ -33,6 +33,7 @@ const message_pt = {
     msgBlockAll: 'Você não tem acesso a este repositorio, por fvor entre em contato com o admin do projeto',
     msgBlock: 'Você não tem acesso de escrita neste repositorio, caso deseje criar um fork clique no botão abaixo',
     pullrequestOk: 'Pull request realizado com sucesso',
+    msgAllSynced: 'Tudo já está sincronizado — pull request desnecessário (os arquivos deletados já não existem no repositório remoto).',
     errorVerify: 'Foi encontrado arquivos com erros',
     obsVerify: 'O salvamento só será permitido se não houver arquivos com erros ou se a verificação for cancelada!',
     msgTotFile: 'Tamanho total dos arquivos selecionados:',
@@ -58,6 +59,7 @@ const message_en = {
     msgBlockAll: 'You do not have access to this repository, please contact the project admin',
     msgBlock: 'You do not have write access to this repository, if you wish to create a fork click the button below',
     pullrequestOk: 'Pull request completed successfully',
+    msgAllSynced: 'Everything is already in sync — pull request not needed (the deleted files no longer exist in the remote repository).',
     errorVerify: 'Files with errors were found',
     obsVerify: 'Saving will only be allowed if there are no files with errors, or the check is cancelled!',
     msgTotFile: 'Total size of selected files:',
@@ -953,10 +955,17 @@ export class ServiceSave extends ServiceBase {
 
             await this.onSavenewPullrequest(array, msg);
             //console.info('gerou o push');
-            this.loadingFeedBack = `Generating a pull request...`;
 
-            await this.firePullrequest(msg);
-            //console.info('gerou o pullrequest');
+            const driver = mls.stor.others.getDefaultDriver(prj);
+            const saveInfo = (driver as any).lastSaveInfo as { commits: number, skippedDeletions: string[] } | undefined;
+            const hasCommits = !saveInfo || saveInfo.commits > 0;
+
+            if (hasCommits) {
+                this.loadingFeedBack = `Generating a pull request...`;
+
+                await this.firePullrequest(msg);
+                //console.info('gerou o pullrequest');
+            }
 
             this.backChecked();
 
@@ -974,7 +983,8 @@ export class ServiceSave extends ServiceBase {
 
             await this.setInfos();
             this.fireEvents();
-            (window as any).collabMessages.add(this.myMessage.pullrequestOk, 'information', { timeToClose: 5000, autoClose: true });
+            const msgEnd = hasCommits ? this.myMessage.pullrequestOk : this.myMessage.msgAllSynced;
+            (window as any).collabMessages.add(msgEnd, 'information', { timeToClose: 5000, autoClose: true });
             this.showLoader(false);
 
         } catch (err: any) {
@@ -1425,13 +1435,13 @@ export class ServiceSave extends ServiceBase {
         let aux = '';
         /*if (file && file.inLocalStorage) {
             this.freeToSave.hasDS = true;
-            aux = '<plugin-verify-error-design-system-100554 autoPrepare="true"></plugin-verify-error-design-system-100554>'
+            aux = '<plugin-verify--plugin-verify-error-design-system-100555 autoPrepare="true"></plugin-verify--plugin-verify-error-design-system-100555>'
         }*/
 
         const options = {
             shortName: undefined,
             project: undefined,
-            htmlText: '<plugin-pullrequest-100554 autoPrepare="true"></plugin-pullrequest-100554><plugin-verify-error-100554 autoPrepare="true"></plugin-verify-error-100554>' + aux
+            htmlText: '<plugin-git--plugin-pullrequest-100555 autoPrepare="true"></plugin-git--plugin-pullrequest-100555><plugin-verify--plugin-verify-error-100555 autoPrepare="true"></plugin-verify--plugin-verify-error-100555>' + aux
         }
         mls.events.fire(
             mls.actualLevel as any,

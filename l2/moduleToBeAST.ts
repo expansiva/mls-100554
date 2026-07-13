@@ -1,7 +1,7 @@
 /// <mls fileReference="_100554_/l2/moduleToBeAST.ts" enhancement="_blank"/>
 
 import { collabImport } from '/_102027_/l2/collabImport.js';
-import { createNewFile } from "/_100554_/l2/pluginNewFileBase.js";
+import { createStorFile, IReqCreateStorFile } from "/_102027_/l2/libStor.js";
 
 const shortName = 'moduleToBe';
 
@@ -44,8 +44,18 @@ export const toBe = ${toBe ? JSON.stringify(toBe, null, 2) : {}};
 export const toBePages = ${toBe ? JSON.stringify(toBePage, null, 2) : {}};
 
 `;
+        const param = {
+            shortName: shortName,
+            project: project,
+            folder: folder || '',
+            level: 2,
+            source: ts
 
-        await createNewFile({ project, shortName, folder, position: 'right', enhancement, sourceTS: ts.trim(), sourceHTML: '', sourceLess: '', sourceDefs: '', openPreview: false });
+        } as IReqCreateStorFile;
+
+        
+
+        await createStorFile(param, true , true);
 
         return { ok: true };
 
