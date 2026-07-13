@@ -579,8 +579,12 @@ export class CollabInit extends LitElement {
 
         levels.forEach((level) => {
             positions.forEach((position) => {
-                // Track already added widgets by their base path name
-                const addedPaths = new Set<string>();
+                // Services override by SHORTNAME (not full path): a higher-priority project
+                // service replaces the base/Studio one with the same shortName, regardless of
+                // folder (e.g. _102020_aura/services/servicePreview overrides _100554_servicePreview).
+                // Consequence (by design): two different services sharing a shortName collide —
+                // the shortName is the service identity.
+                const addedShortNames = new Set<string>();
 
                 // Iterate in priority order: actualProject > dependencies > baseProject
                 for (const prjNumber of projectList) {
@@ -595,14 +599,15 @@ export class CollabInit extends LitElement {
                             const info = mls.actual[0].setFullName(service.widget);
                             const path = info.path;
                             if (!path) continue;
+                            const shortName = info.getStorFileBase()?.shortName || path.split('/').pop() || path;
 
-                            // Only add if no widget with the same path was already added by a higher priority project
-                            if (!addedPaths.has(path)) {
-                                addedPaths.add(path);
+                            // Only add if no widget with the same shortName was already added by a higher priority project
+                            if (!addedShortNames.has(shortName)) {
+                                addedShortNames.add(shortName);
                                 rc[level][position].push(service.widget);
                             } else {
                                 if ((window as any).traceLifeCycle) {
-                                    console.info(`getServices: skipping ${service.widget} (project ${prjNumber}), already provided by higher priority project`);
+                                    console.info(`getServices: skipping ${service.widget} (project ${prjNumber}), '${shortName}' already provided by higher priority project`);
                                 }
                             }
                         }
