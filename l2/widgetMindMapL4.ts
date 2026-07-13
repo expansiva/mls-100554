@@ -1207,13 +1207,13 @@ export class WidgetMindMapL4100554 extends StateLitElement {
     private pluginsMenu = [
         {
             label: 'Question architectures',
-            html: `<plugin-question-architecture-100554></plugin-question-architecture-100554>`,
-            file: '/_100554_/l2/pluginQuestionArchitecture.js'
+            html: `<plugin-architecture--plugin-question-architecture-100555></plugin-architecture--plugin-question-architecture-100555>`,
+            file: '/_100555_/l2/pluginArchitecture/pluginQuestionArchitecture.js'
         },
         {
             label: 'Find in files',
-            html: `<plugin-project-find-files-100554></plugin-project-find-files-100554>`,
-            file: '/_100554_/l2/pluginProjectFindFiles.js'
+            html: `<plugin-project--plugin-project-find-files-100555></plugin-project--plugin-project-find-files-100555>`,
+            file: '/_100555_/l2/pluginProject/pluginProjectFindFiles.js'
         },
         {
             label: 'Code insights',

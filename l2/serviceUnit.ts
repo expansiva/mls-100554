@@ -235,7 +235,7 @@ export class ServiceUnit extends ServiceBase {
         const info = getPath(details.data.widget);
         if (!info) throw new Error('[handleDetailExplorieClick] Not found path:' + details.data.widget);
         const { folder, project, shortName } = info;
-        await import(`/_${project}_/l2/${shortName}`);
+        await import(`/_${project}_/l2/${folder ? folder + '/' : ''}${shortName}`);
         const pluginTag = convertFileNameToTag({ project, shortName, folder });
         const pluginEl = document.createElement(pluginTag);
         pluginEl.setAttribute('autoprepare', '');

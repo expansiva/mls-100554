@@ -35,6 +35,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 auth: ['*'],
                 widget: '_100554_serviceDetail'
             },
+            {
+                category: 'Services',
+                scope: ['l7ServicesLeft', 'l6ServicesLeft', 'l5ServicesLeft', 'l4ServicesLeft', 'l3ServicesLeft', 'l2ServicesLeft', 'l1ServicesLeft'],
+                priority: 10,
+                auth: ['*'],
+                widget: '_100554_serviceCollabMessages'
+            },
             /*{
                     category: 'Services',
                     scope: ['l7ServicesRight'],
@@ -87,13 +94,6 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
             {
                 category: 'Services',
                 scope: ['l4ServicesLeft'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_servicePage'
-            },
-            {
-                category: 'Services',
-                scope: ['l4ServicesLeft'],
                 priority: 2,
                 auth: ['*'],
                 widget: '_100554_serviceProduct'
@@ -132,21 +132,14 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l5Explore'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginExploreList'
+                widget: '_100555_/l2/pluginExplore/pluginExploreList.ts'
             },
             {
                 category: 'Stories',
                 scope: ['l3PageStyle'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginEditStyleL3'
-            },
-            {
-                category: 'Stories',
-                scope: ['l3PageProperties'],
-                priority: 2,
-                auth: ['*'],
-                widget: '_100554_pluginPageProperties'
+                widget: '_100555_/l2/pluginEditL3/pluginEditStyleL3'
             },
             {
                 category: 'Linter',
@@ -160,7 +153,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l2PreviewResults'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginPreviewResultJs'
+                widget: '_100555_/l2/pluginPreview/pluginPreviewResultJs'
             },
 
             {
@@ -168,35 +161,35 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStyleBackground'
+                widget: '_100555_/l2/pluginStyle/pluginStyleBackground'
             },
             {
                 category: 'Border',
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStyleBorder'
+                widget: '_100555_/l2/pluginStyle/pluginStyleBorder'
             },
             {
                 category: 'Clippath',
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStyleClippath'
+                widget: '_100555_/l2/pluginStyle/pluginStyleClippath'
             },
             {
                 category: 'Text Shadow',
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStyleTextShadow'
+                widget: '_100555_/l2/pluginStyle/pluginStyleTextShadow'
             },
             {
                 category: 'Tokens',
                 scope: ['l2StyleHelper'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginStyleTokens'
+                widget: '_100555_/l2/pluginStyle/pluginStyleTokens'
             },
 
             {
@@ -204,7 +197,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStyleTransform'
+                widget: '_100555_/l2/pluginStyle/pluginStyleTransform'
             },
 
             {
@@ -212,7 +205,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStyleFilter'
+                widget: '_100555_/l2/pluginStyle/pluginStyleFilter'
             },
 
             {
@@ -220,7 +213,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStyleColumn'
+                widget: '_100555_/l2/pluginStyle/pluginStyleColumn'
             },
 
             {
@@ -228,7 +221,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStyleMargin'
+                widget: '_100555_/l2/pluginStyle/pluginStyleMargin'
             },
 
             {
@@ -236,98 +229,98 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStylePadding'
+                widget: '_100555_/l2/pluginStyle/pluginStylePadding'
             },
             {
                 category: 'Flex',
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStyleFlex'
+                widget: '_100555_/l2/pluginStyle/pluginStyleFlex'
             },
             {
                 category: 'Cursor',
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStyleCursor'
+                widget: '_100555_/l2/pluginStyle/pluginStyleCursor'
             },
             {
                 category: 'Box Shadow',
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginStyleBoxShadow'
+                widget: '_100555_/l2/pluginStyle/pluginStyleBoxShadow'
             },
             {
                 category: 'Pseudo',
                 scope: ['l2StyleHelper'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_pluginLessPseudo'
+                widget: '_100555_/l2/pluginStyle/pluginLessPseudo'
             },
             {
                 category: 'Details',
                 scope: ['l5Project'],
                 priority: 1,
                 auth: ['admin'],
-                widget: '_100554_pluginProjectUsage'
+                widget: '_100555_/l2/pluginProject/pluginProjectUsage'
             },
             {
                 category: 'Details',
                 scope: ['l5Project'],
                 priority: 1,
                 auth: ['admin'],
-                widget: '_100554_pluginProjectConfig'
+                widget: '_100555_/l2/pluginProject/pluginProjectConfig'
             },
             {
                 category: 'Details',
                 scope: ['l5Project'],
                 priority: 1,
                 auth: ['admin'],
-                widget: '_100554_pluginProjectInfo'
+                widget: '_100555_/l2/pluginProject/pluginProjectInfo'
             },
             {
                 category: 'About',
                 scope: ['l5Project'],
                 priority: 1,
                 auth: ['admin'],
-                widget: '_100554_pluginProjectReadMe'
+                widget: '_100555_/l2/pluginProject/pluginProjectReadMe'
             },
             {
                 category: 'Helpers',
                 scope: ['l5Project'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginProjectFindFiles'
+                widget: '_100555_/l2/pluginProject/pluginProjectFindFiles'
             },
             {
                 category: 'Helpers',
                 scope: ['l5Project'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginProjectDeleteFiles'
+                widget: '_100555_/l2/pluginProject/pluginProjectDeleteFiles'
             },
             {
                 category: 'Helpers',
                 scope: ['l5Project'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginPresenterRecorder'
+                widget: '_100555_/l2/pluginProject/pluginPresenterRecorder'
             },
             {
                 category: 'Helpers',
                 scope: ['l5Project'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginProjectRunTest'
+                widget: '_100555_/l2/pluginProject/pluginProjectRunTest'
             },
             {
                 category: 'Helpers',
                 scope: ['l5Project'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginGenerateDist'
+                widget: '_100555_/l2/pluginProject/pluginGenerateDist'
             },
             {
                 category: 'Profile',
@@ -341,14 +334,14 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l5UserSettings'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginSystemUser'
+                widget: '_100555_/l2/pluginSystem/pluginSystemUser'
             },
             {
                 category: 'System',
                 scope: ['l5UserSettings'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginSystemLanguage'
+                widget: '_100555_/l2/pluginSystem/pluginSystemLanguage'
             },
 
             {
@@ -356,57 +349,49 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l5UserSettings'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginSystemTheme'
+                widget: '_100555_/l2/pluginSystem/pluginSystemTheme'
             },
             {
                 category: 'Page',
                 scope: ['l2NewFile'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginNewFilePage'
+                widget: '_100555_/l2/pluginNewFile/pluginNewFilePage'
             },
             {
                 category: 'Service',
                 scope: ['l2NewFile'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginNewFileService'
+                widget: '_100555_/l2/pluginNewFile/pluginNewFileService'
             },
             {
                 category: 'Component',
                 scope: ['l2NewFile'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginNewFileWebComponent'
+                widget: '_100555_/l2/pluginNewFile/pluginNewFileWebComponent'
             },
             {
                 category: 'Blank',
                 scope: ['l2NewFile'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginNewFileBlank'
+                widget: '_100555_/l2/pluginNewFile/pluginNewFileBlank'
             },
             {
                 category: 'Agent',
                 scope: ['l2NewFile'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginNewFileAgent'
+                widget: '_100555_/l2/pluginNewFile/pluginNewFileAgent'
             },
             {
                 category: 'MD',
                 scope: ['l2NewFile'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100554_pluginNewFileMd'
-            },
-
-            {
-                category: 'Preview',
-                scope: ['l3PreviewAttr'],
-                priority: 1,
-                auth: ['*'],
-                widget: '_100554_pluginAttrDataset'
+                widget: '_100555_/l2/pluginNewFile/pluginNewFileMd'
             },
 
         ];

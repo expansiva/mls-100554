@@ -3,7 +3,7 @@
 import { html, css } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js'; 
 import { ServiceBase, IService, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import { collab_branch } from '/_100554_/l2/collabIcons.js';
 import { undoFile, removeNewStorFilesWithTemplateDefault } from '/_102027_/l2/libStor.js';
@@ -1425,13 +1425,13 @@ export class ServiceSave extends ServiceBase {
         let aux = '';
         /*if (file && file.inLocalStorage) {
             this.freeToSave.hasDS = true;
-            aux = '<plugin-verify-error-design-system-100554 autoPrepare="true"></plugin-verify-error-design-system-100554>'
+            aux = '<plugin-verify--plugin-verify-error-design-system-100555 autoPrepare="true"></plugin-verify--plugin-verify-error-design-system-100555>'
         }*/
 
         const options = {
             shortName: undefined,
             project: undefined,
-            htmlText: '<plugin-pullrequest-100554 autoPrepare="true"></plugin-pullrequest-100554><plugin-verify-error-100554 autoPrepare="true"></plugin-verify-error-100554>' + aux
+            htmlText: '<plugin-git--plugin-pullrequest-100555 autoPrepare="true"></plugin-git--plugin-pullrequest-100555><plugin-verify--plugin-verify-error-100555 autoPrepare="true"></plugin-verify--plugin-verify-error-100555>' + aux
         }
         mls.events.fire(
             mls.actualLevel as any,

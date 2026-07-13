@@ -184,10 +184,10 @@ export class Modules extends CollabLitElement {
         }
       }
 
-      openService('_100554_servicePage', 'left', 4, { 'tab': 'navigation' });
+      openService('', 'left', 4, { 'tab': 'navigation' });
 
     } catch (e) {
-      openService('_100554_servicePage', 'left', 4);
+      openService('', 'left', 4);
     }
 
   }
