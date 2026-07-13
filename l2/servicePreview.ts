@@ -713,9 +713,9 @@ export class ServicePreview100554 extends ServiceBase {
 
     private pluginResultJS: HTMLElement | undefined;
     private showResultJS() {
-        import('/_100554_/l2/pluginPreviewResultJs.js');
+        import('/_100555_/l2/pluginPreview/pluginPreviewResultJs.js');
         if (this.menu.setMode) {
-            this.pluginResultJS = document.createElement('plugin-preview-result-js-100554');
+            this.pluginResultJS = document.createElement('plugin-preview--plugin-preview-result-js-100555');
             this.pluginResultJS.setAttribute('msize', this.msize);
             this.menu.setMode('page', this.pluginResultJS);
             this.menu.title = 'Result Typescript';
@@ -726,9 +726,9 @@ export class ServicePreview100554 extends ServiceBase {
 
     private pluginResultTestJS: HTMLElement | undefined;
     private showResultTestJS() {
-        import('/_100554_/l2/pluginPreviewResultTestJs.js');
+        import('/_100555_/l2/pluginPreview/pluginPreviewResultTestJs.js');
         if (this.menu.setMode) {
-            this.pluginResultTestJS = document.createElement('plugin-preview-result-test-js-100554');
+            this.pluginResultTestJS = document.createElement('plugin-preview--plugin-preview-result-test-js-100555');
             this.pluginResultTestJS.setAttribute('msize', this.msize);
             this.menu.setMode('page', this.pluginResultTestJS);
             this.menu.title = 'Result Test Typescript';
