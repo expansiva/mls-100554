@@ -14,6 +14,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 	public project: number = 100554;
 	public driverVersion: string = '1.0.0.3';
 
+	public lastSaveInfo: { commits: number, skippedDeletions: string[] } = { commits: 0, skippedDeletions: [] };
+
 	constructor() {
 
 		super();
@@ -300,7 +302,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				if (!info) continue;
 
-				const fileNameOld = `${auxLevelPath}` + (info.originalFolder || '').replace(/\\/g, '/') + aux + info.originalShortName + f.extension;
+				const auxOld = !info.originalFolder || info.originalFolder.endsWith('/') ? '' : '/';
+				const fileNameOld = `${auxLevelPath}` + (info.originalFolder || '').replace(/\\/g, '/') + auxOld + info.originalShortName + f.extension;
 
 				add = await this.setContentAddFile(f, path, add);
 				del.push({ path: fileNameOld });
@@ -608,6 +611,35 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
+	private async filterExistingPaths(owner: string, repo: string, oid: string, paths: string[]): Promise<{ existing: string[], skipped: string[] }> {
+
+		if (paths.length <= 0) return { existing: [], skipped: [] };
+
+		const aliases = paths.map((p, i) => `d${i}: object(expression: "${oid}:${p}") { oid }`);
+
+		const q = `{
+			repository(owner: "${owner}", name: "${repo}") {
+				${aliases.join('\n\t\t\t\t')}
+			}
+		}`;
+
+		const data = await this.fecthQl(q);
+
+		const repository = data.ret.data && data.ret.data.repository;
+		if (!repository) throw new Error('filterExistingPaths: repository not found');
+
+		const existing: string[] = [];
+		const skipped: string[] = [];
+
+		paths.forEach((p, i) => {
+			if (repository[`d${i}`]) existing.push(p);
+			else skipped.push(p);
+		});
+
+		return { existing, skipped };
+
+	}
+
 	public async buildFileGroups(
 		files: mls.stor.IFileInfo[],
 		maxSizeBytes: number = 800 * 1024
@@ -615,6 +647,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		const groups: mls.stor.IFileInfo[][] = [];
 		const singles: mls.stor.IFileInfo[][] = [];
+		const deletions: mls.stor.IFileInfo[] = [];
 
 		let currentGroup: mls.stor.IFileInfo[] = [];
 		let currentSize = 0;
@@ -629,9 +662,9 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		for (const file of files) {
 
-			// 🔥 DELETE nunca conta tamanho, sempre vai pro group
+			// 🔥 DELETE nunca conta tamanho, vai pro grupo exclusivo de deleções
 			if (file.status === 'deleted') {
-				currentGroup.push(file);
+				deletions.push(file);
 				continue;
 			}
 
@@ -664,8 +697,12 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		flushGroup();
 
-		// monta o retorno: groups primeiro, depois singles
+		// monta o retorno: grupo de deleções primeiro, depois groups, depois singles
 		const result: { type: 'single' | 'group'; files: mls.stor.IFileInfo[] }[] = [];
+
+		if (deletions.length) {
+			result.push({ type: 'group', files: deletions });
+		}
 
 		for (const g of groups) {
 			result.push({ type: 'group', files: g });
@@ -685,6 +722,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 	): AsyncGenerator<string, any[], void> {
 
 		this.verifyMKey();
+
+		this.lastSaveInfo = { commits: 0, skippedDeletions: [] };
 
 		const info = await dL.getMyKeysBranch(project, true);
 		const fileGroups = await this.buildFileGroups(files);
@@ -779,6 +818,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					}
 
 					yield `success: ${fileName}`;
+
+					this.lastSaveInfo.commits++;
 
 					results.push({
 						type: 'single',
@@ -2597,6 +2638,14 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				const oid = await this.getOidLastCommitIO(project);
 
+				let delValid = del;
+				if (del.length > 0) {
+					const check = await this.filterExistingPaths(info.owner, info.repo, oid, del.map((d) => d.path));
+					check.skipped.forEach((p) => console.info('[save] deleção ignorada (não existe no remoto):', p));
+					this.lastSaveInfo.skippedDeletions.push(...check.skipped);
+					delValid = del.filter((d) => check.existing.includes(d.path));
+				}
+
 				const aAdd: string[] = [];
 				const aDel: string[] = [];
 
@@ -2604,7 +2653,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					aAdd.push(`{path: "${i.path}", contents: "${i.content}"}`);
 				});
 
-				del.forEach((i) => {
+				delValid.forEach((i) => {
 					aDel.push(`{path: "${i.path}"}`);
 				});
 
@@ -2640,6 +2689,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 				const data = await this.fecthQl(q);
 
 				const ret = data.ret.data && data.ret.data.createCommitOnBranch && data.ret.data.createCommitOnBranch.commit && data.ret.data.createCommitOnBranch.commit.abbreviatedOid;
+
+				if (ret) this.lastSaveInfo.commits++;
 
 				resolve(ret);
 
