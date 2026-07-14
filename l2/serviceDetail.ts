@@ -256,7 +256,11 @@ export class ServiceDetail100554 extends ServiceBase {
     private async getHtmlFromPlugin(info: mls.stor.IFileInfoBase): Promise<string> {
         const keyFile = mls.stor.getKeyToFiles(info.project, 2, info.shortName, info.folder, '.html');
         const storFile = mls.stor.files[keyFile];
-        if (!storFile) return 'Not found storFile:' + JSON.stringify(info);
+        if (!storFile) {
+            const tag = convertFileNameToTag(info);
+            return `<${tag} autoprepare='s'></${tag}>`
+            //return 'Not found storFile:' + JSON.stringify(info);
+        }
         const content = await storFile.getContent();
         if (typeof content !== 'string') return `Error on content of ${keyFile}`;
         return content;
