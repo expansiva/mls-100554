@@ -57,6 +57,7 @@ export class PreviewModeSinglePage {
         if (this.ifr && this.ifr.contentDocument && savedBody) {
             const div = this.ifr.contentDocument.createElement('div');
             div.innerHTML = savedBody;
+            div.style.height = '100%';
             this.ifr.contentDocument.body.appendChild(div);
             //this.ifr.contentDocument.body.insertAdjacentHTML('beforeend', savedBody);
         }
