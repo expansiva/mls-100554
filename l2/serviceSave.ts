@@ -689,10 +689,10 @@ export class ServiceSave extends ServiceBase {
             span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px; height: 16px;" class="fa fa-bug" title="Error"></span>';
             //disabled = true; // arquivos com erro agora podem ser selecionados; onSave pede confirmação
         }
-        if (item.isLocalVersionOutdated) {
+        /*if (item.isLocalVersionOutdated) {
             span = '<span style="font-size: 12px; color: #ff0000; margin-left: 5px;" class="fa fa-unbalanced" title="Version block"></span>';
             disabled = true;
-        }
+        }*/
         if (item.status === 'renamed' && item.getValueInfo) {
             const itemNew = await item.getValueInfo();
             mountText = `${itemNew.originalShortName + item.extension} to ${mountText} `;
