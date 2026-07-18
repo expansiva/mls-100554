@@ -782,7 +782,7 @@ export class CollabFileSystemSync {
             extension: fileBase.extension,
             source: content,
             status: 'new',
-        }, this.shouldCreateModel(fileBase), true, false);
+        }, this.shouldCreateModel(fileBase), true, this.shouldCreateModel(fileBase));
         this.fireBrowserFileChanged(file);
         return file;
     }
@@ -799,12 +799,13 @@ export class CollabFileSystemSync {
         const existingModel = mls.editor.getModel(file) as mls.editor.IModelBase | undefined;
         if (existingModel?.model && !existingModel.model.isDisposed()) {
             if (existingModel.model.getValue() !== content) existingModel.model.setValue(content);
-            mls.editor.forceModelUpdate(existingModel.model);
+            if (this.shouldCreateModel(file)) await this.compileModelIfNeeded(existingModel);
+            else mls.editor.forceModelUpdate(existingModel.model);
         } else if (this.shouldCreateModel(file) && file.getOrCreateModel) {
             const model = await file.getOrCreateModel().catch(() => undefined) as mls.editor.IModelBase | undefined;
             if (model?.model && !model.model.isDisposed()) {
                 if (model.model.getValue() !== content) model.model.setValue(content);
-                mls.editor.forceModelUpdate(model.model);
+                await this.compileModelIfNeeded(model);
             }
         }
 
@@ -813,6 +814,14 @@ export class CollabFileSystemSync {
 
     private shouldCreateModel(file: mls.stor.IFileInfoBase): boolean {
         return file.level === 2 && file.extension === '.ts';
+    }
+
+    private async compileModelIfNeeded(model: mls.editor.IModelBase): Promise<void> {
+        if (!this.shouldCreateModel(model.storFile)) return;
+        const modelTS = model as mls.editor.IModelTS;
+        if (modelTS.compilerResults) modelTS.compilerResults.modelNeedCompile = true;
+        const ok = await mls.l2.typescript.compileAndPostProcess(modelTS, true, true);
+        model.storFile.hasError = ok === false;
     }
 
     private fireBrowserFileChanged(file: mls.stor.IFileInfo): void {

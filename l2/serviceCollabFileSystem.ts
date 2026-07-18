@@ -280,7 +280,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
                             ?disabled=${this.busy || this.projectOptions.length <= 1}
                         >
                             ${this.projectOptions.length > 0
-                                ? this.projectOptions.map((project) => html`<option value=${String(project)}>mls-${project}</option>`)
+                                ? this.projectOptions.map((project) => html`<option value=${String(project)} ?selected=${project === this.project}>mls-${project}</option>`)
                                 : html`<option value="">mls-${this.project || '-'}</option>`}
                         </select>
                     </label>
@@ -941,7 +941,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
                 project > 0 &&
                 projects.indexOf(project) === index
             );
-            return unique.includes(actualProject) ? unique : [...unique, actualProject];
+            return [actualProject, ...unique.filter((project) => project !== actualProject)];
         } catch (err) {
             return [actualProject];
         }
