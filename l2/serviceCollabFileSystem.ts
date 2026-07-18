@@ -190,6 +190,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     @state() private supported = true;
     @state() private busy = false;
     @state() private project = 0;
+    @state() private projectOptions: number[] = [];
     @state() private folderName = '';
     @state() private statusMessage = '';
     @state() private progressMessage = '';
@@ -271,7 +272,18 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
                         <h2>${m.title}</h2>
                         <p>${this.renderHeaderStatus()}</p>
                     </div>
-                    <span class="collab-fs-project">mls-${this.project || '-'}</span>
+                    <label class="collab-fs-project-picker">
+                        <span>${m.project}</span>
+                        <select
+                            .value=${String(this.project || '')}
+                            @change=${(event: Event) => this.onProjectChange(event)}
+                            ?disabled=${this.busy || this.projectOptions.length <= 1}
+                        >
+                            ${this.projectOptions.length > 0
+                                ? this.projectOptions.map((project) => html`<option value=${String(project)}>mls-${project}</option>`)
+                                : html`<option value="">mls-${this.project || '-'}</option>`}
+                        </select>
+                    </label>
                 </header>
 
                 ${this.renderBody()}
@@ -824,9 +836,9 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
         this.statusMessage = '';
     }
 
-    private async loadProjectHandle(): Promise<void> {
+    private async loadProjectHandle(selectActualProject = false): Promise<void> {
         const previousProject = this.project;
-        const project = this.getProject();
+        const project = this.resolveSelectedProject(selectActualProject);
         this.supported = this.adapter.isSupported();
 
         if (!this.supported) {
@@ -850,6 +862,17 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
             return;
         }
         await this.refreshManifestInfo();
+    }
+
+    private async onProjectChange(event: Event): Promise<void> {
+        const value = Number((event.target as HTMLSelectElement).value);
+        if (!Number.isInteger(value) || value <= 0 || value === this.project) return;
+        this.project = value;
+        this.handle = null;
+        this.folderName = '';
+        this.detailsOpen = false;
+        this.resetScanState();
+        await this.loadProjectHandle();
     }
 
     private resetScanState(): void {
@@ -897,7 +920,31 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     }
 
     private getProject(): number {
-        return mls.actualProject || 0;
+        return this.project || mls.actualProject || 0;
+    }
+
+    private resolveSelectedProject(selectActualProject = false): number {
+        const actualProject = mls.actualProject || 0;
+        const options = this.getProjectOptions(actualProject);
+        this.projectOptions = options;
+        if (!actualProject) return 0;
+        if (selectActualProject || !this.project || !options.includes(this.project)) return actualProject;
+        return this.project;
+    }
+
+    private getProjectOptions(actualProject: number): number[] {
+        if (!actualProject) return [];
+        try {
+            const projects = mls.l5.getProjectDependencies(actualProject, true);
+            const unique = projects.filter((project, index) =>
+                Number.isInteger(project) &&
+                project > 0 &&
+                projects.indexOf(project) === index
+            );
+            return unique.includes(actualProject) ? unique : [...unique, actualProject];
+        } catch (err) {
+            return [actualProject];
+        }
     }
 
     private savePreferences(project: number, folderName: string): void {
@@ -952,7 +999,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     }
 
     private setEvents(): void {
-        mls.events.addEventListener([5], ['ProjectSelected' as any], () => this.loadProjectHandle());
+        mls.events.addEventListener([5], ['ProjectSelected' as any], () => this.loadProjectHandle(true));
         mls.events.addEventListener([1, 2, 3, 4, 5, 6, 7], ['ToolBarSelected' as any], () => {
             if (this.visible === 'true') this.loadProjectHandle();
         });

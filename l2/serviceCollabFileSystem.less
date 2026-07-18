@@ -54,11 +54,22 @@ service-collab-file-system-100554 {
         margin-top: 0.5rem;
     }
 
-    .collab-fs-project {
+    .collab-fs-project-picker {
         flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        color: @text-primary-color-lighter;
+        font-size: @font-size-12;
+    }
+
+    .collab-fs-project-picker select {
+        min-width: 7rem;
         border: 1px solid @bg-primary-color-focus;
         border-radius: 4px;
-        padding: 0.2rem 0.45rem;
+        padding: 0.25rem 0.45rem;
+        background: @bg-secondary-color;
+        color: @text-primary-color;
         font-size: @font-size-12;
     }
 
@@ -383,5 +394,4 @@ service-collab-file-system-100554 {
         font-size: @font-size-12;
     }
 }
-
 
