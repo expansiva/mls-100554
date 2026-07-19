@@ -215,6 +215,7 @@ export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
             current = await current.getDirectoryHandle(part);
         }
         await current.removeEntry(fileName, { recursive: false });
+        await this.removeEmptyParentDirectories(directory, parts);
     }
 
     // Backs up the file under .collab-fs-trash before deleting, so a Pull is reversible.
@@ -268,6 +269,39 @@ export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
             current = await current.getDirectoryHandle(part, { create });
         }
         return current.getFileHandle(fileName, { create });
+    }
+
+    private async removeEmptyParentDirectories(directory: CollabFsDirectoryHandle, parts: string[]): Promise<void> {
+        for (let depth = parts.length; depth > 1; depth--) {
+            const dirName = parts[depth - 1];
+            const parent = await this.getDirectoryHandleByParts(directory, parts.slice(0, depth - 1));
+            if (!parent) return;
+
+            const child = await this.getDirectoryHandle(parent, dirName);
+            if (!child) return;
+            if (!await this.isDirectoryEmpty(child)) return;
+
+            await parent.removeEntry(dirName, { recursive: false }).catch(() => undefined);
+        }
+    }
+
+    private async getDirectoryHandleByParts(directory: CollabFsDirectoryHandle, parts: string[]): Promise<CollabFsDirectoryHandle | null> {
+        let current = directory;
+        for (const part of parts) {
+            const next = await this.getDirectoryHandle(current, part);
+            if (!next) return null;
+            current = next;
+        }
+        return current;
+    }
+
+    private async getDirectoryHandle(directory: CollabFsDirectoryHandle, name: string): Promise<CollabFsDirectoryHandle | null> {
+        return directory.getDirectoryHandle(name, { create: false }).catch(() => null);
+    }
+
+    private async isDirectoryEmpty(directory: CollabFsDirectoryHandle): Promise<boolean> {
+        for await (const _entry of directory.entries()) return false;
+        return true;
     }
 
     public assertSafePath(path: string): void {

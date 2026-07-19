@@ -155,6 +155,9 @@ interface CollabFsSyncAdapter {
 const MANIFEST_FILE = '.collab-fs.json';
 const TRASH_ROOT = '.collab-fs-trash';
 const PULL_WRITE_CONCURRENCY = 5;
+const IGNORED_EXTENSIONS = [
+    '.js',
+];
 const KNOWN_EXTENSIONS = [
     '.defs.ts',
     '.test.ts',
@@ -210,7 +213,7 @@ export class CollabFileSystemSync {
         const allLocalFiles = await this.adapter.listTextFiles(handle, (progress) => {
             onProgress?.({ phase: 'local', current: progress.current, path: progress.path });
         }, { readContent: false });
-        const localFilesToValidate = allLocalFiles.filter((file) => this.isProjectLayoutPath(file.path));
+        const localFilesToValidate = allLocalFiles.filter((file) => this.isProjectLayoutPath(file.path) && !this.isIgnoredPath(file.path));
         if (localFilesToValidate.length === 0) return { empty: true };
 
         const localControlled = await this.getLocalEntriesFromFiles(localFilesToValidate, onProgress, { readContent: false });
@@ -891,6 +894,7 @@ export class CollabFileSystemSync {
         const entries: CollabFsLocalEntry[] = [];
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
+            if (this.isIgnoredPath(file.path)) continue;
             if (!this.parseLocalPath(file.path, 0)) continue;
             onProgress?.({ phase: 'local', current: i + 1, total: files.length, path: file.path });
             entries.push({
@@ -977,6 +981,7 @@ export class CollabFileSystemSync {
         if (!file || file.project !== project || file.status === 'deleted') return false;
         if (!Number.isInteger(file.level) || file.level < 1 || file.level > 7) return false;
         if (!file.shortName || !file.extension || !file.extension.startsWith('.')) return false;
+        if (this.isIgnoredPath(this.getBrowserPath(file))) return false;
         return this.isSafeRelativePath(this.getBrowserPath(file));
     }
 
@@ -1015,6 +1020,7 @@ export class CollabFileSystemSync {
 
     private parseLocalPath(path: string, project: number): mls.stor.IFileInfoBase | null {
         if (!this.isSafeRelativePath(path) || path === MANIFEST_FILE) return null;
+        if (this.isIgnoredPath(path)) return null;
         const parts = path.split('/');
         const levelPart = parts[0];
         if (!/^l[1-7]$/.test(levelPart)) return null;
@@ -1035,6 +1041,11 @@ export class CollabFileSystemSync {
     private isSafeRelativePath(path: string): boolean {
         const parts = path.split('/');
         return Boolean(path) && !path.startsWith('/') && !path.includes('\\') && !parts.some((part) => part === '..' || part === '');
+    }
+
+    private isIgnoredPath(path: string): boolean {
+        const normalized = path.toLowerCase();
+        return IGNORED_EXTENSIONS.some((extension) => normalized.endsWith(extension));
     }
 
     private mapByPath<T extends { path: string }>(entries: T[]): Map<string, T> {
