@@ -165,6 +165,7 @@ const KNOWN_EXTENSIONS = [
     '.css',
     '.json',
     '.md',
+    '.mjs',
     '.js',
     '.jsx',
     '.vue',

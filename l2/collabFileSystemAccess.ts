@@ -293,7 +293,7 @@ export class FileSystemAccessAdapter implements CollabFsAccessAdapter {
     }
 
     public shouldReadAsText(path: string): boolean {
-        return /\.(defs\.ts|test\.ts|tsx|ts|html|less|css|json|md|js|jsx|vue|sql|txt|yml|yaml|style|svg)$/i.test(path);
+        return /\.(defs\.ts|test\.ts|tsx|ts|html|less|css|json|md|mjs|js|jsx|vue|sql|txt|yml|yaml|style|svg)$/i.test(path);
     }
 
     public getProjectKey(project: number): string {

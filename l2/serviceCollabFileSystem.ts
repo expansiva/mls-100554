@@ -608,14 +608,14 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     }
 
     private getExtensionFromPath(path: string): string {
-        const known = ['.defs.ts', '.test.ts', '.tsx', '.ts', '.html', '.less', '.css', '.json', '.md', '.js', '.jsx', '.vue', '.sql', '.txt', '.style', '.svg'];
+        const known = ['.defs.ts', '.test.ts', '.tsx', '.ts', '.html', '.less', '.css', '.json', '.md', '.mjs', '.js', '.jsx', '.vue', '.sql', '.txt', '.style', '.svg'];
         return known.find((extension) => path.endsWith(extension)) || '.txt';
     }
 
     private getLanguageFromPath(path: string): string {
         const extension = this.getExtensionFromPath(path);
         if (extension === '.ts' || extension === '.tsx' || extension === '.defs.ts' || extension === '.test.ts') return 'typescript';
-        if (extension === '.js' || extension === '.jsx') return 'javascript';
+        if (extension === '.mjs' || extension === '.js' || extension === '.jsx') return 'javascript';
         if (extension === '.html' || extension === '.vue') return 'html';
         if (extension === '.less') return 'less';
         if (extension === '.css' || extension === '.style') return 'css';
