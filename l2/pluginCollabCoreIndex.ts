@@ -9,6 +9,13 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
         return [
             {
                 category: 'Services',
+                scope: ['l7ServicesRight', 'l6ServicesRight', 'l5ServicesRight', 'l4ServicesRight', 'l3ServicesRight', 'l2ServicesRight', 'l1ServicesRight', 'l0ServicesRight'],
+                priority: 99,
+                auth: ['*'],
+                widget: '_100554_serviceReportBug'
+            },
+            {
+                category: 'Services',
                 scope: ['l4ServicesRight', 'l3ServicesRight', 'l2ServicesRight'],
                 priority: 1,
                 auth: ['*'],
@@ -40,7 +47,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l7ServicesLeft', 'l6ServicesLeft', 'l5ServicesLeft', 'l4ServicesLeft', 'l3ServicesLeft', 'l2ServicesLeft', 'l1ServicesLeft'],
                 priority: 10,
                 auth: ['*'],
-                widget: '_100554_serviceCollabMessages'
+                widget: '_102020_serviceCollabMessages'
             },
             /*{
                     category: 'Services',
