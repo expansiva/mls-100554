@@ -1,0 +1,310 @@
+/// <mls fileReference="_100554_/l2/serviceReportBug.less" enhancement="_100554_/l2/enhancementStyle" />
+
+service-report-bug-100554 {
+
+    display: block;
+    font-family: @font-family-primary;
+    box-sizing: border-box;
+    font-size: @font-size-16;
+    color: @text-primary-color;
+    background: @bg-primary-color;
+    height: 100%;
+    overflow: auto;
+    padding: @space-16;
+
+    .rb-root {
+        display: flex;
+        flex-direction: column;
+        gap: @space-16;
+    }
+
+    .rb-section {
+        display: flex;
+        flex-direction: column;
+        gap: @space-8;
+        background: @bg-secondary-color-lighter;
+        border: 1px solid @grey-color;
+        border-radius: 4px;
+        padding: @space-16;
+    }
+
+    h4 {
+        margin: 0;
+        font-size: @font-size-16;
+        font-weight: @font-weight-bold;
+        color: @text-primary-color-darker;
+        border-bottom: 1px solid @grey-color-dark;
+        padding-bottom: @space-8;
+    }
+
+    .rb-meta {
+        font-size: @font-size-12;
+        color: @text-primary-color-lighter;
+    }
+
+    .rb-empty {
+        padding: @space-16 @space-8;
+        color: @text-primary-color-lighter;
+    }
+
+    .rb-label {
+        font-weight: @font-weight-bold;
+        color: @text-primary-color-darker;
+    }
+
+    .rb-description {
+        width: 100%;
+        box-sizing: border-box;
+        resize: vertical;
+        padding: @space-8;
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        color: @text-primary-color;
+        background: @bg-primary-color;
+        border: 1px solid @grey-color-darker;
+        border-radius: 4px;
+
+        &:focus {
+            outline: none;
+            border-color: @active-color;
+        }
+    }
+
+    .rb-view-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: @space-8;
+        padding: @space-8 @space-16;
+        background: @info-color;
+        color: @bg-primary-color-lighter;
+        border-radius: 4px;
+        font-weight: @font-weight-bold;
+        font-size: @font-size-12;
+    }
+
+    .rb-view-close {
+        padding: 2px @space-8;
+        cursor: pointer;
+        font-family: @font-family-primary;
+        font-size: @font-size-12;
+        color: @info-color;
+        background: @bg-primary-color-lighter;
+        border: none;
+        border-radius: 4px;
+
+        &:hover {
+            background: @bg-primary-color-lighter-hover;
+        }
+    }
+
+    .rb-view-description {
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .rb-select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: @space-8;
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        color: @text-primary-color;
+        background: @bg-primary-color;
+        border: 1px solid @grey-color-darker;
+        border-radius: 4px;
+
+        &:focus {
+            outline: none;
+            border-color: @active-color;
+        }
+    }
+
+    .rb-filter-select {
+        position: relative;
+    }
+
+    .rb-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        max-height: 220px;
+        overflow: auto;
+        background: @bg-primary-color;
+        border: 1px solid @grey-color-darker;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .rb-suggestion {
+        padding: @space-8;
+        cursor: pointer;
+        font-size: @font-size-12;
+        color: @text-primary-color;
+
+        &:hover,
+        &.highlighted {
+            background: @bg-primary-color-hover;
+        }
+
+        &.selected {
+            color: @active-color;
+            font-weight: @font-weight-bold;
+        }
+
+        .rb-suggestion-group {
+            color: @text-primary-color-lighter;
+        }
+    }
+
+    .rb-suggestion-empty {
+        cursor: default;
+        color: @text-primary-color-lighter;
+
+        &:hover {
+            background: transparent;
+        }
+    }
+
+    .rb-send-error {
+        color: @error-color;
+        font-size: @font-size-12;
+    }
+
+    .rb-send {
+        align-self: flex-start;
+        padding: @space-8 @space-24;
+        cursor: pointer;
+        font-family: @font-family-primary;
+        font-size: @font-size-16;
+        font-weight: @font-weight-bold;
+        color: @bg-primary-color-lighter;
+        background: @active-color;
+        border: none;
+        border-radius: 4px;
+        transition: background @transition-slow;
+
+        &:hover {
+            background: @active-color-hover;
+        }
+
+        &:focus {
+            background: @active-color-focus;
+        }
+
+        &:disabled {
+            cursor: default;
+            background: @active-color-disabled;
+        }
+    }
+
+    .rb-sent {
+        color: @success-color;
+        font-size: @font-size-12;
+    }
+
+    .rb-screenshot {
+        max-width: 100%;
+        border: 1px solid @grey-color-darker;
+        border-radius: 4px;
+    }
+
+    .rb-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: @font-size-12;
+
+        th {
+            text-align: left;
+            padding: @space-8;
+            font-weight: @font-weight-bold;
+            color: @text-primary-color-darker;
+            background: @bg-secondary-color;
+            border-bottom: 1px solid @grey-color-darker;
+        }
+
+        td {
+            border-bottom: 1px solid @grey-color;
+            padding: @space-8;
+            vertical-align: top;
+            color: @text-primary-color;
+        }
+
+        .rb-url {
+            max-width: 0;
+            width: 60%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .rb-error td {
+            color: @error-color;
+        }
+    }
+
+    .rb-console {
+        max-height: 260px;
+        overflow: auto;
+        font-family: monospace;
+        font-size: @font-size-12;
+        background: @bg-primary-color;
+        border: 1px solid @grey-color;
+        border-radius: 4px;
+
+        .rb-console-header {
+            display: flex;
+            gap: @space-8;
+            position: sticky;
+            top: 0;
+            padding: @space-8;
+            font-family: @font-family-primary;
+            font-weight: @font-weight-bold;
+            color: @text-primary-color-darker;
+            background: @bg-secondary-color;
+            border-bottom: 1px solid @grey-color-darker;
+        }
+
+        .rb-line {
+            display: flex;
+            gap: @space-8;
+            padding: 2px @space-8;
+            white-space: pre-wrap;
+            word-break: break-word;
+            border-bottom: 1px dotted @grey-color;
+            color: @text-primary-color;
+        }
+
+        .rb-col-when {
+            flex: 0 0 60px;
+            color: @text-primary-color-lighter;
+        }
+
+        .rb-col-type {
+            flex: 0 0 60px;
+            color: @text-secondary-color;
+        }
+
+        .rb-col-text {
+            flex: 1;
+        }
+
+        .rb-error {
+            color: @error-color;
+
+            .rb-col-text {
+                color: @error-color;
+            }
+        }
+
+        .rb-warn {
+            .rb-col-text {
+                color: @warning-color;
+            }
+        }
+    }
+}
+
+
