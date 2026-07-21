@@ -948,7 +948,7 @@ export class CollabFileSystemSync {
                 path: browserEntry.path,
                 versionRef: browserEntry.versionRef,
                 browserHash: browserEntry.hash,
-                diskHash: diskEntry?.hash || '',
+                diskHash: this.getManifestDiskHash(browserEntry, diskEntry),
                 diskSize: 'size' in (diskEntry || {}) ? (diskEntry as CollabFsLocalEntry).size : undefined,
                 diskLastModified: 'lastModified' in (diskEntry || {}) ? (diskEntry as CollabFsLocalEntry).lastModified : undefined,
                 lastDirection,
@@ -975,6 +975,11 @@ export class CollabFileSystemSync {
         };
         await this.adapter.writeTextFile(handle, MANIFEST_FILE, `${JSON.stringify(manifest, null, 2)}\n`);
         return manifest;
+    }
+
+    private getManifestDiskHash(browserEntry: CollabFsBrowserEntry, diskEntry: CollabFsBrowserEntry | CollabFsLocalEntry | undefined): string {
+        if (!diskEntry) return '';
+        return diskEntry.hash || browserEntry.hash || '';
     }
 
     private isBrowserFileMappable(file: mls.stor.IFileInfo, project: number): boolean {
