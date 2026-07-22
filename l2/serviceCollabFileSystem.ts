@@ -62,8 +62,8 @@ const message_en = {
     nothingToPull: 'Nothing to pull.',
     nothingToPush: 'Nothing to push.',
     disconnected: 'Folder disconnected.',
-    killBrowser: 'Kill browser version',
-    killFs: 'Kill FS version',
+    keepBrowser: 'Use browser version',
+    keepFs: 'Use FS version',
     viewDiff: 'View diff',
     resolvedKeepBrowser: 'Resolved. Browser version won.',
     resolvedKeepFs: 'Resolved. FS version won.',
@@ -140,8 +140,8 @@ const message_pt: typeof message_en = {
     nothingToPull: 'Nada para trazer.',
     nothingToPush: 'Nada para enviar.',
     disconnected: 'Pasta desconectada.',
-    killBrowser: 'Matar versão do browser',
-    killFs: 'Matar versão do FS',
+    keepBrowser: 'Usar versão do browser',
+    keepFs: 'Usar versão do FS',
     viewDiff: 'Ver diff',
     resolvedKeepBrowser: 'Resolvido. Venceu a versão do browser.',
     resolvedKeepFs: 'Resolvido. Venceu a versão do FS.',
@@ -561,18 +561,17 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
         const actions = document.createElement('div');
         actions.className = 'collab-fs-detail-actions';
 
-        // "kill browser" keeps the disk version; "kill fs" keeps the browser version.
-        const killBrowser = document.createElement('button');
-        killBrowser.className = 'danger';
-        killBrowser.textContent = m.killBrowser;
-        killBrowser.addEventListener('click', () => void this.resolveConflict(change, 'disk'));
-        actions.appendChild(killBrowser);
+        const keepBrowser = document.createElement('button');
+        keepBrowser.className = 'danger';
+        keepBrowser.textContent = m.keepBrowser;
+        keepBrowser.addEventListener('click', () => void this.resolveConflict(change, 'browser'));
+        actions.appendChild(keepBrowser);
 
-        const killFs = document.createElement('button');
-        killFs.className = 'danger';
-        killFs.textContent = m.killFs;
-        killFs.addEventListener('click', () => void this.resolveConflict(change, 'browser'));
-        actions.appendChild(killFs);
+        const keepFs = document.createElement('button');
+        keepFs.className = 'danger';
+        keepFs.textContent = m.keepFs;
+        keepFs.addEventListener('click', () => void this.resolveConflict(change, 'disk'));
+        actions.appendChild(keepFs);
 
         container.appendChild(actions);
 
