@@ -10,13 +10,14 @@ import {
 } from '/_102027_/l2/libCommom.js';
 
 import {
-  collab_arrows_rotate
+  collab_arrows_rotate 
 } from '/_100554_/l2/collabIcons.js';
 
 import {
   template_package,
   template_build,
   template_tsconfig,
+  template_deps,
 } from '/_102027_/l2/libNewProject.js';
 
 import '/_100554_/l2/pluginNewProjectLog.js';
@@ -74,6 +75,7 @@ const message_pt = {
   log_error_04: "Existe um repositório, mas não foi possível validar o usuário",
   projectOk1: 'Projeto {project} criado com sucesso',
   projectOk2: 'Agora você pode salvar o seu projeto',
+  log_17: "Criando arquivo de dependências",
 };
 
 const message_en = {
@@ -125,6 +127,7 @@ const message_en = {
   log_error_04: " There is a repository, but I was unable to validate the user",
   projectOk1: 'Project {project} created sucessfully',
   projectOk2: 'Now you can saving your project',
+  log_17: "Creating initial dependency file",
 };
 
 type MessageType = typeof message_en;
@@ -406,6 +409,12 @@ export class PluginCreateProject extends CollabLitElement {
   private async createInitialTSConfigFile(project: number) {
     const fileName = 'tsconfiglib.json';
     const content = template_tsconfig.template.replace(/\[project\]/g, project.toString()).trim();
+    await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
+  }
+
+  private async createInitialDepsConfigFile(project: number) {
+    const fileName = 'mlsDep.json';
+    const content = template_deps.template.trim();
     await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
   }
 
@@ -969,14 +978,19 @@ export class PluginCreateProject extends CollabLitElement {
       this.setProgress(newPercent);
 
       await this.sleep(200);
-      await this.tryItem(async () => await this.createInitialPackageFile(this.newProjectNumber), this.msg.log_9);
+      await this.tryItem(async () => await this.createInitialDepsConfigFile(this.newProjectNumber), this.msg.log_17);
       newPercent += percent;
       this.setProgress(newPercent);
 
-      await this.sleep(200);
-      await this.tryItem(async () => await this.createInitialTSConfigFile(this.newProjectNumber), this.msg.log_11);
-      newPercent += percent;
-      this.setProgress(newPercent);
+      //await this.sleep(200);
+      //await this.tryItem(async () => await this.createInitialPackageFile(this.newProjectNumber), this.msg.log_9);
+      //newPercent += percent;
+      //this.setProgress(newPercent);
+
+      //await this.sleep(200);
+      //await this.tryItem(async () => await this.createInitialTSConfigFile(this.newProjectNumber), this.msg.log_11);
+      //newPercent += percent;
+      //this.setProgress(newPercent);
 
       await this.sleep(200);
       await this.tryItem(async () => await this.migrateLocalFiles(this.projectLocalNumber, this.newProjectNumber), this.msg.log_16);
