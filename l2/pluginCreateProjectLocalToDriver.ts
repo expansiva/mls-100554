@@ -16,8 +16,7 @@ import {
 import {
   template_package,
   template_build,
-  template_tsconfig,
-  template_deps,
+  template_tsconfig
 } from '/_102027_/l2/libNewProject.js';
 
 import '/_100554_/l2/pluginNewProjectLog.js';
@@ -409,12 +408,6 @@ export class PluginCreateProject extends CollabLitElement {
   private async createInitialTSConfigFile(project: number) {
     const fileName = 'tsconfiglib.json';
     const content = template_tsconfig.template.replace(/\[project\]/g, project.toString()).trim();
-    await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
-  }
-
-  private async createInitialDepsConfigFile(project: number) {
-    const fileName = 'mlsDep.json';
-    const content = template_deps.template.trim();
     await this.instanceDriver?.createFileInRepo(this.orgName, this.NEWREPONAME, fileName, content);
   }
 
@@ -978,14 +971,9 @@ export class PluginCreateProject extends CollabLitElement {
       this.setProgress(newPercent);
 
       await this.sleep(200);
-      await this.tryItem(async () => await this.createInitialDepsConfigFile(this.newProjectNumber), this.msg.log_17);
+      await this.tryItem(async () => await this.createInitialPackageFile(this.newProjectNumber), this.msg.log_9);
       newPercent += percent;
       this.setProgress(newPercent);
-
-      //await this.sleep(200);
-      //await this.tryItem(async () => await this.createInitialPackageFile(this.newProjectNumber), this.msg.log_9);
-      //newPercent += percent;
-      //this.setProgress(newPercent);
 
       //await this.sleep(200);
       //await this.tryItem(async () => await this.createInitialTSConfigFile(this.newProjectNumber), this.msg.log_11);
