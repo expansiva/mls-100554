@@ -15,6 +15,9 @@ let on1CompileMonaco = true;
 export async function initCompileMonaco(project: number): Promise<boolean> {
     if (!on1CompileMonaco) return true;
     try {
+        // Monaco is loaded by the shell and may still be downloading when collab init runs.
+        const monacoReady = (window as any).monacoReady as Promise<void> | undefined;
+        if (monacoReady) await monacoReady;
         await mls.editor.InitMonaco();
 
         let depsActualProject = mls.l5.getProjectDependencies(project, false);
