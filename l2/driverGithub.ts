@@ -1,15 +1,15 @@
 /// <mls fileReference="_100554_/l2/driverGithub.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import * as dL from '/_100554_/l2/driverLib.js';
+ 
+let mKey = ""; 
 
-let mKey = "";
-
-export function init(initString: string) {
+export function init(initString: string) { 
 	mKey = atob(initString);
 }
 
 export class DriverGitHub extends mls.stor.others.DriverIOBase {
-
+	
 	public shortName: mls.cbe.Provider = 'github';
 	public project: number = 100554;
 	public driverVersion: string = '1.0.0.3';
@@ -48,7 +48,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		return this._getUrl(file);
 	}
 
-	public getVersionFromFiles(options: { owner: string; repo: string; branchName: string; files: mls.stor.IFileInfo[]; }): Promise<{ [key: string]: string; } | undefined> {
+	public getVersionFromFiles(project: number, options: { owner: string; repo: string; branchName: string; files: mls.stor.IFileInfo[]; }): Promise<{ [key: string]: string; } | undefined> {
 		return this.getVersionFromFilesIO(options);
 	}
 
@@ -60,8 +60,8 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		return this.createNewBranchIO(option);
 	}
 
-	public createPullRequest(options: { owner: string; repo: string; title: string; branch: string; description: string; }): Promise<boolean> {
-		return this.createPullRequestIO(options);
+	public createPullRequest(project: number, options: { owner: string; repo: string; title: string; branch: string; description: string; }): Promise<boolean> {
+		return this.createPullRequestIO(project, options);
 	}
 
 	public reviewPullRequest(options: { owner: string; repo: string; branch: string; idRequest: string; isApproved: boolean; }): Promise<boolean> {
@@ -132,28 +132,28 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 		return this.addVariableIO(owner, repo, name, value);
 	}
 
-	public addVariable(name: string, value: string): Promise<boolean> {
+	public addVariable(project: number, name: string, value: string): Promise<boolean> {
 		throw new Error('Not implemented');
 		//return this.addVariableIO(name, value);
 	}
 
-	public updateVariable(name: string, value: string): Promise<boolean> {
-		return this.updateVariableIO(name, value);
+	public updateVariable(project: number, name: string, value: string): Promise<boolean> {
+		return this.updateVariableIO(project, name, value);
 	}
 
-	public listVariables(): Promise<{ variables: { name: string; value: string; created_at: string; updated_at: string; }[]; total_count: number; }> {
-		return this.listVariablesIO();
+	public listVariables(project: number): Promise<{ variables: { name: string; value: string; created_at: string; updated_at: string; }[]; total_count: number; }> {
+		return this.listVariablesIO(project);
 	}
 
-	public delVariable(name: string): Promise<boolean> {
-		return this.delVariableIO(name);
+	public delVariable(project: number, name: string): Promise<boolean> {
+		return this.delVariableIO(project, name);
 	}
 
 	public checkFork(ownerOrigin: string, repoOrigin: string, login: string): Promise<boolean> {
 		return this.checkForkIO(ownerOrigin, repoOrigin, login);
 	}
 
-	public syncFork(options: { repoOrigin: string, ownerOrigin: string, branchOrigin: string, repoDest: string, ownerDest: string, branchDest: string }): Promise<boolean> {
+	public syncFork(project: number, options: { repoOrigin: string, ownerOrigin: string, branchOrigin: string, repoDest: string, ownerDest: string, branchDest: string }): Promise<boolean> {
 		return this.syncForkIO(options);
 	}
 
@@ -1196,7 +1196,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-	private delVariableIO(variable: string): Promise<boolean> {
+	private delVariableIO(project: number, variable: string): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -1209,13 +1209,12 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				this.verifyMKey();
 
-				const prj = mls.actualProject;
-				if (!prj) {
+				if (!project) {
 					reject(new Error('Not Found project!'));
 					return;
 				}
 
-				const info = await dL.getMyKeysBranch(prj);
+				const info = await dL.getMyKeysBranch(project);
 
 				const retFetch = await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/actions/variables/${variable}`, {
 					method: 'DELETE',
@@ -1262,7 +1261,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-	private listVariablesIO(): Promise<{ variables: { name: string, value: string, created_at: string, updated_at: string }[], total_count: number }> {
+	private listVariablesIO(project: number): Promise<{ variables: { name: string, value: string, created_at: string, updated_at: string }[], total_count: number }> {
 
 		return new Promise<{ variables: { name: string, value: string, created_at: string, updated_at: string }[], total_count: number }>(async (resolve, reject) => {
 
@@ -1270,13 +1269,12 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				this.verifyMKey();
 
-				const prj = mls.actualProject;
-				if (!prj) {
+				if (!project) {
 					reject(new Error('Not Found project!'));
 					return;
 				}
 
-				const info = await dL.getMyKeysBranch(prj);
+				const info = await dL.getMyKeysBranch(project);
 
 				const retFetch = await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/actions/variables`, {
 					method: 'GET',
@@ -1314,7 +1312,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-	private updateVariableIO(variable: string, secret: string): Promise<boolean> {
+	private updateVariableIO(project: number, variable: string, secret: string): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
@@ -1327,13 +1325,12 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				this.verifyMKey();
 
-				const prj = mls.actualProject;
-				if (!prj) {
+				if (!project) {
 					reject(new Error('Not Found project!'));
 					return;
 				}
 
-				const info = await dL.getMyKeysBranch(prj)
+				const info = await dL.getMyKeysBranch(project)
 
 				const body = {
 					name: variable,
@@ -2363,13 +2360,12 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 	}
 
-	private createPullRequestIO(option: { owner: string, repo: string, branch: string, title: string, description: string }): Promise<boolean> {
+	private createPullRequestIO(project: number, option: { owner: string, repo: string, branch: string, title: string, description: string }): Promise<boolean> {
 
 		return new Promise<boolean>(async (resolve, reject) => {
 
 			try {
 
-				const project = mls.actualProject;
 				if (!project) throw new Error('Not set project actual');
 
 				const uB = dL.getMyKeysBranch(project);

@@ -40,7 +40,9 @@ const message_pt = {
     msgErroTotFile: 'Excedeu o tamanho total permitido',
     msgErrorFilesSelected: 'Arquivos com erro foram selecionados, deseja realmente continuar?',
     sync: 'Sinc',
-    msgSync: 'Deseja realmente sincronizar? Suas alterações do projeto [prj] serão todas perdidas.'
+    msgSync: 'Deseja realmente sincronizar? Suas alterações do projeto [prj] serão todas perdidas.',
+    select: 'Selecionar',
+    selected: 'Selecionado'
 }
 const message_en = {
     openPullrequest: 'Open pull requests',
@@ -66,7 +68,9 @@ const message_en = {
     msgErroTotFile: 'Exceeded the total size allowed',
     msgErrorFilesSelected: 'Files with errors are selected, do you really want to continue?',
     sync: 'Sync',
-    msgSync: 'Do you really want to synchronize? All your project [prj] changes will be lost.'
+    msgSync: 'Do you really want to synchronize? All your project [prj] changes will be lost.',
+    select: 'Select',
+    selected: 'Selected'
 }
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
@@ -91,6 +95,7 @@ export class ServiceSave extends ServiceBase {
     @state() freeToSave: { ts: boolean, less: boolean, hasDS: boolean } = { ts: false, less: false, hasDS: false };
 
     @property() isFreeToSave: boolean = false;
+    @property() selectedProject: number | undefined = undefined;
     @property() itens: IDefItem | undefined = undefined;
     //@property() otherProjects: number[] = [];
     @property() otherProjects: Record<string, Record<string, string[]>> = {};
@@ -101,9 +106,13 @@ export class ServiceSave extends ServiceBase {
         return this;
     }
 
+    get currentProject(): number | undefined {
+        return this.selectedProject !== undefined ? this.selectedProject : mls.actualProject;
+    }
+
     constructor() {
         super();
-        readProjectTypescriptAndCompile(mls.actualProject as number, '', true);
+        readProjectTypescriptAndCompile(this.currentProject as number, '', true);
         this.setEvents();
         this.setError('');
     }
@@ -199,7 +208,7 @@ export class ServiceSave extends ServiceBase {
         for (let i of array) {
             const f = mls.stor.files[i];
             if (!f) continue;
-            if (f.project === mls.actualProject && f.status !== 'nochange')
+            if (f.project === this.currentProject && f.status !== 'nochange')
                 exist = true;
             if (exist) break;
         }
@@ -218,7 +227,7 @@ export class ServiceSave extends ServiceBase {
         this.myMessage = messages[lang];
 
 
-        if (mls.actualProject === mls.stor.LOCALPROJECTNUMBER) {
+        if (this.currentProject === mls.stor.LOCALPROJECTNUMBER) {
             return html`<plugin-create-project-local-to-driver-100554
             
             @project-local-created=${() => { this.init(); }}
@@ -308,12 +317,13 @@ export class ServiceSave extends ServiceBase {
         return html`
         <sectionsave>
             <ul>
-                ${repeat(Object.keys(this.otherProjects), ((key: string) => key) as any, ((k: number, index: any) => { return this.renderOthersProjectsItens(k) }) as any)}
+                ${repeat(Object.keys(this.otherProjects), ((key: string) => key) as any, ((k: number, index: any) => { return this.renderOthersProjectsItens(+k) }) as any)}
             </ul>
         </sectionsave>`
     }
 
     renderOthersProjectsItens(project: number) {
+        const isDependency = this.getActualProjectDependencies().includes(project);
         return html`
         <li style="cursor: pointer;">
             <div style="cursor: pointer;">
@@ -322,7 +332,11 @@ export class ServiceSave extends ServiceBase {
                 </span>
                 <input type="checkbox" disabled style="cursor: not-allowed;">
                 <label style="cursor: pointer;">${project}</label>
-                
+                ${isDependency ? html`
+                    <span class="link-select-project" style="cursor:pointer; margin-left:8px; font-size:12px; text-decoration:underline; color:#7678a6;" @click="${(e: MouseEvent) => this.selectProject(e, project)}">
+                        ${this.selectedProject === project ? this.myMessage.selected : this.myMessage.select}
+                    </span>
+                ` : ''}
             </div>
             <ul>
                     ${repeat(Object.keys(this.otherProjects[project]), ((item: any) => 'other' + project + item) as any, ((i: any, indexI: any) => { return this.renderItensOtherProjects(project, i); }) as any)}
@@ -544,7 +558,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private async initInfoProject() {
-        const prj = mls.actualProject;
+        const prj = this.currentProject;
         if (!prj || prj === mls.stor.LOCALPROJECTNUMBER) return;
         const info = getMyKeysBranch(prj);
         if (!info) return;
@@ -593,7 +607,7 @@ export class ServiceSave extends ServiceBase {
                 if (!file ||
                     (!file.inLocalStorage && file.status !== 'deleted') ||
                     file.project === 0 ||
-                    file.project !== mls.actualProject
+                    file.project !== this.currentProject
                 ) continue;
 
                 const obj = this.setProjectLevelShortName(objProjects, file.project, file.level, file.folder, file.shortName);
@@ -617,10 +631,24 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
+    private getActualProjectDependencies(): number[] {
+        if (!mls.actualProject) return [];
+        const details = mls.l5.getProjectDetails(mls.actualProject);
+        const ret = [...(details?.prj_dependencies || [])];
+        ret.push(mls.actualProject)
+        return ret;
+    }
+
+    private selectProject(e: MouseEvent, project: number): void {
+        e.stopPropagation();
+        this.selectedProject = this.selectedProject === project ? undefined : project;
+        this.init();
+    }
+
     private async getOtherProjects() {
 
         let dt = await mls.stor.localDB.getKeysWithPrefix('File_');
-        dt = dt.filter((t) => t.indexOf(`_${mls.actualProject}_`) < 0);
+        dt = dt.filter((t) => t.indexOf(`_${this.currentProject}_`) < 0);
 
         const info: any = {};
 
@@ -823,7 +851,7 @@ export class ServiceSave extends ServiceBase {
 
     private async fireOnPullrequest(e: MouseEvent) {
         try {
-            const prj = mls.actualProject;
+            const prj = this.currentProject;
             if (!prj) throw new Error('Not found project actual');
             this.showLoader(true);
             const driver = mls.stor.others.getDefaultDriver(prj);
@@ -834,7 +862,7 @@ export class ServiceSave extends ServiceBase {
                 title: 'Pull request',
                 description: 'Pull request'
             }
-            const ret = await driver.createPullRequest(opt);
+            const ret = await (driver as any).createPullRequest(prj, opt);
             if (!ret) throw new Error('Error Pull request');
             this.showLoader(false);
         } catch (e: any) {
@@ -848,7 +876,7 @@ export class ServiceSave extends ServiceBase {
     private async createFork(e: MouseEvent) {
         try {
             e.stopPropagation();
-            const prj = mls.actualProject;
+            const prj = this.currentProject;
             if (!prj) throw new Error('Not found project actual');
             this.showLoader(true);
             const info = this.getLocalHIstoryCurrentInfoDriver();
@@ -916,7 +944,7 @@ export class ServiceSave extends ServiceBase {
             this.showLoader(true);
             if (!mls.l5.actualOrg) throw new Error('No organization selected');
 
-            const prj = mls.actualProject;
+            const prj = this.currentProject;
             if (!prj) throw new Error('Not found project actual');
 
             const actualOrg = Object.keys(mls.stor.orgs)[mls.l5.actualOrg];
@@ -1009,7 +1037,7 @@ export class ServiceSave extends ServiceBase {
 
         return;
         if (!this.freeToSave.hasDS) return;
-        const has = array.filter((a) => a.project === mls.actualProject && a.shortName === 'designSystem' && a.extension === '.ts' && a.folder === '').length > 0;
+        const has = array.filter((a) => a.project === this.currentProject && a.shortName === 'designSystem' && a.extension === '.ts' && a.folder === '').length > 0;
 
         if (!has) throw new Error('Design system needs to be saved along with upcoming changes!');
 
@@ -1076,7 +1104,7 @@ export class ServiceSave extends ServiceBase {
     private isRemovedFork: boolean = false;
     private async fireCreateForkOrUpdate() {
         try {
-            const prj = mls.actualProject;
+            const prj = this.currentProject;
             if (!prj) throw new Error('Not found project actual');
 
             const info = this.getLocalHIstoryCurrentInfoDriver();
@@ -1102,7 +1130,7 @@ export class ServiceSave extends ServiceBase {
                     ownerDest: info.login,
                     branchDest: 'main',
                 }
-                const ret = await (driver as any).syncFork(opt);
+                const ret = await (driver as any).syncFork(prj, opt);
                 if (!ret) throw new Error('Error sync fork');
                 this.owner = info.login;
             }
@@ -1123,7 +1151,7 @@ export class ServiceSave extends ServiceBase {
     private async removeFork() {
         try {
             this.isRemovedFork = true;
-            const prj = mls.actualProject;
+            const prj = this.currentProject;
             if (!prj) throw new Error('Not found project actual');
             const info = this.getLocalHIstoryCurrentInfoDriver();
             const driver = mls.stor.others.getDefaultDriver(prj);
@@ -1145,7 +1173,7 @@ export class ServiceSave extends ServiceBase {
 
     private async fireCreateNewBranch() {
         try {
-            const prj = mls.actualProject;
+            const prj = this.currentProject;
             if (!prj) throw new Error('Not found project actual');
             const driver = mls.stor.others.getDefaultDriver(prj);
             const user = await driver.getUserInfo();
@@ -1162,7 +1190,7 @@ export class ServiceSave extends ServiceBase {
 
     private async firePullrequest(msg: string) {
         try {
-            const prj = mls.actualProject;
+            const prj = this.currentProject;
             if (!prj) throw new Error('Not found project actual');
             const driver = mls.stor.others.getDefaultDriver(prj);
             const opt = {
@@ -1172,7 +1200,7 @@ export class ServiceSave extends ServiceBase {
                 title: msg,
                 description: msg
             }
-            const ret = await driver.createPullRequest(opt);
+            const ret = await (driver as any).createPullRequest(prj, opt);
             if (!ret) throw new Error('Error Pull request');
         } catch (err: any) {
             throw new Error(err.message + ' in: firePullrequest');
@@ -1189,7 +1217,7 @@ export class ServiceSave extends ServiceBase {
             if (!father) return;
             this.showLoader(true);
             if (!mls.l5.actualOrg) throw new Error('No organization selected');
-            const prj = mls.actualProject;
+            const prj = this.currentProject;
             if (!prj) throw new Error('Not found project actual');
             const actualOrg = Object.keys(mls.stor.orgs)[mls.l5.actualOrg];
             const config = await getConfigProject(prj, true);
@@ -1244,7 +1272,7 @@ export class ServiceSave extends ServiceBase {
 
     private async veriFyPermission(): Promise<IPermission> {
         try {
-            const prj = mls.actualProject;
+            const prj = this.currentProject;
             if (!prj) throw new Error('Not found project actual');
             const info = this.getLocalHIstoryCurrentInfoDriver();
             const driver = mls.stor.others.getDefaultDriver(prj)
@@ -1261,7 +1289,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private clearLocalHIstoryCurrentInfoDriver(): void {
-        const prj = mls.actualProject;
+        const prj = this.currentProject;
         if (!prj) throw new Error('Not found project actual');
         let str = localStorage.getItem('InfoCurrentDriver');
         if (!str) str = '{}';
@@ -1271,7 +1299,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private setLocalHIstoryCurrentInfoDriver(user: string | undefined = undefined): void {
-        const prj = mls.actualProject;
+        const prj = this.currentProject;
         if (!prj) throw new Error('Not found project actual');
         let str = localStorage.getItem('InfoCurrentDriver');
         if (!str) str = '{}';
@@ -1286,7 +1314,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private getLocalHIstoryCurrentInfoDriver(): { owner: string, repo: string, branch: string, login: string } {
-        const prj = mls.actualProject;
+        const prj = this.currentProject;
         if (!prj) throw new Error('Not found project actual');
         let str = localStorage.getItem('InfoCurrentDriver');
         if (!str) str = '{}';
@@ -1381,10 +1409,10 @@ export class ServiceSave extends ServiceBase {
 
     private async uppVersionAfterSave(array: mls.stor.IFileInfo[]) {
         try {
-            const driver = mls.stor.others.getDefaultDriver(mls.actualProject as number);
+            const driver = mls.stor.others.getDefaultDriver(this.currentProject as number);
             if (!driver || !(driver as any).getVersionFromFiles) return;
 
-            const info = await (driver as any).getVersionFromFiles(this.owner, this.repo, this.branch, array);
+            const info = await (driver as any).getVersionFromFiles(this.currentProject, this.owner, this.repo, this.branch, array);
             if (!info) return;
 
             for await (const a of array) {
@@ -1420,7 +1448,7 @@ export class ServiceSave extends ServiceBase {
         const params = {} as mls.events.IFileAction;
         params.action = 'projectListChanged';
         params.level = 5;
-        params.project = mls.actualProject as number;
+        params.project = this.currentProject as number;
         params.position = this.position as ('right' | 'left');
         mls.events.fire([5], ['FileAction'], JSON.stringify(params), time);
         this.fireEventsDetails();
@@ -1430,7 +1458,7 @@ export class ServiceSave extends ServiceBase {
 
         this.isFreeToSave = false;
         this.freeToSave = { ts: false, less: false, hasDS: false };
-        const key = mls.stor.getKeyToFiles(mls.actualProject as number, 2, 'designSystem', '', '.ts');
+        const key = mls.stor.getKeyToFiles(this.currentProject as number, 2, 'designSystem', '', '.ts');
         const file = mls.stor.files[key];
         let aux = '';
         /*if (file && file.inLocalStorage) {
@@ -1453,8 +1481,8 @@ export class ServiceSave extends ServiceBase {
 
     private freeToSaveProjectAndDs(arr: mls.stor.IFileInfo[]) {
         return;
-        const keyDS = mls.stor.getKeyToFiles(mls.actualProject as number, 2, 'designSystem', '', '.ts');
-        const keyPrj = mls.stor.getKeyToFiles(mls.actualProject as number, 2, 'project', '', '.ts');
+        const keyDS = mls.stor.getKeyToFiles(this.currentProject as number, 2, 'designSystem', '', '.ts');
+        const keyPrj = mls.stor.getKeyToFiles(this.currentProject as number, 2, 'project', '', '.ts');
         const fileDS = mls.stor.files[keyDS];
         const filePrj = mls.stor.files[keyPrj];
 
@@ -1548,11 +1576,11 @@ export class ServiceSave extends ServiceBase {
 
     private async forceSync() {
 
-        const conf = window.confirm(this.myMessage.msgSync.replace('[prj]', (mls.actualProject || 0).toString()));
+        const conf = window.confirm(this.myMessage.msgSync.replace('[prj]', (this.currentProject || 0).toString()));
         if (!conf) return;
 
 
-        const obj = Object.values(mls.stor.files).filter((s) => s.status !== 'nochange' && s.project === mls.actualProject);
+        const obj = Object.values(mls.stor.files).filter((s) => s.status !== 'nochange' && s.project === this.currentProject);
 
         if (!obj || obj.length === 0) return;
 
@@ -1565,7 +1593,7 @@ export class ServiceSave extends ServiceBase {
             }
 
             const data = this.getAllUserOpenedFiles();
-            if (data[mls.actualProject || 0]) delete data[mls.actualProject || 0];
+            if (data[this.currentProject || 0]) delete data[this.currentProject || 0];
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
 
             this.showLoader(false);

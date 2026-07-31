@@ -46,8 +46,8 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
         return this._getUrl(file);
     }
 
-    public getVersionFromFiles(options: { owner: string; repo: string; branchName: string; files: mls.stor.IFileInfo[]; }): Promise<{ [key: string]: string; } | undefined> {
-        return this.getVersionFromFilesIO(options);
+    public getVersionFromFiles(project:number, options: { owner: string; repo: string; branchName: string; files: mls.stor.IFileInfo[]; }): Promise<{ [key: string]: string; } | undefined> {
+        return this.getVersionFromFilesIO(project, options);
     }
 
     public checkBranchExistence(owner: string, repo: string, branchName: string): Promise<boolean> {
@@ -58,8 +58,8 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
         return this.createNewBranchIO(option);
     }
 
-    public createPullRequest(options: { owner: string; repo: string; title: string; branch: string; description: string; }): Promise<boolean> {
-        return this.createPullRequestIO(options);
+    public createPullRequest(project:number, options: { owner: string; repo: string; title: string; branch: string; description: string; }): Promise<boolean> {
+        return this.createPullRequestIO(project, options);
     }
 
     public reviewPullRequest(options: { owner: string; repo: string; branch: string; idRequest: string; isApproved: boolean; }): Promise<boolean> {
@@ -118,28 +118,28 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
         return this.verifyPermissionIO(owner, repo, login);
     }
 
-    public addVariable(name: string, value: string): Promise<boolean> {
-        return this.addVariableIO(name, value);
+    public addVariable(project:number, name: string, value: string): Promise<boolean> {
+        return this.addVariableIO(project,name, value);
     }
 
-    public updateVariable(name: string, value: string): Promise<boolean> {
-        return this.updateVariableIO(name, value);
+    public updateVariable(project:number,name: string, value: string): Promise<boolean> {
+        return this.updateVariableIO(project,name, value);
     }
 
     public listVariables(): Promise<{ variables: { name: string; value: string; created_at: string; updated_at: string; }[]; total_count: number; }> {
         return this.listVariablesIO();
     }
 
-    public delVariable(name: string): Promise<boolean> {
-        return this.delVariableIO(name);
+    public delVariable(project:number,name: string): Promise<boolean> {
+        return this.delVariableIO(project,name);
     }
 
     public checkFork(ownerOrigin: string, repoOrigin: string, login: string): Promise<boolean> {
         return this.checkForkIO(ownerOrigin, repoOrigin, login);
     }
 
-    public syncFork(options: { repoOrigin: string, ownerOrigin: string, branchOrigin: string, repoDest: string, ownerDest: string, branchDest: string }): Promise<boolean> {
-        return this.syncForkIO(options);
+    public syncFork(project:number, options: { repoOrigin: string, ownerOrigin: string, branchOrigin: string, repoDest: string, ownerDest: string, branchDest: string }): Promise<boolean> {
+        return this.syncForkIO(project, options);
     }
 
     //---------IMPLEMENTS-----------
@@ -693,7 +693,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
         });
     }
 
-    private syncForkIO(opt: { repoOrigin: string, ownerOrigin: string, branchOrigin: string, repoDest: string, ownerDest: string, branchDest: string }): Promise<boolean> {
+    private syncForkIO(project:number,opt: { repoOrigin: string, ownerOrigin: string, branchOrigin: string, repoDest: string, ownerDest: string, branchDest: string }): Promise<boolean> {
 
         return new Promise<boolean>(async (resolve, reject) => {
 
@@ -704,7 +704,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
             try {
 
-                const prj = mls.actualProject;
+                const prj = project;
                 if (!prj) throw new Error('Not found project actual');
 
                 const forkProjectId = await this.getIDProject(0, opt.ownerDest, opt.repoDest);
@@ -787,7 +787,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
     }
 
-    private delVariableIO(variable: string): Promise<boolean> {
+    private delVariableIO(project:number,variable: string): Promise<boolean> {
 
         return new Promise<boolean>(async (resolve, reject) => {
 
@@ -798,7 +798,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
             try {
 
-                const prj = mls.actualProject;
+                const prj = project;
                 if (!prj) {
                     reject(new Error('Not Found project!'));
                     return;
@@ -914,7 +914,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
     }
 
-    private updateVariableIO(variable: string, secret: string): Promise<boolean> {
+    private updateVariableIO(project:number,variable: string, secret: string): Promise<boolean> {
 
         return new Promise<boolean>(async (resolve, reject) => {
 
@@ -925,7 +925,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
             try {
 
-                const prj = mls.actualProject;
+                const prj = project;
                 if (!prj) {
                     reject(new Error('Not Found project!'));
                     return;
@@ -977,7 +977,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
     }
 
-    private addVariableIO(newVariable: string, secret: string): Promise<boolean> {
+    private addVariableIO(project:number, newVariable: string, secret: string): Promise<boolean> {
 
         return new Promise<boolean>(async (resolve, reject) => {
 
@@ -988,7 +988,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
             try {
 
-                const prj = mls.actualProject;
+                const prj = project;
                 if (!prj) {
                     reject(new Error('Not Found project!'));
                     return;
@@ -1268,10 +1268,10 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
         });
     }
 
-    private getVersionFromFilesIO(options: { owner: string; repo: string; branchName: string; files: mls.stor.IFileInfo[]; }): Promise<{ [key: string]: string; } | undefined> {
+    private getVersionFromFilesIO(project:number, options: { owner: string; repo: string; branchName: string; files: mls.stor.IFileInfo[]; }): Promise<{ [key: string]: string; } | undefined> {
         return new Promise<{ [key: string]: string } | undefined>(async (resolve, reject) => {
 
-            const prj = mls.actualProject;
+            const prj = project;
             if (!prj) throw new Error('Not found project actual')
             const uB = await dL.getMyKeysBranch(prj);
 
@@ -1888,7 +1888,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
     }
 
-    private createPullRequestIO(option: { owner: string, repo: string, branch: string, title: string, description: string }): Promise<boolean> {
+    private createPullRequestIO(project:number, option: { owner: string, repo: string, branch: string, title: string, description: string }): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
 
             if (!option) {
@@ -1898,7 +1898,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
             try {
 
-                const prj = mls.actualProject;
+                const prj = project;
                 if (!prj) throw new Error('Not found project actual')
                 //const info = await this.getMyKeysBranch(project);
                 const id = await this.getIDProject(0, option.owner, option.repo);
