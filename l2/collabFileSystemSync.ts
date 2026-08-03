@@ -468,7 +468,8 @@ export class CollabFileSystemSync {
     public async pushToBrowser(project: number, handle: CollabFsDirectoryHandle, onProgress?: (progress: CollabFsProgress) => void): Promise<CollabFsPushResult> {
         const scanResult = await this.scan(project, handle, onProgress);
         const blockingChanges = scanResult.changes.filter((change) => this.isBrowserSideChange(change));
-        if (blockingChanges.length > 0) {
+        const pushChanges = scanResult.changes.filter((change) => this.isDiskSideChange(change));
+        if (blockingChanges.length > 0 && pushChanges.length === 0) {
             throw new Error(`Push blocked. Pull to FS first or resolve browser changes: ${this.formatPathExamples(blockingChanges, 5)}.`);
         }
 
@@ -476,7 +477,6 @@ export class CollabFileSystemSync {
         const localMap = this.mapByPath(localEntries);
         const browserEntries = await this.getBrowserEntries(project, onProgress, { readContent: false });
         const browserMap = this.mapByPath(browserEntries.filter((entry) => !entry.unsupported));
-        const pushChanges = scanResult.changes.filter((change) => this.isDiskSideChange(change));
         let created = 0;
         let updated = 0;
         let deleted = 0;
@@ -517,9 +517,19 @@ export class CollabFileSystemSync {
         }
 
         onProgress?.({ phase: 'manifest', current: 1, total: 1, path: MANIFEST_FILE });
+        const previousManifest = await this.readManifest(handle);
         const browserEntriesAfterPush = await this.getBrowserEntries(project, onProgress, { readContent: true });
         const localAfterPush = await this.getLocalEntries(handle, onProgress, { readContent: false });
-        const manifest = await this.writeManifest(project, handle, browserEntriesAfterPush, localAfterPush, 'fs-to-browser');
+        const preservePaths = new Set(blockingChanges.map((change) => change.path));
+        const manifest = await this.writeManifest(
+            project,
+            handle,
+            browserEntriesAfterPush,
+            localAfterPush,
+            'fs-to-browser',
+            previousManifest?.selectedAt,
+            preservePaths.size > 0 ? { previous: previousManifest, paths: preservePaths } : undefined
+        );
         return { created, updated, deleted, skipped, manifest };
     }
 

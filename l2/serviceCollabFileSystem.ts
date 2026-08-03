@@ -45,6 +45,7 @@ const message_en = {
     pull: 'Pull',
     push: 'Push',
     pushBlocked: 'Push blocked. Pull to FS first.',
+    pushPartial: 'Push will upload FS changes and keep browser/conflict changes pending.',
     confirmPullTitle: 'Pull to FS',
     confirmPushTitle: 'Push to Browser',
     cWrite: 'written to disk from the browser',
@@ -54,6 +55,7 @@ const message_en = {
     cCreate: 'created in the browser',
     cUpdate: 'updated in the browser',
     cDelete: 'deleted in the browser',
+    cBlockedKept: 'browser/conflict change(s) kept pending',
     confirm: 'Confirm',
     cancel: 'Cancel',
     folderLinked: 'Folder linked. Scan to see changes.',
@@ -123,6 +125,7 @@ const message_pt: typeof message_en = {
     pull: 'Pull',
     push: 'Push',
     pushBlocked: 'Push bloqueado. Faça Pull to FS primeiro.',
+    pushPartial: 'Push vai subir mudanças do FS e manter pendências do browser/conflitos.',
     confirmPullTitle: 'Pull to FS',
     confirmPushTitle: 'Push to Browser',
     cWrite: 'gravados no disco a partir do browser',
@@ -132,6 +135,7 @@ const message_pt: typeof message_en = {
     cCreate: 'criados no browser',
     cUpdate: 'atualizados no browser',
     cDelete: 'removidos no browser',
+    cBlockedKept: 'mudança(s) do browser/conflito mantidas pendentes',
     confirm: 'Confirmar',
     cancel: 'Cancelar',
     folderLinked: 'Pasta conectada. Verifique as mudanças.',
@@ -389,11 +393,11 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
                 <button class="primary" @click=${() => this.requestPull()} ?disabled=${this.busy || pullCount === 0}>
                     <span class="dir">&darr;</span> ${m.pull} &middot; ${pullCount}
                 </button>
-                <button @click=${() => this.requestPush()} ?disabled=${this.busy || pushCount === 0 || pushBlocked}>
+                <button @click=${() => this.requestPush()} ?disabled=${this.busy || pushCount === 0}>
                     <span class="dir">&uarr;</span> ${m.push} &middot; ${pushCount}
                 </button>
             </div>
-            ${pushBlocked ? html`<p class="collab-fs-muted center">${m.pushBlocked}</p>` : html``}
+            ${pushBlocked ? html`<p class="collab-fs-muted center">${pushCount > 0 ? m.pushPartial : m.pushBlocked}</p>` : html``}
             <button class="block rescan-btn" @click=${() => this.scan()} ?disabled=${this.busy}>
                 <span class="dir">&#x21BB;</span> ${m.rescan}
             </button>
@@ -453,7 +457,9 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
 
     private pushConfirmLines(plan: ReturnType<CollabFileSystemSync['planPush']>): string[] {
         const m = this.msg;
-        return [`${plan.create.length} ${m.cCreate}`, `${plan.update.length} ${m.cUpdate}`, `${plan.delete.length} ${m.cDelete}`];
+        const lines = [`${plan.create.length} ${m.cCreate}`, `${plan.update.length} ${m.cUpdate}`, `${plan.delete.length} ${m.cDelete}`];
+        if (plan.blocked.length) lines.push(`${plan.blocked.length} ${m.cBlockedKept}`);
+        return lines;
     }
 
     private renderHeaderStatus() {
@@ -752,12 +758,10 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     private requestPush(): void {
         if (this.busy || !this.handle || !this.scanned) return;
         const plan = this.sync.planPush(this.changes);
-        if (plan.blocked.length > 0) {
-            this.statusMessage = this.msg.pushBlocked;
-            return;
-        }
-        if (plan.create.length + plan.update.length + plan.delete.length === 0) {
-            this.statusMessage = this.msg.nothingToPush;
+        const pushCount = plan.create.length + plan.update.length + plan.delete.length;
+        if (pushCount === 0) {
+            if (plan.blocked.length > 0) this.statusMessage = this.msg.pushBlocked;
+            else this.statusMessage = this.msg.nothingToPush;
             return;
         }
         this.pendingConfirm = { kind: 'push', push: plan };
