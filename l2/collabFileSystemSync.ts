@@ -797,6 +797,7 @@ export class CollabFileSystemSync {
             source: content,
             status: 'new',
         }, this.shouldCreateModel(fileBase), true, this.shouldCreateModel(fileBase));
+        if (this.shouldCreateModel(fileBase)) this.logTsPushCompileResult('create', path, file, mls.editor.getModel(file) as mls.editor.IModelBase | undefined);
         this.fireBrowserFileChanged(file);
         return file;
     }
@@ -813,14 +814,22 @@ export class CollabFileSystemSync {
         const existingModel = mls.editor.getModel(file) as mls.editor.IModelBase | undefined;
         if (existingModel?.model && !existingModel.model.isDisposed()) {
             if (existingModel.model.getValue() !== content) existingModel.model.setValue(content);
-            if (this.shouldCreateModel(file)) await this.compileModelIfNeeded(existingModel);
+            if (this.shouldCreateModel(file)) {
+                const compileOk = await this.compileModelIfNeeded(existingModel);
+                this.logTsPushCompileResult('update', this.getBrowserPath(file), file, existingModel, compileOk);
+            }
             else mls.editor.forceModelUpdate(existingModel.model);
         } else if (this.shouldCreateModel(file) && file.getOrCreateModel) {
             const model = await file.getOrCreateModel().catch(() => undefined) as mls.editor.IModelBase | undefined;
             if (model?.model && !model.model.isDisposed()) {
                 if (model.model.getValue() !== content) model.model.setValue(content);
-                await this.compileModelIfNeeded(model);
+                const compileOk = await this.compileModelIfNeeded(model);
+                this.logTsPushCompileResult('update', this.getBrowserPath(file), file, model, compileOk);
+            } else {
+                this.logTsPushCompileResult('update', this.getBrowserPath(file), file, model);
             }
+        } else if (this.shouldCreateModel(file)) {
+            this.logTsPushCompileResult('update', this.getBrowserPath(file), file);
         }
 
         this.fireBrowserFileChanged(file);
@@ -830,12 +839,57 @@ export class CollabFileSystemSync {
         return file.level === 2 && file.extension === '.ts';
     }
 
-    private async compileModelIfNeeded(model: mls.editor.IModelBase): Promise<void> {
-        if (!this.shouldCreateModel(model.storFile)) return;
+    private async compileModelIfNeeded(model: mls.editor.IModelBase): Promise<boolean | undefined> {
+        if (!this.shouldCreateModel(model.storFile)) return undefined;
         const modelTS = model as mls.editor.IModelTS;
         if (modelTS.compilerResults) modelTS.compilerResults.modelNeedCompile = true;
         const ok = await mls.l2.typescript.compileAndPostProcess(modelTS, true, true);
         model.storFile.hasError = ok === false;
+        return ok;
+    }
+
+    private logTsPushCompileResult(
+        operation: 'create' | 'update',
+        path: string,
+        file: mls.stor.IFileInfo,
+        model?: mls.editor.IModelBase,
+        compileOk?: boolean
+    ): void {
+        try {
+            const modelTS = model as mls.editor.IModelTS | undefined;
+            const compilerResults = modelTS?.compilerResults;
+            const errors = compilerResults?.errors || [];
+            const trace = compilerResults?.trace || [];
+            const prodJSLen = compilerResults?.prodJS?.length || 0;
+            const cacheSaved = trace.some((line) => line.startsWith('cache saved:'));
+            const compiled = compileOk !== undefined || trace.some((line) => line.startsWith('compiling '));
+            const payload = {
+                direction: 'fs-to-browser',
+                operation,
+                path,
+                modelKey: mls.editor.getKeyModel(file.project, file.shortName, file.folder, file.level),
+                modelLoaded: Boolean(modelTS?.model && !modelTS.model.isDisposed()),
+                compiled,
+                compileOk: compileOk ?? null,
+                hasError: Boolean(file.hasError || errors.length > 0 || compileOk === false),
+                errorCount: errors.length,
+                prodJSLen,
+                cacheVersion: compilerResults?.cacheVersion || '',
+                cacheSaved,
+                traceLast: trace.slice(-6),
+                errors: errors.slice(0, 5).map((error) => ({
+                    messageText: String(error.messageText || ''),
+                    start: error.start,
+                    length: error.length,
+                    code: error.code,
+                })),
+            };
+            const shouldWarn = !payload.modelLoaded || payload.hasError || !payload.prodJSLen || !payload.cacheVersion || !payload.cacheSaved;
+            const label = shouldWarn ? '[collab-fs] push TS compilacao incompleta' : '[collab-fs] push TS compilado';
+            (shouldWarn ? console.warn : console.info)(label, payload);
+        } catch (err) {
+            console.warn('[collab-fs] push TS erro ao gerar log de compilacao', { path, err });
+        }
     }
 
     private fireBrowserFileChanged(file: mls.stor.IFileInfo): void {
