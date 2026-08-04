@@ -69,6 +69,12 @@ const message_en = {
     viewDiff: 'View diff',
     resolvedKeepBrowser: 'Resolved. Browser version won.',
     resolvedKeepFs: 'Resolved. FS version won.',
+    resolvedChanged: 'File changed.',
+    resolvedMoved: 'File moved to .collab-fs-trash.',
+    resolvedDeletedBrowser: 'File deleted in the browser.',
+    nextChangeOpened: 'Next file opened.',
+    noMoreChanges: 'No more pending files.',
+    resolutionTitle: 'Resolution',
     resWritten: 'written',
     resTrashed: 'trashed',
     resSkipped: 'skipped',
@@ -149,6 +155,12 @@ const message_pt: typeof message_en = {
     viewDiff: 'Ver diff',
     resolvedKeepBrowser: 'Resolvido. Venceu a versão do browser.',
     resolvedKeepFs: 'Resolvido. Venceu a versão do FS.',
+    resolvedChanged: 'Arquivo alterado.',
+    resolvedMoved: 'Arquivo movido para .collab-fs-trash.',
+    resolvedDeletedBrowser: 'Arquivo removido no browser.',
+    nextChangeOpened: 'Próximo arquivo aberto.',
+    noMoreChanges: 'Não há mais arquivos pendentes.',
+    resolutionTitle: 'Conciliação',
     resWritten: 'gravados',
     resTrashed: 'p/ lixeira',
     resSkipped: 'ignorados',
@@ -599,10 +611,52 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
             if (!this.handle) throw new Error('No folder selected.');
             if (!await this.adapter.ensurePermission(this.handle)) throw new Error('Folder permission was not granted.');
 
+            const resolvedIndex = this.changes.findIndex((item) => item.path === change.path);
             await this.sync.resolveConflict(project, this.handle, change.path, keep, this.reportProgress.bind(this));
             await this.scanCurrent();
-            this.statusMessage = keep === 'browser' ? this.msg.resolvedKeepBrowser : this.msg.resolvedKeepFs;
+            const nextChange = this.getNextChangeAfterResolution(change.path, resolvedIndex);
+            const resolutionMessage = this.getResolutionMessage(change, keep);
+            if (nextChange) {
+                this.openChangeDetails(nextChange);
+                this.statusMessage = `${resolutionMessage} ${this.msg.nextChangeOpened}`;
+            } else {
+                this.selectedPath = '';
+                this.statusMessage = `${resolutionMessage} ${this.msg.noMoreChanges}`;
+                this.openResolutionSummary(this.statusMessage);
+            }
         });
+    }
+
+    private getNextChangeAfterResolution(resolvedPath: string, resolvedIndex: number): CollabFsChange | undefined {
+        const nextResolvable = this.pickNextChange(this.changes.filter((change) => change.path !== resolvedPath && this.isResolvable(change.kind)), resolvedIndex);
+        return nextResolvable || this.pickNextChange(this.changes.filter((change) => change.path !== resolvedPath), resolvedIndex);
+    }
+
+    private pickNextChange(changes: CollabFsChange[], resolvedIndex: number): CollabFsChange | undefined {
+        if (changes.length === 0) return undefined;
+        const safeIndex = Math.max(0, resolvedIndex);
+        return changes[Math.min(safeIndex, changes.length - 1)];
+    }
+
+    private getResolutionMessage(change: CollabFsChange, keep: 'browser' | 'disk'): string {
+        const winner = keep === 'browser' ? this.msg.resolvedKeepBrowser : this.msg.resolvedKeepFs;
+        if (keep === 'browser' && change.kind === 'browserDeleted') return `${winner} ${this.msg.resolvedMoved}`;
+        if (keep === 'disk' && change.kind === 'diskDeleted') return `${winner} ${this.msg.resolvedDeletedBrowser}`;
+        return `${winner} ${this.msg.resolvedChanged}`;
+    }
+
+    private openResolutionSummary(message: string): void {
+        const div = document.createElement('div');
+        div.className = 'collab-fs-detail-page';
+        div.style.padding = '0.75rem';
+        div.appendChild(this.createDetailStyle());
+
+        const title = document.createElement('h3');
+        title.textContent = this.msg.resolutionTitle;
+        div.appendChild(title);
+
+        this.appendMuted(div, message);
+        this.openDetailsRight(div);
     }
 
     private isDiskSideChange(change: CollabFsChange): boolean {
