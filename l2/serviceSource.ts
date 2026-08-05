@@ -355,7 +355,7 @@ export class ServiceSource100554 extends ServiceBase {
         }
         if (!models) return;
         this.activeModels = models;
-        await readProjectTypescriptAndCompile(project, '', true)
+        // await readProjectTypescriptAndCompile(project, '', true)
         if (models && models.ts) mls.editor.forceModelUpdate(models.ts.model);
         this.loading = false;
         setTimeout(() => {
@@ -1658,7 +1658,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         }
         if (!models) return;
         this.activeModels = models;
-        await readProjectTypescriptAndCompile(actualProject, '', true)
+        // await readProjectTypescriptAndCompile(actualProject, '', true)
         if (models && models.ts) mls.editor.forceModelUpdate(models.ts.model);
         this.loading = false;
         setTimeout(() => {
@@ -1775,7 +1775,6 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
     }
 
     connectedCallback() {
-
         initState('less', {
             left: {},
             right: {}
