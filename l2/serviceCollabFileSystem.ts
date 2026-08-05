@@ -4,7 +4,7 @@ import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import { CollabFsDirectoryHandle, FileSystemAccessAdapter } from '/_100554_/l2/collabFileSystemAccess.js';
-import { CollabFileSystemSync, CollabFsChange, CollabFsProgress, CollabFsScanResult } from '/_100554_/l2/collabFileSystemSync.js';
+import { CollabFileSystemSync, CollabFsChange, CollabFsProgress, CollabFsScanResult, CollabFsTsCompileIssue } from '/_100554_/l2/collabFileSystemSync.js';
 import { openElementInServiceDetails } from '/_102027_/l2/libCommom.js';
 
 
@@ -81,6 +81,7 @@ const message_en = {
     resCreated: 'created',
     resUpdated: 'updated',
     resDeleted: 'deleted',
+    resTsCompileErrors: 'TS error(s); see console',
     pBrowser: 'Reading browser',
     pLocal: 'Reading local',
     pCompare: 'Comparing',
@@ -167,6 +168,7 @@ const message_pt: typeof message_en = {
     resCreated: 'criados',
     resUpdated: 'atualizados',
     resDeleted: 'removidos',
+    resTsCompileErrors: 'erro(s) TS; veja o console',
     pBrowser: 'Lendo browser',
     pLocal: 'Lendo local',
     pCompare: 'Comparando',
@@ -209,6 +211,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     @state() private projectOptions: number[] = [];
     @state() private folderName = '';
     @state() private statusMessage = '';
+    @state() private statusKind: 'normal' | 'error' = 'normal';
     @state() private progressMessage = '';
     @state() private changes: CollabFsChange[] = [];
     @state() private selectedPath = '';
@@ -485,7 +488,8 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
 
     private renderNotice() {
         if (!this.statusMessage || this.busy) return html``;
-        return html`<div class="collab-fs-notice">${this.statusMessage}</div>`;
+        const className = this.statusKind === 'error' ? 'collab-fs-notice error' : 'collab-fs-notice';
+        return html`<div class=${className}>${this.statusMessage}</div>`;
     }
 
     private getBadgeClass(kind: CollabFsChange['kind']): string {
@@ -803,6 +807,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
         if (this.busy || !this.handle || !this.scanned) return;
         const plan = this.sync.planPull(this.changes);
         if (plan.write.length + plan.delete.length === 0) {
+            this.statusKind = 'normal';
             this.statusMessage = this.msg.nothingToPull;
             return;
         }
@@ -814,6 +819,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
         const plan = this.sync.planPush(this.changes);
         const pushCount = plan.create.length + plan.update.length + plan.delete.length;
         if (pushCount === 0) {
+            this.statusKind = 'normal';
             if (plan.blocked.length > 0) this.statusMessage = this.msg.pushBlocked;
             else this.statusMessage = this.msg.nothingToPush;
             return;
@@ -824,6 +830,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     private confirmCancel(): void {
         const kind = this.pendingConfirm?.kind;
         this.pendingConfirm = null;
+        this.statusKind = 'normal';
         this.statusMessage = kind === 'pull' ? this.msg.pullCanceled : this.msg.pushCanceled;
     }
 
@@ -871,11 +878,26 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
                 updated: result.updated,
                 deleted: result.deleted,
                 skipped: result.skipped,
+                compileErrors: result.compileErrors,
             }), 0);
             await this.scanCurrent();
             const m = this.msg;
-            this.statusMessage = `${result.created} ${m.resCreated} · ${result.updated} ${m.resUpdated} · ${result.deleted} ${m.resDeleted} · ${result.skipped} ${m.resSkipped}`;
+            this.statusKind = result.compileErrors.length > 0 ? 'error' : 'normal';
+            this.statusMessage = this.formatPushResultMessage(result);
         });
+    }
+
+    private formatPushResultMessage(result: Awaited<ReturnType<CollabFileSystemSync['pushToBrowser']>>): string {
+        const m = this.msg;
+        const base = `${result.created} ${m.resCreated} · ${result.updated} ${m.resUpdated} · ${result.deleted} ${m.resDeleted} · ${result.skipped} ${m.resSkipped}`;
+        if (result.compileErrors.length === 0) return base;
+        return `${base} · ${result.compileErrors.length} ${m.resTsCompileErrors}: ${this.formatCompileErrorPaths(result.compileErrors)}`;
+    }
+
+    private formatCompileErrorPaths(errors: CollabFsTsCompileIssue[]): string {
+        const paths = errors.map((error) => error.path).slice(0, 3).join(', ');
+        const remaining = errors.length - 3;
+        return remaining > 0 ? `${paths}, +${remaining}` : paths;
     }
 
     private async scanCurrent(): Promise<void> {
@@ -1022,11 +1044,13 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
     private async runExclusive(action: () => Promise<void>): Promise<void> {
         if (this.busy) return;
         this.busy = true;
+        this.statusKind = 'normal';
         this.progressMessage = '';
         this.lastProgressAt = 0;
         try {
             await action();
         } catch (err) {
+            this.statusKind = 'error';
             this.statusMessage = err instanceof Error ? err.message : String(err);
         } finally {
             this.progressMessage = '';

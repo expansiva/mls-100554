@@ -107,7 +107,30 @@ export interface CollabFsPushResult {
     updated: number;
     deleted: number;
     skipped: number;
+    compileErrors: CollabFsTsCompileIssue[];
     manifest: CollabFsManifest;
+}
+
+export interface CollabFsTsCompileIssue {
+    direction: 'fs-to-browser';
+    operation: 'create' | 'update';
+    path: string;
+    modelKey: string;
+    modelLoaded: boolean;
+    compiled: boolean;
+    compileOk: boolean | null;
+    hasError: boolean;
+    errorCount: number;
+    prodJSLen: number;
+    cacheVersion: string;
+    cacheSaved: boolean;
+    traceLast: string[];
+    errors: Array<{
+        messageText: string;
+        start?: number;
+        length?: number;
+        code?: number | string;
+    }>;
 }
 
 export interface CollabFsFirstSyncValidation {
@@ -481,6 +504,7 @@ export class CollabFileSystemSync {
         let updated = 0;
         let deleted = 0;
         let skipped = 0;
+        const compileErrors: CollabFsTsCompileIssue[] = [];
 
         for (let i = 0; i < pushChanges.length; i++) {
             const change = pushChanges[i];
@@ -507,12 +531,12 @@ export class CollabFileSystemSync {
             const localEntry = await this.hydrateLocalEntry(handle, localEntryBase);
             const browserEntry = browserMap.get(change.path);
             if (browserEntry) {
-                await this.updateBrowserFile(browserEntry.file, localEntry.content || '');
+                await this.updateBrowserFile(browserEntry.file, localEntry.content || '', compileErrors);
                 updated++;
                 continue;
             }
 
-            await this.createBrowserFile(project, change.path, localEntry.content || '');
+            await this.createBrowserFile(project, change.path, localEntry.content || '', compileErrors);
             created++;
         }
 
@@ -530,7 +554,7 @@ export class CollabFileSystemSync {
             previousManifest?.selectedAt,
             preservePaths.size > 0 ? { previous: previousManifest, paths: preservePaths } : undefined
         );
-        return { created, updated, deleted, skipped, manifest };
+        return { created, updated, deleted, skipped, compileErrors, manifest };
     }
 
     // Resolves a single file by picking a winning side and making the other match it — including
@@ -768,7 +792,7 @@ export class CollabFileSystemSync {
         };
     }
 
-    private async createBrowserFile(project: number, path: string, content: string | Blob): Promise<mls.stor.IFileInfo> {
+    private async createBrowserFile(project: number, path: string, content: string | Blob, compileErrors?: CollabFsTsCompileIssue[]): Promise<mls.stor.IFileInfo> {
         const fileBase = this.parseLocalPath(path, project);
         if (!fileBase) throw new Error(`Cannot map local path to browser file: ${path}`);
         if (content instanceof Blob) {
@@ -797,12 +821,12 @@ export class CollabFileSystemSync {
             source: content,
             status: 'new',
         }, this.shouldCreateModel(fileBase), true, this.shouldCreateModel(fileBase));
-        if (this.shouldCreateModel(fileBase)) this.logTsPushCompileResult('create', path, file, mls.editor.getModel(file) as mls.editor.IModelBase | undefined);
+        if (this.shouldCreateModel(fileBase)) this.addTsCompileIssue(compileErrors, this.logTsPushCompileResult('create', path, file, mls.editor.getModel(file) as mls.editor.IModelBase | undefined));
         this.fireBrowserFileChanged(file);
         return file;
     }
 
-    private async updateBrowserFile(file: mls.stor.IFileInfo, content: string | Blob): Promise<void> {
+    private async updateBrowserFile(file: mls.stor.IFileInfo, content: string | Blob, compileErrors?: CollabFsTsCompileIssue[]): Promise<void> {
         file.status = file.status === 'new' ? 'new' : 'changed';
         file.updatedAt = new Date().toISOString();
         await mls.stor.localStor.setContent(file, { content, contentType: content instanceof Blob ? 'blob' : 'string' });
@@ -816,7 +840,7 @@ export class CollabFileSystemSync {
             if (existingModel.model.getValue() !== content) existingModel.model.setValue(content);
             if (this.shouldCreateModel(file)) {
                 const compileOk = await this.compileModelIfNeeded(existingModel);
-                this.logTsPushCompileResult('update', this.getBrowserPath(file), file, existingModel, compileOk);
+                this.addTsCompileIssue(compileErrors, this.logTsPushCompileResult('update', this.getBrowserPath(file), file, existingModel, compileOk));
             }
             else mls.editor.forceModelUpdate(existingModel.model);
         } else if (this.shouldCreateModel(file) && file.getOrCreateModel) {
@@ -824,12 +848,12 @@ export class CollabFileSystemSync {
             if (model?.model && !model.model.isDisposed()) {
                 if (model.model.getValue() !== content) model.model.setValue(content);
                 const compileOk = await this.compileModelIfNeeded(model);
-                this.logTsPushCompileResult('update', this.getBrowserPath(file), file, model, compileOk);
+                this.addTsCompileIssue(compileErrors, this.logTsPushCompileResult('update', this.getBrowserPath(file), file, model, compileOk));
             } else {
-                this.logTsPushCompileResult('update', this.getBrowserPath(file), file, model);
+                this.addTsCompileIssue(compileErrors, this.logTsPushCompileResult('update', this.getBrowserPath(file), file, model));
             }
         } else if (this.shouldCreateModel(file)) {
-            this.logTsPushCompileResult('update', this.getBrowserPath(file), file);
+            this.addTsCompileIssue(compileErrors, this.logTsPushCompileResult('update', this.getBrowserPath(file), file));
         }
 
         this.fireBrowserFileChanged(file);
@@ -848,13 +872,17 @@ export class CollabFileSystemSync {
         return ok;
     }
 
+    private addTsCompileIssue(compileErrors: CollabFsTsCompileIssue[] | undefined, issue: CollabFsTsCompileIssue | undefined): void {
+        if (compileErrors && issue?.hasError) compileErrors.push(issue);
+    }
+
     private logTsPushCompileResult(
         operation: 'create' | 'update',
         path: string,
         file: mls.stor.IFileInfo,
         model?: mls.editor.IModelBase,
         compileOk?: boolean
-    ): void {
+    ): CollabFsTsCompileIssue | undefined {
         try {
             const modelTS = model as mls.editor.IModelTS | undefined;
             const compilerResults = modelTS?.compilerResults;
@@ -863,7 +891,7 @@ export class CollabFileSystemSync {
             const prodJSLen = compilerResults?.prodJS?.length || 0;
             const cacheSaved = trace.some((line) => line.startsWith('cache saved:'));
             const compiled = compileOk !== undefined || trace.some((line) => line.startsWith('compiling '));
-            const payload = {
+            const payload: CollabFsTsCompileIssue = {
                 direction: 'fs-to-browser',
                 operation,
                 path,
@@ -887,8 +915,10 @@ export class CollabFileSystemSync {
             const shouldWarn = !payload.modelLoaded || payload.hasError || !payload.prodJSLen || !payload.cacheVersion || !payload.cacheSaved;
             const label = shouldWarn ? '[collab-fs] push TS compilacao incompleta' : '[collab-fs] push TS compilado';
             (shouldWarn ? console.warn : console.info)(label, payload);
+            return payload;
         } catch (err) {
             console.warn('[collab-fs] push TS erro ao gerar log de compilacao', { path, err });
+            return undefined;
         }
     }
 
