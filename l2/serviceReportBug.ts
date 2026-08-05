@@ -146,15 +146,15 @@ function safeText(args: unknown[]): string {
 
 function installConsoleInterceptor(): void {
     const methods = ['log', 'info', 'warn', 'error', 'debug', 'trace', 'dir', 'table', 'assert', 'count', 'group', 'groupCollapsed'];
-    methods.forEach((method) => {
+   /* methods.forEach((method) => {
         const c = console as any;
         if (typeof c[method] !== 'function') return;
         const original = c[method].bind(console);
         c[method] = (...args: unknown[]) => {
-            try { pushCapped(consoleBuffer, { ts: nowIso(), level: method, text: safeText(args) }, CONSOLE_CAP); } catch { /* never break console */ }
+            try { pushCapped(consoleBuffer, { ts: nowIso(), level: method, text: safeText(args) }, CONSOLE_CAP); } catch { }
             original(...args);
         };
-    });
+    });*/
 }
 
 function installNetworkInterceptor(): void {
