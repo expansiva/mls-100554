@@ -282,6 +282,7 @@ export class CollabInit extends LitElement {
      */
     private async setTokensCss(): Promise<void> {
 
+    
         if ((window as any).traceLifeCycle) console.info('setting: tokens');
         try {
             const module = await import('/_102027_/l2/designSystemBase.js')
@@ -294,8 +295,8 @@ export class CollabInit extends LitElement {
             style.id = 'collab-tokens';
 
             const styleMessages = document.createElement('style');
-            style.textContent = tokensMessages;
-            style.id = 'collab-messages-tokens';
+            styleMessages.textContent = tokensMessages;
+            styleMessages.id = 'collab-messages-tokens';
 
             document.head.appendChild(style);
             document.head.appendChild(styleMessages);
