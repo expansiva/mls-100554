@@ -284,13 +284,22 @@ export class CollabInit extends LitElement {
 
         if ((window as any).traceLifeCycle) console.info('setting: tokens');
         try {
-            const module = await import('/_102027_/l2/designSystemBase.js');
+            const module = await import('/_102027_/l2/designSystemBase.js')
             if (!module || !module.getTokensCss || typeof module.getTokensCss !== 'function') return;
             const tokensCss = await module.getTokensCss(this.baseProject, 'Default');
+            const tokensMessages = await module.getTokensCss(102025, 'Default');
+
             const style = document.createElement('style');
             style.textContent = tokensCss;
             style.id = 'collab-tokens';
+
+            const styleMessages = document.createElement('style');
+            style.textContent = tokensMessages;
+            style.id = 'collab-messages-tokens';
+
             document.head.appendChild(style);
+            document.head.appendChild(styleMessages);
+
         } catch (err: any) {
             console.error('Error on listen initCoachMark' + err.message)
         }
