@@ -699,7 +699,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
         style.textContent = `
             .collab-fs-detail-page {
                 box-sizing: border-box;
-                color: var(--text-primary-color, inherit);
+                color: var(--text-default, inherit);
                 height: 100%;
                 overflow: auto;
             }
@@ -710,7 +710,7 @@ export class ServiceCollabFileSystem100554 extends ServiceBase {
             }
             .collab-fs-detail-meta,
             .collab-fs-muted {
-                color: var(--text-primary-color-lighter, #8b949e);
+                color: var(--text-muted, #8b949e);
                 font-size: 0.8rem;
             }
             .collab-fs-detail-actions {

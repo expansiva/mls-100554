@@ -12,7 +12,7 @@ collab-org-teams-100554 {
         justify-content: center;
         gap: 12px;
         padding: 48px 24px;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         font-size: @font-size-16;
     }
 
@@ -20,8 +20,8 @@ collab-org-teams-100554 {
         display: inline-block;
         width: 20px;
         height: 20px;
-        border: 3px solid @grey-color;
-        border-top-color: @active-color;
+        border: 3px solid @border-subtle;
+        border-top-color: @selected-border;
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
     }
@@ -37,8 +37,8 @@ collab-org-teams-100554 {
     }
 
     .feedback.error {
-        color: @error-color;
-        background-color: @grey-color-lighter;
+        color: @status-error-text;
+        background-color: @surface-alt-bg;
     }
 
     .teams-root {
@@ -58,17 +58,17 @@ collab-org-teams-100554 {
 
     .page-title {
         font-size: @font-size-24;
-        color: @text-primary-color;
+        color: @text-default;
         margin: 0;
     }
 
     /* ── New Team Form ── */
 
     .new-team-form-wrapper {
-        border: 1px solid @grey-color-dark;
+        border: 1px solid @border-default;
         border-radius: 4px;
         padding: 20px;
-        background-color: @bg-secondary-color-lighter;
+        background-color: @surface-alt-bg;
     }
 
     .new-team-form {
@@ -85,15 +85,15 @@ collab-org-teams-100554 {
 
     .form-group label {
         font-size: @font-size-16;
-        color: @text-primary-color;
+        color: @text-default;
     }
 
     .form-group input {
         font-family: @font-family-primary;
         font-size: @font-size-16;
-        color: @text-primary-color;
-        background-color: @bg-primary-color;
-        border: 1px solid @grey-color-dark;
+        color: @text-default;
+        background-color: @surface-bg;
+        border: 1px solid @border-default;
         border-radius: 4px;
         padding: 8px 12px;
         box-sizing: border-box;
@@ -102,12 +102,12 @@ collab-org-teams-100554 {
 
     .form-group input:focus {
         outline: none;
-        border-color: @active-color;
+        border-color: @selected-border;
     }
 
     .form-group input:disabled {
-        background-color: @bg-primary-color-disabled;
-        color: @text-primary-color-disabled;
+        background-color: @surface-bg-disabled;
+        color: @text-default-disabled;
         cursor: not-allowed;
     }
 
@@ -123,7 +123,7 @@ collab-org-teams-100554 {
         padding: 8px 20px;
         font-family: @font-family-primary;
         font-size: @font-size-16;
-        background-color: @active-color;
+        background-color: @button-primary-bg;
         color: #fff;
         border: none;
         border-radius: 4px;
@@ -131,11 +131,11 @@ collab-org-teams-100554 {
     }
 
     .btn-primary:hover:not(:disabled) {
-        background-color: @active-color-hover;
+        background-color: @button-primary-bg-hover;
     }
 
     .btn-primary:disabled {
-        background-color: @active-color-disabled;
+        background-color: @button-primary-bg-disabled;
         cursor: not-allowed;
     }
 
@@ -144,18 +144,18 @@ collab-org-teams-100554 {
         font-family: @font-family-primary;
         font-size: @font-size-16;
         background-color: transparent;
-        color: @text-primary-color;
-        border: 1px solid @grey-color-dark;
+        color: @text-default;
+        border: 1px solid @border-default;
         border-radius: 4px;
         cursor: pointer;
     }
 
     .btn-secondary:hover:not(:disabled) {
-        background-color: @bg-primary-color-hover;
+        background-color: @surface-bg-hover;
     }
 
     .btn-secondary:disabled {
-        color: @text-primary-color-disabled;
+        color: @text-default-disabled;
         cursor: not-allowed;
     }
 
@@ -172,21 +172,21 @@ collab-org-teams-100554 {
     }
 
     .teams-table thead tr {
-        background-color: @bg-secondary-color-lighter;
-        border-bottom: 2px solid @grey-color-dark;
+        background-color: @surface-alt-bg;
+        border-bottom: 2px solid @border-default;
     }
 
     .teams-table th {
         text-align: left;
         padding: 10px 14px;
         font-size: @font-size-16;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
     }
 
     .teams-table td {
         padding: 10px 14px;
-        border-bottom: 1px solid @grey-color;
-        color: @text-primary-color;
+        border-bottom: 1px solid @border-subtle;
+        color: @text-default;
         vertical-align: middle;
     }
 
@@ -196,21 +196,21 @@ collab-org-teams-100554 {
 
     .expand-row td {
         padding: 0 0 1px 0;
-        border-bottom: 1px solid @grey-color;
-        background-color: @bg-secondary-color-lighter;
+        border-bottom: 1px solid @border-subtle;
+        background-color: @surface-alt-bg;
     }
 
     .btn-expand {
         background: none;
         border: none;
         cursor: pointer;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         font-size: @font-size-12;
         padding: 4px 6px;
     }
 
     .btn-expand:hover {
-        color: @text-primary-color;
+        color: @text-default;
     }
 
     .td-name {
@@ -224,25 +224,25 @@ collab-org-teams-100554 {
     }
 
     .auth-badge.auth-admin {
-        background-color: @active-color;
+        background-color: @button-primary-bg;
         color: #fff;
     }
 
     .auth-badge.auth-write {
-        background-color: @success-color;
+        background-color: @status-success-text;
         color: #fff;
     }
 
     .auth-badge.auth-read {
-        background-color: @grey-color-dark;
-        color: @text-primary-color;
+        background-color: @border-default;
+        color: @text-default;
     }
 
     .btn-link {
         background: none;
         border: none;
         cursor: pointer;
-        color: @link-color;
+        color: @link-text;
         font-family: @font-family-primary;
         font-size: @font-size-16;
         padding: 0;
@@ -250,12 +250,12 @@ collab-org-teams-100554 {
     }
 
     .btn-link:hover {
-        color: @link-color-hover;
+        color: @link-text-hover;
     }
 
     .no-teams {
         font-size: @font-size-16;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         margin: 0;
     }
 

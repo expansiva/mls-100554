@@ -33,7 +33,7 @@ collab-org-team-card-100554 {
     }
 
     .member-item:hover {
-        background-color: @bg-primary-color-hover;
+        background-color: @surface-bg-hover;
     }
 
     .member-info {
@@ -51,12 +51,12 @@ collab-org-team-card-100554 {
 
     .member-name {
         font-size: @font-size-16;
-        color: @text-primary-color;
+        color: @text-default;
     }
 
     .no-members {
         font-size: @font-size-16;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         padding: 8px 0;
     }
 
@@ -70,7 +70,7 @@ collab-org-team-card-100554 {
 
     .confirm-label {
         font-size: @font-size-12;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
     }
 
     /* ── Add section ── */
@@ -85,16 +85,16 @@ collab-org-team-card-100554 {
         cursor: pointer;
         font-family: @font-family-primary;
         font-size: @font-size-16;
-        color: @link-color;
+        color: @link-text;
         padding: 0;
     }
 
     .btn-add-toggle:hover:not(:disabled) {
-        color: @link-color-hover;
+        color: @link-text-hover;
     }
 
     .btn-add-toggle:disabled {
-        color: @link-color-disabled;
+        color: @link-text-disabled;
         cursor: not-allowed;
     }
 
@@ -107,9 +107,9 @@ collab-org-team-card-100554 {
     .add-input {
         font-family: @font-family-primary;
         font-size: @font-size-16;
-        color: @text-primary-color;
-        background-color: @bg-primary-color;
-        border: 1px solid @grey-color-dark;
+        color: @text-default;
+        background-color: @surface-bg;
+        border: 1px solid @border-default;
         border-radius: 4px;
         padding: 6px 10px;
         flex: 1;
@@ -118,12 +118,12 @@ collab-org-team-card-100554 {
 
     .add-input:focus {
         outline: none;
-        border-color: @active-color;
+        border-color: @selected-border;
     }
 
     .add-input:disabled {
-        background-color: @bg-primary-color-disabled;
-        color: @text-primary-color-disabled;
+        background-color: @surface-bg-disabled;
+        color: @text-default-disabled;
         cursor: not-allowed;
     }
 
@@ -133,7 +133,7 @@ collab-org-team-card-100554 {
         padding: 6px 14px;
         font-family: @font-family-primary;
         font-size: @font-size-16;
-        background-color: @active-color;
+        background-color: @button-primary-bg;
         color: #fff;
         border: none;
         border-radius: 4px;
@@ -142,11 +142,11 @@ collab-org-team-card-100554 {
     }
 
     .btn-primary:hover:not(:disabled) {
-        background-color: @active-color-hover;
+        background-color: @button-primary-bg-hover;
     }
 
     .btn-primary:disabled {
-        background-color: @active-color-disabled;
+        background-color: @button-primary-bg-disabled;
         cursor: not-allowed;
     }
 
@@ -155,22 +155,22 @@ collab-org-team-card-100554 {
         font-family: @font-family-primary;
         font-size: @font-size-16;
         background-color: transparent;
-        color: @text-primary-color;
-        border: 1px solid @grey-color-dark;
+        color: @text-default;
+        border: 1px solid @border-default;
         border-radius: 4px;
         cursor: pointer;
         white-space: nowrap;
     }
 
     .btn-secondary:hover {
-        background-color: @bg-primary-color-hover;
+        background-color: @surface-bg-hover;
     }
 
     .btn-danger {
         padding: 6px 14px;
         font-family: @font-family-primary;
         font-size: @font-size-16;
-        background-color: @error-color;
+        background-color: @button-danger-bg;
         color: #fff;
         border: none;
         border-radius: 4px;
@@ -179,11 +179,11 @@ collab-org-team-card-100554 {
     }
 
     .btn-danger:hover:not(:disabled) {
-        background-color: @error-color-hover;
+        background-color: @button-danger-bg-hover;
     }
 
     .btn-danger:disabled {
-        background-color: @error-color-disabled;
+        background-color: @button-danger-bg-disabled;
         cursor: not-allowed;
     }
 
@@ -193,13 +193,13 @@ collab-org-team-card-100554 {
         cursor: pointer;
         font-size: @font-size-16;
         padding: 4px 6px;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         border-radius: 4px;
         line-height: 1;
     }
 
     .btn-remove:hover:not(:disabled) {
-        background-color: @error-color;
+        background-color: @button-danger-bg;
         color: #fff;
     }
 

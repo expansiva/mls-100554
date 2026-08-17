@@ -82,7 +82,7 @@ export class AgentTester extends CollabLitElement {
     Running...
 </div>
 
-<button @click=${this.openInMessage} class="action-btn" style=" width:300px; margin: 1rem auto; color: var(--bg-primary-color); background: var(--active-color);">Open Message</button>
+<button @click=${this.openInMessage} class="action-btn" style=" width:300px; margin: 1rem auto; color: var(--button-primary-text); background: var(--button-primary-bg);">Open Message</button>
 </div>
 </div>
 <div class="actions">
@@ -272,7 +272,7 @@ draggable="true"
         if (typeof this.result !== 'string') return this.renderCompare();
 
         const aux = this.inError ? 'color:red' : '';
-        return html`<button @click=${this.openInMessage} class="action-btn" style=" width:calc(100% - 50px); margin: 1rem auto; color: var(--bg-primary-color); background: var(--active-color);">Open Details</button> <pre class="result" style="${aux}"> ${this.escape(this.result)} </pre> `
+        return html`<button @click=${this.openInMessage} class="action-btn" style=" width:calc(100% - 50px); margin: 1rem auto; color: var(--button-primary-text); background: var(--button-primary-bg);">Open Details</button> <pre class="result" style="${aux}"> ${this.escape(this.result)} </pre> `
     }
 
     renderCompare() {

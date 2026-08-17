@@ -9,8 +9,8 @@ service-explore-projects-100554 {
     font-size: @font-size-16;
     font-weight: @font-weight-normal;
     line-height: 1.5;
-    color: @text-primary-color;
-    background-color: @bg-primary-color;
+    color: @text-default;
+    background-color: @surface-bg;
 
     input,
     select,
@@ -28,8 +28,8 @@ service-explore-projects-100554 {
     }
 
     svg{
-        color: @text-primary-color;
-        fill: @text-primary-color;
+        color: @text-default;
+        fill: @text-default;
     }
 
     button {
@@ -46,16 +46,16 @@ service-explore-projects-100554 {
         padding: 0.5rem;
         cursor: pointer;
         background: none;
-        color: @active-color;
+        color: @selected-text;
 
         &:hover {
-            color: @active-color-hover;
+            color: @selected-text-hover;
             text-decoration: underline;
         }
     }
 
     .linkItem {
-        color: @link-color-hover;
+        color: @link-text-hover;
         cursor: pointer;
     }
 
@@ -74,8 +74,8 @@ service-explore-projects-100554 {
         .serviceListTitle {
             padding: 0.3em 1em;
             list-style-type: none;
-            background:@grey-color ;
-            color: @text-primary-color; 
+            background:@surface-alt-bg ;
+            color: @text-default; 
             font-weight: 600;
             cursor: default;
             display:flex; 
@@ -124,11 +124,11 @@ service-explore-projects-100554 {
 
                 &:hover,
                 &.selected {
-                    background: @bg-primary-color-lighter-disabled;
+                    background: @surface-bg-disabled;
 
                     .linkItem {
                         font-weight: @font-weight-bolder;
-                        color: @link-color-hover;
+                        color: @link-text-hover;
                     }
                 }
 
@@ -154,7 +154,7 @@ service-explore-projects-100554 {
                 }
 
                 .linkItem {
-                    color: @active-color;
+                    color: @selected-text;
                     cursor: pointer;
                 }
 
@@ -166,7 +166,7 @@ service-explore-projects-100554 {
     }
 
     #button-see-project {
-        background-color: @active-color;
+        background-color: @button-primary-bg;
         color: #fff;
     }
 

@@ -20,7 +20,7 @@ collab-org-invite-user-100554 {
 
     .form-group label {
         font-size: @font-size-16;
-        color: @text-primary-color;
+        color: @text-default;
     }
 
     .form-group input,
@@ -28,9 +28,9 @@ collab-org-invite-user-100554 {
     .form-group textarea {
         font-family: @font-family-primary;
         font-size: @font-size-16;
-        color: @text-primary-color;
-        background-color: @bg-primary-color;
-        border: 1px solid @grey-color-dark;
+        color: @text-default;
+        background-color: @surface-bg;
+        border: 1px solid @border-default;
         border-radius: 4px;
         padding: 8px 12px;
         box-sizing: border-box;
@@ -40,21 +40,21 @@ collab-org-invite-user-100554 {
     .form-group input:hover,
     .form-group select:hover,
     .form-group textarea:hover {
-        border-color: @grey-color-darker;
+        border-color: @border-default;
     }
 
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
         outline: none;
-        border-color: @active-color;
+        border-color: @selected-border;
     }
 
     .form-group input:disabled,
     .form-group select:disabled,
     .form-group textarea:disabled {
-        background-color: @bg-primary-color-disabled;
-        color: @text-primary-color-disabled;
+        background-color: @surface-bg-disabled;
+        color: @text-default-disabled;
         cursor: not-allowed;
     }
 
@@ -69,13 +69,13 @@ collab-org-invite-user-100554 {
     }
 
     .feedback.success {
-        color: @success-color;
-        background-color: @grey-color-lighter;
+        color: @status-success-text;
+        background-color: @surface-alt-bg;
     }
 
     .feedback.error {
-        color: @error-color;
-        background-color: @grey-color-lighter;
+        color: @status-error-text;
+        background-color: @surface-alt-bg;
     }
 
     .form-actions {
@@ -87,7 +87,7 @@ collab-org-invite-user-100554 {
         padding: 8px 20px;
         font-family: @font-family-primary;
         font-size: @font-size-16;
-        background-color: @active-color;
+        background-color: @button-primary-bg;
         color: #fff;
         border: none;
         border-radius: 4px;
@@ -95,11 +95,11 @@ collab-org-invite-user-100554 {
     }
 
     .btn-primary:hover:not(:disabled) {
-        background-color: @active-color-hover;
+        background-color: @button-primary-bg-hover;
     }
 
     .btn-primary:disabled {
-        background-color: @active-color-disabled;
+        background-color: @button-primary-bg-disabled;
         cursor: not-allowed;
     }
 

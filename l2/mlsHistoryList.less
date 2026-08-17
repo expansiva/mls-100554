@@ -12,8 +12,8 @@ mls-history-list-100554 {
             line-height: 2em;
 
             summary {
-                border-bottom: 1px solid @grey-color-dark;
-                background: @bg-secondary-color-lighter;
+                border-bottom: 1px solid @border-default;
+                background: @surface-alt-bg;
                 outline: none;
                 user-select: none;
             }
@@ -22,7 +22,7 @@ mls-history-list-100554 {
         .historie-item {
 
             &.active {
-                background: @grey-color-light;
+                background: @surface-alt-bg;
             }
 
             >svg {
@@ -43,12 +43,12 @@ mls-history-list-100554 {
 
             .historie-additions {
                 font-weight: bold;
-                color: @success-color;
+                color: @status-success-text;
             }
 
             .historie-deletions {
                 font-weight: bold;
-                color: @error-color;
+                color: @status-error-text;
             }
 
             img {
@@ -61,7 +61,7 @@ mls-history-list-100554 {
             }
 
             &:hover {
-                background-color: @bg-secondary-color-lighter;
+                background-color: @surface-alt-bg;
             }
 
 

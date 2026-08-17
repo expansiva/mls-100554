@@ -11,8 +11,8 @@ collab-panel-100554 {
     font-size: @font-size-16;
     font-weight: @font-weight-normal;
     line-height: 1.5;
-    color: @text-primary-color;
-    background-color: @bg-primary-color;
+    color: @text-default;
+    background-color: @surface-bg;
 
     details {
         box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
@@ -34,7 +34,7 @@ collab-panel-100554 {
     }
 
     svg {
-        fill: @text-primary-color;
+        fill: @text-default;
     }   
     
     panelicon {
@@ -79,7 +79,7 @@ collab-panel-100554 {
 
         svg{
             width: 22px;
-            fill: @text-primary-color;
+            fill: @text-default;
         }
     }
 
@@ -93,7 +93,7 @@ collab-panel-100554 {
         position: absolute;
         top: 26px;
         left: -1px;
-        background: @error-color;
+        background: @button-danger-bg;
         color: #fff;
         font-size: .7rem;
         padding: .2rem;
@@ -105,11 +105,11 @@ collab-panel-100554 {
     }
 
     collab-panel-item-100554 .loading {
-        background-color: @bg-primary-color;
+        background-color: @surface-bg;
         background: linear-gradient(100deg,
                 rgba(255, 255, 255, 0) 40%,
                 rgba(255, 255, 255, .5) 50%,
-                rgba(255, 255, 255, 0) 60%) @bg-primary-color;
+                rgba(255, 255, 255, 0) 60%) @surface-bg;
                 
         background-size: 200% 100%;
         background-position-x: 180%;

@@ -25,8 +25,8 @@ wc-aux-command-100554 {
         padding: 1rem;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
         border-radius: 5px;
-        background-color: @bg-primary-color;
-        color: @text-primary-color;
+        background-color: @surface-bg;
+        color: @text-default;
         min-width: 150px;
         max-height: 350px;
         width: min-content;
@@ -42,7 +42,7 @@ wc-aux-command-100554 {
         transform: translateX(-50%);
         width: 12px;
         height: 6px;
-        background: @bg-primary-color-darker-disabled;
+        background: @surface-alt-bg-disabled;
         border: 1px solid #cccccc;
         clip-path: polygon(50% 0, 0 100%, 100% 100%);
         box-sizing: border-box;
@@ -78,7 +78,7 @@ wc-aux-command-100554 {
             justify-content: center;
             svg{
                 width: 12px;
-                fill: @text-primary-color;
+                fill: @text-default;
             }
         }
     }
@@ -92,10 +92,10 @@ wc-aux-command-100554 {
     }
 
     li.headergroup{
-        color: @text-primary-color-lighter-disabled;
+        color: @text-muted-disabled;
         font-weight: bold;
         padding-bottom: .5rem;
-        border-bottom: 1px solid @text-primary-color-lighter-disabled;
+        border-bottom: 1px solid @text-muted-disabled;
     }
 
     &.active {

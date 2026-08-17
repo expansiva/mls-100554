@@ -80,7 +80,7 @@ collab-org-projects-100554 {
         justify-content: center;
         gap: 12px;
         padding: 48px 24px;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         font-size: @font-size-16;
     }
 
@@ -88,8 +88,8 @@ collab-org-projects-100554 {
         display: inline-block;
         width: 20px;
         height: 20px;
-        border: 3px solid @grey-color;
-        border-top-color: @active-color;
+        border: 3px solid @border-subtle;
+        border-top-color: @selected-border;
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
     }
@@ -105,13 +105,13 @@ collab-org-projects-100554 {
     }
 
     .feedback.error {
-        color: @error-color;
-        background-color: @grey-color-lighter;
+        color: @status-error-text;
+        background-color: @surface-alt-bg;
     }
 
     .no-results {
         font-size: @font-size-16;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         margin: 0;
     }
 

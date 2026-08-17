@@ -23,10 +23,10 @@ widget-clarification-new-widget-100554 {
     }
 
     button {
-        background-color: @info-color;
+        background-color: @button-primary-bg;
         border-radius: 8px;
         border: none;
-        box-shadow: 0px 1px 3px 0px @grey-color;
+        box-shadow: 0px 1px 3px 0px @border-subtle;
         display: flex;
         flex-direction: row;
         justify-content: center;
@@ -72,23 +72,23 @@ widget-clarification-new-widget-100554 {
 
     .error {
         font-weight: bold;
-        color: @error-color;
+        color: @status-error-text;
     }
 
 
     .cancel {
-        background-color: @warning-color;
+        background-color: @status-warning-text;
         color: white;
         &:hover {
-            background-color: @warning-color-hover;
+            background-color: @status-warning-text-hover;
         }
     }
 
     .continue {
-        background-color: @success-color;
+        background-color: @status-success-text;
         color: white;
             &:hover {
-            background-color: @success-color-hover;
+            background-color: @status-success-text-hover;
         }
     }
                 

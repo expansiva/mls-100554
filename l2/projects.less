@@ -25,7 +25,7 @@ projects-100554 {
     .header h2 {
         font-size: 20px;
         font-weight: 600;
-        color: @text-primary-color;
+        color: @text-default;
         margin: 0;
     }
 
@@ -193,8 +193,8 @@ projects-100554 {
     }
 
     .project-details {
-        background-color: @bg-primary-color;
-        color: @text-primary-color;
+        background-color: @surface-bg;
+        color: @text-default;
         width: 310px;
         padding: 2rem;
         margin: 2rem auto;
@@ -208,7 +208,7 @@ projects-100554 {
         font-size: 1rem;
         cursor: pointer;
         margin-bottom: 1rem;
-        color: @active-color;
+        color: @selected-text;
 
         &:hover {
             text-decoration: underline;
@@ -221,12 +221,12 @@ projects-100554 {
         padding: 0.5rem;
         border: 1px solid #444;
         border-radius: 4px;
-        background-color: @bg-primary-color;
+        background-color: @surface-bg;
     }
 
     .project-details button:not(.back-button) {
-        background: @bg-secondary-color-darker;
-        color: @text-secondary-color;
+        background: @border-default;
+        color: @link-text;
         border: none;
         padding: 0.5rem 1rem;
         margin-top: 0.5rem;

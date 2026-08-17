@@ -4,18 +4,18 @@ plugin-create-project-local-to-driver-100554 {
 
     display: block;
     font-family: @font-family-primary;
-    color: @text-primary-color;
+    color: @text-default;
     font-size: @font-size-16;
 
     .error-msg {
-        color: @error-color;
+        color: @status-error-text;
         font-size: 0.9em;
     }
 
     input[type="text"],
     textarea {
         &.invalid {
-            border-color: @error-color;
+            border-color: @status-error-text;
         }
     }
 
@@ -25,7 +25,7 @@ plugin-create-project-local-to-driver-100554 {
 
 
         .banner {
-            background: @bg-secondary-color-lighter;
+            background: @surface-alt-bg;
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 16px;
@@ -41,8 +41,8 @@ plugin-create-project-local-to-driver-100554 {
             display: flex;
             align-items: center;
             gap: 8px;
-            background: @bg-primary-color;
-            border: 1px solid @grey-color;
+            background: @surface-bg;
+            border: 1px solid @border-subtle;
             border-radius: 8px;
             padding: 8px;
         }
@@ -55,7 +55,7 @@ plugin-create-project-local-to-driver-100554 {
         }
 
         .connected {
-            color: @success-color;
+            color: @status-success-text;
             margin-left: 6px;
             font-size: 0.9em;
         }
@@ -64,30 +64,30 @@ plugin-create-project-local-to-driver-100554 {
             margin-left: 8px;
             font-size: @font-size-12;
             padding: 4px 10px;
-            border: 1px solid @text-secondary-color;
+            border: 1px solid @selected-border;
             border-radius: 6px;
             background: transparent;
-            color: @text-secondary-color;
+            color: @link-text;
             cursor: pointer;
             transition: background-color @transition-normal, color @transition-normal, border-color @transition-normal;
 
             &:hover {
-                background-color: @bg-secondary-color-lighter-hover;
-                border-color: @text-secondary-color-hover;
-                color: @text-secondary-color-hover;
+                background-color: @surface-alt-bg-hover;
+                border-color: @selected-border-hover;
+                color: @link-text-hover;
             }
 
             &:focus {
                 outline: none;
-                border-color: @text-secondary-color-focus;
-                color: @text-secondary-color-focus;
+                border-color: @selected-border-focus;
+                color: @link-text-focus;
             }
 
             &:disabled {
                 opacity: 0.6;
                 cursor: not-allowed;
-                border-color: @text-secondary-color-disabled;
-                color: @text-secondary-color-disabled;
+                border-color: @selected-border-disabled;
+                color: @link-text-disabled;
             }
         }
 
@@ -118,7 +118,7 @@ plugin-create-project-local-to-driver-100554 {
         }
 
         .cancel {
-            background: @bg-secondary-color;
+            background: @surface-alt-bg;
             border: none;
             padding: 6px 12px;
             border-radius: 6px;
@@ -126,7 +126,7 @@ plugin-create-project-local-to-driver-100554 {
         }
 
         .continue {
-            background: @active-color;
+            background: @button-primary-bg;
             color: #fff;
             border: none;
             padding: 6px 12px;
@@ -216,13 +216,13 @@ plugin-create-project-local-to-driver-100554 {
             height: 1rem;
             overflow: hidden;
             font-size: .75rem;
-            background-color: @grey-color-light;
+            background-color: @surface-alt-bg;
             border-radius: .25rem;
             transition: width .6s ease;
             margin-bottom: 1rem;
 
             >div {
-                background-color: @success-color;
+                background-color: @status-success-text;
 
                 &:not(&.finished) {
                     animation: progress-bar-stripes 1s linear infinite;
@@ -231,7 +231,7 @@ plugin-create-project-local-to-driver-100554 {
                 }
 
                 &.error {
-                    background-color: @error-color;
+                    background-color: @button-danger-bg;
                     opacity: .7;
                 }
             }

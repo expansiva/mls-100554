@@ -7,7 +7,7 @@ collab-org-home-100554 {
     justify-content: center;
     font-family: @font-family-primary;
     font-size: @font-size-16;
-    color: @text-primary-color; 
+    color: @text-default; 
     padding-top: 1rem;
 
     .state-loading,
@@ -17,13 +17,13 @@ collab-org-home-100554 {
         justify-content: center;
         gap: 12px;
         padding: 48px 24px;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         font-size: @font-size-16;
     }
 
     .state-error {
         flex-direction: column;
-        color: @error-color;
+        color: @status-error-text;
 
         .error-icon {
             font-size: @font-size-24;
@@ -32,7 +32,7 @@ collab-org-home-100554 {
         button {
             margin-top: 8px;
             padding: 6px 16px;
-            background-color: @active-color;
+            background-color: @button-primary-bg;
             color: #ffffff;
             border: none;
             border-radius: 4px;
@@ -41,11 +41,11 @@ collab-org-home-100554 {
             cursor: pointer;
 
             &:hover {
-                background-color: @active-color-hover;
+                background-color: @button-primary-bg-hover;
             }
 
             &:focus {
-                background-color: @active-color-focus;
+                background-color: @button-primary-bg-focus;
                 outline: none;
             }
         }
@@ -55,8 +55,8 @@ collab-org-home-100554 {
         display: inline-block;
         width: 20px;
         height: 20px;
-        border: 3px solid @grey-color;
-        border-top-color: @active-color;
+        border: 3px solid @border-subtle;
+        border-top-color: @selected-border;
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
     }
@@ -83,7 +83,7 @@ collab-org-home-100554 {
         margin: 0;
         font-size: @font-size-24;
         font-family: @font-family-primary;
-        color: @text-primary-color-darker;
+        color: @text-strong;
         display: flex;
         justify-content: center;
         font-weight: 700;
@@ -94,7 +94,7 @@ collab-org-home-100554 {
         justify-content: center;
         margin: 0;
         font-size: @font-size-16;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
     }
 
     .org-counters {
@@ -108,8 +108,8 @@ collab-org-home-100554 {
         flex-direction: column;
         align-items: center;
         gap: 4px;
-        background-color: @bg-primary-color;
-        border: 1px solid @grey-color-dark;
+        background-color: @surface-bg;
+        border: 1px solid @border-default;
         border-radius: 8px;
         padding: 20px 32px;
         min-width: 120px;
@@ -118,12 +118,12 @@ collab-org-home-100554 {
     .counter-value {
         font-size: @font-size-24;
         font-weight: 700;
-        color: @active-color;
+        color: @selected-text;
     }
 
     .counter-label {
         font-size: @font-size-12;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }

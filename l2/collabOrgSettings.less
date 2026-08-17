@@ -5,7 +5,7 @@ collab-org-settings-100554 {
     display: block;
     font-family: @font-family-primary;
     font-size: @font-size-16;
-    color: @text-primary-color;
+    color: @text-default;
 
     // ── Loading ────────────────────────────────────────────────────────────────
 
@@ -15,7 +15,7 @@ collab-org-settings-100554 {
         justify-content: center;
         gap: 12px;
         padding: 48px 24px;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         font-size: @font-size-16;
     }
 
@@ -23,8 +23,8 @@ collab-org-settings-100554 {
         display: inline-block;
         width: 20px;
         height: 20px;
-        border: 3px solid @grey-color;
-        border-top-color: @active-color;
+        border: 3px solid @border-subtle;
+        border-top-color: @selected-border;
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
     }
@@ -48,7 +48,7 @@ collab-org-settings-100554 {
         margin: 0;
         font-size: @font-size-24;
         font-weight: 700;
-        color: @text-primary-color-darker;
+        color: @text-strong;
     }
 
     // ── Form ──────────────────────────────────────────────────────────────────
@@ -67,12 +67,12 @@ collab-org-settings-100554 {
         label {
             font-size: @font-size-16;
             font-weight: 600;
-            color: @text-primary-color;
+            color: @text-default;
 
             .hint {
                 font-weight: 400;
                 font-size: @font-size-12;
-                color: @text-primary-color-lighter;
+                color: @text-muted;
                 margin-left: 4px;
             }
         }
@@ -81,9 +81,9 @@ collab-org-settings-100554 {
         textarea {
             font-family: @font-family-primary;
             font-size: @font-size-16;
-            color: @text-primary-color;
-            background-color: @bg-primary-color;
-            border: 1px solid @grey-color-dark;
+            color: @text-default;
+            background-color: @surface-bg;
+            border: 1px solid @border-default;
             border-radius: 4px;
             padding: 8px 12px;
             outline: none;
@@ -91,11 +91,11 @@ collab-org-settings-100554 {
             resize: vertical;
 
             &:hover {
-                border-color: @grey-color-darker;
+                border-color: @border-default;
             }
 
             &:focus {
-                border-color: @active-color;
+                border-color: @selected-border;
             }
         }
     }
@@ -108,15 +108,15 @@ collab-org-settings-100554 {
         font-size: @font-size-16;
 
         &.success {
-            background-color: @bg-secondary-color-lighter;
-            color: @success-color;
-            border: 1px solid @success-color;
+            background-color: @surface-alt-bg;
+            color: @status-success-text;
+            border: 1px solid @status-success-text;
         }
 
         &.error {
-            background-color: @bg-secondary-color-lighter;
-            color: @error-color;
-            border: 1px solid @error-color;
+            background-color: @surface-alt-bg;
+            color: @status-error-text;
+            border: 1px solid @status-error-text;
         }
     }
 
@@ -131,7 +131,7 @@ collab-org-settings-100554 {
         font-family: @font-family-primary;
         font-size: @font-size-16;
         color: #ffffff;
-        background-color: @active-color;
+        background-color: @button-primary-bg;
         border: none;
         border-radius: 4px;
         padding: 8px 24px;
@@ -139,16 +139,16 @@ collab-org-settings-100554 {
         transition: background-color 0.15s ease;
 
         &:hover:not(:disabled) {
-            background-color: @active-color-hover;
+            background-color: @button-primary-bg-hover;
         }
 
         &:focus:not(:disabled) {
-            background-color: @active-color-focus;
+            background-color: @button-primary-bg-focus;
             outline: none;
         }
 
         &:disabled {
-            background-color: @active-color-disabled;
+            background-color: @button-primary-bg-disabled;
             cursor: not-allowed;
         }
     }
@@ -159,7 +159,7 @@ collab-org-settings-100554 {
         display: flex;
         flex-direction: column;
         gap: 0;
-        border: 1px solid @error-color;
+        border: 1px solid @status-error-text;
         border-radius: 6px;
         overflow: hidden;
     }
@@ -169,9 +169,9 @@ collab-org-settings-100554 {
         padding: 12px 16px;
         font-size: @font-size-16;
         font-weight: 700;
-        color: @error-color;
-        background-color: @bg-secondary-color-lighter;
-        border-bottom: 1px solid @error-color;
+        color: @status-error-text;
+        background-color: @surface-alt-bg;
+        border-bottom: 1px solid @status-error-text;
     }
 
     .danger-item {
@@ -180,7 +180,7 @@ collab-org-settings-100554 {
         justify-content: space-between;
         gap: 16px;
         padding: 16px;
-        border-bottom: 1px solid @grey-color;
+        border-bottom: 1px solid @border-subtle;
 
         &:last-child {
             border-bottom: none;
@@ -194,13 +194,13 @@ collab-org-settings-100554 {
 
         strong {
             font-size: @font-size-16;
-            color: @text-primary-color-darker;
+            color: @text-strong;
         }
 
         p {
             margin: 0;
             font-size: @font-size-12;
-            color: @text-primary-color-lighter;
+            color: @text-muted;
         }
     }
 
@@ -208,7 +208,7 @@ collab-org-settings-100554 {
         font-family: @font-family-primary;
         font-size: @font-size-16;
         color: #ffffff;
-        background-color: @warning-color;
+        background-color: @status-warning-text;
         border: none;
         border-radius: 4px;
         padding: 6px 16px;
@@ -217,11 +217,11 @@ collab-org-settings-100554 {
         transition: background-color 0.15s ease;
 
         &:hover {
-            background-color: @warning-color-hover;
+            background-color: @status-warning-text-hover;
         }
 
         &:focus {
-            background-color: @warning-color-focus;
+            background-color: @status-warning-text-focus;
             outline: none;
         }
     }
@@ -230,7 +230,7 @@ collab-org-settings-100554 {
         font-family: @font-family-primary;
         font-size: @font-size-16;
         color: #ffffff;
-        background-color: @error-color;
+        background-color: @button-danger-bg;
         border: none;
         border-radius: 4px;
         padding: 6px 16px;
@@ -239,11 +239,11 @@ collab-org-settings-100554 {
         transition: background-color 0.15s ease;
 
         &:hover {
-            background-color: @error-color-hover;
+            background-color: @button-danger-bg-hover;
         }
 
         &:focus {
-            background-color: @error-color-focus;
+            background-color: @button-danger-bg-focus;
             outline: none;
         }
     }

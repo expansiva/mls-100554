@@ -4,8 +4,8 @@ service-collab-file-system-100554 {
     display: block;
     height: 100%;
     overflow: auto;
-    color: @text-primary-color;
-    background: @bg-primary-color;
+    color: @text-default;
+    background: @surface-bg;
 
     .collab-fs-shell {
         box-sizing: border-box;
@@ -21,7 +21,7 @@ service-collab-file-system-100554 {
         align-items: flex-start;
         justify-content: space-between;
         gap: 0.75rem;
-        border-bottom: 1px solid @bg-primary-color-focus;
+        border-bottom: 1px solid @border-subtle-focus;
         padding-bottom: 0.75rem;
     }
 
@@ -45,7 +45,7 @@ service-collab-file-system-100554 {
 
     .collab-fs-header p,
     .collab-fs-muted {
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         font-size: @font-size-12;
     }
 
@@ -59,34 +59,34 @@ service-collab-file-system-100554 {
         display: flex;
         flex-direction: column;
         gap: 0.2rem;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         font-size: @font-size-12;
     }
 
     .collab-fs-project-picker select {
         min-width: 7rem;
-        border: 1px solid @bg-primary-color-focus;
+        border: 1px solid @border-subtle-focus;
         border-radius: 4px;
         padding: 0.25rem 0.45rem;
-        background: @bg-secondary-color;
-        color: @text-primary-color;
+        background: @surface-alt-bg;
+        color: @text-default;
         font-size: @font-size-12;
     }
 
     // ---- buttons ----
     button {
         min-height: 2rem;
-        border: 1px solid @bg-primary-color-focus;
+        border: 1px solid @border-subtle-focus;
         border-radius: 4px;
         padding: 0.35rem 0.6rem;
-        background: @bg-secondary-color;
-        color: @text-primary-color;
+        background: @surface-alt-bg;
+        color: @text-default;
         cursor: pointer;
         font: inherit;
     }
 
     button:hover {
-        border-color: @text-primary-color-lighter;
+        border-color: @text-muted;
     }
 
     button:disabled {
@@ -114,7 +114,7 @@ service-collab-file-system-100554 {
         min-height: auto;
         border: none;
         background: transparent;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         padding: 0.15rem 0.3rem;
     }
 
@@ -131,7 +131,7 @@ service-collab-file-system-100554 {
     .collab-fs-firstrun-icon {
         font-family: 'Font Awesome 6 Pro', 'FontAwesome';
         font-size: 1.8rem;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
     }
 
     .collab-fs-firstrun-title {
@@ -146,7 +146,7 @@ service-collab-file-system-100554 {
 
     // ---- connection ----
     .collab-fs-connection {
-        background: @bg-secondary-color;
+        background: @surface-alt-bg;
         border-radius: 6px;
         padding: 0.5rem 0.65rem;
     }
@@ -174,12 +174,12 @@ service-collab-file-system-100554 {
     }
 
     .collab-fs-connection-text .arrow {
-        color: @text-primary-color-lighter;
+        color: @text-muted;
     }
 
     .collab-fs-details-panel {
         margin-top: 0.6rem;
-        border-top: 1px solid @bg-primary-color-focus;
+        border-top: 1px solid @border-subtle-focus;
         padding-top: 0.6rem;
     }
 
@@ -196,7 +196,7 @@ service-collab-file-system-100554 {
     }
 
     .collab-fs-details-panel dt {
-        color: @text-primary-color-lighter;
+        color: @text-muted;
     }
 
     .collab-fs-details-panel dd {
@@ -228,7 +228,7 @@ service-collab-file-system-100554 {
         align-items: center;
         justify-content: space-between;
         gap: 0.5rem;
-        background: @bg-secondary-color;
+        background: @surface-alt-bg;
         border-radius: 6px;
         padding: 0.65rem 0.75rem;
         font-size: @font-size-12;
@@ -246,7 +246,7 @@ service-collab-file-system-100554 {
         display: flex;
         flex-direction: column;
         align-items: center;
-        background: @bg-secondary-color;
+        background: @surface-alt-bg;
         border-radius: 6px;
         padding: 0.4rem 0.25rem;
     }
@@ -258,7 +258,7 @@ service-collab-file-system-100554 {
 
     .collab-fs-metrics .lbl {
         font-size: @font-size-12;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
     }
 
     .collab-fs-metrics .rescan {
@@ -279,7 +279,7 @@ service-collab-file-system-100554 {
     .collab-fs-group-title {
         margin: 0.65rem 0 0.25rem;
         font-size: @font-size-12;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
     }
 
     .collab-fs-change {
@@ -296,7 +296,7 @@ service-collab-file-system-100554 {
     }
 
     .collab-fs-change.selected {
-        background: @bg-secondary-color;
+        background: @surface-alt-bg;
     }
 
     .collab-fs-change .path {
@@ -361,8 +361,8 @@ service-collab-file-system-100554 {
 
     // ---- confirm panel ----
     .collab-fs-confirm {
-        background: @bg-secondary-color;
-        border: 1px solid @bg-primary-color-focus;
+        background: @surface-alt-bg;
+        border: 1px solid @border-subtle-focus;
         border-radius: 6px;
         padding: 0.75rem;
     }
@@ -389,7 +389,7 @@ service-collab-file-system-100554 {
     // ---- notice ----
     .collab-fs-notice {
         border-left: 3px solid #1f6feb;
-        background: @bg-secondary-color;
+        background: @surface-alt-bg;
         padding: 0.5rem 0.65rem;
         font-size: @font-size-12;
     }

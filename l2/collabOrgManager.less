@@ -23,8 +23,8 @@ collab-org-manager-100554 {
         flex-direction: column;
         width: 220px;
         min-height: 100%;
-        background-color: @bg-secondary-color-lighter;
-        border-right: 1px solid @grey-color-dark;
+        background-color: @surface-alt-bg;
+        border-right: 1px solid @border-default;
         padding: 8px 0;
         transition: width 0.25s ease;
         overflow: hidden;
@@ -37,7 +37,7 @@ collab-org-manager-100554 {
         gap: 12px;
         padding: 10px 16px;
         cursor: pointer;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         border-radius: 6px;
         margin: 2px 8px;
         position: relative;
@@ -45,30 +45,30 @@ collab-org-manager-100554 {
         transition: background-color 0.15s ease, color 0.15s ease;
 
         &:hover {
-            background-color: @bg-secondary-color-lighter-hover;
-            color: @text-primary-color-lighter-hover;
+            background-color: @surface-alt-bg-hover;
+            color: @text-muted-hover;
         }
 
         &:focus {
-            background-color: @bg-secondary-color-lighter-focus;
-            color: @text-primary-color-lighter-focus;
+            background-color: @surface-alt-bg-focus;
+            color: @text-muted-focus;
         }
 
         &.active {
-            background-color: @bg-primary-color-focus;
-            color: @active-color;
+            background-color: @surface-bg-focus;
+            color: @selected-text;
 
             .menu-icon svg {
-                fill: @active-color;
+                fill: @selected-text;
             }
 
             .menu-label {
-                color: @active-color;
+                color: @selected-text;
                 font-weight: 600;
             }
 
             .menu-arrow {
-                color: @active-color;
+                color: @selected-text;
                 opacity: 1;
             }
         }
@@ -94,13 +94,13 @@ collab-org-manager-100554 {
         white-space: nowrap;
         overflow: hidden;
         font-size: @font-size-16;
-        color: @text-primary-color;
+        color: @text-default;
         transition: opacity 0.15s ease;
     }
 
     .menu-arrow {
         font-size: @font-size-16;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         opacity: 0.4;
         flex-shrink: 0;
     }
@@ -108,7 +108,7 @@ collab-org-manager-100554 {
     .content {
         flex: 1;
         overflow: auto;
-        background-color: @bg-primary-color;
+        background-color: @surface-bg;
         padding: 24px;
     }
 
@@ -117,7 +117,7 @@ collab-org-manager-100554 {
         align-items: center;
         justify-content: center;
         height: 100%;
-        color: @text-primary-color-lighter;
+        color: @text-muted;
         font-size: @font-size-20;
     }
 
@@ -139,8 +139,8 @@ collab-org-manager-100554 {
                 left: 60px;
                 top: 50%;
                 transform: translateY(-50%);
-                background-color: @bg-secondary-color-darker;
-                color: @text-primary-color-darker;
+                background-color: @border-default;
+                color: @text-strong;
                 padding: 4px 10px;
                 border-radius: 4px;
                 white-space: nowrap;

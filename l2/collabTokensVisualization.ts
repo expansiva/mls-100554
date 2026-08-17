@@ -32,12 +32,12 @@ export class CollabTokensVisuzalization100554 extends StateLitElement {
                             })}
                         </div>
                         <br>
-                        <div style="border:1px solid var(--text-primary-color); padding:1rem; background:var(--bg-primary-color);">
+                        <div style="border:1px solid var(--text-default); padding:1rem; background:var(--surface-bg);">
                             Hello world;
                         </div>
                         <br>
                         
-                        <div style="border:1px solid var(--text-primary-color); padding:1rem; background:var(--bg-secondary-color);">
+                        <div style="border:1px solid var(--text-default); padding:1rem; background:var(--surface-alt-bg);">
                             Hello world;
                         </div>
 

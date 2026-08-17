@@ -22,10 +22,10 @@ collab-nav4-menu-100554 {
 			cursor: pointer;
 			padding: 6px 12px;
 			background: var(--collab-nav-bg-3);
-			color: @text-primary-color;
+			color: @text-default;
 			transition: all @transition-slow;
 			border: none;
-			border-bottom: 1px solid @bg-secondary-color;
+			border-bottom: 1px solid @border-default;
 			// box-shadow: none;
 			position: relative;
 			z-index: 0;
@@ -36,7 +36,7 @@ collab-nav4-menu-100554 {
 
 
 			&:hover {
-				background: @bg-secondary-color-lighter;
+				background: @surface-alt-bg;
 			}
 
 			.arrow {
@@ -45,9 +45,9 @@ collab-nav4-menu-100554 {
 			}
 
 			&.active {
-				border: 1px solid @grey-color;
+				border: 1px solid @border-subtle;
 				border-bottom: none;
-				background: @bg-secondary-color-lighter;
+				background: @surface-alt-bg;
 				font-weight: @font-weight-bold;
 			}
 
@@ -67,13 +67,13 @@ collab-nav4-menu-100554 {
 				margin-left: 4px;
 				background: transparent;
 				border: none;
-				color: @text-primary-color-lighter;
+				color: @text-muted;
 				cursor: pointer;
 				font-size: @font-size-16;
 				transition: color @transition-slow;
 
 				&:hover {
-					color: @error-color;
+					color: @status-error-text;
 				}
 			}
 
@@ -116,7 +116,7 @@ collab-nav4-menu-100554 {
 		background: var(--collab-nav-bg-3);
 
 		svg{
-			fill: @text-primary-color;
+			fill: @text-default;
 		}
 	}
 
@@ -136,7 +136,7 @@ collab-nav4-menu-100554 {
 		.dropdown-title{
 			text-align: center;
 			padding: .3rem;
-			border-bottom: 1px solid @grey-color-light;
+			border-bottom: 1px solid @border-subtle;
 			h3{
 				font-size: @font-size-16;
 				margin: 0;
@@ -153,7 +153,7 @@ collab-nav4-menu-100554 {
 			gap: 1rem;
 
 			&:hover, &.selected {
-				background: @bg-secondary-color-lighter;
+				background: @surface-alt-bg;
 				color: var(--collab-nav-color-active);
 			}
 		}

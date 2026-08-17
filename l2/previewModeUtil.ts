@@ -27,8 +27,8 @@ export function mountCSS(ifr: HTMLIFrameElement): void {
         ifr.contentDocument.body.className = 'scroll-custom';
         ifr.contentDocument.body.style.width = '100%';
 
-        ifr.contentDocument.body.style.background = 'var(--bg-primary-color)';
-        ifr.contentDocument.body.style.color = 'var(--text-primary-color)';
+        ifr.contentDocument.body.style.background = 'var(--surface-bg)';
+        ifr.contentDocument.body.style.color = 'var(--text-default)';
 
 
         ifr.contentDocument.body.appendChild(style);
