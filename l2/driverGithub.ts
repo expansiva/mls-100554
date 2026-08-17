@@ -12,7 +12,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 	
 	public shortName: mls.cbe.Provider = 'github';
 	public project: number = 100554;
-	public driverVersion: string = '1.0.0.3';
+	public driverVersion: string = '1.0.0.4';
 
 	public lastSaveInfo: { commits: number, skippedDeletions: string[] } = { commits: 0, skippedDeletions: [] };
 
@@ -217,13 +217,22 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 				let ret: any = '';
 
-				if (['.html', '.ts', '.test.ts', '.defs.ts', '.css', '.txt', '.json', '.md', '.js', '.less'].includes(ext)) {
+				if (['.html', '.ts', '.test.ts', '.d.ts', '.defs.ts', '.css', '.txt', '.json', '.md', '.js', '.less'].includes(ext)) {
 
 					ret = await this.getFilesIO(fileInfo.project, fileName);
 
+				} else if (!fileInfo.versionRef || fileInfo.versionRef === '0') {
+
+					// A file created in this session was never committed, so there is NO blob to fetch:
+					// the request can only answer 422. Generated projects hit this once per file per
+					// sweep (hundreds of `GET .../git/blobs/0 422` in the console), which buries the
+					// real errors. The content of such a file lives in the local storage.
+					if (mls.istrace) console.info(`gitDriver: no blob for _${fileInfo.project}_/l${fileInfo.level}/${fileInfo.folder}/${fileInfo.shortName}${ext} (never committed); local content only`);
+					ret = null;
+
 				} else {
 
-					ret = await this.getFilesRestIO(fileInfo.project, fileInfo.versionRef, fileInfo.extension);
+					ret = await this.getFilesRestIO(fileInfo.project, fileInfo.versionRef, fileInfo.extension, fileName);
 
 				}
 				resolve(ret);
@@ -2587,14 +2596,17 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 	}
 
 
-	private async getFilesRestIO(project: number, oid: string, extension: string): Promise<Blob> {
+	private async getFilesRestIO(project: number, oid: string, extension: string, fileName = ''): Promise<Blob> {
 
 		const info = await dL.getMyKeysBranch(project);
+		// Everything needed to act on a failure: which file, in which repo, under which sha. Without it
+		// the console only ever showed `git/blobs/<sha> 422` with no way to tell WHICH file it was.
+		const what = `_${project}_/${fileName || `(sha ${oid})`} in ${info.owner}/${info.repo}, sha ${oid}`;
 
 		try {
 
 			this.verifyMKey();
-			const ret = await (await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/git/blobs/${oid}`, {
+			const response = await fetch(`https://api.github.com/repos/${info.owner}/${info.repo}/git/blobs/${oid}`, {
 				method: 'GET',
 				mode: 'cors',
 				cache: 'no-cache',
@@ -2604,17 +2616,28 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 					Authorization: 'bearer ' + mKey,
 				},
 				referrerPolicy: 'no-referrer'
-			})).json();
+			});
+			const ret = await response.json().catch(() => null);
 
-			const b64 = ret && ret.content ? ret.content : 'Erro';
-			if (!b64 || b64 === 'Erro') return b64;
+			if (!response.ok || !ret || !ret.content) {
+				// GitHub explains itself in the body (`message` + `documentation_url`); an empty body on
+				// a 2xx means the blob exists but carries no content — say which case it is.
+				const detail = ret && (ret.message || ret.documentation_url)
+					? `${ret.message || ''}${ret.documentation_url ? ` (${ret.documentation_url})` : ''}`
+					: response.ok ? 'response had no content' : 'no error body';
+				const message = `getFilesRestIO ${response.status} ${response.statusText}: ${what} — ${detail}`;
+				console.warn(`gitDriver: ${message}`);
+				return message as any;
+			}
 
-			const blob = await dL.base64ToBlob(b64, extension, oid);
+			const blob = await dL.base64ToBlob(ret.content, extension, oid);
 			return blob as any;
 
 		} catch (e: any) {
 
-			return e.message;
+			const message = `getFilesRestIO failed: ${what} — ${e && e.message ? e.message : String(e)}`;
+			console.warn(`gitDriver: ${message}`);
+			return message as any;
 
 		}
 
