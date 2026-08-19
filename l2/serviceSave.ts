@@ -942,7 +942,7 @@ export class ServiceSave extends ServiceBase {
             }
 
             this.showLoader(true);
-            if (!mls.l5.actualOrg) throw new Error('No organization selected');
+            if (mls.l5.actualOrg === undefined) throw new Error('No organization selected');
 
             const prj = this.currentProject;
             if (!prj) throw new Error('Not found project actual');
@@ -1216,7 +1216,7 @@ export class ServiceSave extends ServiceBase {
             const father = el.closest('sectionsave') as HTMLDivElement;
             if (!father) return;
             this.showLoader(true);
-            if (!mls.l5.actualOrg) throw new Error('No organization selected');
+            if (mls.l5.actualOrg === undefined) throw new Error('No organization selected');
             const prj = this.currentProject;
             if (!prj) throw new Error('Not found project actual');
             const actualOrg = Object.keys(mls.stor.orgs)[mls.l5.actualOrg];
