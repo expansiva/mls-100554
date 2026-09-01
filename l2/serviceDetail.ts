@@ -317,6 +317,10 @@ export class ServiceDetail100554 extends ServiceBase {
         const allWcs = getAllWebComponentsInSource(elementToAdd.outerHTML);
         el.innerHTML = '';
         allWcs.forEach((wc) => {
+            // Already registered — a second <script type="module"> for the same widget re-runs its
+            // top-level code (a fresh fetch/evaluation), and `customElements.define` throws on the
+            // tag it already owns (NotSupportedError). No API to re-register, so skip is the only move.
+            if (customElements.get(wc)) return;
             const info = convertTagToFileName(wc);
             if (info) {
                 const script = document.createElement('script');
@@ -339,6 +343,10 @@ export class ServiceDetail100554 extends ServiceBase {
         el.innerHTML = content;
         (el as any).args = args;
         allWcs.forEach((wc) => {
+            // Already registered — a second <script type="module"> for the same widget re-runs its
+            // top-level code (a fresh fetch/evaluation), and `customElements.define` throws on the
+            // tag it already owns (NotSupportedError). No API to re-register, so skip is the only move.
+            if (customElements.get(wc)) return;
             const info = convertTagToFileName(wc);
             if (info) {
                 const script = document.createElement('script');
