@@ -10,3 +10,8 @@ appconfig.json
 .DS_Store
 preBuild
 .collab-fs.json
+
+# --- collab-vm (gitReposSetup) ---
+.collab-fs-trash/
+!*.js
+!*.mjs
