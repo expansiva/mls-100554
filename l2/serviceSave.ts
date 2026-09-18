@@ -952,7 +952,7 @@ export class ServiceSave extends ServiceBase {
             if (!config) throw new Error('Not found config file in this project');
 
             const configOrg = config.orgName;
-            if (actualOrg !== configOrg) {
+            if (actualOrg !== configOrg && actualOrg !== 'local') {
                 config.orgName = actualOrg;
                 await updateConfigProject(prj, config);
                 this.forceSaveL5ProjectFile = true;
