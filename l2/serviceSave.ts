@@ -951,8 +951,11 @@ export class ServiceSave extends ServiceBase {
             const config = await getConfigProject(prj, true);
             if (!config) throw new Error('Not found config file in this project');
 
+            const driver = mls.stor.others.getDefaultDriver(prj);
+            if (!driver) throw new Error('Not found driver in this project');
+
             const configOrg = config.orgName;
-            if (actualOrg !== configOrg && actualOrg !== 'local') {
+            if (actualOrg !== configOrg && driver.shortName !== 'vm' as  mls.cbe.Provider) {
                 config.orgName = actualOrg;
                 await updateConfigProject(prj, config);
                 this.forceSaveL5ProjectFile = true;
@@ -984,7 +987,7 @@ export class ServiceSave extends ServiceBase {
             await this.onSavenewPullrequest(array, msg);
             //console.info('gerou o push');
 
-            const driver = mls.stor.others.getDefaultDriver(prj);
+            //const driver = mls.stor.others.getDefaultDriver(prj);
             const saveInfo = (driver as any).lastSaveInfo as { commits: number, skippedDeletions: string[] } | undefined;
             const hasCommits = !saveInfo || saveInfo.commits > 0;
 
