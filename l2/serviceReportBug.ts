@@ -146,7 +146,7 @@ function safeText(args: unknown[]): string {
 
 function installConsoleInterceptor(): void {
     const methods = ['log', 'info', 'warn', 'error', 'debug', 'trace', 'dir', 'table', 'assert', 'count', 'group', 'groupCollapsed'];
-   /* methods.forEach((method) => {
+    methods.forEach((method) => {
         const c = console as any;
         if (typeof c[method] !== 'function') return;
         const original = c[method].bind(console);
@@ -154,7 +154,7 @@ function installConsoleInterceptor(): void {
             try { pushCapped(consoleBuffer, { ts: nowIso(), level: method, text: safeText(args) }, CONSOLE_CAP); } catch { }
             original(...args);
         };
-    });*/
+    });
 }
 
 function installNetworkInterceptor(): void {
@@ -217,8 +217,8 @@ function installAll(): void {
     const w = window as any;
     if (w.__collabBugReportInstalled) return;
     w.__collabBugReportInstalled = true;
-    installConsoleInterceptor();
-    installNetworkInterceptor();
+    //installConsoleInterceptor();
+    //installNetworkInterceptor();
     installShortcutListener();
     installOpenViewListener();
 }
