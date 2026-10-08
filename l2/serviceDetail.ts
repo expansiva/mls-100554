@@ -19,9 +19,24 @@ export class ServiceDetail100554 extends ServiceBase {
 
     private plugin: { shortName: string, project: number } = {} as any;
 
-    constructor() {
-        super();
-        this.setEvents();
+    private readonly handlePluginDetails = (ev: mls.events.IEvent) => this.onPluginDetails(ev);
+    private readonly handleMonacoEvents = (ev: mls.events.IEvent) => this.onMonacoEvents(ev);
+    private readonly handleFileAction = (ev: mls.events.IEvent) => this.onFileActionReceived(ev);
+
+    private eventsSubscribed = false;
+
+    connectedCallback() {
+        super.connectedCallback();
+        // Only the instance the nav3 mounted as the Detail service listens to the global events. A host
+        // created by hand (e.g. the runtime's nav3 "Detail" tab) lives inside ANOTHER service's container
+        // (serviceClientApp): its openMe() would click THAT service's nav2 item and pull the app back over
+        // the studio Detail — so actions opening the Detail seemed to do nothing until the tab was closed.
+        if (this.isNav3DetailService()) this.setEvents();
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeEvents();
     }
 
 
@@ -165,11 +180,25 @@ export class ServiceDetail100554 extends ServiceBase {
 
     //----------IMPLEMENTS-------------------
 
-    private setEvents(): void {
-        mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['PluginDetails'], (ev) => this.onPluginDetails(ev));
-        mls.events.addListener(2, 'MonacoAction', (ev) => this.onMonacoEvents(ev));
-        mls.events.addListener(2, 'FileAction', (ev) => this.onFileActionReceived.bind(this)(ev));
+    private isNav3DetailService(): boolean {
+        const dataService = this.closest('collab-nav-3-service')?.getAttribute('data-service') || '';
+        return /serviceDetail$/.test(dataService);
+    }
 
+    private setEvents(): void {
+        if (this.eventsSubscribed) return;
+        this.eventsSubscribed = true;
+        mls.events.addEventListener([0, 1, 2, 3, 4, 5, 6, 7], ['PluginDetails'], this.handlePluginDetails);
+        mls.events.addListener(2, 'MonacoAction', this.handleMonacoEvents);
+        mls.events.addListener(2, 'FileAction', this.handleFileAction);
+    }
+
+    private removeEvents(): void {
+        if (!this.eventsSubscribed) return;
+        this.eventsSubscribed = false;
+        mls.events.removeEventListener(undefined, undefined, this.handlePluginDetails);
+        mls.events.removeEventListener(undefined, undefined, this.handleMonacoEvents);
+        mls.events.removeEventListener(undefined, undefined, this.handleFileAction);
     }
 
     private onMonacoEvents(ev: mls.events.IEvent): void {
