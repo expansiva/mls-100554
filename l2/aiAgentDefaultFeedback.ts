@@ -39,14 +39,7 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
         }
     }
 
-    private getTitle(
-        step:
-            | mls.msg.AIAgentStep
-            | mls.msg.AIToolStep
-            | mls.msg.AIClarificationStep
-            | mls.msg.AIResultStep
-            | mls.msg.AIFlexibleResultStep
-    ): string {
+    private getTitle(step: mls.msg.AIPayload): string {
         return (
             step.stepTitle ||
             (step as mls.msg.AIAgentStep).agentName ||
@@ -178,7 +171,7 @@ export class AiAgentDefaultFeedback100554 extends StateLitElement {
     `;
     }
 
-    private clickDetails(step: mls.msg.AIAgentStep | mls.msg.AIToolStep | mls.msg.AIClarificationStep) {
+    private clickDetails(step: mls.msg.AIPayload) {
         //this.selectedStep = step;
 
         if (!this.father) return;
