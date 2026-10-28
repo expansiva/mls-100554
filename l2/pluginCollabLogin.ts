@@ -195,7 +195,7 @@ export class PluginCollabLogin100554 extends PluginBaseModule {
 
   gitHubLogin() {
     if (this.verifyDisconnect('github')) return;
-    const clientId = 'Ov23lilKDcEv2JFTkzqr';
+    const clientId = 'Ov23liz6csr4BVqknUlF';
     const redirectUri = encodeURIComponent(`${this.getRedirectLink()}?source=github`);
     //const scope = 'repo read:user user:email';
     const scope = [
