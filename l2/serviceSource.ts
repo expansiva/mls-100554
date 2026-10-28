@@ -658,7 +658,7 @@ export class ServiceSource100554 extends ServiceBase {
         const i2 = `/_${this.baseProject}_${'mlsHistoryList'}`;
         scr.type = 'module';
         scr.id = i2.replace('/', '');
-        scr.src = i2;
+        scr.src = `/_${this.baseProject}_/l2/mlsHistoryList`;
         div.appendChild(scr);
         const obj: { [key: number]: string } = {
             0: '.ts',

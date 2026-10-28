@@ -255,7 +255,7 @@ export class PreviewModeSinglePage {
 
                 const info = convertTagToFileName(el.getAttribute('widget') || '');
                 if (!info) return '';
-                return '/' + `_${info.project}_${info.shortName}`;
+                return '/' + `_${info.project}_/l2/${info.folder ? info.folder + '/' : ''}${info.shortName}`;
 
             })
             .filter(Boolean);

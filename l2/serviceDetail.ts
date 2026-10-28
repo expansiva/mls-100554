@@ -355,7 +355,7 @@ export class ServiceDetail100554 extends ServiceBase {
                 const script = document.createElement('script');
                 script.type = 'module';
                 script.id = `_${info.project}_${info.shortName}`;
-                script.src = (`/_${info.project}_${info.folder ? info.folder + '/' : ''}${info.shortName}`);
+                script.src = (`/_${info.project}_/l2/${info.folder ? info.folder + '/' : ''}${info.shortName}`);
                 el.appendChild(script)
             }
         });
@@ -381,7 +381,7 @@ export class ServiceDetail100554 extends ServiceBase {
                 const script = document.createElement('script');
                 script.type = 'module';
                 script.id = `_${info.project}_${info.shortName}`;
-                script.src = (`/_${info.project}_${info.folder ? info.folder + '/' : ''}${info.shortName}`);
+                script.src = (`/_${info.project}_/l2/${info.folder ? info.folder + '/' : ''}${info.shortName}`);
                 el.appendChild(script)
             }
         });
