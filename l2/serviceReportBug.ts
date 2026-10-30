@@ -7,7 +7,9 @@ import { ServiceBase, IService, IToolbarContent, IServiceMenu } from '/_102027_/
 /// **collab_i18n_start**
 const message_pt = {
     title: 'Reportar Bug',
-    emptyHint: 'Aperte Ctrl+Shift+B na tela onde o problema aconteceu para capturar o estado e o print.',
+    emptyHintBefore: 'Aperte Ctrl+Shift+B na tela onde o problema aconteceu, ou',
+    captureHere: 'aperte aqui',
+    emptyHintAfter: ', para capturar o estado e o print.',
     description: 'O que você tentou fazer quando o erro aconteceu?',
     descriptionPlaceholder: 'Descreva os passos que levaram ao erro...',
     sendTo: 'Enviar para',
@@ -25,6 +27,8 @@ const message_pt = {
     screenshot: 'Print da tela',
     noScreenshot: 'Print não capturado (permissão negada ou não suportado).',
     context: 'Contexto (mls)',
+    bootContext: 'Contexto do boot (servidor)',
+    notDefined: 'não definido',
     network: 'Últimas requisições',
     console: 'Mensagens do console',
     capturedAt: 'Capturado em',
@@ -43,7 +47,9 @@ const message_pt = {
 
 const message_en = {
     title: 'Report Bug',
-    emptyHint: 'Press Ctrl+Shift+B on the screen where the problem happened to capture the state and screenshot.',
+    emptyHintBefore: 'Press Ctrl+Shift+B on the screen where the problem happened, or',
+    captureHere: 'click here',
+    emptyHintAfter: ', to capture the state and screenshot.',
     description: 'What were you trying to do when the error happened?',
     descriptionPlaceholder: 'Describe the steps that led to the error...',
     sendTo: 'Send to',
@@ -61,6 +67,8 @@ const message_en = {
     screenshot: 'Screenshot',
     noScreenshot: 'Screenshot not captured (permission denied or not supported).',
     context: 'Context (mls)',
+    bootContext: 'Boot context (server)',
+    notDefined: 'not defined',
     network: 'Last requests',
     console: 'Console messages',
     capturedAt: 'Captured at',
@@ -103,6 +111,9 @@ interface IMlsSnapshot {
 
 interface IFileRef { project?: number; shortName?: string; folder?: string; extension?: string }
 
+// Injected by the app server (startServer, mls-102034) when the page loads.
+interface IBootSnapshot { collabBoot?: unknown; collabFecho?: unknown }
+
 interface IBugSnapshot {
     capturedAt: string;
     user: string;
@@ -110,6 +121,7 @@ interface IBugSnapshot {
     userAgent: string;
     viewport: string;
     mls: IMlsSnapshot;
+    boot?: IBootSnapshot;
     console: IConsoleEntry[];
     network: INetworkEntry[];
     screenshot?: string;
@@ -144,55 +156,60 @@ function safeText(args: unknown[]): string {
     return text.length > CONSOLE_ENTRY_MAX_CHARS ? `${text.slice(0, CONSOLE_ENTRY_MAX_CHARS)}[truncated]` : text;
 }
 
-function installConsoleInterceptor(): void {
-    const methods = ['log', 'info', 'warn', 'error', 'debug', 'trace', 'dir', 'table', 'assert', 'count', 'group', 'groupCollapsed'];
-    methods.forEach((method) => {
-        const c = console as any;
-        if (typeof c[method] !== 'function') return;
-        const original = c[method].bind(console);
-        c[method] = (...args: unknown[]) => {
-            try { pushCapped(consoleBuffer, { ts: nowIso(), level: method, text: safeText(args) }, CONSOLE_CAP); } catch { }
-            original(...args);
-        };
+function pushConsole(level: string, args: unknown[]): void {
+    try { pushCapped(consoleBuffer, { ts: nowIso(), level, text: safeText(args) }, CONSOLE_CAP); } catch { }
+}
+
+function installErrorListeners(): void {
+    // Uncaught errors are observed, not wrapped: DevTools attribution stays intact.
+    window.addEventListener('error', (ev: ErrorEvent) => {
+        pushConsole('uncaught', [ev.error || ev.message, `at ${ev.filename}:${ev.lineno}:${ev.colno}`]);
+    });
+    window.addEventListener('unhandledrejection', (ev: PromiseRejectionEvent) => {
+        pushConsole('unhandledrejection', [ev.reason]);
     });
 }
 
-function installNetworkInterceptor(): void {
-    const originalFetch = window.fetch.bind(window);
-    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-        const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-        const method = (init?.method || (input instanceof Request ? input.method : 'GET')).toUpperCase();
-        const started = performance.now();
-        try {
-            const res = await originalFetch(input, init);
-            pushCapped(networkBuffer, { ts: nowIso(), method, url, status: res.status, durationMs: Math.round(performance.now() - started) }, NETWORK_CAP);
-            return res;
-        } catch (err) {
-            pushCapped(networkBuffer, { ts: nowIso(), method, url, status: 'failed', durationMs: Math.round(performance.now() - started) }, NETWORK_CAP);
-            throw err;
-        }
-    };
+function installConsoleInterceptor(): void {
+    // Only warn/error are wrapped (log stays untouched). The wrapper is compiled as a
+    // separate script whose sourceURL contains /node_modules/, which Chrome DevTools
+    // ignore-lists by default, so the console link points to the real caller.
+    const source = `return function (push) {
+    ['warn', 'error'].forEach(function (method) {
+        var original = console[method];
+        if (typeof original !== 'function') return;
+        console[method] = function () {
+            try { push(method, Array.prototype.slice.call(arguments)); } catch (e) { }
+            return original.apply(console, arguments);
+        };
+    });
+};
+//# sourceURL=/node_modules/collab-bug-report/consoleInterceptor.js`;
+    try {
+        (new Function(source))()(pushConsole);
+    } catch {
+        // CSP without unsafe-eval: skip the wrapper, error listeners still apply.
+    }
+}
 
-    const XHR = XMLHttpRequest.prototype as any;
-    const originalOpen = XHR.open;
-    const originalSend = XHR.send;
-    XHR.open = function (method: string, url: string, ...rest: any[]) {
-        this.__bugReport = { method: (method || 'GET').toUpperCase(), url: String(url) };
-        return originalOpen.call(this, method, url, ...rest);
-    };
-    XHR.send = function (...args: any[]) {
-        const info = this.__bugReport;
-        if (info) {
-            const started = performance.now();
-            this.addEventListener('loadend', () => {
+function installNetworkObserver(): void {
+    // Reads the browser's Resource Timing instead of patching fetch/XHR, so the
+    // Initiator column in the Network panel keeps pointing to the real caller.
+    if (typeof PerformanceObserver === 'undefined') return;
+    try {
+        new PerformanceObserver((list) => {
+            (list.getEntries() as PerformanceResourceTiming[]).forEach((e) => {
+                if (e.initiatorType !== 'fetch' && e.initiatorType !== 'xmlhttprequest') return;
                 pushCapped(networkBuffer, {
-                    ts: nowIso(), method: info.method, url: info.url,
-                    status: this.status || 'failed', durationMs: Math.round(performance.now() - started)
+                    ts: new Date(performance.timeOrigin + e.startTime).toISOString(),
+                    method: '-', // not exposed by Resource Timing
+                    url: e.name,
+                    status: (e as any).responseStatus || '-', // Chrome 109+; 0 = failed or cross-origin without Timing-Allow-Origin
+                    durationMs: Math.round(e.duration),
                 }, NETWORK_CAP);
             });
-        }
-        return originalSend.apply(this, args);
-    };
+        }).observe({ type: 'resource', buffered: true });
+    } catch { }
 }
 
 function installShortcutListener(): void {
@@ -217,8 +234,9 @@ function installAll(): void {
     const w = window as any;
     if (w.__collabBugReportInstalled) return;
     w.__collabBugReportInstalled = true;
-    //installConsoleInterceptor();
-    //installNetworkInterceptor();
+    installErrorListeners();
+    installConsoleInterceptor();
+    installNetworkObserver();
     installShortcutListener();
     installOpenViewListener();
 }
@@ -249,6 +267,17 @@ function snapshotMls(): IMlsSnapshot {
         actualModule: g.actualModule,
         actual,
     };
+}
+
+function cloneSafe(value: unknown): unknown {
+    // Copy, not reference: the live object may change after the capture.
+    if (value === undefined) return undefined;
+    try { return JSON.parse(JSON.stringify(value)); } catch { return String(value); }
+}
+
+function snapshotBoot(): IBootSnapshot {
+    const w = window as any;
+    return { collabBoot: cloneSafe(w.collabBoot), collabFecho: cloneSafe(w.collabFecho) };
 }
 
 async function captureScreenshot(): Promise<string | undefined> {
@@ -322,6 +351,7 @@ async function captureAndOpen(): Promise<void> {
             userAgent: navigator.userAgent,
             viewport: `${window.innerWidth}x${window.innerHeight}`,
             mls: snapshotMls(),
+            boot: snapshotBoot(),
             console: consoleBuffer.slice(),
             network: networkBuffer.slice(-NETWORK_SEND),
             screenshot,
@@ -424,6 +454,7 @@ export class ServiceReportBug100554 extends ServiceBase {
                 userAgent: data.userAgent || '-',
                 viewport: data.viewport || '-',
                 mls: data.mls || { actual: [] },
+                boot: data.boot && typeof data.boot === 'object' ? data.boot : {},
                 console: Array.isArray(data.console) ? data.console : [],
                 network: Array.isArray(data.network) ? data.network : [],
                 screenshot: data.screenshot,
@@ -527,7 +558,12 @@ export class ServiceReportBug100554 extends ServiceBase {
     }
 
     private renderEmpty() {
-        return html`<div class="rb-empty">${this.msg.emptyHint}</div>`;
+        return html`
+            <div class="rb-empty">
+                ${this.msg.emptyHintBefore}
+                <button class="rb-capture-link" @click=${() => captureAndOpen()}>${this.msg.captureHere}</button>${this.msg.emptyHintAfter}
+            </div>
+        `;
     }
 
     private renderMlsContext(m: IMlsSnapshot) {
@@ -556,6 +592,23 @@ export class ServiceReportBug100554 extends ServiceBase {
         `;
     }
 
+    private renderBootContext(b: IBootSnapshot | undefined) {
+        const items: Array<[string, unknown]> = [
+            ['window.collabBoot', b?.collabBoot],
+            ['window.collabFecho', b?.collabFecho],
+        ];
+        return html`
+            ${items.map(([name, value]) => value === undefined
+                ? html`<div class="rb-boot-item"><span class="rb-boot-name">${name}</span>: <span class="rb-boot-undefined">${this.msg.notDefined}</span></div>`
+                : html`
+                    <details class="rb-boot-item">
+                        <summary class="rb-boot-name">${name}</summary>
+                        <pre class="rb-boot-json">${JSON.stringify(value, null, 2)}</pre>
+                    </details>
+                `)}
+        `;
+    }
+
     private renderNetwork(entries: INetworkEntry[]) {
         return html`
             <table class="rb-table">
@@ -569,7 +622,7 @@ export class ServiceReportBug100554 extends ServiceBase {
                 </thead>
                 <tbody>
                     ${entries.map((n) => html`
-                        <tr class="${typeof n.status === 'number' && n.status < 400 ? '' : 'rb-error'}">
+                        <tr class="${(typeof n.status === 'number' && n.status >= 400) || n.status === 'failed' ? 'rb-error' : ''}">
                             <td>${n.method}</td>
                             <td class="rb-url" title="${n.url}">${n.url}</td>
                             <td>${n.status}</td>
@@ -612,6 +665,11 @@ export class ServiceReportBug100554 extends ServiceBase {
             <div class="rb-section">
                 <h4>${this.msg.context}</h4>
                 ${this.renderMlsContext(s.mls)}
+            </div>
+
+            <div class="rb-section">
+                <h4>${this.msg.bootContext}</h4>
+                ${this.renderBootContext(s.boot)}
             </div>
 
             <div class="rb-section">

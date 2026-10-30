@@ -47,6 +47,17 @@ service-report-bug-100554 {
         color: @text-muted;
     }
 
+    .rb-capture-link {
+        padding: 0;
+        cursor: pointer;
+        font-family: @font-family-primary;
+        font-size: inherit;
+        color: @link-text;
+        text-decoration: underline;
+        background: none;
+        border: none;
+    }
+
     .rb-label {
         font-weight: @font-weight-bold;
         color: @text-strong;
@@ -243,6 +254,37 @@ service-report-bug-100554 {
         .rb-error td {
             color: @status-error-text;
         }
+    }
+
+    .rb-boot-item {
+        font-size: @font-size-12;
+        color: @text-default;
+    }
+
+    .rb-boot-name {
+        font-family: monospace;
+        font-weight: @font-weight-bold;
+        color: @text-strong;
+        cursor: pointer;
+    }
+
+    .rb-boot-undefined {
+        color: @text-muted;
+    }
+
+    .rb-boot-json {
+        max-height: 260px;
+        overflow: auto;
+        margin: @space-8 0 0;
+        padding: @space-8;
+        font-family: monospace;
+        font-size: @font-size-12;
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: @text-default;
+        background: @surface-bg;
+        border: 1px solid @border-subtle;
+        border-radius: 4px;
     }
 
     .rb-console {
