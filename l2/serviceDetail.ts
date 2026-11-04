@@ -132,12 +132,14 @@ export class ServiceDetail100554 extends ServiceBase {
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
         if (!this.contentPlugin || reinit) return;
+        const levelSuffix = String(mls.actualLevel);
         Array.from(this.contentPlugin.children).forEach((child) => {
             if (child.tagName.startsWith('PLUGIN-')) {
                 child.setAttribute('msize', this.msize);
             }
 
-            (child as HTMLElement).style.display = 'none';
+            const htmlChild = child as HTMLElement;
+            htmlChild.style.display = visible && htmlChild.id.endsWith(levelSuffix) ? '' : 'none';
         });
 
     }
