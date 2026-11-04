@@ -85,9 +85,22 @@ test('onServiceClick hides every child and, on return, shows only the current le
     assert.equal(plugin.style.display, 'none');
     assert.equal(plugin.msize, 'compact');
 
-    onServiceClick.call(host, true, false, null);
+    // Coming back to the tab: `serviceBase.attributeChangedCallback` passes reinit = true
+    // (`oldVal !== null && visible`). The first version of the fix was tested with false and
+    // did nothing in the browser, because the method returned early on reinit.
+    onServiceClick.call(host, true, true, null);
     assert.equal(any4.style.display, '');
     assert.equal(any3.style.display, 'none');
     assert.equal(plugin.style.display, 'none');
     assert.equal(plugin.msize, 'compact');
+
+    onServiceClick.call(host, false, false, null);
+    assert.equal(any4.style.display, 'none');
+    onServiceClick.call(host, true, true, null);
+    assert.equal(any4.style.display, '', 'a second round trip shows it again');
+
+    // First show of the service (oldVal null): reinit false, visible true. Same result.
+    onServiceClick.call(host, false, false, null);
+    onServiceClick.call(host, true, false, null);
+    assert.equal(any4.style.display, '');
 });

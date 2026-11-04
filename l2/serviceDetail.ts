@@ -131,7 +131,9 @@ export class ServiceDetail100554 extends ServiceBase {
 
     onServiceClick(visible: boolean, reinit: boolean, el: IToolbarContent | null) {
 
-        if (!this.contentPlugin || reinit) return;
+        // `reinit` is true exactly when the tab comes back (`serviceBase.attributeChangedCallback`:
+        // `oldVal !== null && visible`). That is the case that has to show the content again.
+        if (!this.contentPlugin) return;
         const levelSuffix = String(mls.actualLevel);
         Array.from(this.contentPlugin.children).forEach((child) => {
             if (child.tagName.startsWith('PLUGIN-')) {
