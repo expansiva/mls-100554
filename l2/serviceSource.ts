@@ -100,6 +100,8 @@ export class ServiceSource100554 extends ServiceBase {
         else if (op === 'opMonacoReset') this.showMonacoReset();
         else if (op === 'opHistory') this.showHistory();
         else if (op === 'opView') this.openRepo();
+        else if (op === 'opOpenPage') this.openPageInApp();
+        else if (op === 'opInspect') this.toggleInspect();
         else if (this.menu.setMode) this.menu.setMode('initial');
     }
 
@@ -311,6 +313,7 @@ export class ServiceSource100554 extends ServiceBase {
 
         if (!visible) {
             this.saveViewState();
+            this.stopInspect();
             return;
         }
 
@@ -358,6 +361,7 @@ export class ServiceSource100554 extends ServiceBase {
         // await readProjectTypescriptAndCompile(project, '', true)
         if (models && models.ts) mls.editor.forceModelUpdate(models.ts.model);
         this.loading = false;
+        this.refreshOpenPageOption();
         setTimeout(() => {
             this.showActiveModel();
         }, 500);
@@ -643,6 +647,131 @@ export class ServiceSource100554 extends ServiceBase {
         return true;
     }
 
+    //---------- Abrir página --------
+    // Takes the running app (cbe--service-client-app-102033) to the screen of the open file. Only a
+    // PAGE has a screen: a file is a page when l5/config.json declares a route for its exact source
+    // (frontend.pages[].source). For any other file the option does not exist in the menu.
+    // The route reading and the navigation are the genome's (102020 pageNavigation), loaded on demand.
+
+    private openPageToken = 0;
+
+    private getOpenSourceFile(): { project: number, folder: string, shortName: string } | undefined {
+        const actual = mls.actual[2]?.[this.position];
+        if (!actual || !actual.project || !actual.shortName) return;
+        return { project: actual.project, folder: actual.folder || '', shortName: actual.shortName };
+    }
+
+    private async refreshOpenPageOption(): Promise<void> {
+        const token = ++this.openPageToken;
+        let isPage = false;
+        const file = this.getOpenSourceFile();
+        // The inspect points at lines of ONE file: another file in the editor ends it.
+        if (this.inspectFileKey !== this.fileKey(file)) this.stopInspect();
+        try {
+            if (file) {
+                const url = '/_102020_/l2/aura/helpers/pageNavigation.js';
+                const { routeOfPageFile } = await import(url);
+                isPage = (await routeOfPageFile(file, mls.actualProject)) !== '';
+            }
+        } catch (e) {
+            console.warn('[serviceSource] could not check if the file is a page', e);
+        }
+        if (token !== this.openPageToken) return; // another file was opened meanwhile
+
+        if (isPage === ('opOpenPage' in this.menu.main)) return;
+        if (isPage) {
+            this.menu.main.opOpenPage = 'Abrir página';
+            if (mls.actualLevel === 2) this.menu.main.opInspect = 'Inspect';
+        } else {
+            delete this.menu.main.opOpenPage;
+            delete this.menu.main.opInspect;
+        }
+        if (this.menu.refresh) this.menu.refresh();
+    }
+
+    private async openPageInApp(): Promise<void> {
+        this.closeMenu();
+        const file = this.getOpenSourceFile();
+        if (!file) return;
+        try {
+            const url = '/_102020_/l2/aura/helpers/pageNavigation.js';
+            const { navigateAppToPage } = await import(url);
+            await navigateAppToPage(file, mls.actualProject);
+        } catch (e) {
+            console.warn('[serviceSource] could not open the page in the app', e);
+        }
+    }
+
+    //---------- Inspect --------
+    // Level 2 only, page files only (shown with "Abrir página"). While on, hovering the app outlines
+    // the element under the pointer and a click jumps this editor to the line of the PAGE that writes
+    // it; a click inside a molecule goes to the line where the page uses that molecule.
+    // A click that finds its line turns it off; so do Esc, the menu again, another file or leaving level 2. The DOM -> source part is
+    // 102020's (studioSourceInspect), loaded on demand.
+
+    private inspectStop: (() => void) | undefined;
+    private inspectFileKey: string | undefined;
+
+    private fileKey(file: { project: number, folder: string, shortName: string } | undefined): string | undefined {
+        return file ? `_${file.project}_${file.folder}/${file.shortName}` : undefined;
+    }
+
+    private setInspectLabel(): void {
+        if (!('opInspect' in this.menu.main)) return;
+        this.menu.main.opInspect = this.inspectStop ? 'Parar Inspect' : 'Inspect';
+        if (this.menu.refresh) this.menu.refresh();
+    }
+
+    private stopInspect(): void {
+        // onStop (below) clears the state and the label
+        if (this.inspectStop) this.inspectStop();
+    }
+
+    private async toggleInspect(): Promise<void> {
+        this.closeMenu();
+        if (this.inspectStop) {
+            this.stopInspect();
+            return;
+        }
+        const file = this.getOpenSourceFile();
+        if (!file || mls.actualLevel !== 2) return;
+        try {
+            const url = '/_102020_/l2/aura/studio/studioSourceInspect.js';
+            const { startSourceInspect } = await import(url);
+            const started = startSourceInspect({
+                file,
+                source: () => mls.editor.getModels(file.project, file.shortName, file.folder)?.ts?.model.getValue() || '',
+                isActive: () => mls.actualLevel === 2,
+                onPick: (offset: number) => this.goToSourceOffset(offset),
+                onRefuse: (message: string) => (window as any).collabMessages?.add(message, 'information'),
+                onStop: () => {
+                    this.inspectStop = undefined;
+                    this.inspectFileKey = undefined;
+                    this.setInspectLabel();
+                },
+            });
+            if (!started.ok) {
+                (window as any).collabMessages?.add(started.message, 'information');
+                return;
+            }
+            this.inspectStop = started.stop;
+            this.inspectFileKey = this.fileKey(file);
+            this.setInspectLabel();
+        } catch (e) {
+            console.warn('[serviceSource] could not start the inspect', e);
+        }
+    }
+
+    /** offset: 0-based, in the .ts of the open file */
+    private goToSourceOffset(offset: number): void {
+        if (this.mode !== 'icTs') {
+            if (this.menu.setTabActive) this.menu.setTabActive(EToolsSource.icTs);
+            this.onClickTabs(EToolsSource.icTs);
+        }
+        this.goToPosition(offset + 1, this.position);
+        this._ed1?.focus();
+    }
+
     private showHistory() {
         this.showHistorie2();
         return true;
@@ -758,6 +887,7 @@ export class ServiceSource100554 extends ServiceBase {
             }
             if (this.horizontalSpliter && (this.horizontalSpliter as any).resizeItens) (this.horizontalSpliter as any).resizeItens();
             this.loading = false;
+            this.refreshOpenPageOption();
         };
 
         const onEditorEvents = async (): Promise<void> => {
@@ -1661,6 +1791,7 @@ mls.editor.conf['${this.confE}'] = ` + JSON.stringify(mls.editor.conf[this.confE
         // await readProjectTypescriptAndCompile(actualProject, '', true)
         if (models && models.ts) mls.editor.forceModelUpdate(models.ts.model);
         this.loading = false;
+        this.refreshOpenPageOption();
         setTimeout(() => {
             this.showActiveModel();
         }, 500);
