@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/driverGithub.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import * as dL from '/_100554_/l2/driverLib.js';
+import { readStudioDefs } from '/_102029_/l2/studioDefs.js';
  
 let mKey = ""; 
 
@@ -20,7 +21,7 @@ export class DriverGitHub extends mls.stor.others.DriverIOBase {
 
 		super();
 		if (mls.istrace) console.info('gitDriver: ' + this.driverVersion);
-		mKey = localStorage.getItem('keyGitHub') || mKey;
+		mKey = readStudioDefs().github?.token || mKey;
 
 	}
 

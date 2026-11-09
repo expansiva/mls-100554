@@ -1,6 +1,7 @@
 /// <mls fileReference="_100554_/l2/driverGitlab.ts" enhancement="_100554_/l2/enhancementLit" />
 
 import * as dL from '/_100554_/l2/driverLib.js';
+import { readStudioDefs } from '/_102029_/l2/studioDefs.js';
 
 let mKey = "";
 
@@ -18,7 +19,7 @@ export class DriverGitLab extends mls.stor.others.DriverIOBase {
 
         super();
         if (mls.istrace) console.info('gitDriver: ' + this.driverVersion);
-		mKey = localStorage.getItem('keyGitLab') || mKey;
+		mKey = readStudioDefs().gitlab?.token || mKey;
 
     }
 
