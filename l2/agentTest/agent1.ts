@@ -1,7 +1,7 @@
 /// <mls fileReference="_100554_/l2/agentTest/agent1.ts" enhancement="_102027_/l2/enhancementAgent" />
 
 import { IAgentAsync, IAgentMeta } from '/_102027_/l2/aiAgentBase.js';
-
+//Teste
 export function createAgent(): IAgentAsync {
     return {
         agentName: "agent1",
