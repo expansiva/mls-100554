@@ -6,7 +6,7 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { customElement, property, state } from 'lit/decorators.js'; 
 import { ServiceBase, IService, IServiceMenu } from '/_102027_/l2/serviceBase.js';
 import { collab_branch } from '/_100554_/l2/collabIcons.js';
-import { undoFile, removeNewStorFilesWithTemplateDefault } from '/_102027_/l2/libStor.js';
+import { undoFile, undoFiles, removeNewStorFilesWithTemplateDefault } from '/_102027_/l2/libStor.js';
 import { initServiceSaveaddBranch } from '/_100554_/l2/saveAddBranch.js';
 import { getMyKeysBranch, calculateTotalStringSize } from '/_102027_/l2/libCommom.js';
 import { getConfigProject, updateConfigProject } from '/_102027_/l2/libProjectConfig.js';
@@ -1591,9 +1591,7 @@ export class ServiceSave extends ServiceBase {
 
         try {
 
-            for (const file of obj) {
-                await undoFile(file);
-            }
+            await undoFiles(obj);
 
             const data = this.getAllUserOpenedFiles();
             if (data[this.currentProject || 0]) delete data[this.currentProject || 0];
