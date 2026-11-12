@@ -606,9 +606,34 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
+    // Legacy Save (pull request) drops untouched template files. A project whose
+    // driver is the VM keeps them. One gate here covers every init caller.
+    private async templateSweepApplies(): Promise<boolean> {
+        // Same prefix as isVmDriver (studioDraft.ts:44). Local: this file does not import 102033.
+        const VM_DRIVER_PREFIX = '1.0.0-vm';
+        const project = mls.actualProject;
+        if (typeof project !== 'number') return true;
+        const others = mls.stor.others;
+        if (typeof others?.getDefaultDriver !== 'function') {
+            console.error('[serviceSave] getDefaultDriver is missing; template sweep skipped');
+            return false;
+        }
+        try {
+            const driver = await others.getDefaultDriver(project);
+            const version = driver?.driverVersion;
+            return !(typeof version === 'string' && version.startsWith(VM_DRIVER_PREFIX));
+        } catch (err) {
+            const detail = err instanceof Error ? err.message : String(err);
+            console.error('[serviceSave] getDefaultDriver failed; template sweep skipped: ' + detail);
+            return false;
+        }
+    }
+
     private async init(isSetInfoProject: boolean = true) {
         this.showLoader(true);
-        await removeNewStorFilesWithTemplateDefault();
+        if (await this.templateSweepApplies()) {
+            await removeNewStorFilesWithTemplateDefault();
+        }
         this.totFileSize = `${this.myMessage.msgTotFile} 0B`
         this.scenery = 'save';
         if (isSetInfoProject) await this.initInfoProject();
