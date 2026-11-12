@@ -8,12 +8,17 @@ import { ServiceBase, IService, IServiceMenu } from '/_102027_/l2/serviceBase.js
 import { collab_branch } from '/_100554_/l2/collabIcons.js';
 import { undoFile, undoFiles, removeNewStorFilesWithTemplateDefault } from '/_102027_/l2/libStor.js';
 import { initServiceSaveaddBranch } from '/_100554_/l2/saveAddBranch.js';
-import { getMyKeysBranch, calculateTotalStringSize } from '/_102027_/l2/libCommom.js';
+import { calculateTotalStringSize } from '/_102027_/l2/libCommom.js';
 import { getConfigProject, updateConfigProject } from '/_102027_/l2/libProjectConfig.js';
 import { readProjectTypescriptAndCompile } from '/_102027_/l2/libModel.js';
+import { getGitProvider, getGitDriver, getGitRepoKeys, registerGitDriverLoader } from '/_102029_/l2/libGitProject.js';
 import '/_100554_/l2/pluginCreateProjectLocalToDriver.js';
 
 initServiceSaveaddBranch();
+
+//Drivers reais do GitHub/GitLab para o save e para o plugin de pull requests (no VM o slot só lê).
+registerGitDriverLoader('github', async () => new (await import('/_100554_/l2/driverGithub.js')).DriverGitHub());
+registerGitDriverLoader('gitlab', async () => new (await import('/_100554_/l2/driverGitlab.js')).DriverGitLab());
 
 /// **collab_i18n_start**
 const message_pt = {
@@ -42,7 +47,11 @@ const message_pt = {
     sync: 'Sinc',
     msgSync: 'Deseja realmente sincronizar? Suas alterações do projeto [prj] serão todas perdidas.',
     select: 'Selecionar',
-    selected: 'Selecionado'
+    selected: 'Selecionado',
+    selectProjectToSave: 'Selecione o projeto que deseja salvar',
+    saving: 'Salvando projeto',
+    forkNameMismatch: 'Seu fork de [origin] se chama [fork], não [login]/[repo]. Renomeie ou apague esse fork no GitHub para salvar.',
+    repoNotFork: 'Já existe [login]/[repo] na sua conta, mas ele não é fork de [origin]. Apague ou renomeie esse repositório no GitHub para o save criar o fork.'
 }
 const message_en = {
     openPullrequest: 'Open pull requests',
@@ -70,7 +79,11 @@ const message_en = {
     sync: 'Sync',
     msgSync: 'Do you really want to synchronize? All your project [prj] changes will be lost.',
     select: 'Select',
-    selected: 'Selected'
+    selected: 'Selected',
+    selectProjectToSave: 'Select the project you want to save',
+    saving: 'Saving project',
+    forkNameMismatch: 'Your fork of [origin] is named [fork], not [login]/[repo]. Rename or delete that fork on GitHub to save.',
+    repoNotFork: '[login]/[repo] already exists in your account, but it is not a fork of [origin]. Delete or rename that repository on GitHub so the save can create the fork.'
 }
 type MessageType = typeof message_en;
 const messages: { [key: string]: MessageType } = {
@@ -96,6 +109,8 @@ export class ServiceSave extends ServiceBase {
 
     @property() isFreeToSave: boolean = false;
     @property() selectedProject: number | undefined = undefined;
+    //Projeto escolhido na lista para salvar; o owner/repo/branch do cabeçalho são dele.
+    @state() saveProject: number | undefined = undefined;
     @property() itens: IDefItem | undefined = undefined;
     //@property() otherProjects: number[] = [];
     @property() otherProjects: Record<string, Record<string, string[]>> = {};
@@ -208,7 +223,7 @@ export class ServiceSave extends ServiceBase {
         for (let i of array) {
             const f = mls.stor.files[i];
             if (!f) continue;
-            if (f.project === this.currentProject && f.status !== 'nochange')
+            if (getGitProvider(f.project) && f.status !== 'nochange')
                 exist = true;
             if (exist) break;
         }
@@ -225,6 +240,36 @@ export class ServiceSave extends ServiceBase {
     render() {
         const lang = this.getMessageKey(messages);
         this.myMessage = messages[lang];
+        return html`${this.renderService()}${this.inSaving ? this.renderSaveProgress() : ''}`;
+    }
+
+    updated(changedProperties: Map<string | number | symbol, unknown>) {
+        super.updated(changedProperties);
+        if (changedProperties.has('inSaving')) {
+            this.classList.toggle('saving', this.inSaving);
+            if (this.inSaving) this.scrollTop = 0;
+        }
+        if (changedProperties.has('saveLog')) {
+            const log = this.querySelector('.save-progress-log');
+            if (log) log.scrollTop = log.scrollHeight;
+        }
+    }
+
+    //Tela do próprio service durante o save: bloqueia os cliques e mostra cada etapa.
+    renderSaveProgress() {
+        return html`
+            <div class="save-progress">
+                <div class="save-progress-box">
+                    <h4>${this.myMessage.saving}${this.saveProject ? ` ${this.saveProject}` : ''}...</h4>
+                    <ul class="save-progress-log">
+                        ${repeat(this.saveLog, ((item: string, i: number) => i) as any, ((item: string) => html`<li>${item}</li>`) as any)}
+                    </ul>
+                </div>
+            </div>
+        `;
+    }
+
+    renderService() {
 
 
         if (this.currentProject === mls.stor.LOCALPROJECTNUMBER) {
@@ -278,8 +323,19 @@ export class ServiceSave extends ServiceBase {
     }
 
     renderHeader() {
+        if (this.saveProject === undefined) {
+            return html`
+            <div class="header-save">
+                <span style="font-weight:600">${this.myMessage.selectProjectToSave}</span>
+            </div>
+        `
+        }
         return html`
             <div class="header-save">
+                <div>
+                    <span style="font-weight:600">Project:</span>
+                    <span>${this.saveProject}</span>
+                </div>
                 <div>
                     <span style="font-weight:600">Owner:</span>
                     <span>${this.owner}</span>
@@ -379,7 +435,7 @@ export class ServiceSave extends ServiceBase {
                         <h4 class="mt-3">${this.myMessage.comments}:</h4>
                         <div style="display:flex; gap:1rem; align-items:center;">
                             <textarea id="commitMessage" class="form-control" style="max-width:600px;" maxlength="50"></textarea>
-                            <button id="btn_save" ${'' /* ?disabled=${!this.isFreeToSave} */} class="btn-service-save btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
+                            <button id="btn_save" ${'' /* ?disabled=${!this.isFreeToSave} */} ?disabled=${this.saveProject === undefined} class="btn-service-save btnSave btn-sm btnSave-primary" @click="${this.onSave}">${this.myMessage.update}</button>
                         </div>
                         <small style="font-size:12px;font-weight:bold">*${this.myMessage.obsVerify}</small>
                     </div>
@@ -404,8 +460,11 @@ export class ServiceSave extends ServiceBase {
                     <span class="fatv fa-caret-righttv rotate" @click="${this.openMeList}">
                         <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
                     </span>
-                    <input type="checkbox" id="l0-${index}" @click="${this.clickSetValueAllChilds}">
+                    <input type="checkbox" id="l0-${index}" ?disabled=${+project !== this.saveProject} @click="${this.clickSetValueAllChilds}">
                     <label for="l0-${index}">${project}</label>
+                    <span class="link-select-project" style="cursor:pointer; margin-left:8px; font-size:12px; text-decoration:underline; color:#7678a6;" @click="${(e: MouseEvent) => this.selectSaveProject(e, +project)}">
+                        ${this.saveProject === +project ? this.myMessage.selected : this.myMessage.select}
+                    </span>
                 </div>
                 <ul>
                     ${repeat(keys, ((key: any) => key) as any, ((k: any, indexl: any) => { return this.renderLevels(k, project, index, indexl); }) as any)}
@@ -427,7 +486,7 @@ export class ServiceSave extends ServiceBase {
                     <span class="fatv fa-caret-righttv rotate" @click="${this.openMeList}" > 
                         <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
                     </span>
-                    <input type = "checkbox" id = "l1-${indexP}-${index}" @click="${this.clickSetValueAllChilds}"/>
+                    <input type = "checkbox" id = "l1-${indexP}-${index}" ?disabled=${+project !== this.saveProject} @click="${this.clickSetValueAllChilds}"/>
                     <label for= "l1-${indexP}-${index}" > l${level} </label>
                 </div>
                 <ul>
@@ -452,7 +511,7 @@ export class ServiceSave extends ServiceBase {
                     <span class="fatv fa-caret-righttv" @click="${this.openMeList}" > 
                         <svg xmlns="http://www.w3.org/2000/svg" style="fill: var(--collab-text-primary-color);"  height="1em" viewBox="0 0 256 512"><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
                     </span>
-                    <input type = "checkbox" ${'' /* ?disabled=${forceError} */} id = "l2-${indexPP}-${indexP}-${index}" @click="${this.clickSetValueAllChilds}"/>
+                    <input type = "checkbox" ${'' /* ?disabled=${forceError} */} ?disabled=${+project !== this.saveProject} id = "l2-${indexPP}-${indexP}-${index}" @click="${this.clickSetValueAllChilds}"/>
                     <label for= "l2-${indexPP}-${indexP}-${index}" > ${file} </label>
                 </div>
                 <ul>
@@ -468,7 +527,7 @@ export class ServiceSave extends ServiceBase {
         return html`
             <li style="padding-left: 1.1rem;" class="${item.errorLocal || item.modelIsDispose ? 'errorLocal' : ''}">
                 <div style="align-items: center;">
-                    ${item.disabled || item.onlyFather || item.errorLocal /*|| forceError*/ || item.modelIsDispose
+                    ${item.disabled || item.onlyFather || item.errorLocal /*|| forceError*/ || item.modelIsDispose || item.file.project !== this.saveProject
                 ? html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" disabled onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
                 : html`<input type="checkbox" id="l3-${indexP}-${indexL}-${indexM}-${index}" onlyStatusFather="${item.onlyFather}" @click="${this.clickVerifyStatusFather}" .instance=${item.file}>`
             }
@@ -558,10 +617,16 @@ export class ServiceSave extends ServiceBase {
     }
 
     private async initInfoProject() {
-        const prj = this.currentProject;
-        if (!prj || prj === mls.stor.LOCALPROJECTNUMBER) return;
-        const info = getMyKeysBranch(prj);
-        if (!info) return;
+        const prj = this.projectInSave;
+        //Projeto vm não tem url de repositório: só os projetos git carregam o cabeçalho.
+        if (!prj || prj === mls.stor.LOCALPROJECTNUMBER || !getGitProvider(prj)) return;
+        let info: { branch: string, owner: string, repo: string };
+        try {
+            info = await getGitRepoKeys(prj);
+        } catch (e: any) {
+            this.setError(e.message);
+            return;
+        }
         this.branch = info.branch;
         this.owner = info.owner;
         this.repo = info.repo;
@@ -601,13 +666,12 @@ export class ServiceSave extends ServiceBase {
 
             const objProjects: any = {};
             const filesKeys = Object.keys(mls.stor.files);
-            this.otherProjects = await this.getOtherProjects();
             for (const fKey of filesKeys) {
                 const file = mls.stor.files[fKey] as mls.stor.IFileInfo;
                 if (!file ||
                     (!file.inLocalStorage && file.status !== 'deleted') ||
                     file.project === 0 ||
-                    file.project !== this.currentProject
+                    !getGitProvider(file.project)
                 ) continue;
 
                 const obj = this.setProjectLevelShortName(objProjects, file.project, file.level, file.folder, file.shortName);
@@ -615,6 +679,8 @@ export class ServiceSave extends ServiceBase {
                 obj.push(await this.configItem(file));
 
             }
+            this.otherProjects = await this.getOtherProjects(objProjects);
+            if (this.saveProject !== undefined && !objProjects[this.saveProject]) this.saveProject = undefined;
 
             if (Object.keys(objProjects).length > 0) {
                 this.itens = objProjects;
@@ -639,13 +705,28 @@ export class ServiceSave extends ServiceBase {
         return ret;
     }
 
+    private getDriverInSave(prj: number): mls.stor.others.DriverIOBase {
+        return this.saveDriver || mls.stor.others.getDefaultDriver(prj);
+    }
+
+    private selectSaveProject(e: MouseEvent, project: number): void {
+        e.stopPropagation();
+        this.backChecked();
+        if (this.saveProject === project) {
+            this.saveProject = undefined;
+            return;
+        }
+        this.saveProject = project;
+        this.initInfoProject();
+    }
+
     private selectProject(e: MouseEvent, project: number): void {
         e.stopPropagation();
         this.selectedProject = this.selectedProject === project ? undefined : project;
         this.init();
     }
 
-    private async getOtherProjects() {
+    private async getOtherProjects(listedProjects: any) {
 
         let dt = await mls.stor.localDB.getKeysWithPrefix('File_');
         dt = dt.filter((t) => t.indexOf(`_${this.currentProject}_`) < 0);
@@ -655,7 +736,7 @@ export class ServiceSave extends ServiceBase {
         dt.forEach((i) => {
 
             const file = mls.stor.localDB.parseKeyToFile(i);
-            if (!file || file.project === 0) return;
+            if (!file || file.project === 0 || listedProjects[file.project]) return;
             const name = `${file.folder ? file.folder + '/' : ''}${file.shortName}`
             if (info[file.project]) {
 
@@ -901,15 +982,25 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
-    private forceSaveL5ProjectFile: boolean = false;
+    private forceSaveL5Projects: Set<number> = new Set();
     private arrayRollback: mls.stor.IFileInfo[] = [];
-    private inSaving: boolean = false;
+    private saveDriver: mls.stor.others.DriverIOBase | undefined = undefined;
+    private get projectInSave(): number | undefined {
+        return this.saveProject !== undefined ? this.saveProject : this.currentProject;
+    }
+    @state() private inSaving: boolean = false;
+    @state() private saveLog: string[] = [];
+
+    private addSaveLog(msg: string): void {
+        this.saveLog = [...this.saveLog, msg];
+    }
     //Sempre que salvar vai gerar um novo branch no usuario e solicitar um pullrequest.
     private async onSave(e: MouseEvent) {
 
         if (this.inSaving) return;
 
         this.inSaving = true;
+        this.saveLog = [];
 
         const oldOwner = this.owner;
         const oldRepo = this.repo;
@@ -944,25 +1035,19 @@ export class ServiceSave extends ServiceBase {
             this.showLoader(true);
             if (mls.l5.actualOrg === undefined) throw new Error('No organization selected');
 
-            const prj = this.currentProject;
-            if (!prj) throw new Error('Not found project actual');
+            const prj = this.saveProject;
+            if (!prj) throw new Error(this.myMessage.selectProjectToSave);
 
-            const actualOrg = Object.keys(mls.stor.orgs)[mls.l5.actualOrg];
-            const config = await getConfigProject(prj, true);
-            if (!config) throw new Error('Not found config file in this project');
+            const driver = await getGitDriver(prj);
 
-            const driver = mls.stor.others.getDefaultDriver(prj);
-            if (!driver) throw new Error('Not found driver in this project');
-
-            const configOrg = config.orgName;
-            if (actualOrg !== configOrg && driver.shortName !== 'vm' as  mls.cbe.Provider) {
-                config.orgName = actualOrg;
-                await updateConfigProject(prj, config);
-                this.forceSaveL5ProjectFile = true;
-            }
+            //Repositório do save vem da url do l5/config.json; sem config.json ou sem url, o save para.
+            const keys = await getGitRepoKeys(prj);
+            this.owner = keys.owner;
+            this.repo = keys.repo;
+            this.branch = keys.branch;
 
             const msg = txt.value;
-            const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
+            const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father).filter((f) => f.project === prj);
 
             if (array.some((f) => f.hasError && f.status !== 'deleted')) {
                 if (!window.confirm(this.myMessage.msgErrorFilesSelected)) {
@@ -974,25 +1059,31 @@ export class ServiceSave extends ServiceBase {
 
             this.verifyNeedSelectDS(array);
             this.freeToSaveProjectAndDs(array);
+
+            this.saveDriver = driver;
             this.arrayRollback = array;
             this.isRemovedFork = false;
 
-            this.loadingFeedBack = `Checking repository...`;
+            this.addSaveLog(`Checking fork of ${this.owner}/${this.repo}...`);
+            await this.verifyForkTarget(driver);
+
+            this.addSaveLog(`Updating fork main (${this.owner}/${this.repo})...`);
             await this.fireCreateForkOrUpdate();
             //console.info('gerou o fork');
 
+            this.addSaveLog(`Creating branch in ${this.owner}/${this.repo}...`);
             await this.fireCreateNewBranch();
             //console.info('gerou o branche');
 
+            this.addSaveLog(`Saving ${array.length} files in branch ${this.branch}...`);
             await this.onSavenewPullrequest(array, msg);
             //console.info('gerou o push');
 
-            //const driver = mls.stor.others.getDefaultDriver(prj);
             const saveInfo = (driver as any).lastSaveInfo as { commits: number, skippedDeletions: string[] } | undefined;
             const hasCommits = !saveInfo || saveInfo.commits > 0;
 
             if (hasCommits) {
-                this.loadingFeedBack = `Generating a pull request...`;
+                this.addSaveLog(`Generating a pull request...`);
 
                 await this.firePullrequest(msg);
                 //console.info('gerou o pullrequest');
@@ -1004,6 +1095,7 @@ export class ServiceSave extends ServiceBase {
             txt.value = '';
 
             this.clearLocalHIstoryCurrentInfoDriver();
+            this.saveDriver = undefined;
 
             this.inSaving = false;
             this.owner = oldOwner;
@@ -1020,6 +1112,7 @@ export class ServiceSave extends ServiceBase {
 
         } catch (err: any) {
             this.inSaving = false;
+            this.saveDriver = undefined;
             this.owner = oldOwner;
             this.repo = oldRepo;
             this.branch = oldBranch;
@@ -1081,19 +1174,17 @@ export class ServiceSave extends ServiceBase {
                     const oldValue = _value;
                     _value = newValue;
 
-                    let aux = newValue;
-                    if (newValue.startsWith('success')) {
-                        currentFile++;
-                        aux = '';
-                    }
-                    father.loadingFeedBack = `FILES(${arrSet.length})<br>${aux}`;
+                    if (newValue.startsWith('success')) currentFile++;
+                    father.addSaveLog(`FILES(${currentFile}/${arrSet.length}) ${newValue}`);
 
                 },
                 configurable: true
             });
 
             if (arrSet.length > 0) {
-                await mls.stor.setContents(arrSet, msg);
+                //Direto no driver do save: o mls.stor.setContents iria pelo slot, que no VM só lê.
+                const prj = this.projectInSave as number;
+                await this.getDriverInSave(prj).setContents(prj, arrSet, msg);
 
             }
             return;
@@ -1104,14 +1195,40 @@ export class ServiceSave extends ServiceBase {
         }
     }
 
+    //Trava antes de mexer no GitHub: o fork do usuário tem que ser login/repo. Fora do try do
+    //fireCreateForkOrUpdate de propósito, para não cair no removeFork (que apaga login/repo).
+    private async verifyForkTarget(driver: mls.stor.others.DriverIOBase): Promise<void> {
+        if (driver.shortName !== 'github') return;
+        const login = (await driver.getUserInfo()).login;
+        const origin = `${this.owner}/${this.repo}`;
+        const target = `${login}/${this.repo}`;
+        const msg = (text: string, fork: string = '') => text
+            .replace('[origin]', origin).replace('[fork]', fork).replace('[login]', login).replace('[repo]', this.repo);
+
+        const forks = await driver.listForks(this.owner, this.repo);
+        const myFork = forks.find((f) => f.nameWithOwner.toLowerCase().startsWith(`${login.toLowerCase()}/`));
+        if (myFork) {
+            if (myFork.nameWithOwner.toLowerCase() !== target.toLowerCase()) throw new Error(msg(this.myMessage.forkNameMismatch, myFork.nameWithOwner));
+            return;
+        }
+
+        let repoId = '';
+        try {
+            repoId = await (driver as any).getIdProjectIO(0, login, this.repo);
+        } catch (e: any) {
+            if (!/could not resolve/i.test(e?.message || '')) throw e;
+        }
+        if (repoId) throw new Error(msg(this.myMessage.repoNotFork));
+    }
+
     private isRemovedFork: boolean = false;
     private async fireCreateForkOrUpdate() {
         try {
-            const prj = this.currentProject;
+            const prj = this.projectInSave;
             if (!prj) throw new Error('Not found project actual');
 
             const info = this.getLocalHIstoryCurrentInfoDriver();
-            const driver = mls.stor.others.getDefaultDriver(prj);
+            const driver = this.getDriverInSave(prj);
             const user = await driver.getUserInfo();
 
             info.login = user.login;
@@ -1154,10 +1271,10 @@ export class ServiceSave extends ServiceBase {
     private async removeFork() {
         try {
             this.isRemovedFork = true;
-            const prj = this.currentProject;
+            const prj = this.projectInSave;
             if (!prj) throw new Error('Not found project actual');
             const info = this.getLocalHIstoryCurrentInfoDriver();
-            const driver = mls.stor.others.getDefaultDriver(prj);
+            const driver = this.getDriverInSave(prj);
             const user = await driver.getUserInfo();
             info.login = user.login;
             const isForkExist = await (driver as any).checkForkIO(this.owner, this.repo, info.login);
@@ -1176,9 +1293,9 @@ export class ServiceSave extends ServiceBase {
 
     private async fireCreateNewBranch() {
         try {
-            const prj = this.currentProject;
+            const prj = this.projectInSave;
             if (!prj) throw new Error('Not found project actual');
-            const driver = mls.stor.others.getDefaultDriver(prj);
+            const driver = this.getDriverInSave(prj);
             const user = await driver.getUserInfo();
             const login = user.login;
             const newBranch = login + '_' + Date.now().toString();
@@ -1193,9 +1310,9 @@ export class ServiceSave extends ServiceBase {
 
     private async firePullrequest(msg: string) {
         try {
-            const prj = this.currentProject;
+            const prj = this.projectInSave;
             if (!prj) throw new Error('Not found project actual');
-            const driver = mls.stor.others.getDefaultDriver(prj);
+            const driver = this.getDriverInSave(prj);
             const opt = {
                 owner: this.owner,
                 repo: this.repo,
@@ -1229,7 +1346,7 @@ export class ServiceSave extends ServiceBase {
             if (actualOrg !== configOrg) {
                 config.orgName = actualOrg;
                 await updateConfigProject(prj, config);
-                this.forceSaveL5ProjectFile = true;
+                this.forceSaveL5Projects.add(prj);
             }
             const txt = father.querySelector('textarea')
             const array: mls.stor.IFileInfo[] = this.getAllFileToSave(father);
@@ -1292,7 +1409,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private clearLocalHIstoryCurrentInfoDriver(): void {
-        const prj = this.currentProject;
+        const prj = this.projectInSave;
         if (!prj) throw new Error('Not found project actual');
         let str = localStorage.getItem('InfoCurrentDriver');
         if (!str) str = '{}';
@@ -1302,7 +1419,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private setLocalHIstoryCurrentInfoDriver(user: string | undefined = undefined): void {
-        const prj = this.currentProject;
+        const prj = this.projectInSave;
         if (!prj) throw new Error('Not found project actual');
         let str = localStorage.getItem('InfoCurrentDriver');
         if (!str) str = '{}';
@@ -1317,7 +1434,7 @@ export class ServiceSave extends ServiceBase {
     }
 
     private getLocalHIstoryCurrentInfoDriver(): { owner: string, repo: string, branch: string, login: string } {
-        const prj = this.currentProject;
+        const prj = this.projectInSave;
         if (!prj) throw new Error('Not found project actual');
         let str = localStorage.getItem('InfoCurrentDriver');
         if (!str) str = '{}';
@@ -1328,17 +1445,18 @@ export class ServiceSave extends ServiceBase {
 
     private getAllFileToSave(father: HTMLElement): mls.stor.IFileInfo[] {
         const ar: mls.stor.IFileInfo[] = [];
-        if (this.forceSaveL5ProjectFile) {
+        if (this.forceSaveL5Projects.size > 0) {
             const allChecks = father.querySelectorAll('input[type="checkbox"][onlyStatusFather]');
             allChecks.forEach((item: any) => {
                 if (item.instance
+                    && this.forceSaveL5Projects.has(item.instance.project)
                     && item.instance.level === 5
                     && item.instance.shortName === 'project'
                     && item.instance.extension === '.json') {
                     item.checked = true;
                 }
             });
-            this.forceSaveL5ProjectFile = false;
+            this.forceSaveL5Projects.clear();
         }
         const els = father.querySelectorAll('input[type="checkbox"][onlyStatusFather]:checked');
         els.forEach((el: any) => {
@@ -1579,11 +1697,11 @@ export class ServiceSave extends ServiceBase {
 
     private async forceSync() {
 
-        const conf = window.confirm(this.myMessage.msgSync.replace('[prj]', (this.currentProject || 0).toString()));
+        const conf = window.confirm(this.myMessage.msgSync.replace('[prj]', (this.projectInSave || 0).toString()));
         if (!conf) return;
 
 
-        const obj = Object.values(mls.stor.files).filter((s) => s.status !== 'nochange' && s.project === this.currentProject);
+        const obj = Object.values(mls.stor.files).filter((s) => s.status !== 'nochange' && s.project === this.projectInSave);
 
         if (!obj || obj.length === 0) return;
 
@@ -1594,7 +1712,7 @@ export class ServiceSave extends ServiceBase {
             await undoFiles(obj);
 
             const data = this.getAllUserOpenedFiles();
-            if (data[this.currentProject || 0]) delete data[this.currentProject || 0];
+            if (data[this.projectInSave || 0]) delete data[this.projectInSave || 0];
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
 
             this.showLoader(false);
