@@ -104,3 +104,37 @@ test('onServiceClick hides every child and, on return, shows only the current le
     onServiceClick.call(host, true, false, null);
     assert.equal(any4.style.display, '');
 });
+
+test('onServiceClick shows the content last opened on the level, even when its id has no level', () => {
+    const onServiceClick = loadOnServiceClick();
+    (globalThis as { mls: { actualLevel: number } }).mls.actualLevel = 5;
+    // An element opened by openElementInServiceDetails: wrapper id = its tag, no level suffix.
+    const editor = child('aura--plugins--plugin-menu-editor-102020', 'block');
+    const older = child('any5', 'none');
+    const host = {
+        contentPlugin: { children: [older, editor] },
+        msize: 'compact',
+        activeContentByLevel: new Map<number, Child>([[5, editor]]),
+    };
+
+    // openMe() makes the tab visible AFTER the content was put in place: it must stay shown.
+    onServiceClick.call(host as unknown as Host, true, false, null);
+    assert.equal(editor.style.display, '');
+    assert.equal(older.style.display, 'none', 'only the active content, not every one of the level');
+
+    onServiceClick.call(host as unknown as Host, false, false, null);
+    assert.equal(editor.style.display, 'none');
+    onServiceClick.call(host as unknown as Host, true, true, null);
+    assert.equal(editor.style.display, '');
+});
+
+test('onServiceClick without an active content shows only the last child of the level', () => {
+    const onServiceClick = loadOnServiceClick();
+    (globalThis as { mls: { actualLevel: number } }).mls.actualLevel = 5;
+    const first = child('a5', 'none');
+    const last = child('b5', 'none');
+    const host: Host = { contentPlugin: { children: [first, last] }, msize: 'compact' };
+    onServiceClick.call(host, true, false, null);
+    assert.equal(first.style.display, 'none');
+    assert.equal(last.style.display, '');
+});

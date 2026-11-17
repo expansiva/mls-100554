@@ -19,6 +19,9 @@ export class ServiceDetail100554 extends ServiceBase {
 
     private plugin: { shortName: string, project: number } = {} as any;
 
+    /** The content last opened on each level: the one the tab shows again when it comes back. */
+    private readonly activeContentByLevel = new Map<number, HTMLElement>();
+
     private readonly handlePluginDetails = (ev: mls.events.IEvent) => this.onPluginDetails(ev);
     private readonly handleMonacoEvents = (ev: mls.events.IEvent) => this.onMonacoEvents(ev);
     private readonly handleFileAction = (ev: mls.events.IEvent) => this.onFileActionReceived(ev);
@@ -133,15 +136,22 @@ export class ServiceDetail100554 extends ServiceBase {
 
         // `reinit` is true exactly when the tab comes back (`serviceBase.attributeChangedCallback`:
         // `oldVal !== null && visible`). That is the case that has to show the content again.
+        // Opening the tab from code (openMe) lands here AFTER the content was already put in place, so the
+        // content to show is the one last opened on this level, whatever its id. Content opened before
+        // this bookkeeping existed falls back to the id that ends with the level (only the last one).
         if (!this.contentPlugin) return;
-        const levelSuffix = String(mls.actualLevel);
-        Array.from(this.contentPlugin.children).forEach((child) => {
+        const level = mls.actualLevel;
+        const levelSuffix = String(level);
+        const children = Array.from(this.contentPlugin.children) as HTMLElement[];
+        const active = this.activeContentByLevel?.get(level);
+        const shown = active && children.includes(active)
+            ? active
+            : children.filter((child) => child.id.endsWith(levelSuffix)).pop();
+        children.forEach((child) => {
             if (child.tagName.startsWith('PLUGIN-')) {
                 child.setAttribute('msize', this.msize);
             }
-
-            const htmlChild = child as HTMLElement;
-            htmlChild.style.display = visible && htmlChild.id.endsWith(levelSuffix) ? '' : 'none';
+            child.style.display = visible && child === shown ? '' : 'none';
         });
 
     }
@@ -178,7 +188,7 @@ export class ServiceDetail100554 extends ServiceBase {
     }
 
     renderDefault() {
-        return html`<div style="overflow:auto;height: calc(100% - 2rem);padding:1rem" id="contentPlugin"></div>`;
+        return html`<div style="overflow:auto;height:100%" id="contentPlugin"></div>`;
     }
 
 
@@ -308,9 +318,12 @@ export class ServiceDetail100554 extends ServiceBase {
 
         let el = this.contentPlugin.querySelector('#' + ori1 + mls.actualLevel) as HTMLElement;
 
+        if (el) this.activeContentByLevel.set(mls.actualLevel, el);
+
         if (!el) {
             el = document.createElement('div');
             el.id = ori1 + mls.actualLevel;
+            this.activeContentByLevel.set(mls.actualLevel, el);
             this.setContentinEl(el, content, args);
             el.style.cssText = ' width: 100%; height: 100%;';
             return;
@@ -340,6 +353,7 @@ export class ServiceDetail100554 extends ServiceBase {
         }
         el.style.display = 'block';
         el.style.height = '100%';
+        this.activeContentByLevel.set(mls.actualLevel, el);
         this.setContentElement(el, element);
 
     }
