@@ -89,7 +89,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l5ServicesLeft'],
                 priority: 2,
                 auth: ['*'],
-                widget: '_100554_serviceSave'
+                widget: '_100554_serviceSave2' // teste: serviceSave2 no lugar do serviceSave
             },
             {
                 category: 'Services',
@@ -139,7 +139,7 @@ export class PluginCollabCoreIndex extends PluginBaseIndex {
                 scope: ['l5Explore'],
                 priority: 1,
                 auth: ['*'],
-                widget: '_100555_/l2/pluginExplore/pluginExploreList.ts'
+                widget: '_100555_/l2/pluginExplore/pluginExploreList2.ts' // teste: List2 no lugar do pluginExploreList
             },
             {
                 category: 'Stories',
